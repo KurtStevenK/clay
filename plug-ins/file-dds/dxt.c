@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -34,7 +34,7 @@
 #include <math.h>
 #include <glib.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "bc7.h"
 #include "dds.h"

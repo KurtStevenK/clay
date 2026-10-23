@@ -45,7 +45,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  path = gimp_path_new (image, name);
+  path = clay_path_new (image, name);
 }
 CODE
     );
@@ -80,15 +80,15 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_pdb_layer_is_text_layer (layer, 0, error))
+  if (clay_pdb_layer_is_text_layer (layer, 0, error))
     {
       gint x, y;
 
-      path = gimp_text_path_new (image,
-				       gimp_text_layer_get_text (GIMP_TEXT_LAYER (layer)));
+      path = clay_text_path_new (image,
+				       clay_text_layer_get_text (CLAY_TEXT_LAYER (layer)));
 
-      gimp_item_get_offset (GIMP_ITEM (layer), &x, &y);
-      gimp_item_translate (GIMP_ITEM (path), x, y, FALSE);
+      clay_item_get_offset (CLAY_ITEM (layer), &x, &y);
+      clay_item_translate (CLAY_ITEM (path), x, y, FALSE);
     }
   else
     {
@@ -126,7 +126,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  path_copy = GIMP_PATH (gimp_item_duplicate (GIMP_ITEM (path),
+  path_copy = CLAY_PATH (clay_item_duplicate (CLAY_ITEM (path),
                          G_TYPE_FROM_INSTANCE (path)));
 
   if (! path_copy)
@@ -160,20 +160,20 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  num_strokes = gimp_path_get_n_strokes (path);
+  num_strokes = clay_path_get_n_strokes (path);
 
   if (num_strokes)
     {
-      GimpStroke *cur_stroke;
+      ClayStroke *cur_stroke;
       gint        i = 0;
 
       stroke_ids = g_new (gint32, num_strokes);
 
-      for (cur_stroke = gimp_path_stroke_get_next (path, NULL);
+      for (cur_stroke = clay_path_stroke_get_next (path, NULL);
            cur_stroke;
-           cur_stroke = gimp_path_stroke_get_next (path, cur_stroke))
+           cur_stroke = clay_path_stroke_get_next (path, cur_stroke))
         {
-          stroke_ids[i] = gimp_stroke_get_id (cur_stroke);
+          stroke_ids[i] = clay_stroke_get_id (cur_stroke);
           i++;
         }
     }
@@ -205,10 +205,10 @@ sub path_stroke_get_length {
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
   if (stroke)
-    length = gimp_stroke_get_length (stroke, precision);
+    length = clay_stroke_get_length (stroke, precision);
   else
     success = FALSE;
 }
@@ -254,13 +254,13 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
   if (stroke)
     {
-      GimpCoords coord;
+      ClayCoords coord;
 
-      valid = gimp_stroke_get_point_at_dist (stroke, dist, precision,
+      valid = clay_stroke_get_point_at_dist (stroke, dist, precision,
                                              &coord, &slope);
       x_point = valid ? coord.x : 0;
       y_point = valid ? coord.y : 0;
@@ -291,17 +291,17 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT, error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Remove path stroke"),
                                        path);
 
-      gimp_path_stroke_remove (path, stroke);
+      clay_path_stroke_remove (path, stroke);
     }
   else
     success = FALSE;
@@ -329,19 +329,19 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT, error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Close path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_close (stroke);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_close (stroke);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -370,19 +370,19 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT, error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Reverse path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_reverse (stroke);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_reverse (stroke);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -415,21 +415,21 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT |
-                                                 GIMP_PDB_ITEM_POSITION,
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT |
+                                                 CLAY_PDB_ITEM_POSITION,
                                                  error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Translate path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_translate (stroke, off_x, off_y);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_translate (stroke, off_x, off_y);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -461,21 +461,21 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT |
-                                                 GIMP_PDB_ITEM_POSITION,
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT |
+                                                 CLAY_PDB_ITEM_POSITION,
                                                  error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Scale path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_scale (stroke, scale_x, scale_y);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_scale (stroke, scale_x, scale_y);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -508,21 +508,21 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT |
-                                                 GIMP_PDB_ITEM_POSITION,
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT |
+                                                 CLAY_PDB_ITEM_POSITION,
                                                  error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Rotate path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_rotate (stroke, center_x, center_y, angle);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_rotate (stroke, center_x, center_y, angle);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -545,7 +545,7 @@ HELP
 	{ name => 'stroke_id', type => 'int32',
 	  desc => 'The stroke ID' },
 	{ name => "flip_type",
-	  type => 'enum GimpOrientationType (no GIMP_ORIENTATION_UNKNOWN)',
+	  type => 'enum ClayOrientationType (no CLAY_ORIENTATION_UNKNOWN)',
 	  desc => "Flip orientation, either vertical or horizontal" },
 	{ name => "axis", type => 'double',
 	  desc => "axis coordinate about which to flip, in pixels" }
@@ -554,21 +554,21 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT |
-                                                 GIMP_PDB_ITEM_POSITION,
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT |
+                                                 CLAY_PDB_ITEM_POSITION,
                                                  error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Flip path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_flip (stroke, flip_type, axis);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_flip (stroke, flip_type, axis);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -605,21 +605,21 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT |
-                                                 GIMP_PDB_ITEM_POSITION,
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT |
+                                                 CLAY_PDB_ITEM_POSITION,
                                                  error);
 
   if (stroke)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Flip path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_stroke_flip_free (stroke, x1, y1, x2, y2);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_stroke_flip_free (stroke, x1, y1, x2, y2);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -633,7 +633,7 @@ sub path_stroke_get_points {
 
     $help = <<'HELP';
 returns the control points of a stroke. The interpretation of the coordinates
-returned depends on the type of the stroke. For Gimp 2.4 this is always a
+returned depends on the type of the stroke. For Clay 2.4 this is always a
 bezier stroke, where the coordinates are the control points.
 HELP
 
@@ -647,8 +647,8 @@ HELP
     );
 
     @outargs = (
-        { name => 'type', type => 'enum GimpPathStrokeType',
-          desc => 'type of the stroke (always GIMP_PATH_STROKE_TYPE_BEZIER for now).' },
+        { name => 'type', type => 'enum ClayPathStrokeType',
+          desc => 'type of the stroke (always CLAY_PATH_STROKE_TYPE_BEZIER for now).' },
         { name => 'controlpoints', type => 'doublearray',
           desc => 'List of the control points for the stroke (x0, y0, x1, y1, ...).',
           array => { name => 'num_points',
@@ -660,27 +660,27 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
-  if (GIMP_IS_BEZIER_STROKE (stroke))
+  if (CLAY_IS_BEZIER_STROKE (stroke))
     {
       GArray *points_array;
       gint    i;
 
-      points_array = gimp_stroke_control_points_get (stroke, &closed);
+      points_array = clay_stroke_control_points_get (stroke, &closed);
 
       if (points_array)
         {
           num_points = points_array->len;
           controlpoints = g_new (gdouble, num_points * 2);
 
-          type = GIMP_PATH_STROKE_TYPE_BEZIER;
+          type = CLAY_PATH_STROKE_TYPE_BEZIER;
           for (i = 0; i < num_points; i++)
             {
               controlpoints[2*i]   = g_array_index (points_array,
-	                                            GimpAnchor, i).position.x;
+	                                            ClayAnchor, i).position.x;
               controlpoints[2*i+1] = g_array_index (points_array,
-	                                            GimpAnchor, i).position.y;
+	                                            ClayAnchor, i).position.y;
             }
           g_array_free (points_array, TRUE);
           num_points *= 2;
@@ -726,14 +726,14 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
   if (stroke)
     {
       GArray *coords_array;
       gint    i;
 
-      coords_array = gimp_stroke_interpolate (stroke, precision, &closed);
+      coords_array = clay_stroke_interpolate (stroke, precision, &closed);
 
       if (coords_array)
         {
@@ -742,8 +742,8 @@ HELP
 
           for (i = 0; i < num_coords; i++)
             {
-              coords[2*i]   = g_array_index (coords_array, GimpCoords, i).x;
-              coords[2*i+1] = g_array_index (coords_array, GimpCoords, i).y;
+              coords[2*i]   = g_array_index (coords_array, ClayCoords, i).x;
+              coords[2*i+1] = g_array_index (coords_array, ClayCoords, i).y;
             }
           g_array_free (coords_array, TRUE);
           num_coords *= 2;
@@ -765,7 +765,7 @@ sub path_stroke_new_from_points {
     $help = <<'HELP';
 Adds a stroke of a given type to the path object. The coordinates of the
 control points can be specified.
-For now only strokes of the type GIMP_PATH_STROKE_TYPE_BEZIER are supported.
+For now only strokes of the type CLAY_PATH_STROKE_TYPE_BEZIER are supported.
 The control points are specified as a pair of double values for the x- and
 y-coordinate.
 The Bezier stroke type needs a multiple of three control points. Each Bezier
@@ -778,8 +778,8 @@ HELP
     @inargs = (
 	{ name => 'path', type => 'path',
 	  desc => 'The path object' },
-	{ name => 'type', type => 'enum GimpPathStrokeType',
-	  desc => 'type of the stroke (always GIMP_PATH_STROKE_TYPE_BEZIER for now).' },
+	{ name => 'type', type => 'enum ClayPathStrokeType',
+	  desc => 'type of the stroke (always CLAY_PATH_STROKE_TYPE_BEZIER for now).' },
 	{ name => 'controlpoints', type => 'doublearray',
 	  desc => 'List of the x- and y-coordinates of the control points.',
           array => { name => 'num_points',
@@ -798,17 +798,17 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke;
-  GimpCoords *coords;
-  GimpCoords  default_coords = GIMP_COORDS_DEFAULT_VALUES;
+  ClayStroke *stroke;
+  ClayCoords *coords;
+  ClayCoords  default_coords = CLAY_COORDS_DEFAULT_VALUES;
   gint i;
 
   success = FALSE;
 
-  if (type == GIMP_PATH_STROKE_TYPE_BEZIER &&
+  if (type == CLAY_PATH_STROKE_TYPE_BEZIER &&
       num_points % 6 == 0)
     {
-      coords = g_new (GimpCoords, num_points/2);
+      coords = g_new (ClayCoords, num_points/2);
       for (i = 0; i < num_points/2; i++)
         {
 	  coords[i] = default_coords;
@@ -816,18 +816,18 @@ HELP
 	  coords[i].y = controlpoints[i*2+1];
 	}
 
-      stroke = gimp_stroke_new_from_coords (type, coords, num_points/2, closed);
+      stroke = clay_stroke_new_from_coords (type, coords, num_points/2, closed);
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Add path stroke"),
                                            path);
 
-	  gimp_path_stroke_add (path, stroke);
+	  clay_path_stroke_add (path, stroke);
 	  g_object_unref (stroke);
 
-	  stroke_id = gimp_stroke_get_id (stroke);
+	  stroke_id = clay_stroke_get_id (stroke);
 
 	  success = TRUE;
 	}
@@ -865,27 +865,27 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (path),
-                                   GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (path), error))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (path),
+                                   CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (path), error))
     {
-      GimpStroke *stroke;
-      GimpCoords  coord0 = GIMP_COORDS_DEFAULT_VALUES;
+      ClayStroke *stroke;
+      ClayCoords  coord0 = CLAY_COORDS_DEFAULT_VALUES;
 
       coord0.x = x0;
       coord0.y = y0;
 
-      stroke = gimp_bezier_stroke_new_moveto (&coord0);
+      stroke = clay_bezier_stroke_new_moveto (&coord0);
 
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Add path stroke"),
                                        path);
 
-      gimp_path_stroke_add (path, stroke);
+      clay_path_stroke_add (path, stroke);
       g_object_unref (stroke);
 
-      stroke_id = gimp_stroke_get_id (stroke);
+      stroke_id = clay_stroke_get_id (stroke);
     }
   else
     success = FALSE;
@@ -917,24 +917,24 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT, error);
 
   if (stroke)
     {
-      GimpCoords coord0 = GIMP_COORDS_DEFAULT_VALUES;
+      ClayCoords coord0 = CLAY_COORDS_DEFAULT_VALUES;
 
       coord0.x = x0;
       coord0.y = y0;
 
-     if (gimp_item_is_attached (GIMP_ITEM (path)))
-       gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+     if (clay_item_is_attached (CLAY_ITEM (path)))
+       clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                       _("Extend path stroke"),
                                       path);
 
-      gimp_path_freeze (path);
-      gimp_bezier_stroke_lineto (stroke, &coord0);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_bezier_stroke_lineto (stroke, &coord0);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -972,13 +972,13 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT, error);
 
   if (stroke)
     {
-      GimpCoords coord0 = GIMP_COORDS_DEFAULT_VALUES;
-      GimpCoords coord1 = GIMP_COORDS_DEFAULT_VALUES;
+      ClayCoords coord0 = CLAY_COORDS_DEFAULT_VALUES;
+      ClayCoords coord1 = CLAY_COORDS_DEFAULT_VALUES;
 
       coord0.x = x0;
       coord0.y = y0;
@@ -986,14 +986,14 @@ HELP
       coord1.x = x1;
       coord1.y = y1;
 
-     if (gimp_item_is_attached (GIMP_ITEM (path)))
-       gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+     if (clay_item_is_attached (CLAY_ITEM (path)))
+       clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                       _("Extend path stroke"),
                                       path);
 
-      gimp_path_freeze (path);
-      gimp_bezier_stroke_conicto (stroke, &coord0, &coord1);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_bezier_stroke_conicto (stroke, &coord0, &coord1);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -1033,14 +1033,14 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                 GIMP_PDB_ITEM_CONTENT, error);
+  ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                 CLAY_PDB_ITEM_CONTENT, error);
 
   if (stroke)
     {
-      GimpCoords coord0 = GIMP_COORDS_DEFAULT_VALUES;
-      GimpCoords coord1 = GIMP_COORDS_DEFAULT_VALUES;
-      GimpCoords coord2 = GIMP_COORDS_DEFAULT_VALUES;
+      ClayCoords coord0 = CLAY_COORDS_DEFAULT_VALUES;
+      ClayCoords coord1 = CLAY_COORDS_DEFAULT_VALUES;
+      ClayCoords coord2 = CLAY_COORDS_DEFAULT_VALUES;
 
       coord0.x = x0;
       coord0.y = y0;
@@ -1051,14 +1051,14 @@ HELP
       coord2.x = x2;
       coord2.y = y2;
 
-     if (gimp_item_is_attached (GIMP_ITEM (path)))
-       gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+     if (clay_item_is_attached (CLAY_ITEM (path)))
+       clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Extend path stroke"),
                                        path);
 
-      gimp_path_freeze (path);
-      gimp_bezier_stroke_cubicto (stroke, &coord0, &coord1, &coord2);
-      gimp_path_thaw (path);
+      clay_path_freeze (path);
+      clay_bezier_stroke_cubicto (stroke, &coord0, &coord1, &coord2);
+      clay_path_thaw (path);
     }
   else
     success = FALSE;
@@ -1100,27 +1100,27 @@ HELP
     %invoke = (
         code => <<"CODE"
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (path),
-                                   GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (path), error))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (path),
+                                   CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (path), error))
     {
-      GimpStroke *stroke;
-      GimpCoords  coord0 = GIMP_COORDS_DEFAULT_VALUES;
+      ClayStroke *stroke;
+      ClayCoords  coord0 = CLAY_COORDS_DEFAULT_VALUES;
 
       coord0.x = x0;
       coord0.y = y0;
 
-      stroke = gimp_bezier_stroke_new_ellipse (&coord0, radius_x, radius_y, angle);
+      stroke = clay_bezier_stroke_new_ellipse (&coord0, radius_x, radius_y, angle);
 
-      if (gimp_item_is_attached (GIMP_ITEM (path)))
-        gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+      if (clay_item_is_attached (CLAY_ITEM (path)))
+        clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                        _("Add path stroke"),
                                        path);
 
-      gimp_path_stroke_add (path, stroke);
+      clay_path_stroke_add (path, stroke);
       g_object_unref (stroke);
 
-      stroke_id = gimp_stroke_get_id (stroke);
+      stroke_id = clay_stroke_get_id (stroke);
     }
   else
     success = FALSE;
@@ -1131,17 +1131,17 @@ CODE
 
 
 @headers = qw(<string.h>
-              "core/gimplist.h"
-              "core/gimpimage.h"
-              "core/gimpimage-undo-push.h"
-              "path/gimpanchor.h"
-              "path/gimpstroke-new.h"
-              "path/gimpbezierstroke.h"
-              "path/gimppath.h"
-              "text/gimptext-path.h"
-              "text/gimptextlayer.h"
-              "gimppdb-utils.h"
-              "gimp-intl.h");
+              "core/claylist.h"
+              "core/clayimage.h"
+              "core/clayimage-undo-push.h"
+              "path/clayanchor.h"
+              "path/claystroke-new.h"
+              "path/claybezierstroke.h"
+              "path/claypath.h"
+              "text/claytext-path.h"
+              "text/claytextlayer.h"
+              "claypdb-utils.h"
+              "clay-intl.h");
 
 @procs = qw(path_new
             path_new_from_text_layer
@@ -1169,7 +1169,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Path';
-$doc_title = 'gimppath';
+$doc_title = 'claypath';
 $doc_short_desc = 'Functions for querying and manipulating path.';
 $doc_long_desc = 'Functions for querying and manipulating path.';
 

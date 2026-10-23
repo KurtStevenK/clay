@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GIMP PSD Plug-in
+ * Clay PSD Plug-in
  * Copyright 2007 by John Marshall
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,8 @@
 
 #include <glib/gstdio.h>
 #include <zlib.h>
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "psd.h"
 #include "psd-util.h"
@@ -34,7 +34,7 @@
 #include "psd-layer-res-load.h"
 #include "psd-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define COMP_MODE_SIZE sizeof(guint16)
@@ -82,54 +82,54 @@ static gint             read_merged_image_block    (PSDimage       *img_a,
                                                     GInputStream   *input,
                                                     GError        **error);
 
-static GimpImage *      create_gimp_image          (PSDimage       *img_a,
+static ClayImage *      create_clay_image          (PSDimage       *img_a,
                                                     GFile          *file);
 
-static gint             add_color_map              (GimpImage      *image,
+static gint             add_color_map              (ClayImage      *image,
                                                     PSDimage       *img_a);
 
-static gint             add_image_resources        (GimpImage      *image,
+static gint             add_image_resources        (ClayImage      *image,
                                                     PSDimage       *img_a,
                                                     GInputStream   *input,
                                                     gboolean       *resolution_loaded,
                                                     gboolean       *profile_loaded,
                                                     GError        **error);
 
-static gint             add_layers                 (GimpImage      *image,
+static gint             add_layers                 (ClayImage      *image,
                                                     PSDimage       *img_a,
                                                     PSDlayer      **lyr_a,
                                                     GInputStream   *input,
                                                     GError        **error);
 
-static void             add_legacy_layer_effects   (GimpLayer      *layer,
+static void             add_legacy_layer_effects   (ClayLayer      *layer,
                                                     PSDlayer       *lyr_a,
                                                     PSDimage       *img_a);
 
-static void             add_adjustment_layer       (GimpLayer      *layer,
+static void             add_adjustment_layer       (ClayLayer      *layer,
                                                     PSDlayer       *lyr_a);
-static void             add_layer_effects          (GimpLayer      *layer,
+static void             add_layer_effects          (ClayLayer      *layer,
                                                     PSDlayer       *lyr_a,
                                                     PSDimage       *img_a);
 
-static GimpLayer      * get_text_layer             (GimpImage      *image,
-                                                    GimpLayer      *parent_group,
+static ClayLayer      * get_text_layer             (ClayImage      *image,
+                                                    ClayLayer      *parent_group,
                                                     PSDlayer       *lyr_a,
                                                     PSDimage       *img_a);
 
-static GimpLayer      * get_linked_layer           (GimpImage      *image,
+static ClayLayer      * get_linked_layer           (ClayImage      *image,
                                                     PSDlayer       *lyr_a,
                                                     PSDimage       *img_a);
 
-static GimpPath       * get_layer_path             (GimpImage      *image,
+static ClayPath       * get_layer_path             (ClayImage      *image,
                                                     PSDlayer       *lyr_a,
                                                     PSDimage       *img_a);
 
-static GimpLayer      * get_vector_layer           (GimpImage      *image,
-                                                    GimpPath       *path,
+static ClayLayer      * get_vector_layer           (ClayImage      *image,
+                                                    ClayPath       *path,
                                                     PSDlayer       *lyr_a,
                                                     PSDimage       *img_a);
 
-static gint             add_merged_image           (GimpImage      *image,
+static gint             add_merged_image           (ClayImage      *image,
                                                     PSDimage       *img_a,
                                                     GInputStream   *input,
                                                     GError        **error);
@@ -152,8 +152,8 @@ static GList *         get_font_info_list          (JsonNode       *node,
                                                     guint          *font_count);
 static gint  *         get_font_sections_list      (JsonNode       *node,
                                                     guint          *font_count);
-static GimpFont *      match_font                  (const gchar    *font_name);
-static void            create_text_markup          (GimpTextLayer  *layer,
+static ClayFont *      match_font                  (const gchar    *font_name);
+static void            create_text_markup          (ClayTextLayer  *layer,
                                                     const gchar    *full_text,
                                                     GList          *font_info,
                                                     gint           *sections,
@@ -165,8 +165,8 @@ static void       check_duplicate_clipping_group   (PSDlayer      **lyr_a,
                                                     ClippingInfo   *clipping_info);
 static void             mark_clipping_groups       (PSDimage       *img_a,
                                                     PSDlayer      **lyr_a);
-static GimpLayer      * add_clipping_group         (GimpImage      *image,
-                                                    GimpLayer      *parent);
+static ClayLayer      * add_clipping_group         (ClayImage      *image,
+                                                    ClayLayer      *parent);
 
 static gchar          * get_psd_color_mode_name    (PSDColorMode    mode);
 
@@ -175,9 +175,9 @@ static void             convert_legacy_psd_color   (GeglColor      *color,
                                                     const Babl     *space,
                                                     gboolean        ibm_pc_format);
 
-static void             psd_to_gimp_color_map      (guchar         *map256);
+static void             psd_to_clay_color_map      (guchar         *map256);
 
-static GimpImageType    get_gimp_image_type        (GimpImageBaseType image_base_type,
+static ClayImageType    get_clay_image_type        (ClayImageBaseType image_base_type,
                                                     gboolean          alpha);
 
 static void             free_linked_files_data     (PSDimage        *img_a);
@@ -220,7 +220,7 @@ static const Babl*      get_mask_format            (PSDimage       *img_a);
 static void             initialize_unsupported     (PSDSupport     *supported_features);
 
 /* Main file load function */
-GimpImage *
+ClayImage *
 load_image (GFile        *file,
             gboolean      merged_image_only,
             gboolean     *resolution_loaded,
@@ -231,7 +231,7 @@ load_image (GFile        *file,
   GInputStream  *input;
   PSDimage       img_a;
   PSDlayer     **lyr_a;
-  GimpImage     *image = NULL;
+  ClayImage     *image = NULL;
   GError        *error = NULL;
 
   img_a.ibm_pc_format            = FALSE;
@@ -255,22 +255,22 @@ load_image (GFile        *file,
       if (! error)
         g_set_error (load_error, G_FILE_ERROR, g_file_error_from_errno (errno),
                      _("Could not open '%s' for reading: %s"),
-                     gimp_file_get_utf8_name (file), g_strerror (errno));
+                     clay_file_get_utf8_name (file), g_strerror (errno));
       else
         {
           g_set_error (load_error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not open '%s' for reading: %s"),
-                       gimp_file_get_utf8_name (file), error->message);
+                       clay_file_get_utf8_name (file), error->message);
           g_error_free (error);
         }
 
       return NULL;
     }
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
-  IFDBG(1) g_debug ("Open file %s", gimp_file_get_utf8_name (file));
+  IFDBG(1) g_debug ("Open file %s", clay_file_get_utf8_name (file));
 
   img_a.merged_image_only = merged_image_only;
 
@@ -279,21 +279,21 @@ load_image (GFile        *file,
                     PSD_TELL(input));
   if (read_header_block (&img_a, input, &error) < 0)
     goto load_error;
-  gimp_progress_update (0.1);
+  clay_progress_update (0.1);
 
   /* ----- Read the PSD file Color Mode block ----- */
   IFDBG(2) g_debug ("Read color mode block at offset %" G_GOFFSET_FORMAT,
                     PSD_TELL(input));
   if (read_color_mode_block (&img_a, input, &error) < 0)
     goto load_error;
-  gimp_progress_update (0.2);
+  clay_progress_update (0.2);
 
   /* ----- Read the PSD file Image Resource block ----- */
   IFDBG(2) g_debug ("Read image resource block at offset %" G_GOFFSET_FORMAT,
                     PSD_TELL(input));
   if (read_image_resource_block (&img_a, input, &error) < 0)
     goto load_error;
-  gimp_progress_update (0.3);
+  clay_progress_update (0.3);
 
   /* ----- Read the PSD file Layer & Mask block ----- */
   IFDBG(2) g_debug ("Read layer & mask block at offset %" G_GOFFSET_FORMAT,
@@ -321,27 +321,27 @@ load_image (GFile        *file,
           goto load_error;
         }
     }
-  gimp_progress_update (0.4);
+  clay_progress_update (0.4);
 
   /* ----- Read the PSD file Merged Image Data block ----- */
   IFDBG(2) g_debug ("Read merged image and extra alpha channel block at offset %" G_GOFFSET_FORMAT,
                     PSD_TELL(input));
   if (read_merged_image_block (&img_a, input, &error) < 0)
     goto load_error;
-  gimp_progress_update (0.5);
+  clay_progress_update (0.5);
 
-  /* ----- Create GIMP image ----- */
+  /* ----- Create Clay image ----- */
   IFDBG(2) g_debug ("Create Clay image");
-  image = create_gimp_image (&img_a, file);
+  image = create_clay_image (&img_a, file);
   if (! image)
     goto load_error;
-  gimp_progress_update (0.6);
+  clay_progress_update (0.6);
 
   /* ----- Add color map ----- */
   IFDBG(2) g_debug ("Add color map");
   if (add_color_map (image, &img_a) < 0)
     goto load_error;
-  gimp_progress_update (0.7);
+  clay_progress_update (0.7);
 
   /* ----- Add image resources ----- */
   IFDBG(2) g_debug ("Add image resources");
@@ -349,27 +349,27 @@ load_image (GFile        *file,
                            resolution_loaded, profile_loaded,
                            &error) < 0)
     goto load_error;
-  gimp_progress_update (0.8);
+  clay_progress_update (0.8);
 
   /* ----- Add layers -----*/
   IFDBG(2) g_debug ("Add layers");
   if (add_layers (image, &img_a, lyr_a, input, &error) < 0)
     goto load_error;
-  gimp_progress_update (0.9);
+  clay_progress_update (0.9);
 
   /* ----- Add merged image data and extra alpha channels ----- */
   IFDBG(2) g_debug ("Add merged image data and extra alpha channels");
   if (add_merged_image (image, &img_a, input, &error) < 0)
     goto load_error;
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
-  IFDBG(2) g_debug ("Close file & return, image id: %d", gimp_image_get_id (image));
+  IFDBG(2) g_debug ("Close file & return, image id: %d", clay_image_get_id (image));
   IFDBG(1) g_debug ("\n----------------------------------------"
                     "----------------------------------------\n");
   free_linked_files_data (&img_a);
 
-  gimp_image_clean_all (image);
-  gimp_image_undo_enable (image);
+  clay_image_clean_all (image);
+  clay_image_undo_enable (image);
   g_object_unref (input);
   return image;
 
@@ -386,7 +386,7 @@ load_image (GFile        *file,
 
   /* Delete partially loaded image */
   if (image)
-    gimp_image_delete (image);
+    clay_image_delete (image);
 
   /* Close file if Open */
   g_object_unref (input);
@@ -395,10 +395,10 @@ load_image (GFile        *file,
 }
 
 /* Loading metadata for external file formats */
-GimpImage *
+ClayImage *
 load_image_metadata (GFile        *file,
                      gint          data_length,
-                     GimpImage    *image,
+                     ClayImage    *image,
                      gboolean      for_layers,
                      gboolean      is_cmyk,
                      PSDSupport   *unsupported_features,
@@ -423,9 +423,9 @@ load_image_metadata (GFile        *file,
   img_a.version             = 1;
   img_a.layer_state         = 0;
   img_a.layer_selection     = NULL;
-  img_a.columns             = gimp_image_get_width (image);
-  img_a.rows                = gimp_image_get_height (image);
-  img_a.base_type           = gimp_image_get_base_type (image);
+  img_a.columns             = clay_image_get_width (image);
+  img_a.rows                = clay_image_get_height (image);
+  img_a.base_type           = clay_image_get_base_type (image);
   img_a.merged_image_only   = FALSE;
   img_a.ibm_pc_format       = FALSE;
   img_a.alpha_names         = NULL;
@@ -449,7 +449,7 @@ load_image_metadata (GFile        *file,
       PSDimageres     res_a;
       gchar          *alpha_name;
       PSDchanneldata *channel_data;
-      GimpChannel    *channel;
+      ClayChannel    *channel;
 
       while (PSD_TELL (input) < img_a.image_res_start + img_a.image_res_len)
         {
@@ -474,14 +474,14 @@ load_image_metadata (GFile        *file,
           alpha_name = g_ptr_array_index (img_a.alpha_names, i);
           channel_data = img_a.alpha_display_info[i];
 
-          channel = gimp_channel_new (image, alpha_name,
+          channel = clay_channel_new (image, alpha_name,
                                       (gint) img_a.columns,
                                       (gint) img_a.rows,
                                       channel_data->opacity,
-                                      channel_data->gimp_color);
+                                      channel_data->clay_color);
 
-          gimp_image_insert_channel (image, channel, NULL, i);
-          gimp_item_set_visible (GIMP_ITEM (channel), FALSE);
+          clay_image_insert_channel (image, channel, NULL, i);
+          clay_item_set_visible (CLAY_ITEM (channel), FALSE);
         }
     }
   else
@@ -492,7 +492,7 @@ load_image_metadata (GFile        *file,
       guint32            raw_len32 = 0;
       guint32            payload_len;
       guint32            skip_len;
-      GimpColorProfile  *profile = NULL;
+      ClayColorProfile  *profile = NULL;
 
       while (data_length >= 12)
         {
@@ -556,27 +556,27 @@ load_image_metadata (GFile        *file,
           else
             {
               /* Get BPC from existing image */
-              switch (gimp_image_get_precision (image))
+              switch (clay_image_get_precision (image))
                 {
-                case GIMP_PRECISION_U8_LINEAR:
-                case GIMP_PRECISION_U8_NON_LINEAR:
-                case GIMP_PRECISION_U8_PERCEPTUAL:
+                case CLAY_PRECISION_U8_LINEAR:
+                case CLAY_PRECISION_U8_NON_LINEAR:
+                case CLAY_PRECISION_U8_PERCEPTUAL:
                   img_a.bps = 8;
                   break;
-                case GIMP_PRECISION_U16_LINEAR:
-                case GIMP_PRECISION_U16_NON_LINEAR:
-                case GIMP_PRECISION_U16_PERCEPTUAL:
-                case GIMP_PRECISION_HALF_LINEAR:
-                case GIMP_PRECISION_HALF_NON_LINEAR:
-                case GIMP_PRECISION_HALF_PERCEPTUAL:
+                case CLAY_PRECISION_U16_LINEAR:
+                case CLAY_PRECISION_U16_NON_LINEAR:
+                case CLAY_PRECISION_U16_PERCEPTUAL:
+                case CLAY_PRECISION_HALF_LINEAR:
+                case CLAY_PRECISION_HALF_NON_LINEAR:
+                case CLAY_PRECISION_HALF_PERCEPTUAL:
                   img_a.bps = 16;
                   break;
-                case GIMP_PRECISION_U32_LINEAR:
-                case GIMP_PRECISION_U32_NON_LINEAR:
-                case GIMP_PRECISION_U32_PERCEPTUAL:
-                case GIMP_PRECISION_FLOAT_LINEAR:
-                case GIMP_PRECISION_FLOAT_NON_LINEAR:
-                case GIMP_PRECISION_FLOAT_PERCEPTUAL:
+                case CLAY_PRECISION_U32_LINEAR:
+                case CLAY_PRECISION_U32_NON_LINEAR:
+                case CLAY_PRECISION_U32_PERCEPTUAL:
+                case CLAY_PRECISION_FLOAT_LINEAR:
+                case CLAY_PRECISION_FLOAT_NON_LINEAR:
+                case CLAY_PRECISION_FLOAT_PERCEPTUAL:
                   img_a.bps = 32;
                   break;
                 default:
@@ -587,25 +587,25 @@ load_image_metadata (GFile        *file,
                 }
             }
 
-          switch (gimp_image_get_base_type (image))
+          switch (clay_image_get_base_type (image))
             {
-            case GIMP_RGB:
+            case CLAY_RGB:
               img_a.color_mode = PSD_RGB;
 
-              profile = gimp_image_get_color_profile (image);
+              profile = clay_image_get_color_profile (image);
 
               if (profile)
                 {
                   img_a.rgb_space =
-                    gimp_color_profile_get_space (profile,
-                                                  GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+                    clay_color_profile_get_space (profile,
+                                                  CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                                   error);
                 }
               break;
-            case GIMP_GRAY:
+            case CLAY_GRAY:
               img_a.color_mode = PSD_GRAYSCALE;
               break;
-            case GIMP_INDEXED:
+            case CLAY_INDEXED:
               img_a.color_mode = PSD_INDEXED;
               break;
             }
@@ -726,7 +726,7 @@ read_header_block (PSDimage      *img_a,
       return -1;
     }
 
-  if (img_a->rows < 1 || img_a->rows > GIMP_MAX_IMAGE_SIZE)
+  if (img_a->rows < 1 || img_a->rows > CLAY_MAX_IMAGE_SIZE)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                   _("Unsupported or invalid image height: %d"),
@@ -734,7 +734,7 @@ read_header_block (PSDimage      *img_a,
       return -1;
     }
 
-  if (img_a->columns < 1 || img_a->columns > GIMP_MAX_IMAGE_SIZE)
+  if (img_a->columns < 1 || img_a->columns > CLAY_MAX_IMAGE_SIZE)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                   _("Unsupported or invalid image width: %d"),
@@ -856,7 +856,7 @@ read_color_mode_block (PSDimage      *img_a,
             }
           else
             {
-              psd_to_gimp_color_map (img_a->color_map);
+              psd_to_clay_color_map (img_a->color_map);
               img_a->color_map_entries = 256;
             }
         }
@@ -1112,7 +1112,7 @@ read_layer_info (PSDimage      *img_a,
           if (! lyr_a[lidx]->layer_flags.irrelevant)
             {
               if (lyr_a[lidx]->bottom < lyr_a[lidx]->top ||
-                  lyr_a[lidx]->bottom - lyr_a[lidx]->top > GIMP_MAX_IMAGE_SIZE)
+                  lyr_a[lidx]->bottom - lyr_a[lidx]->top > CLAY_MAX_IMAGE_SIZE)
                 {
                   g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                _("Unsupported or invalid layer height: %d"),
@@ -1121,7 +1121,7 @@ read_layer_info (PSDimage      *img_a,
                   return NULL;
                 }
               if (lyr_a[lidx]->right < lyr_a[lidx]->left ||
-                  lyr_a[lidx]->right - lyr_a[lidx]->left > GIMP_MAX_IMAGE_SIZE)
+                  lyr_a[lidx]->right - lyr_a[lidx]->left > CLAY_MAX_IMAGE_SIZE)
                 {
                   g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                _("Unsupported or invalid layer width: %d"),
@@ -1312,7 +1312,7 @@ read_layer_info (PSDimage      *img_a,
                 {
                   /* sanity checks */
                   if (lyr_a[lidx]->layer_mask.bottom < lyr_a[lidx]->layer_mask.top ||
-                      lyr_a[lidx]->layer_mask.bottom - lyr_a[lidx]->layer_mask.top > GIMP_MAX_IMAGE_SIZE)
+                      lyr_a[lidx]->layer_mask.bottom - lyr_a[lidx]->layer_mask.top > CLAY_MAX_IMAGE_SIZE)
                     {
                       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                    _("Unsupported or invalid layer mask height: %d"),
@@ -1321,7 +1321,7 @@ read_layer_info (PSDimage      *img_a,
                       return NULL;
                     }
                   if (lyr_a[lidx]->layer_mask.right < lyr_a[lidx]->layer_mask.left ||
-                      lyr_a[lidx]->layer_mask.right - lyr_a[lidx]->layer_mask.left > GIMP_MAX_IMAGE_SIZE)
+                      lyr_a[lidx]->layer_mask.right - lyr_a[lidx]->layer_mask.left > CLAY_MAX_IMAGE_SIZE)
                     {
                       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                    _("Unsupported or invalid layer mask width: %d"),
@@ -1741,30 +1741,30 @@ read_merged_image_block (PSDimage      *img_a,
   return 0;
 }
 
-static GimpImage *
-create_gimp_image (PSDimage *img_a,
+static ClayImage *
+create_clay_image (PSDimage *img_a,
                    GFile    *file)
 {
-  GimpImage     *image = NULL;
-  GimpPrecision  precision;
+  ClayImage     *image = NULL;
+  ClayPrecision  precision;
 
   switch (img_a->color_mode)
     {
     case PSD_MULTICHANNEL:
     case PSD_GRAYSCALE:
     case PSD_DUOTONE:
-      img_a->base_type = GIMP_GRAY;
+      img_a->base_type = CLAY_GRAY;
       break;
 
     case PSD_BITMAP:
     case PSD_INDEXED:
-      img_a->base_type = GIMP_INDEXED;
+      img_a->base_type = CLAY_INDEXED;
       break;
 
     case PSD_LAB:
     case PSD_CMYK:
     case PSD_RGB:
-      img_a->base_type = GIMP_RGB;
+      img_a->base_type = CLAY_RGB;
       break;
 
     default:
@@ -1777,22 +1777,22 @@ create_gimp_image (PSDimage *img_a,
     switch (img_a->bps)
       {
       case 32:
-        precision = GIMP_PRECISION_FLOAT_NON_LINEAR;
+        precision = CLAY_PRECISION_FLOAT_NON_LINEAR;
         break;
 
       case 16:
         if (img_a->color_mode == PSD_CMYK || img_a->color_mode == PSD_LAB)
-          precision = GIMP_PRECISION_FLOAT_NON_LINEAR;
+          precision = CLAY_PRECISION_FLOAT_NON_LINEAR;
         else
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
         break;
 
       case 8:
       case 1:
         if (img_a->color_mode == PSD_CMYK || img_a->color_mode == PSD_LAB)
-          precision = GIMP_PRECISION_FLOAT_NON_LINEAR;
+          precision = CLAY_PRECISION_FLOAT_NON_LINEAR;
         else
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
         break;
 
       default:
@@ -1802,26 +1802,26 @@ create_gimp_image (PSDimage *img_a,
         break;
       }
 
-  /* Create gimp image */
+  /* Create clay image */
   IFDBG(2) g_debug ("Create image");
-  image = gimp_image_new_with_precision (img_a->columns, img_a->rows,
+  image = clay_image_new_with_precision (img_a->columns, img_a->rows,
                                          img_a->base_type, precision);
-  gimp_image_undo_disable (image);
+  clay_image_undo_disable (image);
 
   return image;
 }
 
 static gint
-add_color_map (GimpImage *image,
+add_color_map (ClayImage *image,
                PSDimage  *img_a)
 {
-  GimpParasite *parasite;
+  ClayParasite *parasite;
 
   if (img_a->color_map_len)
     {
       if (img_a->color_mode != PSD_DUOTONE)
         {
-          gimp_palette_set_colormap (gimp_image_get_palette (image),
+          clay_palette_set_colormap (clay_image_get_palette (image),
                                      babl_format ("R'G'B' u8"),
                                      img_a->color_map, img_a->color_map_len);
         }
@@ -1829,10 +1829,10 @@ add_color_map (GimpImage *image,
         {
            /* Add parasite for Duotone color data */
           IFDBG(2) g_debug ("Add Duotone color data parasite");
-          parasite = gimp_parasite_new (PSD_PARASITE_DUOTONE_DATA, 0,
+          parasite = clay_parasite_new (PSD_PARASITE_DUOTONE_DATA, 0,
                                         img_a->color_map_len, img_a->color_map);
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
         }
       g_free (img_a->color_map);
     }
@@ -1841,7 +1841,7 @@ add_color_map (GimpImage *image,
 }
 
 static gint
-add_image_resources (GimpImage     *image,
+add_image_resources (ClayImage     *image,
                      PSDimage      *img_a,
                      GInputStream  *input,
                      gboolean      *resolution_loaded,
@@ -1906,14 +1906,14 @@ psd_convert_cmyk_to_srgb (PSDimage *img_a,
   const Babl *space       = NULL;
 
   if (img_a->cmyk_profile &&
-      gimp_color_profile_is_cmyk (img_a->cmyk_profile))
+      clay_color_profile_is_cmyk (img_a->cmyk_profile))
     {
       /* If no CMYK profile attached, babl_format_with_space ()
        * will ignore the NULL space value and process the image
        * as if it were just using babl_format ()
        */
-      space = gimp_color_profile_get_space (img_a->cmyk_profile,
-                                            GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+      space = clay_color_profile_get_space (img_a->cmyk_profile,
+                                            CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                             error);
     }
 
@@ -2253,24 +2253,24 @@ get_font_sections_list (JsonNode *node,
   return font_sections;
 }
 
-static GimpFont *
+static ClayFont *
 match_font (const gchar *font_name)
 {
-  GimpFont  *font  = NULL;
-  GimpFont **fonts;
+  ClayFont  *font  = NULL;
+  ClayFont **fonts;
 
   if (! font_name)
     return NULL;
 
   /* PSD stores font names in Postscript format, so we'll first
    * try to get the font by that value */
-  font = gimp_font_get_by_postscript_name (font_name);
+  font = clay_font_get_by_postscript_name (font_name);
   if (font)
     return font;
 
   /* Fallback - if there's no direct match, use the first one returned
    * from the search */
-  fonts = gimp_fonts_get_list (font_name);
+  fonts = clay_fonts_get_list (font_name);
   if (! font && fonts)
     font = fonts[0];
 
@@ -2280,7 +2280,7 @@ match_font (const gchar *font_name)
 }
 
 static void
-create_text_markup (GimpTextLayer *layer,
+create_text_markup (ClayTextLayer *layer,
                     const gchar   *full_text,
                     GList         *font_info,
                     gint          *sections,
@@ -2362,15 +2362,15 @@ create_text_markup (GimpTextLayer *layer,
           /* Other settings should overwrite this when necessary */
           if (g_strcmp0 (font->font_name, original_font_name) != 0)
             {
-              GimpFont *gimp_font = NULL;
+              ClayFont *clay_font = NULL;
 
-              gimp_font = gimp_font_get_by_postscript_name (font->font_name);
-              if (gimp_font)
+              clay_font = clay_font_get_by_postscript_name (font->font_name);
+              if (clay_font)
                 {
                   PangoFontDescription *desc;
                   gchar                *face;
 
-                  desc = gimp_font_get_pango_font_description (gimp_font);
+                  desc = clay_font_get_pango_font_description (clay_font);
                   face = pango_font_description_to_string (desc);
 
                   if (face)
@@ -2398,7 +2398,7 @@ create_text_markup (GimpTextLayer *layer,
       list = g_list_next (list);
     }
 
-  gimp_text_layer_set_markup (layer, markup->str);
+  clay_text_layer_set_markup (layer, markup->str);
   g_string_free (markup, TRUE);
 }
 
@@ -2408,7 +2408,7 @@ check_duplicate_clipping_group (PSDlayer     **lyr_a,
                                 ClippingInfo  *clipping_info)
 {
   /* Check whether there is a Photoshop group containing the same layers as
-   * the new GIMP clipping group that we intend to add. If that is the case
+   * the new Clay clipping group that we intend to add. If that is the case
    * there is no reason to add an extra clipping group.
    * Example image: see layers 55-52 and 40-37 */
 
@@ -2451,7 +2451,7 @@ mark_clipping_groups (PSDimage  *img_a,
 
       if (lyr_a[lidx]->clipping == 1)
         {
-          /* Photoshop handles layers with clipping differently than GIMP does.
+          /* Photoshop handles layers with clipping differently than Clay does.
            * To correctly show these layers we need to make a new group
            * starting with the first non-clipping layer and including all
            * the clipping layers above it.
@@ -2589,7 +2589,7 @@ mark_clipping_groups (PSDimage  *img_a,
 }
 
 static gint
-add_layers (GimpImage     *image,
+add_layers (ClayImage     *image,
             PSDimage      *img_a,
             PSDlayer     **lyr_a,
             GInputStream  *input,
@@ -2597,7 +2597,7 @@ add_layers (GimpImage     *image,
 {
   PSDchannel          **lyr_chn;
   GArray               *parent_group_stack;
-  GimpLayer            *parent_group = NULL;
+  ClayLayer            *parent_group = NULL;
   guint16               alpha_chn;
   guint16               user_mask_chn;
   guint16               layer_channels, base_channels;
@@ -2611,8 +2611,8 @@ add_layers (GimpImage     *image,
   gint32                lm_y;                  /* Layer mask y */
   gint32                lm_w;                  /* Layer mask width */
   gint32                lm_h;                  /* Layer mask height */
-  GimpLayer            *layer           = NULL;
-  GimpLayerMask        *mask            = NULL;
+  ClayLayer            *layer           = NULL;
+  ClayLayerMask        *mask            = NULL;
   GList                *selected_layers = NULL;
   gint                  lidx;                  /* Layer index */
   gint                  cidx;                  /* Channel index */
@@ -2622,7 +2622,7 @@ add_layers (GimpImage     *image,
   gboolean              empty_mask;
   gboolean              no_draw_layer   = FALSE;
   GeglBuffer           *buffer;
-  GimpImageType         image_type;
+  ClayImageType         image_type;
   LayerModeInfo         mode_info;
 
 
@@ -2644,7 +2644,7 @@ add_layers (GimpImage     *image,
   mark_clipping_groups (img_a, lyr_a);
 
   /* set the root of the group hierarchy */
-  parent_group_stack = g_array_new (FALSE, FALSE, sizeof (GimpLayer *));
+  parent_group_stack = g_array_new (FALSE, FALSE, sizeof (ClayLayer *));
   g_array_append_val (parent_group_stack, parent_group);
 
   for (lidx = 0; lidx < img_a->num_layers; ++lidx)
@@ -2736,10 +2736,10 @@ add_layers (GimpImage     *image,
                             lyr_chn[cidx]->rows);
 
           /* Vector masks can have a high value for rows, but then columns will be 0. */
-          if (lyr_chn[cidx]->columns > GIMP_MAX_IMAGE_SIZE ||
-              (lyr_chn[cidx]->rows > GIMP_MAX_IMAGE_SIZE && lyr_chn[cidx]->columns != 0))
+          if (lyr_chn[cidx]->columns > CLAY_MAX_IMAGE_SIZE ||
+              (lyr_chn[cidx]->rows > CLAY_MAX_IMAGE_SIZE && lyr_chn[cidx]->columns != 0))
             {
-              g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+              g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                            _("Invalid channel dimensions %u x %u"),
                            lyr_chn[cidx]->columns, lyr_chn[cidx]->rows);
               free_lyr_chn (lyr_chn, lyr_a[lidx]->num_channels);
@@ -2828,7 +2828,7 @@ add_layers (GimpImage     *image,
       l_w = img_a->columns;
       l_h = img_a->rows;
       if (parent_group_stack->len > 0)
-        parent_group = g_array_index (parent_group_stack, GimpLayer *,
+        parent_group = g_array_index (parent_group_stack, ClayLayer *,
                                       parent_group_stack->len - 1);
       else
         parent_group = NULL; /* root */
@@ -2947,7 +2947,7 @@ add_layers (GimpImage     *image,
           /* End of clipping group */
           if (parent_group_stack->len)
             {
-              parent_group = g_array_index (parent_group_stack, GimpLayer *,
+              parent_group = g_array_index (parent_group_stack, ClayLayer *,
                                             parent_group_stack->len - 1);
               IFDBG(2) g_debug ("[%d] End clipping group layer.", lidx);
               g_array_remove_index (parent_group_stack,
@@ -2962,9 +2962,9 @@ add_layers (GimpImage     *image,
 
       if (strlen (lyr_a[lidx]->adjustment_layer->type))
         {
-          layer = GIMP_LAYER (gimp_group_layer_new (image, NULL));
+          layer = CLAY_LAYER (clay_group_layer_new (image, NULL));
 
-          gimp_layer_set_mode (layer, GIMP_LAYER_MODE_PASS_THROUGH);
+          clay_layer_set_mode (layer, CLAY_LAYER_MODE_PASS_THROUGH);
 
           add_adjustment_layer (layer, lyr_a[lidx]);
         }
@@ -2976,7 +2976,7 @@ add_layers (GimpImage     *image,
                * assemble the layer structure in a single pass
                */
               IFDBG(2) g_debug ("Create placeholder group layer");
-              layer = GIMP_LAYER (gimp_group_layer_new (image, NULL));
+              layer = CLAY_LAYER (clay_group_layer_new (image, NULL));
               /* add this group layer as the new parent */
               g_array_append_val (parent_group_stack, layer);
             }
@@ -2984,9 +2984,9 @@ add_layers (GimpImage     *image,
             {
               if (parent_group_stack->len)
                 {
-                  layer = g_array_index (parent_group_stack, GimpLayer *,
+                  layer = g_array_index (parent_group_stack, ClayLayer *,
                                          parent_group_stack->len - 1);
-                  IFDBG(2) g_debug ("End group layer id %d.", gimp_item_get_id (GIMP_ITEM (layer)));
+                  IFDBG(2) g_debug ("End group layer id %d.", clay_item_get_id (CLAY_ITEM (layer)));
                   /* since the layers are stored in reverse, the group
                    * layer start marker actually means we're done with
                    * that layer group
@@ -2994,10 +2994,10 @@ add_layers (GimpImage     *image,
                   g_array_remove_index (parent_group_stack,
                                         parent_group_stack->len - 1);
 
-                  gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &l_x, &l_y);
+                  clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &l_x, &l_y);
 
-                  l_w = gimp_drawable_get_width  (GIMP_DRAWABLE (layer));
-                  l_h = gimp_drawable_get_height (GIMP_DRAWABLE (layer));
+                  l_w = clay_drawable_get_width  (CLAY_DRAWABLE (layer));
+                  l_h = clay_drawable_get_height (CLAY_DRAWABLE (layer));
                 }
               else
                 {
@@ -3010,7 +3010,7 @@ add_layers (GimpImage     *image,
                    * now need to finish. */
                   if (parent_group_stack->len)
                     {
-                      parent_group = g_array_index (parent_group_stack, GimpLayer *,
+                      parent_group = g_array_index (parent_group_stack, ClayLayer *,
                                                     parent_group_stack->len - 1);
                       IFDBG(2) g_debug ("[%d] End clipping group layer.", lidx);
                       g_array_remove_index (parent_group_stack,
@@ -3057,7 +3057,7 @@ add_layers (GimpImage     *image,
 
           if (lyr_a[lidx]->vector.path_len > 0)
             {
-              GimpPath *path;
+              ClayPath *path;
 
               path = get_layer_path (image, lyr_a[lidx], img_a);
 
@@ -3069,7 +3069,7 @@ add_layers (GimpImage     *image,
                 layer = get_vector_layer (image, path, lyr_a[lidx], img_a);
             }
 
-          image_type = get_gimp_image_type (img_a->base_type, alpha);
+          image_type = get_clay_image_type (img_a->base_type, alpha);
           IFDBG(3) g_debug ("Layer type %d", image_type);
 
           if (lyr_a[lidx]->smart_object.smart_object_data &&
@@ -3086,9 +3086,9 @@ add_layers (GimpImage     *image,
           no_draw_layer = (layer != NULL);
 
           if (! layer)
-            layer = gimp_layer_new (image, lyr_a[lidx]->name,
+            layer = clay_layer_new (image, lyr_a[lidx]->name,
                                     l_w, l_h, image_type,
-                                    100, GIMP_LAYER_MODE_NORMAL);
+                                    100, CLAY_LAYER_MODE_NORMAL);
         }
 
       if (layer != NULL)
@@ -3099,7 +3099,7 @@ add_layers (GimpImage     *image,
            * start marker.
            */
           if (lyr_a[lidx]->name)
-            gimp_item_set_name (GIMP_ITEM (layer), lyr_a[lidx]->name);
+            clay_item_set_name (CLAY_ITEM (layer), lyr_a[lidx]->name);
 
           /* Set the layer properties (skip this for layer group end
            * markers; we set their properties when processing the start
@@ -3108,20 +3108,20 @@ add_layers (GimpImage     *image,
           if (lyr_a[lidx]->group_type != 3)
             {
               /* Mode */
-              psd_to_gimp_blend_mode (lyr_a[lidx], &mode_info);
+              psd_to_clay_blend_mode (lyr_a[lidx], &mode_info);
               if (! strlen (lyr_a[lidx]->adjustment_layer->type))
-                gimp_layer_set_mode (layer, mode_info.mode);
-              gimp_layer_set_blend_space (layer, mode_info.blend_space);
-              gimp_layer_set_composite_space (layer, mode_info.composite_space);
-              gimp_layer_set_composite_mode (layer, mode_info.composite_mode);
+                clay_layer_set_mode (layer, mode_info.mode);
+              clay_layer_set_blend_space (layer, mode_info.blend_space);
+              clay_layer_set_composite_space (layer, mode_info.composite_space);
+              clay_layer_set_composite_mode (layer, mode_info.composite_mode);
 
               /* Opacity */
-              gimp_layer_set_opacity (layer,
+              clay_layer_set_opacity (layer,
                                       lyr_a[lidx]->opacity * 100.0 / 255.0);
 
               /* Flags */
-              gimp_layer_set_lock_alpha  (layer, lyr_a[lidx]->layer_flags.trans_prot);
-              gimp_item_set_visible (GIMP_ITEM (layer), lyr_a[lidx]->layer_flags.visible);
+              clay_layer_set_lock_alpha  (layer, lyr_a[lidx]->layer_flags.trans_prot);
+              clay_item_set_visible (CLAY_ITEM (layer), lyr_a[lidx]->layer_flags.visible);
 #if 0
               /* according to the spec, the 'irrelevant' flag indicates
                * that the layer's "pixel data is irrelevant to the
@@ -3136,26 +3136,26 @@ add_layers (GimpImage     *image,
               if (lyr_a[lidx]->layer_flags.irrelevant &&
                   lyr_a[lidx]->group_type == 0)
                 {
-                  gimp_item_set_visible (GIMP_ITEM (layer), FALSE);
+                  clay_item_set_visible (CLAY_ITEM (layer), FALSE);
                 }
 #endif
 
               /* Position */
               if (l_x != 0 || l_y != 0)
-                gimp_layer_set_offsets (layer, l_x, l_y);
+                clay_layer_set_offsets (layer, l_x, l_y);
 
               /* Color tag */
-              gimp_item_set_color_tag (GIMP_ITEM (layer),
-                                       psd_to_gimp_layer_color_tag (lyr_a[lidx]->color_tag[0]));
+              clay_item_set_color_tag (CLAY_ITEM (layer),
+                                       psd_to_clay_layer_color_tag (lyr_a[lidx]->color_tag[0]));
 
               /* Tattoo */
               if (lyr_a[lidx]->id)
-                gimp_item_set_tattoo (GIMP_ITEM (layer), lyr_a[lidx]->id);
+                clay_item_set_tattoo (CLAY_ITEM (layer), lyr_a[lidx]->id);
 
               /* For layer groups, expand or collapse the group */
               if (lyr_a[lidx]->group_type != 0)
                 {
-                  gimp_item_set_expanded (GIMP_ITEM (layer),
+                  clay_item_set_expanded (CLAY_ITEM (layer),
                                           lyr_a[lidx]->group_type == 1);
                 }
             }
@@ -3185,7 +3185,7 @@ add_layers (GimpImage     *image,
 
               if (empty)
                 {
-                  gimp_drawable_fill (GIMP_DRAWABLE (layer), GIMP_FILL_TRANSPARENT);
+                  clay_drawable_fill (CLAY_DRAWABLE (layer), CLAY_FILL_TRANSPARENT);
                 }
               else
                 {
@@ -3195,7 +3195,7 @@ add_layers (GimpImage     *image,
                   if (bps == 0)
                     bps++;
 
-                  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+                  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
                   iter = gegl_buffer_iterator_new (
                     buffer, NULL, 0, get_layer_format (img_a, alpha),
@@ -3292,13 +3292,13 @@ add_layers (GimpImage     *image,
                 {
                   IFDBG(3) g_debug ("Create empty mask");
                   if (lyr_a[lidx]->layer_mask.def_color == 255)
-                    mask = gimp_layer_create_mask (layer,
-                                                   GIMP_ADD_MASK_WHITE);
+                    mask = clay_layer_create_mask (layer,
+                                                   CLAY_ADD_MASK_WHITE);
                   else
-                    mask = gimp_layer_create_mask (layer,
-                                                   GIMP_ADD_MASK_BLACK);
-                  gimp_layer_add_mask (layer, mask);
-                  gimp_layer_set_apply_mask (layer,
+                    mask = clay_layer_create_mask (layer,
+                                                   CLAY_ADD_MASK_BLACK);
+                  clay_layer_add_mask (layer, mask);
+                  clay_layer_set_apply_mask (layer,
                                              ! lyr_a[lidx]->layer_mask.mask_flags.disabled);
                 }
               else
@@ -3326,19 +3326,19 @@ add_layers (GimpImage     *image,
                                         mask_rect.width, mask_rect.height);
 
                       if (lyr_a[lidx]->layer_mask.def_color == 255)
-                        mask = gimp_layer_create_mask (layer,
-                                                       GIMP_ADD_MASK_WHITE);
+                        mask = clay_layer_create_mask (layer,
+                                                       CLAY_ADD_MASK_WHITE);
                       else
-                        mask = gimp_layer_create_mask (layer,
-                                                       GIMP_ADD_MASK_BLACK);
+                        mask = clay_layer_create_mask (layer,
+                                                       CLAY_ADD_MASK_BLACK);
 
                       bps = img_a->bps / 8;
                       if (bps == 0)
                         bps++;
 
-                      IFDBG(3) g_debug ("New layer mask %d", gimp_item_get_id (GIMP_ITEM (mask)));
-                      gimp_layer_add_mask (layer, mask);
-                      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (mask));
+                      IFDBG(3) g_debug ("New layer mask %d", clay_item_get_id (CLAY_ITEM (mask)));
+                      clay_layer_add_mask (layer, mask);
+                      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (mask));
                       gegl_buffer_set (buffer,
                                         &mask_rect,
                                         0, get_mask_format (img_a),
@@ -3347,7 +3347,7 @@ add_layers (GimpImage     *image,
                                           (mask_rect.x - lm_x)) * bps,
                                         lm_w * bps);
                       g_object_unref (buffer);
-                      gimp_layer_set_apply_mask (layer,
+                      clay_layer_set_apply_mask (layer,
                                                  ! lyr_a[lidx]->layer_mask.mask_flags.disabled);
                     }
                   g_free (lyr_chn[user_mask_chn]->data);
@@ -3364,12 +3364,12 @@ add_layers (GimpImage     *image,
               add_legacy_layer_effects (layer, lyr_a[lidx], img_a);
 
             /* Insert the layer */
-            if (! GIMP_IS_TEXT_LAYER (layer)  &&
+            if (! CLAY_IS_TEXT_LAYER (layer)  &&
                 (lyr_a[lidx]->group_type == 0 || /* normal layer */
                  lyr_a[lidx]->group_type == 3 || /* group layer end marker */
                  strlen (lyr_a[lidx]->adjustment_layer->type)))
               {
-                gimp_image_insert_layer (image, layer, parent_group, 0);
+                clay_image_insert_layer (image, layer, parent_group, 0);
               }
         }
 
@@ -3387,26 +3387,26 @@ add_layers (GimpImage     *image,
   g_array_free (parent_group_stack, FALSE);
 
   /* Set the selected layers */
-  gimp_image_take_selected_layers (image, selected_layers);
+  clay_image_take_selected_layers (image, selected_layers);
   g_list_free (img_a->layer_selection);
 
   return 0;
 }
 
 static void
-add_legacy_layer_effects (GimpLayer *layer,
+add_legacy_layer_effects (ClayLayer *layer,
                           PSDlayer  *lyr_a,
                           PSDimage  *img_a)
 {
-  const Babl *format = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+  const Babl *format = clay_drawable_get_format (CLAY_DRAWABLE (layer));
   const Babl *space  = babl_format_get_space (format);
 
   if (lyr_a->layer_styles->count == 7 &&
       lyr_a->layer_styles->sofi.enabled == 1)
     {
       PSDLayerStyleSolidFill  sofi;
-      GimpLayerMode           mode;
-      GimpDrawableFilter     *filter;
+      ClayLayerMode           mode;
+      ClayDrawableFilter     *filter;
       GeglColor              *color = gegl_color_new ("none");
 
       sofi = lyr_a->layer_styles->sofi;
@@ -3414,7 +3414,7 @@ add_legacy_layer_effects (GimpLayer *layer,
       convert_legacy_psd_color (color, sofi.natcolor, space, img_a->ibm_pc_format);
       convert_psd_mode (sofi.blend, &mode);
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:color-overlay",
                                                 NULL,
                                                 mode,
@@ -3429,8 +3429,8 @@ add_legacy_layer_effects (GimpLayer *layer,
   if (lyr_a->layer_styles->oglw.effecton == 1)
     {
       PSDLayerStyleGlow   oglw;
-      GimpLayerMode       mode;
-      GimpDrawableFilter *filter;
+      ClayLayerMode       mode;
+      ClayDrawableFilter *filter;
       GeglColor          *color = gegl_color_new ("none");
       gdouble             blur;
 
@@ -3445,11 +3445,11 @@ add_legacy_layer_effects (GimpLayer *layer,
 
       convert_psd_mode (oglw.effect, &mode);
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:dropshadow",
                                                 /* TODO: Translate after string freeze */
                                                 "Outer Glow (imported)",
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0,
                                                 "x",           0,
                                                 "y",           0,
@@ -3466,8 +3466,8 @@ add_legacy_layer_effects (GimpLayer *layer,
   if (lyr_a->layer_styles->isdw.effecton == 1)
     {
       PSDLayerStyleShadow  isdw;
-      GimpLayerMode        mode;
-      GimpDrawableFilter  *filter;
+      ClayLayerMode        mode;
+      ClayDrawableFilter  *filter;
       GeglColor           *color = gegl_color_new ("none");
       gchar               *filter_name;
       gdouble              x;
@@ -3506,7 +3506,7 @@ add_legacy_layer_effects (GimpLayer *layer,
 
       convert_psd_mode (isdw.blendsig, &mode);
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:inner-glow",
                                                 filter_name,
                                                 mode,
@@ -3527,8 +3527,8 @@ add_legacy_layer_effects (GimpLayer *layer,
   if (lyr_a->layer_styles->dsdw.effecton == 1)
     {
       PSDLayerStyleShadow  dsdw;
-      GimpLayerMode        mode;
-      GimpDrawableFilter  *filter;
+      ClayLayerMode        mode;
+      ClayDrawableFilter  *filter;
       GeglColor           *color = gegl_color_new ("none");
       gdouble              x;
       gdouble              y;
@@ -3567,10 +3567,10 @@ add_legacy_layer_effects (GimpLayer *layer,
 
       convert_psd_mode (dsdw.blendsig, &mode);
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:dropshadow",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0,
                                                 "x",       x,
                                                 "y",       y,
@@ -3585,32 +3585,32 @@ add_legacy_layer_effects (GimpLayer *layer,
 }
 
 static void
-add_adjustment_layer (GimpLayer *layer,
+add_adjustment_layer (ClayLayer *layer,
                       PSDlayer  *lyr_a)
 {
-  GimpDrawableFilter *filter = NULL;
+  ClayDrawableFilter *filter = NULL;
   PSDAdjustmentLayer *ladj   = lyr_a->adjustment_layer;
 
   if (memcmp (ladj->type, PSD_LADJ_LEVEL, 4) == 0)
     {
-      GimpDrawableFilterConfig *config;
+      ClayDrawableFilterConfig *config;
 
       filter =
-        gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                         "gimp:levels",
+        clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                         "clay:levels",
                                          NULL,
-                                         GIMP_LAYER_MODE_REPLACE,
+                                         CLAY_LAYER_MODE_REPLACE,
                                          1.0,
                                          NULL);
 
-      config = gimp_drawable_filter_get_config (filter);
+      config = clay_drawable_filter_get_config (filter);
 
       for (gint i = 3; i >= 0; i--)
         {
           g_object_set (config, "channel", i, NULL);
-          gimp_drawable_filter_update (filter);
+          clay_drawable_filter_update (filter);
           g_object_set (config,
-                        "trc",         GIMP_TRC_PERCEPTUAL,
+                        "trc",         CLAY_TRC_PERCEPTUAL,
                         /* Per PSD specification, low-input range is 0 - 253 */
                         "low-input",   ladj->in_out_gamma[i][0] / 253,
                         "high-input",  ladj->in_out_gamma[i][1] / 255,
@@ -3618,30 +3618,30 @@ add_adjustment_layer (GimpLayer *layer,
                         "high-output", ladj->in_out_gamma[i][3] / 255,
                         "gamma",       ladj->in_out_gamma[i][4] / 100,
                         NULL);
-          gimp_drawable_filter_update (filter);
+          clay_drawable_filter_update (filter);
         }
     }
   else if (memcmp (ladj->type, PSD_LADJ_CURVE, 4) == 0)
     {
-      GimpDrawableFilterConfig *config;
+      ClayDrawableFilterConfig *config;
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                "gimp:curves",
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                "clay:curves",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0, NULL);
 
-      config = gimp_drawable_filter_get_config (filter);
+      config = clay_drawable_filter_get_config (filter);
 
       for (gint i = ladj->curve_count - 1; i >= 0; i--)
        {
          g_object_set (config, "channel", i, NULL);
-         gimp_drawable_filter_update (filter);
+         clay_drawable_filter_update (filter);
           g_object_set (config,
-                        "trc",   GIMP_TRC_PERCEPTUAL,
+                        "trc",   CLAY_TRC_PERCEPTUAL,
                         "curve", ladj->curve[i],
                         NULL);
-         gimp_drawable_filter_update (filter);
+         clay_drawable_filter_update (filter);
        }
     }
   else if (memcmp (ladj->type, PSD_LADJ_BRIGHTNESS, 4) == 0)
@@ -3654,10 +3654,10 @@ add_adjustment_layer (GimpLayer *layer,
       brightness = ladj->brightness / 128.0f;
       contrast   = ladj->contrast / 128.0f;
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                "gimp:brightness-contrast",
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                "clay:brightness-contrast",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0,
                                                 "brightness", brightness,
                                                 "contrast",   contrast,
@@ -3665,41 +3665,41 @@ add_adjustment_layer (GimpLayer *layer,
     }
   else if (memcmp (ladj->type, PSD_LADJ_BALANCE, 4) == 0)
     {
-      GimpDrawableFilterConfig *config;
+      ClayDrawableFilterConfig *config;
 
       filter =
-        gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                         "gimp:color-balance",
+        clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                         "clay:color-balance",
                                          NULL,
-                                         GIMP_LAYER_MODE_REPLACE,
+                                         CLAY_LAYER_MODE_REPLACE,
                                          1.0,
-                                         "range",         GIMP_TRANSFER_SHADOWS,
+                                         "range",         CLAY_TRANSFER_SHADOWS,
                                          "cyan-red",      ladj->shadows[0] / 100.0f,
                                          "magenta-green", ladj->shadows[1] / 100.0f,
                                          "yellow-blue",   ladj->shadows[2] / 100.0f,
                                          NULL);
 
-      config = gimp_drawable_filter_get_config (filter);
+      config = clay_drawable_filter_get_config (filter);
 
       /* Shadows, midtones, and highlights have to be set separately,
        * due to the filter design */
-      g_object_set (config, "range", GIMP_TRANSFER_MIDTONES, NULL);
-      gimp_drawable_filter_update (filter);
+      g_object_set (config, "range", CLAY_TRANSFER_MIDTONES, NULL);
+      clay_drawable_filter_update (filter);
       g_object_set (config,
                     "cyan-red",      ladj->midtones[0] / 100.0f,
                     "magenta-green", ladj->midtones[1] / 100.0f,
                     "yellow-blue",   ladj->midtones[2] / 100.0f,
                     NULL);
-      gimp_drawable_filter_update (filter);
+      clay_drawable_filter_update (filter);
 
-      g_object_set (config, "range", GIMP_TRANSFER_HIGHLIGHTS, NULL);
-      gimp_drawable_filter_update (filter);
+      g_object_set (config, "range", CLAY_TRANSFER_HIGHLIGHTS, NULL);
+      clay_drawable_filter_update (filter);
       g_object_set (config,
                     "cyan-red",      ladj->highlights[0] / 100.0f,
                     "magenta-green", ladj->highlights[1] / 100.0f,
                     "yellow-blue",   ladj->highlights[2] / 100.0f,
                     NULL);
-      gimp_drawable_filter_update (filter);
+      clay_drawable_filter_update (filter);
     }
   else if (memcmp (ladj->type, PSD_LADJ_HUE, 4) == 0 ||
            memcmp (ladj->type, PSD_LADJ_HUE2, 4) == 0)
@@ -3712,10 +3712,10 @@ add_adjustment_layer (GimpLayer *layer,
                                ladj->colorization[1], ladj->colorization[2],
                                1.0, NULL);
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:colorize",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:colorize",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_REPLACE,
+                                                    CLAY_LAYER_MODE_REPLACE,
                                                     1.0,
                                                     "hue",        ladj->colorization[0],
                                                     "saturation", ladj->colorization[1],
@@ -3726,13 +3726,13 @@ add_adjustment_layer (GimpLayer *layer,
         }
       else
         {
-          GimpHueRange              range = GIMP_HUE_RANGE_ALL;
-          GimpDrawableFilterConfig *config;
+          ClayHueRange              range = CLAY_HUE_RANGE_ALL;
+          ClayDrawableFilterConfig *config;
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:hue-saturation",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:hue-saturation",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_HSL_COLOR,
+                                                    CLAY_LAYER_MODE_HSL_COLOR,
                                                     1.0,
                                                     "range",      range,
                                                     "hue",        ladj->hsl[0][0],
@@ -3740,21 +3740,21 @@ add_adjustment_layer (GimpLayer *layer,
                                                     "lightness",  ladj->hsl[0][2],
                                                     NULL);
 
-          config = gimp_drawable_filter_get_config (filter);
+          config = clay_drawable_filter_get_config (filter);
           for (gint i = 1; i < 7; i++)
             {
               /* Sequence is red, yellow, green, cyan, blue, and magenta */
               range++;
 
               g_object_set (config, "range", range, NULL);
-              gimp_drawable_filter_update (filter);
+              clay_drawable_filter_update (filter);
 
               g_object_set (config,
                             "hue",        ladj->hsl[i][0],
                             "saturation", ladj->hsl[i][1],
                             "lightness",  ladj->hsl[i][2],
                             NULL);
-              gimp_drawable_filter_update (filter);
+              clay_drawable_filter_update (filter);
             }
 
         }
@@ -3762,10 +3762,10 @@ add_adjustment_layer (GimpLayer *layer,
   else if (memcmp (ladj->type, PSD_LADJ_MIXER, 4) == 0)
     {
       if (! ladj->is_mono)
-        filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+        filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                   "gegl:channel-mixer",
                                                   NULL,
-                                                  GIMP_LAYER_MODE_REPLACE,
+                                                  CLAY_LAYER_MODE_REPLACE,
                                                   1.0,
                                                   "rr-gain", ladj->red[0] / 100.0f,
                                                   "rg-gain", ladj->red[1] / 100.0f,
@@ -3778,10 +3778,10 @@ add_adjustment_layer (GimpLayer *layer,
                                                   "bb-gain", ladj->blue[2] / 100.0f,
                                                   NULL);
       else
-        filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+        filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                   "gegl:mono-mixer",
                                                   NULL,
-                                                  GIMP_LAYER_MODE_REPLACE,
+                                                  CLAY_LAYER_MODE_REPLACE,
                                                   1.0,
                                                   "red",   ladj->red[0] / 100.0f,
                                                   "green", ladj->red[1] / 100.0f,
@@ -3790,37 +3790,37 @@ add_adjustment_layer (GimpLayer *layer,
     }
   else if (memcmp (ladj->type, PSD_LADJ_INVERT, 4) == 0)
     {
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:invert-gamma",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0, NULL);
     }
   else if (memcmp (ladj->type, PSD_LADJ_POSTERIZE, 4) == 0)
     {
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                "gimp:posterize",
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                "clay:posterize",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0,
                                                 "levels", ladj->level,
                                                 NULL);
     }
   else if (memcmp (ladj->type, PSD_LADJ_THRESHOLD, 4) == 0)
     {
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                "gimp:threshold",
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                "clay:threshold",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0,
                                                 "low",     ladj->level / 255.0f,
-                                                "channel", GIMP_HISTOGRAM_LUMINANCE,
+                                                "channel", CLAY_HISTOGRAM_LUMINANCE,
                                                 NULL);
     }
   /* Fill layers */
   else if (memcmp (ladj->type, PSD_LFIL_SOLID, 4) == 0)
     {
-      const Babl *format = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+      const Babl *format = clay_drawable_get_format (CLAY_DRAWABLE (layer));
       const Babl *space  = babl_format_get_space (format);
       GeglColor  *color  = NULL;
 
@@ -3859,10 +3859,10 @@ add_adjustment_layer (GimpLayer *layer,
           IFDBG(3) g_debug ("WARNING: Color not initialized!");
         }
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:color-overlay",
                                                 NULL,
-                                                GIMP_LAYER_MODE_REPLACE,
+                                                CLAY_LAYER_MODE_REPLACE,
                                                 1.0,
                                                 "value", color,
                                                 NULL);
@@ -4026,7 +4026,7 @@ get_json_dimensions (JsonReader *reader,
 static void
 json_read_shadow (JsonReader *reader,
                   const Babl *space,
-                  GimpLayer  *layer,
+                  ClayLayer  *layer,
                   gint        shadow_type,
                   gint        global_angle)
 {
@@ -4149,8 +4149,8 @@ json_read_shadow (JsonReader *reader,
         }
       if (present && enabled)
         {
-          GimpDrawableFilter  *filter;
-          GimpLayerMode        gimp_mode;
+          ClayDrawableFilter  *filter;
+          ClayLayerMode        clay_mode;
           gchar               *filter_name = NULL;
           gdouble              x;
           gdouble              y;
@@ -4184,16 +4184,16 @@ json_read_shadow (JsonReader *reader,
 
           gegl_blur = (blur / 250.0) * 100.0;
 
-          /* FIXME Besides certain modes not working for Dropshadow in GIMP,
+          /* FIXME Besides certain modes not working for Dropshadow in Clay,
            * an additional issue is that the mode names in the descriptor
            * are different than elsewhere in PSD's, so we need a new
            * conversion function.
            */
-          convert_psd_effect_mode (mode, &gimp_mode);
+          convert_psd_effect_mode (mode, &clay_mode);
           if (shadow_type == PS_DROPSHADOW)
             {
               IFDBG(3) g_debug ("DropShadow: setting layer mode to Replace instead of %.4s.", mode);
-              gimp_mode = GIMP_LAYER_MODE_REPLACE;
+              clay_mode = CLAY_LAYER_MODE_REPLACE;
             }
           else if (shadow_type == PS_INNERSHADOW)
             {
@@ -4210,7 +4210,7 @@ json_read_shadow (JsonReader *reader,
               grow_radius = range / 100.0 * gegl_blur;
               IFDBG(3) g_debug ("OuterGlow: setting layer mode to Replace instead of %.4s.", mode);
               /* Modes like Screen don't work with this (is this a bug?). */
-              gimp_mode = GIMP_LAYER_MODE_REPLACE;
+              clay_mode = CLAY_LAYER_MODE_REPLACE;
               filter_name = g_strdup_printf ("%s (%s)", _("Outer Glow"),
                                              _("imported"));
             }
@@ -4226,7 +4226,7 @@ json_read_shadow (JsonReader *reader,
               gegl_blur = 0.0;
               grow_radius = size;
               IFDBG(3) g_debug ("Stroke: setting layer mode to Replace instead of %.4s.", mode);
-              gimp_mode = GIMP_LAYER_MODE_REPLACE;
+              clay_mode = CLAY_LAYER_MODE_REPLACE;
               filter_name = g_strdup_printf ("%s (%s)", _("Stroke"),
                                              _("imported"));
               if (! g_str_equal (style, "OutF") ||
@@ -4243,10 +4243,10 @@ json_read_shadow (JsonReader *reader,
               IFDBG(3) g_debug ("WARNING: Color not initialized!");
             }
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                     gegl_op[shadow_type],
                                                     filter_name,
-                                                    gimp_mode,
+                                                    clay_mode,
                                                     1.0,
                                                     "x",           x,
                                                     "y",           y,
@@ -4272,7 +4272,7 @@ json_read_shadow (JsonReader *reader,
 static void
 json_read_solidfill (JsonReader *reader,
                      const Babl *space,
-                     GimpLayer  *layer)
+                     ClayLayer  *layer)
 {
   gboolean     enabled   = FALSE;
   gboolean     present   = TRUE;        /* Not always present in descriptor*/
@@ -4326,8 +4326,8 @@ json_read_solidfill (JsonReader *reader,
         }
       if (present && enabled)
         {
-          GimpDrawableFilter  *filter;
-          GimpLayerMode        layer_mode;
+          ClayDrawableFilter  *filter;
+          ClayLayerMode        layer_mode;
 
           /* The blend mode names in the descriptor are different than
            * elsewhere in PSD's, so we use a different conversion function.
@@ -4341,7 +4341,7 @@ json_read_solidfill (JsonReader *reader,
               IFDBG(3) g_debug ("WARNING: Color not initialized!");
             }
 
-      filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+      filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                 "gegl:color-overlay",
                                                 NULL,
                                                 layer_mode,
@@ -4361,11 +4361,11 @@ json_read_solidfill (JsonReader *reader,
 }
 
 static void
-add_layer_effects (GimpLayer *layer,
+add_layer_effects (ClayLayer *layer,
                    PSDlayer  *lyr_a,
                    PSDimage  *img_a)
 {
-  const Babl *format = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+  const Babl *format = clay_drawable_get_format (CLAY_DRAWABLE (layer));
   const Babl *space  = babl_format_get_space (format);
 
   if (lyr_a->layer_effects.effects)
@@ -4475,14 +4475,14 @@ add_layer_effects (GimpLayer *layer,
     }
 }
 
-static GimpLayer *
-get_text_layer (GimpImage *image,
-                GimpLayer *parent_group,
+static ClayLayer *
+get_text_layer (ClayImage *image,
+                ClayLayer *parent_group,
                 PSDlayer  *lyr_a,
                 PSDimage  *img_a)
 {
-  GimpLayer  *layer              = NULL;
-  GimpFont   *font               = NULL;
+  ClayLayer  *layer              = NULL;
+  ClayFont   *font               = NULL;
   GList      *font_names         = NULL;
   GList      *font_info          = NULL;
   gint       *font_sections      = NULL;
@@ -4496,10 +4496,10 @@ get_text_layer (GimpImage *image,
       JsonReader *reader = NULL;
 
       /* Create default text layer to fill in afterwards */
-      layer = GIMP_LAYER (gimp_text_layer_new (image, "Text",
-                                               gimp_context_get_font (),
-                                               24, gimp_unit_pixel ()));
-      gimp_image_insert_layer (image, layer, parent_group, 0);
+      layer = CLAY_LAYER (clay_text_layer_new (image, "Text",
+                                               clay_context_get_font (),
+                                               24, clay_unit_pixel ()));
+      clay_image_insert_layer (image, layer, parent_group, 0);
 
       reader = json_reader_new (lyr_a->text.textdata);
       if (json_reader_read_member (reader, "descriptor"))
@@ -4564,29 +4564,29 @@ get_text_layer (GimpImage *image,
 
   if (layer)
     {
-      gimp_text_layer_set_text (GIMP_TEXT_LAYER (layer), text);
-      gimp_text_layer_set_antialias (GIMP_TEXT_LAYER (layer), antialias);
+      clay_text_layer_set_text (CLAY_TEXT_LAYER (layer), text);
+      clay_text_layer_set_antialias (CLAY_TEXT_LAYER (layer), antialias);
 
       if (font_info && font_info->data)
         {
           FontInfo  *font_props = font_info->data;
           GeglColor *color      = gegl_color_new ("black");
 
-          gimp_text_layer_set_font_size (GIMP_TEXT_LAYER (layer),
+          clay_text_layer_set_font_size (CLAY_TEXT_LAYER (layer),
                                          font_props->font_size,
-                                         gimp_unit_pixel ());
+                                         clay_unit_pixel ());
 
           font = match_font ((const gchar *) font_props->font_name);
           if (font)
-            gimp_text_layer_set_font (GIMP_TEXT_LAYER (layer), font);
+            clay_text_layer_set_font (CLAY_TEXT_LAYER (layer), font);
 
           gegl_color_set_pixel (color, babl_format ("R'G'B' double"),
                                 font_props->fg_color);
 
-          gimp_text_layer_set_color (GIMP_TEXT_LAYER (layer), color);
+          clay_text_layer_set_color (CLAY_TEXT_LAYER (layer), color);
 
           /* Create markup version */
-          create_text_markup (GIMP_TEXT_LAYER (layer),
+          create_text_markup (CLAY_TEXT_LAYER (layer),
                               (const gchar *) text, font_info,
                               font_sections, font_section_count);
 
@@ -4603,12 +4603,12 @@ get_text_layer (GimpImage *image,
   return layer;
 }
 
-static GimpLayer *
-get_linked_layer (GimpImage *image,
+static ClayLayer *
+get_linked_layer (ClayImage *image,
                   PSDlayer  *lyr_a,
                   PSDimage  *img_a)
 {
-  GimpLayer *layer = NULL;
+  ClayLayer *layer = NULL;
 
   if (lyr_a->smart_object.smart_object_data)
     {
@@ -4731,9 +4731,9 @@ get_linked_layer (GimpImage *image,
                   if (g_file_query_exists (file, NULL))
                     {
                       found = TRUE;
-                      layer = GIMP_LAYER (gimp_link_layer_new (image, file));
+                      layer = CLAY_LAYER (clay_link_layer_new (image, file));
                       IFDBG(3) g_debug ("Link layer created for external image %s",
-                                        gimp_file_get_utf8_name (file));
+                                        clay_file_get_utf8_name (file));
                     }
                   g_object_unref (file);
                 }
@@ -4752,9 +4752,9 @@ get_linked_layer (GimpImage *image,
                       g_free (full_path);
                       if (g_file_query_exists (rel_file, NULL))
                         {
-                          layer = GIMP_LAYER (gimp_link_layer_new (image, rel_file));
+                          layer = CLAY_LAYER (clay_link_layer_new (image, rel_file));
                           IFDBG(3) g_debug ("Link layer created for external image %s",
-                                            gimp_file_get_utf8_name (rel_file));
+                                            clay_file_get_utf8_name (rel_file));
                         }
                       g_object_unref (rel_file);
                     }
@@ -4774,12 +4774,12 @@ get_linked_layer (GimpImage *image,
 
 /* Based on load_resource_2000 (), except using an array rather than
  * GOutputStream */
-static GimpPath *
-get_layer_path (GimpImage *image,
+static ClayPath *
+get_layer_path (ClayImage *image,
                 PSDlayer  *lyr_a,
                 PSDimage  *img_a)
 {
-  GimpPath *path = NULL;
+  ClayPath *path = NULL;
 
   if (lyr_a->vector.path_data)
     {
@@ -4815,14 +4815,14 @@ get_layer_path (GimpImage *image,
 
       path_rec--;
 
-      path = gimp_path_new (image, lyr_a->name);
+      path = clay_path_new (image, lyr_a->name);
 
-      image_width  = gimp_image_get_width (image);
-      image_height = gimp_image_get_height (image);
-      paths        = gimp_image_list_paths (image);
+      image_width  = clay_image_get_width (image);
+      image_height = clay_image_get_height (image);
+      paths        = clay_image_list_paths (image);
       n_paths      = g_list_length (paths);
 
-      gimp_image_insert_path (image, path, NULL, n_paths);
+      clay_image_insert_path (image, path, NULL, n_paths);
       g_list_free (paths);
 
       i = 26;
@@ -4913,8 +4913,8 @@ get_layer_path (GimpImage *image,
                   path_rec--;
                   num_rec--;
                 }
-              gimp_path_stroke_new_from_points (path,
-                                                GIMP_PATH_STROKE_TYPE_BEZIER,
+              clay_path_stroke_new_from_points (path,
+                                                CLAY_PATH_STROKE_TYPE_BEZIER,
                                                 cntr, controlpoints, closed);
               g_free (controlpoints);
             }
@@ -4930,13 +4930,13 @@ get_layer_path (GimpImage *image,
   return path;
 }
 
-static GimpLayer *
-get_vector_layer (GimpImage *image,
-                  GimpPath  *path,
+static ClayLayer *
+get_vector_layer (ClayImage *image,
+                  ClayPath  *path,
                   PSDlayer  *lyr_a,
                   PSDimage  *img_a)
 {
-  GimpVectorLayer *layer               = NULL;
+  ClayVectorLayer *layer               = NULL;
   GeglColor       *fill_color          = NULL;
   GeglColor       *stroke_color        = NULL;
   gboolean         enable_fill         = TRUE;
@@ -4944,8 +4944,8 @@ get_vector_layer (GimpImage *image,
   gdouble          stroke_width        = 0;
   gdouble          stroke_miter        = 0;
   gdouble          stroke_dash_offset  = 0;
-  GimpCapStyle     stroke_cap          = GIMP_CAP_BUTT;
-  GimpJoinStyle    stroke_join         = GIMP_JOIN_MITER;
+  ClayCapStyle     stroke_cap          = CLAY_CAP_BUTT;
+  ClayJoinStyle    stroke_join         = CLAY_JOIN_MITER;
   gdouble         *stroke_dash_pattern = NULL;
   gsize            dash_count          = 0;
   const Babl      *format;
@@ -4964,8 +4964,8 @@ get_vector_layer (GimpImage *image,
       return NULL;
     }
 
-  layer  = gimp_vector_layer_new (image, path);
-  format = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+  layer  = clay_vector_layer_new (image, path);
+  format = clay_drawable_get_format (CLAY_DRAWABLE (layer));
   space  = babl_format_get_space (format);
 
   if (lyr_a->vector.vstk)
@@ -5040,10 +5040,10 @@ get_vector_layer (GimpImage *image,
 
                               if (json_string_equal (join,
                                                      "strokeStyleBevelJoin"))
-                                stroke_join = GIMP_JOIN_BEVEL;
+                                stroke_join = CLAY_JOIN_BEVEL;
                               else if (json_string_equal (join,
                                                           "strokeStyleRoundJoin"))
-                                stroke_join = GIMP_JOIN_ROUND;
+                                stroke_join = CLAY_JOIN_ROUND;
                             }
 
                           json_reader_end_member (reader);
@@ -5055,9 +5055,9 @@ get_vector_layer (GimpImage *image,
                               const gchar *cap = json_reader_get_string_value (reader);
 
                               if (json_string_equal (cap, "strokeStyleRoundCap"))
-                                stroke_cap = GIMP_CAP_ROUND;
+                                stroke_cap = CLAY_CAP_ROUND;
                               else if (json_string_equal (cap, "strokeStyleSquareCap"))
-                                stroke_cap = GIMP_CAP_SQUARE;
+                                stroke_cap = CLAY_CAP_SQUARE;
                             }
 
                           json_reader_end_member (reader);
@@ -5213,25 +5213,25 @@ get_vector_layer (GimpImage *image,
       json_node_free (lyr_a->vector.vscg);
     }
 
-  gimp_vector_layer_set_enable_fill (layer, enable_fill);
-  gimp_vector_layer_set_enable_stroke (layer, enable_stroke);
-  gimp_vector_layer_set_stroke_width (layer, stroke_width);
-  gimp_vector_layer_set_stroke_miter_limit (layer, stroke_miter);
-  gimp_vector_layer_set_stroke_dash_offset (layer, stroke_dash_offset);
-  gimp_vector_layer_set_stroke_join_style (layer, stroke_join);
-  gimp_vector_layer_set_stroke_cap_style (layer, stroke_cap);
+  clay_vector_layer_set_enable_fill (layer, enable_fill);
+  clay_vector_layer_set_enable_stroke (layer, enable_stroke);
+  clay_vector_layer_set_stroke_width (layer, stroke_width);
+  clay_vector_layer_set_stroke_miter_limit (layer, stroke_miter);
+  clay_vector_layer_set_stroke_dash_offset (layer, stroke_dash_offset);
+  clay_vector_layer_set_stroke_join_style (layer, stroke_join);
+  clay_vector_layer_set_stroke_cap_style (layer, stroke_cap);
 
   if (stroke_dash_pattern)
     {
-      gimp_vector_layer_set_stroke_dash_pattern (layer, dash_count,
+      clay_vector_layer_set_stroke_dash_pattern (layer, dash_count,
                                                  stroke_dash_pattern);
       g_free (stroke_dash_pattern);
     }
 
   if (fill_color)
-    gimp_vector_layer_set_fill_color (layer, fill_color);
+    clay_vector_layer_set_fill_color (layer, fill_color);
   if (stroke_color)
-    gimp_vector_layer_set_stroke_color (layer, stroke_color);
+    clay_vector_layer_set_stroke_color (layer, stroke_color);
 
   g_clear_object (&fill_color);
   g_clear_object (&stroke_color);
@@ -5239,15 +5239,15 @@ get_vector_layer (GimpImage *image,
   /* TODO: Remove when we support all vector formats */
   if (unsupported)
     {
-      gimp_item_delete (GIMP_ITEM (layer));
+      clay_item_delete (CLAY_ITEM (layer));
       layer = NULL;
     }
 
-  return GIMP_LAYER (layer);
+  return CLAY_LAYER (layer);
 }
 
 static gint
-add_merged_image (GimpImage     *image,
+add_merged_image (ClayImage     *image,
                   PSDimage      *img_a,
                   GInputStream  *input,
                   GError       **error)
@@ -5263,8 +5263,8 @@ add_merged_image (GimpImage     *image,
   guint32              *rle_pack_len[MAX_CHANNELS];
   guint32               alpha_id;
   gsize                 layer_size;
-  GimpLayer            *layer   = NULL;
-  GimpChannel          *channel = NULL;
+  ClayLayer            *layer   = NULL;
+  ClayChannel          *channel = NULL;
   gint16                alpha_opacity;
   gint                  cidx;                  /* Channel index */
   gint                  rowi;                  /* Row index */
@@ -5272,7 +5272,7 @@ add_merged_image (GimpImage     *image,
   gboolean              alpha_visible;
   gboolean              alpha_channel = FALSE;
   GeglBuffer           *buffer;
-  GimpImageType         image_type;
+  ClayImageType         image_type;
   GeglColor            *alpha_rgb;
 
   total_channels = img_a->channels;
@@ -5444,7 +5444,7 @@ add_merged_image (GimpImage     *image,
   if (img_a->merged_image_only ||
       img_a->num_layers == 0)            /* Merged image - Photoshop 2 style */
     {
-      image_type = get_gimp_image_type (img_a->base_type,
+      image_type = get_clay_image_type (img_a->base_type,
                                         img_a->transparency || alpha_channel);
 
       layer_size = (gsize) img_a->columns * img_a->rows;
@@ -5465,14 +5465,14 @@ add_merged_image (GimpImage     *image,
 
       /* Add background layer */
       IFDBG(2) g_debug ("Draw merged image");
-      layer = gimp_layer_new (image, _("Background"),
+      layer = clay_layer_new (image, _("Background"),
                               img_a->columns, img_a->rows,
                               image_type,
                               100,
-                              gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, 0);
+                              clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, 0);
 
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
       if (img_a->color_mode == PSD_CMYK)
         {
@@ -5603,7 +5603,7 @@ add_merged_image (GimpImage     *image,
                 alpha_name = g_ptr_array_index (img_a->alpha_names, i + offset);
                 if (alpha_name)
                   g_free (alpha_name);
-                alpha_name = g_strdup (GIMP_IMAGE_QUICK_MASK_NAME);
+                alpha_name = g_strdup (CLAY_IMAGE_QUICK_MASK_NAME);
                 alpha_visible = TRUE;
               }
           if (! alpha_name && img_a->alpha_names)
@@ -5621,7 +5621,7 @@ add_merged_image (GimpImage     *image,
           if (offset < img_a->alpha_display_count &&
               i + offset <= img_a->alpha_display_count)
             {
-              alpha_rgb = gegl_color_duplicate (img_a->alpha_display_info[i + offset]->gimp_color);
+              alpha_rgb = gegl_color_duplicate (img_a->alpha_display_info[i + offset]->clay_color);
               alpha_opacity = img_a->alpha_display_info[i + offset]->opacity;
             }
           else
@@ -5633,16 +5633,16 @@ add_merged_image (GimpImage     *image,
           cidx = base_channels + i;
           pixels = g_realloc (pixels, (gsize) chn_a[cidx].columns * chn_a[cidx].rows * bps);
           memcpy (pixels, chn_a[cidx].data, (gsize) chn_a[cidx].columns * chn_a[cidx].rows * bps);
-          channel = gimp_channel_new (image, alpha_name,
+          channel = clay_channel_new (image, alpha_name,
                                       chn_a[cidx].columns, chn_a[cidx].rows,
                                       alpha_opacity, alpha_rgb);
-          gimp_image_insert_channel (image, channel, NULL, i);
+          clay_image_insert_channel (image, channel, NULL, i);
           g_object_unref (alpha_rgb);
           g_free (alpha_name);
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (channel));
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (channel));
           if (alpha_id)
-            gimp_item_set_tattoo (GIMP_ITEM (channel), alpha_id);
-          gimp_item_set_visible (GIMP_ITEM (channel), alpha_visible);
+            clay_item_set_tattoo (CLAY_ITEM (channel), alpha_id);
+          clay_item_set_visible (CLAY_ITEM (channel), alpha_visible);
           gegl_buffer_set (buffer,
                            GEGL_RECTANGLE (0, 0,
                                            gegl_buffer_get_width (buffer),
@@ -5664,37 +5664,37 @@ add_merged_image (GimpImage     *image,
         {
           for (cidx = 0; cidx < img_a->alpha_display_count; ++cidx)
             {
-              g_clear_object (&img_a->alpha_display_info[cidx]->gimp_color);
+              g_clear_object (&img_a->alpha_display_info[cidx]->clay_color);
               g_free (img_a->alpha_display_info[cidx]);
             }
           g_free (img_a->alpha_display_info);
         }
     }
 
-  /* FIXME gimp image tattoo state */
+  /* FIXME clay image tattoo state */
 
   return 0;
 }
 
 
 /* Local utility functions */
-static GimpLayer *
-add_clipping_group (GimpImage  *image,
-                    GimpLayer  *parent)
+static ClayLayer *
+add_clipping_group (ClayImage  *image,
+                    ClayLayer  *parent)
 {
-  GimpLayer * clipping_group = NULL;
+  ClayLayer * clipping_group = NULL;
 
-  /* We need to create a group because GIMP handles clipping and
+  /* We need to create a group because Clay handles clipping and
    * composition mode in a different manner than PS. */
   IFDBG(2) g_debug ("Creating a layer group to handle PS transparency clipping correctly.");
 
-  clipping_group = GIMP_LAYER (gimp_group_layer_new (image, "Group added by Clay"));
+  clipping_group = CLAY_LAYER (clay_group_layer_new (image, "Group added by Clay"));
 
-  gimp_layer_set_blend_space (clipping_group, GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
-  gimp_layer_set_composite_space (clipping_group, GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
-  gimp_layer_set_composite_mode (clipping_group, GIMP_LAYER_COMPOSITE_UNION);
+  clay_layer_set_blend_space (clipping_group, CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
+  clay_layer_set_composite_space (clipping_group, CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
+  clay_layer_set_composite_mode (clipping_group, CLAY_LAYER_COMPOSITE_UNION);
 
-  gimp_image_insert_layer (image, clipping_group, parent, 0);
+  clay_image_insert_layer (image, clipping_group, parent, 0);
 
   return clipping_group;
 }
@@ -5748,7 +5748,7 @@ convert_legacy_psd_color (GeglColor  *color,
 }
 
 static void
-psd_to_gimp_color_map (guchar *map256)
+psd_to_clay_color_map (guchar *map256)
 {
   guchar *tmpmap;
   gint    i;
@@ -5766,24 +5766,24 @@ psd_to_gimp_color_map (guchar *map256)
   g_free (tmpmap);
 }
 
-static GimpImageType
-get_gimp_image_type (GimpImageBaseType image_base_type,
+static ClayImageType
+get_clay_image_type (ClayImageBaseType image_base_type,
                      gboolean          alpha)
 {
-  GimpImageType image_type;
+  ClayImageType image_type;
 
   switch (image_base_type)
     {
-    case GIMP_GRAY:
-      image_type = (alpha) ? GIMP_GRAYA_IMAGE : GIMP_GRAY_IMAGE;
+    case CLAY_GRAY:
+      image_type = (alpha) ? CLAY_GRAYA_IMAGE : CLAY_GRAY_IMAGE;
       break;
 
-    case GIMP_INDEXED:
-      image_type = (alpha) ? GIMP_INDEXEDA_IMAGE : GIMP_INDEXED_IMAGE;
+    case CLAY_INDEXED:
+      image_type = (alpha) ? CLAY_INDEXEDA_IMAGE : CLAY_INDEXED_IMAGE;
       break;
 
-    case GIMP_RGB:
-      image_type = (alpha) ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE;
+    case CLAY_RGB:
+      image_type = (alpha) ? CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE;
       break;
 
     default:
@@ -5843,7 +5843,7 @@ read_channel_data (PSDchannel     *channel,
   raw_data = g_try_malloc (allocation);
   if (raw_data == NULL)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("There was not enough memory to complete the "
                      "operation."));
       return -1;
@@ -5924,7 +5924,7 @@ read_channel_data (PSDchannel     *channel,
         }
     }
 
-  /* Convert channel data to GIMP format */
+  /* Convert channel data to Clay format */
   switch (bps)
     {
     case 32:
@@ -6091,9 +6091,9 @@ get_layer_format (PSDimage *img_a,
 {
   const Babl *format = NULL;
 
-  switch (get_gimp_image_type (img_a->base_type, alpha))
+  switch (get_clay_image_type (img_a->base_type, alpha))
     {
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       switch (img_a->bps)
         {
         case 32:
@@ -6116,7 +6116,7 @@ get_layer_format (PSDimage *img_a,
         }
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       switch (img_a->bps)
         {
         case 32:
@@ -6138,7 +6138,7 @@ get_layer_format (PSDimage *img_a,
         }
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       switch (img_a->bps)
         {
         case 32:
@@ -6168,7 +6168,7 @@ get_layer_format (PSDimage *img_a,
         }
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       switch (img_a->bps)
         {
         case 32:
@@ -6223,7 +6223,7 @@ get_channel_format (PSDimage *img_a)
 
     case 8:
     case 1:
-      /* see gimp_image_get_channel_format() */
+      /* see clay_image_get_channel_format() */
       format = babl_format ("Y' u8");
       break;
 
@@ -6286,13 +6286,13 @@ load_dialog (const gchar *title,
   GtkWidget *label;
   GtkWidget *vbox;
 
-  dialog = gimp_dialog_new (title,
+  dialog = clay_dialog_new (title,
                             "import-psd",
                             NULL, 0, NULL, NULL,
                             _("_OK"), GTK_RESPONSE_OK,
                             NULL);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
@@ -6416,7 +6416,7 @@ load_dialog (const gchar *title,
   gtk_widget_set_visible (dialog, TRUE);
 
   /* run the dialog */
-  gimp_dialog_run (GIMP_DIALOG (dialog));
+  clay_dialog_run (CLAY_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 }

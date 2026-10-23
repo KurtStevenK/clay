@@ -20,13 +20,13 @@
 #include "display/display-types.h"
 
 
-typedef void (* GimpScaleCallback) (GtkWidget             *dialog,
-                                    GimpViewable          *viewable,
+typedef void (* ClayScaleCallback) (GtkWidget             *dialog,
+                                    ClayViewable          *viewable,
                                     gint                   width,
                                     gint                   height,
-                                    GimpUnit              *unit,
-                                    GimpInterpolationType  interpolation,
+                                    ClayUnit              *unit,
+                                    ClayInterpolationType  interpolation,
                                     gdouble                xresolution,
                                     gdouble                yresolution,
-                                    GimpUnit              *resolution_unit,
+                                    ClayUnit              *resolution_unit,
                                     gpointer               user_data);

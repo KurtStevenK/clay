@@ -27,80 +27,80 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpaction-history.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpsearchpopup.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayaction-history.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claysearchpopup.h"
 
 #include "action-search-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 #define ACTION_SECTION_INACTIVE 7
 
-static void         action_search_history_and_actions      (GimpSearchPopup   *popup,
+static void         action_search_history_and_actions      (ClaySearchPopup   *popup,
                                                             const gchar       *keyword,
                                                             gpointer           data);
-static gboolean     action_search_match_keyword            (GimpAction        *action,
+static gboolean     action_search_match_keyword            (ClayAction        *action,
                                                             const gchar*       keyword,
                                                             gint              *section,
-                                                            Gimp              *gimp);
+                                                            Clay              *clay);
 
 
 /* Public Functions */
 
 GtkWidget *
-action_search_dialog_create (Gimp *gimp)
+action_search_dialog_create (Clay *clay)
 {
   GtkWidget *dialog;
 
-  dialog = gimp_search_popup_new (gimp,
-                                  "gimp-action-search-dialog",
+  dialog = clay_search_popup_new (clay,
+                                  "clay-action-search-dialog",
                                   _("Search Actions"),
                                   action_search_history_and_actions,
-                                  gimp);
+                                  clay);
   return dialog;
 }
 
 /* Private Functions */
 
 static void
-action_search_history_and_actions (GimpSearchPopup *popup,
+action_search_history_and_actions (ClaySearchPopup *popup,
                                    const gchar     *keyword,
                                    gpointer         data)
 {
   gchar **actions;
   GList  *list;
   GList  *history_actions = NULL;
-  Gimp   *gimp;
+  Clay   *clay;
 
-  g_return_if_fail (GIMP_IS_GIMP (data));
+  g_return_if_fail (CLAY_IS_CLAY (data));
 
-  gimp = GIMP (data);
+  clay = Clay (data);
 
   if (g_strcmp0 (keyword, "") == 0)
     return;
 
-  history_actions = gimp_action_history_search (gimp,
+  history_actions = clay_action_history_search (clay,
                                                 action_search_match_keyword,
                                                 keyword);
 
   /* 0. Top result: matching action in run history. */
   for (list = history_actions; list; list = g_list_next (list))
-    gimp_search_popup_add_result (popup, list->data,
-                                  gimp_action_is_sensitive (list->data, NULL) ? 0 : ACTION_SECTION_INACTIVE);
+    clay_search_popup_add_result (popup, list->data,
+                                  clay_action_is_sensitive (list->data, NULL) ? 0 : ACTION_SECTION_INACTIVE);
 
   /* 1. Then other matching actions. */
-  actions = g_action_group_list_actions (G_ACTION_GROUP (gimp->app));
+  actions = g_action_group_list_actions (G_ACTION_GROUP (clay->app));
 
   for (gint i = 0; actions[i] != NULL; i++)
     {
@@ -109,20 +109,20 @@ action_search_history_and_actions (GimpSearchPopup *popup,
 
       /* The action search dialog doesn't show any non-historized
        * actions, with a few exceptions. See the difference between
-       * gimp_action_history_is_blacklisted_action() and
-       * gimp_action_history_is_excluded_action().
+       * clay_action_history_is_blacklisted_action() and
+       * clay_action_history_is_excluded_action().
        */
-      if (gimp_action_history_is_blacklisted_action (actions[i]))
+      if (clay_action_history_is_blacklisted_action (actions[i]))
         continue;
 
-      action = g_action_map_lookup_action (G_ACTION_MAP (gimp->app), actions[i]);
+      action = g_action_map_lookup_action (G_ACTION_MAP (clay->app), actions[i]);
 
-      g_return_if_fail (GIMP_IS_ACTION (action));
+      g_return_if_fail (CLAY_IS_ACTION (action));
 
-      if (! gimp_action_is_visible (GIMP_ACTION (action)))
+      if (! clay_action_is_visible (CLAY_ACTION (action)))
         continue;
 
-      if (action_search_match_keyword (GIMP_ACTION (action), keyword, &section, gimp))
+      if (action_search_match_keyword (CLAY_ACTION (action), keyword, &section, clay))
         {
           GList *redundant;
 
@@ -130,11 +130,11 @@ action_search_history_and_actions (GimpSearchPopup *popup,
            * it as an history action.
            */
           for (redundant = history_actions; redundant; redundant = g_list_next (redundant))
-            if (strcmp (gimp_action_get_name (redundant->data), actions[i]) == 0)
+            if (strcmp (clay_action_get_name (redundant->data), actions[i]) == 0)
               break;
 
           if (redundant == NULL)
-            gimp_search_popup_add_result (popup, GIMP_ACTION (action), section);
+            clay_search_popup_add_result (popup, CLAY_ACTION (action), section);
         }
     }
 
@@ -145,14 +145,14 @@ action_search_history_and_actions (GimpSearchPopup *popup,
 
 /**
  * action_search_match_keyword:
- * @action: a #GimpAction to be matched.
+ * @action: a #ClayAction to be matched.
  * @keyword: free text keyword to match with @action.
  * @section: relative section telling "how well" @keyword matched
  *           @action. The smaller the @section, the better the match. In
  *           particular this value can be used in the call to
- *           gimp_search_popup_add_result() to show best matches at the
+ *           clay_search_popup_add_result() to show best matches at the
  *           top of the list.
- * @gimp: the #Gimp object. This matters because we will tokenize
+ * @clay: the #Clay object. This matters because we will tokenize
  *        keywords, labels and tooltip by language.
  *
  * This function will check if some freely typed text @keyword matches
@@ -182,10 +182,10 @@ action_search_history_and_actions (GimpSearchPopup *popup,
  * will be set as well).
  */
 static gboolean
-action_search_match_keyword (GimpAction  *action,
+action_search_match_keyword (ClayAction  *action,
                              const gchar *keyword,
                              gint        *section,
-                             Gimp        *gimp)
+                             Clay        *clay)
 {
   gboolean   matched = FALSE;
   gchar    **key_tokens;
@@ -199,14 +199,14 @@ action_search_match_keyword (GimpAction  *action,
        * matches.
        */
       if (section)
-        *section = gimp_action_is_sensitive (action, NULL) ? 0 : ACTION_SECTION_INACTIVE;
+        *section = clay_action_is_sensitive (action, NULL) ? 0 : ACTION_SECTION_INACTIVE;
 
       return TRUE;
     }
 
-  key_tokens   = g_str_tokenize_and_fold (keyword, gimp->config->language, NULL);
-  tmp          = gimp_strip_uline (gimp_action_get_label (action));
-  label_tokens = g_str_tokenize_and_fold (tmp, gimp->config->language, &label_alternates);
+  key_tokens   = g_str_tokenize_and_fold (keyword, clay->config->language, NULL);
+  tmp          = clay_strip_uline (clay_action_get_label (action));
+  label_tokens = g_str_tokenize_and_fold (tmp, clay->config->language, &label_alternates);
   g_free (tmp);
 
   /* Try to match the keyword as an initialism of the action's label.
@@ -299,15 +299,15 @@ one_matched:
     }
 
   if (! matched && key_tokens[0] && g_utf8_strlen (key_tokens[0], -1) > 2 &&
-      gimp_action_get_tooltip (action) != NULL)
+      clay_action_get_tooltip (action) != NULL)
     {
       gchar    **tooltip_tokens;
       gchar    **tooltip_alternates = NULL;
       gboolean   mixed_match;
       gint       i;
 
-      tooltip_tokens = g_str_tokenize_and_fold (gimp_action_get_tooltip (action),
-                                                gimp->config->language, &tooltip_alternates);
+      tooltip_tokens = g_str_tokenize_and_fold (clay_action_get_tooltip (action),
+                                                clay->config->language, &tooltip_alternates);
 
       if (g_strv_length (tooltip_tokens) > 0)
         {
@@ -369,7 +369,7 @@ one_tooltip_matched:
   g_strfreev (label_tokens);
   g_strfreev (label_alternates);
 
-  if (matched && section && ! gimp_action_is_sensitive (action, NULL))
+  if (matched && section && ! clay_action_is_sensitive (action, NULL))
     *section += ACTION_SECTION_INACTIVE;
 
   return matched;

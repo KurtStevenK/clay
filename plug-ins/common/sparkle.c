@@ -1,4 +1,4 @@
-/* Sparkle --- image filter plug-in for GIMP
+/* Sparkle --- image filter plug-in for Clay
  * Copyright (C) 1996 by John Beale;  ported to Gimp by Michael J. Hammel;
  *
  * It has been optimized a little, bugfixed and modified by Martin Weber
@@ -32,15 +32,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-sparkle"
 #define PLUG_IN_BINARY "sparkle"
-#define PLUG_IN_ROLE   "gimp-sparkle"
+#define PLUG_IN_ROLE   "clay-sparkle"
 
 #define MAX_CHANNELS     4
 #define PSV              2  /* point spread value */
@@ -55,12 +55,12 @@ typedef struct _SparkleClass SparkleClass;
 
 struct _Sparkle
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _SparkleClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -69,31 +69,31 @@ struct _SparkleClass
 
 GType                   sparkle_get_type         (void);
 
-static GList          * sparkle_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * sparkle_create_procedure (GimpPlugIn           *plug_in,
+static GList          * sparkle_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * sparkle_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * sparkle_run              (GimpProcedure        *procedure,
-                                                  GimpRunMode           run_mode,
-                                                  GimpImage            *image,
-                                                  GimpDrawable        **drawables,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray * sparkle_run              (ClayProcedure        *procedure,
+                                                  ClayRunMode           run_mode,
+                                                  ClayImage            *image,
+                                                  ClayDrawable        **drawables,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
-static gboolean         sparkle_dialog           (GimpProcedure        *procedure,
+static gboolean         sparkle_dialog           (ClayProcedure        *procedure,
                                                   GObject              *config,
-                                                  GimpDrawable         *drawable);
+                                                  ClayDrawable         *drawable);
 
 static gint             compute_luminosity       (const guchar         *pixel,
                                                   gboolean              gray,
                                                   gboolean              has_alpha,
                                                   gint                  inverse);
-static gint             compute_lum_threshold    (GimpDrawable         *drawable,
+static gint             compute_lum_threshold    (ClayDrawable         *drawable,
                                                   gdouble               percentile,
                                                   gint                  inverse);
 static void             sparkle                  (GObject              *config,
-                                                  GimpDrawable         *drawable,
-                                                  GimpPreview          *preview);
+                                                  ClayDrawable         *drawable,
+                                                  ClayPreview          *preview);
 static void             sparkle_preview          (GtkWidget            *widget,
                                                   GObject              *config);
 static void             fspike                   (GObject              *config,
@@ -127,9 +127,9 @@ static void             rpnt                     (GObject              *config,
                                                   guchar               *dest_buf);
 
 
-G_DEFINE_TYPE (Sparkle, sparkle, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Sparkle, sparkle, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SPARKLE_TYPE)
+CLAY_MAIN (SPARKLE_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -139,7 +139,7 @@ static gint num_sparkles;
 static void
 sparkle_class_init (SparkleClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = sparkle_query_procedures;
   plug_in_class->create_procedure = sparkle_create_procedure;
@@ -152,124 +152,124 @@ sparkle_init (Sparkle *sparkle)
 }
 
 static GList *
-sparkle_query_procedures (GimpPlugIn *plug_in)
+sparkle_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-sparkle_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+sparkle_create_procedure (ClayPlugIn  *plug_in,
                           const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             sparkle_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Sparkle..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("_Sparkle..."));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Light and Shadow/[Light]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Turn bright spots into "
                                           "starry sparkles"),
                                         _("Uses a percentage based luminosity "
                                           "threshold to find candidate pixels "
                                           "for adding some sparkles (spikes)."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "John Beale, & (ported to Clay v0.54) "
                                       "Michael J. Hammel & ted to Clay v1.0) "
                                       "& Seth Burgess & Spencer Kimball",
                                       "John Beale",
                                       "Version 1.27, September 2003");
 
-      gimp_procedure_add_double_argument (procedure, "lum-threshold",
+      clay_procedure_add_double_argument (procedure, "lum-threshold",
                                           _("Lu_minosity threshold"),
                                           _("Adjust the luminosity threshold"),
                                           0.0, 0.1, 0.01,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "flare-inten",
+      clay_procedure_add_double_argument (procedure, "flare-inten",
                                           _("_Flare intensity"),
                                           _("Adjust the flare intensity"),
                                           0.0, 1.0, 0.5,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "spike-len",
+      clay_procedure_add_int_argument (procedure, "spike-len",
                                        _("Spi_ke length"),
                                        _("Adjust the spike length (in pixels)"),
                                        1, 100, 20,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "spike-points",
+      clay_procedure_add_int_argument (procedure, "spike-points",
                                        _("Spike _points"),
                                        _("Adjust the number of spikes"),
                                        1, 16, 4,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "spike-angle",
+      clay_procedure_add_int_argument (procedure, "spike-angle",
                                        _("Spike angle (-_1: random)"),
                                        _("Adjust the spike angle "
                                          "(-1 causes a random angle to be chosen)"),
                                        -1, 360, 15,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "density",
+      clay_procedure_add_double_argument (procedure, "density",
                                           _("Spike _density"),
                                           _("Adjust the spike density"),
                                           0.0, 1.0, 1.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "transparency",
+      clay_procedure_add_double_argument (procedure, "transparency",
                                           _("_Transparency"),
                                           _("Adjust the opacity of the spikes"),
                                           0.0, 1.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "random-hue",
+      clay_procedure_add_double_argument (procedure, "random-hue",
                                           _("Random _hue"),
                                           _("Adjust how much the hue should be "
                                             "changed randomly"),
                                           0.0, 1.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "random-saturation",
+      clay_procedure_add_double_argument (procedure, "random-saturation",
                                           _("R_andom saturation"),
                                           _("Adjust how much the saturation should be "
                                             "changed randomly"),
                                           0.0, 1.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "preserve-luminosity",
+      clay_procedure_add_boolean_argument (procedure, "preserve-luminosity",
                                            _("Preserve l_uminosity"),
                                            _("Should the luminosity be preserved?"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "inverse",
+      clay_procedure_add_boolean_argument (procedure, "inverse",
                                            _("In_verse"),
                                            _("Should the effect be inversed?"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "border",
+      clay_procedure_add_boolean_argument (procedure, "border",
                                            _("Add _border"),
                                            _("Draw a border of spikes around the image"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "color-type",
+      clay_procedure_add_choice_argument (procedure, "color-type",
                                           _("_Color Type"),
                                           _("Color of sparkles"),
-                                          gimp_choice_new_with_values ("natural-color",    NATURAL,    _("Natural color"),    NULL,
+                                          clay_choice_new_with_values ("natural-color",    NATURAL,    _("Natural color"),    NULL,
                                                                        "foreground-color", FOREGROUND, _("Foreground color"), NULL,
                                                                        "background-color", BACKGROUND, _("Background color"), NULL,
                                                                        NULL),
@@ -280,29 +280,29 @@ sparkle_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-sparkle_run (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
-             GimpDrawable        **drawables,
-             GimpProcedureConfig  *config,
+static ClayValueArray *
+sparkle_run (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
+             ClayDrawable        **drawables,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gint          x, y, w, h;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -310,44 +310,44 @@ sparkle_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (! gimp_drawable_mask_intersect (drawable, &x, &y, &w, &h))
+  if (! clay_drawable_mask_intersect (drawable, &x, &y, &w, &h))
     {
       g_message (_("Region selected for filter is empty"));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_SUCCESS,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_SUCCESS,
                                                NULL);
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! sparkle_dialog (procedure, G_OBJECT (config), drawable))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! sparkle_dialog (procedure, G_OBJECT (config), drawable))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
-  if (gimp_drawable_is_rgb (drawable) ||
-      gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_rgb (drawable) ||
+      clay_drawable_is_gray (drawable))
     {
-      gimp_progress_init (_("Sparkling"));
+      clay_progress_init (_("Sparkling"));
 
       sparkle (G_OBJECT (config), drawable, NULL);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gboolean
-sparkle_dialog (GimpProcedure *procedure,
+sparkle_dialog (ClayProcedure *procedure,
                 GObject       *config,
-                GimpDrawable  *drawable)
+                ClayDrawable  *drawable)
 {
   GtkWidget *dialog;
   GtkWidget *preview;
@@ -355,65 +355,65 @@ sparkle_dialog (GimpProcedure *procedure,
   GtkWidget *scale;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Sparkle"));
 
   gtk_widget_set_size_request (dialog, 430, -1);
   gtk_container_set_border_width (
     GTK_CONTAINER (gtk_dialog_get_content_area (GTK_DIALOG (dialog))), 12);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "lum-threshold", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "flare-inten", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "spike-len", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "spike-points", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "spike-angle", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "density", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "density", 1.0);;
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "transparency", 1.0);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "random-hue", 1.0);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "random-saturation", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "sparkle-bool-vbox",
                                   "preserve-luminosity", "inverse",
                                   "border", NULL);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "sparkle-bool-label",
                                    _("Additional Options"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "sparkle-bool-frame", "sparkle-bool-label",
                                     FALSE, "sparkle-bool-vbox");
 
   /*  colortype  */
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "color-type", GIMP_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "color-type", CLAY_TYPE_INT_RADIO_FRAME);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "sparkle-row", "sparkle-bool-frame",
                                         "color-type", NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -422,7 +422,7 @@ sparkle_dialog (GimpProcedure *procedure,
   gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
   gtk_widget_set_margin_bottom (hbox, 12);
 
-  preview = gimp_procedure_dialog_get_drawable_preview (GIMP_PROCEDURE_DIALOG (dialog),
+  preview = clay_procedure_dialog_get_drawable_preview (CLAY_PROCEDURE_DIALOG (dialog),
                                                         "preview", drawable);
   g_object_set_data (config, "drawable", drawable);
 
@@ -431,10 +431,10 @@ sparkle_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "preview",
                               "lum-threshold", "flare-inten", "spike-len",
                               "spike-points", "spike-angle", "density",
@@ -444,7 +444,7 @@ sparkle_dialog (GimpProcedure *procedure,
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -496,7 +496,7 @@ compute_luminosity (const guchar *pixel,
 }
 
 static gint
-compute_lum_threshold (GimpDrawable *drawable,
+compute_lum_threshold (ClayDrawable *drawable,
                        gdouble       percentile,
                        gint          inverse)
 {
@@ -515,12 +515,12 @@ compute_lum_threshold (GimpDrawable *drawable,
   /*  zero out the luminosity values array  */
   memset (values, 0, sizeof (gint) * 256);
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &x1, &y1, &width, &height))
     return 0;
 
-  gray = gimp_drawable_is_gray (drawable);
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  gray = clay_drawable_is_gray (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   if (gray)
     {
@@ -539,7 +539,7 @@ compute_lum_threshold (GimpDrawable *drawable,
 
   bpp = babl_format_get_bytes_per_pixel (format);
 
-  src_buffer = gimp_drawable_get_buffer (drawable);
+  src_buffer = clay_drawable_get_buffer (drawable);
 
   iter = gegl_buffer_iterator_new (src_buffer,
                                    GEGL_RECTANGLE (x1, y1, width, height), 0,
@@ -578,8 +578,8 @@ compute_lum_threshold (GimpDrawable *drawable,
 
 static void
 sparkle (GObject      *config,
-         GimpDrawable *drawable,
-         GimpPreview  *preview)
+         ClayDrawable *drawable,
+         ClayPreview  *preview)
 {
   GeglBuffer         *src_buffer;
   GeglBuffer         *dest_buffer;
@@ -617,8 +617,8 @@ sparkle (GObject      *config,
                 "border",        &border,
                 NULL);
 
-  gray = gimp_drawable_is_gray (drawable);
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  gray = clay_drawable_is_gray (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   if (gray)
     {
@@ -641,8 +641,8 @@ sparkle (GObject      *config,
 
   if (preview)
     {
-      gimp_preview_get_position (preview, &x1, &y1);
-      gimp_preview_get_size (preview, &width, &height);
+      clay_preview_get_position (preview, &x1, &y1);
+      clay_preview_get_size (preview, &width, &height);
 
       x2 = x1 + width;
       y2 = y1 + height;
@@ -650,7 +650,7 @@ sparkle (GObject      *config,
     }
   else
     {
-      if (! gimp_drawable_mask_intersect (drawable,
+      if (! clay_drawable_mask_intersect (drawable,
                                           &x1, &y1, &width, &height))
         return;
 
@@ -661,8 +661,8 @@ sparkle (GObject      *config,
   if (width < 1 || height < 1)
     return;
 
-  d_width  = gimp_drawable_get_width  (drawable);
-  d_height = gimp_drawable_get_height (drawable);
+  d_width  = clay_drawable_get_width  (drawable);
+  d_height = clay_drawable_get_height (drawable);
 
   gr = g_rand_new ();
 
@@ -682,8 +682,8 @@ sparkle (GObject      *config,
   max_progress = num_sparkles;
 
   /* copy what is already there */
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
   iter = gegl_buffer_iterator_new (src_buffer,
                                    GEGL_RECTANGLE (x1, y1, width, height), 0,
@@ -816,7 +816,7 @@ sparkle (GObject      *config,
                       cur_progress ++;
 
                       if ((cur_progress % 5) == 0)
-                        gimp_progress_update ((double) cur_progress /
+                        clay_progress_update ((double) cur_progress /
                                               (double) max_progress);
                     }
                 }
@@ -833,15 +833,15 @@ sparkle (GObject      *config,
 
   if (preview)
     {
-      gimp_preview_draw_buffer (preview, dest_buf, width * bytes);
+      clay_preview_draw_buffer (preview, dest_buf, width * bytes);
       g_free (dest_buf);
     }
   else
     {
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
 
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, x1, y1, width, height);
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, x1, y1, width, height);
     }
 
   g_rand_free (gr);
@@ -851,8 +851,8 @@ static void
 sparkle_preview (GtkWidget *widget,
                  GObject   *config)
 {
-  GimpPreview  *preview  = GIMP_PREVIEW (widget);
-  GimpDrawable *drawable = g_object_get_data (config, "drawable");
+  ClayPreview  *preview  = CLAY_PREVIEW (widget);
+  ClayDrawable *drawable = g_object_get_data (config, "drawable");
 
   sparkle (config, drawable, preview);
 }
@@ -993,7 +993,7 @@ fspike (GObject      *config,
                 "random-saturation", &random_saturation,
                 "inverse",           &inverse,
                 NULL);
-  colortype = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  colortype = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                    "color-type");
 
   theta = angle;
@@ -1004,13 +1004,13 @@ fspike (GObject      *config,
       break;
 
     case FOREGROUND:
-      gegl_color = gimp_context_get_foreground ();
+      gegl_color = clay_context_get_foreground ();
       gegl_color_get_pixel (gegl_color, babl_format_with_space ("R'G'B' u8", NULL), chosen_color);
       g_clear_object (&gegl_color);
       break;
 
     case BACKGROUND:
-      gegl_color = gimp_context_get_background ();
+      gegl_color = clay_context_get_background ();
       gegl_color_get_pixel (gegl_color, babl_format_with_space ("R'G'B' u8", NULL), chosen_color);
       g_clear_object (&gegl_color);
       break;

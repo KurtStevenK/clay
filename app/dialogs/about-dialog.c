@@ -31,29 +31,29 @@
 #include <datetimeapi.h>
 #endif /* G_OS_WIN32 */
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpwidgets/gimpwidgets.h"
-#include "libgimpwidgets/gimpwidgets-private.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaywidgets/claywidgets.h"
+#include "libclaywidgets/claywidgets-private.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
-#include "config/gimpguiconfig.h"
+#include "config/claycoreconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp-utils.h"
+#include "core/clay-utils.h"
 
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "about.h"
 #include "git-version.h"
 
 #include "about-dialog.h"
 #include "authors.h"
-#include "gimp-update.h"
-#include "gimp-version.h"
+#include "clay-update.h"
+#include "clay-version.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /* The first authors are the creators and maintainers, don't shuffle
@@ -67,10 +67,10 @@ typedef struct
 {
   GtkWidget      *dialog;
 
-  Gimp           *gimp;
+  Clay           *clay;
 
   GtkWidget      *update_frame;
-  GimpCoreConfig *config;
+  ClayCoreConfig *config;
 
   GtkWidget      *anim_area;
   PangoLayout    *layout;
@@ -85,13 +85,13 @@ typedef struct
   gint            animstep;
   gint            state;
   gboolean        visible;
-} GimpAboutDialog;
+} ClayAboutDialog;
 
 typedef struct
 {
   const gchar *key;
   gchar       *value;
-} GimpAboutInfo;
+} ClayAboutInfo;
 
 #ifdef PLATFORM_OSX
 static NSWindow *previous_key_window = nil;
@@ -102,21 +102,21 @@ static void        about_dialog_response      (GtkDialog       *dialog,
                                                gpointer         user_data);
 #if defined(G_OS_WIN32) || defined(PLATFORM_OSX)
 static void        about_dialog_realize       (GtkWidget       *widget,
-                                               GimpAboutDialog *dialog);
+                                               ClayAboutDialog *dialog);
 #endif
 static void        about_dialog_map           (GtkWidget       *widget,
-                                               GimpAboutDialog *dialog);
+                                               ClayAboutDialog *dialog);
 static void        about_dialog_unmap         (GtkWidget       *widget,
-                                               GimpAboutDialog *dialog);
+                                               ClayAboutDialog *dialog);
 static GdkPixbuf * about_dialog_load_logo     (void);
 static void        about_dialog_add_animation (GtkWidget       *vbox,
-                                               GimpAboutDialog *dialog);
-static void        about_dialog_add_update    (GimpAboutDialog *dialog,
-                                               GimpCoreConfig  *config);
+                                               ClayAboutDialog *dialog);
+static void        about_dialog_add_update    (ClayAboutDialog *dialog,
+                                               ClayCoreConfig  *config);
 static gboolean    about_dialog_anim_draw     (GtkWidget       *widget,
                                                cairo_t         *cr,
-                                               GimpAboutDialog *dialog);
-static void        about_dialog_reshuffle     (GimpAboutDialog *dialog);
+                                               ClayAboutDialog *dialog);
+static void        about_dialog_reshuffle     (ClayAboutDialog *dialog);
 static gboolean    about_dialog_timer         (gpointer         data);
 
 static GPtrArray * about_dialog_debug_info      (void);
@@ -125,21 +125,21 @@ static void        about_dialog_add_debug_info  (GtkBox        *vbox);
 static void        about_dialog_copy_debug_info (GtkButton     *button,
                                                  gpointer       data);
 
-#ifndef GIMP_RELEASE
+#ifndef CLAY_RELEASE
 static void        about_dialog_add_unstable_message
                                               (GtkWidget       *vbox);
-#endif /* ! GIMP_RELEASE */
+#endif /* ! CLAY_RELEASE */
 
 static void        about_dialog_last_release_changed
-                                              (GimpCoreConfig   *config,
+                                              (ClayCoreConfig   *config,
                                                const GParamSpec *pspec,
-                                               GimpAboutDialog  *dialog);
+                                               ClayAboutDialog  *dialog);
 static void        about_dialog_download_clicked
                                               (GtkButton   *button,
                                                const gchar *link);
 
 static gchar *
-gimp_native_date_time_format (GDateTime   *datetime,
+clay_native_date_time_format (GDateTime   *datetime,
                               const gchar *format)
 {
 #define FORMAT_DATE 1
@@ -224,10 +224,10 @@ gimp_native_date_time_format (GDateTime   *datetime,
 }
 
 GtkWidget *
-about_dialog_create (Gimp           *gimp,
-                     GimpCoreConfig *config)
+about_dialog_create (Clay           *clay,
+                     ClayCoreConfig *config)
 {
-  static GimpAboutDialog dialog;
+  static ClayAboutDialog dialog;
 
   if (! dialog.dialog)
     {
@@ -238,7 +238,7 @@ about_dialog_create (Gimp           *gimp,
       gchar     *copyright;
       gchar     *version;
 
-      dialog.gimp      = gimp;
+      dialog.clay      = clay;
       dialog.n_authors = G_N_ELEMENTS (authors) - 1;
       dialog.config    = config;
 
@@ -250,35 +250,35 @@ about_dialog_create (Gimp           *gimp,
        * list. This is redundant anyway as the full list is available in
        * the Credits tab.
        */
-      dialog.use_animation = gimp_widget_animation_enabled ();
+      dialog.use_animation = clay_widget_animation_enabled ();
 
       pixbuf = about_dialog_load_logo ();
 
-      copyright = g_strdup (GIMP_COPYRIGHT);
-      if (gimp_version_get_revision () > 0)
-        /* Translators: the %s is GIMP version, the %d is the
+      copyright = g_strdup (CLAY_COPYRIGHT);
+      if (clay_version_get_revision () > 0)
+        /* Translators: the %s is Clay version, the %d is the
          * installer/package revision.
          * For instance: "2.10.18 (revision 2)"
          */
-        version = g_strdup_printf (_("%s (revision %d)"), GIMP_VERSION,
-                                   gimp_version_get_revision ());
+        version = g_strdup_printf (_("%s (revision %d)"), CLAY_VERSION,
+                                   clay_version_get_revision ());
       else
-        version = g_strdup (GIMP_VERSION);
+        version = g_strdup (CLAY_VERSION);
 
 #ifdef PLATFORM_OSX
-      /* since `widget` is not created with gimp_dialog_new, there is no auto focus */
+      /* since `widget` is not created with clay_dialog_new, there is no auto focus */
       previous_key_window = [NSApp keyWindow];
 #endif
 
       widget = g_object_new (GTK_TYPE_ABOUT_DIALOG,
-                             "role",               "gimp-about",
+                             "role",               "clay-about",
                              "window-position",    GTK_WIN_POS_CENTER,
                              "title",              _("About Clay"),
-                             "program-name",       GIMP_ACRONYM,
+                             "program-name",       CLAY_ACRONYM,
                              "version",            version,
                              "copyright",          copyright,
-                             "comments",           GIMP_NAME,
-                             "license",            GIMP_LICENSE,
+                             "comments",           CLAY_NAME,
+                             "license",            CLAY_LICENSE,
                              "wrap-license",       TRUE,
                              "logo",               pixbuf,
                              "website",            "https://claydesign.web.app",
@@ -302,7 +302,7 @@ about_dialog_create (Gimp           *gimp,
 #ifdef PLATFORM_OSX
       /* restore the focus manually for MWM sake */
       if (previous_key_window)
-        g_object_set_data (G_OBJECT (widget), "gimp-transient-parent-window",
+        g_object_set_data (G_OBJECT (widget), "clay-transient-parent-window",
                            previous_key_window);
 #endif
 
@@ -321,9 +321,9 @@ about_dialog_create (Gimp           *gimp,
                         G_CALLBACK (about_dialog_unmap),
                         &dialog);
 #ifdef PLATFORM_OSX
-      /* since `widget` is not created with gimp_dialog_new */
+      /* since `widget` is not created with clay_dialog_new */
       g_signal_connect (widget, "map",
-                        G_CALLBACK (gimp_widget_set_auto_transient),
+                        G_CALLBACK (clay_widget_set_auto_transient),
                         NULL);
 #endif
 
@@ -335,11 +335,11 @@ about_dialog_create (Gimp           *gimp,
         {
           if (dialog.use_animation)
             about_dialog_add_animation (children->data, &dialog);
-#ifndef GIMP_RELEASE
+#ifndef CLAY_RELEASE
           about_dialog_add_unstable_message (children->data);
-#endif /* ! GIMP_RELEASE */
+#endif /* ! CLAY_RELEASE */
 #ifdef CHECK_UPDATE
-          if (gimp_version_check_update ())
+          if (clay_version_check_update ())
             about_dialog_add_update (&dialog, config);
 #endif
           about_dialog_add_debug_info (GTK_BOX (children->data));
@@ -351,7 +351,7 @@ about_dialog_create (Gimp           *gimp,
     }
 
   gtk_style_context_add_class (gtk_widget_get_style_context (dialog.dialog),
-                               "gimp-about-dialog");
+                               "clay-about-dialog");
 
   return dialog.dialog;
 }
@@ -370,14 +370,14 @@ about_dialog_response (GtkDialog *dialog,
 #if defined(G_OS_WIN32) || defined(PLATFORM_OSX)
 static void
 about_dialog_realize (GtkWidget *widget,
-                      GimpAboutDialog *dialog)
+                      ClayAboutDialog *dialog)
 {
 #ifdef G_OS_WIN32
-  gimp_window_set_title_bar_theme (dialog->gimp, widget);
+  clay_window_set_title_bar_theme (dialog->clay, widget);
 #endif
 
 #ifdef PLATFORM_OSX
-  /* since `widget` is not created with gimp_dialog_new, drop minimize manually */
+  /* since `widget` is not created with clay_dialog_new, drop minimize manually */
   GdkWindow *window = gtk_widget_get_window (widget);
 
   if (window)
@@ -394,9 +394,9 @@ about_dialog_realize (GtkWidget *widget,
 
 static void
 about_dialog_map (GtkWidget       *widget,
-                  GimpAboutDialog *dialog)
+                  ClayAboutDialog *dialog)
 {
-  gimp_update_refresh (dialog->config);
+  clay_update_refresh (dialog->config);
 
   if (dialog->layout && dialog->timer == 0)
     {
@@ -413,7 +413,7 @@ about_dialog_map (GtkWidget       *widget,
 
 static void
 about_dialog_unmap (GtkWidget       *widget,
-                    GimpAboutDialog *dialog)
+                    ClayAboutDialog *dialog)
 {
   if (dialog->timer)
     {
@@ -429,11 +429,11 @@ about_dialog_load_logo (void)
   GFile        *file;
   GInputStream *input;
 
-  file = gimp_data_directory_file ("images",
-#ifdef GIMP_UNSTABLE
-                                   "gimp-devel-logo.png",
+  file = clay_data_directory_file ("images",
+#ifdef CLAY_UNSTABLE
+                                   "clay-devel-logo.png",
 #else
-                                   "gimp-logo.png",
+                                   "clay-logo.png",
 #endif
                                    NULL);
 
@@ -451,7 +451,7 @@ about_dialog_load_logo (void)
 
 static void
 about_dialog_add_animation (GtkWidget       *vbox,
-                            GimpAboutDialog *dialog)
+                            ClayAboutDialog *dialog)
 {
   gint  height;
 
@@ -474,8 +474,8 @@ about_dialog_add_animation (GtkWidget       *vbox,
 }
 
 static void
-about_dialog_add_update (GimpAboutDialog *dialog,
-                         GimpCoreConfig  *config)
+about_dialog_add_update (ClayAboutDialog *dialog,
+                         ClayCoreConfig  *config)
 {
   GtkWidget *container;
   GList     *children;
@@ -552,7 +552,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
       gtk_image_set_from_icon_name (GTK_IMAGE (button_image),
                                     "software-update-available",
                                     GTK_ICON_SIZE_DIALOG);
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
       download_url = "https://www.gimp.org/downloads/devel/";
 #else
       download_url = "https://www.gimp.org/downloads/";
@@ -563,7 +563,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
 
       /* The preferred localized date representation without the time. */
       datetime = g_date_time_new_from_unix_local (config->last_release_timestamp);
-      date = gimp_native_date_time_format (datetime, "%x");
+      date = clay_native_date_time_format (datetime, "%x");
       g_date_time_unref (datetime);
 
       if (config->last_revision > 0)
@@ -613,7 +613,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
       gtk_style_context_add_class (gtk_widget_get_style_context (button),
                                    "text-button");
       g_signal_connect_swapped (button, "clicked",
-                                (GCallback) gimp_update_check, config);
+                                (GCallback) clay_update_check, config);
 
     }
 
@@ -635,7 +635,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
       gtk_widget_set_tooltip_text (button, _("Check for updates"));
       gtk_box_pack_start (GTK_BOX (box2), button, FALSE, FALSE, 0);
       g_signal_connect_swapped (button, "clicked",
-                                (GCallback) gimp_update_check, config);
+                                (GCallback) clay_update_check, config);
       gtk_widget_set_visible (button, TRUE);
     }
 
@@ -646,8 +646,8 @@ about_dialog_add_update (GimpAboutDialog *dialog,
 
       datetime = g_date_time_new_from_unix_local (config->check_update_timestamp);
 
-      date = gimp_native_date_time_format (datetime, "%x");
-      time = gimp_native_date_time_format (datetime, "%X");
+      date = clay_native_date_time_format (datetime, "%x");
+      time = clay_native_date_time_format (datetime, "%X");
       if (config->last_known_release != NULL)
         /* Translators: first string is the date in the locale's date
         * representation (e.g., 12/31/99), second is the time in the
@@ -688,7 +688,7 @@ about_dialog_add_update (GimpAboutDialog *dialog,
 }
 
 static void
-about_dialog_reshuffle (GimpAboutDialog *dialog)
+about_dialog_reshuffle (ClayAboutDialog *dialog)
 {
   GRand *gr = g_rand_new ();
   gint   i;
@@ -716,7 +716,7 @@ about_dialog_reshuffle (GimpAboutDialog *dialog)
 static gboolean
 about_dialog_anim_draw (GtkWidget       *widget,
                         cairo_t         *cr,
-                        GimpAboutDialog *dialog)
+                        ClayAboutDialog *dialog)
 {
   GtkStyleContext *style = gtk_widget_get_style_context (widget);
   GtkAllocation    allocation;
@@ -787,7 +787,7 @@ insert_spacers (const gchar *string)
 }
 
 static void
-decorate_text (GimpAboutDialog *dialog,
+decorate_text (ClayAboutDialog *dialog,
                gint             anim_type,
                gdouble          time)
 {
@@ -870,7 +870,7 @@ decorate_text (GimpAboutDialog *dialog,
 static gboolean
 about_dialog_timer (gpointer data)
 {
-  GimpAboutDialog *dialog        = data;
+  ClayAboutDialog *dialog        = data;
   gint             timeout       = 0;
 
   if (dialog->animstep == 0)
@@ -954,7 +954,7 @@ about_dialog_timer (gpointer data)
   return G_SOURCE_CONTINUE;
 }
 
-#ifndef GIMP_RELEASE
+#ifndef CLAY_RELEASE
 
 static void
 about_dialog_add_unstable_message (GtkWidget *vbox)
@@ -963,13 +963,13 @@ about_dialog_add_unstable_message (GtkWidget *vbox)
   gchar     *text;
 
   text = g_strdup_printf (_("This is a development build\n"
-                            "commit %s"), GIMP_GIT_VERSION_ABBREV);
+                            "commit %s"), CLAY_GIT_VERSION_ABBREV);
   label = gtk_label_new (text);
   g_free (text);
 
   gtk_label_set_selectable (GTK_LABEL (label), TRUE);
   gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
-  gimp_label_set_attributes (GTK_LABEL (label),
+  clay_label_set_attributes (GTK_LABEL (label),
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                              -1);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
@@ -977,12 +977,12 @@ about_dialog_add_unstable_message (GtkWidget *vbox)
   gtk_widget_set_visible (label, TRUE);
 }
 
-#endif /* ! GIMP_RELEASE */
+#endif /* ! CLAY_RELEASE */
 
 static void
 about_dialog_info_free (gpointer data)
 {
-  GimpAboutInfo *info = data;
+  ClayAboutInfo *info = data;
 
   g_free (info->value);
   g_free (info);
@@ -994,7 +994,7 @@ about_dialog_info_add (GPtrArray   *array,
                        const gchar *key,
                        gchar       *value)
 {
-  GimpAboutInfo *info = g_new (GimpAboutInfo, 1);
+  ClayAboutInfo *info = g_new (ClayAboutInfo, 1);
 
   info->key   = key;
   info->value = value;
@@ -1066,32 +1066,32 @@ about_dialog_debug_info (void)
   else
     display_sys = type_name;
 
-  /* GIMP_BUILD_ID is "unknown" on a plain source build. So put
+  /* CLAY_BUILD_ID is "unknown" on a plain source build. So put
    * "Built from source" instead of "unknown" into the report.
    */
-  if (g_strcmp0 (GIMP_BUILD_ID, "unknown") == 0)
+  if (g_strcmp0 (CLAY_BUILD_ID, "unknown") == 0)
     package = g_strdup (_("built from source"));
-  else if (gimp_version_get_revision () > 0)
+  else if (clay_version_get_revision () > 0)
     /* Translators: build id, revision number */
     package = g_strdup_printf (_("%s revision %d"),
-                               GIMP_BUILD_ID, gimp_version_get_revision ());
+                               CLAY_BUILD_ID, clay_version_get_revision ());
   else
-    package = g_strdup (GIMP_BUILD_ID);
+    package = g_strdup (CLAY_BUILD_ID);
 
   info = g_ptr_array_new_with_free_func (about_dialog_info_free);
 
   about_dialog_info_add (info, _("Version:"),
-                         g_strdup_printf ("%s (%s)", GIMP_VERSION, package));
+                         g_strdup_printf ("%s (%s)", CLAY_VERSION, package));
   about_dialog_info_add (info, _("OS:"),
                          g_strdup_printf ("%s (%s)",
                                           os_name ? os_name : _("unknown"),
                                           display_sys));
 
-  /* total physical RAM - gimp_get_physical_memory_size returns 0 where the
+  /* total physical RAM - clay_get_physical_memory_size returns 0 where the
    * platform can't tell us
    */
-  phys_mem  = gimp_get_physical_memory_size ();
-  avail_mem = gimp_get_available_memory_size ();
+  phys_mem  = clay_get_physical_memory_size ();
+  avail_mem = clay_get_available_memory_size ();
   if (phys_mem > 0)
     {
       mem_size = g_format_size (phys_mem);
@@ -1177,7 +1177,7 @@ about_dialog_info_grid (GPtrArray *info)
 
   for (i = 0; i < info->len; i++)
     {
-      GimpAboutInfo *line = g_ptr_array_index (info, i);
+      ClayAboutInfo *line = g_ptr_array_index (info, i);
       GtkWidget     *key;
       GtkWidget     *value;
 
@@ -1206,7 +1206,7 @@ about_dialog_markdown_text (GPtrArray *info)
 
   for (i = 0; i < info->len; i++)
     {
-      GimpAboutInfo *line = g_ptr_array_index (info, i);
+      ClayAboutInfo *line = g_ptr_array_index (info, i);
 
       g_string_append_printf (md, "- **%s** %s\n", line->key, line->value);
     }
@@ -1340,9 +1340,9 @@ about_dialog_copy_debug_info (GtkButton *button,
 }
 
 static void
-about_dialog_last_release_changed (GimpCoreConfig   *config,
+about_dialog_last_release_changed (ClayCoreConfig   *config,
                                    const GParamSpec *pspec,
-                                   GimpAboutDialog  *dialog)
+                                   ClayAboutDialog  *dialog)
 {
   g_signal_handlers_disconnect_by_func (config,
                                         (GCallback) about_dialog_last_release_changed,

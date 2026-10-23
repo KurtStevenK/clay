@@ -1,10 +1,10 @@
 ; Deprecated and should not be used in new scripts.
-; GIMP developers strongly recommend you not use this file
+; Clay developers strongly recommend you not use this file
 ; in scripts that you will distribute to other users.
 
 ; Mostly definitions from the ancient SIOD dialect of Scheme.
 
-; These were deprecated in GIMP 2 and obsoleted in GIMP 3
+; These were deprecated in Clay 2 and obsoleted in Clay 3
 ; ScriptFu since v3 does not automatically load these definitions.
 
 ; This file is NOT automatically loaded by ScriptFu.
@@ -27,7 +27,7 @@
 ; They remain in v3, still deprecated.
 
 ; See also the companion file PDB-compat-v2.scm
-; which defines aliases for obsolete PDB procedure names, from GIMP 2.
+; which defines aliases for obsolete PDB procedure names, from Clay 2.
 
 
 (define aset vector-set!)

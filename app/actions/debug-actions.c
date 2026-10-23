@@ -20,21 +20,21 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimpactiongroup.h"
+#include "widgets/clayactiongroup.h"
 
 #include "debug-actions.h"
 #include "debug-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry debug_actions[] =
+static const ClayActionEntry debug_actions[] =
 {
   { "debug-gtk-inspector", NULL,
     N_("Start _GtkInspector"), NULL, { NULL }, NULL,
@@ -72,29 +72,29 @@ static const GimpActionEntry debug_actions[] =
 };
 
 void
-debug_actions_setup (GimpActionGroup *group)
+debug_actions_setup (ClayActionGroup *group)
 {
   gint i;
 
-  gimp_action_group_add_actions (group, NULL,
+  clay_action_group_add_actions (group, NULL,
                                  debug_actions,
                                  G_N_ELEMENTS (debug_actions));
 
 #define SET_VISIBLE(action,condition) \
-        gimp_action_group_set_action_visible (group, action, (condition) != 0)
+        clay_action_group_set_action_visible (group, action, (condition) != 0)
 
   for (i = 0; i < G_N_ELEMENTS (debug_actions); i++)
-    SET_VISIBLE (debug_actions[i].name, group->gimp->show_debug_menu);
+    SET_VISIBLE (debug_actions[i].name, group->clay->show_debug_menu);
 
 #undef SET_VISIBLE
 }
 
 void
-debug_actions_update (GimpActionGroup *group,
+debug_actions_update (ClayActionGroup *group,
                       gpointer         data)
 {
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 
   SET_SENSITIVE ("debug-show-image-graph", gegl_has_operation ("gegl:introspect"));
 

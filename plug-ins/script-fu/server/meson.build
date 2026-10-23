@@ -32,7 +32,7 @@ if not meson.is_cross_build()
   plugin_exe = executable(plugin_name,
                           plugin_sources,
                           dependencies: [
-                            libgimpui_dep,
+                            libclayui_dep,
                             math,
                             winsock,
                           ],
@@ -45,5 +45,5 @@ if not meson.is_cross_build()
                           link_with : libscriptfu,
                           win_subsystem: 'windows',
                           install: true,
-                          install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                          install_dir: clayplugindir / 'plug-ins' / plugin_name)
 endif

@@ -17,7 +17,7 @@
 # "Perlized" from C source by Manish Singh <yosh@gimp.org>
 
 sub palettes_popup {
-    $blurb = 'Invokes the Gimp palette selection dialog.';
+    $blurb = 'Invokes the Clay palette selection dialog.';
     $help  = 'Opens a dialog letting a user choose a palette.';
 
     &mitch_pdb_misc('2002');
@@ -36,14 +36,14 @@ sub palettes_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->palette_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->palette_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, palette_callback) ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
-                             gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, palette_callback) ||
+      ! clay_pdb_dialog_new (clay, context, progress,
+                             clay_container_get_child_type (container),
                              parent_window, popup_title, palette_callback,
-                             GIMP_OBJECT (initial_palette), NULL))
+                             CLAY_OBJECT (initial_palette), NULL))
     success = FALSE;
 }
 CODE
@@ -64,12 +64,12 @@ sub palettes_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->palette_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->palette_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, palette_callback) ||
-      ! gimp_pdb_dialog_close (gimp,
-                               gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, palette_callback) ||
+      ! clay_pdb_dialog_close (clay,
+                               clay_container_get_child_type (container),
                                palette_callback))
     success = FALSE;
 }
@@ -93,13 +93,13 @@ sub palettes_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->palette_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->palette_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, palette_callback) ||
-      ! gimp_pdb_dialog_set (gimp,
-                             gimp_container_get_child_type (container),
-                             palette_callback, GIMP_OBJECT (palette), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, palette_callback) ||
+      ! clay_pdb_dialog_set (clay,
+                             clay_container_get_child_type (container),
+                             palette_callback, CLAY_OBJECT (palette), NULL))
     success = FALSE;
 }
 CODE
@@ -107,9 +107,9 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdatafactory.h");
+@headers = qw("core/clay.h"
+              "core/claycontainer.h"
+              "core/claydatafactory.h");
 
 @procs = qw(palettes_popup
             palettes_close_popup
@@ -118,8 +118,8 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Palette UI';
-$doc_title = 'gimppaletteselect';
+$doc_title = 'claypaletteselect';
 $doc_short_desc = 'Methods of a palette chooser dialog';
-$doc_long_desc = 'A dialog letting a user choose a palette.  Read more at gimpfontselect.';
+$doc_long_desc = 'A dialog letting a user choose a palette.  Read more at clayfontselect.';
 
 1;

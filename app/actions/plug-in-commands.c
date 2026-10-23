@@ -20,33 +20,33 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimp-filter-history.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpitem.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clay-filter-history.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayitem.h"
+#include "core/clayparamspecs.h"
+#include "core/clayprogress.h"
 
-#include "pdb/gimpprocedure.h"
+#include "pdb/clayprocedure.h"
 
-#include "plug-in/gimppluginmanager.h"
-#include "plug-in/gimppluginmanager-data.h"
+#include "plug-in/claypluginmanager.h"
+#include "plug-in/claypluginmanager-data.h"
 
-#include "widgets/gimpbufferview.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpdatafactoryview.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpimageeditor.h"
-#include "widgets/gimpitemtreeview.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
+#include "widgets/claybufferview.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claydatafactoryview.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayimageeditor.h"
+#include "widgets/clayitemtreeview.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
 
 #include "dialogs/dialogs.h"
 
@@ -54,29 +54,29 @@
 #include "plug-in-commands.h"
 #include "procedure-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void   plug_in_reset_all_response (GtkWidget *dialog,
                                           gint       response_id,
-                                          Gimp      *gimp);
+                                          Clay      *clay);
 
 
 /*  public functions  */
 
 void
-plug_in_run_cmd_callback (GimpAction *action,
+plug_in_run_cmd_callback (ClayAction *action,
                           GVariant   *value,
                           gpointer    data)
 {
-  Gimp           *gimp;
-  GimpValueArray *args    = NULL;
-  GimpDisplay    *display = NULL;
-  GimpProcedure  *procedure;
+  Clay           *clay;
+  ClayValueArray *args    = NULL;
+  ClayDisplay    *display = NULL;
+  ClayProcedure  *procedure;
   gsize           hack;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
   hack = g_variant_get_uint64 (value);
 
@@ -84,50 +84,50 @@ plug_in_run_cmd_callback (GimpAction *action,
 
   switch (procedure->proc_type)
     {
-    case GIMP_PDB_PROC_TYPE_PERSISTENT:
+    case CLAY_PDB_PROC_TYPE_PERSISTENT:
       args = procedure_commands_get_run_mode_arg (procedure);
       break;
 
-    case GIMP_PDB_PROC_TYPE_PLUGIN:
-    case GIMP_PDB_PROC_TYPE_TEMPORARY:
-      if (GIMP_IS_DATA_FACTORY_VIEW (data) ||
-          GIMP_IS_BUFFER_VIEW (data))
+    case CLAY_PDB_PROC_TYPE_PLUGIN:
+    case CLAY_PDB_PROC_TYPE_TEMPORARY:
+      if (CLAY_IS_DATA_FACTORY_VIEW (data) ||
+          CLAY_IS_BUFFER_VIEW (data))
         {
-          GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-          GimpContainer       *container;
-          GimpContext         *context;
-          GimpObject          *object;
+          ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+          ClayContainer       *container;
+          ClayContext         *context;
+          ClayObject          *object;
 
-          container = gimp_container_view_get_container (editor->view);
-          context   = gimp_container_view_get_context (editor->view);
+          container = clay_container_view_get_container (editor->view);
+          context   = clay_container_view_get_context (editor->view);
 
-          object = gimp_context_get_by_type (context,
-                                             gimp_container_get_child_type (container));
+          object = clay_context_get_by_type (context,
+                                             clay_container_get_child_type (container));
 
           args = procedure_commands_get_data_args (procedure, object);
         }
-      else if (GIMP_IS_IMAGE_EDITOR (data))
+      else if (CLAY_IS_IMAGE_EDITOR (data))
         {
-          GimpImageEditor *editor = GIMP_IMAGE_EDITOR (data);
-          GimpImage       *image;
+          ClayImageEditor *editor = CLAY_IMAGE_EDITOR (data);
+          ClayImage       *image;
 
-          image = gimp_image_editor_get_image (editor);
+          image = clay_image_editor_get_image (editor);
 
           args = procedure_commands_get_image_args (procedure, image);
         }
-      else if (GIMP_IS_ITEM_TREE_VIEW (data))
+      else if (CLAY_IS_ITEM_TREE_VIEW (data))
         {
-          GimpItemTreeView *view = GIMP_ITEM_TREE_VIEW (data);
-          GimpImage        *image;
+          ClayItemTreeView *view = CLAY_ITEM_TREE_VIEW (data);
+          ClayImage        *image;
           GList            *items = NULL;
 
-          image = gimp_item_tree_view_get_image (view);
+          image = clay_item_tree_view_get_image (view);
 
           if (image)
             {
-              GType item_type = GIMP_ITEM_TREE_VIEW_GET_CLASS (view)->item_type;
+              GType item_type = CLAY_ITEM_TREE_VIEW_GET_CLASS (view)->item_type;
 
-              items = gimp_image_get_selected_items (image, item_type);
+              items = clay_image_get_selected_items (image, item_type);
             }
 
           args = procedure_commands_get_items_args (procedure, image, items);
@@ -140,69 +140,69 @@ plug_in_run_cmd_callback (GimpAction *action,
         }
       break;
 
-    case GIMP_PDB_PROC_TYPE_INTERNAL:
+    case CLAY_PDB_PROC_TYPE_INTERNAL:
       g_warning ("Unhandled procedure type.");
       break;
     }
 
   if (args)
     {
-      if (procedure_commands_run_procedure_async (procedure, gimp,
-                                                  GIMP_PROGRESS (display),
-                                                  GIMP_RUN_INTERACTIVE, args,
+      if (procedure_commands_run_procedure_async (procedure, clay,
+                                                  CLAY_PROGRESS (display),
+                                                  CLAY_RUN_INTERACTIVE, args,
                                                   display))
         {
           /* remember only image plug-ins */
           if (procedure->num_args >= 2 &&
-              GIMP_IS_PARAM_SPEC_IMAGE (procedure->args[1]))
+              CLAY_IS_PARAM_SPEC_IMAGE (procedure->args[1]))
             {
-              gimp_filter_history_add (gimp, procedure);
+              clay_filter_history_add (clay, procedure);
             }
         }
 
-      gimp_value_array_unref (args);
+      clay_value_array_unref (args);
     }
 }
 
 void
-plug_in_reset_all_cmd_callback (GimpAction *action,
+plug_in_reset_all_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  Gimp      *gimp;
+  Clay      *clay;
   GtkWidget *dialog;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
-#define RESET_FILTERS_DIALOG_KEY "gimp-reset-all-filters-dialog"
+#define RESET_FILTERS_DIALOG_KEY "clay-reset-all-filters-dialog"
 
-  dialog = dialogs_get_dialog (G_OBJECT (gimp), RESET_FILTERS_DIALOG_KEY);
+  dialog = dialogs_get_dialog (G_OBJECT (clay), RESET_FILTERS_DIALOG_KEY);
 
   if (! dialog)
     {
-      dialog = gimp_message_dialog_new (_("Reset all Filters"),
-                                        GIMP_ICON_DIALOG_QUESTION,
+      dialog = clay_message_dialog_new (_("Reset all Filters"),
+                                        CLAY_ICON_DIALOG_QUESTION,
                                         NULL, 0,
-                                        gimp_standard_help_func, NULL,
+                                        clay_standard_help_func, NULL,
 
                                         _("_Cancel"), GTK_RESPONSE_CANCEL,
                                         _("_Reset"),  GTK_RESPONSE_OK,
 
                                         NULL);
 
-      gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+      clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                                GTK_RESPONSE_OK,
                                                GTK_RESPONSE_CANCEL,
                                                -1);
 
       g_signal_connect (dialog, "response",
                         G_CALLBACK (plug_in_reset_all_response),
-                        gimp);
+                        clay);
 
-      gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+      clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                          _("Do you really want to reset all "
                                            "filters to default values?"));
 
-      dialogs_attach_dialog (G_OBJECT (gimp), RESET_FILTERS_DIALOG_KEY, dialog);
+      dialogs_attach_dialog (G_OBJECT (clay), RESET_FILTERS_DIALOG_KEY, dialog);
     }
 
   gtk_window_present (GTK_WINDOW (dialog));
@@ -214,10 +214,10 @@ plug_in_reset_all_cmd_callback (GimpAction *action,
 static void
 plug_in_reset_all_response (GtkWidget *dialog,
                             gint       response_id,
-                            Gimp      *gimp)
+                            Clay      *clay)
 {
   gtk_widget_destroy (dialog);
 
   if (response_id == GTK_RESPONSE_OK)
-    gimp_plug_in_manager_data_free (gimp->plug_in_manager);
+    clay_plug_in_manager_data_free (clay->plug_in_manager);
 }

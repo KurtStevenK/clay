@@ -22,12 +22,12 @@
 
 #include "menus-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "window-menu.h"
 
@@ -36,16 +36,16 @@
 
 static void   window_menu_display_opened (GdkDisplayManager *disp_manager,
                                           GdkDisplay        *display,
-                                          GimpUIManager     *manager);
+                                          ClayUIManager     *manager);
 static void   window_menu_display_closed (GdkDisplay        *display,
                                           gboolean           is_error,
-                                          GimpUIManager     *manager);
+                                          ClayUIManager     *manager);
 
 
 /*  public functions  */
 
 void
-window_menu_setup (GimpUIManager *manager,
+window_menu_setup (ClayUIManager *manager,
                    const gchar   *group_name,
                    const gchar   *ui_path)
 {
@@ -53,7 +53,7 @@ window_menu_setup (GimpUIManager *manager,
   GSList            *displays;
   GSList            *list;
 
-  g_return_if_fail (GIMP_IS_UI_MANAGER (manager));
+  g_return_if_fail (CLAY_IS_UI_MANAGER (manager));
   g_return_if_fail (ui_path != NULL);
 
   g_object_set_data_full (G_OBJECT (manager), "move-to-screen-group-name",
@@ -86,7 +86,7 @@ window_menu_setup (GimpUIManager *manager,
 static void
 window_menu_display_opened (GdkDisplayManager *disp_manager,
                             GdkDisplay        *display,
-                            GimpUIManager     *manager)
+                            ClayUIManager     *manager)
 {
   const gchar *group_name;
   const gchar *ui_path;
@@ -103,14 +103,14 @@ window_menu_display_opened (GdkDisplayManager *disp_manager,
     display_name = "eek";
 
   action_name = g_strdup_printf ("%s-move-to-screen-%s", group_name, display_name);
-  gimp_make_valid_action_name (action_name);
+  clay_make_valid_action_name (action_name);
 
   /* TODO GMenu: there is also a case with the dockable menu, which is not yet
    * using our new GAction/GMenu-based code. In such case, the ui_path is
    * "/dockable-popup/Move to Screen".
    */
   if (g_str_has_prefix (ui_path, "/image-menubar/"))
-    gimp_ui_manager_add_ui (manager, "/View/Move to Screen", action_name, FALSE);
+    clay_ui_manager_add_ui (manager, "/View/Move to Screen", action_name, FALSE);
 
   g_free (action_name);
 
@@ -122,7 +122,7 @@ window_menu_display_opened (GdkDisplayManager *disp_manager,
 static void
 window_menu_display_closed (GdkDisplay    *display,
                             gboolean       is_error,
-                            GimpUIManager *manager)
+                            ClayUIManager *manager)
 {
   const gchar *group_name;
   const gchar *display_name;
@@ -134,7 +134,7 @@ window_menu_display_closed (GdkDisplay    *display,
     display_name = "eek";
 
   action_name = g_strdup_printf ("%s-move-to-screen-%s", group_name, display_name);
-  gimp_ui_manager_remove_ui (manager, action_name);
+  clay_ui_manager_remove_ui (manager, action_name);
 
   g_free (action_name);
 }

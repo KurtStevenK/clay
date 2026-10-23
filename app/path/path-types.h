@@ -25,12 +25,12 @@
 #include "path-enums.h"
 
 
-typedef struct _GimpAnchor             GimpAnchor;
+typedef struct _ClayAnchor             ClayAnchor;
 
-typedef struct _GimpPath               GimpPath;
-typedef struct _GimpStroke             GimpStroke;
-typedef struct _GimpBezierStroke       GimpBezierStroke;
+typedef struct _ClayPath               ClayPath;
+typedef struct _ClayStroke             ClayStroke;
+typedef struct _ClayBezierStroke       ClayBezierStroke;
 
-typedef struct _GimpVectorLayer        GimpVectorLayer;
-typedef struct _GimpVectorLayerOptions GimpVectorLayerOptions;
-typedef struct _GimpVectorLayerUndo    GimpVectorLayerUndo;
+typedef struct _ClayVectorLayer        ClayVectorLayer;
+typedef struct _ClayVectorLayerOptions ClayVectorLayerOptions;
+typedef struct _ClayVectorLayerUndo    ClayVectorLayerUndo;

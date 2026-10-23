@@ -24,12 +24,12 @@
 
 #define METADATA_XML_VERSION    2          /* Version of the exported metadata XML */
 
-struct _GimpXmlParser
+struct _ClayXmlParser
 {
   GMarkupParseContext *context;
 };
 
-typedef struct _GimpXmlParser GimpXmlParser;
+typedef struct _ClayXmlParser ClayXmlParser;
 
 void
 xml_parser_start_element                     (GMarkupParseContext   *context,
@@ -57,12 +57,12 @@ xml_parser_end_element                       (GMarkupParseContext  *context,
                                               GError              **error);
 
 gboolean
-xml_parser_parse_file                        (GimpXmlParser        *parser,
+xml_parser_parse_file                        (ClayXmlParser        *parser,
                                               const gchar          *filename,
                                               GError              **error);
 
 void
-xml_parser_free                              (GimpXmlParser        *parser);
+xml_parser_free                              (ClayXmlParser        *parser);
 
 gboolean
 parse_encoding                               (const gchar          *text,
@@ -70,11 +70,11 @@ parse_encoding                               (const gchar          *text,
                                               gchar               **encoding);
 
 gboolean
-xml_parser_parse_io_channel                  (GimpXmlParser        *parser,
+xml_parser_parse_io_channel                  (ClayXmlParser        *parser,
                                               GIOChannel           *io,
                                               GError              **error);
 
-GimpXmlParser *
+ClayXmlParser *
 xml_parser_new                               (const GMarkupParser  *markup_parser,
                                               gpointer              user_data);
 

@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "script-fu-color.h"
 #include "script-fu-types.h"
@@ -26,7 +26,7 @@
 /* This encapsulates the implementation of the SFColorType.
  * It knows how to manipulate a SFArg of that type.
  * SFArg is the original abstraction
- * that in other parts of Gimp is a property and its metadata GParamSpec.
+ * that in other parts of Clay is a property and its metadata GParamSpec.
  *
  * Separate because it is likely to change and is slightly complex.
  *
@@ -35,7 +35,7 @@
  *  - planned change is to eliminate the duplicate old-style interface.
  *  - New-style ScriptFu scripts may not need to keep actual values
  *    and default values, only the declarations of defaults etc.
- *    Since a GimpProcedureConfig carries the values
+ *    Since a ClayProcedureConfig carries the values
  *    and GParamSpec carries the defaults.
  *  - ScriptFu might support other formats
  *
@@ -114,7 +114,7 @@ sf_color_arg_set_default_by_name (SFArg *arg,
 
   /* Create a default value for the old-style interface.
    */
-  if (! (color = gimp_color_parse_css (name_of_default)))
+  if (! (color = clay_color_parse_css (name_of_default)))
     {
       result = FALSE;
     }
@@ -125,7 +125,7 @@ sf_color_arg_set_default_by_name (SFArg *arg,
        * However, "transparent" is also a css named color.
        */
       /* We don't override alpha:
-       * Not calling: gimp_color_set_alpha (color, 1.0);
+       * Not calling: clay_color_set_alpha (color, 1.0);
        */
 
       /* Expect the default is NULL, but call the setter anyway,
@@ -222,5 +222,5 @@ sf_color_get_repr_from_gegl_color (GeglColor *color)
 GeglColor *
 sf_color_get_color_from_name (gchar *color_name)
 {
-  return gimp_color_parse_css (color_name);
+  return clay_color_parse_css (color_name);
 }

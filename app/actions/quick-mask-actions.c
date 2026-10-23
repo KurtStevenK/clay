@@ -20,67 +20,67 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimpimage.h"
-#include "core/gimpimage-quick-mask.h"
+#include "core/clayimage.h"
+#include "core/clayimage-quick-mask.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "actions.h"
 #include "quick-mask-actions.h"
 #include "quick-mask-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry quick_mask_actions[] =
+static const ClayActionEntry quick_mask_actions[] =
 {
   { "quick-mask-configure", NULL,
     NC_("quick-mask-action", "_Configure Color and Opacity..."), NULL, { NULL }, NULL,
     quick_mask_configure_cmd_callback,
-    GIMP_HELP_QUICK_MASK_EDIT }
+    CLAY_HELP_QUICK_MASK_EDIT }
 };
 
-static const GimpToggleActionEntry quick_mask_toggle_actions[] =
+static const ClayToggleActionEntry quick_mask_toggle_actions[] =
 {
-  { "quick-mask-toggle", GIMP_ICON_QUICK_MASK_ON,
+  { "quick-mask-toggle", CLAY_ICON_QUICK_MASK_ON,
     NC_("quick-mask-action", "Toggle _Quick Mask"), NULL, { "<shift>Q", NULL },
     NC_("quick-mask-action", "Toggle Quick Mask on/off"),
     quick_mask_toggle_cmd_callback,
     FALSE,
-    GIMP_HELP_QUICK_MASK_TOGGLE }
+    CLAY_HELP_QUICK_MASK_TOGGLE }
 };
 
-static const GimpRadioActionEntry quick_mask_invert_actions[] =
+static const ClayRadioActionEntry quick_mask_invert_actions[] =
 {
   { "quick-mask-invert-on", NULL,
     NC_("quick-mask-action", "Mask _Selected Areas"), NULL, { NULL }, NULL,
     TRUE,
-    GIMP_HELP_QUICK_MASK_INVERT },
+    CLAY_HELP_QUICK_MASK_INVERT },
 
   { "quick-mask-invert-off", NULL,
     NC_("quick-mask-action", "Mask _Unselected Areas"), NULL, { NULL }, NULL,
     FALSE,
-    GIMP_HELP_QUICK_MASK_INVERT }
+    CLAY_HELP_QUICK_MASK_INVERT }
 };
 
 
 void
-quick_mask_actions_setup (GimpActionGroup *group)
+quick_mask_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "quick-mask-action",
+  clay_action_group_add_actions (group, "quick-mask-action",
                                  quick_mask_actions,
                                  G_N_ELEMENTS (quick_mask_actions));
 
-  gimp_action_group_add_toggle_actions (group, "quick-mask-action",
+  clay_action_group_add_toggle_actions (group, "quick-mask-action",
                                         quick_mask_toggle_actions,
                                         G_N_ELEMENTS (quick_mask_toggle_actions));
 
-  gimp_action_group_add_radio_actions (group, "quick-mask-action",
+  clay_action_group_add_radio_actions (group, "quick-mask-action",
                                        quick_mask_invert_actions,
                                        G_N_ELEMENTS (quick_mask_invert_actions),
                                        NULL,
@@ -89,28 +89,28 @@ quick_mask_actions_setup (GimpActionGroup *group)
 }
 
 void
-quick_mask_actions_update (GimpActionGroup *group,
+quick_mask_actions_update (ClayActionGroup *group,
                            gpointer         data)
 {
-  GimpImage *image               = action_data_get_image (data);
+  ClayImage *image               = action_data_get_image (data);
   gboolean   quick_mask_state    = FALSE;
   gboolean   quick_mask_inverted = FALSE;
   GeglColor *quick_mask_color    = NULL;
 
   if (image)
     {
-      quick_mask_state    = gimp_image_get_quick_mask_state (image);
-      quick_mask_inverted = gimp_image_get_quick_mask_inverted (image);
+      quick_mask_state    = clay_image_get_quick_mask_state (image);
+      quick_mask_inverted = clay_image_get_quick_mask_inverted (image);
 
-      quick_mask_color = gimp_image_get_quick_mask_color (image);
+      quick_mask_color = clay_image_get_quick_mask_color (image);
     }
 
 #define SET_SENSITIVE(action,sensitive) \
-        gimp_action_group_set_action_sensitive (group, action, (sensitive) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (sensitive) != 0, NULL)
 #define SET_ACTIVE(action,active) \
-        gimp_action_group_set_action_active (group, action, (active) != 0)
+        clay_action_group_set_action_active (group, action, (active) != 0)
 #define SET_COLOR(action,color) \
-        gimp_action_group_set_action_color (group, action, (color), FALSE)
+        clay_action_group_set_action_color (group, action, (color), FALSE)
 
   SET_SENSITIVE ("quick-mask-toggle", image);
   SET_ACTIVE    ("quick-mask-toggle", quick_mask_state);

@@ -24,18 +24,18 @@
 
 #include "core/core-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-color-profile.h"
-#include "core/gimpimage-convert-precision.h"
-#include "core/gimpimage-rotate.h"
-#include "core/gimplayer.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-color-profile.h"
+#include "core/clayimage-convert-precision.h"
+#include "core/clayimage-rotate.h"
+#include "core/claylayer.h"
+#include "core/clayprogress.h"
 
-#include "text/gimptextlayer.h"
+#include "text/claytextlayer.h"
 
 #include "file-import.h"
 
@@ -43,56 +43,56 @@
 /*  public functions  */
 
 void
-file_import_image (GimpImage    *image,
-                   GimpContext  *context,
+file_import_image (ClayImage    *image,
+                   ClayContext  *context,
                    GFile        *file,
                    gboolean      interactive,
-                   GimpProgress *progress)
+                   ClayProgress *progress)
 {
-  GimpCoreConfig *config;
+  ClayCoreConfig *config;
 
-  g_return_if_fail (GIMP_IS_IMAGE (image));
-  g_return_if_fail (GIMP_IS_CONTEXT (context));
+  g_return_if_fail (CLAY_IS_IMAGE (image));
+  g_return_if_fail (CLAY_IS_CONTEXT (context));
   g_return_if_fail (G_IS_FILE (file));
-  g_return_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress));
+  g_return_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress));
 
-  config = image->gimp->config;
+  config = image->clay->config;
 
-  if (interactive && gimp_image_get_base_type (image) != GIMP_INDEXED)
+  if (interactive && clay_image_get_base_type (image) != CLAY_INDEXED)
     {
       if (config->import_promote_float)
         {
-          GimpPrecision old_precision = gimp_image_get_precision (image);
+          ClayPrecision old_precision = clay_image_get_precision (image);
 
-          if (old_precision != GIMP_PRECISION_FLOAT_LINEAR)
+          if (old_precision != CLAY_PRECISION_FLOAT_LINEAR)
             {
-              gimp_image_convert_precision (image,
-                                            GIMP_PRECISION_FLOAT_LINEAR,
+              clay_image_convert_precision (image,
+                                            CLAY_PRECISION_FLOAT_LINEAR,
                                             GEGL_DITHER_NONE,
                                             GEGL_DITHER_NONE,
                                             GEGL_DITHER_NONE,
                                             progress);
 
               if (config->import_promote_dither &&
-                  old_precision == GIMP_PRECISION_U8_NON_LINEAR)
+                  old_precision == CLAY_PRECISION_U8_NON_LINEAR)
                 {
-                  gimp_image_convert_dither_u8 (image, progress);
+                  clay_image_convert_dither_u8 (image, progress);
                 }
             }
         }
 
       if (config->import_add_alpha)
         {
-          GList *layers = gimp_image_get_layer_list (image);
+          GList *layers = clay_image_get_layer_list (image);
           GList *list;
 
           for (list = layers; list; list = g_list_next (list))
             {
-              if (! gimp_viewable_get_children (list->data) &&
-                  ! gimp_item_is_text_layer (list->data)    &&
-                  ! gimp_drawable_has_alpha (list->data))
+              if (! clay_viewable_get_children (list->data) &&
+                  ! clay_item_is_text_layer (list->data)    &&
+                  ! clay_drawable_has_alpha (list->data))
                 {
-                  gimp_layer_add_alpha (list->data);
+                  clay_layer_add_alpha (list->data);
                 }
             }
 
@@ -100,12 +100,12 @@ file_import_image (GimpImage    *image,
         }
     }
 
-  gimp_image_import_color_profile (image, context, progress, interactive);
-  gimp_image_import_rotation_metadata (image, context, progress, interactive);
+  clay_image_import_color_profile (image, context, progress, interactive);
+  clay_image_import_rotation_metadata (image, context, progress, interactive);
 
   /* Remember the import source */
-  gimp_image_set_imported_file (image, file);
+  clay_image_set_imported_file (image, file);
 
   /* We shall treat this file as an Untitled file */
-  gimp_image_set_file (image, NULL);
+  clay_image_set_file (image, NULL);
 }

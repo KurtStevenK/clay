@@ -25,45 +25,45 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpimagecommenteditor.h"
-#include "widgets/gimpimagepropview.h"
-#include "widgets/gimpimageprofileview.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayimagecommenteditor.h"
+#include "widgets/clayimagepropview.h"
+#include "widgets/clayimageprofileview.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "image-properties-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 GtkWidget *
-image_properties_dialog_new (GimpImage   *image,
-                             GimpContext *context,
+image_properties_dialog_new (ClayImage   *image,
+                             ClayContext *context,
                              GtkWidget   *parent)
 {
   GtkWidget *dialog;
   GtkWidget *notebook;
   GtkWidget *view;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (parent == NULL || GTK_IS_WIDGET (parent), NULL);
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                      _("Image Properties"),
-                                     "gimp-image-properties",
+                                     "clay-image-properties",
                                      "dialog-information",
                                      _("Image Properties"),
                                      parent,
-                                     gimp_standard_help_func,
-                                     GIMP_HELP_IMAGE_PROPERTIES,
+                                     clay_standard_help_func,
+                                     CLAY_HELP_IMAGE_PROPERTIES,
 
                                      _("_Close"), GTK_RESPONSE_CLOSE,
 
@@ -80,18 +80,18 @@ image_properties_dialog_new (GimpImage   *image,
                       notebook, FALSE, FALSE, 0);
   gtk_widget_set_visible (notebook, TRUE);
 
-  view = gimp_image_prop_view_new (image);
+  view = clay_image_prop_view_new (image);
   gtk_container_set_border_width (GTK_CONTAINER (view), 12);
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             view, gtk_label_new_with_mnemonic (_("_Properties")));
   gtk_widget_set_visible (view, TRUE);
 
-  view = gimp_image_profile_view_new (image);
+  view = clay_image_profile_view_new (image);
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             view, gtk_label_new_with_mnemonic (_("C_olor Profile")));
   gtk_widget_set_visible (view, TRUE);
 
-  view = gimp_image_comment_editor_new (image);
+  view = clay_image_comment_editor_new (image);
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             view, gtk_label_new_with_mnemonic (_("Co_mment")));
   gtk_widget_set_visible (view, TRUE);

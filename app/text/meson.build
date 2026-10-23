@@ -11,26 +11,26 @@ stamp_text_enums = custom_target('stamp-text-enums.h',
     meson.current_build_dir(),
     'text-',
     '#include <gio/gio.h>\n'              +
-    '#include "libgimpbase/gimpbase.h"\n',
-    '#include "gimp-intl.h"'
+    '#include "libclaybase/claybase.h"\n',
+    '#include "clay-intl.h"'
   ],
   build_by_default: true
 )
 
 libapptext_sources = [
-  'gimpfont.c',
-  'gimpfontfactory.c',
-  'gimptext-compat.c',
-  'gimptext-parasite.c',
-  'gimptext-path.c',
-  'gimptext-xlfd.c',
-  'gimptext.c',
-  'gimptextlayer-transform.c',
-  'gimptextlayer-xcf.c',
-  'gimptextlayer.c',
-  'gimptextlayout-render.c',
-  'gimptextlayout.c',
-  'gimptextundo.c',
+  'clayfont.c',
+  'clayfontfactory.c',
+  'claytext-compat.c',
+  'claytext-parasite.c',
+  'claytext-path.c',
+  'claytext-xlfd.c',
+  'claytext.c',
+  'claytextlayer-transform.c',
+  'claytextlayer-xcf.c',
+  'claytextlayer.c',
+  'claytextlayout-render.c',
+  'claytextlayout.c',
+  'claytextundo.c',
 
   'text-enums.c',
   stamp_text_enums
@@ -40,7 +40,7 @@ libapptext_sources = [
 libapptext = static_library('apptext',
   libapptext_sources,
   include_directories: [ rootInclude, rootAppInclude, ],
-  c_args: '-DG_LOG_DOMAIN="Gimp-Text"',
+  c_args: '-DG_LOG_DOMAIN="Clay-Text"',
   dependencies: [
     gegl, gdk_pixbuf, gexiv2, harfbuzz, pangocairo, pangoft2,
   ],

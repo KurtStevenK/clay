@@ -1,0 +1,93 @@
+/* Light variant for the Clay theme.
+ *
+ * Lane design DNA (T:/Apps/warp/server/dashboard/app.css, App.xaml):
+ *   Parchment/cappuccino: paper #F3E9D0  plate #EADEC1  field #FAF3E0  ink #211A12
+ *   lede #454340   muted #555450  line #E5E2D8  edge #B7B5AC
+ *   accent #205EA6  accent-hover #4274B3  on-accent #FFFFFF
+ */
+
+/* Hint for debugging themes:
+ * first enable the GTK inspector with
+   gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
+ * then (after restarting Clay) call it up with ctrl+shift+i
+ * or from Clay's UI: File > Debug > Start GtkInspector
+ */
+
+/* Basic foreground, background and border colors. */
+@define-color fg-color               rgb(33,26,18);
+@define-color bg-color               rgb(243,233,208);
+@define-color border-color           rgb(216,203,170);
+
+/********* Variants for foreground colors *********/
+
+/* In places where we want not as strongly contrasted text. */
+@define-color dimmed-fg-color        rgb(78,66,50);
+/* Disabled items, such as disabled actions in menus. */
+@define-color disabled-fg-color      rgb(110,98,80);
+/* Disabled buttons are dimmed even more (text needs to still be
+ * readable, but buttons design are usually enough. */
+@define-color disabled-button-color  rgb(179,164,131);
+
+/********* Variants for background colors *********/
+
+/* Background color for hovered items to "stick out". */
+@define-color hover-color            rgb(227,214,182);
+/* Background color when we want widgets-in-widgets to differentiate. It
+ * will usually be "less extreme", i.e. darker on a light theme, or
+ * lighter on a dark theme.
+ */
+@define-color widget-bg-color        rgb(234,222,193);
+/* Color for selected items, in particular when their usual background
+ * color is @widget-bg-color or @bg-color. It will usually be lighter on
+ * a light theme, or darker on a dark theme.
+ */
+@define-color selected-color         rgb(222,207,170);
+
+/* Background color more extreme in the theme tendency, i.e. darker on a
+ * dark theme, lighter on a light theme. */
+@define-color extreme-bg-color       rgb(250,243,224);
+/* Color for a selected item to "stick out" when @extreme-bg-color is
+ * used. It will usually be darker than @bg-color on a light theme,
+ * lighter on a dark theme.
+ */
+@define-color extreme-selected-color rgb(222,207,170);
+
+/********* Variants for border colors *********/
+
+@define-color strong-border-color    rgb(179,164,131);
+@define-color stronger-border-color  rgb(179,164,131);
+/* Border color for the edge of certain widgets. This needs
+ * to be dark on light theme and very dark on dark themes */
+@define-color edge-border-color      rgb(179,164,131);
+
+/********* Colors for special cases *********/
+
+@define-color scrollbar-slider-color rgb(179,164,131);
+@define-color scrollbar-trough-color rgb(243,233,208);
+
+@define-color ruler-color            rgba(216,203,170,0.3);
+
+@define-color accent-color           rgb(43,82,152);
+@define-color accent-hover-color     rgb(66,104,174);
+@define-color on-accent-color        rgb(255,255,255);
+@define-color destructive-color      rgb(154,52,18);
+@define-color good-color             rgb(59,110,59);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+/*
+ * Paned separator handles
+ */
+paned.horizontal > separator {
+  background-image: url("ui/separator-handle-v.svg");
+}
+
+paned.vertical > separator {
+  background-image: url("ui/separator-handle-h.svg");
+}
+
+
+@import url("common-light.css");

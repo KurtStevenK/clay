@@ -43,17 +43,17 @@ HELP
     %invoke = (
        code => <<'CODE'
 {
-  const Babl *format = gimp_drawable_get_format (drawable);
+  const Babl *format = clay_drawable_get_format (drawable);
 
-  if (x_coord < gimp_item_get_width  (GIMP_ITEM (drawable)) &&
-      y_coord < gimp_item_get_height (GIMP_ITEM (drawable)))
+  if (x_coord < clay_item_get_width  (CLAY_ITEM (drawable)) &&
+      y_coord < clay_item_get_height (CLAY_ITEM (drawable)))
     {
       gint     n_bytes = babl_format_get_bytes_per_pixel (format);
       gpointer pixel;
 
       pixel = g_malloc0 (n_bytes);
 
-      gegl_buffer_sample (gimp_drawable_get_buffer (drawable),
+      gegl_buffer_sample (clay_drawable_get_buffer (drawable),
                           x_coord, y_coord, NULL, pixel, format,
                           GEGL_SAMPLER_NEAREST, GEGL_ABYSS_NONE);
       color = gegl_color_new ("black");
@@ -94,13 +94,13 @@ HELP
     %invoke = (
        code => <<'CODE'
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (drawable),
-                                   GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
-      x_coord < gimp_item_get_width  (GIMP_ITEM (drawable)) &&
-      y_coord < gimp_item_get_height (GIMP_ITEM (drawable)))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (drawable),
+                                   CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
+      x_coord < clay_item_get_width  (CLAY_ITEM (drawable)) &&
+      y_coord < clay_item_get_height (CLAY_ITEM (drawable)))
     {
-      gegl_buffer_set_color (gimp_drawable_get_buffer (drawable),
+      gegl_buffer_set_color (clay_drawable_get_buffer (drawable),
                              GEGL_RECTANGLE (x_coord, y_coord, 1, 1),
                              color);
     }
@@ -118,16 +118,16 @@ sub drawable_append_filter {
 This procedure adds the specified drawable effect at the top of the effect list of @drawable.
 
 The @drawable argument must be the same as the one used when you created
-the effect with [ctor@Gimp.DrawableFilter.new].
+the effect with [ctor@Clay.DrawableFilter.new].
 
 Some effects may be slower than others to render. In order to minimize
 processing time, it is preferred to customize the operation's arguments
-as received with [method@Gimp.DrawableFilter.get_config] then sync them
-to the application with [method@Gimp.DrawableFilter.update] before
+as received with [method@Clay.DrawableFilter.get_config] then sync them
+to the application with [method@Clay.DrawableFilter.update] before
 adding the effect.
 
 This function is private and should not be used. Use
-[method@Gimp.Drawable.append_filter] instead.
+[method@Clay.Drawable.append_filter] instead.
 HELP
 
     &jehan_pdb_misc('2024', '3.0');
@@ -145,26 +145,26 @@ HELP
 {
   GeglNode *node;
 
-  if (gimp_drawable_filter_get_drawable (filter) != drawable)
+  if (clay_drawable_filter_get_drawable (filter) != drawable)
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    "%s: the filter was not created for this drawable.",
                    G_STRFUNC);
       success = FALSE;
     }
-  else if (! GIMP_IS_LAYER (drawable))
+  else if (! CLAY_IS_LAYER (drawable))
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
-                   "%s: only drawables of type GimpLayer can have non-destructive effects.",
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
+                   "%s: only drawables of type ClayLayer can have non-destructive effects.",
                    G_STRFUNC);
       success = FALSE;
     }
 
-  node = gimp_drawable_filter_get_operation (filter);
+  node = clay_drawable_filter_get_operation (filter);
   if (success && gegl_node_has_pad (node, "aux"))
     {
-      /* Filters with aux input should not be NDE. See: gimp_filter_tool_create_filter(). */
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      /* Filters with aux input should not be NDE. See: clay_filter_tool_create_filter(). */
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    "%s: effects with an 'aux' pad cannot be applied non-destructively.",
                    G_STRFUNC);
       success = FALSE;
@@ -172,12 +172,12 @@ HELP
 
   if (success)
     {
-      GimpImage *image = gimp_item_get_image (GIMP_ITEM (drawable));
+      ClayImage *image = clay_item_get_image (CLAY_ITEM (drawable));
 
-      gimp_image_undo_push_filter_add (image, _("Add filter"), drawable, filter);
-      gimp_drawable_filter_apply (filter, NULL);
-      gimp_drawable_filter_commit (filter, TRUE, NULL, FALSE);
-      gimp_drawable_filter_layer_mask_freeze (filter);
+      clay_image_undo_push_filter_add (image, _("Add filter"), drawable, filter);
+      clay_drawable_filter_apply (filter, NULL);
+      clay_drawable_filter_commit (filter, TRUE, NULL, FALSE);
+      clay_drawable_filter_layer_mask_freeze (filter);
 
       g_object_unref (filter);
     }
@@ -193,16 +193,16 @@ This procedure applies the specified drawable effect on @drawable and merge it
 (therefore before non-destructive effects are computed).
 
 The @drawable argument must be the same as the one used when you created
-the effect with [ctor@Gimp.DrawableFilter.new].
+the effect with [ctor@Clay.DrawableFilter.new].
 
 Once this is run, @filter is not valid anymore and you should not try to
 do anything with it. In particular, you must customize the operation's
-arguments as received with [method@Gimp.DrawableFilter.get_config] then
-sync them to the application with [method@Gimp.DrawableFilter.update]
+arguments as received with [method@Clay.DrawableFilter.get_config] then
+sync them to the application with [method@Clay.DrawableFilter.update]
 before merging the effect.
 
 This function is private and should not be used. Use
-[method@Gimp.Drawable.merge_filter] instead.
+[method@Clay.Drawable.merge_filter] instead.
 HELP
 
     &jehan_pdb_misc('2024', '3.0');
@@ -218,9 +218,9 @@ HELP
 
     $invoke{code} = <<'CODE';
 {
-  if (gimp_drawable_filter_get_drawable (filter) != drawable)
+  if (clay_drawable_filter_get_drawable (filter) != drawable)
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    "%s: the filter was not created for this drawable.",
                    G_STRFUNC);
       success = FALSE;
@@ -228,18 +228,18 @@ HELP
 
   if (success)
     {
-      GimpContainer *filters;
+      ClayContainer *filters;
       gint           count;
 
-      gimp_drawable_filter_apply (filter, NULL);
+      clay_drawable_filter_apply (filter, NULL);
 
-      filters = gimp_drawable_get_filters (drawable);
-      count   = gimp_container_get_n_children (filters);
+      filters = clay_drawable_get_filters (drawable);
+      count   = clay_container_get_n_children (filters);
       if (count > 1)
-        gimp_container_reorder (filters, GIMP_OBJECT (filter), count - 1);
+        clay_container_reorder (filters, CLAY_OBJECT (filter), count - 1);
 
-      gimp_drawable_filter_layer_mask_freeze (filter);
-      gimp_drawable_filter_commit (filter, FALSE, NULL, FALSE);
+      clay_drawable_filter_layer_mask_freeze (filter);
+      clay_drawable_filter_commit (filter, FALSE, NULL, FALSE);
 
       g_object_unref (filter);
     }
@@ -270,16 +270,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpContainer *container;
+  ClayContainer *container;
   GList         *iter;
   gsize          num_filters;
   gint           i;
 
-  container   = gimp_drawable_get_filters (drawable);
-  num_filters = gimp_container_get_n_children (container);
-  filters     = g_new0 (GimpDrawableFilter *, num_filters + 1);
+  container   = clay_drawable_get_filters (drawable);
+  num_filters = clay_container_get_n_children (container);
+  filters     = g_new0 (ClayDrawableFilter *, num_filters + 1);
 
-  iter = GIMP_LIST (container)->queue->head;
+  iter = CLAY_LIST (container)->queue->head;
   for (i = 0; i < num_filters; i++, iter = iter->next)
     filters[i] = iter->data;
 }
@@ -303,11 +303,11 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-filters.h") ],
+	headers => [ qw("core/claydrawable-filters.h") ],
 	code    => <<'CODE'
 {
-  if (gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
-    gimp_drawable_merge_filters (drawable);
+  if (clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
+    clay_drawable_merge_filters (drawable);
   else
     success = FALSE;
 }
@@ -335,21 +335,21 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-shadow.h"
-                        "plug-in/gimpplugin.h"
-                        "plug-in/gimppluginmanager.h") ],
+	headers => [ qw("core/claydrawable-shadow.h"
+                        "plug-in/clayplugin.h"
+                        "plug-in/claypluginmanager.h") ],
 	code    => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
       const gchar *undo_desc = _("Plug-in");
 
-      if (gimp->plug_in_manager->current_plug_in)
-        undo_desc = gimp_plug_in_get_undo_desc (gimp->plug_in_manager->current_plug_in);
+      if (clay->plug_in_manager->current_plug_in)
+        undo_desc = clay_plug_in_get_undo_desc (clay->plug_in_manager->current_plug_in);
 
-      gimp_drawable_merge_shadow_buffer (drawable, undo, undo_desc);
+      clay_drawable_merge_shadow_buffer (drawable, undo, undo_desc);
     }
   else
     success = FALSE;
@@ -376,14 +376,14 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("plug-in/gimpplugin-cleanup.h") ],
+	headers => [ qw("plug-in/clayplugin-cleanup.h") ],
 	code => <<'CODE'
 {
-  if (gimp->plug_in_manager->current_plug_in)
-    gimp_plug_in_cleanup_remove_shadow (gimp->plug_in_manager->current_plug_in,
+  if (clay->plug_in_manager->current_plug_in)
+    clay_plug_in_cleanup_remove_shadow (clay->plug_in_manager->current_plug_in,
                                         drawable);
 
-  gimp_drawable_free_shadow_buffer (drawable);
+  clay_drawable_free_shadow_buffer (drawable);
 }
 CODE
     );
@@ -401,7 +401,7 @@ channel, in which case the alpha channel is set to transparent. If the
 drawable has no alpha channel, it is filled to white. No fill leaves
 the drawable's contents undefined.
 
-This procedure is unlike gimp_drawable_edit_fill() or the bucket fill
+This procedure is unlike clay_drawable_edit_fill() or the bucket fill
 tool because it fills regardless of a selection. Its main purpose is to
 fill a newly created drawable before adding it to the image. This
 operation cannot be undone.
@@ -412,19 +412,19 @@ HELP
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'fill_type', type => 'enum GimpFillType',
+	{ name => 'fill_type', type => 'enum ClayFillType',
 	  desc => 'The type of fill' }
     );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-fill.h") ],
+	headers => [ qw("core/claydrawable-fill.h") ],
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (drawable),
-                                   GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (drawable),
+                                   CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
-      gimp_drawable_fill (drawable, context, (GimpFillType) fill_type);
+      clay_drawable_fill (drawable, context, (ClayFillType) fill_type);
     }
   else
     success = FALSE;
@@ -460,7 +460,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_drawable_update (drawable, x, y, width, height);
+  clay_drawable_update (drawable, x, y, width, height);
 }
 CODE
     );
@@ -483,7 +483,7 @@ of the selection can be calculated as (x2 - x1), its height as (y2 - y1).
 
 Note that the returned boolean does NOT correspond with the returned
 region being empty or not, it always returns whether the selection
-is non_empty. See gimp_drawable_mask_intersect() for a boolean
+is non_empty. See clay_drawable_mask_intersect() for a boolean
 return value which is more useful in most cases.
 HELP
 
@@ -510,8 +510,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL, 0, error))
-    non_empty = gimp_item_mask_bounds (GIMP_ITEM (drawable), &x1, &y1, &x2, &y2);
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL, 0, error))
+    non_empty = clay_item_mask_bounds (CLAY_ITEM (drawable), &x1, &y1, &x2, &y2);
   else
     success = FALSE;
 }
@@ -527,7 +527,7 @@ BLURB
 
     $help = <<'HELP';
 This procedure returns whether there is an intersection between the
-drawable and the selection. Unlike gimp_drawable_mask_bounds(), the
+drawable and the selection. Unlike clay_drawable_mask_bounds(), the
 intersection's bounds are returned as x, y, width, height.
 
 If there is no selection this function returns TRUE and the returned
@@ -557,8 +557,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL, 0, error))
-    non_empty = gimp_item_mask_intersect (GIMP_ITEM (drawable),
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL, 0, error))
+    non_empty = clay_item_mask_intersect (CLAY_ITEM (drawable),
                                           &x, &y, &width, &height);
   else
     success = FALSE;
@@ -574,7 +574,7 @@ sub drawable_get_format {
 This procedure returns the drawable's Babl format.
 
 Note that the actual PDB procedure only transfers the format's
-encoding. In order to get to the real format, the libbgimp C wrapper
+encoding. In order to get to the real format, the libbclay C wrapper
 must be used.
 HELP
 
@@ -596,10 +596,10 @@ HELP
 	code => <<'CODE'
 {
   /* this only transfers the encoding, losing the space, see the
-   * code in libgimp/gimpdrawable.c which reconstructs the actual
+   * code in libclay/claydrawable.c which reconstructs the actual
    * format in the plug-in process
    */
-  format = g_strdup (babl_format_get_encoding (gimp_drawable_get_format (drawable)));
+  format = g_strdup (babl_format_get_encoding (clay_drawable_get_format (drawable)));
 }
 CODE
     );
@@ -611,8 +611,8 @@ sub drawable_get_thumbnail_format {
     $help = <<'HELP';
 This procedure returns the drawable's thumbnail Babl format.
 
-Thumbnails are always 8-bit images, see gimp_drawable_thumbnail() and
-gimp_drawable_sub_thmbnail().
+Thumbnails are always 8-bit images, see clay_drawable_thumbnail() and
+clay_drawable_sub_thmbnail().
 HELP
 
     &mitch_pdb_misc('2019', '2.10.14');
@@ -632,7 +632,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  format = g_strdup (babl_format_get_encoding (gimp_drawable_get_preview_format (drawable)));
+  format = g_strdup (babl_format_get_encoding (clay_drawable_get_preview_format (drawable)));
 
 }
 CODE
@@ -651,14 +651,14 @@ sub drawable_type {
     );
 
     @outargs = (
-	{ name => 'type', type => 'enum GimpImageType',
+	{ name => 'type', type => 'enum ClayImageType',
 	  desc => "The drawable's type" }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  type = gimp_babl_format_get_image_type (gimp_drawable_get_format (drawable));
+  type = clay_babl_format_get_image_type (clay_drawable_get_format (drawable));
 }
 CODE
     );
@@ -688,7 +688,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 }
 CODE
     );
@@ -712,19 +712,19 @@ HELP
     );
 
     @outargs = (
-	{ name => 'type_with_alpha', type => 'enum GimpImageType
-					      (no GIMP_RGB_IMAGE,
-					       GIMP_GRAY_IMAGE,
-					       GIMP_INDEXED_IMAGE)',
+	{ name => 'type_with_alpha', type => 'enum ClayImageType
+					      (no CLAY_RGB_IMAGE,
+					       CLAY_GRAY_IMAGE,
+					       CLAY_INDEXED_IMAGE)',
 	  desc => "The drawable's type with alpha" }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  const Babl *format = gimp_drawable_get_format_with_alpha (drawable);
+  const Babl *format = clay_drawable_get_format_with_alpha (drawable);
 
-  type_with_alpha = gimp_babl_format_get_image_type (format);
+  type_with_alpha = clay_babl_format_get_image_type (format);
 }
 CODE
     );
@@ -753,7 +753,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  is_rgb = gimp_drawable_is_rgb (drawable);
+  is_rgb = clay_drawable_is_rgb (drawable);
 }
 CODE
     );
@@ -782,7 +782,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  is_gray = gimp_drawable_is_gray (drawable);
+  is_gray = clay_drawable_is_gray (drawable);
 }
 CODE
     );
@@ -811,7 +811,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  is_indexed = gimp_drawable_is_indexed (drawable);
+  is_indexed = clay_drawable_is_indexed (drawable);
 }
 CODE
     );
@@ -839,7 +839,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  const Babl *format = gimp_drawable_get_format (drawable);
+  const Babl *format = clay_drawable_get_format (drawable);
 
   bpp = babl_format_get_bytes_per_pixel (format);
 }
@@ -866,7 +866,7 @@ sub drawable_get_width {
     %invoke = (
 	code => <<'CODE'
 {
-  width = gimp_item_get_width (GIMP_ITEM (drawable));
+  width = clay_item_get_width (CLAY_ITEM (drawable));
 }
 CODE
     );
@@ -891,7 +891,7 @@ sub drawable_get_height {
     %invoke = (
 	code => <<'CODE'
 {
-  height = gimp_item_get_height (GIMP_ITEM (drawable));
+  height = clay_item_get_height (CLAY_ITEM (drawable));
 }
 CODE
     );
@@ -923,7 +923,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_item_get_offset (GIMP_ITEM (drawable), &offset_x, &offset_y);
+  clay_item_get_offset (CLAY_ITEM (drawable), &offset_x, &offset_y);
 }
 CODE
     );
@@ -966,32 +966,32 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpImage   *image = gimp_item_get_image (GIMP_ITEM (drawable));
-  GimpTempBuf *buf;
+  ClayImage   *image = clay_item_get_image (CLAY_ITEM (drawable));
+  ClayTempBuf *buf;
   gint         dwidth, dheight;
 
-  gimp_assert (GIMP_VIEWABLE_MAX_PREVIEW_SIZE >= 1024);
+  clay_assert (CLAY_VIEWABLE_MAX_PREVIEW_SIZE >= 1024);
 
   /* Adjust the width/height ratio */
-  dwidth  = gimp_item_get_width  (GIMP_ITEM (drawable));
-  dheight = gimp_item_get_height (GIMP_ITEM (drawable));
+  dwidth  = clay_item_get_width  (CLAY_ITEM (drawable));
+  dheight = clay_item_get_height (CLAY_ITEM (drawable));
 
   if (dwidth > dheight)
     height = MAX (1, (width * dheight) / dwidth);
   else
     width  = MAX (1, (height * dwidth) / dheight);
 
-  if (image->gimp->config->layer_previews)
-    buf = gimp_viewable_get_new_preview (GIMP_VIEWABLE (drawable), context,
+  if (image->clay->config->layer_previews)
+    buf = clay_viewable_get_new_preview (CLAY_VIEWABLE (drawable), context,
                                          width, height, 1, NULL);
   else
-    buf = gimp_viewable_get_dummy_preview (GIMP_VIEWABLE (drawable),
+    buf = clay_viewable_get_dummy_preview (CLAY_VIEWABLE (drawable),
                                            width, height, 1,
-                                           gimp_drawable_get_preview_format (drawable));
+                                           clay_drawable_get_preview_format (drawable));
 
   if (buf)
     {
-      const Babl *format      = gimp_temp_buf_get_format (buf);
+      const Babl *format      = clay_temp_buf_get_format (buf);
       const Babl *rgb_format  = babl_format ("R'G'B' u8");
       const Babl *rgba_format = babl_format ("R'G'B'A u8");
       const Babl *fish        = NULL;
@@ -1007,8 +1007,8 @@ HELP
           format = rgb_format;
         }
 
-      actual_width  = gimp_temp_buf_get_width  (buf);
-      actual_height = gimp_temp_buf_get_height (buf);
+      actual_width  = clay_temp_buf_get_width  (buf);
+      actual_height = clay_temp_buf_get_height (buf);
       bpp           = babl_format_get_bytes_per_pixel (format);
       if (fish)
         {
@@ -1016,18 +1016,18 @@ HELP
           gint    data_size = bpp * actual_width * actual_height;
 
           data = g_malloc (data_size);
-          babl_process (fish, gimp_temp_buf_get_data (buf), data, actual_width * actual_height);
+          babl_process (fish, clay_temp_buf_get_data (buf), data, actual_width * actual_height);
 
           thumbnail_data = g_bytes_new (data, data_size);
           g_free (data);
         }
       else
         {
-          thumbnail_data = g_bytes_new (gimp_temp_buf_get_data (buf),
-                                        gimp_temp_buf_get_data_size (buf));
+          thumbnail_data = g_bytes_new (clay_temp_buf_get_data (buf),
+                                        clay_temp_buf_get_data_size (buf));
         }
 
-      gimp_temp_buf_unref (buf);
+      clay_temp_buf_unref (buf);
     }
   else
     success = FALSE;
@@ -1079,28 +1079,28 @@ HELP
       );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-preview.h") ],
+	headers => [ qw("core/claydrawable-preview.h") ],
         code    => <<'CODE'
 {
-  if ((src_x + src_width)  <= gimp_item_get_width  (GIMP_ITEM (drawable)) &&
-      (src_y + src_height) <= gimp_item_get_height (GIMP_ITEM (drawable)))
+  if ((src_x + src_width)  <= clay_item_get_width  (CLAY_ITEM (drawable)) &&
+      (src_y + src_height) <= clay_item_get_height (CLAY_ITEM (drawable)))
     {
-      GimpImage   *image = gimp_item_get_image (GIMP_ITEM (drawable));
-      GimpTempBuf *buf;
+      ClayImage   *image = clay_item_get_image (CLAY_ITEM (drawable));
+      ClayTempBuf *buf;
 
-      if (image->gimp->config->layer_previews)
-        buf = gimp_drawable_get_sub_preview (drawable,
+      if (image->clay->config->layer_previews)
+        buf = clay_drawable_get_sub_preview (drawable,
                                              src_x, src_y,
                                              src_width, src_height,
                                              dest_width, dest_height, 1);
       else
-        buf = gimp_viewable_get_dummy_preview (GIMP_VIEWABLE (drawable),
+        buf = clay_viewable_get_dummy_preview (CLAY_VIEWABLE (drawable),
                                                dest_width, dest_height, 1,
-                                               gimp_drawable_get_preview_format (drawable));
+                                               clay_drawable_get_preview_format (drawable));
 
       if (buf)
         {
-          const Babl *format      = gimp_temp_buf_get_format (buf);
+          const Babl *format      = clay_temp_buf_get_format (buf);
           const Babl *rgb_format  = babl_format ("R'G'B' u8");
           const Babl *rgba_format = babl_format ("R'G'B'A u8");
           const Babl *fish        = NULL;
@@ -1116,8 +1116,8 @@ HELP
               format = rgb_format;
             }
 
-          width  = gimp_temp_buf_get_width  (buf);
-          height = gimp_temp_buf_get_height (buf);
+          width  = clay_temp_buf_get_width  (buf);
+          height = clay_temp_buf_get_height (buf);
           bpp    = babl_format_get_bytes_per_pixel (format);
           if (fish)
             {
@@ -1125,7 +1125,7 @@ HELP
               gint    data_size = bpp * width * height;
 
               data = g_malloc (data_size);
-              babl_process (fish, gimp_temp_buf_get_data (buf), data,
+              babl_process (fish, clay_temp_buf_get_data (buf), data,
                             width * height);
 
               thumbnail_data = g_bytes_new (data, data_size);
@@ -1133,11 +1133,11 @@ HELP
             }
           else
             {
-              thumbnail_data = g_bytes_new (gimp_temp_buf_get_data (buf),
-                                            gimp_temp_buf_get_data_size (buf));
+              thumbnail_data = g_bytes_new (clay_temp_buf_get_data (buf),
+                                            clay_temp_buf_get_data_size (buf));
             }
 
-          gimp_temp_buf_unref (buf);
+          clay_temp_buf_unref (buf);
         }
       else
         success = FALSE;
@@ -1170,7 +1170,7 @@ HELP
 	  desc => 'The drawable to offset' },
 	{ name => 'wrap_around', type => 'boolean',
 	  desc => 'wrap image around or fill vacated regions' },
-	{ name => 'fill_type', type => 'enum GimpOffsetType',
+	{ name => 'fill_type', type => 'enum ClayOffsetType',
 	  desc => 'fill vacated regions of drawable with background or
 		   transparent' },
     { name => 'color', type => 'geglcolor',
@@ -1185,10 +1185,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
-    gimp_drawable_offset (drawable, context, wrap_around, fill_type,
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
+    clay_drawable_offset (drawable, context, wrap_around, fill_type,
                           color, offset_x, offset_y);
   else
     success = FALSE;
@@ -1214,36 +1214,36 @@ HELP
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-        { name => 'mode', type => 'enum GimpForegroundExtractMode',
+        { name => 'mode', type => 'enum ClayForegroundExtractMode',
 	  desc => 'The algorithm to use' },
         { name => 'mask', type => 'drawable', desc => 'Tri-Map' }
     );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-foreground-extract.h") ],
+	headers => [ qw("core/claydrawable-foreground-extract.h") ],
         code    => <<'CODE'
 {
-  if (mode == GIMP_FOREGROUND_EXTRACT_MATTING &&
-      gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL, 0, error))
+  if (mode == CLAY_FOREGROUND_EXTRACT_MATTING &&
+      clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL, 0, error))
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
-      GimpImage      *image       = gimp_item_get_image (GIMP_ITEM (drawable));
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
+      ClayImage      *image       = clay_item_get_image (CLAY_ITEM (drawable));
       GeglBuffer     *buffer;
 
-      buffer = gimp_drawable_foreground_extract (drawable,
-                                                 GIMP_MATTING_ENGINE_GLOBAL,
+      buffer = clay_drawable_foreground_extract (drawable,
+                                                 CLAY_MATTING_ENGINE_GLOBAL,
                                                  2,
                                                  2,
                                                  2,
-                                                 gimp_drawable_get_buffer (mask),
+                                                 clay_drawable_get_buffer (mask),
                                                  progress);
 
-      gimp_channel_select_buffer (gimp_image_get_mask (image),
+      clay_channel_select_buffer (clay_image_get_mask (image),
                                   C_("command", "Foreground Select"),
                                   buffer,
                                   0, /* x offset */
                                   0, /* y offset */
-                                  GIMP_CHANNEL_OP_REPLACE,
+                                  CLAY_CHANNEL_OP_REPLACE,
                                   pdb_context->feather,
                                   pdb_context->feather_radius_x,
                                   pdb_context->feather_radius_y);
@@ -1258,24 +1258,24 @@ CODE
 }
 
 
-@headers = qw("config/gimpcoreconfig.h"
-              "gegl/gimp-babl.h"
-              "gegl/gimp-babl-compat.h"
-              "core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpchannel-select.h"
-              "core/gimpdrawablefilter.h"
-              "core/gimpdrawable-filters.h"
-              "core/gimpdrawable-offset.h"
-              "core/gimpimage.h"
-              "core/gimpimage-undo-push.h"
-              "core/gimplayer.h"
-              "core/gimplist.h"
-              "core/gimptempbuf.h"
-              "gimppdb-utils.h"
-              "gimppdbcontext.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+@headers = qw("config/claycoreconfig.h"
+              "gegl/clay-babl.h"
+              "gegl/clay-babl-compat.h"
+              "core/clay.h"
+              "core/claycontainer.h"
+              "core/claychannel-select.h"
+              "core/claydrawablefilter.h"
+              "core/claydrawable-filters.h"
+              "core/claydrawable-offset.h"
+              "core/clayimage.h"
+              "core/clayimage-undo-push.h"
+              "core/claylayer.h"
+              "core/claylist.h"
+              "core/claytempbuf.h"
+              "claypdb-utils.h"
+              "claypdbcontext.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(drawable_get_format
             drawable_get_thumbnail_format
@@ -1309,7 +1309,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Drawable procedures';
-$doc_title = 'gimpdrawable';
+$doc_title = 'claydrawable';
 $doc_short_desc = 'Functions to manipulate drawables.';
 $doc_long_desc = 'Functions to manipulate drawables.';
 

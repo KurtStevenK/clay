@@ -19,8 +19,8 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #ifdef GDK_WINDOWING_QUARTZ
 #import <Cocoa/Cocoa.h>
@@ -78,7 +78,7 @@ static void   script_fu_file_callback       (GtkWidget     *widget,
                                              SFFilename    *file);
 static void   script_fu_combo_callback      (GtkWidget     *widget,
                                              SFOption      *option);
-static void   script_fu_color_button_update (GimpColorButton *button,
+static void   script_fu_color_button_update (ClayColorButton *button,
                                              SFColorType      color);
 
 static void   script_fu_resource_set_handler (gpointer       data,
@@ -101,7 +101,7 @@ static SFInterface       *sf_interface = NULL;  /*  there can only be at most
                                                  *  one interactive interface
                                                  */
 
-static GimpPDBStatusType  sf_status    = GIMP_PDB_SUCCESS;
+static ClayPDBStatusType  sf_status    = CLAY_PDB_SUCCESS;
 
 
 /*
@@ -115,7 +115,7 @@ script_fu_interface_is_active (void)
 }
 
 
-GimpPDBStatusType
+ClayPDBStatusType
 script_fu_interface_dialog (SFScript  *script,
                             gint       start_arg)
 {
@@ -126,7 +126,7 @@ script_fu_interface_dialog (SFScript  *script,
   gchar        *title;
   gint          i;
 
-  /* Requires gimp_ui_init called previously. */
+  /* Requires clay_ui_init called previously. */
 
   g_debug ("%s", G_STRFUNC);
 
@@ -145,12 +145,12 @@ script_fu_interface_dialog (SFScript  *script,
       g_message (message, sf_interface->title);
       g_free (message);
 
-      return GIMP_PDB_CANCEL;
+      return CLAY_PDB_CANCEL;
     }
 
   g_return_val_if_fail (script != NULL, FALSE);
 
-  sf_status = GIMP_PDB_SUCCESS;
+  sf_status = CLAY_PDB_SUCCESS;
 
   sf_interface = g_slice_new0 (SFInterface);
 
@@ -160,9 +160,9 @@ script_fu_interface_dialog (SFScript  *script,
   title = g_strdup_printf ("%s", sf_interface->title);
 
   sf_interface->dialog = dialog =
-    gimp_dialog_new (title, "gimp-script-fu",
+    clay_dialog_new (title, "clay-script-fu",
                      NULL, 0,
-                     gimp_standard_help_func, script->name,
+                     clay_standard_help_func, script->name,
 
                      _("_Reset"),  RESPONSE_RESET,
                      _("_Cancel"), GTK_RESPONSE_CANCEL,
@@ -171,13 +171,13 @@ script_fu_interface_dialog (SFScript  *script,
                      NULL);
   g_free (title);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   g_signal_connect (dialog, "response",
                     G_CALLBACK (script_fu_response),
@@ -232,27 +232,27 @@ script_fu_interface_dialog (SFScript  *script,
           switch (arg->type)
             {
             case SF_IMAGE:
-              widget = gimp_image_combo_box_new (NULL, NULL, NULL);
+              widget = clay_image_combo_box_new (NULL, NULL, NULL);
               ID_ptr = &arg->value.sfa_image;
               break;
 
             case SF_DRAWABLE:
-              widget = gimp_drawable_combo_box_new (NULL, NULL, NULL);
+              widget = clay_drawable_combo_box_new (NULL, NULL, NULL);
               ID_ptr = &arg->value.sfa_drawable;
               break;
 
             case SF_LAYER:
-              widget = gimp_layer_combo_box_new (NULL, NULL, NULL);
+              widget = clay_layer_combo_box_new (NULL, NULL, NULL);
               ID_ptr = &arg->value.sfa_layer;
               break;
 
             case SF_CHANNEL:
-              widget = gimp_channel_combo_box_new (NULL, NULL, NULL);
+              widget = clay_channel_combo_box_new (NULL, NULL, NULL);
               ID_ptr = &arg->value.sfa_channel;
               break;
 
             case SF_VECTORS:
-              widget = gimp_path_combo_box_new (NULL, NULL, NULL);
+              widget = clay_path_combo_box_new (NULL, NULL, NULL);
               ID_ptr = &arg->value.sfa_vectors;
               break;
 
@@ -260,25 +260,25 @@ script_fu_interface_dialog (SFScript  *script,
               break;
             }
 
-          gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (widget), *ID_ptr,
-                                      G_CALLBACK (gimp_int_combo_box_get_active),
+          clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (widget), *ID_ptr,
+                                      G_CALLBACK (clay_int_combo_box_get_active),
                                       ID_ptr, NULL);
           break;
 
         case SF_COLOR:
           {
-            GimpColorConfig *config;
+            ClayColorConfig *config;
             GeglColor       *color = sf_color_get_gegl_color (arg->value.sfa_color);
 
             left_align = TRUE;
-            widget = gimp_color_button_new (_("Script-Fu Color Selection"),
+            widget = clay_color_button_new (_("Script-Fu Color Selection"),
                                             COLOR_SAMPLE_WIDTH, COLOR_SAMPLE_HEIGHT,
-                                            color, GIMP_COLOR_AREA_FLAT);
+                                            color, CLAY_COLOR_AREA_FLAT);
 
-            gimp_color_button_set_update (GIMP_COLOR_BUTTON (widget), TRUE);
+            clay_color_button_set_update (CLAY_COLOR_BUTTON (widget), TRUE);
 
-            config = gimp_get_color_configuration ();
-            gimp_color_button_set_color_config (GIMP_COLOR_BUTTON (widget),
+            config = clay_get_color_configuration ();
+            clay_color_button_set_color_config (CLAY_COLOR_BUTTON (widget),
                                                 config);
             g_object_unref (config);
             g_object_unref (color);
@@ -297,7 +297,7 @@ script_fu_interface_dialog (SFScript  *script,
                                         arg->value.sfa_toggle);
 
           g_signal_connect (widget, "toggled",
-                            G_CALLBACK (gimp_toggle_button_update),
+                            G_CALLBACK (clay_toggle_button_update),
                             &arg->value.sfa_toggle);
           break;
 
@@ -353,7 +353,7 @@ script_fu_interface_dialog (SFScript  *script,
                                                    arg->default_value.sfa_adjustment.step,
                                                    arg->default_value.sfa_adjustment.page,
                                                    0.0);
-                  widget = gimp_spin_scale_new (adj_widget, arg->label, arg->default_value.sfa_adjustment.digits);
+                  widget = clay_spin_scale_new (adj_widget, arg->label, arg->default_value.sfa_adjustment.digits);
                 }
                 break;
 
@@ -371,7 +371,7 @@ script_fu_interface_dialog (SFScript  *script,
                                       arg->default_value.sfa_adjustment.step,
                                       arg->default_value.sfa_adjustment.page,
                                       0);
-                widget = gimp_spin_button_new (adj_widget,
+                widget = clay_spin_button_new (adj_widget,
                                                arg->default_value.sfa_adjustment.step,
                                                arg->default_value.sfa_adjustment.digits);
                 gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (widget), TRUE);
@@ -385,7 +385,7 @@ script_fu_interface_dialog (SFScript  *script,
 
             g_signal_connect (adj_widget,
                               "value-changed",
-                              G_CALLBACK (gimp_double_adjustment_update),
+                              G_CALLBACK (clay_double_adjustment_update),
                               &arg->value.sfa_adjustment.value);
           } /* end case SF_ADJUSTMENT */
           break;
@@ -411,34 +411,34 @@ script_fu_interface_dialog (SFScript  *script,
         case SF_FONT:
           widget = script_fu_resource_widget (label_text,
                                               arg,
-                                              GIMP_TYPE_FONT);
+                                              CLAY_TYPE_FONT);
           break;
 
         case SF_PALETTE:
           widget = script_fu_resource_widget (label_text,
                                               arg,
-                                              GIMP_TYPE_PALETTE);
+                                              CLAY_TYPE_PALETTE);
           break;
 
         case SF_PATTERN:
           left_align = TRUE;
           widget = script_fu_resource_widget (label_text,
                                               arg,
-                                              GIMP_TYPE_PATTERN);
+                                              CLAY_TYPE_PATTERN);
           break;
 
         case SF_GRADIENT:
           left_align = TRUE;
           widget = script_fu_resource_widget (label_text,
                                               arg,
-                                              GIMP_TYPE_GRADIENT);
+                                              CLAY_TYPE_GRADIENT);
           break;
 
         case SF_BRUSH:
           left_align = TRUE;
           widget = script_fu_resource_widget (label_text,
                                               arg,
-                                              GIMP_TYPE_BRUSH);
+                                              CLAY_TYPE_BRUSH);
           break;
 
         case SF_OPTION:
@@ -460,13 +460,13 @@ script_fu_interface_dialog (SFScript  *script,
           break;
 
         case SF_ENUM:
-          widget = gimp_enum_combo_box_new (g_type_from_name (arg->default_value.sfa_enum.type_name));
+          widget = clay_enum_combo_box_new (g_type_from_name (arg->default_value.sfa_enum.type_name));
 
-          gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (widget),
+          clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (widget),
                                          arg->value.sfa_enum.history);
 
           g_signal_connect (widget, "changed",
-                            G_CALLBACK (gimp_int_combo_box_get_active),
+                            G_CALLBACK (clay_int_combo_box_get_active),
                             &arg->value.sfa_enum.history);
           break;
 
@@ -478,7 +478,7 @@ script_fu_interface_dialog (SFScript  *script,
         {
           if (label_text)
             {
-              gimp_grid_attach_aligned (GTK_GRID (sf_interface->grid),
+              clay_grid_attach_aligned (GTK_GRID (sf_interface->grid),
                                         0, row,
                                         label_text, 0.0, label_yalign,
                                         widget, 2);
@@ -500,7 +500,7 @@ script_fu_interface_dialog (SFScript  *script,
 
   g_object_unref (group);
 
-  /* focus the first spin/text entry like on GIMP 2.10 */
+  /* focus the first spin/text entry like on Clay 2.10 */
   script_fu_widgets_grab_focus_on_first_entry (dialog);
 
 #ifdef G_OS_WIN32
@@ -540,7 +540,7 @@ script_fu_resource_widget (const gchar    *title,
                            GType           resource_type)
 {
   GtkWidget    *result_widget = NULL;
-  GimpResource *initial_value;
+  ClayResource *initial_value;
 
   g_debug ("%s type: %" G_GSIZE_FORMAT, G_STRFUNC, resource_type);
 
@@ -556,25 +556,25 @@ script_fu_resource_widget (const gchar    *title,
    */
   /* Create a widget with initial value of the arg. */
   initial_value = sf_resource_arg_get_value (arg);
-  if (g_type_is_a (resource_type, GIMP_TYPE_FONT))
+  if (g_type_is_a (resource_type, CLAY_TYPE_FONT))
     {
-      result_widget = gimp_font_chooser_new (title, "", GIMP_FONT (initial_value));
+      result_widget = clay_font_chooser_new (title, "", CLAY_FONT (initial_value));
     }
-  else if (g_type_is_a (resource_type, GIMP_TYPE_BRUSH))
+  else if (g_type_is_a (resource_type, CLAY_TYPE_BRUSH))
     {
-      result_widget = gimp_brush_chooser_new (title, "", GIMP_BRUSH (initial_value));
+      result_widget = clay_brush_chooser_new (title, "", CLAY_BRUSH (initial_value));
     }
-  else if (g_type_is_a (resource_type, GIMP_TYPE_GRADIENT))
+  else if (g_type_is_a (resource_type, CLAY_TYPE_GRADIENT))
     {
-      result_widget = gimp_gradient_chooser_new (title, "", GIMP_GRADIENT (initial_value));
+      result_widget = clay_gradient_chooser_new (title, "", CLAY_GRADIENT (initial_value));
     }
-  else if (g_type_is_a (resource_type, GIMP_TYPE_PALETTE))
+  else if (g_type_is_a (resource_type, CLAY_TYPE_PALETTE))
     {
-      result_widget = gimp_palette_chooser_new (title, "", GIMP_PALETTE (initial_value));
+      result_widget = clay_palette_chooser_new (title, "", CLAY_PALETTE (initial_value));
     }
-  else if (g_type_is_a (resource_type, GIMP_TYPE_PATTERN))
+  else if (g_type_is_a (resource_type, CLAY_TYPE_PATTERN))
     {
-      result_widget = gimp_pattern_chooser_new (title, "", GIMP_PATTERN (initial_value));
+      result_widget = clay_pattern_chooser_new (title, "", CLAY_PATTERN (initial_value));
     }
   else
     {
@@ -609,7 +609,7 @@ script_fu_interface_quit (SFScript *script)
   sf_interface = NULL;
 
   /*  We do not call gtk_main_quit() earlier to reduce the possibility
-   *  that script_fu_script_proc() is called from gimp_extension_process()
+   *  that script_fu_script_proc() is called from clay_extension_process()
    *  while we are not finished with the current script. This sucks!
    */
 
@@ -635,10 +635,10 @@ script_fu_combo_callback (GtkWidget *widget,
 }
 
 static void
-script_fu_color_button_update (GimpColorButton *button,
+script_fu_color_button_update (ClayColorButton *button,
                                SFColorType      arg_value)
 {
-  GeglColor *color = gimp_color_button_get_color (button);
+  GeglColor *color = clay_color_button_get_color (button);
 
   sf_color_set_from_gegl_color (&arg_value, color);
 
@@ -660,7 +660,7 @@ script_fu_resource_set_handler (gpointer      data,  /* callback "data" */
   gint32 *id_pointer = data;
 
   /* Store integer ID, not pointer to Resource.  We bind to integer ID. */
-  *id_pointer = gimp_resource_get_id (resource);
+  *id_pointer = clay_resource_get_id (resource);
 
   if (closing) script_fu_activate_main_dialog ();
 }
@@ -710,7 +710,7 @@ script_fu_response (GtkWidget *widget,
 
       script_fu_flush_events ();
       /*
-       * The script could have created a new GimpImageWindow, so
+       * The script could have created a new ClayImageWindow, so
        * unset the transient-for property not to focus the
        * ImageWindow from which the script was started
        */
@@ -720,7 +720,7 @@ script_fu_response (GtkWidget *widget,
       break;
 
     default:
-      sf_status = GIMP_PDB_CANCEL;
+      sf_status = CLAY_PDB_CANCEL;
 
       script_fu_flush_events ();
       gtk_widget_destroy (sf_interface->dialog);
@@ -797,8 +797,8 @@ script_fu_ok (SFScript *script)
 
   /*  run the command through the interpreter  */
 
-  gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   script_fu_redirect_output_to_stdout ();
 
@@ -807,17 +807,17 @@ script_fu_ok (SFScript *script)
     {
       gchar *message;
 
-      /* Log to stdout.  Later to Gimp. */
+      /* Log to stdout.  Later to Clay. */
       message = g_strdup_printf (_("Error while executing %s:"), script->name);
       g_message ("%s\n", message);
       g_free (message);
 
       /* Set global to be returned by script-fu-interface-dialog. */
-      sf_status = GIMP_PDB_EXECUTION_ERROR;
+      sf_status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                      GIMP_PDB_ERROR_HANDLER_INTERNAL);
+  clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                      CLAY_PDB_ERROR_HANDLER_INTERNAL);
 
   g_free (command);
 }
@@ -852,7 +852,7 @@ script_fu_reset (SFScript *script)
           {
             GeglColor *color = sf_color_get_gegl_color (value->sfa_color);
 
-            gimp_color_button_set_color (GIMP_COLOR_BUTTON (widget), color);
+            clay_color_button_set_color (CLAY_COLOR_BUTTON (widget), color);
             g_object_unref (color);
           }
           break;
@@ -882,14 +882,14 @@ script_fu_reset (SFScript *script)
           {
             /* Reset the widget's underlying GtkAdjustment.
              * The widget knows its own GtkAdjustment.
-             * The widget is a GimpSpinScale or a GimpSpinButton.
+             * The widget is a ClaySpinScale or a ClaySpinButton.
              */
             GtkAdjustment *adj_widget = NULL;
 
             switch (script->args[i].default_value.sfa_adjustment.type)
               {
-              case SF_SLIDER:  /* GimpSpinScale */
-              case SF_SPINNER: /* GimpSpinButton */
+              case SF_SLIDER:  /* ClaySpinScale */
+              case SF_SPINNER: /* ClaySpinButton */
                 adj_widget = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (widget));
                 break;
               }
@@ -910,7 +910,7 @@ script_fu_reset (SFScript *script)
         case SF_PATTERN:
         case SF_GRADIENT:
         case SF_BRUSH:
-          gimp_resource_chooser_set_resource (GIMP_RESOURCE_CHOOSER (widget),
+          clay_resource_chooser_set_resource (CLAY_RESOURCE_CHOOSER (widget),
                                               sf_resource_arg_get_default (arg));
           break;
 
@@ -920,7 +920,7 @@ script_fu_reset (SFScript *script)
           break;
 
         case SF_ENUM:
-          gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (widget),
+          clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (widget),
                                          value->sfa_enum.history);
           break;
         }
@@ -932,13 +932,13 @@ script_fu_reset (SFScript *script)
  * Functions for window front/back management.
  * These might only be necessary for MacOS.
  *
- * One problem is that the GIMP and the scriptfu extension process are separate "apps".
+ * One problem is that the Clay and the scriptfu extension process are separate "apps".
  * Closing a main scriptfu dialog does not terminate the scriptfu extension process,
  * and MacOS does not then activate some other app.
- * On other platforms, the select dialogs are transient to the GIMP app's progress bar,
+ * On other platforms, the select dialogs are transient to the Clay app's progress bar,
  * but that doesn't seem to work on MacOS.
  *
- * Also some of the GIMP "select" widgets (for brush, pattern, gradient, font, palette)
+ * Also some of the Clay "select" widgets (for brush, pattern, gradient, font, palette)
  * for plugins are independent and tool like:
  * their popup dialog window is not a child of the button which pops it up.
  * The button "owns" the popup but GDK is not aware of that relation,
@@ -948,9 +948,9 @@ script_fu_reset (SFScript *script)
  * from the scriptfu extension to the select dialog on closing
  *
  * This might change in the future.
- * 1) in GIMP 3, scriptfu and python plugins should use a common API for a control dialog,
+ * 1) in Clay 3, scriptfu and python plugins should use a common API for a control dialog,
  * (script-fu-interface.c is obsoleted?)
- * 2) the code for select dialogs is significantly changed in GIMP 3
+ * 2) the code for select dialogs is significantly changed in Clay 3
  * 3) Gtk3 might solve this (now using Gtk2.)
  */
 
@@ -982,8 +982,8 @@ script_fu_flush_events (void)
 
 
 /* On MacOS, without calls to this,
- * when user closes GIMP "select" dialogs (child of main dialog)
- * the main scriptfu dialog can be obscured by GIMP main window.
+ * when user closes Clay "select" dialogs (child of main dialog)
+ * the main scriptfu dialog can be obscured by Clay main window.
  * The main scriptfu dialog must be visible so user can choose the OK button,
  * and it contains a progress bar.
  *

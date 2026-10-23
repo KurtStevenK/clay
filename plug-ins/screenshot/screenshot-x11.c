@@ -22,8 +22,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #ifdef GDK_WINDOWING_X11
 
@@ -45,12 +45,12 @@
 #include "screenshot.h"
 #include "screenshot-x11.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
-static guint32     select_window        (GimpProcedureConfig  *config,
+static guint32     select_window        (ClayProcedureConfig  *config,
                                          GdkMonitor       *monitor);
-static GimpImage * create_image         (cairo_surface_t  *surface,
+static ClayImage * create_image         (cairo_surface_t  *surface,
                                          cairo_region_t   *shape,
                                          const gchar      *name);
 
@@ -58,7 +58,7 @@ static GimpImage * create_image         (cairo_surface_t  *surface,
 /* Allow the user to select a window or a region with the mouse */
 
 static guint32
-select_window (GimpProcedureConfig *config,
+select_window (ClayProcedureConfig *config,
                GdkMonitor          *monitor)
 {
   Display      *x_dpy    = GDK_DISPLAY_XDISPLAY (gdk_monitor_get_display (monitor));
@@ -88,7 +88,7 @@ select_window (GimpProcedureConfig *config,
                 "screenshot-delay",   &screenshot_delay,
                 "include-decoration", &decorate,
                 NULL);
-  shoot_type = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  shoot_type = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                     "shoot-type");
 
   if (shoot_type == SHOOT_REGION)
@@ -392,13 +392,13 @@ window_get_shape (GdkMonitor *monitor,
 }
 
 static void
-image_select_shape (GimpImage      *image,
+image_select_shape (ClayImage      *image,
                     cairo_region_t *shape)
 {
   gint num_rects;
   gint i;
 
-  gimp_selection_none (image);
+  clay_selection_none (image);
 
   num_rects = cairo_region_num_rectangles (shape);
 
@@ -408,63 +408,63 @@ image_select_shape (GimpImage      *image,
 
       cairo_region_get_rectangle (shape, i, &rect);
 
-      gimp_image_select_rectangle (image, GIMP_CHANNEL_OP_ADD,
+      clay_image_select_rectangle (image, CLAY_CHANNEL_OP_ADD,
                                    rect.x, rect.y,
                                    rect.width, rect.height);
     }
 
-  gimp_selection_invert (image);
+  clay_selection_invert (image);
 }
 
 
-/* Create a GimpImage from a GdkPixbuf */
+/* Create a ClayImage from a GdkPixbuf */
 
-static GimpImage *
+static ClayImage *
 create_image (cairo_surface_t *surface,
               cairo_region_t  *shape,
               const gchar     *name)
 {
-  GimpImage *image;
-  GimpLayer *layer;
+  ClayImage *image;
+  ClayLayer *layer;
   gdouble    xres, yres;
   gint       width, height;
 
-  gimp_progress_init (_("Importing screenshot"));
+  clay_progress_init (_("Importing screenshot"));
 
   width  = cairo_image_surface_get_width (surface);
   height = cairo_image_surface_get_height (surface);
 
-  image = gimp_image_new (width, height, GIMP_RGB);
-  gimp_image_undo_disable (image);
+  image = clay_image_new (width, height, CLAY_RGB);
+  clay_image_undo_disable (image);
 
-  gimp_get_monitor_resolution (&xres, &yres);
-  gimp_image_set_resolution (image, xres, yres);
+  clay_get_monitor_resolution (&xres, &yres);
+  clay_image_set_resolution (image, xres, yres);
 
-  layer = gimp_layer_new_from_surface (image,
+  layer = clay_layer_new_from_surface (image,
                                        name ? name : _("Screenshot"),
                                        surface,
                                        0.0, 1.0);
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
   if (shape && ! cairo_region_is_empty (shape))
     {
       image_select_shape (image, shape);
 
-      if (! gimp_selection_is_empty (image))
+      if (! clay_selection_is_empty (image))
         {
-          gimp_layer_add_alpha (layer);
-          gimp_drawable_edit_clear (GIMP_DRAWABLE (layer));
-          gimp_selection_none (image);
+          clay_layer_add_alpha (layer);
+          clay_drawable_edit_clear (CLAY_DRAWABLE (layer));
+          clay_selection_none (image);
         }
     }
 
-  gimp_image_undo_enable (image);
+  clay_image_undo_enable (image);
 
   return image;
 }
 
 static void
-add_cursor_image (GimpImage  *image,
+add_cursor_image (ClayImage  *image,
                   GdkDisplay *display)
 {
 #ifdef HAVE_XFIXES
@@ -472,7 +472,7 @@ add_cursor_image (GimpImage  *image,
   GeglBuffer         *buffer;
   GeglBufferIterator *iter;
   GeglRectangle      *roi;
-  GimpLayer          *layer;
+  ClayLayer          *layer;
   GList              *selected;
 
   cursor = XFixesGetCursorImage (GDK_DISPLAY_XDISPLAY (display));
@@ -480,20 +480,20 @@ add_cursor_image (GimpImage  *image,
   if (!cursor)
     return;
 
-  selected = gimp_image_list_selected_layers (image);
+  selected = clay_image_list_selected_layers (image);
 
-  layer = gimp_layer_new (image, _("Mouse Pointer"),
+  layer = clay_layer_new (image, _("Mouse Pointer"),
                           cursor->width, cursor->height,
-                          GIMP_RGBA_IMAGE,
+                          CLAY_RGBA_IMAGE,
                           100.0,
-                          gimp_image_get_default_new_layer_mode (image));
+                          clay_image_get_default_new_layer_mode (image));
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   iter = gegl_buffer_iterator_new (buffer,
                                    GEGL_RECTANGLE (0, 0,
-                                                   gimp_drawable_get_width  (GIMP_DRAWABLE (layer)),
-                                                   gimp_drawable_get_height (GIMP_DRAWABLE (layer))),
+                                                   clay_drawable_get_width  (CLAY_DRAWABLE (layer)),
+                                                   clay_drawable_get_height (CLAY_DRAWABLE (layer))),
                                    0, babl_format ("R'G'B'A u8"),
                                    GEGL_ACCESS_READWRITE, GEGL_ABYSS_NONE, 1);
   roi = &iter->items[0].roi;
@@ -533,11 +533,11 @@ add_cursor_image (GimpImage  *image,
 
   g_object_unref (buffer);
 
-  gimp_image_insert_layer (image, layer, NULL, -1);
-  gimp_layer_set_offsets (layer,
+  clay_image_insert_layer (image, layer, NULL, -1);
+  clay_layer_set_offsets (layer,
                           cursor->x - cursor->xhot, cursor->y - cursor->yhot);
 
-  gimp_image_take_selected_layers (image, selected);
+  clay_image_take_selected_layers (image, selected);
 #endif
 }
 
@@ -576,10 +576,10 @@ screenshot_x11_get_capabilities (void)
   return capabilities;
 }
 
-GimpPDBStatusType
-screenshot_x11_shoot (GimpProcedureConfig  *config,
+ClayPDBStatusType
+screenshot_x11_shoot (ClayProcedureConfig  *config,
                       GdkMonitor           *monitor,
-                      GimpImage           **image,
+                      ClayImage           **image,
                       GError              **error)
 {
   GdkDisplay       *display;
@@ -588,7 +588,7 @@ screenshot_x11_shoot (GimpProcedureConfig  *config,
   cairo_surface_t  *screenshot;
   cairo_region_t   *shape = NULL;
   cairo_t          *cr;
-  GimpColorProfile *profile;
+  ClayColorProfile *profile;
   GdkRectangle      rect;
   GdkRectangle      screen_rect;
   gchar            *name  = NULL;
@@ -605,7 +605,7 @@ screenshot_x11_shoot (GimpProcedureConfig  *config,
                 "selection-delay",  &select_delay,
                 "include-pointer",  &show_cursor,
                 NULL);
-  shoot_type = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  shoot_type = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                     "shoot-type");
 
   /* use default screen if we are running non-interactively */
@@ -620,7 +620,7 @@ screenshot_x11_shoot (GimpProcedureConfig  *config,
       window_id = select_window (config, monitor);
 
       if (! window_id)
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
     }
 
   if (screenshot_delay > 0)
@@ -666,7 +666,7 @@ screenshot_x11_shoot (GimpProcedureConfig  *config,
       if (! window)
         {
           g_set_error_literal (error, 0, 0, _("Specified window not found"));
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       rect.width  = gdk_window_get_width (window);
@@ -684,7 +684,7 @@ screenshot_x11_shoot (GimpProcedureConfig  *config,
   screen_rect.height = gdk_window_get_height (window);
 
   if (! gdk_rectangle_intersect (&rect, &screen_rect, &rect))
-    return GIMP_PDB_EXECUTION_ERROR;
+    return CLAY_PDB_EXECUTION_ERROR;
 
   screenshot = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
                                            rect.width, rect.height);
@@ -725,15 +725,15 @@ screenshot_x11_shoot (GimpProcedureConfig  *config,
   if ((shoot_type == SHOOT_ROOT || shoot_type == SHOOT_WINDOW) && show_cursor)
     add_cursor_image (*image, display);
 
-  profile = gimp_monitor_get_color_profile (monitor);
+  profile = clay_monitor_get_color_profile (monitor);
 
   if (profile)
     {
-      gimp_image_set_color_profile (*image, profile);
+      clay_image_set_color_profile (*image, profile);
       g_object_unref (profile);
     }
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 #endif /* GDK_WINDOWING_X11 */

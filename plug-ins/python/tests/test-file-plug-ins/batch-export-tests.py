@@ -20,12 +20,12 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Batch non-interactive GIMP file export plug-ins testing."""
+"""Batch non-interactive Clay file export plug-ins testing."""
 
-from gimpconfig import GimpConfig
-from gimplogger import GimpLogger
-from gimptestframework import GimpExportTestRunner
-from gimpexporttests import BmpExportTests
+from clayconfig import ClayConfig
+from claylogger import ClayLogger
+from claytestframework import ClayExportTestRunner
+from clayexporttests import BmpExportTests
 
 
 #DEBUGGING=True
@@ -36,11 +36,11 @@ PRINT_VERBOSE = False
 
 LOG_APPEND = False
 
-test_cfg = GimpConfig()
+test_cfg = ClayConfig()
 
-log = GimpLogger(False, test_cfg.log_file, LOG_APPEND, PRINT_VERBOSE, DEBUGGING)
+log = ClayLogger(False, test_cfg.log_file, LOG_APPEND, PRINT_VERBOSE, DEBUGGING)
 
-runner = GimpExportTestRunner(log, "export", test_cfg)
+runner = ClayExportTestRunner(log, "export", test_cfg)
 if not runner:
     log.error("Failed to create export test runner!")
 else:

@@ -8,19 +8,19 @@ apptests_links = [
   libapppropgui,
   libapptools,
   libappwidgets,
-  libgimpbase,
-  libgimpcolor,
-  libgimpconfig,
-  libgimpmath,
-  libgimpmodule,
-  libgimpthumb,
-  libgimpwidgets,
+  libclaybase,
+  libclaycolor,
+  libclayconfig,
+  libclaymath,
+  libclaymodule,
+  libclaythumb,
+  libclaywidgets,
 ]
 
 
 libapptestutils_sources = [
-  'gimp-app-test-utils.c',
-  'gimp-test-session-utils.c',
+  'clay-app-test-utils.c',
+  'clay-test-session-utils.c',
 ]
 
 libapptestutils = static_library('apptestutils',
@@ -32,11 +32,11 @@ libapptestutils = static_library('apptestutils',
 apptests_links += libapptestutils
 
 # TODO: we need to implement proper GUI unit testing, actually based on
-# the real GIMP and simulating pointer clicks or keyboard inputs the
+# the real Clay and simulating pointer clicks or keyboard inputs the
 # proper way.
 app_tests = [
   'core',
-  'gimpidtable',
+  'clayidtable',
 #'session-2-8-compatibility-multi-window',
 #'session-2-8-compatibility-single-window',
 #'single-window-mode',
@@ -60,9 +60,9 @@ foreach test_name : app_tests
   test(test_name,
     test_exe,
     env: [
-      'GIMP_TESTING_ABS_TOP_SRCDIR='  + meson.project_source_root(),
-      'GIMP_TESTING_ABS_TOP_BUILDDIR='+ meson.project_build_root(),
-      'GIMP_TESTING_PLUGINDIRS='      + meson.project_build_root()/'plug-ins'/'common',
+      'CLAY_TESTING_ABS_TOP_SRCDIR='  + meson.project_source_root(),
+      'CLAY_TESTING_ABS_TOP_BUILDDIR='+ meson.project_build_root(),
+      'CLAY_TESTING_PLUGINDIRS='      + meson.project_build_root()/'plug-ins'/'common',
       'UI_TEST=yes',
     ],
     suite: 'app',
@@ -75,7 +75,7 @@ foreach test_name : app_tests
 
 endforeach
 
-## Newer Tests using GIMP directly ##
+## Newer Tests using Clay directly ##
 
 if not meson.can_run_host_binaries()
   warning('XCF loading unit testing disabled in cross-building or similar environments.')
@@ -88,12 +88,12 @@ tests = [
   }
 ]
 
-test_env=gimp_run_env
-test_env.set('GIMP_TESTING_ABS_TOP_SRCDIR', meson.project_source_root())
-test_env.set('GIMP_TESTING_ABS_TOP_BUILDDIR', meson.project_build_root())
-test_env.append('GIMP_TESTING_PLUG_INS', 'common/file-png', separator: ':')
+test_env=clay_run_env
+test_env.set('CLAY_TESTING_ABS_TOP_SRCDIR', meson.project_source_root())
+test_env.set('CLAY_TESTING_ABS_TOP_BUILDDIR', meson.project_build_root())
+test_env.append('CLAY_TESTING_PLUG_INS', 'common/file-png', separator: ':')
 
-run_python_test = find_program(meson.project_source_root() / 'libgimp/tests/libgimp-run-python-test.py')
+run_python_test = find_program(meson.project_source_root() / 'libclay/tests/libclay-run-python-test.py')
 foreach testinfo : tests
   test_name = testinfo['name']
   basename = 'test-' + testinfo['name']
@@ -101,13 +101,13 @@ foreach testinfo : tests
   py_test  = meson.current_source_dir() / basename + '.py'
   if testinfo.has_key('input')
     test(test_name, run_python_test,
-         args: [ gimp_exe.full_path(), py_test, testinfo['input']],
+         args: [ clay_exe.full_path(), py_test, testinfo['input']],
          env: test_env,
          suite: ['app'],
          timeout: 90)
   else
     test(test_name, run_python_test,
-         args: [ gimp_exe.full_path(), py_test ],
+         args: [ clay_exe.full_path(), py_test ],
          env: test_env,
          suite: ['app'],
          timeout: 90)

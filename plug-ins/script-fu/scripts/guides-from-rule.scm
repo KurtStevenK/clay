@@ -6,53 +6,53 @@
                                     drawables
                                     rule)
   (let* (
-        (width (car (gimp-image-get-width image)))
-      	(height (car (gimp-image-get-height image)))
+        (width (car (clay-image-get-width image)))
+      	(height (car (clay-image-get-height image)))
         (SQRT5 2.236067977)
         )
 
-    (gimp-image-undo-group-start image)
+    (clay-image-undo-group-start image)
 
     (if (= rule 0)          ; centre lines
         (begin
-            (gimp-image-add-hguide image (/ height 2))
-            (gimp-image-add-vguide image (/ width 2))
+            (clay-image-add-hguide image (/ height 2))
+            (clay-image-add-vguide image (/ width 2))
         )
     )
 
     (if (= rule 1)          ; rule of thirds
         (begin
-            (gimp-image-add-hguide image (/ height 3))
-            (gimp-image-add-vguide image (/ width 3))
-            (gimp-image-add-hguide image (/ (* height 2) 3))
-            (gimp-image-add-vguide image (/ (* width 2) 3))
+            (clay-image-add-hguide image (/ height 3))
+            (clay-image-add-vguide image (/ width 3))
+            (clay-image-add-hguide image (/ (* height 2) 3))
+            (clay-image-add-vguide image (/ (* width 2) 3))
         )
     )
 
     (if (= rule 2)          ; rule of fifths
         (begin
-            (gimp-image-add-hguide image (/ height 5))
-            (gimp-image-add-vguide image (/ width 5))
-            (gimp-image-add-hguide image (/ (* height 2) 5))
-            (gimp-image-add-vguide image (/ (* width 2) 5))
-            (gimp-image-add-hguide image (/ (* height 3) 5))
-            (gimp-image-add-vguide image (/ (* width 3) 5))
-            (gimp-image-add-hguide image (/ (* height 4) 5))
-            (gimp-image-add-vguide image (/ (* width 4) 5))
+            (clay-image-add-hguide image (/ height 5))
+            (clay-image-add-vguide image (/ width 5))
+            (clay-image-add-hguide image (/ (* height 2) 5))
+            (clay-image-add-vguide image (/ (* width 2) 5))
+            (clay-image-add-hguide image (/ (* height 3) 5))
+            (clay-image-add-vguide image (/ (* width 3) 5))
+            (clay-image-add-hguide image (/ (* height 4) 5))
+            (clay-image-add-vguide image (/ (* width 4) 5))
         )
     )
 
     (if (= rule 3)          ; golden sections
         (begin
-            (gimp-image-add-hguide image (/ (* height (+ 1 SQRT5)) (+ 3 SQRT5)))
-            (gimp-image-add-hguide image (/ (* height 2) (+ 3 SQRT5)))
-            (gimp-image-add-vguide image (/ (* width (+ 1 SQRT5)) (+ 3 SQRT5)))
-            (gimp-image-add-vguide image (/ (* width 2) (+ 3 SQRT5)))
+            (clay-image-add-hguide image (/ (* height (+ 1 SQRT5)) (+ 3 SQRT5)))
+            (clay-image-add-hguide image (/ (* height 2) (+ 3 SQRT5)))
+            (clay-image-add-vguide image (/ (* width (+ 1 SQRT5)) (+ 3 SQRT5)))
+            (clay-image-add-vguide image (/ (* width 2) (+ 3 SQRT5)))
         )
     )
 
-    (gimp-image-undo-group-end image)
-    (gimp-displays-flush)
+    (clay-image-undo-group-end image)
+    (clay-displays-flush)
   )
 )
 

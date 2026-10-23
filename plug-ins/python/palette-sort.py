@@ -16,7 +16,7 @@
 
 
 # For a detailed explanation of the parameters of this plugin, see :
-# https://gitlab.gnome.org/GNOME/gimp/-/issues/4368#note_763460
+# https://github.com/KurtStevenK/clay/-/issues/4368#note_763460
 
 # little known, colorsys is part of Python's stdlib
 from colorsys import rgb_to_yiq
@@ -27,8 +27,8 @@ import struct
 import gi
 gi.require_version('Babl', '0.1')
 from gi.repository import Babl
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -206,8 +206,8 @@ def palette_sort(palette, selection, slice_expr, channel1, ascending1,
         def hexcolor(c):
             rgba = c.get_rgba()
             return "#%02x%02x%02x" % (int(255 * rgba[0]), int(255 * rgba[1]), int(255 * rgba[2]))
-        fg = Gimp.context_get_foreground()
-        bg = Gimp.context_get_background()
+        fg = Clay.context_get_foreground()
+        bg = Clay.context_get_background()
         start = find_index(fg)
         end = find_index(bg)
 
@@ -310,7 +310,7 @@ def palette_sort(palette, selection, slice_expr, channel1, ascending1,
     return palette
 
 # FIXME: Write humanly readable help -
-# See for reference: https://gitlab.gnome.org/GNOME/gimp/-/issues/4368#note_763460
+# See for reference: https://github.com/KurtStevenK/clay/-/issues/4368#note_763460
 
 # Important to describe the general effect on palettes rather than details of the sort.
 help_doc = r"""
@@ -319,13 +319,13 @@ Sorts the given palette when it is editable, otherwise creates a new sorted pale
 The default is a 1D sort, but you can also sort over two color channels
 or create a 2D sorted palette with sorted rows.
 You can optionally install colormath (https://pypi.python.org/pypi/colormath/1.0.8)
-to GIMP's Python to get even more channels to choose from.
+to Clay's Python to get even more channels to choose from.
 """
 
-class PaletteSort (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class PaletteSort (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return ["python-fu-palette-sort"]
@@ -333,8 +333,8 @@ class PaletteSort (Gimp.PlugIn):
     def do_create_procedure(self, name):
         procedure = None
         if name == "python-fu-palette-sort":
-            procedure = Gimp.Procedure.new(self, name,
-                                           Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.Procedure.new(self, name,
+                                           Clay.PDBProcType.PLUGIN,
                                            self.run, None)
             procedure.set_menu_label(_("_Sort Palette..."))
             procedure.set_documentation(
@@ -348,15 +348,15 @@ class PaletteSort (Gimp.PlugIn):
             procedure.add_menu_path ('<Palettes>/Palettes Menu')
 
             procedure.add_enum_argument ("run-mode", _("Run mode"),
-                                         _("The run mode"), Gimp.RunMode,
-                                         Gimp.RunMode.INTERACTIVE,
+                                         _("The run mode"), Clay.RunMode,
+                                         Clay.RunMode.INTERACTIVE,
                                          GObject.ParamFlags.READWRITE)
             procedure.add_palette_argument ("palette", _("_Palette"),
                                             _("Palette"), True,
                                             None, True, # Default to context.
                                             GObject.ParamFlags.READWRITE)
 
-            selection_choice = Gimp.Choice.new()
+            selection_choice = Clay.Choice.new()
             selection_choice.add("all", 0, _("All"), "")
             selection_choice.add("slice-array", 1, _("Slice / Array"), "")
             selection_choice.add("auto-slice", 2, _("Autoslice (fg->bg)"), "")
@@ -368,13 +368,13 @@ class PaletteSort (Gimp.PlugIn):
             procedure.add_string_argument ("slice-expr", _("Slice _expression"),
                                            _(slice_expr_doc), "",
                                            GObject.ParamFlags.READWRITE)
-            channel_choice = Gimp.Choice.new()
+            channel_choice = Clay.Choice.new()
             self.add_choices (channel_choice)
             procedure.add_choice_argument ("channel1", _("Channel _to sort"), _("Channel to sort"),
                                            channel_choice, "luma", GObject.ParamFlags.READWRITE)
             procedure.add_boolean_argument ("ascending1", _("_Ascending"), _("Ascending"),
                                             True, GObject.ParamFlags.READWRITE)
-            channel_choice2 = Gimp.Choice.new()
+            channel_choice2 = Clay.Choice.new()
             self.add_choices (channel_choice2)
             procedure.add_choice_argument ("channel2", _("Secondary C_hannel to sort"),
                                            _("Secondary Channel to sort"), channel_choice2,
@@ -384,7 +384,7 @@ class PaletteSort (Gimp.PlugIn):
             procedure.add_double_argument ("quantize", _("_Quantization"),
                                            _("Quantization"), 0.0, 1.0, 0.0,
                                            GObject.ParamFlags.READWRITE)
-            pchannel_choice = Gimp.Choice.new()
+            pchannel_choice = Clay.Choice.new()
             self.add_choices (pchannel_choice)
             procedure.add_choice_argument ("pchannel", _("Partitionin_g channel"),
                                            _("Partitioning channel"), pchannel_choice,
@@ -405,25 +405,25 @@ class PaletteSort (Gimp.PlugIn):
         if palette is None or not palette.is_valid():
             if palette is not None:
               sys.stderr.write(f'Invalid palette id: {palette.get_id()}\n')
-              sys.stderr.write('This should not happen. Please report to GIMP project.\n')
+              sys.stderr.write('This should not happen. Please report to Clay project.\n')
               sys.stderr.write('Falling back to context palette instead.\n')
-            palette = Gimp.context_get_palette()
+            palette = Clay.context_get_palette()
             config.set_property("palette", palette)
 
         if not palette.is_valid():
             palette_name = palette.get_id()
             error = f'Invalid palette id: {palette_name}'
-            return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR,
+            return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR,
                                                GLib.Error(error))
 
-        if run_mode == Gimp.RunMode.INTERACTIVE:
-            gi.require_version('GimpUi', '3.0')
-            from gi.repository import GimpUi
+        if run_mode == Clay.RunMode.INTERACTIVE:
+            gi.require_version('ClayUi', '3.0')
+            from gi.repository import ClayUi
             gi.require_version('Gtk', '3.0')
             from gi.repository import Gtk
 
-            GimpUi.init('python-fu-palette-sort')
-            dialog = GimpUi.ProcedureDialog(procedure=procedure, config=config)
+            ClayUi.init('python-fu-palette-sort')
+            dialog = ClayUi.ProcedureDialog(procedure=procedure, config=config)
 
             config.set_property("palette", None)
             dialog.fill (["palette"])
@@ -434,7 +434,7 @@ class PaletteSort (Gimp.PlugIn):
 
             if not dialog.run():
                 dialog.destroy()
-                return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
+                return procedure.new_return_values(Clay.PDBStatusType.CANCEL, GLib.Error())
 
             dialog.destroy()
 
@@ -452,11 +452,11 @@ class PaletteSort (Gimp.PlugIn):
             new_palette = palette_sort(palette, selection, slice_expr, channel1, ascending1,
                                        channel2, ascending2, quantize, pchannel, pquantize)
         except ValueError as err:
-            return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR,
+            return procedure.new_return_values(Clay.PDBStatusType.EXECUTION_ERROR,
                                                GLib.Error(str(err)))
 
-        return_val = procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
-        value = GObject.Value(Gimp.Palette, new_palette)
+        return_val = procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
+        value = GObject.Value(Clay.Palette, new_palette)
         return_val.remove(1)
         return_val.insert(1, value)
         return return_val
@@ -480,4 +480,4 @@ class PaletteSort (Gimp.PlugIn):
        choice.add("chroma-lchab", 14, _("Chroma (LCHab)"), "")
        choice.add("hue-lchab", 15, _("Hue (LCHab)"), "")
 
-Gimp.main(PaletteSort.__gtype__, sys.argv)
+Clay.main(PaletteSort.__gtype__, sys.argv)

@@ -20,26 +20,26 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpimage.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "path-export-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _PathExportDialog PathExportDialog;
 
 struct _PathExportDialog
 {
-  GimpImage              *image;
+  ClayImage              *image;
   gboolean                active_only;
-  GimpPathExportCallback  callback;
+  ClayPathExportCallback  callback;
   gpointer                user_data;
 };
 
@@ -54,18 +54,18 @@ static void   path_export_dialog_response (GtkNativeDialog  *dialog,
 /*  public function  */
 
 GtkNativeDialog *
-path_export_dialog_new (GimpImage              *image,
+path_export_dialog_new (ClayImage              *image,
                         GtkWidget              *parent,
                         GFile                  *export_folder,
                         gboolean                active_only,
-                        GimpPathExportCallback  callback,
+                        ClayPathExportCallback  callback,
                         gpointer                user_data)
 {
   PathExportDialog     *private;
   GtkFileChooserNative *dialog;
   GtkFileFilter        *filter;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (export_folder == NULL || G_IS_FILE (export_folder),
                         NULL);

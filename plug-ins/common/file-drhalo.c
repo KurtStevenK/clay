@@ -27,27 +27,27 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-drhalo-cut-load"
 #define PLUG_IN_BINARY "file-drhalo"
-#define PLUG_IN_ROLE   "gimp-file-drhalo"
+#define PLUG_IN_ROLE   "clay-file-drhalo"
 
 typedef struct _Drhalo      Drhalo;
 typedef struct _DrhaloClass DrhaloClass;
 
 struct _Drhalo
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _DrhaloClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -57,27 +57,27 @@ struct _DrhaloClass
 GType                   drhalo_get_type         (void);
 
 
-static GList          * drhalo_query_procedures   (GimpPlugIn            *plug_in);
-static GimpProcedure  * drhalo_create_procedure   (GimpPlugIn            *plug_in,
+static GList          * drhalo_query_procedures   (ClayPlugIn            *plug_in);
+static ClayProcedure  * drhalo_create_procedure   (ClayPlugIn            *plug_in,
                                                    const gchar           *name);
 
-static GimpValueArray * drhalo_load               (GimpProcedure         *procedure,
-                                                   GimpRunMode            run_mode,
+static ClayValueArray * drhalo_load               (ClayProcedure         *procedure,
+                                                   ClayRunMode            run_mode,
                                                    GFile                 *file,
-                                                   GimpMetadata          *metadata,
-                                                   GimpMetadataLoadFlags *flags,
-                                                   GimpProcedureConfig   *config,
+                                                   ClayMetadata          *metadata,
+                                                   ClayMetadataLoadFlags *flags,
+                                                   ClayProcedureConfig   *config,
                                                    gpointer               run_data);
 
-static GimpImage      * load_image                (GFile                 *file,
+static ClayImage      * load_image                (GFile                 *file,
                                                    GObject               *config,
-                                                   GimpRunMode            run_mode,
+                                                   ClayRunMode            run_mode,
                                                    GError               **error);
 
 
-G_DEFINE_TYPE (Drhalo, drhalo, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Drhalo, drhalo, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (DRHALO_TYPE)
+CLAY_MAIN (DRHALO_TYPE)
 DEFINE_STD_SET_I18N
 
 typedef struct _HaloHeader
@@ -90,7 +90,7 @@ typedef struct _HaloHeader
 static void
 drhalo_class_init (DrhaloClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = drhalo_query_procedures;
   plug_in_class->create_procedure = drhalo_create_procedure;
@@ -103,7 +103,7 @@ drhalo_init (Drhalo *drhalo)
 }
 
 static GList *
-drhalo_query_procedures (GimpPlugIn *plug_in)
+drhalo_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -112,48 +112,48 @@ drhalo_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-drhalo_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+drhalo_create_procedure (ClayPlugIn  *plug_in,
                          const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            drhalo_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Dr. Halo CUT image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load Dr. Halo CUT image format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Jacob Boerema",
                                       "Jacob Boerema",
                                       "2026");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-cut");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "cut");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-drhalo_load (GimpProcedure         *procedure,
-             GimpRunMode            run_mode,
+static ClayValueArray *
+drhalo_load (ClayProcedure         *procedure,
+             ClayRunMode            run_mode,
              GFile                 *file,
-             GimpMetadata          *metadata,
-             GimpMetadataLoadFlags *flags,
-             GimpProcedureConfig   *config,
+             ClayMetadata          *metadata,
+             ClayMetadataLoadFlags *flags,
+             ClayProcedureConfig   *config,
              gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -161,27 +161,27 @@ drhalo_load (GimpProcedure         *procedure,
   image = load_image (file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage  *image      = NULL;
-  GimpLayer  *layer;
+  ClayImage  *image      = NULL;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   guchar     *pixels     = NULL;
   guchar     *line_data  = NULL;
@@ -198,7 +198,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -218,7 +218,7 @@ load_image (GFile        *file,
 
   if (header.Width == 0 || header.Height == 0)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Invalid dimensions: %d x %d"),
                    (gint) header.Width, (gint) header.Height * 2);
       fclose (fp);
@@ -231,16 +231,16 @@ load_image (GFile        *file,
    * NB Check KISS image plug-in if there are similarities...
    */
 
-  image = gimp_image_new_with_precision (header.Width, header.Height, GIMP_GRAY,
-                                         GIMP_PRECISION_U8_NON_LINEAR);
+  image = clay_image_new_with_precision (header.Width, header.Height, CLAY_GRAY,
+                                         CLAY_PRECISION_U8_NON_LINEAR);
 
-  layer = gimp_layer_new (image, _("Background"), header.Width, header.Height,
-                          GIMP_GRAY_IMAGE,
-                          100, gimp_image_get_default_new_layer_mode (image));
+  layer = clay_layer_new (image, _("Background"), header.Width, header.Height,
+                          CLAY_GRAY_IMAGE,
+                          100, clay_image_get_default_new_layer_mode (image));
 
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   max_pixels = (gint) header.Width * header.Height;
   pixels     = g_try_malloc0 (max_pixels);
@@ -249,7 +249,7 @@ load_image (GFile        *file,
 
   if (! pixels || ! line_data)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("There was not enough memory to complete the "
                      "operation."));
       fclose (fp);
@@ -280,7 +280,7 @@ load_image (GFile        *file,
               g_free (line_data);
               return NULL;
             }
-          gimp_message (_("Error reading data. Image may be corrupt."));
+          clay_message (_("Error reading data. Image may be corrupt."));
           break;
         }
 
@@ -301,7 +301,7 @@ load_image (GFile        *file,
               g_free (line_data);
               return NULL;
             }
-          gimp_message (_("Error reading data. Image may be corrupt."));
+          clay_message (_("Error reading data. Image may be corrupt."));
           break;
         }
 
@@ -316,7 +316,7 @@ load_image (GFile        *file,
             }
           else if (x >= header.Width || i >= line_size)
             {
-              gimp_message (_("Invalid data: image may be corrupt."));
+              clay_message (_("Invalid data: image may be corrupt."));
               break;
             }
 
@@ -332,7 +332,7 @@ load_image (GFile        *file,
 
               if (pixel + value >= max_pixels)
                 {
-                  gimp_message (_("Invalid data: image may be corrupt."));
+                  clay_message (_("Invalid data: image may be corrupt."));
                   pixel += value;
                   break;
                 }
@@ -344,7 +344,7 @@ load_image (GFile        *file,
             {
               if (i + value >= line_size || pixel + value >= max_pixels)
                 {
-                  gimp_message (_("Invalid data: image may be corrupt."));
+                  clay_message (_("Invalid data: image may be corrupt."));
                   pixel += value;
                   break;
                 }

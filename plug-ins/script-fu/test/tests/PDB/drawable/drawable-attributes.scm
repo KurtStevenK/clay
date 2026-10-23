@@ -7,15 +7,15 @@
 ; setup
 
 (define testImage (testing:load-test-image-basic-v3))
-; Loaded "gimp-logo.png" i.e. Wilber having one layer
-(define testDrawable (vector-ref (gimp-image-get-layers testImage) 0))
+; Loaded "clay-logo.png" i.e. Wilber having one layer
+(define testDrawable (vector-ref (clay-image-get-layers testImage) 0))
 
 
 
 
 ; a drawable is represented by an ID
 ; As an item, it is type Drawable
-(assert `(gimp-item-id-is-drawable ,testDrawable))
+(assert `(clay-item-id-is-drawable ,testDrawable))
 
 
 
@@ -25,43 +25,43 @@
 ; only testing getters that are not of the superclass Item
 
 ; bytes per pixel
-(assert `(number? (gimp-drawable-get-bpp ,testDrawable)))
+(assert `(number? (clay-drawable-get-bpp ,testDrawable)))
 ; height and width are single numbers
-(assert `(number? (gimp-drawable-get-height ,testDrawable)))
-(assert `(number? (gimp-drawable-get-width ,testDrawable)))
+(assert `(number? (clay-drawable-get-height ,testDrawable)))
+(assert `(number? (clay-drawable-get-width ,testDrawable)))
 ; offset is list of two numbers
-(assert `(list? (gimp-drawable-get-offsets ,testDrawable)))
+(assert `(list? (clay-drawable-get-offsets ,testDrawable)))
 
-; since 3.0rc2 drawable-get-format is private to libgimp
+; since 3.0rc2 drawable-get-format is private to libclay
 ; formats are strings encoded for babl
-; (assert `(string? (gimp-drawable-get-format ,testDrawable)))
+; (assert `(string? (clay-drawable-get-format ,testDrawable)))
 
-; Since 3.0rc2, this is private to libgimp
-;(assert `(string? (gimp-drawable-get-thumbnail-format ,testDrawable)))
+; Since 3.0rc2, this is private to libclay
+;(assert `(string? (clay-drawable-get-thumbnail-format ,testDrawable)))
 
 
 ; the test drawable has transparency
-; FUTURE: inconsistent naming, should be gimp-drawable-get-alpha?
-(assert `(gimp-drawable-has-alpha ,testDrawable))
+; FUTURE: inconsistent naming, should be clay-drawable-get-alpha?
+(assert `(clay-drawable-has-alpha ,testDrawable))
 
 ; the test drawable has image base type RGB
-(assert `(gimp-drawable-is-rgb ,testDrawable))
-(assert `(not (gimp-drawable-is-gray ,testDrawable)))
-(assert `(not (gimp-drawable-is-indexed ,testDrawable)))
+(assert `(clay-drawable-is-rgb ,testDrawable))
+(assert `(not (clay-drawable-is-gray ,testDrawable)))
+(assert `(not (clay-drawable-is-indexed ,testDrawable)))
 
 ; the test drawable has type RGBA
-(assert `(= (gimp-drawable-type ,testDrawable)
+(assert `(= (clay-drawable-type ,testDrawable)
             RGBA-IMAGE))
 
 
 ; These are deprecated.
-; Scripts should use superclass gimp-item-get.
+; Scripts should use superclass clay-item-get.
 ; Which are tested elsewhere
-;(assert `(gimp-drawable-get-image ,testDrawable))
-;(assert `(gimp-drawable-get-name ,testDrawable))
-;(assert `(gimp-drawable-get-tattoo ,testDrawable))
+;(assert `(clay-drawable-get-image ,testDrawable))
+;(assert `(clay-drawable-get-name ,testDrawable))
+;(assert `(clay-drawable-get-tattoo ,testDrawable))
 ; the test drawable is visible
-;(assert-PDB-true `(gimp-drawable-get-visible ,testDrawable))
+;(assert-PDB-true `(clay-drawable-get-visible ,testDrawable))
 
 
 

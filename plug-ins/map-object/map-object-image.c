@@ -13,8 +13,8 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "map-object-main.h"
 #include "map-object-preview.h"
@@ -23,17 +23,17 @@
 #include "map-object-image.h"
 
 
-GimpImage    *image;
+ClayImage    *image;
 
-GimpDrawable *input_drawable;
-GimpDrawable *output_drawable;
+ClayDrawable *input_drawable;
+ClayDrawable *output_drawable;
 GeglBuffer   *source_buffer;
 GeglBuffer   *dest_buffer;
 
-GimpDrawable *box_drawables[6];
+ClayDrawable *box_drawables[6];
 GeglBuffer   *box_buffers[6];
 
-GimpDrawable *cylinder_drawables[2];
+ClayDrawable *cylinder_drawables[2];
 GeglBuffer   *cylinder_buffers[2];
 
 guchar          *preview_rgb_data = NULL;
@@ -154,11 +154,11 @@ checkbounds_cylinder_image (gint image,
     return TRUE;
 }
 
-GimpVector3
+ClayVector3
 int_to_pos (gint x,
             gint y)
 {
-  GimpVector3 pos;
+  ClayVector3 pos;
 
   pos.x = (gdouble) x / (gdouble) width;
   pos.y = (gdouble) y / (gdouble) height;
@@ -223,7 +223,7 @@ get_image_color (gdouble  u,
       for (gint i = 0; i < 4; i++)
         pixels[i + 12] = p[i];
 
-      gimp_bilinear_rgb (u * width, v * height, pixels, TRUE, color);
+      clay_bilinear_rgb (u * width, v * height, pixels, TRUE, color);
 
       return;
     }
@@ -263,7 +263,7 @@ get_image_color (gdouble  u,
   for (gint i = 0; i < 4; i++)
     pixels[i + 12] = p[i];
 
-  gimp_bilinear_rgb (u * width, v * height, pixels, TRUE, color);
+  clay_bilinear_rgb (u * width, v * height, pixels, TRUE, color);
 }
 
 void
@@ -314,7 +314,7 @@ get_box_image_color (gint     image,
   for (gint i = 0; i < 4; i++)
     pixels[i + 12] = p[i];
 
-  gimp_bilinear_rgb (u * w, v * w, pixels, TRUE, color);
+  clay_bilinear_rgb (u * w, v * w, pixels, TRUE, color);
 }
 
 void
@@ -365,7 +365,7 @@ get_cylinder_image_color (gint     image,
   for (gint i = 0; i < 4; i++)
     pixels[i + 12] = p[i];
 
-  gimp_bilinear_rgb (u * w, v * h, pixels, TRUE, color);
+  clay_bilinear_rgb (u * w, v * h, pixels, TRUE, color);
 }
 
 /****************************************/
@@ -373,9 +373,9 @@ get_cylinder_image_color (gint     image,
 /****************************************/
 
 gint
-image_setup (GimpDrawable        *drawable,
+image_setup (ClayDrawable        *drawable,
              gint                 interactive,
-             GimpProcedureConfig *config)
+             ClayProcedureConfig *config)
 {
   gboolean transparent_background;
 
@@ -386,14 +386,14 @@ image_setup (GimpDrawable        *drawable,
                 "transparent_background", &transparent_background,
                 NULL);
 
-  if (! gimp_drawable_mask_intersect (drawable, &border_x, &border_y,
+  if (! clay_drawable_mask_intersect (drawable, &border_x, &border_y,
                                       &border_w, &border_h))
     return FALSE;
 
-  width  = gimp_drawable_get_width  (input_drawable);
-  height = gimp_drawable_get_height (input_drawable);
+  width  = clay_drawable_get_width  (input_drawable);
+  height = clay_drawable_get_height (input_drawable);
 
-  source_buffer = gimp_drawable_get_buffer (input_drawable);
+  source_buffer = clay_drawable_get_buffer (input_drawable);
 
   maxcounter = (glong) width * (glong) height;
 
@@ -406,8 +406,8 @@ image_setup (GimpDrawable        *drawable,
     {
       GeglColor *gegl_color;
 
-      gegl_color = gimp_context_get_background ();
-      gimp_color_set_alpha (gegl_color, 1.0);
+      gegl_color = clay_context_get_background ();
+      clay_color_set_alpha (gegl_color, 1.0);
       gegl_color_get_rgba_with_space (gegl_color, &background[0], &background[1],
                                       &background[2], &background[3], NULL);
 

@@ -20,22 +20,22 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpitem.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayitem.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpsizebox.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claysizebox.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "scale-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -44,12 +44,12 @@ typedef struct _ScaleDialog ScaleDialog;
 
 struct _ScaleDialog
 {
-  GimpViewable          *viewable;
-  GimpUnit              *unit;
-  GimpInterpolationType  interpolation;
+  ClayViewable          *viewable;
+  ClayUnit              *unit;
+  ClayInterpolationType  interpolation;
   GtkWidget             *box;
   GtkWidget             *combo;
-  GimpScaleCallback      callback;
+  ClayScaleCallback      callback;
   gpointer               user_data;
 };
 
@@ -66,16 +66,16 @@ static void   scale_dialog_reset    (ScaleDialog *private);
 /*  public function  */
 
 GtkWidget *
-scale_dialog_new (GimpViewable          *viewable,
-                  GimpContext           *context,
+scale_dialog_new (ClayViewable          *viewable,
+                  ClayContext           *context,
                   const gchar           *title,
                   const gchar           *role,
                   GtkWidget             *parent,
-                  GimpHelpFunc           help_func,
+                  ClayHelpFunc           help_func,
                   const gchar           *help_id,
-                  GimpUnit              *unit,
-                  GimpInterpolationType  interpolation,
-                  GimpScaleCallback      callback,
+                  ClayUnit              *unit,
+                  ClayInterpolationType  interpolation,
+                  ClayScaleCallback      callback,
                   gpointer               user_data)
 {
   GtkWidget      *dialog;
@@ -83,34 +83,34 @@ scale_dialog_new (GimpViewable          *viewable,
   GtkWidget      *hbox;
   GtkWidget      *frame;
   GtkWidget      *label;
-  GimpSizeEntry  *entry;
+  ClaySizeEntry  *entry;
   ScaleDialog    *private;
-  GimpImage      *image = NULL;
+  ClayImage      *image = NULL;
   const gchar    *text  = NULL;
   gint            width, height;
   gdouble         xres, yres;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE (viewable), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE (viewable), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (callback != NULL, NULL);
 
-  if (GIMP_IS_IMAGE (viewable))
+  if (CLAY_IS_IMAGE (viewable))
     {
-      image = GIMP_IMAGE (viewable);
+      image = CLAY_IMAGE (viewable);
 
-      width  = gimp_image_get_width (image);
-      height = gimp_image_get_height (image);
+      width  = clay_image_get_width (image);
+      height = clay_image_get_height (image);
 
       text = _("Image Size");
     }
-  else if (GIMP_IS_ITEM (viewable))
+  else if (CLAY_IS_ITEM (viewable))
     {
-      GimpItem *item = GIMP_ITEM (viewable);
+      ClayItem *item = CLAY_ITEM (viewable);
 
-      image = gimp_item_get_image (item);
+      image = clay_item_get_image (item);
 
-      width  = gimp_item_get_width  (item);
-      height = gimp_item_get_height (item);
+      width  = clay_item_get_width  (item);
+      height = clay_item_get_height (item);
 
       text = _("Layer Size");
     }
@@ -127,10 +127,10 @@ scale_dialog_new (GimpViewable          *viewable,
   private->callback      = callback;
   private->user_data     = user_data;
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
-                                     title, role, GIMP_ICON_OBJECT_SCALE, title,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
+                                     title, role, CLAY_ICON_OBJECT_SCALE, title,
                                      parent,
                                      help_func, help_id,
 
@@ -140,7 +140,7 @@ scale_dialog_new (GimpViewable          *viewable,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             RESPONSE_RESET,
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
@@ -155,15 +155,15 @@ scale_dialog_new (GimpViewable          *viewable,
                     G_CALLBACK (scale_dialog_response),
                     private);
 
-  private->box = g_object_new (GIMP_TYPE_SIZE_BOX,
+  private->box = g_object_new (CLAY_TYPE_SIZE_BOX,
                                "width",           width,
                                "height",          height,
                                "unit",            unit,
                                "xresolution",     xres,
                                "yresolution",     yres,
-                               "resolution-unit", gimp_image_get_unit (image),
+                               "resolution-unit", clay_image_get_unit (image),
                                "keep-aspect",     TRUE,
-                               "edit-resolution", GIMP_IS_IMAGE (viewable),
+                               "edit-resolution", CLAY_IS_IMAGE (viewable),
                                NULL);
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
@@ -172,14 +172,14 @@ scale_dialog_new (GimpViewable          *viewable,
                       vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  frame = gimp_frame_new (text);
+  frame = clay_frame_new (text);
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
   gtk_container_add (GTK_CONTAINER (frame), private->box);
   gtk_widget_set_visible (private->box, TRUE);
 
-  frame = gimp_frame_new (_("Quality"));
+  frame = clay_frame_new (_("Quality"));
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -195,20 +195,20 @@ scale_dialog_new (GimpViewable          *viewable,
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
 
-  gtk_size_group_add_widget (GIMP_SIZE_BOX (private->box)->size_group, label);
+  gtk_size_group_add_widget (CLAY_SIZE_BOX (private->box)->size_group, label);
 
-  private->combo = gimp_enum_combo_box_new (GIMP_TYPE_INTERPOLATION_TYPE);
+  private->combo = clay_enum_combo_box_new (CLAY_TYPE_INTERPOLATION_TYPE);
   gtk_label_set_mnemonic_widget (GTK_LABEL (label), private->combo);
   gtk_box_pack_start (GTK_BOX (hbox), private->combo, TRUE, TRUE, 0);
   gtk_widget_set_visible (private->combo, TRUE);
 
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->combo),
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->combo),
                                  private->interpolation);
 
   /* Set focus to size entry for immediate editing */
-  entry = gimp_size_box_get_size_entry (GIMP_SIZE_BOX (private->box));
-  gimp_size_entry_set_activates_default (entry, TRUE);
-  gimp_size_entry_grab_focus (entry);
+  entry = clay_size_box_get_size_entry (CLAY_SIZE_BOX (private->box));
+  clay_size_entry_set_activates_default (entry, TRUE);
+  clay_size_entry_grab_focus (entry);
 
   return dialog;
 }
@@ -227,9 +227,9 @@ scale_dialog_response (GtkWidget   *dialog,
                        gint         response_id,
                        ScaleDialog *private)
 {
-  GimpUnit *unit          = private->unit;
+  ClayUnit *unit          = private->unit;
   gint      interpolation = private->interpolation;
-  GimpUnit *resolution_unit;
+  ClayUnit *resolution_unit;
   gint      width, height;
   gdouble   xres, yres;
 
@@ -249,7 +249,7 @@ scale_dialog_response (GtkWidget   *dialog,
                     "resolution-unit", &resolution_unit,
                     NULL);
 
-      gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (private->combo),
+      clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (private->combo),
                                      &interpolation);
 
       private->callback (dialog,
@@ -268,32 +268,32 @@ scale_dialog_response (GtkWidget   *dialog,
 static void
 scale_dialog_reset (ScaleDialog *private)
 {
-  GimpImage *image;
+  ClayImage *image;
   gint       width, height;
   gdouble    xres, yres;
 
-  if (GIMP_IS_IMAGE (private->viewable))
+  if (CLAY_IS_IMAGE (private->viewable))
     {
-      image = GIMP_IMAGE (private->viewable);
+      image = CLAY_IMAGE (private->viewable);
 
-      width  = gimp_image_get_width (image);
-      height = gimp_image_get_height (image);
+      width  = clay_image_get_width (image);
+      height = clay_image_get_height (image);
     }
-  else if (GIMP_IS_ITEM (private->viewable))
+  else if (CLAY_IS_ITEM (private->viewable))
     {
-      GimpItem *item = GIMP_ITEM (private->viewable);
+      ClayItem *item = CLAY_ITEM (private->viewable);
 
-      image = gimp_item_get_image (item);
+      image = clay_item_get_image (item);
 
-      width  = gimp_item_get_width  (item);
-      height = gimp_item_get_height (item);
+      width  = clay_item_get_width  (item);
+      height = clay_item_get_height (item);
     }
   else
     {
       g_return_if_reached ();
     }
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
   g_object_set (private->box,
                 "keep-aspect",     FALSE,
@@ -309,9 +309,9 @@ scale_dialog_reset (ScaleDialog *private)
                 "keep-aspect",     TRUE,
                 "xresolution",     xres,
                 "yresolution",     yres,
-                "resolution-unit", gimp_image_get_unit (image),
+                "resolution-unit", clay_image_get_unit (image),
                 NULL);
 
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->combo),
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->combo),
                                  private->interpolation);
 }

@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   quick_mask_actions_setup  (GimpActionGroup *group);
-void   quick_mask_actions_update (GimpActionGroup *group,
+void   quick_mask_actions_setup  (ClayActionGroup *group);
+void   quick_mask_actions_update (ClayActionGroup *group,
                                   gpointer         data);

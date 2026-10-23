@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -29,13 +29,13 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "gfig.h"
 #include "gfig-dobject.h"
 #include "gfig-arc.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static gdouble     dist                (gdouble   x1,
                                         gdouble   y1,
@@ -93,7 +93,7 @@ static void        d_update_arc_line   (GdkPoint   *pnt);
 static void        d_update_arc        (GdkPoint   *pnt);
 static void        d_arc_line_start    (GdkPoint   *pnt,
                                         gboolean    shift_down);
-static void        d_arc_line_end      (GimpGfig   *gfig,
+static void        d_arc_line_end      (ClayGfig   *gfig,
                                         GdkPoint   *pnt,
                                         gboolean    shift_down);
 
@@ -650,7 +650,7 @@ d_arc_start (GdkPoint *pnt,
 }
 
 static void
-d_arc_line_end (GimpGfig *gfig,
+d_arc_line_end (ClayGfig *gfig,
                 GdkPoint *pnt,
                 gboolean  shift_down)
 {
@@ -705,7 +705,7 @@ d_arc_line_end (GimpGfig *gfig,
 }
 
 void
-d_arc_end (GimpGfig *gfig,
+d_arc_end (ClayGfig *gfig,
            GdkPoint *pnt,
            gboolean  shift_down)
 {

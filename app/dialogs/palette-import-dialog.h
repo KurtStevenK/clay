@@ -18,4 +18,4 @@
 #pragma once
 
 
-GtkWidget * palette_import_dialog_new (GimpContext *context);
+GtkWidget * palette_import_dialog_new (ClayContext *context);

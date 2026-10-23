@@ -25,10 +25,10 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_BINARY "file-gegl"
@@ -60,12 +60,12 @@ typedef struct _GoatClass GoatClass;
 
 struct _Goat
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GoatClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -74,39 +74,39 @@ struct _GoatClass
 
 GType                   goat_get_type         (void);
 
-static GList          * goat_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * goat_create_procedure (GimpPlugIn            *plug_in,
+static GList          * goat_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * goat_create_procedure (ClayPlugIn            *plug_in,
                                                const gchar           *name);
 
-static GimpValueArray * goat_load             (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
+static ClayValueArray * goat_load             (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
                                                GFile                 *file,
-                                               GimpMetadata          *metadata,
-                                               GimpMetadataLoadFlags *flags,
-                                               GimpProcedureConfig   *config,
+                                               ClayMetadata          *metadata,
+                                               ClayMetadataLoadFlags *flags,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
-static GimpValueArray * goat_export           (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
-                                               GimpImage             *image,
+static ClayValueArray * goat_export           (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
+                                               ClayImage             *image,
                                                GFile                 *file,
-                                               GimpExportOptions     *options,
-                                               GimpMetadata          *metadata,
-                                               GimpProcedureConfig   *config,
+                                               ClayExportOptions     *options,
+                                               ClayMetadata          *metadata,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
 
-static GimpImage      * load_image            (GFile                 *file,
+static ClayImage      * load_image            (GFile                 *file,
                                                const gchar           *gegl_op,
                                                GError               **error);
 static gboolean         export_image          (GFile                 *file,
                                                const gchar           *gegl_op,
-                                               GimpImage             *image,
-                                               GimpDrawable          *drawable,
+                                               ClayImage             *image,
+                                               ClayDrawable          *drawable,
                                                GError               **error);
 
 
-G_DEFINE_TYPE (Goat, goat, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Goat, goat, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GOAT_TYPE)
+CLAY_MAIN (GOAT_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -134,7 +134,7 @@ static const FileFormat file_formats[] =
     "exr",
     "0,lelong,20000630",
 
-    /* no EXR loading (implemented in native GIMP plug-in) */
+    /* no EXR loading (implemented in native Clay plug-in) */
     NULL, NULL, NULL, NULL,
 
     "file-exr-export",
@@ -148,7 +148,7 @@ static const FileFormat file_formats[] =
 static void
 goat_class_init (GoatClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = goat_query_procedures;
   plug_in_class->create_procedure = goat_create_procedure;
@@ -161,7 +161,7 @@ goat_init (Goat *goat)
 }
 
 static GList *
-goat_query_procedures (GimpPlugIn *plug_in)
+goat_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
   gint   i;
@@ -180,11 +180,11 @@ goat_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-goat_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+goat_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
   gint           i;
 
   for (i = 0; i < G_N_ELEMENTS (file_formats); i++)
@@ -193,51 +193,51 @@ goat_create_procedure (GimpPlugIn  *plug_in,
 
       if (! g_strcmp0 (name, format->load_proc))
         {
-          procedure = gimp_load_procedure_new (plug_in, name,
-                                               GIMP_PDB_PROC_TYPE_PLUGIN,
+          procedure = clay_load_procedure_new (plug_in, name,
+                                               CLAY_PDB_PROC_TYPE_PLUGIN,
                                                goat_load,
                                                (gpointer) format, NULL);
 
-          gimp_procedure_set_menu_label (procedure, _(format->file_type));
+          clay_procedure_set_menu_label (procedure, _(format->file_type));
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             _(format->load_blurb),
                                             _(format->load_help),
                                             name);
 
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               format->mime_type);
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               format->extensions);
-          gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                           format->magic);
         }
       else if (! g_strcmp0 (name, format->export_proc))
         {
-          procedure = gimp_export_procedure_new (plug_in, name,
-                                                 GIMP_PDB_PROC_TYPE_PLUGIN,
+          procedure = clay_export_procedure_new (plug_in, name,
+                                                 CLAY_PDB_PROC_TYPE_PLUGIN,
                                                  FALSE, goat_export,
                                                  (gpointer) format, NULL);
 
-          gimp_procedure_set_image_types (procedure, "*");
+          clay_procedure_set_image_types (procedure, "*");
 
-          gimp_procedure_set_menu_label (procedure, _(format->file_type));
+          clay_procedure_set_menu_label (procedure, _(format->file_type));
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             _(format->export_blurb),
                                             _(format->export_help),
                                             name);
 
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               format->mime_type);
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               format->extensions);
 
-          gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                                  GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                                  GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                                  GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                                  GIMP_EXPORT_CAN_HANDLE_ALPHA,
+          clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                                  CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                                  CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                                  CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                                  CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                                   NULL, NULL, NULL);
         }
     }
@@ -245,18 +245,18 @@ goat_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-goat_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+goat_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
   const FileFormat *format = run_data;
-  GimpValueArray   *return_vals;
-  GimpImage        *image;
+  ClayValueArray   *return_vals;
+  ClayImage        *image;
   GError           *error  = NULL;
 
   gegl_init (NULL, NULL);
@@ -264,63 +264,63 @@ goat_load (GimpProcedure         *procedure,
   image = load_image (file, format->load_op, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-goat_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+goat_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
   const FileFormat  *format = run_data;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
   if (! export_image (file, format->export_op, image, drawables->data,
                     &error))
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             const gchar  *gegl_op,
             GError      **error)
 {
-  GimpImage         *image;
-  GimpLayer         *layer;
-  GimpImageType      image_type;
-  GimpImageBaseType  base_type;
-  GimpPrecision      precision;
+  ClayImage         *image;
+  ClayLayer         *layer;
+  ClayImageType      image_type;
+  ClayImageBaseType  base_type;
+  ClayPrecision      precision;
   gint               width;
   gint               height;
   GeglNode          *graph;
@@ -330,8 +330,8 @@ load_image (GFile        *file,
   GeglBuffer        *dest_buf = NULL;
   const Babl        *format;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   graph = gegl_node_new ();
 
@@ -354,11 +354,11 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not open '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
-  gimp_progress_update (0.33);
+  clay_progress_update (0.33);
 
   width  = gegl_buffer_get_width (src_buf);
   height = gegl_buffer_get_height (src_buf);
@@ -366,14 +366,14 @@ load_image (GFile        *file,
 
   if (babl_format_is_palette (format))
     {
-      base_type = GIMP_INDEXED;
+      base_type = CLAY_INDEXED;
 
       if (babl_format_has_alpha (format))
-        image_type = GIMP_INDEXEDA_IMAGE;
+        image_type = CLAY_INDEXEDA_IMAGE;
       else
-        image_type = GIMP_INDEXED_IMAGE;
+        image_type = CLAY_INDEXED_IMAGE;
 
-      precision = GIMP_PRECISION_U8_NON_LINEAR;
+      precision = CLAY_PRECISION_U8_NON_LINEAR;
     }
   else
     {
@@ -386,12 +386,12 @@ load_image (GFile        *file,
           model == babl_model ("YA") ||
           model == babl_model ("Y'A"))
         {
-          base_type = GIMP_GRAY;
+          base_type = CLAY_GRAY;
 
           if (babl_format_has_alpha (format))
-            image_type = GIMP_GRAYA_IMAGE;
+            image_type = CLAY_GRAYA_IMAGE;
           else
-            image_type = GIMP_GRAY_IMAGE;
+            image_type = CLAY_GRAY_IMAGE;
 
           if (model == babl_model ("Y'") ||
               model == babl_model ("Y'A"))
@@ -399,12 +399,12 @@ load_image (GFile        *file,
         }
       else
         {
-          base_type = GIMP_RGB;
+          base_type = CLAY_RGB;
 
           if (babl_format_has_alpha (format))
-            image_type = GIMP_RGBA_IMAGE;
+            image_type = CLAY_RGBA_IMAGE;
           else
-            image_type = GIMP_RGB_IMAGE;
+            image_type = CLAY_RGB_IMAGE;
 
           if (model == babl_model ("R'G'B'") ||
               model == babl_model ("R'G'B'A"))
@@ -414,52 +414,52 @@ load_image (GFile        *file,
       if (linear)
         {
           if (type == babl_type ("u8"))
-            precision = GIMP_PRECISION_U8_LINEAR;
+            precision = CLAY_PRECISION_U8_LINEAR;
           else if (type == babl_type ("u16"))
-            precision = GIMP_PRECISION_U16_LINEAR;
+            precision = CLAY_PRECISION_U16_LINEAR;
           else if (type == babl_type ("u32"))
-            precision = GIMP_PRECISION_U32_LINEAR;
+            precision = CLAY_PRECISION_U32_LINEAR;
           else if (type == babl_type ("half"))
-            precision = GIMP_PRECISION_HALF_LINEAR;
+            precision = CLAY_PRECISION_HALF_LINEAR;
           else
-            precision = GIMP_PRECISION_FLOAT_LINEAR;
+            precision = CLAY_PRECISION_FLOAT_LINEAR;
         }
       else
         {
           if (type == babl_type ("u8"))
-            precision = GIMP_PRECISION_U8_NON_LINEAR;
+            precision = CLAY_PRECISION_U8_NON_LINEAR;
           else if (type == babl_type ("u16"))
-            precision = GIMP_PRECISION_U16_NON_LINEAR;
+            precision = CLAY_PRECISION_U16_NON_LINEAR;
           else if (type == babl_type ("u32"))
-            precision = GIMP_PRECISION_U32_NON_LINEAR;
+            precision = CLAY_PRECISION_U32_NON_LINEAR;
           else if (type == babl_type ("half"))
-            precision = GIMP_PRECISION_HALF_NON_LINEAR;
+            precision = CLAY_PRECISION_HALF_NON_LINEAR;
           else
-            precision = GIMP_PRECISION_FLOAT_NON_LINEAR;
+            precision = CLAY_PRECISION_FLOAT_NON_LINEAR;
         }
     }
 
 
-  image = gimp_image_new_with_precision (width, height,
+  image = clay_image_new_with_precision (width, height,
                                          base_type, precision);
-  layer = gimp_layer_new (image,
+  layer = clay_layer_new (image,
                           _("Background"),
                           width, height,
                           image_type,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  dest_buf = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  dest_buf = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
-  gimp_progress_update (0.66);
+  clay_progress_update (0.66);
 
   gegl_buffer_copy (src_buf, NULL, GEGL_ABYSS_NONE, dest_buf, NULL);
 
   g_object_unref (src_buf);
   g_object_unref (dest_buf);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
@@ -467,8 +467,8 @@ load_image (GFile        *file,
 static gboolean
 export_image (GFile         *file,
               const gchar   *gegl_op,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GError       **error)
 {
   GeglNode   *graph;
@@ -476,7 +476,7 @@ export_image (GFile         *file,
   GeglNode   *sink;
   GeglBuffer *src_buf;
 
-  src_buf = gimp_drawable_get_buffer (drawable);
+  src_buf = clay_drawable_get_buffer (drawable);
 
   graph = gegl_node_new ();
 

@@ -20,20 +20,20 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/claytoolinfo.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimptoolpath.h"
+#include "display/claydisplay.h"
+#include "display/claytoolpath.h"
 
 #include "dialogs/dialogs.h"
 
@@ -43,52 +43,52 @@
 /*  public functions  */
 
 void
-tool_path_delete_anchor_cmd_callback (GimpAction *action,
+tool_path_delete_anchor_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpToolPath *tool_path = GIMP_TOOL_PATH (data);
+  ClayToolPath *tool_path = CLAY_TOOL_PATH (data);
 
-  gimp_tool_path_delete_anchor (tool_path);
+  clay_tool_path_delete_anchor (tool_path);
 }
 
 void
-tool_path_shift_start_cmd_callback (GimpAction *action,
+tool_path_shift_start_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpToolPath *tool_path = GIMP_TOOL_PATH (data);
+  ClayToolPath *tool_path = CLAY_TOOL_PATH (data);
 
-  gimp_tool_path_shift_start (tool_path);
+  clay_tool_path_shift_start (tool_path);
 }
 
 void
-tool_path_insert_anchor_cmd_callback (GimpAction *action,
+tool_path_insert_anchor_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpToolPath *tool_path = GIMP_TOOL_PATH (data);
+  ClayToolPath *tool_path = CLAY_TOOL_PATH (data);
 
-  gimp_tool_path_insert_anchor (tool_path);
+  clay_tool_path_insert_anchor (tool_path);
 }
 
 void
-tool_path_delete_segment_cmd_callback (GimpAction *action,
+tool_path_delete_segment_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data)
 {
-  GimpToolPath *tool_path = GIMP_TOOL_PATH (data);
+  ClayToolPath *tool_path = CLAY_TOOL_PATH (data);
 
-  gimp_tool_path_delete_segment (tool_path);
+  clay_tool_path_delete_segment (tool_path);
 }
 
 void
-tool_path_reverse_stroke_cmd_callback (GimpAction *action,
+tool_path_reverse_stroke_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data)
 {
-  GimpToolPath *tool_path = GIMP_TOOL_PATH (data);
+  ClayToolPath *tool_path = CLAY_TOOL_PATH (data);
 
-  gimp_tool_path_reverse_stroke (tool_path);
+  clay_tool_path_reverse_stroke (tool_path);
 }
 

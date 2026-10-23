@@ -1,5 +1,5 @@
 
-; Test ScriptFu's binding to all Gimp C arg types of the PDB
+; Test ScriptFu's binding to all Clay C arg types of the PDB
 
 
 ; The PDB procedures called are arbitrary, chosen for the type of their args.
@@ -14,7 +14,7 @@
 ; Testing is with knowledge of the code.
 ; Only testing representatives for cases in switch statement of scheme-wrapper.c.
 ; For example, the code has a case for GObject that covers most subclasses
-; of GimpItem, so we only test once, say for GimpLayer.
+; of ClayItem, so we only test once, say for ClayLayer.
 
 ; Also, we don't test all primitive types.
 ; We know they are tested drive-by in other tests,
@@ -23,7 +23,7 @@
 
 ; Note that no PDB procedure takes or returns:
 ;    gchar (the type for a single character.)
-;    GParam or GimpParam
+;    GParam or ClayParam
 ; There is no case in scheme-wrapper.c.
 
 
@@ -32,13 +32,13 @@
 ; float
 
 ; Colors (GeglColor) are tested e.g. with Palette
-; GimpColorArray is tested e.g.
+; ClayColorArray is tested e.g.
 ; from palette-get-colormap
 ; to is not tested: not an arg to any PDB proc
 
 ; GStrv string array
 ; from brushes-get-list
-; to file-gih-export or extension-gimp-help
+; to file-gih-export or extension-clay-help
 ; TODO test GStrv to file-gih-export
 
 ; GBytes
@@ -46,43 +46,43 @@
 ; to image-set-colormap
 
 ; FloatArray
-; from gimp-context-get-line-dash-pattern
-; to gimp-context-set-line-dash-pattern
+; from clay-context-get-line-dash-pattern
+; to clay-context-set-line-dash-pattern
 
 
-;                 GimpResource
+;                 ClayResource
 ; see resource.scm and context.scm
 
 
 ;                 GFile
 
-;                 GimpParasite
+;                 ClayParasite
 
-; ScriptFu takes and returns a list of attributes of a GimpParasite
-; A GimpParasite is a named string having a flags attribute ?
+; ScriptFu takes and returns a list of attributes of a ClayParasite
+; A ClayParasite is a named string having a flags attribute ?
 ; Also tested elsewhere, many objects can have parasites.
-; This tests the global parasites, on the gimp instance.
+; This tests the global parasites, on the clay instance.
 
 ; to
-(assert '(gimp-attach-parasite (list "foo" 1 "zed")))
+(assert '(clay-attach-parasite (list "foo" 1 "zed")))
 ; from
-(assert `(equal? (car (gimp-get-parasite "foo"))
+(assert `(equal? (car (clay-get-parasite "foo"))
                  '("foo" 1 "zed")))
 
 
-;                 GimpUnit
+;                 ClayUnit
 
-; A GimpUnit is both an enum and an object???
+; A ClayUnit is both an enum and an object???
 ; ScriptFu converts to int.  More or less an ID.
 
-; obsolete: GimpUnit is now an object
+; obsolete: ClayUnit is now an object
 ; to
 ; unit index 0 is px
-;(assert '(string=? (car (gimp-unit-get-abbreviation 0))
+;(assert '(string=? (car (clay-unit-get-abbreviation 0))
 ;                   "px"))
 
 ; from
 ; default line width unit is px
-(assert '(= (car (gimp-context-get-line-width-unit))
+(assert '(= (car (clay-context-get-line-width-unit))
             0))
 

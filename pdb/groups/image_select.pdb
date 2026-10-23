@@ -33,10 +33,10 @@ must also have minimum alpha.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_antialias(), gimp_context_set_feather(),
-gimp_context_set_feather_radius(), gimp_context_set_sample_merged(),
-gimp_context_set_sample_criterion(), gimp_context_set_sample_threshold(),
-gimp_context_set_sample_transparent().
+clay_context_set_antialias(), clay_context_set_feather(),
+clay_context_set_feather_radius(), clay_context_set_sample_merged(),
+clay_context_set_sample_criterion(), clay_context_set_sample_threshold(),
+clay_context_set_sample_transparent().
 
 
 In the case of a merged sampling, the supplied drawable is ignored.
@@ -47,7 +47,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The affected image' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The affected drawable' },
@@ -58,13 +58,13 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+  ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
   if (pdb_context->sample_merged ||
-      gimp_pdb_item_is_attached (GIMP_ITEM (drawable), image, 0, error))
+      clay_pdb_item_is_attached (CLAY_ITEM (drawable), image, 0, error))
     {
       GList *drawables = g_list_prepend (NULL, drawable);
-      gimp_channel_select_by_color (gimp_image_get_mask (image), drawables,
+      clay_channel_select_by_color (clay_image_get_mask (image), drawables,
                                     pdb_context->sample_merged,
                                     color,
                                     pdb_context->sample_threshold,
@@ -105,10 +105,10 @@ to the threshold bar at pixels along the seed fill boundary.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_antialias(), gimp_context_set_feather(),
-gimp_context_set_feather_radius(), gimp_context_set_sample_merged(),
-gimp_context_set_sample_criterion(), gimp_context_set_sample_threshold(),
-gimp_context_set_sample_transparent(), gimp_context_set_diagonal_neighbors().
+clay_context_set_antialias(), clay_context_set_feather(),
+clay_context_set_feather_radius(), clay_context_set_sample_merged(),
+clay_context_set_sample_criterion(), clay_context_set_sample_threshold(),
+clay_context_set_sample_transparent(), clay_context_set_diagonal_neighbors().
 
 
 In the case of a merged sampling, the supplied drawable is ignored.
@@ -121,7 +121,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The affected image' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The affected drawable' },
@@ -136,13 +136,13 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+  ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
   if (pdb_context->sample_merged ||
-      gimp_pdb_item_is_attached (GIMP_ITEM (drawable), image, 0, error))
+      clay_pdb_item_is_attached (CLAY_ITEM (drawable), image, 0, error))
     {
 
-      gimp_channel_select_fuzzy (gimp_image_get_mask (image),
+      clay_channel_select_fuzzy (clay_image_get_mask (image),
                                  drawable,
                                  pdb_context->sample_merged,
                                  x, y,
@@ -174,7 +174,7 @@ or replace the contents of the previous selection mask.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_feather(), gimp_context_set_feather_radius().
+clay_context_set_feather(), clay_context_set_feather_radius().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -182,7 +182,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
 	{ name => 'x', type => 'double',
 	  desc => 'x coordinate of upper-left corner of rectangle' },
@@ -197,9 +197,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+  ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-  gimp_channel_select_rectangle (gimp_image_get_mask (image),
+  clay_channel_select_rectangle (clay_image_get_mask (image),
                                  (gint) x, (gint) y,
                                  (gint) width, (gint) height,
                                  operation,
@@ -224,8 +224,8 @@ mask.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_antialias(), gimp_context_set_feather(),
-gimp_context_set_feather_radius().
+clay_context_set_antialias(), clay_context_set_feather(),
+clay_context_set_feather_radius().
 HELP
 
     &martin_pdb_misc('2010', '2.8');
@@ -233,7 +233,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
 	{ name => 'x', type => 'double',
 	  desc => 'x coordinate of upper-left corner of rectangle' },
@@ -243,18 +243,18 @@ HELP
 	  desc => 'The width of the rectangle' },
 	{ name => 'height', type => '0 < double',
 	  desc => 'The height of the rectangle' },
-        { name => 'corner_radius_x', type => '0 < double < GIMP_MAX_IMAGE_SIZE',
+        { name => 'corner_radius_x', type => '0 < double < CLAY_MAX_IMAGE_SIZE',
           desc => 'The corner radius in X direction' },
-        { name => 'corner_radius_y', type => '0 < double < GIMP_MAX_IMAGE_SIZE',
+        { name => 'corner_radius_y', type => '0 < double < CLAY_MAX_IMAGE_SIZE',
           desc => 'The corner radius in Y direction' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+  ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-  gimp_channel_select_round_rect (gimp_image_get_mask (image),
+  clay_channel_select_round_rect (clay_image_get_mask (image),
                                   (gint) x, (gint) y,
                                   (gint) width, (gint) height,
                                   corner_radius_x,
@@ -281,8 +281,8 @@ or replace the contents of the previous selection mask.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_antialias(), gimp_context_set_feather(),
-gimp_context_set_feather_radius().
+clay_context_set_antialias(), clay_context_set_feather(),
+clay_context_set_feather_radius().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -290,7 +290,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
 	{ name => 'x', type => 'double',
 	  desc => 'x coordinate of upper-left corner of ellipse bounding box' },
@@ -305,9 +305,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+  ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-  gimp_channel_select_ellipse (gimp_image_get_mask (image),
+  clay_channel_select_ellipse (clay_image_get_mask (image),
                                (gint) x, (gint) y,
                                (gint) width, (gint) height,
                                operation,
@@ -337,8 +337,8 @@ point, a connecting segment is automatically added.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_antialias(), gimp_context_set_feather(),
-gimp_context_set_feather_radius().
+clay_context_set_antialias(), clay_context_set_feather(),
+clay_context_set_feather_radius().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -346,7 +346,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
         { name => 'segs', type => 'doublearray',
           desc => 'Array of points: { p1.x, p1.y, p2.x, p2.y, ...,
@@ -359,12 +359,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+  ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-  gimp_channel_select_polygon (gimp_image_get_mask (image),
+  clay_channel_select_polygon (clay_image_get_mask (image),
                                _("Free Select"),
                                num_segs / 2,
-                               (GimpVector2 *) segs,
+                               (ClayVector2 *) segs,
                                operation,
                                pdb_context->antialias,
                                pdb_context->feather,
@@ -388,8 +388,8 @@ for paths the path's shape.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_antialias(), gimp_context_set_feather(),
-gimp_context_set_feather_radius().
+clay_context_set_antialias(), clay_context_set_feather(),
+clay_context_set_feather_radius().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -397,7 +397,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-        { name => 'operation', type => 'enum GimpChannelOps',
+        { name => 'operation', type => 'enum ClayChannelOps',
           desc => 'The desired operation with current selection' },
         { name => 'item', type => 'item',
           desc => 'The item to render to the selection' }
@@ -406,11 +406,11 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (item, image, 0, error))
+  if (clay_pdb_item_is_attached (item, image, 0, error))
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-      gimp_item_to_selection (item, operation,
+      clay_item_to_selection (item, operation,
                               pdb_context->antialias,
                               pdb_context->feather,
                               pdb_context->feather_radius_x,
@@ -444,12 +444,12 @@ sub images_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
-                             GIMP_TYPE_IMAGE,
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+      ! clay_pdb_dialog_new (clay, context, progress,
+                             CLAY_TYPE_IMAGE,
                              parent_window, popup_title, callback,
-                             GIMP_OBJECT (initial_image),
+                             CLAY_OBJECT (initial_image),
                              NULL))
     success = FALSE;
 }
@@ -471,9 +471,9 @@ sub images_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-      ! gimp_pdb_dialog_close (gimp, GIMP_TYPE_IMAGE, callback))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+      ! clay_pdb_dialog_close (clay, CLAY_TYPE_IMAGE, callback))
     success = FALSE;
 }
 CODE
@@ -496,22 +496,22 @@ sub images_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-      ! gimp_pdb_dialog_set (gimp, GIMP_TYPE_IMAGE, callback, GIMP_OBJECT (image), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+      ! clay_pdb_dialog_set (clay, CLAY_TYPE_IMAGE, callback, CLAY_OBJECT (image), NULL))
     success = FALSE;
 }
 CODE
     );
 }
 
-@headers = qw("libgimpbase/gimpbase.h"
-              "core/gimp.h"
-              "core/gimpchannel-select.h"
-              "core/gimpdatafactory.h"
-              "gimppdb-utils.h"
-              "gimppdbcontext.h"
-              "gimp-intl.h");
+@headers = qw("libclaybase/claybase.h"
+              "core/clay.h"
+              "core/claychannel-select.h"
+              "core/claydatafactory.h"
+              "claypdb-utils.h"
+              "claypdbcontext.h"
+              "clay-intl.h");
 
 @procs = qw(image_select_color
             image_select_contiguous_color
@@ -527,7 +527,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Selection procedures';
-$doc_title = 'gimpimageselect';
+$doc_title = 'clayimageselect';
 $doc_short_desc = "Modify the image's selection.";
 $doc_long_desc = "Functions to modify the image's selection.";
 

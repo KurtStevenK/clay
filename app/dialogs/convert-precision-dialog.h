@@ -26,21 +26,21 @@
 #define CONVERT_PRECISION_DIALOG_MAX_DITHER_BITS 8
 
 
-typedef void (* GimpConvertPrecisionCallback) (GtkWidget        *dialog,
-                                               GimpImage        *image,
-                                               GimpPrecision     precision,
+typedef void (* ClayConvertPrecisionCallback) (GtkWidget        *dialog,
+                                               ClayImage        *image,
+                                               ClayPrecision     precision,
                                                GeglDitherMethod  layer_dither_method,
                                                GeglDitherMethod  text_layer_dither_method,
                                                GeglDitherMethod  channel_dither_method,
                                                gpointer          user_data);
 
 
-GtkWidget * convert_precision_dialog_new (GimpImage                    *image,
-                                          GimpContext                  *context,
+GtkWidget * convert_precision_dialog_new (ClayImage                    *image,
+                                          ClayContext                  *context,
                                           GtkWidget                    *parent,
-                                          GimpComponentType             component_type,
+                                          ClayComponentType             component_type,
                                           GeglDitherMethod              layer_dither_method,
                                           GeglDitherMethod              text_layer_dither_method,
                                           GeglDitherMethod              channel_dither_method,
-                                          GimpConvertPrecisionCallback  callback,
+                                          ClayConvertPrecisionCallback  callback,
                                           gpointer                      user_data);

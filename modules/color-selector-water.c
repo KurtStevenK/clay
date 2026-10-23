@@ -24,12 +24,12 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaycolor/claycolor.h"
+#include "libclaymath/claymath.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 
 #define COLORSEL_TYPE_WATER            (colorsel_water_get_type ())
@@ -44,7 +44,7 @@ typedef struct _ColorselWaterClass ColorselWaterClass;
 
 struct _ColorselWater
 {
-  GimpColorSelector   parent_instance;
+  ClayColorSelector   parent_instance;
 
   GtkWidget          *area;
   GtkWidget          *label;
@@ -55,13 +55,13 @@ struct _ColorselWater
   gfloat              pressure_adjust;
   guint32             motion_time;
 
-  GimpColorConfig    *config;
+  ClayColorConfig    *config;
   const Babl         *format;
 };
 
 struct _ColorselWaterClass
 {
-  GimpColorSelectorClass  parent_class;
+  ClayColorSelectorClass  parent_class;
 };
 
 
@@ -69,10 +69,10 @@ GType             colorsel_water_get_type          (void);
 
 static void       colorsel_water_dispose           (GObject           *object);
 
-static void       colorsel_water_set_format        (GimpColorSelector *selector,
+static void       colorsel_water_set_format        (ClayColorSelector *selector,
                                                     const Babl        *format);
-static void       colorsel_water_set_config        (GimpColorSelector *selector,
-                                                    GimpColorConfig   *config);
+static void       colorsel_water_set_config        (ClayColorSelector *selector,
+                                                    ClayColorConfig   *config);
 
 static gboolean   select_area_draw                 (GtkWidget         *widget,
                                                     cairo_t           *cr,
@@ -90,9 +90,9 @@ static void       pressure_adjust_update           (GtkAdjustment     *adj,
                                                     ColorselWater     *water);
 
 
-static const GimpModuleInfo colorsel_water_info =
+static const ClayModuleInfo colorsel_water_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   N_("Watercolor style color selector"),
   "Raph Levien <raph@acm.org>, Sven Neumann <sven@gimp.org>",
   "v0.4",
@@ -102,17 +102,17 @@ static const GimpModuleInfo colorsel_water_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (ColorselWater, colorsel_water,
-                       GIMP_TYPE_COLOR_SELECTOR)
+                       CLAY_TYPE_COLOR_SELECTOR)
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &colorsel_water_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
   colorsel_water_register_type (module);
 
@@ -123,13 +123,13 @@ static void
 colorsel_water_class_init (ColorselWaterClass *klass)
 {
   GObjectClass           *object_class   = G_OBJECT_CLASS (klass);
-  GimpColorSelectorClass *selector_class = GIMP_COLOR_SELECTOR_CLASS (klass);
+  ClayColorSelectorClass *selector_class = CLAY_COLOR_SELECTOR_CLASS (klass);
 
   object_class->dispose      = colorsel_water_dispose;
 
   selector_class->name       = _("Watercolor");
-  selector_class->help_id    = "gimp-colorselector-watercolor";
-  selector_class->icon_name  = GIMP_ICON_COLOR_SELECTOR_WATER;
+  selector_class->help_id    = "clay-colorselector-watercolor";
+  selector_class->icon_name  = CLAY_ICON_COLOR_SELECTOR_WATER;
   selector_class->set_format = colorsel_water_set_format;
   selector_class->set_config = colorsel_water_set_config;
 
@@ -194,7 +194,7 @@ colorsel_water_init (ColorselWater *water)
   scale = gtk_scale_new (GTK_ORIENTATION_VERTICAL, adj);
   gtk_scale_set_digits (GTK_SCALE (scale), 0);
   gtk_scale_set_draw_value (GTK_SCALE (scale), FALSE);
-  gimp_help_set_help_data (scale, _("Pressure"), NULL);
+  clay_help_set_help_data (scale, _("Pressure"), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), scale, FALSE, FALSE, 0);
 
   gtk_widget_show_all (hbox);
@@ -222,13 +222,13 @@ calc (gdouble x,
 static void
 colorsel_water_dispose (GObject *object)
 {
-  colorsel_water_set_config (GIMP_COLOR_SELECTOR (object), NULL);
+  colorsel_water_set_config (CLAY_COLOR_SELECTOR (object), NULL);
 
   G_OBJECT_CLASS (colorsel_water_parent_class)->dispose (object);
 }
 
 static void
-colorsel_water_set_format (GimpColorSelector *selector,
+colorsel_water_set_format (ClayColorSelector *selector,
                            const Babl        *format)
 {
   ColorselWater *water = COLORSEL_WATER (selector);
@@ -240,32 +240,32 @@ colorsel_water_set_format (GimpColorSelector *selector,
       if (format == NULL || babl_format_get_space (format) == babl_space ("sRGB"))
         {
           gtk_label_set_text (GTK_LABEL (water->label), _("Profile: sRGB"));
-          gimp_help_set_help_data (water->label, NULL, NULL);
+          clay_help_set_help_data (water->label, NULL, NULL);
         }
       else
         {
-          GimpColorProfile *profile = NULL;
+          ClayColorProfile *profile = NULL;
           const gchar      *icc;
           gint              icc_len;
 
           icc = babl_space_get_icc (babl_format_get_space (format), &icc_len);
-          profile = gimp_color_profile_new_from_icc_profile ((const guint8 *) icc, icc_len, NULL);
+          profile = clay_color_profile_new_from_icc_profile ((const guint8 *) icc, icc_len, NULL);
 
           if (profile != NULL)
             {
               gchar *text;
 
-              text = g_strdup_printf (_("Profile: %s"), gimp_color_profile_get_label (profile));
+              text = g_strdup_printf (_("Profile: %s"), clay_color_profile_get_label (profile));
               gtk_label_set_text (GTK_LABEL (water->label), text);
-              gimp_help_set_help_data (water->label,
-                                       gimp_color_profile_get_summary (profile),
+              clay_help_set_help_data (water->label,
+                                       clay_color_profile_get_summary (profile),
                                        NULL);
               g_free (text);
             }
           else
             {
               gtk_label_set_markup (GTK_LABEL (water->label), _("Profile: <i>unknown</i>"));
-              gimp_help_set_help_data (water->label, NULL, NULL);
+              clay_help_set_help_data (water->label, NULL, NULL);
             }
 
           g_clear_object (&profile);
@@ -275,8 +275,8 @@ colorsel_water_set_format (GimpColorSelector *selector,
 }
 
 static void
-colorsel_water_set_config (GimpColorSelector *selector,
-                           GimpColorConfig   *config)
+colorsel_water_set_config (ClayColorSelector *selector,
+                           ClayColorConfig   *config)
 {
   ColorselWater *water = COLORSEL_WATER (selector);
 
@@ -313,7 +313,7 @@ select_area_draw (GtkWidget     *widget,
   dx = 1.0 / allocation.width;
   dy = 1.0 / allocation.height;
 
-  render_space = gimp_widget_get_render_space (widget, water->config);
+  render_space = clay_widget_get_render_space (widget, water->config);
   render_fish = babl_fish (babl_format_with_space ("cairo-RGB24", water->format),
                            babl_format_with_space ("cairo-RGB24", render_space)),
 
@@ -345,7 +345,7 @@ select_area_draw (GtkWidget     *widget,
 
       for (i = 0; i < area.width; i++)
         {
-          GIMP_CAIRO_RGB24_SET_PIXEL (d,
+          CLAY_CAIRO_RGB24_SET_PIXEL (d,
                                       CLAMP ((gint) r, 0, 255),
                                       CLAMP ((gint) g, 0, 255),
                                       CLAMP ((gint) b, 0, 255));
@@ -377,8 +377,8 @@ add_pigment (ColorselWater *water,
              gdouble        y,
              gdouble        much)
 {
-  GimpColorSelector *selector = GIMP_COLOR_SELECTOR (water);
-  GeglColor         *color    = gimp_color_selector_get_color (selector);
+  ClayColorSelector *selector = CLAY_COLOR_SELECTOR (water);
+  GeglColor         *color    = clay_color_selector_get_color (selector);
   gdouble            rgb[3];
 
   much *= (gdouble) water->pressure_adjust;
@@ -409,7 +409,7 @@ add_pigment (ColorselWater *water,
   rgb[2] = CLAMP (rgb[2], 0.0, 1.0);
   gegl_color_set_pixel (color, babl_format ("R'G'B' double"), rgb);
 
-  gimp_color_selector_set_color (selector, color);
+  clay_color_selector_set_color (selector, color);
 
   g_object_unref (color);
 }

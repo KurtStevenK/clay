@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -22,12 +22,12 @@
 #define __DDSWRITE_H__
 
 
-extern GimpPDBStatusType write_dds (GFile               *file,
-                                    GimpImage           *image,
-                                    GimpDrawable        *drawable,
+extern ClayPDBStatusType write_dds (GFile               *file,
+                                    ClayImage           *image,
+                                    ClayDrawable        *drawable,
                                     gboolean             interactive,
-                                    GimpProcedure       *procedure,
-                                    GimpProcedureConfig *config,
+                                    ClayProcedure       *procedure,
+                                    ClayProcedureConfig *config,
                                     gboolean             is_duplicate_image);
 
 

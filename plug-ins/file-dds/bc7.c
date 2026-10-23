@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -26,7 +26,7 @@
 #include <math.h>
 #include <glib.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "bc7.h"
 

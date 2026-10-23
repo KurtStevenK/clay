@@ -117,7 +117,7 @@
 ; Some Schemes have an optional argument a string that is the initial contents?
 ; Guile does not. Racket does not, but takes a name for the port. MIT does not.
 ;
-; The initial string is now ignored, Gimp v3
+; The initial string is now ignored, Clay v3
 ; In v2, the initial string was always overwritten, but used for the contents.
 ; Only the size of the initial string ed, not the contents.
 ; Also, see test9.scm, which tests this using a string whose scope is larger

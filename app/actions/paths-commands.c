@@ -22,42 +22,42 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpdialogconfig.h"
+#include "config/claydialogconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimp-utils.h"
-#include "core/gimpchannel.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-merge.h"
-#include "core/gimpimage-undo.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpprogress.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/clay-utils.h"
+#include "core/claychannel.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-merge.h"
+#include "core/clayimage-undo.h"
+#include "core/clayparamspecs.h"
+#include "core/clayprogress.h"
+#include "core/claytoolinfo.h"
 
-#include "pdb/gimppdb.h"
-#include "pdb/gimpprocedure.h"
+#include "pdb/claypdb.h"
+#include "pdb/clayprocedure.h"
 
-#include "path/gimppath.h"
-#include "path/gimppath-export.h"
-#include "path/gimppath-import.h"
-#include "path/gimpvectorlayer.h"
+#include "path/claypath.h"
+#include "path/claypath-export.h"
+#include "path/claypath-import.h"
+#include "path/clayvectorlayer.h"
 
-#include "tools/gimptools-utils.h"
+#include "tools/claytools-utils.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpclipboard.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayclipboard.h"
+#include "widgets/clayhelp-ids.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
-#include "tools/gimppathtool.h"
+#include "tools/claypathtool.h"
 #include "tools/tool_manager.h"
 
 #include "dialogs/dialogs.h"
@@ -69,35 +69,35 @@
 #include "items-commands.h"
 #include "paths-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void   paths_new_callback             (GtkWidget       *dialog,
-                                              GimpImage       *image,
-                                              GimpPath        *path,
-                                              GimpContext     *context,
+                                              ClayImage       *image,
+                                              ClayPath        *path,
+                                              ClayContext     *context,
                                               const gchar     *path_name,
                                               gboolean         path_visible,
-                                              GimpColorTag     path_color_tag,
+                                              ClayColorTag     path_color_tag,
                                               gboolean         path_lock_content,
                                               gboolean         path_lock_position,
                                               gboolean         path_lock_visibility,
                                               gpointer         user_data);
 static void   paths_edit_attributes_callback (GtkWidget       *dialog,
-                                              GimpImage       *image,
-                                              GimpPath        *path,
-                                              GimpContext     *context,
+                                              ClayImage       *image,
+                                              ClayPath        *path,
+                                              ClayContext     *context,
                                               const gchar     *path_name,
                                               gboolean         path_visible,
-                                              GimpColorTag     path_color_tag,
+                                              ClayColorTag     path_color_tag,
                                               gboolean         path_lock_content,
                                               gboolean         path_lock_position,
                                               gboolean         path_lock_visibility,
                                               gpointer         user_data);
 static void   paths_import_callback          (GtkWidget       *dialog,
-                                              GimpImage       *image,
+                                              ClayImage       *image,
                                               GFile           *file,
                                               GFile           *import_folder,
                                               gboolean         merge_paths,
@@ -106,7 +106,7 @@ static void   paths_import_callback          (GtkWidget       *dialog,
 static void   paths_export_cmd_callback      (gpointer         data,
                                               gboolean         selected_only);
 static void   paths_export_callback          (GtkNativeDialog *dialog,
-                                              GimpImage       *image,
+                                              ClayImage       *image,
                                               GFile           *file,
                                               GFile           *export_folder,
                                               gboolean         active_only,
@@ -116,44 +116,44 @@ static void   paths_export_callback          (GtkNativeDialog *dialog,
 /*  public functions  */
 
 void
-paths_edit_cmd_callback (GimpAction *action,
+paths_edit_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
-  GimpTool  *active_tool;
+  ClayTool  *active_tool;
   return_if_no_paths (image, paths, data);
 
   if (g_list_length (paths) != 1)
     return;
 
-  active_tool = tool_manager_get_active (image->gimp);
+  active_tool = tool_manager_get_active (image->clay);
 
-  if (! GIMP_IS_PATH_TOOL (active_tool))
+  if (! CLAY_IS_PATH_TOOL (active_tool))
     {
-      GimpToolInfo *tool_info = gimp_get_tool_info (image->gimp,
-                                                    "gimp-path-tool");
+      ClayToolInfo *tool_info = clay_get_tool_info (image->clay,
+                                                    "clay-path-tool");
 
-      if (GIMP_IS_TOOL_INFO (tool_info))
+      if (CLAY_IS_TOOL_INFO (tool_info))
         {
-          gimp_context_set_tool (action_data_get_context (data), tool_info);
-          active_tool = tool_manager_get_active (image->gimp);
+          clay_context_set_tool (action_data_get_context (data), tool_info);
+          active_tool = tool_manager_get_active (image->clay);
         }
     }
 
-  if (GIMP_IS_PATH_TOOL (active_tool))
-    gimp_path_tool_set_path (GIMP_PATH_TOOL (active_tool), NULL, paths->data);
+  if (CLAY_IS_PATH_TOOL (active_tool))
+    clay_path_tool_set_path (CLAY_PATH_TOOL (active_tool), NULL, paths->data);
 }
 
 void
-paths_edit_attributes_cmd_callback (GimpAction *action,
+paths_edit_attributes_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpImage   *image;
+  ClayImage   *image;
   GList       *paths;
-  GimpPath    *path;
+  ClayPath    *path;
   GtkWidget   *widget;
   GtkWidget   *dialog;
   return_if_no_paths (image, paths, data);
@@ -164,28 +164,28 @@ paths_edit_attributes_cmd_callback (GimpAction *action,
 
   path = paths->data;
 
-#define EDIT_DIALOG_KEY "gimp-path-edit-attributes-dialog"
+#define EDIT_DIALOG_KEY "clay-path-edit-attributes-dialog"
 
   dialog = dialogs_get_dialog (G_OBJECT (path), EDIT_DIALOG_KEY);
 
   if (! dialog)
     {
-      GimpItem *item = GIMP_ITEM (path);
+      ClayItem *item = CLAY_ITEM (path);
 
       dialog = path_options_dialog_new (image, path,
                                         action_data_get_context (data),
                                         widget,
                                         _("Path Attributes"),
-                                        "gimp-path-edit",
-                                        GIMP_ICON_EDIT,
+                                        "clay-path-edit",
+                                        CLAY_ICON_EDIT,
                                         _("Edit Path Attributes"),
-                                        GIMP_HELP_PATH_EDIT,
-                                        gimp_object_get_name (path),
-                                        gimp_item_get_visible (item),
-                                        gimp_item_get_color_tag (item),
-                                        gimp_item_get_lock_content (item),
-                                        gimp_item_get_lock_position (item),
-                                        gimp_item_get_lock_visibility (item),
+                                        CLAY_HELP_PATH_EDIT,
+                                        clay_object_get_name (path),
+                                        clay_item_get_visible (item),
+                                        clay_item_get_color_tag (item),
+                                        clay_item_get_lock_content (item),
+                                        clay_item_get_lock_position (item),
+                                        clay_item_get_lock_visibility (item),
                                         paths_edit_attributes_callback,
                                         NULL);
 
@@ -196,35 +196,35 @@ paths_edit_attributes_cmd_callback (GimpAction *action,
 }
 
 void
-paths_new_cmd_callback (GimpAction *action,
+paths_new_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GtkWidget *widget;
   GtkWidget *dialog;
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-#define NEW_DIALOG_KEY "gimp-path-new-dialog"
+#define NEW_DIALOG_KEY "clay-path-new-dialog"
 
   dialog = dialogs_get_dialog (G_OBJECT (image), NEW_DIALOG_KEY);
 
   if (! dialog)
     {
-      GimpDialogConfig *config = GIMP_DIALOG_CONFIG (image->gimp->config);
+      ClayDialogConfig *config = CLAY_DIALOG_CONFIG (image->clay->config);
 
       dialog = path_options_dialog_new (image, NULL,
                                         action_data_get_context (data),
                                         widget,
                                         _("New Path"),
-                                        "gimp-path-new",
-                                        GIMP_ICON_PATH,
+                                        "clay-path-new",
+                                        CLAY_ICON_PATH,
                                         _("Create a New Path"),
-                                        GIMP_HELP_PATH_NEW,
+                                        CLAY_HELP_PATH_NEW,
                                         config->path_new_name,
                                         FALSE,
-                                        GIMP_COLOR_TAG_NONE,
+                                        CLAY_COLOR_TAG_NONE,
                                         FALSE,
                                         FALSE,
                                         FALSE,
@@ -238,29 +238,29 @@ paths_new_cmd_callback (GimpAction *action,
 }
 
 void
-paths_new_last_vals_cmd_callback (GimpAction *action,
+paths_new_last_vals_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpImage        *image;
-  GimpPath         *path;
-  GimpDialogConfig *config;
+  ClayImage        *image;
+  ClayPath         *path;
+  ClayDialogConfig *config;
   return_if_no_image (image, data);
 
-  config = GIMP_DIALOG_CONFIG (image->gimp->config);
+  config = CLAY_DIALOG_CONFIG (image->clay->config);
 
-  path = gimp_path_new (image, config->path_new_name);
-  gimp_image_add_path (image, path,
-                       GIMP_IMAGE_ACTIVE_PARENT, -1, TRUE);
-  gimp_image_flush (image);
+  path = clay_path_new (image, config->path_new_name);
+  clay_image_add_path (image, path,
+                       CLAY_IMAGE_ACTIVE_PARENT, -1, TRUE);
+  clay_image_flush (image);
 }
 
 void
-paths_raise_cmd_callback (GimpAction *action,
+paths_raise_cmd_callback (ClayAction *action,
                           GVariant   *value,
                           gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *list;
   GList     *iter;
   GList     *moved_list = NULL;
@@ -270,14 +270,14 @@ paths_raise_cmd_callback (GimpAction *action,
     {
       gint index;
 
-      index = gimp_item_get_index (iter->data);
+      index = clay_item_get_index (iter->data);
       if (index > 0)
         {
           moved_list = g_list_prepend (moved_list, iter->data);
         }
       else
         {
-          gimp_image_flush (image);
+          clay_image_flush (image);
           g_list_free (moved_list);
           return;
         }
@@ -285,28 +285,28 @@ paths_raise_cmd_callback (GimpAction *action,
 
   if (moved_list)
     {
-      gimp_image_undo_group_start (image,
-                                   GIMP_UNDO_GROUP_ITEM_DISPLACE,
+      clay_image_undo_group_start (image,
+                                   CLAY_UNDO_GROUP_ITEM_DISPLACE,
                                    ngettext ("Raise Path",
                                              "Raise Paths",
                                              g_list_length (moved_list)));
 
       moved_list = g_list_reverse (moved_list);
       for (iter = moved_list; iter; iter = iter->next)
-        gimp_image_raise_item (image, GIMP_ITEM (iter->data), NULL);
+        clay_image_raise_item (image, CLAY_ITEM (iter->data), NULL);
 
-      gimp_image_flush (image);
-      gimp_image_undo_group_end (image);
+      clay_image_flush (image);
+      clay_image_undo_group_end (image);
       g_list_free (moved_list);
     }
 }
 
 void
-paths_raise_to_top_cmd_callback (GimpAction *action,
+paths_raise_to_top_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *list;
   GList     *iter;
   GList     *moved_list = NULL;
@@ -316,34 +316,34 @@ paths_raise_to_top_cmd_callback (GimpAction *action,
     {
       gint index;
 
-      index = gimp_item_get_index (iter->data);
+      index = clay_item_get_index (iter->data);
       if (index > 0)
         moved_list = g_list_prepend (moved_list, iter->data);
     }
 
   if (moved_list)
     {
-      gimp_image_undo_group_start (image,
-                                   GIMP_UNDO_GROUP_ITEM_DISPLACE,
+      clay_image_undo_group_start (image,
+                                   CLAY_UNDO_GROUP_ITEM_DISPLACE,
                                    ngettext ("Raise Path to Top",
                                              "Raise Paths to Top",
                                              g_list_length (moved_list)));
 
       for (iter = moved_list; iter; iter = iter->next)
-        gimp_image_raise_item_to_top (image, GIMP_ITEM (iter->data));
+        clay_image_raise_item_to_top (image, CLAY_ITEM (iter->data));
 
-      gimp_image_flush (image);
-      gimp_image_undo_group_end (image);
+      clay_image_flush (image);
+      clay_image_undo_group_end (image);
       g_list_free (moved_list);
     }
 }
 
 void
-paths_lower_cmd_callback (GimpAction *action,
+paths_lower_cmd_callback (ClayAction *action,
                           GVariant   *value,
                           gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *list;
   GList     *iter;
   GList     *moved_list = NULL;
@@ -354,15 +354,15 @@ paths_lower_cmd_callback (GimpAction *action,
       GList *paths_list;
       gint   index;
 
-      paths_list = gimp_item_get_container_iter (GIMP_ITEM (iter->data));
-      index = gimp_item_get_index (iter->data);
+      paths_list = clay_item_get_container_iter (CLAY_ITEM (iter->data));
+      index = clay_item_get_index (iter->data);
       if (index < g_list_length (paths_list) - 1)
         {
           moved_list = g_list_prepend (moved_list, iter->data);
         }
       else
         {
-          gimp_image_flush (image);
+          clay_image_flush (image);
           g_list_free (moved_list);
           return;
         }
@@ -370,27 +370,27 @@ paths_lower_cmd_callback (GimpAction *action,
 
   if (moved_list)
     {
-      gimp_image_undo_group_start (image,
-                                   GIMP_UNDO_GROUP_ITEM_DISPLACE,
+      clay_image_undo_group_start (image,
+                                   CLAY_UNDO_GROUP_ITEM_DISPLACE,
                                    ngettext ("Lower Path",
                                              "Lower Paths",
                                              g_list_length (moved_list)));
 
       for (iter = moved_list; iter; iter = iter->next)
-        gimp_image_lower_item (image, GIMP_ITEM (iter->data), NULL);
+        clay_image_lower_item (image, CLAY_ITEM (iter->data), NULL);
 
-      gimp_image_flush (image);
-      gimp_image_undo_group_end (image);
+      clay_image_flush (image);
+      clay_image_undo_group_end (image);
       g_list_free (moved_list);
     }
 }
 
 void
-paths_lower_to_bottom_cmd_callback (GimpAction *action,
+paths_lower_to_bottom_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *list;
   GList     *iter;
   GList     *moved_list = NULL;
@@ -401,8 +401,8 @@ paths_lower_to_bottom_cmd_callback (GimpAction *action,
       GList *paths_list;
       gint   index;
 
-      paths_list = gimp_item_get_container_iter (GIMP_ITEM (iter->data));
-      index = gimp_item_get_index (iter->data);
+      paths_list = clay_item_get_container_iter (CLAY_ITEM (iter->data));
+      index = clay_item_get_index (iter->data);
       if (index < g_list_length (paths_list) - 1)
         moved_list = g_list_prepend (moved_list, iter->data);
     }
@@ -410,27 +410,27 @@ paths_lower_to_bottom_cmd_callback (GimpAction *action,
   if (moved_list)
     {
       moved_list = g_list_reverse (moved_list);
-      gimp_image_undo_group_start (image,
-                                   GIMP_UNDO_GROUP_ITEM_DISPLACE,
+      clay_image_undo_group_start (image,
+                                   CLAY_UNDO_GROUP_ITEM_DISPLACE,
                                    ngettext ("Lower Path to Bottom",
                                              "Lower Paths to Bottom",
                                              g_list_length (moved_list)));
 
       for (iter = moved_list; iter; iter = iter->next)
-        gimp_image_lower_item_to_bottom (image, GIMP_ITEM (iter->data));
+        clay_image_lower_item_to_bottom (image, CLAY_ITEM (iter->data));
 
-      gimp_image_flush (image);
-      gimp_image_undo_group_end (image);
+      clay_image_flush (image);
+      clay_image_undo_group_end (image);
       g_list_free (moved_list);
     }
 }
 
 void
-paths_duplicate_cmd_callback (GimpAction *action,
+paths_duplicate_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   GList     *new_paths = NULL;
   GList     *iter;
@@ -440,39 +440,39 @@ paths_duplicate_cmd_callback (GimpAction *action,
   paths = g_list_reverse (paths);
 
   /* TODO: proper undo group. */
-  gimp_image_undo_group_start (image,
-                               GIMP_UNDO_GROUP_PATHS_IMPORT,
+  clay_image_undo_group_start (image,
+                               CLAY_UNDO_GROUP_PATHS_IMPORT,
                                _("Duplicate Paths"));
   for (iter = paths; iter; iter = iter->next)
     {
-      GimpPath *new_path;
+      ClayPath *new_path;
 
-      new_path = GIMP_PATH (gimp_item_duplicate (iter->data,
+      new_path = CLAY_PATH (clay_item_duplicate (iter->data,
                                                  G_TYPE_FROM_INSTANCE (iter->data)));
-      /*  use the actual parent here, not GIMP_IMAGE_ACTIVE_PARENT because
+      /*  use the actual parent here, not CLAY_IMAGE_ACTIVE_PARENT because
        *  the latter would add a duplicated group inside itself instead of
        *  above it
        */
-      gimp_image_add_path (image, new_path,
-                           gimp_path_get_parent (iter->data), -1,
+      clay_image_add_path (image, new_path,
+                           clay_path_get_parent (iter->data), -1,
                            TRUE);
       new_paths = g_list_prepend (new_paths, new_path);
     }
   if (new_paths)
     {
-      gimp_image_set_selected_paths (image, new_paths);
-      gimp_image_flush (image);
+      clay_image_set_selected_paths (image, new_paths);
+      clay_image_flush (image);
     }
-  gimp_image_undo_group_end (image);
+  clay_image_undo_group_end (image);
   g_list_free (paths);
 }
 
 void
-paths_delete_cmd_callback (GimpAction *action,
+paths_delete_cmd_callback (ClayAction *action,
                            GVariant   *value,
                            gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   GtkWidget *widget;
   return_if_no_paths (image, paths, data);
@@ -483,40 +483,40 @@ paths_delete_cmd_callback (GimpAction *action,
   /* Initial check to make sure none are connected to vector layers */
   for (GList *iter = paths; iter; iter = iter->next)
     {
-      if (gimp_path_attached_to_vector_layer (GIMP_PATH (iter->data), image))
+      if (clay_path_attached_to_vector_layer (CLAY_PATH (iter->data), image))
         {
-          gimp_message_literal (image->gimp, G_OBJECT (widget),
-                                GIMP_MESSAGE_WARNING,
+          clay_message_literal (image->clay, G_OBJECT (widget),
+                                CLAY_MESSAGE_WARNING,
                                 _("Cannot delete paths attached to vector "
                                   "layers"));
-          gimp_tools_blink_item (image->gimp, GIMP_ITEM (iter->data));
+          clay_tools_blink_item (image->clay, CLAY_ITEM (iter->data));
           g_list_free (paths);
           return;
         }
     }
 
   /* TODO: proper undo group. */
-  gimp_image_undo_group_start (image,
-                               GIMP_UNDO_GROUP_PATHS_IMPORT,
+  clay_image_undo_group_start (image,
+                               CLAY_UNDO_GROUP_PATHS_IMPORT,
                                _("Remove Paths"));
 
   for (GList *iter = paths; iter; iter = iter->next)
-    gimp_image_remove_path (image, iter->data, TRUE, NULL);
+    clay_image_remove_path (image, iter->data, TRUE, NULL);
 
-  gimp_image_undo_group_end (image);
-  gimp_image_flush (image);
+  clay_image_undo_group_end (image);
+  clay_image_flush (image);
   g_list_free (paths);
 }
 
 void
-paths_merge_visible_cmd_callback (GimpAction *action,
+paths_merge_visible_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpImage   *image;
+  ClayImage   *image;
   GList       *paths;
   GtkWidget   *widget;
-  GimpPath    *path;
+  ClayPath    *path;
   GList       *list;
   GError      *error = NULL;
   return_if_no_paths (image, paths, data);
@@ -524,96 +524,96 @@ paths_merge_visible_cmd_callback (GimpAction *action,
 
   /* Make sure none of the visible paths are attached to vector layers
    * before attempting to merge them. */
-  for (list = gimp_image_get_path_iter (image);
+  for (list = clay_image_get_path_iter (image);
        list; list = g_list_next (list))
     {
       path = list->data;
 
-      if (gimp_item_get_visible (GIMP_ITEM (path)) &&
-          gimp_path_attached_to_vector_layer (path, image))
+      if (clay_item_get_visible (CLAY_ITEM (path)) &&
+          clay_path_attached_to_vector_layer (path, image))
         {
-          gimp_message_literal (image->gimp, G_OBJECT (widget),
-                                GIMP_MESSAGE_WARNING,
+          clay_message_literal (image->clay, G_OBJECT (widget),
+                                CLAY_MESSAGE_WARNING,
                                 _("Cannot merge paths attached to vector "
                                   "layers"));
-          gimp_tools_blink_item (image->gimp, GIMP_ITEM (path));
+          clay_tools_blink_item (image->clay, CLAY_ITEM (path));
           return;
         }
     }
 
-  if (! gimp_image_merge_visible_paths (image, &error))
+  if (! clay_image_merge_visible_paths (image, &error))
     {
-      gimp_message_literal (image->gimp,
-                            G_OBJECT (widget), GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay,
+                            G_OBJECT (widget), CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
       return;
     }
 
-  gimp_image_flush (image);
+  clay_image_flush (image);
 }
 
 void
-path_to_vector_layer_cmd_callback (GimpAction *action,
+path_to_vector_layer_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpImage       *image;
+  ClayImage       *image;
   GList           *paths;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   return_if_no_paths (image, paths, data);
 
-  layer = gimp_vector_layer_new (image, paths->data,
-                                 gimp_get_user_context (image->gimp));
-  gimp_image_add_layer (image,
-                        GIMP_LAYER (layer),
-                        GIMP_IMAGE_ACTIVE_PARENT,
+  layer = clay_vector_layer_new (image, paths->data,
+                                 clay_get_user_context (image->clay));
+  clay_image_add_layer (image,
+                        CLAY_LAYER (layer),
+                        CLAY_IMAGE_ACTIVE_PARENT,
                         -1,
                         TRUE);
-  gimp_vector_layer_refresh (layer);
+  clay_vector_layer_refresh (layer);
 
-  gimp_image_flush (image);
+  clay_image_flush (image);
 }
 
 void
-paths_to_selection_cmd_callback (GimpAction *action,
+paths_to_selection_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpImage      *image;
+  ClayImage      *image;
   GList          *paths;
   GList          *iter;
-  GimpChannelOps  operation;
+  ClayChannelOps  operation;
   return_if_no_paths (image, paths, data);
 
-  gimp_image_undo_group_start (image,
-                               GIMP_UNDO_GROUP_DRAWABLE_MOD,
+  clay_image_undo_group_start (image,
+                               CLAY_UNDO_GROUP_DRAWABLE_MOD,
                                _("Paths to selection"));
 
-  operation = (GimpChannelOps) g_variant_get_int32 (value);
+  operation = (ClayChannelOps) g_variant_get_int32 (value);
 
   for (iter = paths; iter; iter = iter->next)
     {
-      gimp_item_to_selection (iter->data, operation, TRUE, FALSE, 0, 0);
+      clay_item_to_selection (iter->data, operation, TRUE, FALSE, 0, 0);
 
-      if (operation == GIMP_CHANNEL_OP_REPLACE && iter == paths)
-        operation = GIMP_CHANNEL_OP_ADD;
+      if (operation == CLAY_CHANNEL_OP_REPLACE && iter == paths)
+        operation = CLAY_CHANNEL_OP_ADD;
     }
 
-  gimp_image_undo_group_end (image);
-  gimp_image_flush (image);
+  clay_image_undo_group_end (image);
+  clay_image_flush (image);
 }
 
 void
-paths_selection_to_paths_cmd_callback (GimpAction *action,
+paths_selection_to_paths_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data)
 {
-  GimpImage      *image;
+  ClayImage      *image;
   GtkWidget      *widget;
-  GimpProcedure  *procedure;
-  GimpValueArray *args;
-  GimpDisplay    *display;
+  ClayProcedure  *procedure;
+  ClayValueArray *args;
+  ClayDisplay    *display;
   gboolean        advanced;
   GError         *error = NULL;
   return_if_no_image (image, data);
@@ -621,65 +621,65 @@ paths_selection_to_paths_cmd_callback (GimpAction *action,
 
   advanced = (gboolean) g_variant_get_int32 (value);
 
-  procedure = gimp_pdb_lookup_procedure (image->gimp->pdb,
+  procedure = clay_pdb_lookup_procedure (image->clay->pdb,
                                          "plug-in-sel2path");
 
   if (! procedure)
     {
-      gimp_message_literal (image->gimp,
-                            G_OBJECT (widget), GIMP_MESSAGE_ERROR,
+      clay_message_literal (image->clay,
+                            G_OBJECT (widget), CLAY_MESSAGE_ERROR,
                             "Selection to path procedure lookup failed.");
       return;
     }
 
-  display = gimp_context_get_display (action_data_get_context (data));
+  display = clay_context_get_display (action_data_get_context (data));
 
-  args = gimp_procedure_get_arguments (procedure);
+  args = clay_procedure_get_arguments (procedure);
 
-  g_value_set_enum   (gimp_value_array_index (args, 0),
+  g_value_set_enum   (clay_value_array_index (args, 0),
                       advanced ?
-                      GIMP_RUN_INTERACTIVE : GIMP_RUN_NONINTERACTIVE);
-  g_value_set_object (gimp_value_array_index (args, 1),
+                      CLAY_RUN_INTERACTIVE : CLAY_RUN_NONINTERACTIVE);
+  g_value_set_object (clay_value_array_index (args, 1),
                       image);
 
-  gimp_procedure_execute_async (procedure, image->gimp,
+  clay_procedure_execute_async (procedure, image->clay,
                                 action_data_get_context (data),
-                                GIMP_PROGRESS (display), args,
+                                CLAY_PROGRESS (display), args,
                                 display, &error);
 
-  gimp_value_array_unref (args);
+  clay_value_array_unref (args);
 
   if (error)
     {
-      gimp_message_literal (image->gimp,
-                            G_OBJECT (widget), GIMP_MESSAGE_ERROR,
+      clay_message_literal (image->clay,
+                            G_OBJECT (widget), CLAY_MESSAGE_ERROR,
                             error->message);
       g_error_free (error);
     }
 }
 
 void
-paths_fill_cmd_callback (GimpAction *action,
+paths_fill_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
   items_fill_cmd_callback (action, image, paths,
                            _("Fill Path"),
-                           GIMP_ICON_TOOL_BUCKET_FILL,
-                           GIMP_HELP_PATH_FILL,
+                           CLAY_ICON_TOOL_BUCKET_FILL,
+                           CLAY_HELP_PATH_FILL,
                            data);
 }
 
 void
-paths_fill_last_vals_cmd_callback (GimpAction *action,
+paths_fill_last_vals_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
@@ -687,27 +687,27 @@ paths_fill_last_vals_cmd_callback (GimpAction *action,
 }
 
 void
-paths_stroke_cmd_callback (GimpAction *action,
+paths_stroke_cmd_callback (ClayAction *action,
                            GVariant   *value,
                            gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
   items_stroke_cmd_callback (action, image, paths,
                              _("Stroke Path"),
-                             GIMP_ICON_PATH_STROKE,
-                             GIMP_HELP_PATH_STROKE,
+                             CLAY_ICON_PATH_STROKE,
+                             CLAY_HELP_PATH_STROKE,
                              data);
 }
 
 void
-paths_stroke_last_vals_cmd_callback (GimpAction *action,
+paths_stroke_last_vals_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
@@ -715,54 +715,54 @@ paths_stroke_last_vals_cmd_callback (GimpAction *action,
 }
 
 void
-paths_copy_cmd_callback (GimpAction *action,
+paths_copy_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpImage   *image;
+  ClayImage   *image;
   GList       *paths;
   gchar       *svg;
   return_if_no_paths (image, paths, data);
 
-  svg = gimp_path_export_string (image, paths);
+  svg = clay_path_export_string (image, paths);
 
   if (svg)
     {
-      gimp_clipboard_set_svg (image->gimp, svg);
+      clay_clipboard_set_svg (image->clay, svg);
       g_free (svg);
     }
 }
 
 void
-paths_paste_cmd_callback (GimpAction *action,
+paths_paste_cmd_callback (ClayAction *action,
                           GVariant   *value,
                           gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GtkWidget *widget;
   gchar     *svg;
   gsize      svg_size;
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-  svg = gimp_clipboard_get_svg (image->gimp, &svg_size);
+  svg = clay_clipboard_get_svg (image->clay, &svg_size);
 
   if (svg)
     {
       GError *error = NULL;
 
-      if (! gimp_path_import_buffer (image, svg, svg_size,
+      if (! clay_path_import_buffer (image, svg, svg_size,
                                      TRUE, FALSE,
-                                     GIMP_IMAGE_ACTIVE_PARENT, -1,
+                                     CLAY_IMAGE_ACTIVE_PARENT, -1,
                                      NULL, &error))
         {
-          gimp_message (image->gimp, G_OBJECT (widget), GIMP_MESSAGE_ERROR,
+          clay_message (image->clay, G_OBJECT (widget), CLAY_MESSAGE_ERROR,
                         "%s", error->message);
           g_clear_error (&error);
         }
       else
         {
-          gimp_image_flush (image);
+          clay_image_flush (image);
         }
 
       g_free (svg);
@@ -770,7 +770,7 @@ paths_paste_cmd_callback (GimpAction *action,
 }
 
 void
-paths_export_selected_cmd_callback (GimpAction *action,
+paths_export_selected_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
@@ -778,7 +778,7 @@ paths_export_selected_cmd_callback (GimpAction *action,
 }
 
 void
-paths_export_all_cmd_callback (GimpAction *action,
+paths_export_all_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
@@ -789,8 +789,8 @@ static void
 paths_export_cmd_callback (gpointer data,
                            gboolean selected_only)
 {
-  GimpImage        *image;
-  GimpDialogConfig *config;
+  ClayImage        *image;
+  ClayDialogConfig *config;
   GList            *paths;
   GFile            *folder = NULL;
   GtkWidget        *widget;
@@ -798,10 +798,10 @@ paths_export_cmd_callback (gpointer data,
   return_if_no_paths (image, paths, data);
   return_if_no_widget (widget, data);
 
-  config = GIMP_DIALOG_CONFIG (image->gimp->config);
+  config = CLAY_DIALOG_CONFIG (image->clay->config);
 
   if (config->path_export_path)
-    folder = gimp_file_new_for_config_path (config->path_export_path,
+    folder = clay_file_new_for_config_path (config->path_export_path,
                                             NULL);
 
   dialog = path_export_dialog_new (image, widget,
@@ -817,27 +817,27 @@ paths_export_cmd_callback (gpointer data,
 }
 
 void
-paths_import_cmd_callback (GimpAction *action,
+paths_import_cmd_callback (ClayAction *action,
                            GVariant   *value,
                            gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GtkWidget *widget;
   GtkWidget *dialog;
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-#define IMPORT_DIALOG_KEY "gimp-paths-import-dialog"
+#define IMPORT_DIALOG_KEY "clay-paths-import-dialog"
 
   dialog = dialogs_get_dialog (G_OBJECT (image), IMPORT_DIALOG_KEY);
 
   if (! dialog)
     {
-      GimpDialogConfig *config = GIMP_DIALOG_CONFIG (image->gimp->config);
+      ClayDialogConfig *config = CLAY_DIALOG_CONFIG (image->clay->config);
       GFile            *folder = NULL;
 
       if (config->path_import_path)
-        folder = gimp_file_new_for_config_path (config->path_import_path,
+        folder = clay_file_new_for_config_path (config->path_import_path,
                                                 NULL);
 
       dialog = path_import_dialog_new (image, widget,
@@ -854,11 +854,11 @@ paths_import_cmd_callback (GimpAction *action,
 }
 
 void
-paths_visible_cmd_callback (GimpAction *action,
+paths_visible_cmd_callback (ClayAction *action,
                             GVariant   *value,
                             gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
@@ -866,11 +866,11 @@ paths_visible_cmd_callback (GimpAction *action,
 }
 
 void
-paths_lock_content_cmd_callback (GimpAction *action,
+paths_lock_content_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
@@ -878,11 +878,11 @@ paths_lock_content_cmd_callback (GimpAction *action,
 }
 
 void
-paths_lock_position_cmd_callback (GimpAction *action,
+paths_lock_position_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *paths;
   return_if_no_paths (image, paths, data);
 
@@ -890,16 +890,16 @@ paths_lock_position_cmd_callback (GimpAction *action,
 }
 
 void
-paths_color_tag_cmd_callback (GimpAction *action,
+paths_color_tag_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpImage    *image;
+  ClayImage    *image;
   GList        *paths;
-  GimpColorTag  color_tag;
+  ClayColorTag  color_tag;
   return_if_no_paths (image, paths, data);
 
-  color_tag = (GimpColorTag) g_variant_get_int32 (value);
+  color_tag = (ClayColorTag) g_variant_get_int32 (value);
 
   items_color_tag_cmd_callback (action, image, paths, color_tag);
 }
@@ -909,84 +909,84 @@ paths_color_tag_cmd_callback (GimpAction *action,
 
 static void
 paths_new_callback (GtkWidget    *dialog,
-                    GimpImage    *image,
-                    GimpPath     *path,
-                    GimpContext  *context,
+                    ClayImage    *image,
+                    ClayPath     *path,
+                    ClayContext  *context,
                     const gchar  *paths_name,
                     gboolean      paths_visible,
-                    GimpColorTag  paths_color_tag,
+                    ClayColorTag  paths_color_tag,
                     gboolean      paths_lock_content,
                     gboolean      paths_lock_position,
                     gboolean      paths_lock_visibility,
                     gpointer      user_data)
 {
-  GimpDialogConfig *config = GIMP_DIALOG_CONFIG (image->gimp->config);
+  ClayDialogConfig *config = CLAY_DIALOG_CONFIG (image->clay->config);
 
   g_object_set (config,
                 "path-new-name", paths_name,
                 NULL);
 
-  path = gimp_path_new (image, config->path_new_name);
-  gimp_item_set_visible (GIMP_ITEM (path), paths_visible, FALSE);
-  gimp_item_set_color_tag (GIMP_ITEM (path), paths_color_tag, FALSE);
-  gimp_item_set_lock_content (GIMP_ITEM (path), paths_lock_content, FALSE);
-  gimp_item_set_lock_position (GIMP_ITEM (path), paths_lock_position, FALSE);
-  gimp_item_set_lock_visibility (GIMP_ITEM (path), paths_lock_visibility, FALSE);
+  path = clay_path_new (image, config->path_new_name);
+  clay_item_set_visible (CLAY_ITEM (path), paths_visible, FALSE);
+  clay_item_set_color_tag (CLAY_ITEM (path), paths_color_tag, FALSE);
+  clay_item_set_lock_content (CLAY_ITEM (path), paths_lock_content, FALSE);
+  clay_item_set_lock_position (CLAY_ITEM (path), paths_lock_position, FALSE);
+  clay_item_set_lock_visibility (CLAY_ITEM (path), paths_lock_visibility, FALSE);
 
-  gimp_image_add_path (image, path,
-                       GIMP_IMAGE_ACTIVE_PARENT, -1, TRUE);
-  gimp_image_flush (image);
+  clay_image_add_path (image, path,
+                       CLAY_IMAGE_ACTIVE_PARENT, -1, TRUE);
+  clay_image_flush (image);
 
   gtk_widget_destroy (dialog);
 }
 
 static void
 paths_edit_attributes_callback (GtkWidget    *dialog,
-                                GimpImage    *image,
-                                GimpPath     *path,
-                                GimpContext  *context,
+                                ClayImage    *image,
+                                ClayPath     *path,
+                                ClayContext  *context,
                                 const gchar  *paths_name,
                                 gboolean      paths_visible,
-                                GimpColorTag  paths_color_tag,
+                                ClayColorTag  paths_color_tag,
                                 gboolean      paths_lock_content,
                                 gboolean      paths_lock_position,
                                 gboolean      paths_lock_visibility,
                                 gpointer      user_data)
 {
-  GimpItem *item = GIMP_ITEM (path);
+  ClayItem *item = CLAY_ITEM (path);
 
-  if (strcmp (paths_name, gimp_object_get_name (path))            ||
-      paths_visible         != gimp_item_get_visible (item)       ||
-      paths_color_tag       != gimp_item_get_color_tag (item)     ||
-      paths_lock_content    != gimp_item_get_lock_content (item)  ||
-      paths_lock_position   != gimp_item_get_lock_position (item) ||
-      paths_lock_visibility != gimp_item_get_lock_visibility (item))
+  if (strcmp (paths_name, clay_object_get_name (path))            ||
+      paths_visible         != clay_item_get_visible (item)       ||
+      paths_color_tag       != clay_item_get_color_tag (item)     ||
+      paths_lock_content    != clay_item_get_lock_content (item)  ||
+      paths_lock_position   != clay_item_get_lock_position (item) ||
+      paths_lock_visibility != clay_item_get_lock_visibility (item))
     {
-      gimp_image_undo_group_start (image,
-                                   GIMP_UNDO_GROUP_ITEM_PROPERTIES,
+      clay_image_undo_group_start (image,
+                                   CLAY_UNDO_GROUP_ITEM_PROPERTIES,
                                    _("Path Attributes"));
 
-      if (strcmp (paths_name, gimp_object_get_name (path)))
-        gimp_item_rename (GIMP_ITEM (path), paths_name, NULL);
+      if (strcmp (paths_name, clay_object_get_name (path)))
+        clay_item_rename (CLAY_ITEM (path), paths_name, NULL);
 
-      if (paths_visible != gimp_item_get_visible (item))
-        gimp_item_set_visible (item, paths_visible, TRUE);
+      if (paths_visible != clay_item_get_visible (item))
+        clay_item_set_visible (item, paths_visible, TRUE);
 
-      if (paths_color_tag != gimp_item_get_color_tag (item))
-        gimp_item_set_color_tag (item, paths_color_tag, TRUE);
+      if (paths_color_tag != clay_item_get_color_tag (item))
+        clay_item_set_color_tag (item, paths_color_tag, TRUE);
 
-      if (paths_lock_content != gimp_item_get_lock_content (item))
-        gimp_item_set_lock_content (item, paths_lock_content, TRUE);
+      if (paths_lock_content != clay_item_get_lock_content (item))
+        clay_item_set_lock_content (item, paths_lock_content, TRUE);
 
-      if (paths_lock_position != gimp_item_get_lock_position (item))
-        gimp_item_set_lock_position (item, paths_lock_position, TRUE);
+      if (paths_lock_position != clay_item_get_lock_position (item))
+        clay_item_set_lock_position (item, paths_lock_position, TRUE);
 
-      if (paths_lock_visibility != gimp_item_get_lock_visibility (item))
-        gimp_item_set_lock_visibility (item, paths_lock_visibility, TRUE);
+      if (paths_lock_visibility != clay_item_get_lock_visibility (item))
+        clay_item_set_lock_visibility (item, paths_lock_visibility, TRUE);
 
-      gimp_image_undo_group_end (image);
+      clay_image_undo_group_end (image);
 
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
 
   gtk_widget_destroy (dialog);
@@ -994,19 +994,19 @@ paths_edit_attributes_callback (GtkWidget    *dialog,
 
 static void
 paths_import_callback (GtkWidget *dialog,
-                       GimpImage *image,
+                       ClayImage *image,
                        GFile     *file,
                        GFile     *import_folder,
                        gboolean   merge_paths,
                        gboolean   scale_paths,
                        gpointer   user_data)
 {
-  GimpDialogConfig *config = GIMP_DIALOG_CONFIG (image->gimp->config);
+  ClayDialogConfig *config = CLAY_DIALOG_CONFIG (image->clay->config);
   gchar            *path   = NULL;
   GError           *error  = NULL;
 
   if (import_folder)
-    path = gimp_file_get_config_path (import_folder, NULL);
+    path = clay_file_get_config_path (import_folder, NULL);
 
   g_object_set (config,
                 "path-import-path",  path,
@@ -1017,18 +1017,18 @@ paths_import_callback (GtkWidget *dialog,
   if (path)
     g_free (path);
 
-  if (gimp_path_import_file (image, file,
+  if (clay_path_import_file (image, file,
                              config->path_import_merge,
                              config->path_import_scale,
-                             GIMP_IMAGE_ACTIVE_PARENT, -1,
+                             CLAY_IMAGE_ACTIVE_PARENT, -1,
                              NULL, &error))
     {
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message (image->gimp, G_OBJECT (dialog),
-                    GIMP_MESSAGE_ERROR,
+      clay_message (image->clay, G_OBJECT (dialog),
+                    CLAY_MESSAGE_ERROR,
                     "%s", error->message);
       g_error_free (error);
       return;
@@ -1039,19 +1039,19 @@ paths_import_callback (GtkWidget *dialog,
 
 static void
 paths_export_callback (GtkNativeDialog *dialog,
-                       GimpImage       *image,
+                       ClayImage       *image,
                        GFile           *file,
                        GFile           *export_folder,
                        gboolean         active_only,
                        gpointer         user_data)
 {
-  GimpDialogConfig *config  = GIMP_DIALOG_CONFIG (image->gimp->config);
+  ClayDialogConfig *config  = CLAY_DIALOG_CONFIG (image->clay->config);
   GList            *paths   = NULL;
   gchar            *path    = NULL;
   GError           *error   = NULL;
 
   if (export_folder)
-    path = gimp_file_get_config_path (export_folder, NULL);
+    path = clay_file_get_config_path (export_folder, NULL);
 
   g_object_set (config,
                 "path-export-path",        path,
@@ -1062,12 +1062,12 @@ paths_export_callback (GtkNativeDialog *dialog,
     g_free (path);
 
   if (config->path_export_active_only)
-    paths = gimp_image_get_selected_paths (image);
+    paths = clay_image_get_selected_paths (image);
 
-  if (! gimp_path_export_file (image, paths, file, &error))
+  if (! clay_path_export_file (image, paths, file, &error))
     {
-      gimp_message (image->gimp, G_OBJECT (dialog),
-                    GIMP_MESSAGE_ERROR,
+      clay_message (image->clay, G_OBJECT (dialog),
+                    CLAY_MESSAGE_ERROR,
                     "%s", error->message);
       g_clear_error (&error);
       return;
@@ -1077,38 +1077,38 @@ paths_export_callback (GtkNativeDialog *dialog,
 }
 
 void
-paths_select_cmd_callback (GimpAction *action,
+paths_select_cmd_callback (ClayAction *action,
                            GVariant   *value,
                            gpointer    data)
 {
-  GimpImage            *image;
+  ClayImage            *image;
   GList                *new_paths = NULL;
   GList                *paths;
   GList                *iter;
-  GimpActionSelectType  select_type;
+  ClayActionSelectType  select_type;
   gboolean              run_once;
   return_if_no_image (image, data);
 
-  select_type = (GimpActionSelectType) g_variant_get_int32 (value);
+  select_type = (ClayActionSelectType) g_variant_get_int32 (value);
 
-  paths = gimp_image_get_selected_paths (image);
+  paths = clay_image_get_selected_paths (image);
   run_once = (g_list_length (paths) == 0);
 
   for (iter = paths; iter || run_once; iter = iter ? iter->next : NULL)
     {
-      GimpPath      *new_vec;
-      GimpContainer *container;
+      ClayPath      *new_vec;
+      ClayContainer *container;
 
       if (iter)
         {
-          container = gimp_item_get_container (GIMP_ITEM (iter->data));
+          container = clay_item_get_container (CLAY_ITEM (iter->data));
         }
       else /* run_once */
         {
-          container = gimp_image_get_paths (image);
+          container = clay_image_get_paths (image);
           run_once  = FALSE;
         }
-      new_vec = (GimpPath *) action_select_object (select_type,
+      new_vec = (ClayPath *) action_select_object (select_type,
                                                    container,
                                                    iter ? iter->data : NULL);
       if (new_vec)
@@ -1117,8 +1117,8 @@ paths_select_cmd_callback (GimpAction *action,
 
   if (new_paths)
     {
-      gimp_image_set_selected_paths (image, new_paths);
-      gimp_image_flush (image);
+      clay_image_set_selected_paths (image, new_paths);
+      clay_image_flush (image);
     }
 
   g_list_free (new_paths);

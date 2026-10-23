@@ -25,28 +25,28 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #undef GTK_DISABLE_SINGLE_INCLUDES
 #include <poppler.h>
 #define GTK_DISABLE_SINGLE_INCLUDES
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC       "file-pdf-load"
 #define LOAD_THUMB_PROC "file-pdf-load-thumb"
 #define PLUG_IN_BINARY  "file-pdf-load"
-#define PLUG_IN_ROLE    "gimp-file-pdf-load"
+#define PLUG_IN_ROLE    "clay-file-pdf-load"
 
 #define THUMBNAIL_SIZE  128
 
-#define GIMP_PLUGIN_PDF_LOAD_ERROR gimp_plugin_pdf_load_error_quark ()
+#define CLAY_PLUGIN_PDF_LOAD_ERROR clay_plugin_pdf_load_error_quark ()
 static GQuark
-gimp_plugin_pdf_load_error_quark (void)
+clay_plugin_pdf_load_error_quark (void)
 {
-  return g_quark_from_static_string ("gimp-plugin-pdf-load-error-quark");
+  return g_quark_from_static_string ("clay-plugin-pdf-load-error-quark");
 }
 
 typedef struct
@@ -61,12 +61,12 @@ typedef struct _PdfClass PdfClass;
 
 struct _Pdf
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PdfClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -75,42 +75,42 @@ struct _PdfClass
 
 GType                   pdf_get_type         (void);
 
-static GList          * pdf_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * pdf_create_procedure (GimpPlugIn            *plug_in,
+static GList          * pdf_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * pdf_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static gboolean         pdf_extract          (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
+static gboolean         pdf_extract          (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
                                               GFile                *file,
-                                              GimpMetadata         *metadata,
-                                              GimpProcedureConfig  *config,
-                                              GimpVectorLoadData   *extracted_dimensions,
+                                              ClayMetadata         *metadata,
+                                              ClayProcedureConfig  *config,
+                                              ClayVectorLoadData   *extracted_dimensions,
                                               gpointer             *data_for_run,
                                               GDestroyNotify       *data_for_run_destroy,
                                               gpointer              extract_data,
                                               GError              **error);
-static GimpValueArray * pdf_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * pdf_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
                                               gint                   width,
                                               gint                   height,
-                                              GimpVectorLoadData     extracted_data,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayVectorLoadData     extracted_data,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               data_from_extract,
                                               gpointer               run_data);
-static GimpValueArray * pdf_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * pdf_load_thumb       (ClayProcedure         *procedure,
                                               GFile                 *file,
                                               gint                   size,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage       * load_image          (PopplerDocument       *doc,
+static ClayImage       * load_image          (PopplerDocument       *doc,
                                               GFile                 *file,
-                                              GimpVectorLoadData     extracted_data,
-                                              GimpRunMode            run_mode,
-                                              GimpPageSelectorTarget target,
+                                              ClayVectorLoadData     extracted_data,
+                                              ClayRunMode            run_mode,
+                                              ClayPageSelectorTarget target,
                                               gint                   width,
                                               gint                   height,
                                               gdouble                resolution,
@@ -119,15 +119,15 @@ static GimpImage       * load_image          (PopplerDocument       *doc,
                                               gboolean               reverse_order,
                                               PdfSelectedPages      *pages);
 
-static GimpPDBStatusType load_dialog         (PopplerDocument       *doc,
+static ClayPDBStatusType load_dialog         (PopplerDocument       *doc,
                                               PdfSelectedPages      *pages,
-                                              GimpVectorLoadData     extracted_data,
-                                              GimpProcedure         *procedure,
-                                              GimpProcedureConfig   *config);
+                                              ClayVectorLoadData     extracted_data,
+                                              ClayProcedure         *procedure,
+                                              ClayProcedureConfig   *config);
 
 static PopplerDocument * open_document       (GFile                 *file,
                                               const gchar           *PDF_password,
-                                              GimpRunMode            run_mode,
+                                              ClayRunMode            run_mode,
                                               gdouble               *width,
                                               gdouble               *height,
                                               GError               **error);
@@ -142,7 +142,7 @@ static GdkPixbuf       * get_thumb_pixbuf    (PopplerDocument       *doc,
                                               gint                   preferred_size,
                                               gboolean               white_background);
 
-static GimpLayer       * layer_from_surface  (GimpImage             *image,
+static ClayLayer       * layer_from_surface  (ClayImage             *image,
                                               const gchar           *layer_name,
                                               gint                   position,
                                               cairo_surface_t       *surface,
@@ -150,16 +150,16 @@ static GimpLayer       * layer_from_surface  (GimpImage             *image,
                                               gdouble                progress_scale);
 
 
-G_DEFINE_TYPE (Pdf, pdf, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pdf, pdf, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PDF_TYPE)
+CLAY_MAIN (PDF_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 pdf_class_init (PdfClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pdf_query_procedures;
   plug_in_class->create_procedure = pdf_create_procedure;
@@ -172,7 +172,7 @@ pdf_init (Pdf *pdf)
 }
 
 static GList *
-pdf_query_procedures (GimpPlugIn *plug_in)
+pdf_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -182,22 +182,22 @@ pdf_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-pdf_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pdf_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_vector_load_procedure_new (plug_in, name,
-                                                  GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_vector_load_procedure_new (plug_in, name,
+                                                  CLAY_PDB_PROC_TYPE_PLUGIN,
                                                   pdf_extract, NULL, NULL,
                                                   pdf_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Portable Document Format"));
+      clay_procedure_set_menu_label (procedure, _("Portable Document Format"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Load file in PDF format",
                                         "Loads files in Adobe's Portable "
                                         "Document Format. PDF is designed to "
@@ -205,52 +205,52 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
                                         "of different platforms, and is a "
                                         "distant cousin of PostScript.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nathan Summers, Lionel N.",
                                       "Nathan Summers, Lionel N.",
                                       "2005, 2017");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PDF"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "application/pdf");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pdf");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0, string,%PDF-");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
 
-      gimp_procedure_add_string_argument (procedure, "password",
+      clay_procedure_add_string_argument (procedure, "password",
                                           _("PDF password"),
                                           _("The password to decrypt the encrypted PDF file"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "reverse-order",
+      clay_procedure_add_boolean_argument (procedure, "reverse-order",
                                            _("Load in re_verse order"),
                                            _("Load PDF pages in reverse order"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      /* FIXME: this should be a gimp_procedure_add_enum_argument () of type
-       * GIMP_TYPE_PAGE_SELECTOR_TARGET but it won't work right now (see FIXME
-       * comment in libgimp/gimpgpparams-body.c:116).
+      /* FIXME: this should be a clay_procedure_add_enum_argument () of type
+       * CLAY_TYPE_PAGE_SELECTOR_TARGET but it won't work right now (see FIXME
+       * comment in libclay/claygpparams-body.c:116).
 
-      gimp_procedure_add_enum_argument (procedure, "target",
+      clay_procedure_add_enum_argument (procedure, "target",
                                         _("Open pages as"),
                                         _("Number of pages to load (0 for all)"),
-                                        GIMP_TYPE_PAGE_SELECTOR_TARGET,
-                                        GIMP_PAGE_SELECTOR_TARGET_LAYERS,
+                                        CLAY_TYPE_PAGE_SELECTOR_TARGET,
+                                        CLAY_PAGE_SELECTOR_TARGET_LAYERS,
                                         G_PARAM_READWRITE);
 
        */
-      gimp_procedure_add_int_aux_argument (procedure, "target",
+      clay_procedure_add_int_aux_argument (procedure, "target",
                                            _("Open pages as"),
                                            _("Number of pages to load (0 for all)"),
-                                           GIMP_PAGE_SELECTOR_TARGET_LAYERS, GIMP_PAGE_SELECTOR_TARGET_IMAGES,
-                                           GIMP_PAGE_SELECTOR_TARGET_LAYERS,
+                                           CLAY_PAGE_SELECTOR_TARGET_LAYERS, CLAY_PAGE_SELECTOR_TARGET_IMAGES,
+                                           CLAY_PAGE_SELECTOR_TARGET_LAYERS,
                                            G_PARAM_READWRITE);
 
       /* FIXME: shouldn't the whole selector be considered as one argument
@@ -260,18 +260,18 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
        * some settings generally, not sure that the list of page makes sense
        * from one PDF document loaded to another (different) one.
        */
-      gimp_procedure_add_int32_array_argument (procedure, "pages",
+      clay_procedure_add_int32_array_argument (procedure, "pages",
                                                _("Pages"),
                                                _("The pages to load in the expected order"),
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "antialias",
+      clay_procedure_add_boolean_argument (procedure, "antialias",
                                            _("Use _Anti-aliasing"),
                                            _("Render texts with anti-aliasing"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "white-background",
+      clay_procedure_add_boolean_argument (procedure, "white-background",
                                            _("_Fill transparent areas with white"),
                                            _("Render all pages as opaque by filling the background in white"),
                                            TRUE,
@@ -279,17 +279,17 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 pdf_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads a preview from a PDF file.",
                                         "Loads a small preview of the first "
                                         "page of the PDF format file. Uses "
                                         "the embedded thumbnail if present.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nathan Summers",
                                       "Nathan Summers",
                                       "2005");
@@ -299,12 +299,12 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
 }
 
 static gboolean
-pdf_extract (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
+pdf_extract (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
              GFile                *file,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
-             GimpVectorLoadData   *extracted_dimensions,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
+             ClayVectorLoadData   *extracted_dimensions,
              gpointer             *data_for_run,
              GDestroyNotify       *data_for_run_destroy,
              gpointer              extract_data,
@@ -315,8 +315,8 @@ pdf_extract (GimpProcedure        *procedure,
   gdouble              width    = 0.0;
   gdouble              height   = 0.0;
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
-    gimp_ui_init (PLUG_IN_BINARY);
+  if (run_mode == CLAY_RUN_INTERACTIVE)
+    clay_ui_init (PLUG_IN_BINARY);
 
   g_object_get (config, "password", &password, NULL);
   doc = open_document (file, password, run_mode,
@@ -327,8 +327,8 @@ pdf_extract (GimpProcedure        *procedure,
 
   extracted_dimensions->width         = width;
   extracted_dimensions->height        = height;
-  extracted_dimensions->width_unit    = gimp_unit_point ();
-  extracted_dimensions->height_unit   = gimp_unit_point ();
+  extracted_dimensions->width_unit    = clay_unit_point ();
+  extracted_dimensions->height_unit   = clay_unit_point ();
   extracted_dimensions->exact_width   = TRUE;
   extracted_dimensions->exact_height  = TRUE;
   extracted_dimensions->correct_ratio = TRUE;
@@ -339,22 +339,22 @@ pdf_extract (GimpProcedure        *procedure,
   return TRUE;
 }
 
-static GimpValueArray *
-pdf_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+pdf_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
           gint                   width,
           gint                   height,
-          GimpVectorLoadData     extracted_data,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayVectorLoadData     extracted_data,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               data_from_extract,
           gpointer               run_data)
 {
-  GimpValueArray      *return_vals;
-  GimpPDBStatusType    status   = GIMP_PDB_SUCCESS;
-  GimpImage           *image    = NULL;
+  ClayValueArray      *return_vals;
+  ClayPDBStatusType    status   = CLAY_PDB_SUCCESS;
+  ClayImage           *image    = NULL;
   PopplerDocument     *doc      = POPPLER_DOCUMENT (data_from_extract);
   PdfSelectedPages     pages    = { 0, NULL };
   GError              *error    = NULL;
@@ -363,25 +363,25 @@ pdf_load (GimpProcedure         *procedure,
 
   if (doc == NULL)
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
-  else if (run_mode == GIMP_RUN_INTERACTIVE)
+  else if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       status = load_dialog (doc, &pages, extracted_data, procedure, config);
     }
-  else if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  else if (run_mode == CLAY_RUN_NONINTERACTIVE)
     {
       PopplerPage *test_page = poppler_document_get_page (doc, 0);
 
       if (test_page)
         {
-          GimpArray    *pages_array;
+          ClayArray    *pages_array;
           const gint32 *page_numbers;
           gint          i;
           gint          doc_n_pages;
 
           g_object_get (config, "pages", &pages_array, NULL);
-          page_numbers = gimp_int32_array_get_values (pages_array, &pages.n_pages);
+          page_numbers = clay_int32_array_get_values (pages_array, &pages.n_pages);
 
           doc_n_pages = poppler_document_get_n_pages (doc);
           /* The number of imported pages may be bigger than
@@ -406,8 +406,8 @@ pdf_load (GimpProcedure         *procedure,
                 {
                   if (page_numbers[i] >= doc_n_pages)
                     {
-                      status = GIMP_PDB_EXECUTION_ERROR;
-                      g_set_error (&error, GIMP_PLUGIN_PDF_LOAD_ERROR, 0,
+                      status = CLAY_PDB_EXECUTION_ERROR;
+                      g_set_error (&error, CLAY_PLUGIN_PDF_LOAD_ERROR, 0,
                                    /* TRANSLATORS: first argument is file name,
                                     * second is out-of-range page number,
                                     * third is number of pages.
@@ -416,7 +416,7 @@ pdf_load (GimpProcedure         *procedure,
                                    ngettext ("PDF document '%1$s' has %3$d page. Page %2$d is out of range.",
                                              "PDF document '%1$s' has %3$d pages. Page %2$d is out of range.",
                                              doc_n_pages),
-                                   gimp_file_get_utf8_name (file),
+                                   clay_file_get_utf8_name (file),
                                    page_numbers[i],
                                    doc_n_pages);
                       break;
@@ -432,9 +432,9 @@ pdf_load (GimpProcedure         *procedure,
         }
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpPageSelectorTarget target;
+      ClayPageSelectorTarget target;
       gboolean               reverse_order;
       gdouble                resolution;
       gboolean               antialias;
@@ -461,30 +461,30 @@ pdf_load (GimpProcedure         *procedure,
                           &pages);
 
       if (image == NULL)
-        status = GIMP_PDB_EXECUTION_ERROR;
+        status = CLAY_PDB_EXECUTION_ERROR;
     }
 
   g_free (pages.pages);
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, error);
-  if (status == GIMP_PDB_SUCCESS)
-    GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  return_vals = clay_procedure_new_return_values (procedure, status, error);
+  if (status == CLAY_PDB_SUCCESS)
+    CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdf_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+pdf_load_thumb (ClayProcedure       *procedure,
                 GFile               *file,
                 gint                 size,
-                GimpProcedureConfig *config,
+                ClayProcedureConfig *config,
                 gpointer             run_data)
 {
-  GimpValueArray  *return_vals;
+  ClayValueArray  *return_vals;
   gdouble          width  = 0;
   gdouble          height = 0;
   gdouble          scale;
-  GimpImage       *image     = NULL;
+  ClayImage       *image     = NULL;
   gint             num_pages = 0;
   PopplerDocument *doc       = NULL;
   cairo_surface_t *surface   = NULL;
@@ -492,7 +492,7 @@ pdf_load_thumb (GimpProcedure       *procedure,
 
   gegl_init (NULL, NULL);
 
-  doc = open_document (file, NULL, GIMP_RUN_NONINTERACTIVE,
+  doc = open_document (file, NULL, CLAY_RUN_NONINTERACTIVE,
                        NULL, NULL, &error);
 
   if (doc)
@@ -515,39 +515,39 @@ pdf_load_thumb (GimpProcedure       *procedure,
 
   if (surface)
     {
-      image = gimp_image_new (cairo_image_surface_get_width (surface),
+      image = clay_image_new (cairo_image_surface_get_width (surface),
                               cairo_image_surface_get_height (surface),
-                              GIMP_RGB);
+                              CLAY_RGB);
 
-      gimp_image_undo_disable (image);
+      clay_image_undo_disable (image);
 
       layer_from_surface (image, "thumbnail", 0, surface, 0.0, 1.0);
       cairo_surface_destroy (surface);
 
-      gimp_image_undo_enable (image);
-      gimp_image_clean_all (image);
+      clay_image_undo_enable (image);
+      clay_image_clean_all (image);
     }
 
   /* Thumbnail resolution: 100.0. */
-  scale = 100.0 / gimp_unit_get_factor (gimp_unit_point ());
+  scale = 100.0 / clay_unit_get_factor (clay_unit_point ());
 
   width  *= scale;
   height *= scale;
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, width);
-  GIMP_VALUES_SET_INT   (return_vals, 3, height);
-  GIMP_VALUES_SET_ENUM  (return_vals, 4, GIMP_RGB_IMAGE);
-  GIMP_VALUES_SET_INT   (return_vals, 5, num_pages);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, width);
+  CLAY_VALUES_SET_INT   (return_vals, 3, height);
+  CLAY_VALUES_SET_ENUM  (return_vals, 4, CLAY_RGB_IMAGE);
+  CLAY_VALUES_SET_INT   (return_vals, 5, num_pages);
 
   return return_vals;
 }
@@ -555,7 +555,7 @@ pdf_load_thumb (GimpProcedure       *procedure,
 static PopplerDocument *
 open_document (GFile        *file,
                const gchar  *PDF_password,
-               GimpRunMode   run_mode,
+               ClayRunMode   run_mode,
                gdouble      *width,
                gdouble      *height,
                GError      **load_error)
@@ -565,7 +565,7 @@ open_document (GFile        *file,
 
   doc = poppler_document_new_from_gfile (file, PDF_password, NULL, &error);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       GtkWidget *label;
 
@@ -579,13 +579,13 @@ open_document (GFile        *file,
           GtkWidget *entry;
           gint       run;
 
-          dialog = gimp_dialog_new (_("Encrypted PDF"), PLUG_IN_ROLE,
+          dialog = clay_dialog_new (_("Encrypted PDF"), PLUG_IN_ROLE,
                                     NULL, 0,
                                     NULL, NULL,
                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
                                     _("_OK"), GTK_RESPONSE_OK,
                                     NULL);
-          gimp_window_set_transient (GTK_WINDOW (dialog));
+          clay_window_set_transient (GTK_WINDOW (dialog));
           vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
           gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
           gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
@@ -598,7 +598,7 @@ open_document (GFile        *file,
 
           gtk_widget_show_all (dialog);
 
-          run = gimp_dialog_run (GIMP_DIALOG (dialog));
+          run = clay_dialog_run (CLAY_DIALOG (dialog));
           if (run == GTK_RESPONSE_OK)
             {
               g_clear_error (&error);
@@ -625,7 +625,7 @@ open_document (GFile        *file,
     {
       g_set_error (load_error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not load '%s': %s"),
-                   gimp_file_get_utf8_name (file),
+                   clay_file_get_utf8_name (file),
                    error->message);
       g_error_free (error);
       return NULL;
@@ -652,20 +652,20 @@ open_document (GFile        *file,
   return doc;
 }
 
-static GimpLayer *
-layer_from_surface (GimpImage       *image,
+static ClayLayer *
+layer_from_surface (ClayImage       *image,
                     const gchar     *layer_name,
                     gint             position,
                     cairo_surface_t *surface,
                     gdouble          progress_start,
                     gdouble          progress_scale)
 {
-  GimpLayer *layer;
+  ClayLayer *layer;
 
-  layer = gimp_layer_new_from_surface (image, layer_name, surface,
+  layer = clay_layer_new_from_surface (image, layer_name, surface,
                                        progress_start,
                                        progress_start + progress_scale);
-  gimp_image_insert_layer (image, layer, NULL, position);
+  clay_image_insert_layer (image, layer, NULL, position);
 
   return layer;
 }
@@ -742,12 +742,12 @@ render_page_to_pixbuf (PopplerPage *page,
 
 #endif
 
-static GimpImage *
+static ClayImage *
 load_image (PopplerDocument        *doc,
             GFile                  *file,
-            GimpVectorLoadData      extracted_data,
-            GimpRunMode             run_mode,
-            GimpPageSelectorTarget  target,
+            ClayVectorLoadData      extracted_data,
+            ClayRunMode             run_mode,
+            ClayPageSelectorTarget  target,
             gint                    doc_width,
             gint                    doc_height,
             gdouble                 resolution,
@@ -756,8 +756,8 @@ load_image (PopplerDocument        *doc,
             gboolean                reverse_order,
             PdfSelectedPages       *pages)
 {
-  GimpImage  *image        = NULL;
-  GimpImage **images       = NULL;
+  ClayImage  *image        = NULL;
+  ClayImage **images       = NULL;
   gint        i;
   gdouble     scale;
   gdouble     doc_progress = 0;
@@ -770,11 +770,11 @@ load_image (PopplerDocument        *doc,
       sign = -1;
     }
 
-  if (target == GIMP_PAGE_SELECTOR_TARGET_IMAGES)
-    images = g_new0 (GimpImage *, pages->n_pages);
+  if (target == CLAY_PAGE_SELECTOR_TARGET_IMAGES)
+    images = g_new0 (ClayImage *, pages->n_pages);
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   scale = (gdouble) doc_width / extracted_data.width;
 
@@ -804,10 +804,10 @@ load_image (PopplerDocument        *doc,
 
       if (! image)
         {
-          image = gimp_image_new (doc_width, doc_height, GIMP_RGB);
-          gimp_image_undo_disable (image);
+          image = clay_image_new (doc_width, doc_height, CLAY_RGB);
+          clay_image_undo_disable (image);
 
-          gimp_image_set_resolution (image, resolution, resolution);
+          clay_image_set_resolution (image, resolution, resolution);
         }
       doc_width  = MAX (doc_width, width);
       doc_height = MAX (doc_height, height);
@@ -822,39 +822,39 @@ load_image (PopplerDocument        *doc,
       cairo_surface_destroy (surface);
 
       doc_progress = (double) (i + 1) / pages->n_pages;
-      gimp_progress_update (doc_progress);
+      clay_progress_update (doc_progress);
 
-      if (target == GIMP_PAGE_SELECTOR_TARGET_IMAGES)
+      if (target == CLAY_PAGE_SELECTOR_TARGET_IMAGES)
         {
           images[i] = image;
 
-          gimp_image_undo_enable (image);
-          gimp_image_clean_all (image);
+          clay_image_undo_enable (image);
+          clay_image_clean_all (image);
 
           image = 0;
         }
     }
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   if (image)
     {
       /* If PDF contains both portrait and landscape pages,
        * then we need to resize the image to contain both */
-      gimp_image_resize (image, doc_width, doc_height, 0, 0);
+      clay_image_resize (image, doc_width, doc_height, 0, 0);
 
-      gimp_image_undo_enable (image);
-      gimp_image_clean_all (image);
+      clay_image_undo_enable (image);
+      clay_image_clean_all (image);
     }
 
-  if (target == GIMP_PAGE_SELECTOR_TARGET_IMAGES)
+  if (target == CLAY_PAGE_SELECTOR_TARGET_IMAGES)
     {
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
         {
           /* Display images in reverse order.  The last will be
-           * displayed by GIMP itself
+           * displayed by Clay itself
            */
           for (i = pages->n_pages - 1; i > 0; i--)
-            gimp_display_new (images[i]);
+            clay_display_new (images[i]);
         }
 
       image = images[0];
@@ -923,7 +923,7 @@ get_thumb_pixbuf (PopplerDocument *doc,
 typedef struct
 {
   PopplerDocument  *document;
-  GimpPageSelector *selector;
+  ClayPageSelector *selector;
   gboolean          white_background;
 
   GMutex            mutex;
@@ -934,7 +934,7 @@ typedef struct
 
 typedef struct
 {
-  GimpPageSelector *selector;
+  ClayPageSelector *selector;
   gint              page_no;
   GdkPixbuf        *pixbuf;
 } IdleData;
@@ -944,7 +944,7 @@ idle_set_thumbnail (gpointer data)
 {
   IdleData *idle_data = data;
 
-  gimp_page_selector_set_page_thumbnail (idle_data->selector,
+  clay_page_selector_set_page_thumbnail (idle_data->selector,
                                          idle_data->page_no,
                                          idle_data->pixbuf);
   g_object_unref (idle_data->pixbuf);
@@ -1036,12 +1036,12 @@ white_background_toggled (GtkToggleButton *widget,
   g_mutex_unlock (&thread_data->mutex);
 }
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 load_dialog (PopplerDocument     *doc,
              PdfSelectedPages    *pages,
-             GimpVectorLoadData   extracted_data,
-             GimpProcedure       *procedure,
-             GimpProcedureConfig *config)
+             ClayVectorLoadData   extracted_data,
+             ClayProcedure       *procedure,
+             ClayProcedureConfig *config)
 {
   GtkWidget  *dialog;
   GtkWidget  *vbox;
@@ -1058,14 +1058,14 @@ load_dialog (PopplerDocument     *doc,
 
   gboolean    run;
 
-  GimpPageSelectorTarget  target;
+  ClayPageSelectorTarget  target;
   gboolean                white_background;
 
   n_pages    = poppler_document_get_n_pages (doc);
   title_text = poppler_document_get_title (doc);
 
-  dialog = gimp_vector_load_procedure_dialog_new (GIMP_VECTOR_LOAD_PROCEDURE (procedure),
-                                                  GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_vector_load_procedure_dialog_new (CLAY_VECTOR_LOAD_PROCEDURE (procedure),
+                                                  CLAY_PROCEDURE_CONFIG (config),
                                                   &extracted_data, NULL);
 
   g_object_get (config,
@@ -1091,7 +1091,7 @@ load_dialog (PopplerDocument     *doc,
     g_free (title_text);
 
   /* Page Selector */
-  selector = gimp_page_selector_new ();
+  selector = clay_page_selector_new ();
   gtk_widget_set_size_request (selector, 380, 300);
   gtk_box_pack_start (GTK_BOX (vbox), selector, TRUE, TRUE, 0);
   gtk_widget_set_visible (selector, TRUE);
@@ -1099,11 +1099,11 @@ load_dialog (PopplerDocument     *doc,
   if (n_pages <= 0)
     {
       g_message (_("Error getting number of pages from the given PDF file."));
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  gimp_page_selector_set_n_pages (GIMP_PAGE_SELECTOR (selector), n_pages);
-  gimp_page_selector_set_target (GIMP_PAGE_SELECTOR (selector),
+  clay_page_selector_set_n_pages (CLAY_PAGE_SELECTOR (selector), n_pages);
+  clay_page_selector_set_target (CLAY_PAGE_SELECTOR (selector),
                                  target);
 
   for (i = 0; i < n_pages; i++)
@@ -1114,7 +1114,7 @@ load_dialog (PopplerDocument     *doc,
       page = poppler_document_get_page (doc, i);
       g_object_get (G_OBJECT (page), "label", &label, NULL);
 
-      gimp_page_selector_set_page_label (GIMP_PAGE_SELECTOR (selector), i,
+      clay_page_selector_set_page_label (CLAY_PAGE_SELECTOR (selector), i,
                                          label);
 
       g_object_unref (page);
@@ -1123,14 +1123,14 @@ load_dialog (PopplerDocument     *doc,
   /* Since selecting none will be equivalent to selecting all, this is
    * only useful as a feedback for the default behavior of selecting all
    * pages. */
-  gimp_page_selector_select_all (GIMP_PAGE_SELECTOR (selector));
+  clay_page_selector_select_all (CLAY_PAGE_SELECTOR (selector));
 
   g_signal_connect_swapped (selector, "activate",
                             G_CALLBACK (gtk_window_activate_default),
                             dialog);
 
   thread_data.document          = doc;
-  thread_data.selector          = GIMP_PAGE_SELECTOR (selector);
+  thread_data.selector          = CLAY_PAGE_SELECTOR (selector);
   thread_data.render_thumbnails = TRUE;
   thread_data.stop_thumbnailing = FALSE;
   thread_data.white_background  = white_background;
@@ -1139,37 +1139,37 @@ load_dialog (PopplerDocument     *doc,
 
   thread = g_thread_new ("thumbnailer", thumbnail_thread, &thread_data);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "reverse-order",
                               NULL);
 
-  white_bg = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  white_bg = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                "white-background", G_TYPE_NONE);
   g_signal_connect (white_bg, "toggled",
                     G_CALLBACK (white_background_toggled), &thread_data);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "antialias",
                               "white-background",
                               NULL);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
-  target = gimp_page_selector_get_target (GIMP_PAGE_SELECTOR (selector));
+  target = clay_page_selector_get_target (CLAY_PAGE_SELECTOR (selector));
   g_object_set (config,
                 "target", target,
                 NULL);
 
   pages->pages =
-    gimp_page_selector_get_selected_pages (GIMP_PAGE_SELECTOR (selector),
+    clay_page_selector_get_selected_pages (CLAY_PAGE_SELECTOR (selector),
                                            (gint *) &pages->n_pages);
 
   /* select all if none selected */
   if (pages->n_pages == 0)
     {
-      gimp_page_selector_select_all (GIMP_PAGE_SELECTOR (selector));
+      clay_page_selector_select_all (CLAY_PAGE_SELECTOR (selector));
 
       pages->pages =
-        gimp_page_selector_get_selected_pages (GIMP_PAGE_SELECTOR (selector),
+        clay_page_selector_get_selected_pages (CLAY_PAGE_SELECTOR (selector),
                                                (gint *) &pages->n_pages);
     }
 
@@ -1186,8 +1186,8 @@ load_dialog (PopplerDocument     *doc,
   /* XXX Unsure why, I get some CRITICALs when destroying the dialog, unless I
    * unselect all first.
    */
-  gimp_page_selector_unselect_all (GIMP_PAGE_SELECTOR (selector));
+  clay_page_selector_unselect_all (CLAY_PAGE_SELECTOR (selector));
   gtk_widget_destroy (dialog);
 
-  return run ? GIMP_PDB_SUCCESS : GIMP_PDB_CANCEL;
+  return run ? CLAY_PDB_SUCCESS : CLAY_PDB_CANCEL;
 }

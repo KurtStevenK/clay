@@ -23,66 +23,66 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-undo.h"
-#include "core/gimplayer.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/clayimage-undo.h"
+#include "core/claylayer.h"
+#include "core/clayprogress.h"
 
 #include "file/file-open.h"
-#include "file/gimp-file.h"
+#include "file/clay-file.h"
 
-#include "widgets/gimpfiledialog.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpopendialog.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayfiledialog.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayopendialog.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "file-open-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void       file_open_dialog_response    (GtkWidget           *dialog,
                                                 gint                 response_id,
-                                                Gimp                *gimp);
-static GimpImage *file_open_dialog_open_image  (GtkWidget           *dialog,
-                                                Gimp                *gimp,
+                                                Clay                *clay);
+static ClayImage *file_open_dialog_open_image  (GtkWidget           *dialog,
+                                                Clay                *clay,
                                                 GFile               *file,
-                                                GimpPlugInProcedure *load_proc,
+                                                ClayPlugInProcedure *load_proc,
                                                 gboolean             as_link);
 static gboolean   file_open_dialog_open_layers (GtkWidget           *dialog,
-                                                GimpImage           *image,
+                                                ClayImage           *image,
                                                 GFile               *file,
-                                                GimpPlugInProcedure *load_proc,
+                                                ClayPlugInProcedure *load_proc,
                                                 gboolean             as_link);
 
 
 /*  public functions  */
 
 GtkWidget *
-file_open_dialog_new (Gimp *gimp)
+file_open_dialog_new (Clay *clay)
 {
   GtkWidget *dialog;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  dialog = gimp_open_dialog_new (gimp);
+  dialog = clay_open_dialog_new (clay);
 
   gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (dialog), TRUE);
 
-  gimp_file_dialog_load_state (GIMP_FILE_DIALOG (dialog),
-                               "gimp-file-open-dialog-state");
+  clay_file_dialog_load_state (CLAY_FILE_DIALOG (dialog),
+                               "clay-file-open-dialog-state");
 
   g_signal_connect (dialog, "response",
                     G_CALLBACK (file_open_dialog_response),
-                    gimp);
+                    clay);
 
   return dialog;
 }
@@ -93,16 +93,16 @@ file_open_dialog_new (Gimp *gimp)
 static void
 file_open_dialog_response (GtkWidget *dialog,
                            gint       response_id,
-                           Gimp      *gimp)
+                           Clay      *clay)
 {
-  GimpFileDialog *file_dialog = GIMP_FILE_DIALOG (dialog);
-  GimpOpenDialog *open_dialog = GIMP_OPEN_DIALOG (dialog);
+  ClayFileDialog *file_dialog = CLAY_FILE_DIALOG (dialog);
+  ClayOpenDialog *open_dialog = CLAY_OPEN_DIALOG (dialog);
   GSList         *files;
   GSList         *list;
   gboolean        success = FALSE;
 
-  gimp_file_dialog_save_state (GIMP_FILE_DIALOG (dialog),
-                               "gimp-file-open-dialog-state");
+  clay_file_dialog_save_state (CLAY_FILE_DIALOG (dialog),
+                               "clay-file-open-dialog-state");
 
   if (response_id != GTK_RESPONSE_OK)
     {
@@ -115,11 +115,11 @@ file_open_dialog_response (GtkWidget *dialog,
   files = gtk_file_chooser_get_files (GTK_FILE_CHOOSER (dialog));
 
   if (files)
-    g_object_set_data_full (G_OBJECT (gimp), GIMP_FILE_OPEN_LAST_FILE_KEY,
+    g_object_set_data_full (G_OBJECT (clay), CLAY_FILE_OPEN_LAST_FILE_KEY,
                             g_object_ref (files->data),
                             (GDestroyNotify) g_object_unref);
 
-  gimp_file_dialog_set_sensitive (file_dialog, FALSE);
+  clay_file_dialog_set_sensitive (file_dialog, FALSE);
 
   /* When we are going to open new image windows, unset the transient
    * window. We don't need it since we will use gdk_window_raise() to
@@ -137,8 +137,8 @@ file_open_dialog_response (GtkWidget *dialog,
   if (file_dialog->image          &&
       open_dialog->open_as_layers &&
       g_slist_length (files) > 1)
-    gimp_image_undo_group_start (file_dialog->image,
-                                 GIMP_UNDO_GROUP_LAYER_ADD,
+    clay_image_undo_group_start (file_dialog->image,
+                                 CLAY_UNDO_GROUP_LAYER_ADD,
                                  _("Open layers"));
 
   for (list = files; list; list = g_slist_next (list))
@@ -149,9 +149,9 @@ file_open_dialog_response (GtkWidget *dialog,
         {
           if (! file_dialog->image)
             {
-              gimp_open_dialog_set_image (open_dialog,
+              clay_open_dialog_set_image (open_dialog,
                                           file_open_dialog_open_image (dialog,
-                                                                       gimp,
+                                                                       clay,
                                                                        file,
                                                                        file_dialog->file_proc,
                                                                        open_dialog->open_as_link),
@@ -163,8 +163,8 @@ file_open_dialog_response (GtkWidget *dialog,
                   g_object_ref (file_dialog->image);
 
                   if (g_slist_length (files) > 1)
-                    gimp_image_undo_group_start (file_dialog->image,
-                                                 GIMP_UNDO_GROUP_LAYER_ADD,
+                    clay_image_undo_group_start (file_dialog->image,
+                                                 CLAY_UNDO_GROUP_LAYER_ADD,
                                                  _("Open layers"));
 
                   success = TRUE;
@@ -182,7 +182,7 @@ file_open_dialog_response (GtkWidget *dialog,
       else
         {
           if (file_open_dialog_open_image (dialog,
-                                           gimp,
+                                           clay,
                                            file,
                                            file_dialog->file_proc,
                                            open_dialog->open_as_link))
@@ -203,14 +203,14 @@ file_open_dialog_response (GtkWidget *dialog,
   if (file_dialog->image          &&
       open_dialog->open_as_layers &&
       g_slist_length (files) > 1)
-    gimp_image_undo_group_end (file_dialog->image);
+    clay_image_undo_group_end (file_dialog->image);
 
   if (success)
     {
       if (file_dialog->image)
         {
           if (open_dialog->open_as_layers)
-            gimp_image_flush (file_dialog->image);
+            clay_image_flush (file_dialog->image);
 
           g_object_unref (file_dialog->image);
         }
@@ -222,41 +222,41 @@ file_open_dialog_response (GtkWidget *dialog,
       if (file_dialog->image)
         g_object_unref (file_dialog->image);
 
-      gimp_file_dialog_set_sensitive (file_dialog, TRUE);
+      clay_file_dialog_set_sensitive (file_dialog, TRUE);
     }
 
   g_slist_free_full (files, (GDestroyNotify) g_object_unref);
 }
 
-static GimpImage *
+static ClayImage *
 file_open_dialog_open_image (GtkWidget           *dialog,
-                             Gimp                *gimp,
+                             Clay                *clay,
                              GFile               *file,
-                             GimpPlugInProcedure *load_proc,
+                             ClayPlugInProcedure *load_proc,
                              gboolean             as_link)
 {
-  GimpImage         *image;
-  GimpPDBStatusType  status;
+  ClayImage         *image;
+  ClayPDBStatusType  status;
   GError            *error = NULL;
 
-  image = file_open_with_proc_and_display (gimp,
-                                           gimp_get_user_context (gimp),
-                                           GIMP_PROGRESS (dialog),
+  image = file_open_with_proc_and_display (clay,
+                                           clay_get_user_context (clay),
+                                           CLAY_PROGRESS (dialog),
                                            file, FALSE, as_link,
                                            load_proc,
-                                           G_OBJECT (gimp_widget_get_monitor (dialog)),
+                                           G_OBJECT (clay_widget_get_monitor (dialog)),
                                            &status, &error);
 
-  if (! image && status != GIMP_PDB_SUCCESS && status != GIMP_PDB_CANCEL)
+  if (! image && status != CLAY_PDB_SUCCESS && status != CLAY_PDB_CANCEL)
     {
       if (error)
-        gimp_message (gimp, G_OBJECT (dialog), GIMP_MESSAGE_ERROR,
+        clay_message (clay, G_OBJECT (dialog), CLAY_MESSAGE_ERROR,
                       _("Opening '%s' failed:\n\n%s"),
-                      gimp_file_get_utf8_name (file), error->message);
+                      clay_file_get_utf8_name (file), error->message);
       else
-        gimp_message (gimp, G_OBJECT (dialog), GIMP_MESSAGE_ERROR,
+        clay_message (clay, G_OBJECT (dialog), CLAY_MESSAGE_ERROR,
                       _("Opening '%s' failed."),
-                      gimp_file_get_utf8_name (file));
+                      clay_file_get_utf8_name (file));
       g_clear_error (&error);
     }
 
@@ -265,40 +265,40 @@ file_open_dialog_open_image (GtkWidget           *dialog,
 
 static gboolean
 file_open_dialog_open_layers (GtkWidget           *dialog,
-                              GimpImage           *image,
+                              ClayImage           *image,
                               GFile               *file,
-                              GimpPlugInProcedure *load_proc,
+                              ClayPlugInProcedure *load_proc,
                               gboolean             as_link)
 {
   GList             *new_layers;
-  GimpPDBStatusType  status;
+  ClayPDBStatusType  status;
   GError            *error = NULL;
 
-  new_layers = file_open_layers (image->gimp,
-                                 gimp_get_user_context (image->gimp),
-                                 GIMP_PROGRESS (dialog),
+  new_layers = file_open_layers (image->clay,
+                                 clay_get_user_context (image->clay),
+                                 CLAY_PROGRESS (dialog),
                                  image, FALSE, as_link,
-                                 file, GIMP_RUN_INTERACTIVE, load_proc,
+                                 file, CLAY_RUN_INTERACTIVE, load_proc,
                                  &status, &error);
 
   if (new_layers)
     {
-      gimp_image_add_layers (image, new_layers,
-                             GIMP_IMAGE_ACTIVE_PARENT, -1,
+      clay_image_add_layers (image, new_layers,
+                             CLAY_IMAGE_ACTIVE_PARENT, -1,
                              0, 0,
-                             gimp_image_get_width (image),
-                             gimp_image_get_height (image),
+                             clay_image_get_width (image),
+                             clay_image_get_height (image),
                              _("Open layers"));
 
       g_list_free (new_layers);
 
       return TRUE;
     }
-  else if (status != GIMP_PDB_CANCEL)
+  else if (status != CLAY_PDB_CANCEL)
     {
-      gimp_message (image->gimp, G_OBJECT (dialog), GIMP_MESSAGE_ERROR,
+      clay_message (image->clay, G_OBJECT (dialog), CLAY_MESSAGE_ERROR,
                     _("Opening '%s' failed:\n\n%s"),
-                    gimp_file_get_utf8_name (file), error ? error->message: _("n/a"));
+                    clay_file_get_utf8_name (file), error ? error->message: _("n/a"));
       g_clear_error (&error);
     }
 

@@ -22,15 +22,15 @@
 
 #include <glib-object.h>
 
-#define GIMP_TYPE_METADATA_TAG_OBJECT (gimp_metadata_tag_object_get_type ())
-G_DECLARE_FINAL_TYPE (GimpMetadataTagObject, gimp_metadata_tag_object,
-                      GIMP, METADATA_TAG_OBJECT,
+#define CLAY_TYPE_METADATA_TAG_OBJECT (clay_metadata_tag_object_get_type ())
+G_DECLARE_FINAL_TYPE (ClayMetadataTagObject, clay_metadata_tag_object,
+                      CLAY, METADATA_TAG_OBJECT,
                       GObject);
 
-GimpMetadataTagObject *  gimp_metadata_tag_object_new         (const gchar           *tag,
+ClayMetadataTagObject *  clay_metadata_tag_object_new         (const gchar           *tag,
                                                                const gchar           *value);
 
-const gchar *            gimp_metadata_tag_object_get_tag     (GimpMetadataTagObject *self);
-const gchar *            gimp_metadata_tag_object_get_value   (GimpMetadataTagObject *self);
+const gchar *            clay_metadata_tag_object_get_tag     (ClayMetadataTagObject *self);
+const gchar *            clay_metadata_tag_object_get_value   (ClayMetadataTagObject *self);
 
 #endif /* __METADATA_TAG_OBJECT_H__ */

@@ -1,0 +1,37 @@
+/* Clay colour scheme "Nord": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(236,239,244);
+@define-color bg-color                   rgb(46,52,64);
+@define-color border-color               rgb(73,78,89);
+@define-color dimmed-fg-color            rgb(188,192,199);
+@define-color disabled-fg-color          rgb(150,155,163);
+@define-color disabled-button-color      rgb(107,112,122);
+@define-color hover-color                rgb(73,78,89);
+@define-color widget-bg-color            rgb(57,63,75);
+@define-color selected-color             rgb(84,89,100);
+@define-color extreme-bg-color           rgb(32,36,45);
+@define-color extreme-selected-color     rgb(73,78,89);
+@define-color strong-border-color        rgb(112,117,127);
+@define-color stronger-border-color      rgb(112,117,127);
+@define-color edge-border-color          rgb(112,117,127);
+@define-color scrollbar-slider-color     rgb(112,117,127);
+@define-color scrollbar-trough-color     rgb(32,36,45);
+@define-color ruler-color                rgba(73,78,89,0.3);
+@define-color accent-color               rgb(136,192,208);
+@define-color accent-hover-color         rgb(160,205,217);
+@define-color on-accent-color            rgb(46,52,64);
+@define-color destructive-color          rgb(191,97,106);
+@define-color good-color                 rgb(163,190,140);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+/* icon colours */
+@define-color lane-rust     rgb(208,135,112);
+@define-color lane-maroon   rgb(180,142,173);
+@define-color lane-mustard  rgb(235,203,139);
+@define-color lane-purple   rgb(180,142,173);
+@define-color lane-blue     rgb(136,192,208);
+@define-color lane-green    rgb(163,190,140);

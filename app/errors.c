@@ -31,25 +31,25 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 #ifdef G_OS_WIN32
-#include "libgimpbase/gimpwin32-io.h"
+#include "libclaybase/claywin32-io.h"
 #endif
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpidtable.h"
-#include "core/gimpitem.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claydrawable.h"
+#include "core/clayidtable.h"
+#include "core/clayitem.h"
+#include "core/clayparamspecs.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "pdb/gimppdb.h"
+#include "pdb/claypdb.h"
 
 #include "errors.h"
-#include "gimp-log.h"
+#include "clay-log.h"
 
 #ifdef G_OS_WIN32
 #include <windows.h>
@@ -57,27 +57,27 @@
 
 /*  private variables  */
 
-static Gimp                *the_errors_gimp    = NULL;
+static Clay                *the_errors_clay    = NULL;
 static gboolean             use_debug_handler  = FALSE;
-static GimpStackTraceMode   stack_trace_mode   = GIMP_STACK_TRACE_QUERY;
+static ClayStackTraceMode   stack_trace_mode   = CLAY_STACK_TRACE_QUERY;
 static gchar               *full_prog_name     = NULL;
 static gchar               *backtrace_file     = NULL;
-static GimpLogHandler       log_domain_handler = 0;
+static ClayLogHandler       log_domain_handler = 0;
 static guint                global_handler_id  = 0;
 
 
 /*  local function prototypes  */
 
-static void    gimp_message_log_func             (const gchar        *log_domain,
+static void    clay_message_log_func             (const gchar        *log_domain,
                                                   GLogLevelFlags      flags,
                                                   const gchar        *message,
                                                   gpointer            data);
-static void    gimp_error_log_func               (const gchar        *domain,
+static void    clay_error_log_func               (const gchar        *domain,
                                                   GLogLevelFlags      flags,
                                                   const gchar        *message,
                                                   gpointer            data) G_GNUC_NORETURN;
 
-static G_GNUC_NORETURN void  gimp_eek            (const gchar        *reason,
+static G_GNUC_NORETURN void  clay_eek            (const gchar        *reason,
                                                   const gchar        *message,
                                                   gboolean            use_handler);
 
@@ -85,22 +85,22 @@ static G_GNUC_NORETURN void  gimp_eek            (const gchar        *reason,
 /*  public functions  */
 
 void
-errors_init (Gimp               *gimp,
+errors_init (Clay               *clay,
              const gchar        *_full_prog_name,
              gboolean            _use_debug_handler,
-             GimpStackTraceMode  _stack_trace_mode,
+             ClayStackTraceMode  _stack_trace_mode,
              const gchar        *_backtrace_file)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
   g_return_if_fail (_full_prog_name != NULL);
   g_return_if_fail (full_prog_name == NULL);
 
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
   g_printerr ("This is a development version of Clay.  "
               "Debug messages may appear here.\n\n");
-#endif /* GIMP_UNSTABLE */
+#endif /* CLAY_UNSTABLE */
 
-  the_errors_gimp   = gimp;
+  the_errors_clay   = clay;
   use_debug_handler = _use_debug_handler ? TRUE : FALSE;
   stack_trace_mode  = _stack_trace_mode;
   full_prog_name    = g_strdup (_full_prog_name);
@@ -112,15 +112,15 @@ errors_init (Gimp               *gimp,
   g_free (backtrace_file);
   backtrace_file = g_strdup (_backtrace_file);
 
-  log_domain_handler = gimp_log_set_handler (FALSE,
+  log_domain_handler = clay_log_set_handler (FALSE,
                                              G_LOG_LEVEL_WARNING |
                                              G_LOG_LEVEL_MESSAGE |
                                              G_LOG_LEVEL_CRITICAL,
-                                             gimp_message_log_func, gimp);
+                                             clay_message_log_func, clay);
 
   global_handler_id = g_log_set_handler (NULL,
                                          G_LOG_LEVEL_ERROR | G_LOG_FLAG_FATAL,
-                                         gimp_error_log_func, gimp);
+                                         clay_error_log_func, clay);
 }
 
 void
@@ -128,7 +128,7 @@ errors_exit (void)
 {
   if (log_domain_handler)
     {
-      gimp_log_remove_handler (log_domain_handler);
+      clay_log_remove_handler (log_domain_handler);
 
       log_domain_handler = 0;
     }
@@ -140,7 +140,7 @@ errors_exit (void)
       global_handler_id = 0;
     }
 
-  the_errors_gimp = NULL;
+  the_errors_clay = NULL;
 
   if (backtrace_file)
     g_free (backtrace_file);
@@ -149,10 +149,10 @@ errors_exit (void)
 }
 
 GHashTable *
-errors_recovered (Gimp *gimp)
+errors_recovered (Clay *clay)
 {
   GHashTable      *recovering;
-  gchar           *backup_path = g_build_filename (gimp_cache_directory (), "images", NULL);
+  gchar           *backup_path = g_build_filename (clay_cache_directory (), "images", NULL);
   GFile           *backups_dir = g_file_new_for_path (backup_path);
   GFileEnumerator *enumerator;
 
@@ -204,7 +204,7 @@ errors_recovered (Gimp *gimp)
                    * recover next. So we make sure all our needed IDs
                    * stay available.
                    */
-                  gimp_id_table_reserve (gimp->image_table, (gint) id);
+                  clay_id_table_reserve (clay->image_table, (gint) id);
                   g_hash_table_insert (recovering, GINT_TO_POINTER ((gint) id), g_object_ref (subdir));
                 }
 
@@ -229,40 +229,40 @@ errors_recovered (Gimp *gimp)
 }
 
 void
-gimp_fatal_error (const gchar *message)
+clay_fatal_error (const gchar *message)
 {
-  gimp_eek ("fatal error", message, TRUE);
+  clay_eek ("fatal error", message, TRUE);
 }
 
 void
-gimp_terminate (const gchar *message)
+clay_terminate (const gchar *message)
 {
-  gimp_eek ("terminated", message, use_debug_handler);
+  clay_eek ("terminated", message, use_debug_handler);
 }
 
 
 /*  private functions  */
 
 static void
-gimp_message_log_func (const gchar    *log_domain,
+clay_message_log_func (const gchar    *log_domain,
                        GLogLevelFlags  flags,
                        const gchar    *message,
                        gpointer        data)
 {
-  Gimp                *gimp        = data;
-  GimpCoreConfig      *config      = gimp->config;
+  Clay                *clay        = data;
+  ClayCoreConfig      *config      = clay->config;
   const gchar         *msg_domain  = NULL;
-  GimpMessageSeverity  severity    = GIMP_MESSAGE_WARNING;
+  ClayMessageSeverity  severity    = CLAY_MESSAGE_WARNING;
   gboolean             gui_message = TRUE;
-  GimpDebugPolicy      debug_policy;
+  ClayDebugPolicy      debug_policy;
 
-  /* All GIMP messages are processed under the same domain, but
+  /* All Clay messages are processed under the same domain, but
    * we need to keep the log domain information for third party
    * messages.
    */
   if (! log_domain ||
-      (! g_str_has_prefix (log_domain, "Gimp") &&
-       ! g_str_has_prefix (log_domain, "LibGimp")))
+      (! g_str_has_prefix (log_domain, "Clay") &&
+       ! g_str_has_prefix (log_domain, "LibClay")))
     msg_domain = log_domain;
 
   /* If debug policy requires it, WARNING and CRITICAL errors must be
@@ -275,58 +275,58 @@ gimp_message_log_func (const gchar    *log_domain,
   switch (flags & G_LOG_LEVEL_MASK)
     {
     case G_LOG_LEVEL_MESSAGE:
-      severity = GIMP_MESSAGE_INFO;
+      severity = CLAY_MESSAGE_INFO;
       break;
     case G_LOG_LEVEL_WARNING:
-      severity = GIMP_MESSAGE_BUG_WARNING;
-      if (debug_policy > GIMP_DEBUG_POLICY_WARNING)
+      severity = CLAY_MESSAGE_BUG_WARNING;
+      if (debug_policy > CLAY_DEBUG_POLICY_WARNING)
         gui_message = FALSE;
       break;
     case G_LOG_LEVEL_CRITICAL:
-      severity = GIMP_MESSAGE_BUG_CRITICAL;
-      if (debug_policy > GIMP_DEBUG_POLICY_CRITICAL)
+      severity = CLAY_MESSAGE_BUG_CRITICAL;
+      if (debug_policy > CLAY_DEBUG_POLICY_CRITICAL)
         gui_message = FALSE;
       break;
     }
 
-  if (gimp && gui_message)
+  if (clay && gui_message)
     {
-      gimp_show_message (gimp, NULL, severity, msg_domain, message);
+      clay_show_message (clay, NULL, severity, msg_domain, message);
     }
   else
     {
       const gchar *reason = "Message";
 
-      gimp_enum_get_value (GIMP_TYPE_MESSAGE_SEVERITY, severity,
+      clay_enum_get_value (CLAY_TYPE_MESSAGE_SEVERITY, severity,
                            NULL, NULL, &reason, NULL);
 
       g_printerr ("%s: %s-%s: %s\n",
-                  gimp_filename_to_utf8 (full_prog_name),
+                  clay_filename_to_utf8 (full_prog_name),
                   log_domain, reason, message);
     }
 }
 
 static void
-gimp_error_log_func (const gchar    *domain,
+clay_error_log_func (const gchar    *domain,
                      GLogLevelFlags  flags,
                      const gchar    *message,
                      gpointer        data)
 {
-  gimp_fatal_error (message);
+  clay_fatal_error (message);
 }
 
 static void
-gimp_eek (const gchar *reason,
+clay_eek (const gchar *reason,
           const gchar *message,
           gboolean     use_handler)
 {
-  GimpCoreConfig  *config        = the_errors_gimp->config;
-#if !defined(G_OS_WIN32) || !defined(GIMP_CONSOLE_COMPILATION)
+  ClayCoreConfig  *config        = the_errors_clay->config;
+#if !defined(G_OS_WIN32) || !defined(CLAY_CONSOLE_COMPILATION)
   gboolean         eek_handled   = FALSE;
 #endif
-  GimpDebugPolicy  debug_policy;
+  ClayDebugPolicy  debug_policy;
 
-  /* GIMP has 2 ways to handle termination signals and fatal errors: one
+  /* Clay has 2 ways to handle termination signals and fatal errors: one
    * is the stack trace mode which is set at start as command line
    * option --stack-trace-mode, this won't change for the length of the
    * session and outputs a trace in terminal; the other is set in
@@ -346,9 +346,9 @@ gimp_eek (const gchar *reason,
 
   if (use_handler)
     {
-#ifndef GIMP_CONSOLE_COMPILATION
-      if (debug_policy != GIMP_DEBUG_POLICY_NEVER &&
-          ! the_errors_gimp->no_interface         &&
+#ifndef CLAY_CONSOLE_COMPILATION
+      if (debug_policy != CLAY_DEBUG_POLICY_NEVER &&
+          ! the_errors_clay->no_interface         &&
           backtrace_file)
         {
 #ifndef G_OS_WIN32
@@ -361,22 +361,22 @@ gimp_eek (const gchar *reason,
            */
 #ifdef G_OS_WIN32
 #ifdef ENABLE_RELOCATABLE_RESOURCES
-          const gchar *gimpdebug = g_build_filename (gimp_installation_directory (), "bin",
-                                                     "clay-debug-tool-" GIMP_TOOL_VERSION ".exe", NULL);
+          const gchar *claydebug = g_build_filename (clay_installation_directory (), "bin",
+                                                     "clay-debug-tool-" CLAY_TOOL_VERSION ".exe", NULL);
 #else
-          const gchar *gimpdebug = BINDIR "/clay-debug-tool-" GIMP_TOOL_VERSION ".exe";
+          const gchar *claydebug = BINDIR "/clay-debug-tool-" CLAY_TOOL_VERSION ".exe";
 #endif
 #elif defined (PLATFORM_OSX)
-          const gchar *gimpdebug = "clay-debug-tool-" GIMP_TOOL_VERSION;
+          const gchar *claydebug = "clay-debug-tool-" CLAY_TOOL_VERSION;
 #elif !defined (G_OS_WIN32) && !defined (PLATFORM_OSX) && defined ENABLE_RELOCATABLE_RESOURCES
-          const gchar *gimpdebug = g_build_filename (gimp_installation_directory (),
-                                                     "libexec", "clay-debug-tool-" GIMP_TOOL_VERSION, NULL);
+          const gchar *claydebug = g_build_filename (clay_installation_directory (),
+                                                     "libexec", "clay-debug-tool-" CLAY_TOOL_VERSION, NULL);
 #else
-          const gchar *gimpdebug = LIBEXECDIR "/clay-debug-tool-" GIMP_TOOL_VERSION;
+          const gchar *claydebug = LIBEXECDIR "/clay-debug-tool-" CLAY_TOOL_VERSION;
 #endif
-          gchar *args[9] = { (gchar *) gimpdebug, full_prog_name, NULL,
+          gchar *args[9] = { (gchar *) claydebug, full_prog_name, NULL,
                              (gchar *) reason, (gchar *) message,
-                             backtrace_file, the_errors_gimp->config->last_known_release,
+                             backtrace_file, the_errors_clay->config->last_known_release,
                              NULL, NULL };
           gchar  pid[16];
           gchar  timestamp[16];
@@ -384,7 +384,7 @@ gimp_eek (const gchar *reason,
           g_snprintf (pid, 16, "%u", (guint) getpid ());
           args[2] = pid;
 
-          g_snprintf (timestamp, 16, "%"G_GINT64_FORMAT, the_errors_gimp->config->last_release_timestamp);
+          g_snprintf (timestamp, 16, "%"G_GINT64_FORMAT, the_errors_clay->config->last_release_timestamp);
           args[7] = timestamp;
 
 #ifndef G_OS_WIN32
@@ -392,7 +392,7 @@ gimp_eek (const gchar *reason,
            * and is waiting for us in a text file.
            */
           fd = g_fopen (backtrace_file, "w");
-          has_backtrace = gimp_stack_trace_print ((const gchar *) full_prog_name,
+          has_backtrace = clay_stack_trace_print ((const gchar *) full_prog_name,
                                                   fd, NULL);
           fclose (fd);
 #endif
@@ -400,7 +400,7 @@ gimp_eek (const gchar *reason,
           /* We don't care about any return value. If it fails, too
            * bad, we just won't have any stack trace.
            * We still need to use the sync() variant because we have
-           * to keep GIMP up long enough for the debugger to get its
+           * to keep Clay up long enough for the debugger to get its
            * trace.
            */
           if (has_backtrace &&
@@ -410,38 +410,38 @@ gimp_eek (const gchar *reason,
                              NULL, NULL, NULL, NULL))
             eek_handled = TRUE;
         }
-#endif /* !GIMP_CONSOLE_COMPILATION */
+#endif /* !CLAY_CONSOLE_COMPILATION */
 
 #ifndef G_OS_WIN32
       if (! eek_handled)
         {
           switch (stack_trace_mode)
             {
-            case GIMP_STACK_TRACE_NEVER:
+            case CLAY_STACK_TRACE_NEVER:
               break;
 
-            case GIMP_STACK_TRACE_QUERY:
+            case CLAY_STACK_TRACE_QUERY:
                 {
                   sigset_t sigset;
 
                   sigemptyset (&sigset);
                   sigprocmask (SIG_SETMASK, &sigset, NULL);
 
-                  if (the_errors_gimp)
-                    gimp_gui_ungrab (the_errors_gimp);
+                  if (the_errors_clay)
+                    clay_gui_ungrab (the_errors_clay);
 
-                  gimp_stack_trace_query ((const gchar *) full_prog_name);
+                  clay_stack_trace_query ((const gchar *) full_prog_name);
                 }
               break;
 
-            case GIMP_STACK_TRACE_ALWAYS:
+            case CLAY_STACK_TRACE_ALWAYS:
                 {
                   sigset_t sigset;
 
                   sigemptyset (&sigset);
                   sigprocmask (SIG_SETMASK, &sigset, NULL);
 
-                  gimp_stack_trace_print ((const gchar *) full_prog_name,
+                  clay_stack_trace_print ((const gchar *) full_prog_name,
                                           stdout, NULL);
                 }
               break;
@@ -454,9 +454,9 @@ gimp_eek (const gchar *reason,
     }
 #endif /* ! G_OS_WIN32 || HAVE_EXCHNDL */
 
-#if defined (G_OS_WIN32) && ! defined (GIMP_CONSOLE_COMPILATION)
+#if defined (G_OS_WIN32) && ! defined (CLAY_CONSOLE_COMPILATION)
   /* g_on_error_* don't do anything reasonable on Win32. */
-  if (! eek_handled && ! the_errors_gimp->no_interface)
+  if (! eek_handled && ! the_errors_clay->no_interface)
     {
       char    *utf8  = g_strdup_printf ("%s: %s", reason, message);
       wchar_t *utf16 = g_utf8_to_utf16 (utf8, -1, NULL, NULL, NULL);

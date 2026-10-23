@@ -125,7 +125,7 @@
 ; The model is NOT of independent read and write cursors.
 ; See the following tests.
 
-; This fails w string-length: argument 1 must be: string (/usr/local/share/gimp/3.0/tests/file-port.scm : 107)
+; This fails w string-length: argument 1 must be: string (/usr/local/share/clay/3.0/tests/file-port.scm : 107)
 ;(test! "string read from input-output file port equals what we just wrote")
 ; read cursor points before what we just wrote
 ;(assert `(string=?

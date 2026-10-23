@@ -22,11 +22,11 @@
 
 #include "actions-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimppalette.h"
+#include "core/claycontext.h"
+#include "core/claypalette.h"
 
-#include "widgets/gimppaletteeditor.h"
-#include "widgets/gimppaletteview.h"
+#include "widgets/claypaletteeditor.h"
+#include "widgets/claypaletteview.h"
 
 #include "palette-editor-commands.h"
 
@@ -34,72 +34,72 @@
 /*  public functions  */
 
 void
-palette_editor_edit_color_cmd_callback (GimpAction *action,
+palette_editor_edit_color_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpPaletteEditor *editor = GIMP_PALETTE_EDITOR (data);
+  ClayPaletteEditor *editor = CLAY_PALETTE_EDITOR (data);
 
-  gimp_palette_editor_edit_color (editor);
+  clay_palette_editor_edit_color (editor);
 }
 
 void
-palette_editor_new_color_cmd_callback (GimpAction *action,
+palette_editor_new_color_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data)
 {
-  GimpPaletteEditor *editor      = GIMP_PALETTE_EDITOR (data);
-  GimpDataEditor    *data_editor = GIMP_DATA_EDITOR (data);
+  ClayPaletteEditor *editor      = CLAY_PALETTE_EDITOR (data);
+  ClayDataEditor    *data_editor = CLAY_DATA_EDITOR (data);
   gboolean           background  = (gboolean) g_variant_get_int32 (value);
 
   if (data_editor->data_editable)
     {
-      GimpPalette      *palette = GIMP_PALETTE (data_editor->data);
-      GimpPaletteEntry *entry;
+      ClayPalette      *palette = CLAY_PALETTE (data_editor->data);
+      ClayPaletteEntry *entry;
       GeglColor        *color;
 
       if (background)
-        color = gimp_context_get_background (data_editor->context);
+        color = clay_context_get_background (data_editor->context);
       else
-        color = gimp_context_get_foreground (data_editor->context);
+        color = clay_context_get_foreground (data_editor->context);
 
-      entry = gimp_palette_add_entry (palette, -1, NULL, color);
-      gimp_palette_view_select_entry (GIMP_PALETTE_VIEW (editor->view), entry);
+      entry = clay_palette_add_entry (palette, -1, NULL, color);
+      clay_palette_view_select_entry (CLAY_PALETTE_VIEW (editor->view), entry);
     }
 }
 
 void
-palette_editor_delete_color_cmd_callback (GimpAction *action,
+palette_editor_delete_color_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data)
 {
-  GimpPaletteEditor *editor      = GIMP_PALETTE_EDITOR (data);
-  GimpDataEditor    *data_editor = GIMP_DATA_EDITOR (data);
+  ClayPaletteEditor *editor      = CLAY_PALETTE_EDITOR (data);
+  ClayDataEditor    *data_editor = CLAY_DATA_EDITOR (data);
 
   if (data_editor->data_editable && editor->color)
     {
-      GimpPalette *palette = GIMP_PALETTE (data_editor->data);
+      ClayPalette *palette = CLAY_PALETTE (data_editor->data);
       gint         index;
 
-      index = gimp_palette_get_entry_position (palette, editor->color);
+      index = clay_palette_get_entry_position (palette, editor->color);
 
-      gimp_palette_delete_entry (palette, editor->color);
+      clay_palette_delete_entry (palette, editor->color);
 
-      if (index >= gimp_palette_get_n_colors (palette))
-        index = gimp_palette_get_n_colors (palette) - 1;
+      if (index >= clay_palette_get_n_colors (palette))
+        index = clay_palette_get_n_colors (palette) - 1;
 
-      gimp_palette_view_select_entry (GIMP_PALETTE_VIEW (editor->view),
-                                      gimp_palette_get_entry (palette, index));
+      clay_palette_view_select_entry (CLAY_PALETTE_VIEW (editor->view),
+                                      clay_palette_get_entry (palette, index));
     }
 }
 
 void
-palette_editor_zoom_cmd_callback (GimpAction *action,
+palette_editor_zoom_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpPaletteEditor *editor    = GIMP_PALETTE_EDITOR (data);
-  GimpZoomType       zoom_type = (GimpZoomType) g_variant_get_int32 (value);
+  ClayPaletteEditor *editor    = CLAY_PALETTE_EDITOR (data);
+  ClayZoomType       zoom_type = (ClayZoomType) g_variant_get_int32 (value);
 
-  gimp_palette_editor_zoom (editor, zoom_type);
+  clay_palette_editor_zoom (editor, zoom_type);
 }

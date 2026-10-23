@@ -1,0 +1,77 @@
+import pathlib
+import os
+import sys
+
+@VARS@
+
+base_path   = '@SRCDIR@/../macos/clay-dmg.xcf.xz'
+wilber_path = '@SRCDIR@/clay-logo.svg'
+splash_path = '@SRCDIR@/../clay-splash.xcf.xz'
+output_path = '@BUILDDIR@/clay-dmg.png'
+#The square Clay logo is drawn smaller than Wilber so it fits inside the ring
+wilber_size = 112
+offset_y    = 98
+
+
+# 1. Loading the base dmg elements.
+procedure = Clay.get_pdb().lookup_procedure("clay-file-load")
+config    = procedure.create_config()
+config.set_property("file", Gio.file_new_for_path(base_path))
+v = Clay.Procedure.run(procedure, config)
+if v.index(0) != Clay.PDBStatusType.SUCCESS:
+  sys.exit(70)
+image = v.index(1)
+image.undo_disable()
+
+# 2. Loading Wilber.
+procedure = Clay.get_pdb().lookup_procedure("file-svg-load")
+config    = procedure.create_config()
+config.set_property("file", Gio.file_new_for_path(wilber_path))
+config.set_property("width",  wilber_size)
+config.set_property("height", wilber_size)
+v = Clay.Procedure.run(procedure, config)
+if v.index(0) != Clay.PDBStatusType.SUCCESS:
+  sys.exit(70)
+tmp_image = v.index(1)
+drawables = tmp_image.get_selected_drawables()
+layer2 = Clay.Layer.new_from_drawable (drawables[0], image)
+image.insert_layer(layer2, None, 0)
+layer2.set_offsets((image.get_width() - wilber_size) / 2, offset_y)
+tmp_image.delete()
+
+# 3. Loading background from cropped splash image.
+procedure = Clay.get_pdb().lookup_procedure("clay-file-load")
+config    = procedure.create_config()
+config.set_property("file", Gio.file_new_for_path(splash_path))
+v = Clay.Procedure.run(procedure, config)
+if v.index(0) != Clay.PDBStatusType.SUCCESS:
+  sys.exit(70)
+tmp_image  = v.index(1)
+new_height = target_macos_h
+new_width  = new_height / image.get_height() * image.get_width()
+tmp_image.crop(new_width, new_height, offset_macos_x, offset_macos_y)
+tmp_image.scale(image.get_width(), image.get_height())
+
+if layer_macos is not None:
+  drawable = tmp_image.get_layer_by_name(layer_macos)
+  if drawable is None:
+    sys.stderr.write(f'ERROR: unknown drawable name "{layer_macos}".\n')
+    sys.stderr.write( '       Please verify variable `layer_macos` in clay-data/images/clay-splash.crop\n')
+    sys.exit(70)
+else:
+  drawable = tmp_image.flatten()
+layer6 = Clay.Layer.new_from_drawable (drawable, image)
+image.insert_layer(layer6, None, 6)
+tmp_image.delete()
+
+# 4. Merging the background and Wilber on top.
+image.merge_down(layer2, Clay.MergeType.CLIP_TO_IMAGE)
+procedure = Clay.get_pdb().lookup_procedure("file-png-export")
+config    = procedure.create_config()
+drawables = image.get_selected_drawables()
+config.set_property("image", image)
+config.set_property("file", Gio.file_new_for_path(output_path))
+v = Clay.Procedure.run(procedure, config)
+image.delete()
+if v.index(0) != Clay.PDBStatusType.SUCCESS:
+  sys.exit(70)

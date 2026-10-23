@@ -22,45 +22,45 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "tools-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpimage.h"
-#include "core/gimptoolgroup.h"
-#include "core/gimptoolinfo.h"
-#include "core/gimptooloptions.h"
-#include "core/gimptoolpreset.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/clayimage.h"
+#include "core/claytoolgroup.h"
+#include "core/claytoolinfo.h"
+#include "core/claytooloptions.h"
+#include "core/claytoolpreset.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
-#include "widgets/gimpcairo-wilber.h"
+#include "widgets/claycairo-wilber.h"
 
-#include "gimpgegltool.h"
-#include "gimptool.h"
-#include "gimptoolcontrol.h"
-#include "gimptransformgridtool.h"
+#include "claygegltool.h"
+#include "claytool.h"
+#include "claytoolcontrol.h"
+#include "claytransformgridtool.h"
 #include "tool_manager.h"
 
 
-typedef struct _GimpToolManager GimpToolManager;
+typedef struct _ClayToolManager ClayToolManager;
 
-struct _GimpToolManager
+struct _ClayToolManager
 {
-  Gimp          *gimp;
+  Clay          *clay;
 
-  GimpTool      *active_tool;
+  ClayTool      *active_tool;
   GSList        *tool_stack;
 
   GList         *history;
   gboolean       block_initialization;
 
-  GimpToolGroup *active_tool_group;
+  ClayToolGroup *active_tool_group;
 
-  GimpImage     *image;
+  ClayImage     *image;
 
   GQuark         image_clean_handler_id;
   GQuark         image_dirty_handler_id;
@@ -70,38 +70,38 @@ struct _GimpToolManager
 
 /*  local function prototypes  */
 
-static GimpToolManager * tool_manager_get                        (Gimp            *gimp);
+static ClayToolManager * tool_manager_get                        (Clay            *clay);
 
-static void              tool_manager_select_tool                (GimpToolManager *tool_manager,
-                                                                  GimpTool        *tool);
+static void              tool_manager_select_tool                (ClayToolManager *tool_manager,
+                                                                  ClayTool        *tool);
 
-static void              tool_manager_set_active_tool_group      (GimpToolManager *tool_manager,
-                                                                  GimpToolGroup   *tool_group);
+static void              tool_manager_set_active_tool_group      (ClayToolManager *tool_manager,
+                                                                  ClayToolGroup   *tool_group);
 
-static void              tool_manager_tool_changed               (GimpContext     *user_context,
-                                                                  GimpToolInfo    *tool_info,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_preset_changed             (GimpContext     *user_context,
-                                                                  GimpToolPreset  *preset,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_image_clean_dirty          (GimpImage       *image,
-                                                                  GimpDirtyMask    dirty_mask,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_image_saving               (GimpImage       *image,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_tool_ancestry_changed      (GimpToolInfo    *tool_info,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_group_active_tool_changed  (GimpToolGroup   *tool_group,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_image_changed              (GimpContext     *context,
-                                                                  GimpImage       *image,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_selected_drawables_changed (GimpImage       *image,
-                                                                  GimpToolManager *tool_manager);
-static void              tool_manager_active_tool_deactivated    (GimpContext     *context,
-                                                                  GimpToolManager *tool_manager);
+static void              tool_manager_tool_changed               (ClayContext     *user_context,
+                                                                  ClayToolInfo    *tool_info,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_preset_changed             (ClayContext     *user_context,
+                                                                  ClayToolPreset  *preset,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_image_clean_dirty          (ClayImage       *image,
+                                                                  ClayDirtyMask    dirty_mask,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_image_saving               (ClayImage       *image,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_tool_ancestry_changed      (ClayToolInfo    *tool_info,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_group_active_tool_changed  (ClayToolGroup   *tool_group,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_image_changed              (ClayContext     *context,
+                                                                  ClayImage       *image,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_selected_drawables_changed (ClayImage       *image,
+                                                                  ClayToolManager *tool_manager);
+static void              tool_manager_active_tool_deactivated    (ClayContext     *context,
+                                                                  ClayToolManager *tool_manager);
 
-static void              tool_manager_cast_spell                 (GimpToolInfo    *tool_info);
+static void              tool_manager_cast_spell                 (ClayToolInfo    *tool_info);
 
 
 static GQuark tool_manager_quark = 0;
@@ -110,40 +110,40 @@ static GQuark tool_manager_quark = 0;
 /*  public functions  */
 
 void
-tool_manager_init (Gimp *gimp)
+tool_manager_init (Clay *clay)
 {
-  GimpToolManager *tool_manager;
-  GimpContext     *user_context;
+  ClayToolManager *tool_manager;
+  ClayContext     *user_context;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
   g_return_if_fail (tool_manager_quark == 0);
 
-  tool_manager_quark = g_quark_from_static_string ("gimp-tool-manager");
+  tool_manager_quark = g_quark_from_static_string ("clay-tool-manager");
 
-  tool_manager = g_slice_new0 (GimpToolManager);
+  tool_manager = g_slice_new0 (ClayToolManager);
 
-  tool_manager->gimp                 = gimp;
+  tool_manager->clay                 = clay;
   tool_manager->history              = NULL;
   tool_manager->block_initialization = FALSE;
 
-  g_object_set_qdata (G_OBJECT (gimp), tool_manager_quark, tool_manager);
+  g_object_set_qdata (G_OBJECT (clay), tool_manager_quark, tool_manager);
 
   tool_manager->image_clean_handler_id =
-    gimp_container_add_handler (gimp->images, "clean",
+    clay_container_add_handler (clay->images, "clean",
                                 G_CALLBACK (tool_manager_image_clean_dirty),
                                 tool_manager);
 
   tool_manager->image_dirty_handler_id =
-    gimp_container_add_handler (gimp->images, "dirty",
+    clay_container_add_handler (clay->images, "dirty",
                                 G_CALLBACK (tool_manager_image_clean_dirty),
                                 tool_manager);
 
   tool_manager->image_saving_handler_id =
-    gimp_container_add_handler (gimp->images, "saving",
+    clay_container_add_handler (clay->images, "saving",
                                 G_CALLBACK (tool_manager_image_saving),
                                 tool_manager);
 
-  user_context = gimp_get_user_context (gimp);
+  user_context = clay_get_user_context (clay);
 
   g_signal_connect (user_context, "tool-changed",
                     G_CALLBACK (tool_manager_tool_changed),
@@ -156,29 +156,29 @@ tool_manager_init (Gimp *gimp)
                     tool_manager);
 
   tool_manager_image_changed (user_context,
-                              gimp_context_get_image (user_context),
+                              clay_context_get_image (user_context),
                               tool_manager);
-  tool_manager_selected_drawables_changed (gimp_context_get_image (user_context),
+  tool_manager_selected_drawables_changed (clay_context_get_image (user_context),
                                            tool_manager);
 
   tool_manager_tool_changed (user_context,
-                             gimp_context_get_tool (user_context),
+                             clay_context_get_tool (user_context),
                              tool_manager);
 }
 
 void
-tool_manager_exit (Gimp *gimp)
+tool_manager_exit (Clay *clay)
 {
-  GimpToolManager *tool_manager;
-  GimpContext     *user_context;
+  ClayToolManager *tool_manager;
+  ClayContext     *user_context;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   g_return_if_fail (tool_manager != NULL);
 
-  user_context = gimp_get_user_context (gimp);
+  user_context = clay_get_user_context (clay);
 
   g_signal_handlers_disconnect_by_func (user_context,
                                         tool_manager_tool_changed,
@@ -195,11 +195,11 @@ tool_manager_exit (Gimp *gimp)
                                           tool_manager_selected_drawables_changed,
                                           tool_manager);
 
-  gimp_container_remove_handler (gimp->images,
+  clay_container_remove_handler (clay->images,
                                  tool_manager->image_clean_handler_id);
-  gimp_container_remove_handler (gimp->images,
+  clay_container_remove_handler (clay->images,
                                  tool_manager->image_dirty_handler_id);
-  gimp_container_remove_handler (gimp->images,
+  clay_container_remove_handler (clay->images,
                                  tool_manager->image_saving_handler_id);
 
   if (tool_manager->active_tool)
@@ -216,34 +216,34 @@ tool_manager_exit (Gimp *gimp)
 
   g_list_free (tool_manager->history);
 
-  g_slice_free (GimpToolManager, tool_manager);
+  g_slice_free (ClayToolManager, tool_manager);
 
-  g_object_set_qdata (G_OBJECT (gimp), tool_manager_quark, NULL);
+  g_object_set_qdata (G_OBJECT (clay), tool_manager_quark, NULL);
 }
 
-GimpTool *
-tool_manager_get_active (Gimp *gimp)
+ClayTool *
+tool_manager_get_active (Clay *clay)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   return tool_manager->active_tool;
 }
 
 void
-tool_manager_push_tool (Gimp     *gimp,
-                        GimpTool *tool)
+tool_manager_push_tool (Clay     *clay,
+                        ClayTool *tool)
 {
-  GimpToolManager *tool_manager;
-  GimpDisplay     *focus_display = NULL;
+  ClayToolManager *tool_manager;
+  ClayDisplay     *focus_display = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
-  g_return_if_fail (GIMP_IS_TOOL (tool));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+  g_return_if_fail (CLAY_IS_TOOL (tool));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
@@ -258,21 +258,21 @@ tool_manager_push_tool (Gimp     *gimp,
   tool_manager_select_tool (tool_manager, tool);
 
   if (focus_display)
-    tool_manager_focus_display_active (gimp, focus_display);
+    tool_manager_focus_display_active (clay, focus_display);
 }
 
 void
-tool_manager_pop_tool (Gimp *gimp)
+tool_manager_pop_tool (Clay *clay)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->tool_stack)
     {
-      GimpTool *tool = tool_manager->tool_stack->data;
+      ClayTool *tool = tool_manager->tool_stack->data;
 
       tool_manager->tool_stack = g_slist_remove (tool_manager->tool_stack,
                                                  tool);
@@ -284,45 +284,45 @@ tool_manager_pop_tool (Gimp *gimp)
 }
 
 void
-tool_manager_swap_tools (Gimp     *gimp,
+tool_manager_swap_tools (Clay     *clay,
                          gboolean  block_initialization)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (g_list_length (tool_manager->history) > 1)
     {
       tool_manager->block_initialization = block_initialization;
-      gimp_context_set_tool (tool_manager->gimp->user_context,
+      clay_context_set_tool (tool_manager->clay->user_context,
                              g_list_nth_data (tool_manager->history, 1));
       tool_manager->block_initialization = FALSE;
     }
 }
 
 gboolean
-tool_manager_initialize_active (Gimp        *gimp,
-                                GimpDisplay *display)
+tool_manager_initialize_active (Clay        *clay,
+                                ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
-  g_return_val_if_fail (GIMP_IS_DISPLAY (display), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
+  g_return_val_if_fail (CLAY_IS_DISPLAY (display), FALSE);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      GimpTool *tool = tool_manager->active_tool;
+      ClayTool *tool = tool_manager->active_tool;
 
-      if (gimp_tool_initialize (tool, display))
+      if (clay_tool_initialize (tool, display))
         {
-          GimpImage *image = gimp_display_get_image (display);
+          ClayImage *image = clay_display_get_image (display);
 
           g_list_free (tool->drawables);
-          tool->drawables = gimp_image_get_selected_drawables (image);
+          tool->drawables = clay_image_get_selected_drawables (image);
 
           return TRUE;
         }
@@ -332,110 +332,110 @@ tool_manager_initialize_active (Gimp        *gimp,
 }
 
 void
-tool_manager_control_active (Gimp           *gimp,
-                             GimpToolAction  action,
-                             GimpDisplay    *display)
+tool_manager_control_active (Clay           *clay,
+                             ClayToolAction  action,
+                             ClayDisplay    *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      GimpTool *tool = tool_manager->active_tool;
+      ClayTool *tool = tool_manager->active_tool;
 
-      if (display && gimp_tool_has_display (tool, display))
+      if (display && clay_tool_has_display (tool, display))
         {
-          gimp_tool_control (tool, action, display);
+          clay_tool_control (tool, action, display);
         }
-      else if (action == GIMP_TOOL_ACTION_HALT)
+      else if (action == CLAY_TOOL_ACTION_HALT)
         {
-          if (gimp_tool_control_is_active (tool->control))
-            gimp_tool_control_halt (tool->control);
+          if (clay_tool_control_is_active (tool->control))
+            clay_tool_control_halt (tool->control);
         }
     }
 }
 
 void
-tool_manager_button_press_active (Gimp                *gimp,
-                                  const GimpCoords    *coords,
+tool_manager_button_press_active (Clay                *clay,
+                                  const ClayCoords    *coords,
                                   guint32              time,
                                   GdkModifierType      state,
-                                  GimpButtonPressType  press_type,
-                                  GimpDisplay         *display)
+                                  ClayButtonPressType  press_type,
+                                  ClayDisplay         *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      gimp_tool_button_press (tool_manager->active_tool,
+      clay_tool_button_press (tool_manager->active_tool,
                               coords, time, state, press_type,
                               display);
     }
 }
 
 void
-tool_manager_button_release_active (Gimp             *gimp,
-                                    const GimpCoords *coords,
+tool_manager_button_release_active (Clay             *clay,
+                                    const ClayCoords *coords,
                                     guint32           time,
                                     GdkModifierType   state,
-                                    GimpDisplay      *display)
+                                    ClayDisplay      *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      gimp_tool_button_release (tool_manager->active_tool,
+      clay_tool_button_release (tool_manager->active_tool,
                                 coords, time, state,
                                 display);
     }
 }
 
 void
-tool_manager_motion_active (Gimp             *gimp,
-                            const GimpCoords *coords,
+tool_manager_motion_active (Clay             *clay,
+                            const ClayCoords *coords,
                             guint32           time,
                             GdkModifierType   state,
-                            GimpDisplay      *display)
+                            ClayDisplay      *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      gimp_tool_motion (tool_manager->active_tool,
+      clay_tool_motion (tool_manager->active_tool,
                         coords, time, state,
                         display);
     }
 }
 
 gboolean
-tool_manager_key_press_active (Gimp        *gimp,
+tool_manager_key_press_active (Clay        *clay,
                                GdkEventKey *kevent,
-                               GimpDisplay *display)
+                               ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_key_press (tool_manager->active_tool,
+      return clay_tool_key_press (tool_manager->active_tool,
                                   kevent,
                                   display);
     }
@@ -444,19 +444,19 @@ tool_manager_key_press_active (Gimp        *gimp,
 }
 
 gboolean
-tool_manager_key_release_active (Gimp        *gimp,
+tool_manager_key_release_active (Clay        *clay,
                                  GdkEventKey *kevent,
-                                 GimpDisplay *display)
+                                 ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_key_release (tool_manager->active_tool,
+      return clay_tool_key_release (tool_manager->active_tool,
                                     kevent,
                                     display);
     }
@@ -465,118 +465,118 @@ tool_manager_key_release_active (Gimp        *gimp,
 }
 
 void
-tool_manager_focus_display_active (Gimp        *gimp,
-                                   GimpDisplay *display)
+tool_manager_focus_display_active (Clay        *clay,
+                                   ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool &&
-      ! gimp_tool_control_is_active (tool_manager->active_tool->control))
+      ! clay_tool_control_is_active (tool_manager->active_tool->control))
     {
-      gimp_tool_set_focus_display (tool_manager->active_tool,
+      clay_tool_set_focus_display (tool_manager->active_tool,
                                    display);
     }
 }
 
 void
-tool_manager_modifier_state_active (Gimp            *gimp,
+tool_manager_modifier_state_active (Clay            *clay,
                                     GdkModifierType  state,
-                                    GimpDisplay     *display)
+                                    ClayDisplay     *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool &&
-      ! gimp_tool_control_is_active (tool_manager->active_tool->control))
+      ! clay_tool_control_is_active (tool_manager->active_tool->control))
     {
-      gimp_tool_set_modifier_state (tool_manager->active_tool,
+      clay_tool_set_modifier_state (tool_manager->active_tool,
                                     state,
                                     display);
     }
 }
 
 void
-tool_manager_active_modifier_state_active (Gimp            *gimp,
+tool_manager_active_modifier_state_active (Clay            *clay,
                                            GdkModifierType  state,
-                                           GimpDisplay     *display)
+                                           ClayDisplay     *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      gimp_tool_set_active_modifier_state (tool_manager->active_tool,
+      clay_tool_set_active_modifier_state (tool_manager->active_tool,
                                            state,
                                            display);
     }
 }
 
 void
-tool_manager_oper_update_active (Gimp             *gimp,
-                                 const GimpCoords *coords,
+tool_manager_oper_update_active (Clay             *clay,
+                                 const ClayCoords *coords,
                                  GdkModifierType   state,
                                  gboolean          proximity,
-                                 GimpDisplay      *display)
+                                 ClayDisplay      *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool &&
-      ! gimp_tool_control_is_active (tool_manager->active_tool->control))
+      ! clay_tool_control_is_active (tool_manager->active_tool->control))
     {
-      gimp_tool_oper_update (tool_manager->active_tool,
+      clay_tool_oper_update (tool_manager->active_tool,
                              coords, state, proximity,
                              display);
     }
 }
 
 void
-tool_manager_cursor_update_active (Gimp             *gimp,
-                                   const GimpCoords *coords,
+tool_manager_cursor_update_active (Clay             *clay,
+                                   const ClayCoords *coords,
                                    GdkModifierType   state,
-                                   GimpDisplay      *display)
+                                   ClayDisplay      *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool &&
-      ! gimp_tool_control_is_active (tool_manager->active_tool->control))
+      ! clay_tool_control_is_active (tool_manager->active_tool->control))
     {
-      gimp_tool_cursor_update (tool_manager->active_tool,
+      clay_tool_cursor_update (tool_manager->active_tool,
                                coords, state,
                                display);
     }
 }
 
 const gchar *
-tool_manager_can_undo_active (Gimp        *gimp,
-                              GimpDisplay *display)
+tool_manager_can_undo_active (Clay        *clay,
+                              ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_can_undo (tool_manager->active_tool,
+      return clay_tool_can_undo (tool_manager->active_tool,
                                  display);
     }
 
@@ -584,18 +584,18 @@ tool_manager_can_undo_active (Gimp        *gimp,
 }
 
 const gchar *
-tool_manager_can_redo_active (Gimp        *gimp,
-                              GimpDisplay *display)
+tool_manager_can_redo_active (Clay        *clay,
+                              ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_can_redo (tool_manager->active_tool,
+      return clay_tool_can_redo (tool_manager->active_tool,
                                  display);
     }
 
@@ -603,18 +603,18 @@ tool_manager_can_redo_active (Gimp        *gimp,
 }
 
 gboolean
-tool_manager_undo_active (Gimp        *gimp,
-                          GimpDisplay *display)
+tool_manager_undo_active (Clay        *clay,
+                          ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_undo (tool_manager->active_tool,
+      return clay_tool_undo (tool_manager->active_tool,
                              display);
     }
 
@@ -622,40 +622,40 @@ tool_manager_undo_active (Gimp        *gimp,
 }
 
 gboolean
-tool_manager_redo_active (Gimp        *gimp,
-                          GimpDisplay *display)
+tool_manager_redo_active (Clay        *clay,
+                          ClayDisplay *display)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_redo (tool_manager->active_tool,
+      return clay_tool_redo (tool_manager->active_tool,
                              display);
     }
 
   return FALSE;
 }
 
-GimpUIManager *
-tool_manager_get_popup_active (Gimp             *gimp,
-                               const GimpCoords *coords,
+ClayUIManager *
+tool_manager_get_popup_active (Clay             *clay,
+                               const ClayCoords *coords,
                                GdkModifierType   state,
-                               GimpDisplay      *display,
+                               ClayDisplay      *display,
                                const gchar     **ui_path)
 {
-  GimpToolManager *tool_manager;
+  ClayToolManager *tool_manager;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  tool_manager = tool_manager_get (gimp);
+  tool_manager = tool_manager_get (clay);
 
   if (tool_manager->active_tool)
     {
-      return gimp_tool_get_popup (tool_manager->active_tool,
+      return clay_tool_get_popup (tool_manager->active_tool,
                                   coords, state,
                                   display,
                                   ui_path);
@@ -667,17 +667,17 @@ tool_manager_get_popup_active (Gimp             *gimp,
 
 /*  private functions  */
 
-static GimpToolManager *
-tool_manager_get (Gimp *gimp)
+static ClayToolManager *
+tool_manager_get (Clay *clay)
 {
-  return g_object_get_qdata (G_OBJECT (gimp), tool_manager_quark);
+  return g_object_get_qdata (G_OBJECT (clay), tool_manager_quark);
 }
 
 static void
-tool_manager_select_tool (GimpToolManager *tool_manager,
-                          GimpTool        *tool)
+tool_manager_select_tool (ClayToolManager *tool_manager,
+                          ClayTool        *tool)
 {
-  Gimp *gimp = tool_manager->gimp;
+  Clay *clay = tool_manager->clay;
 
   /*  reset the previously selected tool, but only if it is not only
    *  temporarily pushed to the tool stack
@@ -687,14 +687,14 @@ tool_manager_select_tool (GimpToolManager *tool_manager,
       if (! tool_manager->tool_stack ||
           tool_manager->active_tool != tool_manager->tool_stack->data)
         {
-          GimpTool    *active_tool = tool_manager->active_tool;
-          GimpDisplay *display;
+          ClayTool    *active_tool = tool_manager->active_tool;
+          ClayDisplay *display;
 
           /*  NULL image returns any display (if there is any)  */
-          display = gimp_tool_has_image (active_tool, NULL);
+          display = clay_tool_has_image (active_tool, NULL);
 
-          tool_manager_control_active (gimp, GIMP_TOOL_ACTION_HALT, display);
-          tool_manager_focus_display_active (gimp, NULL);
+          tool_manager_control_active (clay, CLAY_TOOL_ACTION_HALT, display);
+          tool_manager_focus_display_active (clay, NULL);
         }
     }
 
@@ -723,9 +723,9 @@ tool_manager_select_tool (GimpToolManager *tool_manager,
         {
           /* Never store filter tool in history (only as current tool). */
           GList        *prev_list = g_list_nth (tool_manager->history, 1);
-          GimpToolInfo *prev_tool = prev_list->data;
+          ClayToolInfo *prev_tool = prev_list->data;
 
-          if (g_type_is_a (prev_tool->tool_type, GIMP_TYPE_FILTER_TOOL))
+          if (g_type_is_a (prev_tool->tool_type, CLAY_TYPE_FILTER_TOOL))
             tool_manager->history = g_list_delete_link (tool_manager->history, prev_list);
         }
     }
@@ -734,8 +734,8 @@ tool_manager_select_tool (GimpToolManager *tool_manager,
 }
 
 static void
-tool_manager_set_active_tool_group (GimpToolManager *tool_manager,
-                                    GimpToolGroup   *tool_group)
+tool_manager_set_active_tool_group (ClayToolManager *tool_manager,
+                                    ClayToolGroup   *tool_group)
 {
   if (tool_group != tool_manager->active_tool_group)
     {
@@ -760,24 +760,24 @@ tool_manager_set_active_tool_group (GimpToolManager *tool_manager,
 }
 
 static void
-tool_manager_tool_changed (GimpContext     *user_context,
-                           GimpToolInfo    *tool_info,
-                           GimpToolManager *tool_manager)
+tool_manager_tool_changed (ClayContext     *user_context,
+                           ClayToolInfo    *tool_info,
+                           ClayToolManager *tool_manager)
 {
-  GimpTool *new_tool = NULL;
+  ClayTool *new_tool = NULL;
 
   if (! tool_info)
     return;
 
-  if (! g_type_is_a (tool_info->tool_type, GIMP_TYPE_TOOL))
+  if (! g_type_is_a (tool_info->tool_type, CLAY_TYPE_TOOL))
     {
-      g_warning ("%s: tool_info->tool_type is no GimpTool subclass",
+      g_warning ("%s: tool_info->tool_type is no ClayTool subclass",
                  G_STRFUNC);
       return;
     }
 
-  /* FIXME: gimp_busy HACK */
-  if (user_context->gimp->busy)
+  /* FIXME: clay_busy HACK */
+  if (user_context->clay->busy)
     {
       if (G_TYPE_FROM_INSTANCE (tool_manager->active_tool) !=
           tool_info->tool_type)
@@ -792,7 +792,7 @@ tool_manager_tool_changed (GimpContext     *user_context,
                                            tool_manager);
 
           /*  explicitly set the current tool  */
-          gimp_context_set_tool (user_context,
+          clay_context_set_tool (user_context,
                                  tool_manager->active_tool->tool_info);
 
           g_signal_handlers_unblock_by_func (user_context,
@@ -824,19 +824,19 @@ tool_manager_tool_changed (GimpContext     *user_context,
 
   /* Auto-activate any transform or GEGL operation tools */
   if (! tool_manager->block_initialization &&
-      (GIMP_IS_TRANSFORM_GRID_TOOL (new_tool) ||
-       GIMP_IS_GEGL_TOOL (new_tool)))
+      (CLAY_IS_TRANSFORM_GRID_TOOL (new_tool) ||
+       CLAY_IS_GEGL_TOOL (new_tool)))
     {
-      GimpDisplay *new_display;
+      ClayDisplay *new_display;
 
-      new_display = gimp_context_get_display (user_context);
-      if (new_display && gimp_display_get_image (new_display))
-        tool_manager_initialize_active (user_context->gimp, new_display);
+      new_display = clay_context_get_display (user_context);
+      if (new_display && clay_display_get_image (new_display))
+        tool_manager_initialize_active (user_context->clay, new_display);
     }
 
   g_object_unref (new_tool);
 
-  if (gimp_widget_animation_enabled ())
+  if (clay_widget_animation_enabled ())
     {
       /* ??? */
       tool_manager_cast_spell (tool_info);
@@ -849,7 +849,7 @@ tool_manager_copy_tool_options (GObject *src,
 {
   GList *diff;
 
-  diff = gimp_config_diff (src, dest, G_PARAM_READWRITE);
+  diff = clay_config_diff (src, dest, G_PARAM_READWRITE);
 
   if (diff)
     {
@@ -861,7 +861,7 @@ tool_manager_copy_tool_options (GObject *src,
         {
           GParamSpec *prop_spec = list->data;
 
-          if (g_type_is_a (prop_spec->owner_type, GIMP_TYPE_TOOL_OPTIONS) &&
+          if (g_type_is_a (prop_spec->owner_type, CLAY_TYPE_TOOL_OPTIONS) &&
               ! (prop_spec->flags & G_PARAM_CONSTRUCT_ONLY))
             {
               GValue value = G_VALUE_INIT;
@@ -882,29 +882,29 @@ tool_manager_copy_tool_options (GObject *src,
 }
 
 static void
-tool_manager_preset_changed (GimpContext     *user_context,
-                             GimpToolPreset  *preset,
-                             GimpToolManager *tool_manager)
+tool_manager_preset_changed (ClayContext     *user_context,
+                             ClayToolPreset  *preset,
+                             ClayToolManager *tool_manager)
 {
-  GimpToolInfo *preset_tool;
+  ClayToolInfo *preset_tool;
 
-  if (! preset || user_context->gimp->busy)
+  if (! preset || user_context->clay->busy)
     return;
 
-  preset_tool = gimp_context_get_tool (GIMP_CONTEXT (preset->tool_options));
+  preset_tool = clay_context_get_tool (CLAY_CONTEXT (preset->tool_options));
 
   /* first, select the preset's tool, even if it's already the active
    * tool
    */
-  gimp_context_set_tool (user_context, preset_tool);
+  clay_context_set_tool (user_context, preset_tool);
 
   /* then, copy the context properties the preset remembers, possibly
    * changing some tool options due to the "link brush stuff to brush
-   * defaults" settings in gimptooloptions.c
+   * defaults" settings in claytooloptions.c
    */
-  gimp_context_copy_properties (GIMP_CONTEXT (preset->tool_options),
+  clay_context_copy_properties (CLAY_CONTEXT (preset->tool_options),
                                 user_context,
-                                gimp_tool_preset_get_prop_mask (preset));
+                                clay_tool_preset_get_prop_mask (preset));
 
   /* finally, copy all tool options properties, overwriting any
    * changes resulting from setting the context properties above, we
@@ -915,74 +915,74 @@ tool_manager_preset_changed (GimpContext     *user_context,
 }
 
 static void
-tool_manager_image_clean_dirty (GimpImage       *image,
-                                GimpDirtyMask    dirty_mask,
-                                GimpToolManager *tool_manager)
+tool_manager_image_clean_dirty (ClayImage       *image,
+                                ClayDirtyMask    dirty_mask,
+                                ClayToolManager *tool_manager)
 {
-  GimpTool *tool = tool_manager->active_tool;
+  ClayTool *tool = tool_manager->active_tool;
 
   if (tool &&
-      ! gimp_tool_control_get_preserve (tool->control) &&
-      (gimp_tool_control_get_dirty_mask (tool->control) & dirty_mask))
+      ! clay_tool_control_get_preserve (tool->control) &&
+      (clay_tool_control_get_dirty_mask (tool->control) & dirty_mask))
     {
-      GimpDisplay *display = gimp_tool_has_image (tool, image);
+      ClayDisplay *display = clay_tool_has_image (tool, image);
 
       if (display)
         {
           tool_manager_control_active (
-            image->gimp,
-            gimp_tool_control_get_dirty_action (tool->control),
+            image->clay,
+            clay_tool_control_get_dirty_action (tool->control),
             display);
         }
     }
 }
 
 static void
-tool_manager_image_saving (GimpImage       *image,
-                           GimpToolManager *tool_manager)
+tool_manager_image_saving (ClayImage       *image,
+                           ClayToolManager *tool_manager)
 {
-  GimpTool *tool = tool_manager->active_tool;
+  ClayTool *tool = tool_manager->active_tool;
 
   if (tool &&
-      ! gimp_tool_control_get_preserve (tool->control))
+      ! clay_tool_control_get_preserve (tool->control))
     {
-      GimpDisplay *display = gimp_tool_has_image (tool, image);
+      ClayDisplay *display = clay_tool_has_image (tool, image);
 
       if (display)
-        tool_manager_control_active (image->gimp, GIMP_TOOL_ACTION_COMMIT,
+        tool_manager_control_active (image->clay, CLAY_TOOL_ACTION_COMMIT,
                                      display);
     }
 }
 
 static void
-tool_manager_tool_ancestry_changed (GimpToolInfo    *tool_info,
-                                    GimpToolManager *tool_manager)
+tool_manager_tool_ancestry_changed (ClayToolInfo    *tool_info,
+                                    ClayToolManager *tool_manager)
 {
-  GimpViewable *parent;
+  ClayViewable *parent;
 
-  parent = gimp_viewable_get_parent (GIMP_VIEWABLE (tool_info));
+  parent = clay_viewable_get_parent (CLAY_VIEWABLE (tool_info));
 
   if (parent)
     {
-      gimp_tool_group_set_active_tool_info (GIMP_TOOL_GROUP (parent),
+      clay_tool_group_set_active_tool_info (CLAY_TOOL_GROUP (parent),
                                             tool_info);
     }
 
-  tool_manager_set_active_tool_group (tool_manager, GIMP_TOOL_GROUP (parent));
+  tool_manager_set_active_tool_group (tool_manager, CLAY_TOOL_GROUP (parent));
 }
 
 static void
-tool_manager_group_active_tool_changed (GimpToolGroup   *tool_group,
-                                        GimpToolManager *tool_manager)
+tool_manager_group_active_tool_changed (ClayToolGroup   *tool_group,
+                                        ClayToolManager *tool_manager)
 {
-  gimp_context_set_tool (tool_manager->gimp->user_context,
-                         gimp_tool_group_get_active_tool_info (tool_group));
+  clay_context_set_tool (tool_manager->clay->user_context,
+                         clay_tool_group_get_active_tool_info (tool_group));
 }
 
 static void
-tool_manager_image_changed (GimpContext     *context,
-                            GimpImage       *image,
-                            GimpToolManager *tool_manager)
+tool_manager_image_changed (ClayContext     *context,
+                            ClayImage       *image,
+                            ClayToolManager *tool_manager)
 {
   if (tool_manager->image)
     g_signal_handlers_disconnect_by_func (tool_manager->image,
@@ -993,10 +993,10 @@ tool_manager_image_changed (GimpContext     *context,
 
   /* Turn off auto-activated tools when switching images */
   if (image                                                    &&
-      (GIMP_IS_TRANSFORM_GRID_TOOL (tool_manager->active_tool) ||
-       GIMP_IS_GEGL_TOOL (tool_manager->active_tool)))
+      (CLAY_IS_TRANSFORM_GRID_TOOL (tool_manager->active_tool) ||
+       CLAY_IS_GEGL_TOOL (tool_manager->active_tool)))
     {
-      gimp_context_set_tool (context,
+      clay_context_set_tool (context,
                              tool_manager->active_tool->tool_info);
 
       tool_manager_active_tool_deactivated (context, tool_manager);
@@ -1009,34 +1009,34 @@ tool_manager_image_changed (GimpContext     *context,
 }
 
 static void
-tool_manager_selected_drawables_changed (GimpImage       *image,
-                                         GimpToolManager *tool_manager)
+tool_manager_selected_drawables_changed (ClayImage       *image,
+                                         ClayToolManager *tool_manager)
 {
   /* Re-activate transform tools when changing selected layers */
   if (image                                                    &&
-      (GIMP_IS_TRANSFORM_GRID_TOOL (tool_manager->active_tool) ||
-       GIMP_IS_GEGL_TOOL (tool_manager->active_tool)))
+      (CLAY_IS_TRANSFORM_GRID_TOOL (tool_manager->active_tool) ||
+       CLAY_IS_GEGL_TOOL (tool_manager->active_tool)))
     {
-      gimp_context_set_tool (tool_manager->gimp->user_context,
+      clay_context_set_tool (tool_manager->clay->user_context,
                              tool_manager->active_tool->tool_info);
 
-      tool_manager_tool_changed (tool_manager->gimp->user_context,
-                                 gimp_context_get_tool (tool_manager->gimp->user_context),
+      tool_manager_tool_changed (tool_manager->clay->user_context,
+                                 clay_context_get_tool (tool_manager->clay->user_context),
                                  tool_manager);
     }
 }
 
 static void
-tool_manager_active_tool_deactivated (GimpContext     *context,
-                                      GimpToolManager *tool_manager)
+tool_manager_active_tool_deactivated (ClayContext     *context,
+                                      ClayToolManager *tool_manager)
 {
-  GimpDisplay *display;
+  ClayDisplay *display;
 
-  display = gimp_tool_has_image (tool_manager->active_tool, NULL);
+  display = clay_tool_has_image (tool_manager->active_tool, NULL);
 
   /*  NULL image returns any display (if there is any)  */
   if (display)
-    tool_manager_control_active (context->gimp, GIMP_TOOL_ACTION_COMMIT,
+    tool_manager_control_active (context->clay, CLAY_TOOL_ACTION_COMMIT,
                                  display);
 
   /*  commit the old tool's operation before creating the new tool
@@ -1049,7 +1049,7 @@ tool_manager_active_tool_deactivated (GimpContext     *context,
 }
 
 static void
-tool_manager_cast_spell (GimpToolInfo *tool_info)
+tool_manager_cast_spell (ClayToolInfo *tool_info)
 {
   typedef struct
   {
@@ -1059,13 +1059,13 @@ tool_manager_cast_spell (GimpToolInfo *tool_info)
 
   static const Spell spells[] =
   {
-    { .sequence = "gimp-warp-tool\0"
-                  "gimp-iscissors-tool\0"
-                  "gimp-gradient-tool\0"
-                  "gimp-path-tool\0"
-                  "gimp-ellipse-select-tool\0"
-                  "gimp-rect-select-tool\0",
-      .func     = gimp_cairo_wilber_toggle_pointer_eyes
+    { .sequence = "clay-warp-tool\0"
+                  "clay-iscissors-tool\0"
+                  "clay-gradient-tool\0"
+                  "clay-path-tool\0"
+                  "clay-ellipse-select-tool\0"
+                  "clay-rect-select-tool\0",
+      .func     = clay_cairo_wilber_toggle_pointer_eyes
     }
   };
 
@@ -1073,7 +1073,7 @@ tool_manager_cast_spell (GimpToolInfo *tool_info)
   const gchar        *tool_name;
   gint                i;
 
-  tool_name = gimp_object_get_name (GIMP_OBJECT (tool_info));
+  tool_name = clay_object_get_name (CLAY_OBJECT (tool_info));
 
   for (i = 0; i < G_N_ELEMENTS (spells); i++)
     {

@@ -25,41 +25,41 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpdrawable.h"
-#include "core/gimpimage-crop.h"
-#include "core/gimpimage-resize.h"
-#include "core/gimpimage-undo.h"
-#include "core/gimpimage.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppickable-auto-shrink.h"
-#include "core/gimppickable.h"
+#include "core/claydrawable.h"
+#include "core/clayimage-crop.h"
+#include "core/clayimage-resize.h"
+#include "core/clayimage-undo.h"
+#include "core/clayimage.h"
+#include "core/clayparamspecs.h"
+#include "core/claypickable-auto-shrink.h"
+#include "core/claypickable.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-image_autocrop_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+image_autocrop_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
-  GimpDrawable *drawable;
+  ClayImage *image;
+  ClayDrawable *drawable;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  drawable = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  drawable = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
@@ -67,18 +67,18 @@ image_autocrop_invoker (GimpProcedure         *procedure,
 
       if (drawable != NULL)
         {
-          if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                         GIMP_PDB_ITEM_CONTENT, error))
+          if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                         CLAY_PDB_ITEM_CONTENT, error))
             {
               gint off_x, off_y;
 
-              gimp_pickable_auto_shrink (GIMP_PICKABLE (drawable),
+              clay_pickable_auto_shrink (CLAY_PICKABLE (drawable),
                                          0, 0,
-                                         gimp_item_get_width  (GIMP_ITEM (drawable)),
-                                         gimp_item_get_height (GIMP_ITEM (drawable)),
+                                         clay_item_get_width  (CLAY_ITEM (drawable)),
+                                         clay_item_get_height (CLAY_ITEM (drawable)),
                                          &x, &y, &width, &height);
 
-              gimp_item_get_offset (GIMP_ITEM (drawable), &off_x, &off_y);
+              clay_item_get_offset (CLAY_ITEM (drawable), &off_x, &off_y);
               x += off_x;
               y += off_y;
             }
@@ -89,77 +89,77 @@ image_autocrop_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          gimp_pickable_auto_shrink (GIMP_PICKABLE (image),
+          clay_pickable_auto_shrink (CLAY_PICKABLE (image),
                                      0, 0,
-                                     gimp_image_get_width  (image),
-                                     gimp_image_get_height (image),
+                                     clay_image_get_width  (image),
+                                     clay_image_get_height (image),
                                      &x, &y, &width, &height);
         }
 
       if (success)
         {
-          gimp_image_undo_group_start (image, GIMP_UNDO_GROUP_ITEM_RESIZE,
+          clay_image_undo_group_start (image, CLAY_UNDO_GROUP_ITEM_RESIZE,
                                        _("Autocrop image"));
 
           if (x          < 0                             ||
               y          < 0                             ||
-              x + width  > gimp_image_get_width  (image) ||
-              y + height > gimp_image_get_height (image))
+              x + width  > clay_image_get_width  (image) ||
+              y + height > clay_image_get_height (image))
             {
               /*
                * partially outside the image area, we need to
                * resize the image to be able to crop properly.
                */
-              gimp_image_resize (image, context, width, height, -x, -y, NULL);
+              clay_image_resize (image, context, width, height, -x, -y, NULL);
 
               x = y = 0;
             }
 
-          gimp_image_crop (image, context, GIMP_FILL_TRANSPARENT,
+          clay_image_crop (image, context, CLAY_FILL_TRANSPARENT,
                            x, y, width, height, TRUE);
 
-          gimp_image_undo_group_end (image);
+          clay_image_undo_group_end (image);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_autocrop_selected_layers_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+image_autocrop_selected_layers_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
-  GimpDrawable *drawable;
+  ClayImage *image;
+  ClayDrawable *drawable;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  drawable = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  drawable = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpAutoShrink shrink;
+      ClayAutoShrink shrink;
       gint           x, y, width, height;
 
       if (drawable != NULL)
         {
-          if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                         GIMP_PDB_ITEM_CONTENT, error))
+          if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                         CLAY_PDB_ITEM_CONTENT, error))
             {
               gint off_x, off_y;
 
-              shrink = gimp_pickable_auto_shrink (GIMP_PICKABLE (drawable),
+              shrink = clay_pickable_auto_shrink (CLAY_PICKABLE (drawable),
                                                   0, 0,
-                                                  gimp_item_get_width  (GIMP_ITEM (drawable)),
-                                                  gimp_item_get_height (GIMP_ITEM (drawable)),
+                                                  clay_item_get_width  (CLAY_ITEM (drawable)),
+                                                  clay_item_get_height (CLAY_ITEM (drawable)),
                                                   &x, &y, &width, &height);
 
-              gimp_item_get_offset (GIMP_ITEM (drawable), &off_x, &off_y);
+              clay_item_get_offset (CLAY_ITEM (drawable), &off_x, &off_y);
               x += off_x;
               y += off_y;
             }
@@ -170,38 +170,38 @@ image_autocrop_selected_layers_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          shrink = gimp_pickable_auto_shrink (GIMP_PICKABLE (image),
+          shrink = clay_pickable_auto_shrink (CLAY_PICKABLE (image),
                                               0, 0,
-                                              gimp_image_get_width  (image),
-                                              gimp_image_get_height (image),
+                                              clay_image_get_width  (image),
+                                              clay_image_get_height (image),
                                               &x, &y, &width, &height);
         }
 
-      if (success && shrink != GIMP_AUTO_SHRINK_SHRINK)
+      if (success && shrink != CLAY_AUTO_SHRINK_SHRINK)
         success = FALSE;
 
       if (success)
         {
-          GList *layers = gimp_image_get_selected_layers (image);
+          GList *layers = clay_image_get_selected_layers (image);
 
           if (layers)
             {
               GList *iter;
 
-              gimp_image_undo_group_start (image, GIMP_UNDO_GROUP_ITEM_RESIZE,
+              clay_image_undo_group_start (image, CLAY_UNDO_GROUP_ITEM_RESIZE,
                                            _("Autocrop layer"));
 
               for (iter = layers; iter; iter = iter->next)
                 {
                   gint layer_off_x, layer_off_y;
 
-                  gimp_item_get_offset (GIMP_ITEM (iter->data), &layer_off_x, &layer_off_y);
-                  gimp_item_resize (GIMP_ITEM (iter->data),
-                                    context, GIMP_FILL_TRANSPARENT,
+                  clay_item_get_offset (CLAY_ITEM (iter->data), &layer_off_x, &layer_off_y);
+                  clay_item_resize (CLAY_ITEM (iter->data),
+                                    context, CLAY_FILL_TRANSPARENT,
                                     width, height, layer_off_x - x, layer_off_y - y);
                  }
 
-              gimp_image_undo_group_end (image);
+              clay_image_undo_group_end (image);
             }
           else
             {
@@ -210,75 +210,75 @@ image_autocrop_selected_layers_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_image_autocrop_procs (GimpPDB *pdb)
+register_image_autocrop_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-image-autocrop
+   * clay-image-autocrop
    */
-  procedure = gimp_procedure_new (image_autocrop_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-autocrop");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_autocrop_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-autocrop");
+  clay_procedure_set_static_help (procedure,
                                   "Remove empty borders from the image",
                                   "Remove empty borders from the @image based on empty borders of the input @drawable.\n"
                                   "\n"
                                   "The input drawable serves as a base for detecting cropping extents (transparency or background color).\n"
                                   "With a %NULL input drawable, the image itself will serve as a base for detecting cropping extents.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "Input image)",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "Input drawable",
                                                          TRUE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-autocrop-selected-layers
+   * clay-image-autocrop-selected-layers
    */
-  procedure = gimp_procedure_new (image_autocrop_selected_layers_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-autocrop-selected-layers");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_autocrop_selected_layers_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-autocrop-selected-layers");
+  clay_procedure_set_static_help (procedure,
                                   "Crop the selected layers based on empty borders of the input drawable",
                                   "Crop the selected layers of the input @image based on empty borders of the input @drawable.\n"
                                   "The input drawable serves as a base for detecting cropping extents (transparency or background color), and is not necessarily among the cropped layers (the current selected layers).\n"
                                   "With a %NULL input drawable, the image itself will serve as a base for detecting cropping extents.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "Input image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "Input drawable",
                                                          TRUE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

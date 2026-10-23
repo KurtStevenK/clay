@@ -5,15 +5,15 @@ Jacob Boerema, 2021-2024
 
 ## Introduction
 
-This is a Python 3 framework for testing GIMP file import and export plug-ins.
-It can be run both as a plug-in from within GIMP (in case it is installed),
+This is a Python 3 framework for testing Clay file import and export plug-ins.
+It can be run both as a plug-in from within Clay (in case it is installed),
 and from the command line in batch mode.
 
 
 ## Installation and set-up
 
-For running as a plug-in in GIMP this plug-in needs to be in a location
-that GIMP knows of for plug-ins. By default, it is only installed for
+For running as a plug-in in Clay this plug-in needs to be in a location
+that Clay knows of for plug-ins. By default, it is only installed for
 unstable builds. For using the batch version, it is not necessary to
 have it installed.
 
@@ -22,7 +22,7 @@ as default place for
 
 - configuration files
 - test data files
-  - can be changed by `GIMP_TESTS_DATA_FOLDER` environment variable
+  - can be changed by `CLAY_TESTS_DATA_FOLDER` environment variable
   - further marked as `<folder-with-test-data>`
 
 ### Configuration
@@ -32,7 +32,7 @@ There are 2 types of configuration
   - default configuration is in `config.ini` - by default blank
   - there is also config that is pre-filled with tests 
   and run in Gitlab pipeline; it's called `batch-config.ini`
-  - can be changed with `GIMP_TESTS_CONFIG_FILE` environment variable
+  - can be changed with `CLAY_TESTS_CONFIG_FILE` environment variable
 - **per-format configs** = specific configurations for different file formats 
   - example: `png-tests.ini`, `bmp-tests.ini`, ...
   - defines the specific test sets. This configuration file is expected
@@ -99,18 +99,18 @@ These tests depend on testing images, so in order to run them
 (as configured), you need to download them.
 
 ```bash
-git clone git@ssh.gitlab.gnome.org:Infrastructure/gimp-test-images.git <folder-with-test-data>
+git clone git@ssh.gitlab.gnome.org:Infrastructure/clay-test-images.git <folder-with-test-data>
 
 # as for convenience, during the tests, you can point at <folder-with-test-data> like
 
-export GIMP_TESTS_DATA_FOLDER=<folder-with-test-data>
+export CLAY_TESTS_DATA_FOLDER=<folder-with-test-data>
 ```
 
 ### Actual testing
 
-#### From the GIMP GUI
+#### From the Clay GUI
 
-Gimp menu: `Filters` > `Development` > `Python-Fu` > `Test file import plug-ins`
+Clay menu: `Filters` > `Development` > `Python-Fu` > `Test file import plug-ins`
 
 _Note: this plug-in is not installed for stable builds._
 
@@ -123,29 +123,29 @@ _Note: this plug-in is not installed for stable builds._
 export PYTHONPATH="/location/of/your/python/script/"
 
 # Optional
-export GIMP_TESTS_CONFIG_FILE="/location/of/config.ini" # Default: ./tests/config.ini
-export GIMP_TESTS_LOG_FILE="/location/of/logfile.log"   # Default: ./tests/gimp-tests.log
-export GIMP_TESTS_DATA_FOLDER="/location/of/test-images/rootfolder/" # Default: ./tests/
+export CLAY_TESTS_CONFIG_FILE="/location/of/config.ini" # Default: ./tests/config.ini
+export CLAY_TESTS_LOG_FILE="/location/of/logfile.log"   # Default: ./tests/clay-tests.log
+export CLAY_TESTS_DATA_FOLDER="/location/of/test-images/rootfolder/" # Default: ./tests/
 
-cd location/of/plug-in/gimp-file-plugin-tests
-cat batch-import-tests.py | gimp-console-2.99 -idf --batch-interpreter python-fu-eval -b - --quit
+cd location/of/plug-in/clay-file-plugin-tests
+cat batch-import-tests.py | clay-console-2.99 -idf --batch-interpreter python-fu-eval -b - --quit
 ```
 
-If you are using the Flatpak version of the Gimp, note that the `PYTHONPATH`
+If you are using the Flatpak version of the Clay, note that the `PYTHONPATH`
 and other environment variables are passed differently:
 
 ```bash
-cd location/of/plug-in/gimp-file-plugin-tests
+cd location/of/plug-in/clay-file-plugin-tests
 cat batch-import-tests.py | flatpak run \
   --env=PYTHONPATH=$(pwd) \
-  --env=GIMP_TESTS_DATA_FOLDER=<folder-with-test-data> \
-  --env=GIMP_TESTS_CONFIG_FILE=$(pwd)/tests/batch-config.ini \
-  org.gimp.GIMP -idf --batch-interpreter=python-fu-eval -b - --quit
+  --env=CLAY_TESTS_DATA_FOLDER=<folder-with-test-data> \
+  --env=CLAY_TESTS_CONFIG_FILE=$(pwd)/tests/batch-config.ini \
+  org.clay.Clay -idf --batch-interpreter=python-fu-eval -b - --quit
 ```
 
 In case you run the batch version, the log file is written to the folder
 where the plug-in resides. This location can be adjusted by setting the
-environment variable `GIMP_TESTS_LOG_FILE`. Note that the path to this file
+environment variable `CLAY_TESTS_LOG_FILE`. Note that the path to this file
 needs to exist!
 
 To test for success or regressions in batch mode you can test whether there
@@ -156,7 +156,7 @@ You should grep for `Total number of regressions: 0`.
 
 - The only thing currently being tested is whether the image loads or not. No
   testing is done to see if the image is correctly shown.
-- When running all tiff tests from inside GIMP, it may crash, at least on
+- When running all tiff tests from inside Clay, it may crash, at least on
   Windows, due to the error console running out of resources because of
   the amount of messages.
 - There is some preliminary export testing support, see `batch-export-tests.py`,

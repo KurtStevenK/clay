@@ -1,0 +1,487 @@
+/* xyz.kainzmayer.ClayDesign
+ * Copyright (C) 1995 Spencer Kimball and Peter Mattis
+ *
+ * clayoperationoffset.c
+ * Copyright (C) 2019 Ell
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "config.h"
+
+#include <cairo.h>
+#include <gegl-plugin.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "libclaycolor/claycolor.h"
+
+#include "operations-types.h"
+
+#include "gegl/clay-gegl-loops.h"
+#include "gegl/clay-gegl-utils.h"
+
+#include "core/claycontext.h"
+
+#include "clayoperationoffset.h"
+
+#include "clay-intl.h"
+
+
+enum
+{
+  PROP_0,
+  PROP_COLOR,
+  PROP_TYPE,
+  PROP_X,
+  PROP_Y
+};
+
+
+static void            clay_operation_offset_dispose                   (GObject              *object);
+static void            clay_operation_offset_get_property              (GObject              *object,
+                                                                        guint                 property_id,
+                                                                        GValue               *value,
+                                                                        GParamSpec           *pspec);
+static void            clay_operation_offset_set_property              (GObject              *object,
+                                                                        guint                 property_id,
+                                                                        const GValue         *value,
+                                                                        GParamSpec           *pspec);
+
+static GeglRectangle   clay_operation_offset_get_required_for_output   (GeglOperation        *operation,
+                                                                        const gchar          *input_pad,
+                                                                        const GeglRectangle  *output_roi);
+static GeglRectangle   clay_operation_offset_get_invalidated_by_change (GeglOperation        *operation,
+                                                                        const gchar          *input_pad,
+                                                                        const GeglRectangle  *input_roi);
+static void            clay_operation_offset_prepare                   (GeglOperation        *operation);
+static gboolean        clay_operation_offset_parent_process            (GeglOperation        *operation,
+                                                                        GeglOperationContext *context,
+                                                                        const gchar          *output_pad,
+                                                                        const GeglRectangle  *result,
+                                                                        gint                  level);
+
+static gboolean        clay_operation_offset_process                   (GeglOperation        *operation,
+                                                                        GeglBuffer           *input,
+                                                                        GeglBuffer           *output,
+                                                                        const GeglRectangle  *roi,
+                                                                        gint                  level);
+
+static void            clay_operation_offset_get_offset                (ClayOperationOffset  *offset,
+                                                                        gboolean              invert,
+                                                                        gint                 *x,
+                                                                        gint                 *y);
+static void            clay_operation_offset_get_rect                  (ClayOperationOffset  *offset,
+                                                                        gboolean              invert,
+                                                                        const GeglRectangle  *roi,
+                                                                        GeglRectangle        *rect);
+
+
+G_DEFINE_TYPE (ClayOperationOffset, clay_operation_offset,
+               GEGL_TYPE_OPERATION_FILTER)
+
+#define parent_class clay_operation_offset_parent_class
+
+
+static void
+clay_operation_offset_class_init (ClayOperationOffsetClass *klass)
+{
+  GObjectClass             *object_class    = G_OBJECT_CLASS (klass);
+  GeglOperationClass       *operation_class = GEGL_OPERATION_CLASS (klass);
+  GeglOperationFilterClass *filter_class    = GEGL_OPERATION_FILTER_CLASS (klass);
+
+  object_class->dispose                      = clay_operation_offset_dispose;
+  object_class->set_property                 = clay_operation_offset_set_property;
+  object_class->get_property                 = clay_operation_offset_get_property;
+
+  operation_class->get_required_for_output   = clay_operation_offset_get_required_for_output;
+  operation_class->get_invalidated_by_change = clay_operation_offset_get_invalidated_by_change;
+  operation_class->prepare                   = clay_operation_offset_prepare;
+  operation_class->process                   = clay_operation_offset_parent_process;
+
+  operation_class->threaded                  = FALSE;
+  operation_class->cache_policy              = GEGL_CACHE_POLICY_NEVER;
+
+  filter_class->process                      = clay_operation_offset_process;
+
+  gegl_operation_class_set_keys (operation_class,
+                                 "name",        "clay:offset",
+                                 "title",       _("Offset"),
+                                 "categories",  "transform",
+                                 "description", _("Shift the pixels, optionally wrapping them at the borders"),
+                                 NULL);
+
+  g_object_class_install_property (object_class, PROP_COLOR,
+                                   clay_param_spec_color_from_string ("color",
+                                                                      _("Fill Color"),
+                                                                      _("Fill Color"),
+                                                                      FALSE, "white",
+                                                                      G_PARAM_READWRITE |
+                                                                      G_PARAM_CONSTRUCT));
+
+  g_object_class_install_property (object_class, PROP_TYPE,
+                                   g_param_spec_enum  ("type",
+                                                       "Type",
+                                                       "Offset type",
+                                                       CLAY_TYPE_OFFSET_TYPE,
+                                                       CLAY_OFFSET_WRAP_AROUND,
+                                                       G_PARAM_READWRITE |
+                                                       G_PARAM_CONSTRUCT));
+
+  g_object_class_install_property (object_class, PROP_X,
+                                   g_param_spec_int ("x",
+                                                     "X Offset",
+                                                     "X offset",
+                                                     G_MININT, G_MAXINT, 0,
+                                                     G_PARAM_READWRITE |
+                                                     G_PARAM_CONSTRUCT));
+
+  g_object_class_install_property (object_class, PROP_Y,
+                                   g_param_spec_int ("y",
+                                                     "Y Offset",
+                                                     "Y offset",
+                                                     G_MININT, G_MAXINT, 0,
+                                                     G_PARAM_READWRITE |
+                                                     G_PARAM_CONSTRUCT));
+}
+
+static void
+clay_operation_offset_init (ClayOperationOffset *self)
+{
+}
+
+static void
+clay_operation_offset_dispose (GObject *object)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (object);
+
+  g_object_unref (offset->color);
+
+  G_OBJECT_CLASS (parent_class)->dispose (object);
+}
+
+static void
+clay_operation_offset_get_property (GObject    *object,
+                                    guint       property_id,
+                                    GValue     *value,
+                                    GParamSpec *pspec)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (object);
+
+  switch (property_id)
+    {
+    case PROP_COLOR:
+      g_value_set_object (value, offset->color);
+      break;
+
+    case PROP_TYPE:
+      g_value_set_enum (value, offset->type);
+      break;
+
+    case PROP_X:
+      g_value_set_int (value, offset->x);
+      break;
+
+    case PROP_Y:
+      g_value_set_int (value, offset->y);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      break;
+    }
+}
+
+static void
+clay_operation_offset_set_property (GObject      *object,
+                                    guint         property_id,
+                                    const GValue *value,
+                                    GParamSpec   *pspec)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (object);
+
+  switch (property_id)
+    {
+    case PROP_COLOR:
+      g_clear_object (&offset->color);
+      offset->color = gegl_color_duplicate (g_value_get_object (value));
+      break;
+
+    case PROP_TYPE:
+      offset->type = g_value_get_enum (value);
+      break;
+
+    case PROP_X:
+      offset->x = g_value_get_int (value);
+      break;
+
+    case PROP_Y:
+      offset->y = g_value_get_int (value);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+      break;
+    }
+}
+
+static GeglRectangle
+clay_operation_offset_get_required_for_output (GeglOperation       *operation,
+                                               const gchar         *input_pad,
+                                               const GeglRectangle *output_roi)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (operation);
+  GeglRectangle        rect;
+
+  clay_operation_offset_get_rect (offset, TRUE, output_roi, &rect);
+
+  return rect;
+}
+
+static GeglRectangle
+clay_operation_offset_get_invalidated_by_change (GeglOperation       *operation,
+                                                 const gchar         *input_pad,
+                                                 const GeglRectangle *input_roi)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (operation);
+  GeglRectangle        rect;
+
+  clay_operation_offset_get_rect (offset, FALSE, input_roi, &rect);
+
+  return rect;
+}
+
+static void
+clay_operation_offset_prepare (GeglOperation *operation)
+{
+  const Babl *format;
+
+  format = gegl_operation_get_source_format (operation, "input");
+
+  if (! format)
+    format = babl_format ("RGBA float");
+
+  gegl_operation_set_format (operation, "input",  format);
+  gegl_operation_set_format (operation, "output", format);
+}
+
+static gboolean
+clay_operation_offset_parent_process (GeglOperation        *operation,
+                                      GeglOperationContext *context,
+                                      const gchar          *output_pad,
+                                      const GeglRectangle  *result,
+                                      gint                  level)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (operation);
+  GObject             *input;
+  gint                 x;
+  gint                 y;
+
+  input = gegl_operation_context_get_object (context, "input");
+
+  clay_operation_offset_get_offset (offset, FALSE, &x, &y);
+
+  if (x == 0 && y == 0)
+    {
+      gegl_operation_context_set_object (context, "output", input);
+
+      return TRUE;
+    }
+  else if (offset->type == CLAY_OFFSET_TRANSPARENT)
+    {
+      GObject *output = NULL;
+
+      if (input)
+        {
+          GeglRectangle bounds;
+          GeglRectangle extent;
+
+          bounds = gegl_operation_get_bounding_box (GEGL_OPERATION (offset));
+
+          extent = *gegl_buffer_get_extent (GEGL_BUFFER (input));
+
+          extent.x += x;
+          extent.y += y;
+
+          if (gegl_rectangle_intersect (&extent, &extent, &bounds))
+            {
+              output = g_object_new (GEGL_TYPE_BUFFER,
+                                     "source",  input,
+                                     "x",       extent.x,
+                                     "y",       extent.y,
+                                     "width",   extent.width,
+                                     "height",  extent.height,
+                                     "shift-x", -x,
+                                     "shift-y", -y,
+                                     NULL);
+
+              if (gegl_object_get_has_forked (input))
+                gegl_object_set_has_forked (output);
+            }
+        }
+
+      gegl_operation_context_take_object (context, "output", output);
+
+      return TRUE;
+    }
+
+  return GEGL_OPERATION_CLASS (parent_class)->process (operation, context,
+                                                       output_pad, result,
+                                                       level);
+}
+
+static gboolean
+clay_operation_offset_process (GeglOperation       *operation,
+                               GeglBuffer          *input,
+                               GeglBuffer          *output,
+                               const GeglRectangle *roi,
+                               gint                 level)
+{
+  ClayOperationOffset *offset = CLAY_OPERATION_OFFSET (operation);
+  GeglRectangle        bounds;
+  gint                 x;
+  gint                 y;
+  gint                 i;
+
+  bounds = gegl_operation_get_bounding_box (GEGL_OPERATION (offset));
+
+  clay_operation_offset_get_offset (offset, FALSE, &x, &y);
+
+  for (i = 0; i < 4; i++)
+    {
+      GeglRectangle offset_bounds = bounds;
+      gint          offset_x      = x;
+      gint          offset_y      = y;
+
+      if (i & 1)
+        offset_x += x < 0 ? bounds.width  : -bounds.width;
+      if (i & 2)
+        offset_y += y < 0 ? bounds.height : -bounds.height;
+
+      offset_bounds.x += offset_x;
+      offset_bounds.y += offset_y;
+
+      if (gegl_rectangle_intersect (&offset_bounds, &offset_bounds, roi))
+        {
+          if (i == 0 || offset->type == CLAY_OFFSET_WRAP_AROUND)
+            {
+              GeglRectangle offset_roi = offset_bounds;
+
+              offset_roi.x -= offset_x;
+              offset_roi.y -= offset_y;
+
+              clay_gegl_buffer_copy (input,  &offset_roi, GEGL_ABYSS_NONE,
+                                     output, &offset_bounds);
+            }
+          else if (offset->color)
+            {
+              gegl_buffer_set_color (output, &offset_bounds, offset->color);
+            }
+        }
+    }
+
+  return TRUE;
+}
+
+static void
+clay_operation_offset_get_offset (ClayOperationOffset *offset,
+                                  gboolean             invert,
+                                  gint                *x,
+                                  gint                *y)
+{
+  GeglRectangle bounds;
+
+  bounds = gegl_operation_get_bounding_box (GEGL_OPERATION (offset));
+
+  if (gegl_rectangle_is_empty (&bounds))
+    {
+      *x = 0;
+      *y = 0;
+
+      return;
+    }
+
+  *x = offset->x;
+  *y = offset->y;
+
+  if (invert)
+    {
+      *x = -*x;
+      *y = -*y;
+    }
+
+  if (offset->type == CLAY_OFFSET_WRAP_AROUND)
+    {
+      *x %= bounds.width;
+
+      if (*x < 0)
+        *x += bounds.width;
+
+      *y %= bounds.height;
+
+      if (*y < 0)
+        *y += bounds.height;
+    }
+  else
+    {
+      *x = CLAMP (*x, -bounds.width,  +bounds.width);
+      *y = CLAMP (*y, -bounds.height, +bounds.height);
+    }
+}
+
+static void
+clay_operation_offset_get_rect (ClayOperationOffset *offset,
+                                gboolean             invert,
+                                const GeglRectangle *roi,
+                                GeglRectangle       *rect)
+{
+  GeglRectangle bounds;
+  gint          x;
+  gint          y;
+
+  bounds = gegl_operation_get_bounding_box (GEGL_OPERATION (offset));
+
+  if (gegl_rectangle_is_empty (&bounds))
+    {
+      rect->x      = 0;
+      rect->y      = 0;
+      rect->width  = 0;
+      rect->height = 0;
+
+      return;
+    }
+
+  clay_operation_offset_get_offset (offset, invert, &x, &y);
+
+  *rect = *roi;
+
+  rect->x += x;
+  rect->y += y;
+
+  if (offset->type == CLAY_OFFSET_WRAP_AROUND)
+    {
+      if (rect->x + rect->width > bounds.x + bounds.width)
+        {
+          rect->x      = bounds.x;
+          rect->width  = bounds.width;
+        }
+
+      if (rect->y + rect->height > bounds.y + bounds.height)
+        {
+          rect->y      = bounds.y;
+          rect->height = bounds.height;
+        }
+    }
+
+  gegl_rectangle_intersect (rect, rect, &bounds);
+}

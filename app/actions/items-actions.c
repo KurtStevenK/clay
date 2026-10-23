@@ -20,27 +20,27 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpitem.h"
+#include "core/clay.h"
+#include "core/clayitem.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "items-actions.h"
 
 
 void
-items_actions_setup (GimpActionGroup *group,
+items_actions_setup (ClayActionGroup *group,
                      const gchar     *prefix)
 {
   GEnumClass *enum_class;
   GEnumValue *value;
 
-  enum_class = g_type_class_ref (GIMP_TYPE_COLOR_TAG);
+  enum_class = g_type_class_ref (CLAY_TYPE_COLOR_TAG);
 
   for (value = enum_class->values; value->value_name; value++)
     {
@@ -49,16 +49,16 @@ items_actions_setup (GimpActionGroup *group,
       g_snprintf (action, sizeof (action),
                   "%s-color-tag-%s", prefix, value->value_nick);
 
-      if (value->value == GIMP_COLOR_TAG_NONE)
+      if (value->value == CLAY_COLOR_TAG_NONE)
         {
-          gimp_action_group_set_action_always_show_image (group, action, TRUE);
+          clay_action_group_set_action_always_show_image (group, action, TRUE);
         }
       else
         {
           GeglColor *color = gegl_color_new ("none");
 
-          gimp_get_color_tag_color (value->value, color, FALSE);
-          gimp_action_group_set_action_color (group, action, color, FALSE);
+          clay_get_color_tag_color (value->value, color, FALSE);
+          clay_action_group_set_action_color (group, action, color, FALSE);
           g_object_unref (color);
         }
     }
@@ -67,7 +67,7 @@ items_actions_setup (GimpActionGroup *group,
 }
 
 void
-items_actions_update (GimpActionGroup *group,
+items_actions_update (ClayActionGroup *group,
                       const gchar     *prefix,
                       GList           *items)
 {
@@ -85,7 +85,7 @@ items_actions_update (GimpActionGroup *group,
 
   for (iter = items; iter; iter = iter->next)
     {
-      GimpItem *item = iter->data;
+      ClayItem *item = iter->data;
 
       /* With possible multi-selected items, toggle states may be
        * inconsistent (e.g. some items of the selection may be visible,
@@ -95,32 +95,32 @@ items_actions_update (GimpActionGroup *group,
        * It's mostly arbitrary and doesn't actually change much to the
        * action.
        */
-      visible = (visible || gimp_item_get_visible (item));
+      visible = (visible || clay_item_get_visible (item));
 
-      if (gimp_item_can_lock_content (item))
+      if (clay_item_can_lock_content (item))
         {
-          if (! gimp_item_get_lock_content (item))
+          if (! clay_item_get_lock_content (item))
             lock_content = FALSE;
           can_lock_content = TRUE;
         }
 
-      if (gimp_item_can_lock_position (item))
+      if (clay_item_can_lock_position (item))
         {
-          if (! gimp_item_get_lock_position (item))
+          if (! clay_item_get_lock_position (item))
             lock_position = FALSE;
           can_lock_position = TRUE;
         }
 
       has_color_tag = (has_color_tag ||
-                       gimp_get_color_tag_color (gimp_item_get_color_tag (item),
+                       clay_get_color_tag_color (clay_item_get_color_tag (item),
                                                  tag_color, FALSE));
     }
   g_object_unref (tag_color);
 
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 #define SET_ACTIVE(action,condition) \
-        gimp_action_group_set_action_active (group, action, (condition) != 0)
+        clay_action_group_set_action_active (group, action, (condition) != 0)
 
   g_snprintf (action, sizeof (action), "%s-visible", prefix);
   SET_SENSITIVE (action, items);
@@ -134,7 +134,7 @@ items_actions_update (GimpActionGroup *group,
   SET_SENSITIVE (action, can_lock_position);
   SET_ACTIVE    (action, lock_position);
 
-  enum_class = g_type_class_ref (GIMP_TYPE_COLOR_TAG);
+  enum_class = g_type_class_ref (CLAY_TYPE_COLOR_TAG);
 
   for (value = enum_class->values; value->value_name; value++)
     {

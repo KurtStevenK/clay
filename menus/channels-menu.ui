@@ -4,7 +4,7 @@
   <menu id="/channels-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="channels-action">Channels Menu</attribute>
-      <attribute name="icon">gimp-channels</attribute>
+      <attribute name="icon">clay-channels</attribute>
 
       <item><attribute name="action">app.channels-edit-attributes</attribute></item>
       <submenu>

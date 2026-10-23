@@ -7,13 +7,13 @@ It is important that you fill all the fields of the template. -->
 
 ### Environment/Versions
 
-- GIMP version number: <!-- Please see: https://gimp.org/bugs/report.html#ensure-to-use-the-latest-gimp -->
+- Clay version number: <!-- Please see: https://gimp.org/bugs/report.html#ensure-to-use-the-latest-clay -->
 - Package: <!--[Flatpak? Snap? Installer from gimp.org? MS Store package? If another installer, tell us where from] (write it after the > symbol)-->
 - Operating System: <!--[Windows? macOS? Linux? All? Add OS versions too] (write it after the > symbol) -->
 - (if Linux) Display system: <!--[X11? Wayland? Which compositor and version?] (write it after the > symbol) -->
 
 <!-- Note: you are expected to have verified the security issue still exists
-either in the last stable version of GIMP or on updated development code
+either in the last stable version of Clay or on updated development code
 (master branch). -->
 
 ### Description of the security report
@@ -24,7 +24,7 @@ respecting this issue template. See also: https://www.gimp.org/bugs/report.html#
 ### Security Log
 
 <!-- Please attach a antivirus log or other file detailing the issue, and attach it to the report.
-If you have none, at least report GIMP as false positive to the antivirus before continuing. -->
+If you have none, at least report Clay as false positive to the antivirus before continuing. -->
 
 ### Additional information
 

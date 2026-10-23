@@ -20,15 +20,15 @@
 #include <string.h>
 #include <glib.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "scheme-wrapper.h"       /* type "pointer" */
 
 #include "script-fu-lib.h"
 #include "script-fu-types.h"
 #include "script-fu-interface.h"  /* ScriptFu's GUI implementation. */
-#include "script-fu-dialog.h"     /* Gimp's GUI implementation. */
+#include "script-fu-dialog.h"     /* Clay's GUI implementation. */
 #include "script-fu-script.h"
 #include "script-fu-scripts.h"    /* script_fu_find_script */
 #include "script-fu-command.h"
@@ -38,13 +38,13 @@
 #include "script-fu-run-func.h"
 
 /* Outer run_funcs
- * One each for GimpProcedure and GimpImageProcedure.
- * These are called from Gimp, with two different signatures.
+ * One each for ClayProcedure and ClayImageProcedure.
+ * These are called from Clay, with two different signatures.
  * These form and interpret "commands" which are calls to inner run_funcs
  * defined in Scheme by a script.
 
  * These return the result of interpretation,
- * in a GimpValueArray whose only element is a status.
+ * in a ClayValueArray whose only element is a status.
  * !!! ScriptFu does not let authors define procedures that return values.
  *
  * A prior script may have called (script-fu-use-v3) to opt in to interpret v3 dialect.
@@ -53,45 +53,45 @@
  * FUTURE: default is v3 and script must opt in to v2 dialect.
  */
 
-/* run_func for a GimpImageProcedure
+/* run_func for a ClayImageProcedure
  *
- * Type is GimpRunImageFunc.
+ * Type is ClayRunImageFunc.
  *
- * Uses Gimp's config and gui.
+ * Uses Clay's config and gui.
  *
  * Since 3.0
  */
-GimpValueArray *
-script_fu_run_image_procedure (GimpProcedure        *procedure, /* GimpImageProcedure */
-                               GimpRunMode           run_mode,
-                               GimpImage            *image,
-                               GimpDrawable        **drawables,
-                               GimpProcedureConfig  *config,
+ClayValueArray *
+script_fu_run_image_procedure (ClayProcedure        *procedure, /* ClayImageProcedure */
+                               ClayRunMode           run_mode,
+                               ClayImage            *image,
+                               ClayDrawable        **drawables,
+                               ClayProcedureConfig  *config,
                                gpointer              data)
 {
 
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
   SFScript       *script;
 
   g_debug ("script_fu_run_image_procedure");
-  script = script_fu_find_script (gimp_procedure_get_name (procedure));
+  script = script_fu_find_script (clay_procedure_get_name (procedure));
 
   if (! script)
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR, NULL);
 
   ts_set_run_mode (run_mode);
 
   begin_interpret_default_dialect ();
 
-  script_fu_progress_init (gimp_procedure_get_menu_label (procedure));
+  script_fu_progress_init (clay_procedure_get_menu_label (procedure));
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       {
         guint n_specs;
 
-        gimp_ui_init ("script-fu");
+        clay_ui_init ("script-fu");
 
         g_free (g_object_class_list_properties (G_OBJECT_GET_CLASS (config), &n_specs));
         if (n_specs > 1)
@@ -106,7 +106,7 @@ script_fu_run_image_procedure (GimpProcedure        *procedure, /* GimpImageProc
           }
         break;
       }
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       {
         /* A call from another PDB procedure.
          * Use the given config, without interacting with user.
@@ -115,7 +115,7 @@ script_fu_run_image_procedure (GimpProcedure        *procedure, /* GimpImageProc
         result = script_fu_interpret_image_proc (procedure, script, image, drawables, config);
         break;
       }
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       {
         /* User invoked from a menu "Filter>Run with last values".
          * Do not show dialog. config are already last values.
@@ -125,42 +125,42 @@ script_fu_run_image_procedure (GimpProcedure        *procedure, /* GimpImageProc
       }
     default:
       {
-        result = gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR, NULL);
+        result = clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR, NULL);
       }
     }
 
   return result;
 }
 
-/* The number of pspecs in a config's pspecs to skip, for a regular GimpProcedure.
+/* The number of pspecs in a config's pspecs to skip, for a regular ClayProcedure.
  * Skip procedure-name and run-mode.
  */
 #define SF_ARGS_SKIPPED_REGULAR 2
 
-/* run_func for a GimpProcedure
+/* run_func for a ClayProcedure
  *
- * Type is GimpRunFunc.
+ * Type is ClayRunFunc.
  *
- * Uses Gimp's config and gui.
+ * Uses Clay's config and gui.
  *
  * Since 3.0
  */
-GimpValueArray *
-script_fu_run_regular_procedure (GimpProcedure        *procedure,
-                                 GimpProcedureConfig  *config,
+ClayValueArray *
+script_fu_run_regular_procedure (ClayProcedure        *procedure,
+                                 ClayProcedureConfig  *config,
                                  gpointer              data)
 {
 
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
   SFScript       *script;
-  GimpRunMode     run_mode;
+  ClayRunMode     run_mode;
 
   g_debug ("%s", G_STRFUNC);
 
-  script = script_fu_find_script (gimp_procedure_get_name (procedure));
+  script = script_fu_find_script (clay_procedure_get_name (procedure));
 
   if (! script)
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR, NULL);
 
   /* Unlike ImageProcedure, run-mode is a prop in the config. */
   g_object_get (config, "run-mode", &run_mode, NULL);
@@ -168,15 +168,15 @@ script_fu_run_regular_procedure (GimpProcedure        *procedure,
 
   begin_interpret_default_dialect ();
 
-  script_fu_progress_init (gimp_procedure_get_menu_label (procedure));
+  script_fu_progress_init (clay_procedure_get_menu_label (procedure));
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       {
         guint n_specs;
 
-        gimp_ui_init ("script-fu");
+        clay_ui_init ("script-fu");
 
         g_free (g_object_class_list_properties (G_OBJECT_GET_CLASS (config), &n_specs));
         if (n_specs > SF_ARGS_SKIPPED_REGULAR)
@@ -191,7 +191,7 @@ script_fu_run_regular_procedure (GimpProcedure        *procedure,
           }
         break;
       }
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       {
         /* A call from another PDB procedure.
          * Use the given config, without interacting with user.
@@ -200,7 +200,7 @@ script_fu_run_regular_procedure (GimpProcedure        *procedure,
         result = script_fu_interpret_regular_proc (procedure, script, config);
         break;
       }
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       {
         /* User invoked from a menu "Filter>Run with last values".
          * Do not show dialog. config are already last values.
@@ -210,43 +210,43 @@ script_fu_run_regular_procedure (GimpProcedure        *procedure,
       }
     default:
       {
-        result = gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR, NULL);
+        result = clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR, NULL);
       }
     }
 
   return result;
 }
 
-/* run_func for a GimpProcedure registered using Scheme "script-fu-register"
+/* run_func for a ClayProcedure registered using Scheme "script-fu-register"
  *
- * Type is GimpRunFunc
+ * Type is ClayRunFunc
  *
  * Uses ScriptFu's own GUI implementation, and retains settings locally.
  *
  * Since prior to 3.0 but formerly named script_fu_script_proc
  */
-GimpValueArray *
-script_fu_run_procedure (GimpProcedure       *procedure,
-                         GimpProcedureConfig *config,
+ClayValueArray *
+script_fu_run_procedure (ClayProcedure       *procedure,
+                         ClayProcedureConfig *config,
                          gpointer             data)
 {
-  GimpPDBStatusType   status = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType   status = CLAY_PDB_SUCCESS;
   SFScript           *script;
   GParamSpec        **pspecs;
   guint               n_pspecs;
   gint                n_aux_args;
-  GimpRunMode         run_mode;
+  ClayRunMode         run_mode;
   GError             *error = NULL;
 
-  script = script_fu_find_script (gimp_procedure_get_name (procedure));
+  script = script_fu_find_script (clay_procedure_get_name (procedure));
 
   if (! script)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CALLING_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CALLING_ERROR,
                                              NULL);
 
   pspecs = g_object_class_list_properties (G_OBJECT_GET_CLASS (config), &n_pspecs);
-  gimp_procedure_get_aux_arguments (procedure, &n_aux_args);
+  clay_procedure_get_aux_arguments (procedure, &n_aux_args);
 
   g_object_get (config, "run-mode", &run_mode, NULL);
 
@@ -254,15 +254,15 @@ script_fu_run_procedure (GimpProcedure       *procedure,
 
   begin_interpret_default_dialect ();
 
-  script_fu_progress_init (gimp_procedure_get_menu_label (procedure));
+  script_fu_progress_init (clay_procedure_get_menu_label (procedure));
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       {
         gint min_args = 0;
 
-        gimp_ui_init ("script-fu");
+        clay_ui_init ("script-fu");
 
         /*  First, try to collect the standard script arguments...  */
         min_args = script_fu_script_collect_standard_args (script, pspecs, n_pspecs, config);
@@ -273,12 +273,12 @@ script_fu_run_procedure (GimpProcedure       *procedure,
             /* Get the rest of arguments with a dialog, and run the command.  */
             status = script_fu_interface_dialog (script, min_args);
 
-            if (status == GIMP_PDB_EXECUTION_ERROR)
-              return gimp_procedure_new_return_values (procedure, status,
+            if (status == CLAY_PDB_EXECUTION_ERROR)
+              return clay_procedure_new_return_values (procedure, status,
                                                        script_fu_get_gerror ());
 
-            /* Else no error, or GIMP_PDB_CANCEL.
-             * GIMP_PDB_CALLING_ERROR is emitted prior to this.
+            /* Else no error, or CLAY_PDB_CANCEL.
+             * CLAY_PDB_CALLING_ERROR is emitted prior to this.
              * Break and return without an error message.
              */
             break;
@@ -286,12 +286,12 @@ script_fu_run_procedure (GimpProcedure       *procedure,
         /*  Else fallthrough to next case and run the script without dialog. */
       }
 
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       /* Verify actual args count equals declared arg count. */
       if (n_pspecs != script->n_args + n_aux_args + SF_ARG_TO_CONFIG_OFFSET)
-        status = GIMP_PDB_CALLING_ERROR;
+        status = CLAY_PDB_CALLING_ERROR;
 
-      if (status == GIMP_PDB_SUCCESS)
+      if (status == CLAY_PDB_SUCCESS)
         {
           gchar *command;
 
@@ -300,8 +300,8 @@ script_fu_run_procedure (GimpProcedure       *procedure,
           /*  run the command through the interpreter  */
           if (! script_fu_run_command (command, &error))
             {
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_EXECUTION_ERROR,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_EXECUTION_ERROR,
                                                        error);
             }
 
@@ -309,7 +309,7 @@ script_fu_run_procedure (GimpProcedure       *procedure,
         }
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       {
         gchar *command;
 
@@ -321,8 +321,8 @@ script_fu_run_procedure (GimpProcedure       *procedure,
         /*  run the command through the interpreter  */
         if (! script_fu_run_command (command, &error))
           {
-            return gimp_procedure_new_return_values (procedure,
-                                                     GIMP_PDB_EXECUTION_ERROR,
+            return clay_procedure_new_return_values (procedure,
+                                                     CLAY_PDB_EXECUTION_ERROR,
                                                      error);
           }
 
@@ -334,5 +334,5 @@ script_fu_run_procedure (GimpProcedure       *procedure,
       break;
     }
 
-  return gimp_procedure_new_return_values (procedure, status, NULL);
+  return clay_procedure_new_return_values (procedure, status, NULL);
 }

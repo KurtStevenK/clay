@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Tileit - This plugin take an image and makes repeated copies of it.
  *
@@ -38,14 +38,14 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define PLUG_IN_PROC   "plug-in-small-tiles"
 #define PLUG_IN_BINARY "tile-small"
-#define PLUG_IN_ROLE   "gimp-tile-small"
+#define PLUG_IN_ROLE   "clay-tile-small"
 
 /***** Magic numbers *****/
 
@@ -88,12 +88,12 @@ typedef struct _TileClass TileClass;
 
 struct _Tile
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _TileClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -102,24 +102,24 @@ struct _TileClass
 
 GType                   tile_get_type         (void);
 
-static GList          * tile_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * tile_create_procedure (GimpPlugIn           *plug_in,
+static GList          * tile_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * tile_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * tile_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * tile_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
-static gboolean  tileit_dialog          (GimpProcedure       *procedure,
-                                         GimpProcedureConfig *config,
-                                         GimpDrawable        *drawable);
+static gboolean  tileit_dialog          (ClayProcedure       *procedure,
+                                         ClayProcedureConfig *config,
+                                         ClayDrawable        *drawable);
 
 static void      tileit_scale_update    (GtkAdjustment       *adj,
                                          gint                *value);
-static void      tileit_config_update   (GimpProcedureConfig *config);
+static void      tileit_config_update   (ClayProcedureConfig *config);
 
 static void      tileit_exp_update      (GtkWidget           *widget,
                                          gpointer             value);
@@ -133,9 +133,9 @@ static void      tileit_radio_update    (GtkWidget           *widget,
 static void      tileit_hvtoggle_update (GtkWidget           *widget,
                                          gpointer             data);
 
-static void      do_tiles               (GimpProcedureConfig *config,
-                                         GimpDrawable        *drawable);
-static gint      tiles_xy               (GimpProcedureConfig *config,
+static void      do_tiles               (ClayProcedureConfig *config,
+                                         ClayDrawable        *drawable);
+static gint      tiles_xy               (ClayProcedureConfig *config,
                                          gint                 width,
                                          gint                 height,
                                          gint                 x,
@@ -147,16 +147,16 @@ static void      alt_update             (void);
 static void      explicit_update        (gboolean);
 
 static void      dialog_update_preview  (void);
-static void      cache_preview          (GimpDrawable        *drawable);
+static void      cache_preview          (ClayDrawable        *drawable);
 static gboolean  tileit_preview_draw    (GtkWidget           *widget,
                                          cairo_t             *cr);
 static gboolean  tileit_preview_events  (GtkWidget           *widget,
                                          GdkEvent            *event);
 
 
-G_DEFINE_TYPE (Tile, tile, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Tile, tile, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (TILE_TYPE)
+CLAY_MAIN (TILE_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -233,7 +233,7 @@ static gboolean has_alpha;
 static void
 tile_class_init (TileClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = tile_query_procedures;
   plug_in_class->create_procedure = tile_create_procedure;
@@ -246,40 +246,40 @@ tile_init (Tile *tile)
 }
 
 static GList *
-tile_query_procedures (GimpPlugIn *plug_in)
+tile_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-tile_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+tile_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             tile_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Small Tiles..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Map");
+      clay_procedure_set_menu_label (procedure, _("_Small Tiles..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Map");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Tile image into smaller "
                                           "versions of the original"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Andy Thomas",
                                       "Andy Thomas",
                                       "1997");
 
-      gimp_procedure_add_int_argument (procedure, "num-tiles",
+      clay_procedure_add_int_argument (procedure, "num-tiles",
                                        _("_n²"),
                                        _("Number of tiles to make"),
                                        2, MAX_SEGS, 2,
@@ -289,30 +289,30 @@ tile_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-tile_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+tile_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gint          pwidth;
   gint          pheight;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -320,16 +320,16 @@ tile_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &sel_x1,    &sel_y1,
                                       &sel_width, &sel_height))
     {
       g_message (_("Region selected for filter is empty."));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_SUCCESS,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_SUCCESS,
                                                NULL);
     }
 
@@ -354,38 +354,38 @@ tile_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       if (! tileit_dialog (procedure, config, drawable))
         {
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CANCEL,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CANCEL,
                                                    NULL);
         }
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_NONINTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
       break;
     }
 
-  if (gimp_drawable_is_rgb  (drawable) ||
-      gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_rgb  (drawable) ||
+      clay_drawable_is_gray (drawable))
     {
-      gimp_progress_init (_("Tiling"));
+      clay_progress_init (_("Tiling"));
 
       do_tiles (config, drawable);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static GtkWidget *
@@ -404,7 +404,7 @@ spin_button_new (GtkAdjustment **adjustment,  /* return value */
   *adjustment = gtk_adjustment_new (value, lower, upper,
                                     step_increment, page_increment, 0);
 
-  spinbutton = gimp_spin_button_new (*adjustment, climb_rate, digits);
+  spinbutton = clay_spin_button_new (*adjustment, climb_rate, digits);
 
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
 
@@ -412,9 +412,9 @@ spin_button_new (GtkAdjustment **adjustment,  /* return value */
 }
 
 static gboolean
-tileit_dialog (GimpProcedure       *procedure,
-               GimpProcedureConfig *config,
-               GimpDrawable        *drawable)
+tileit_dialog (ClayProcedure       *procedure,
+               ClayProcedureConfig *config,
+               ClayDrawable        *drawable)
 {
   GtkWidget     *dialog;
   GtkWidget     *main_vbox;
@@ -431,15 +431,15 @@ tileit_dialog (GimpProcedure       *procedure,
   GSList        *orientation_group = NULL;
   gboolean       run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   cache_preview (drawable); /* Get the preview image */
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Small Tiles"));
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
@@ -460,12 +460,12 @@ tileit_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
-  tint.preview = gimp_preview_area_new ();
+  tint.preview = clay_preview_area_new ();
   g_object_set (tint.preview,
-                "check-size",          gimp_check_size (),
-                "check-type",          gimp_check_type (),
-                "check-custom-color1", gimp_check_custom_color1 (),
-                "check-custom-color2", gimp_check_custom_color2 (),
+                "check-size",          clay_check_size (),
+                "check-type",          clay_check_type (),
+                "check-custom-color1", clay_check_custom_color1 (),
+                "check-custom-color2", clay_check_custom_color2 (),
                 NULL);
   gtk_widget_set_size_request (tint.preview, preview_width, preview_height);
   gtk_widget_set_events (GTK_WIDGET (tint.preview), PREVIEW_MASK);
@@ -481,7 +481,7 @@ tileit_dialog (GimpProcedure       *procedure,
 
   /* Area for buttons etc */
 
-  frame = gimp_frame_new (_("Flip"));
+  frame = clay_frame_new (_("Flip"));
   gtk_box_pack_start (GTK_BOX (hbox), frame, TRUE, TRUE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -535,7 +535,7 @@ tileit_dialog (GimpProcedure       *procedure,
   gtk_grid_attach (GTK_GRID (grid), toggle, 0, 0, 4, 1);
   gtk_widget_set_visible (toggle, TRUE);
 
-  g_object_set_data (G_OBJECT (toggle), "gimp-item-data",
+  g_object_set_data (G_OBJECT (toggle), "clay-item-data",
                      GINT_TO_POINTER (ALL));
 
   g_signal_connect (toggle, "toggled",
@@ -548,7 +548,7 @@ tileit_dialog (GimpProcedure       *procedure,
   gtk_grid_attach (GTK_GRID (grid), toggle, 0, 1, 4, 1);
   gtk_widget_set_visible (toggle, TRUE);
 
-  g_object_set_data (G_OBJECT (toggle), "gimp-item-data",
+  g_object_set_data (G_OBJECT (toggle), "clay-item-data",
                      GINT_TO_POINTER (ALT));
 
   g_signal_connect (toggle, "toggled",
@@ -611,7 +611,7 @@ tileit_dialog (GimpProcedure       *procedure,
                           spinbutton, "sensitive",
                           G_BINDING_SYNC_CREATE);
 
-  g_object_set_data (G_OBJECT (toggle), "gimp-item-data",
+  g_object_set_data (G_OBJECT (toggle), "clay-item-data",
                      GINT_TO_POINTER (EXPLICIT));
 
   g_signal_connect (toggle, "toggled",
@@ -635,29 +635,29 @@ tileit_dialog (GimpProcedure       *procedure,
   /* Widget for selecting the Opacity */
 
   exp_call.opacity_adj = gtk_adjustment_new (opacity, 0, 100, 1.0, 10.0, 0.0);
-  scale = gimp_spin_scale_new (exp_call.opacity_adj, _("O_pacity"), 0);
+  scale = clay_spin_scale_new (exp_call.opacity_adj, _("O_pacity"), 0);
   g_signal_connect (exp_call.opacity_adj, "value-changed",
                     G_CALLBACK (tileit_scale_update),
                     &opacity);
 
   gtk_widget_set_visible (scale, TRUE);
-  gtk_widget_set_sensitive (scale, gimp_drawable_has_alpha (drawable));
+  gtk_widget_set_sensitive (scale, clay_drawable_has_alpha (drawable));
   gtk_box_pack_start (GTK_BOX (vbox), scale, FALSE, FALSE, 6);
 
   /* Lower frame saying how many segments */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog), "segments-label",
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog), "segments-label",
                                    _("Number of Segments"), FALSE, FALSE);
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "num-tiles", 1);
   g_signal_connect_object (config, "notify::num-tiles",
                            G_CALLBACK (tileit_config_update),
                            NULL, 0);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "num-tiles-frame",
                                     "segments-label", FALSE,
                                     "num-tiles");
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "num-tiles-frame",
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "num-tiles-frame",
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
@@ -667,7 +667,7 @@ tileit_dialog (GimpProcedure       *procedure,
                 NULL);
   dialog_update_preview ();
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -678,7 +678,7 @@ static void
 tileit_hvtoggle_update (GtkWidget *widget,
                         gpointer   data)
 {
-  gimp_toggle_button_update (widget, data);
+  clay_toggle_button_update (widget, data);
 
   switch (exp_call.type)
     {
@@ -853,7 +853,7 @@ static void
 tileit_radio_update (GtkWidget *widget,
                      gpointer   data)
 {
-  gimp_radio_button_update (widget, data);
+  clay_radio_button_update (widget, data);
 
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)))
     {
@@ -891,7 +891,7 @@ tileit_scale_update (GtkAdjustment *adj,
 }
 
 static void
-tileit_config_update (GimpProcedureConfig *config)
+tileit_config_update (ClayProcedureConfig *config)
 {
   g_object_get (config,
                 "num-tiles", &itvals.numtiles,
@@ -955,13 +955,13 @@ tileit_exp_update_f (GtkWidget *widget,
 /* The preview_cache will contain the small image */
 
 static void
-cache_preview (GimpDrawable *drawable)
+cache_preview (ClayDrawable *drawable)
 {
-  GeglBuffer *buffer = gimp_drawable_get_buffer (drawable);
+  GeglBuffer *buffer = clay_drawable_get_buffer (drawable);
   const Babl *format;
   gdouble     scale;
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     format = babl_format ("R'G'B'A u8");
   else
     format = babl_format ("R'G'B' u8");
@@ -984,8 +984,8 @@ cache_preview (GimpDrawable *drawable)
 }
 
 static void
-do_tiles (GimpProcedureConfig *config,
-          GimpDrawable        *drawable)
+do_tiles (ClayProcedureConfig *config,
+          ClayDrawable        *drawable)
 {
   GeglBuffer         *src_buffer;
   GeglBuffer         *dest_buffer;
@@ -998,10 +998,10 @@ do_tiles (GimpProcedureConfig *config,
   gint                nc, nr;
   gint                i;
 
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   if (has_alpha)
     format = babl_format ("R'G'B'A u8");
@@ -1057,23 +1057,23 @@ do_tiles (GimpProcedureConfig *config,
         }
 
       progress += dest_roi.width * dest_roi.height;
-      gimp_progress_update ((double) progress / max_progress);
+      clay_progress_update ((double) progress / max_progress);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_object_unref (src_buffer);
   g_object_unref (dest_buffer);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable,
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable,
                         sel_x1, sel_y1, sel_width, sel_height);
 }
 
 
 /* Get the xy pos and any action */
 static gint
-tiles_xy (GimpProcedureConfig *config,
+tiles_xy (ClayProcedureConfig *config,
           gint                 width,
           gint                 height,
           gint                 x,
@@ -1201,9 +1201,9 @@ dialog_update_preview (void)
               preview_width * tint.img_bpp);
     }
 
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (tint.preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (tint.preview),
                           0, 0, preview_width, preview_height,
-                          (tint.img_bpp>3)?GIMP_RGBA_IMAGE:GIMP_RGB_IMAGE,
+                          (tint.img_bpp>3)?CLAY_RGBA_IMAGE:CLAY_RGB_IMAGE,
                           buffer,
                           preview_width * tint.img_bpp);
 

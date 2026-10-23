@@ -20,77 +20,77 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpdataeditor.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claydataeditor.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "data-editor-commands.h"
 #include "tool-preset-editor-actions.h"
 #include "tool-preset-editor-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry tool_preset_editor_actions[] =
+static const ClayActionEntry tool_preset_editor_actions[] =
 {
-  { "tool-preset-editor-save", GIMP_ICON_DOCUMENT_SAVE,
+  { "tool-preset-editor-save", CLAY_ICON_DOCUMENT_SAVE,
     NC_("tool-preset-editor-action", "_Save Tool Options to Preset"), NULL, { NULL },
     NC_("tool-preset-editor-action", "Save the active tool options to this "
         "tool preset"),
     tool_preset_editor_save_cmd_callback,
-    GIMP_HELP_TOOL_PRESET_SAVE },
+    CLAY_HELP_TOOL_PRESET_SAVE },
 
-  { "tool-preset-editor-restore", GIMP_ICON_DOCUMENT_REVERT,
+  { "tool-preset-editor-restore", CLAY_ICON_DOCUMENT_REVERT,
     NC_("tool-preset-editor-action", "_Restore Tool Preset"), NULL, { NULL },
     NC_("tool-preset-editor-action", "Restore this tool preset"),
     tool_preset_editor_restore_cmd_callback,
-    GIMP_HELP_TOOL_PRESET_RESTORE }
+    CLAY_HELP_TOOL_PRESET_RESTORE }
 };
 
 
-static const GimpToggleActionEntry tool_preset_editor_toggle_actions[] =
+static const ClayToggleActionEntry tool_preset_editor_toggle_actions[] =
 {
-  { "tool-preset-editor-edit-active", GIMP_ICON_LINKED,
+  { "tool-preset-editor-edit-active", CLAY_ICON_LINKED,
     NC_("tool-preset-editor-action", "Edit Active Tool Preset"), NULL, { NULL }, NULL,
     data_editor_edit_active_cmd_callback,
     FALSE,
-    GIMP_HELP_TOOL_PRESET_EDITOR_EDIT_ACTIVE }
+    CLAY_HELP_TOOL_PRESET_EDITOR_EDIT_ACTIVE }
 };
 
 
 void
-tool_preset_editor_actions_setup (GimpActionGroup *group)
+tool_preset_editor_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "tool-preset-editor-action",
+  clay_action_group_add_actions (group, "tool-preset-editor-action",
                                  tool_preset_editor_actions,
                                  G_N_ELEMENTS (tool_preset_editor_actions));
 
-  gimp_action_group_add_toggle_actions (group, "tool-preset-editor-action",
+  clay_action_group_add_toggle_actions (group, "tool-preset-editor-action",
                                         tool_preset_editor_toggle_actions,
                                         G_N_ELEMENTS (tool_preset_editor_toggle_actions));
 
 }
 
 void
-tool_preset_editor_actions_update (GimpActionGroup *group,
+tool_preset_editor_actions_update (ClayActionGroup *group,
                                    gpointer         user_data)
 {
-  GimpDataEditor *data_editor = GIMP_DATA_EDITOR (user_data);
+  ClayDataEditor *data_editor = CLAY_DATA_EDITOR (user_data);
   gboolean        edit_active = FALSE;
 
-  edit_active = gimp_data_editor_get_edit_active (data_editor);
+  edit_active = clay_data_editor_get_edit_active (data_editor);
 
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 #define SET_ACTIVE(action,condition) \
-        gimp_action_group_set_action_active (group, action, (condition) != 0)
+        clay_action_group_set_action_active (group, action, (condition) != 0)
 
   SET_SENSITIVE ("tool-preset-editor-save",        data_editor->data);
   SET_SENSITIVE ("tool-preset-editor-restore",     data_editor->data);

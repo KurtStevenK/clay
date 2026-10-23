@@ -1,12 +1,12 @@
 /*************************************/
-/* GIMP image manipulation routines. */
+/* Clay image manipulation routines. */
 /*************************************/
 
 #include "config.h"
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "lighting-main.h"
 #include "lighting-image.h"
@@ -14,16 +14,16 @@
 #include "lighting-ui.h"
 
 
-GimpDrawable *input_drawable;
-GimpDrawable *output_drawable;
+ClayDrawable *input_drawable;
+ClayDrawable *output_drawable;
 GeglBuffer   *source_buffer;
 GeglBuffer   *dest_buffer;
 
-GimpDrawable *bump_drawable;
+ClayDrawable *bump_drawable;
 GeglBuffer   *bump_buffer;
 const Babl   *bump_format;
 
-GimpDrawable *env_drawable;
+ClayDrawable *env_drawable;
 GeglBuffer   *env_buffer;
 
 guchar          *preview_rgb_data = NULL;
@@ -133,11 +133,11 @@ check_bounds (gint x,
     return TRUE;
 }
 
-GimpVector3
+ClayVector3
 int_to_pos (gint x,
 	    gint y)
 {
-  GimpVector3 pos;
+  ClayVector3 pos;
 
   if (width >= height)
     {
@@ -158,11 +158,11 @@ int_to_pos (gint x,
   return pos;
 }
 
-GimpVector3
+ClayVector3
 int_to_posf (gdouble x,
 	     gdouble y)
 {
-  GimpVector3 pos;
+  ClayVector3 pos;
 
   if (width >= height)
     {
@@ -281,7 +281,7 @@ get_image_color (gdouble  u,
   for (gint i = 0; i < 4; i++)
     pixels[i + 12] = p[i];
 
-  gimp_bilinear_rgb (u, v, pixels, TRUE, color);
+  clay_bilinear_rgb (u, v, pixels, TRUE, color);
 }
 
 gdouble
@@ -312,7 +312,7 @@ get_map_value (GeglBuffer *buffer,
   p[2] = (gdouble) peek_map (buffer, format, x1, y2);
   p[3] = (gdouble) peek_map (buffer, format, x2, y2);
 
-  return gimp_bilinear (u, v, p);
+  return clay_bilinear (u, v, p);
 }
 
 static void
@@ -347,7 +347,7 @@ compute_maps (void)
 /****************************************/
 
 gint
-image_setup (GimpDrawable *drawable,
+image_setup (ClayDrawable *drawable,
 	     gint          interactive)
 {
   gint	   w, h;
@@ -361,7 +361,7 @@ image_setup (GimpDrawable *drawable,
   input_drawable  = drawable;
   output_drawable = drawable;
 
-  ret = gimp_drawable_mask_intersect (drawable,
+  ret = clay_drawable_mask_intersect (drawable,
                                       &border_x1, &border_y1, &w, &h);
 
   border_x2 = border_x1 + w;
@@ -370,10 +370,10 @@ image_setup (GimpDrawable *drawable,
   if (! ret)
     return FALSE;
 
-  width  = gimp_drawable_get_width  (input_drawable);
-  height = gimp_drawable_get_height (input_drawable);
+  width  = clay_drawable_get_width  (input_drawable);
+  height = clay_drawable_get_height (input_drawable);
 
-  source_buffer = gimp_drawable_get_buffer (input_drawable);
+  source_buffer = clay_drawable_get_buffer (input_drawable);
 
   maxcounter = (glong) width * (glong) height;
 
@@ -393,18 +393,18 @@ image_setup (GimpDrawable *drawable,
 }
 
 void
-bumpmap_setup (GimpDrawable *bumpmap)
+bumpmap_setup (ClayDrawable *bumpmap)
 {
   if (bumpmap)
     {
-      gboolean has_alpha = gimp_drawable_has_alpha (bumpmap);
+      gboolean has_alpha = clay_drawable_has_alpha (bumpmap);
 
       if (! bump_buffer)
         {
-          bump_buffer = gimp_drawable_get_buffer (bumpmap);
+          bump_buffer = clay_drawable_get_buffer (bumpmap);
         }
 
-      if (gimp_drawable_is_rgb (bumpmap))
+      if (clay_drawable_is_rgb (bumpmap))
         bump_format = has_alpha ? babl_format ("R'aG'aB'aA u8") :
                                   babl_format ("R'G'B' u8");
       else
@@ -414,13 +414,13 @@ bumpmap_setup (GimpDrawable *bumpmap)
 }
 
 void
-envmap_setup (GimpDrawable *envmap)
+envmap_setup (ClayDrawable *envmap)
 {
   if (envmap && ! env_buffer)
     {
-      env_width  = gimp_drawable_get_width  (envmap);
-      env_height = gimp_drawable_get_height (envmap);
+      env_width  = clay_drawable_get_width  (envmap);
+      env_height = clay_drawable_get_height (envmap);
 
-      env_buffer = gimp_drawable_get_buffer (envmap);
+      env_buffer = clay_drawable_get_buffer (envmap);
     }
 }

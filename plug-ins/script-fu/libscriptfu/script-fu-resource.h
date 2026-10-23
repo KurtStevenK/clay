@@ -20,7 +20,7 @@
 
 
 /* ScriptFu internally stores Resources as int IDs.
- * In binding to and from the PDB, converted to GimpResource *
+ * In binding to and from the PDB, converted to ClayResource *
  * (which is a proxy object.)
  */
 typedef struct {

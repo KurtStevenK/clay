@@ -1,4 +1,4 @@
-/* CSource - GIMP Plugin to dump image data in RGB(A) format for C source
+/* CSource - Clay Plugin to dump image data in RGB(A) format for C source
  * Copyright (C) 1999 Tim Janik
  *
  * This program is free software: you can redistribute it and/or
@@ -25,15 +25,15 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-csource-export"
 #define PLUG_IN_BINARY "file-csource"
-#define PLUG_IN_ROLE   "gimp-file-csource"
+#define PLUG_IN_ROLE   "clay-file-csource"
 
 
 typedef struct _Csource      Csource;
@@ -41,12 +41,12 @@ typedef struct _CsourceClass CsourceClass;
 
 struct _Csource
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _CsourceClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -55,39 +55,39 @@ struct _CsourceClass
 
 GType                   csource_get_type         (void);
 
-static GList          * csource_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * csource_create_procedure (GimpPlugIn           *plug_in,
+static GList          * csource_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * csource_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * csource_export           (GimpProcedure        *procedure,
-                                                  GimpRunMode           run_mode,
-                                                  GimpImage            *image,
+static ClayValueArray * csource_export           (ClayProcedure        *procedure,
+                                                  ClayRunMode           run_mode,
+                                                  ClayImage            *image,
                                                   GFile                *file,
-                                                  GimpExportOptions    *options,
-                                                  GimpMetadata         *metadata,
-                                                  GimpProcedureConfig  *config,
+                                                  ClayExportOptions    *options,
+                                                  ClayMetadata         *metadata,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
 static gboolean         export_image             (GFile                *file,
-                                                  GimpImage            *image,
-                                                  GimpDrawable         *drawable,
+                                                  ClayImage            *image,
+                                                  ClayDrawable         *drawable,
                                                   GObject              *config,
                                                   GError              **error);
-static gboolean         save_dialog              (GimpImage            *image,
-                                                  GimpProcedure        *procedure,
+static gboolean         save_dialog              (ClayImage            *image,
+                                                  ClayProcedure        *procedure,
                                                   GObject              *config);
 
 
-G_DEFINE_TYPE (Csource, csource, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Csource, csource, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (CSOURCE_TYPE)
+CLAY_MAIN (CSOURCE_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 csource_class_init (CsourceClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = csource_query_procedures;
   plug_in_class->create_procedure = csource_create_procedure;
@@ -100,131 +100,131 @@ csource_init (Csource *csource)
 }
 
 static GList *
-csource_query_procedures (GimpPlugIn *plug_in)
+csource_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-csource_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+csource_create_procedure (ClayPlugIn  *plug_in,
                           const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, csource_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("C source code"));
+      clay_procedure_set_menu_label (procedure, _("C source code"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Dump image data in RGB(A) format "
                                           "for C source"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tim Janik",
                                       "Tim Janik",
                                       "1999");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("C-Source"));
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-csrc");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "c");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB   |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB   |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_string_aux_argument (procedure, "prefixed-name",
+      clay_procedure_add_string_aux_argument (procedure, "prefixed-name",
                                               _("_Prefixed name"),
                                               _("Prefixed name"),
-                                              "gimp_image",
-                                              GIMP_PARAM_READWRITE);
+                                              "clay_image",
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_aux_argument (procedure, "gimp-comment",
+      clay_procedure_add_string_aux_argument (procedure, "clay-comment",
                                               _("Comme_nt"),
                                               _("Comment"),
-                                              gimp_get_default_comment (),
-                                              GIMP_PARAM_READWRITE);
+                                              clay_get_default_comment (),
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_set_argument_sync (procedure, "gimp-comment",
-                                        GIMP_ARGUMENT_SYNC_PARASITE);
+      clay_procedure_set_argument_sync (procedure, "clay-comment",
+                                        CLAY_ARGUMENT_SYNC_PARASITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "include-comment",
+      clay_procedure_add_boolean_aux_argument (procedure, "include-comment",
                                                _("Save comment to _file"),
                                                _("Save comment"),
-                                               gimp_export_comment (),
-                                               GIMP_PARAM_READWRITE);
+                                               clay_export_comment (),
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "glib-types",
+      clay_procedure_add_boolean_aux_argument (procedure, "glib-types",
                                                _("Use GLib types (guint_8*)"),
                                                _("Use GLib types"),
                                                TRUE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "escape-trigraphs",
+      clay_procedure_add_boolean_aux_argument (procedure, "escape-trigraphs",
                                                _("Escape tri_graphs"),
                                                _("Add '\\' in-between ?? "
                                                  "sequences to escape trigraphs "
                                                  "for C23 compatible code"),
                                                TRUE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "save-alpha",
+      clay_procedure_add_boolean_aux_argument (procedure, "save-alpha",
                                                _("Save alpha channel (RG_BA/RGB)"),
                                                _("Save the alpha channel"),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "rgb565",
+      clay_procedure_add_boolean_aux_argument (procedure, "rgb565",
                                                _("Save as RGB565 (1_6-bit)"),
                                                _("Use RGB565 encoding"),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "use-macros",
+      clay_procedure_add_boolean_aux_argument (procedure, "use-macros",
                                                _("_Use macros instead of struct"),
                                                _("Use C macros"),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "use-rle",
+      clay_procedure_add_boolean_aux_argument (procedure, "use-rle",
                                                _("Use _1 bit Run-Length-Encoding"),
                                                _("Use run-length-encoding"),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "opacity",
+      clay_procedure_add_double_aux_argument (procedure, "opacity",
                                               _("Opaci_ty"),
                                               _("Opacity"),
                                               0.0, 100.0, 100.0,
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-csource_export (GimpProcedure        *procedure,
-                GimpRunMode           run_mode,
-                GimpImage            *image,
+static ClayValueArray *
+csource_export (ClayProcedure        *procedure,
+                ClayRunMode           run_mode,
+                ClayImage            *image,
                 GFile                *file,
-                GimpExportOptions    *options,
-                GimpMetadata         *metadata,
-                GimpProcedureConfig  *config,
+                ClayExportOptions    *options,
+                ClayMetadata         *metadata,
+                ClayProcedureConfig  *config,
                 gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   gchar             *prefixed_name;
   gchar             *comment;
@@ -232,24 +232,24 @@ csource_export (GimpProcedure        *procedure,
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
   g_object_set (config,
-                "save-alpha", gimp_drawable_has_alpha (drawables->data),
+                "save-alpha", clay_drawable_has_alpha (drawables->data),
                 NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
   g_object_get (config,
                 "prefixed-name", &prefixed_name,
-                "gimp-comment",  &comment,
+                "clay-comment",  &comment,
                 NULL);
 
   if (! prefixed_name || ! prefixed_name[0])
@@ -259,26 +259,26 @@ csource_export (GimpProcedure        *procedure,
 
   if (comment && ! comment[0])
     g_object_set (config,
-                  "gimp-comment", NULL,
+                  "clay-comment", NULL,
                   NULL);
 
   g_free (prefixed_name);
   g_free (comment);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data, G_OBJECT (config),
                           &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static gboolean
@@ -498,15 +498,15 @@ save_uchar (GOutputStream  *output,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GObject       *config,
               GError       **error)
 {
   GOutputStream *output;
   GeglBuffer    *buffer;
   GCancellable  *cancellable;
-  GimpImageType  drawable_type = gimp_drawable_type (drawable);
+  ClayImageType  drawable_type = clay_drawable_type (drawable);
   gchar         *s_uint_8, *s_uint, *s_char, *s_null;
   guint          c;
   gchar         *macro_name;
@@ -531,7 +531,7 @@ export_image (GFile         *file,
 
   g_object_get (config,
                 "prefixed-name",    &config_prefixed_name,
-                "gimp-comment",     &config_comment,
+                "clay-comment",     &config_comment,
                 "include-comment",  &config_save_comment,
                 "glib-types",       &config_glib_types,
                 "escape-trigraphs", &config_escape_trigraphs,
@@ -559,12 +559,12 @@ export_image (GFile         *file,
       return FALSE;
     }
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     drawable_format = babl_format ("R'G'B'A u8");
   else
     drawable_format = babl_format ("R'G'B' u8");
@@ -593,7 +593,7 @@ export_image (GFile         *file,
               guint8 *d = data + x * drawable_bpp;
               guint8 r, g, b;
               gushort rgb16;
-              gdouble alpha = drawable_type == GIMP_RGBA_IMAGE ? d[3] : 0xff;
+              gdouble alpha = drawable_type == CLAY_RGBA_IMAGE ? d[3] : 0xff;
 
               alpha *= config_opacity / 25500.0;
               r = (0.5 + alpha * (gdouble) d[0]);
@@ -612,7 +612,7 @@ export_image (GFile         *file,
           for (x = 0; x < width; x++)
             {
               guint8 *d = data + x * drawable_bpp;
-              gdouble alpha = drawable_type == GIMP_RGBA_IMAGE ? d[3] : 0xff;
+              gdouble alpha = drawable_type == CLAY_RGBA_IMAGE ? d[3] : 0xff;
 
               alpha *= config_opacity / 100.0;
               *(p++) = d[0];
@@ -626,7 +626,7 @@ export_image (GFile         *file,
           for (x = 0; x < width; x++)
             {
               guint8 *d = data + x * drawable_bpp;
-              gdouble alpha = drawable_type == GIMP_RGBA_IMAGE ? d[3] : 0xff;
+              gdouble alpha = drawable_type == CLAY_RGBA_IMAGE ? d[3] : 0xff;
 
               alpha *= config_opacity / 25500.0;
               *(p++) = 0.5 + alpha * (gdouble) d[0];
@@ -894,8 +894,8 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_RGB_IMAGE:
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGB_IMAGE:
+    case CLAY_RGBA_IMAGE:
       do
         {
           guchar prior = *img_buffer;
@@ -955,28 +955,28 @@ export_image (GFile         *file,
 }
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget *dialog;
   GtkWidget *vbox;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "opacity", 1.0);
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "save-alpha", TRUE, config, "rgb565",
                                        TRUE);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "csource-box",
-                                         "prefixed-name", "gimp-comment",
+                                         "prefixed-name", "clay-comment",
                                          "include-comment", "glib-types",
                                          "escape-trigraphs", "use-macros",
                                          "use-rle", "save-alpha", "rgb565",
@@ -984,12 +984,12 @@ save_dialog (GimpImage     *image,
   gtk_box_set_spacing (GTK_BOX (vbox), 12);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "csource-box",
                               NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

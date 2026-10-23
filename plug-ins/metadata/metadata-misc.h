@@ -24,8 +24,8 @@ typedef struct
 {
   GtkWidget      *dialog;
   GHashTable     *widgets;
-  GimpMetadata   *metadata;
-  GimpImage      *image;
+  ClayMetadata   *metadata;
+  ClayImage      *image;
   gchar          *filename;
 } metadata_editor;
 

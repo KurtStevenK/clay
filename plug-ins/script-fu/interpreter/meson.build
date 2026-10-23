@@ -1,7 +1,7 @@
 
 scriptfuInclude = include_directories('..')
 
-executable_name = 'clay-script-fu-interpreter-' + gimp_api_version
+executable_name = 'clay-script-fu-interpreter-' + clay_api_version
 
 plugin_sourcecode = [
   'script-fu-interpreter.c',
@@ -24,12 +24,12 @@ if not meson.is_cross_build()
   endif
 
   # !!! Installs as a usual binary say to /usr/bin, unlike extension-script-fu
-  # GIMP queries scripts with shebangs, which invokes gimp-script-fu-interpreter-3.0.
+  # Clay queries scripts with shebangs, which invokes clay-script-fu-interpreter-3.0.
 
   script_fu_interpreter = executable(executable_name,
                                      plugin_sources,
                                      dependencies: [
-                                       libgimpui_dep,
+                                       libclayui_dep,
                                        math,
                                      ],
                                      c_args: [
@@ -42,19 +42,12 @@ if not meson.is_cross_build()
                                      win_subsystem: 'windows',
                                      install: true)
 
-  # Scripts and third-party plug-ins name the interpreter by its GIMP name in their
-  # shebang (Windows maps it in gimp-script-fu-interpreter.interp instead)
-  if not platform_windows
-    install_symlink('gimp-script-fu-interpreter-' + gimp_api_version,
-                    pointing_to: executable_name,
-                    install_dir: get_option('bindir'))
-  endif
 
   # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
   plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)
 endif

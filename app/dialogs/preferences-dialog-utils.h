@@ -64,7 +64,7 @@ GtkWidget * prefs_color_button_add            (GObject        *config,
                                                GtkGrid        *grid,
                                                gint            grid_top,
                                                GtkSizeGroup   *group,
-                                               GimpContext    *context);
+                                               ClayContext    *context);
 
 GtkWidget * prefs_entry_add                   (GObject        *config,
                                                const gchar    *property_name,
@@ -148,9 +148,9 @@ void        prefs_gui_config_notify_font_size (GObject        *config,
                                                GParamSpec     *pspec,
                                                GtkRange       *range);
 void        prefs_font_size_value_changed     (GtkRange       *range,
-                                               GimpGuiConfig  *config);
+                                               ClayGuiConfig  *config);
 void        prefs_gui_config_notify_icon_size (GObject        *config,
                                                GParamSpec     *pspec,
                                                GtkRange       *range);
 void        prefs_icon_size_value_changed     (GtkRange       *range,
-                                               GimpGuiConfig  *config);
+                                               ClayGuiConfig  *config);

@@ -1,5 +1,5 @@
 
-; Test cases for cond-expand in ScriptFu interpreter of GIMP app.
+; Test cases for cond-expand in ScriptFu interpreter of Clay app.
 
 ; cond-expand is SRFI-0
 ; https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/cond_002dexpand-_0028SRFI-0_0029.html
@@ -8,7 +8,7 @@
 
 ; This tests existing ScriptFu code, which is not a full implementation of cond-expand.
 ; ScriptFu omits "else" clause.
-; GIMP issue #9729 proposes an enhancement that adds else clause to cond-expand, etc.
+; Clay issue #9729 proposes an enhancement that adds else clause to cond-expand, etc.
 
 
 ; *features* is a defined symbol that names features of language

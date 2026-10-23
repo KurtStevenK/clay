@@ -24,20 +24,20 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "fractal-explorer.h"
 #include "fractal-explorer-dialogs.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define ZOOM_UNDO_SIZE 100
 
 
 static GeglColor       **gradient_samples = NULL;
-static GimpGradient     *gradient = NULL;
+static ClayGradient     *gradient = NULL;
 static gboolean          ready_now = FALSE;
 static gchar            *tpath = NULL;
 static GtkWidget        *cmap_preview;
@@ -81,7 +81,7 @@ static explorer_vals_t standardvals =
  FORWARD DECLARATIONS
  *********************************************************************/
 
-static void update_previews            (GimpProcedureConfig *config);
+static void update_previews            (ClayProcedureConfig *config);
 static void load_file_chooser_response (GtkNativeDialog     *chooser,
                                         gint                 response_id,
                                         gpointer             data);
@@ -95,9 +95,9 @@ static void create_save_file_chooser   (GtkWidget           *widget,
 
 static void cmap_preview_size_allocate (GtkWidget           *widget,
                                         GtkAllocation       *allocation,
-                                        GimpProcedureConfig *config);
+                                        ClayProcedureConfig *config);
 
-static void set_grad_data_cache        (GimpGradient        *in_gradient,
+static void set_grad_data_cache        (ClayGradient        *in_gradient,
                                         gint                 n_colors);
 
 /**********************************************************************
@@ -108,7 +108,7 @@ static void set_grad_data_cache        (GimpGradient        *in_gradient,
  * Handler for notify signals, and also called directly.
  */
 static void
-update_previews (GimpProcedureConfig *config)
+update_previews (ClayProcedureConfig *config)
 {
   set_cmap_preview (config);
   dialog_update_preview (config);
@@ -118,7 +118,7 @@ static void
 dialog_redraw_callback (GtkWidget *widget,
                         gpointer   data)
 {
-  GimpProcedureConfig *config     = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config     = (ClayProcedureConfig *) data;
   gint                 alwaysprev = wvals.alwayspreview;
 
   wvals.alwayspreview = TRUE;
@@ -130,7 +130,7 @@ static void
 dialog_undo_zoom_callback (GtkWidget *widget,
                            gpointer   data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
 
   if (zoomindex > 0)
     {
@@ -160,7 +160,7 @@ static void
 dialog_redo_zoom_callback (GtkWidget *widget,
                            gpointer   data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
 
   if (zoomindex < zoommax)
     {
@@ -181,7 +181,7 @@ static void
 dialog_step_in_callback (GtkWidget *widget,
                          gpointer   data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
   gdouble              xdifferenz;
   gdouble              ydifferenz;
   gdouble              xmin;
@@ -237,7 +237,7 @@ static void
 dialog_step_out_callback (GtkWidget *widget,
                           gpointer   data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
   gdouble              xdifferenz;
   gdouble              ydifferenz;
   gdouble              xmin;
@@ -293,7 +293,7 @@ static void
 explorer_toggle_update (GtkWidget *widget,
                         gpointer   data)
 {
-  gimp_toggle_button_update (widget, data);
+  clay_toggle_button_update (widget, data);
 
   update_previews (wvals.config);
 }
@@ -306,7 +306,7 @@ explorer_radio_update (GtkWidget *widget,
   gint     fractal_type;
 
   fractal_type =
-    gimp_procedure_config_get_choice_id (wvals.config, "fractal-type");
+    clay_procedure_config_get_choice_id (wvals.config, "fractal-type");
 
   switch (fractal_type)
     {
@@ -320,10 +320,10 @@ explorer_radio_update (GtkWidget *widget,
       break;
     }
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (maindlg),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (maindlg),
                                        "cx",
                                        c_sensitive, NULL, NULL, FALSE);
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (maindlg),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (maindlg),
                                        "cy",
                                        c_sensitive, NULL, NULL, FALSE);
 
@@ -331,7 +331,7 @@ explorer_radio_update (GtkWidget *widget,
 }
 
 static void
-explorer_number_of_colors_callback (GimpProcedureConfig *config)
+explorer_number_of_colors_callback (ClayProcedureConfig *config)
 {
   gint n_colors;
 
@@ -343,20 +343,20 @@ explorer_number_of_colors_callback (GimpProcedureConfig *config)
   update_previews (config);
 }
 
-/* Same signature as all GimpResourceSelectButton */
+/* Same signature as all ClayResourceSelectButton */
 static void
 explorer_gradient_select_callback (gpointer      data,  /* config */
-                                   GimpGradient *gradient,
+                                   ClayGradient *gradient,
                                    gboolean      dialog_closing)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
   gint n_colors;
   gint color_mode;
 
   g_object_get (config,
                 "n-colors",   &n_colors,
                 NULL);
-  color_mode = gimp_procedure_config_get_choice_id (config, "color-mode");
+  color_mode = clay_procedure_config_get_choice_id (config, "color-mode");
   set_grad_data_cache (gradient, n_colors);
 
   if (color_mode == 1)
@@ -396,9 +396,9 @@ preview_draw_crosshair (gint px,
 static void
 preview_redraw (void)
 {
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (wint.preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (wint.preview),
                           0, 0, preview_width, preview_height,
-                          GIMP_RGB_IMAGE,
+                          CLAY_RGB_IMAGE,
                           wint.wimage, preview_width * 3);
 
   gtk_widget_queue_draw (wint.preview);
@@ -495,7 +495,7 @@ preview_button_release_event (GtkWidget      *widget,
                               GdkEventButton *event,
                               gpointer        data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
   gdouble l_xmin;
   gdouble l_xmax;
   gdouble l_ymin;
@@ -559,8 +559,8 @@ preview_button_release_event (GtkWidget      *widget,
  *********************************************************************/
 
 gint
-explorer_dialog (GimpProcedure       *procedure,
-                 GimpProcedureConfig *config)
+explorer_dialog (ClayProcedure       *procedure,
+                 ClayProcedureConfig *config)
 {
   GtkWidget *dialog;
   GtkWidget *top_hbox;
@@ -575,9 +575,9 @@ explorer_dialog (GimpProcedure       *procedure,
   gchar     *path;
   gint       n_colors;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  path = gimp_gimprc_query ("fractalexplorer-path");
+  path = clay_clayrc_query ("fractalexplorer-path");
 
   if (path)
     {
@@ -586,27 +586,27 @@ explorer_dialog (GimpProcedure       *procedure,
     }
   else
     {
-      GFile *gimprc    = gimp_directory_file ("gimprc", NULL);
-      gchar *full_path = gimp_config_build_data_path ("fractalexplorer");
+      GFile *clayrc    = clay_directory_file ("clayrc", NULL);
+      gchar *full_path = clay_config_build_data_path ("fractalexplorer");
       gchar *esc_path  = g_strescape (full_path, NULL);
       g_free (full_path);
 
-      g_message (_("No %s in gimprc:\n"
+      g_message (_("No %s in clayrc:\n"
                    "You need to add an entry like\n"
                    "(%s \"%s\")\n"
                    "to your %s file."),
                  "fractalexplorer-path",
                  "fractalexplorer-path",
-                 esc_path, gimp_file_get_utf8_name (gimprc));
+                 esc_path, clay_file_get_utf8_name (clayrc));
 
-      g_object_unref (gimprc);
+      g_object_unref (clayrc);
       g_free (esc_path);
     }
 
   wint.wimage = g_new (guchar, preview_width * preview_height * 3);
 
-  dialog = maindlg = gimp_procedure_dialog_new (procedure,
-                                                GIMP_PROCEDURE_CONFIG (config),
+  dialog = maindlg = clay_procedure_dialog_new (procedure,
+                                                CLAY_PROCEDURE_CONFIG (config),
                                                 _("Fractal Explorer"));
 
   top_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
@@ -630,7 +630,7 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
-  wint.preview = gimp_preview_area_new ();
+  wint.preview = clay_preview_area_new ();
   gtk_widget_set_size_request (wint.preview, preview_width, preview_height);
   gtk_container_add (GTK_CONTAINER (frame), wint.preview);
 
@@ -665,7 +665,7 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle),
                                 wvals.alwayspreview);
   gtk_widget_set_visible (toggle, TRUE);
-  gimp_help_set_help_data (toggle, _("If enabled the preview will "
+  clay_help_set_help_data (toggle, _("If enabled the preview will "
                                      "be redrawn automatically"), NULL);
 
   button = gtk_button_new_with_mnemonic (_("R_edraw preview"));
@@ -676,7 +676,7 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_widget_set_visible (button, TRUE);
 
   /*  Zoom Options  */
-  frame = gimp_frame_new (_("Zoom"));
+  frame = clay_frame_new (_("Zoom"));
   gtk_box_pack_start (GTK_BOX (left_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -714,7 +714,7 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (bbox), button, TRUE, TRUE, 0);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_help_set_help_data (button, _("Undo last zoom change"), NULL);
+  clay_help_set_help_data (button, _("Undo last zoom change"), NULL);
 
   g_signal_connect (button, "clicked",
                     G_CALLBACK (dialog_undo_zoom_callback),
@@ -724,51 +724,51 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (bbox), button, TRUE, TRUE, 0);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_help_set_help_data (button, _("Redo last zoom change"), NULL);
+  clay_help_set_help_data (button, _("Redo last zoom change"), NULL);
 
   g_signal_connect (button, "clicked",
                     G_CALLBACK (dialog_redo_zoom_callback),
                     config);
 
   /*  Create notebook  */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "parameter-tab", _("_Parameters"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "color-tab", _("_Colors"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "fractal-tab", _("_Fractals"), FALSE, TRUE);
 
   /*  "Parameters" page  */
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "xmin", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "xmax", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "ymin", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "ymax", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "iter", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "cx", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "cy", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "parameter-input-label", _("Fractal Parameters"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "parameter-input-box",
                                   "xmin", "xmax", "ymin", "ymax",
                                   "iter", "cx", "cy",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "parameter-input-frame",
                                     "parameter-input-label", FALSE,
                                     "parameter-input-box");
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "fractal-type", GIMP_TYPE_INT_RADIO_FRAME);
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "fractal-type", CLAY_TYPE_INT_RADIO_FRAME);
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "parameter-box",
                                          "parameter-input-frame",
                                          "fractal-type",
@@ -787,7 +787,7 @@ explorer_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (create_load_file_chooser),
                     dialog);
   gtk_widget_set_visible (button, TRUE);
-  gimp_help_set_help_data (button, _("Load a fractal from file"), NULL);
+  clay_help_set_help_data (button, _("Load a fractal from file"), NULL);
 
   button = gtk_button_new_with_mnemonic (_("_Save"));
   gtk_box_pack_start (GTK_BOX (bbox), button, TRUE, FALSE, 0);
@@ -795,7 +795,7 @@ explorer_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (create_save_file_chooser),
                     dialog);
   gtk_widget_set_visible (button, TRUE);
-  gimp_help_set_help_data (button, _("Save active fractal to file"), NULL);
+  clay_help_set_help_data (button, _("Save active fractal to file"), NULL);
 
   g_signal_connect (config, "notify::xmin",
                     G_CALLBACK (update_previews),
@@ -825,76 +825,76 @@ explorer_dialog (GimpProcedure       *procedure,
   explorer_radio_update (NULL, NULL);
 
   /* Colors Page */
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "n-colors", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "num-colors-label", _("Number of Colors"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "num-colors-box",
                                       "n-colors",
                                       "use-loglog-smoothing",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "num-colors-frame",
                                     "num-colors-label", FALSE,
                                     "num-colors-box");
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "red-stretch", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "green-stretch", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "blue-stretch", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "color-density-label", _("Color Density"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "color-density-box",
                                       "red-stretch",
                                       "green-stretch",
                                       "blue-stretch",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "color-density-frame",
                                     "color-density-label", FALSE,
                                     "color-density-box");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "color-function-label", _("Color Function"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "red-function-box",
                                       "red-mode",
                                       "red-invert",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "red-function-frame",
                                     NULL, FALSE,
                                     "red-function-box");
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "green-function-box",
                                       "green-mode",
                                       "green-invert",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "green-function-frame",
                                     NULL, FALSE,
                                     "green-function-box");
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "blue-function-box",
                                       "blue-mode",
                                       "blue-invert",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "blue-function-frame",
                                     NULL, FALSE,
                                     "blue-function-box");
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "function-hbox",
                                          "red-function-frame",
                                          "green-function-frame",
@@ -903,15 +903,15 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
                                   GTK_ORIENTATION_HORIZONTAL);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "color-function-frame",
                                     "color-function-label", FALSE,
                                     "function-hbox");
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "color-mode", GIMP_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "color-mode", CLAY_TYPE_INT_RADIO_FRAME);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "color-mode-hbox",
                                          "color-mode",
                                          NULL);
@@ -924,13 +924,13 @@ explorer_dialog (GimpProcedure       *procedure,
   /* Pass NULL to set local gradient data from context. */
   set_grad_data_cache (NULL, n_colors);
 
-  gradient_button = gimp_gradient_chooser_new (_("FractalExplorer Gradient"), NULL, gradient);
+  gradient_button = clay_gradient_chooser_new (_("FractalExplorer Gradient"), NULL, gradient);
   g_signal_connect_swapped (gradient_button, "resource-set",
                             G_CALLBACK (explorer_gradient_select_callback), config);
   gtk_box_pack_start (GTK_BOX (hbox), gradient_button, TRUE, TRUE, 0);
   gtk_widget_set_visible (gradient_button, TRUE);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "color-box",
                                          "num-colors-frame",
                                          "color-density-frame",
@@ -938,7 +938,7 @@ explorer_dialog (GimpProcedure       *procedure,
                                          "color-mode-hbox",
                                          NULL);
 
-  cmap_preview = gimp_preview_area_new ();
+  cmap_preview = clay_preview_area_new ();
   gtk_widget_set_halign (cmap_preview, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (cmap_preview, GTK_ALIGN_CENTER);
   gtk_widget_set_size_request (cmap_preview, 32, 32);
@@ -984,10 +984,10 @@ explorer_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (update_previews),
                     config);
   /* Fractal Presets */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "preset-label", _("Presets"),
                                    FALSE, FALSE);
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "fractal-box",
                                          "preset-label",
                                          NULL);
@@ -996,14 +996,14 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_widget_set_visible (frame, TRUE);
 
   /* Creating layout */
-  gimp_procedure_dialog_fill_notebook (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_notebook (CLAY_PROCEDURE_DIALOG (dialog),
                                        "main-notebook",
                                        "parameter-tab", "parameter-box",
                                        "color-tab", "color-box",
                                        "fractal-tab", "fractal-box",
                                        NULL);
 
-  top_hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  top_hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                              "top-hbox",
                                              "main-notebook",
                                              NULL);
@@ -1014,14 +1014,14 @@ explorer_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (top_hbox), left_vbox, FALSE, FALSE, 0);
   gtk_box_reorder_child (GTK_BOX (top_hbox), left_vbox, 0);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "top-hbox", NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "top-hbox", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
   ready_now = TRUE;
 
   update_previews (config);
 
-  wint.run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  wint.run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
   gtk_widget_destroy (dialog);
 
   g_free (wint.wimage);
@@ -1035,7 +1035,7 @@ explorer_dialog (GimpProcedure       *procedure,
  *********************************************************************/
 
 void
-dialog_update_preview (GimpProcedureConfig *config)
+dialog_update_preview (ClayProcedureConfig *config)
 {
   gint     ycoord;
   guchar  *p_ul;
@@ -1085,7 +1085,7 @@ dialog_update_preview (GimpProcedureConfig *config)
 static void
 cmap_preview_size_allocate (GtkWidget           *widget,
                             GtkAllocation       *allocation,
-                            GimpProcedureConfig *config)
+                            ClayProcedureConfig *config)
 {
   gint             i;
   gint             x;
@@ -1093,7 +1093,7 @@ cmap_preview_size_allocate (GtkWidget           *widget,
   gint             j;
   gint             n_colors;
   guchar          *b;
-  GimpPreviewArea *preview = GIMP_PREVIEW_AREA (widget);
+  ClayPreviewArea *preview = CLAY_PREVIEW_AREA (widget);
 
   g_object_get (config,
                 "n-colors", &n_colors,
@@ -1119,9 +1119,9 @@ cmap_preview_size_allocate (GtkWidget           *widget,
             }
         }
     }
-  gimp_preview_area_draw (preview,
+  clay_preview_area_draw (preview,
                           0, 0, allocation->width, allocation->height,
-                          GIMP_RGB_IMAGE, b, allocation->width*3);
+                          CLAY_RGB_IMAGE, b, allocation->width*3);
   gtk_widget_queue_draw (cmap_preview);
 
   g_free (b);
@@ -1133,7 +1133,7 @@ cmap_preview_size_allocate (GtkWidget           *widget,
  *********************************************************************/
 
 void
-set_cmap_preview (GimpProcedureConfig *config)
+set_cmap_preview (ClayProcedureConfig *config)
 {
   gint xsize;
   gint ysize;
@@ -1165,7 +1165,7 @@ set_cmap_preview (GimpProcedureConfig *config)
  *********************************************************************/
 
 void
-make_color_map (GimpProcedureConfig *config)
+make_color_map (ClayProcedureConfig *config)
 {
   const Babl *colormap_format = babl_format ("R'G'B' u8");
   gint        i;
@@ -1194,19 +1194,19 @@ make_color_map (GimpProcedureConfig *config)
                 "green-invert",  &green_invert,
                 "blue-invert",   &blue_invert,
                 NULL);
-  red_mode    = gimp_procedure_config_get_choice_id (config, "red-mode");
-  green_mode  = gimp_procedure_config_get_choice_id (config, "green-mode");
-  blue_mode   = gimp_procedure_config_get_choice_id (config, "blue-mode");
-  color_mode  = gimp_procedure_config_get_choice_id (config, "color-mode");
+  red_mode    = clay_procedure_config_get_choice_id (config, "red-mode");
+  green_mode  = clay_procedure_config_get_choice_id (config, "green-mode");
+  blue_mode   = clay_procedure_config_get_choice_id (config, "blue-mode");
+  color_mode  = clay_procedure_config_get_choice_id (config, "color-mode");
 
   /*  get gradient samples if they don't exist -- fixes gradient color
    *  mode for noninteractive use (bug #103470).
    */
   if (gradient_samples == NULL)
     {
-      GimpGradient *gradient = gimp_context_get_gradient ();
+      ClayGradient *gradient = clay_context_get_gradient ();
 
-      gradient_samples = gimp_gradient_get_uniform_samples (gradient,
+      gradient_samples = clay_gradient_get_uniform_samples (gradient,
                                                             n_colors, FALSE);
     }
 
@@ -1331,11 +1331,11 @@ save_options (FILE * fp)
                 "blue-invert",   &blue_invert,
                 NULL);
   fractal_type =
-    gimp_procedure_config_get_choice_id (wvals.config, "fractal-type");
-  red_mode = gimp_procedure_config_get_choice_id (wvals.config, "red-mode");
-  green_mode = gimp_procedure_config_get_choice_id (wvals.config, "green-mode");
-  blue_mode = gimp_procedure_config_get_choice_id (wvals.config, "blue-mode");
-  color_mode = gimp_procedure_config_get_choice_id (wvals.config, "color-mode");
+    clay_procedure_config_get_choice_id (wvals.config, "fractal-type");
+  red_mode = clay_procedure_config_get_choice_id (wvals.config, "red-mode");
+  green_mode = clay_procedure_config_get_choice_id (wvals.config, "green-mode");
+  blue_mode = clay_procedure_config_get_choice_id (wvals.config, "blue-mode");
+  color_mode = clay_procedure_config_get_choice_id (wvals.config, "color-mode");
 
   /* Save options */
 
@@ -1394,7 +1394,7 @@ save_callback (void)
   if (!fp)
     {
       g_message (_("Could not open '%s' for writing: %s"),
-                 gimp_filename_to_utf8 (savename), g_strerror (errno));
+                 clay_filename_to_utf8 (savename), g_strerror (errno));
       return;
     }
 
@@ -1408,7 +1408,7 @@ save_callback (void)
 
   if (ferror (fp))
     g_message (_("Could not write '%s': %s"),
-               gimp_filename_to_utf8 (savename), g_strerror (ferror (fp)));
+               clay_filename_to_utf8 (savename), g_strerror (ferror (fp)));
 
   fclose (fp);
 }
@@ -1437,17 +1437,17 @@ file_chooser_set_default_folder (GtkFileChooser *chooser)
   if (! fractalexplorer_path)
     return;
 
-  path_list = gimp_parse_search_path (fractalexplorer_path, 256, FALSE, NULL);
+  path_list = clay_parse_search_path (fractalexplorer_path, 256, FALSE, NULL);
 
-  dir = gimp_get_user_writable_dir (path_list);
+  dir = clay_get_user_writable_dir (path_list);
 
   if (! dir)
-    dir = g_strdup (gimp_directory ());
+    dir = g_strdup (clay_directory ());
 
   gtk_file_chooser_set_current_folder (chooser, dir);
 
   g_free (dir);
-  gimp_free_paths (path_list);
+  clay_free_paths (path_list);
 }
 
 static void
@@ -1455,7 +1455,7 @@ load_file_chooser_response (GtkNativeDialog *chooser,
                             gint             response_id,
                             gpointer         data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
 
   if (response_id == GTK_RESPONSE_ACCEPT)
     {
@@ -1476,9 +1476,9 @@ create_load_file_chooser (GtkWidget *widget,
                           GtkWidget *dialog)
 {
   static GtkFileChooserNative *window = NULL;
-  GimpProcedureConfig         *config;
+  ClayProcedureConfig         *config;
 
-  g_object_get (GIMP_PROCEDURE_DIALOG (dialog),
+  g_object_get (CLAY_PROCEDURE_DIALOG (dialog),
                 "config", &config,
                 NULL);
 
@@ -1547,20 +1547,20 @@ create_save_file_chooser (GtkWidget *widget,
  * the plugin machinery must not destroy the proxy object until this plugin exits.
  */
 static void
-set_grad_data_cache (GimpGradient *in_gradient,
+set_grad_data_cache (ClayGradient *in_gradient,
                      gint          n_colors)
 {
   /* Set the global gradient. */
   if (in_gradient == NULL)
-    gradient = gimp_context_get_gradient ();
+    gradient = clay_context_get_gradient ();
   else
     gradient = in_gradient;
 
   /* Refresh the global cache of samples. */
   if (gradient_samples != NULL)
-    gimp_color_array_free (gradient_samples);
+    clay_color_array_free (gradient_samples);
 
-  gradient_samples = gimp_gradient_get_uniform_samples (gradient,
+  gradient_samples = clay_gradient_get_uniform_samples (gradient,
                                                         n_colors, FALSE);
 }
 
@@ -1722,7 +1722,7 @@ explorer_load (void)
   if (!fp)
     {
       g_message (_("Could not open '%s' for reading: %s"),
-                 gimp_filename_to_utf8 (filename), g_strerror (errno));
+                 clay_filename_to_utf8 (filename), g_strerror (errno));
       return;
     }
   get_line (load_buf, MAX_LOAD_LINE, fp, 1);
@@ -1730,14 +1730,14 @@ explorer_load (void)
   if (strncmp (FRACTAL_HEADER, load_buf, strlen (load_buf)))
     {
       g_message (_("'%s' is not a FractalExplorer file"),
-                 gimp_filename_to_utf8 (filename));
+                 clay_filename_to_utf8 (filename));
       fclose (fp);
       return;
     }
   if (load_options (current_obj, fp))
     {
       g_message (_("'%s' is corrupt. Line %d Option section incorrect"),
-                 gimp_filename_to_utf8 (filename), line_no);
+                 clay_filename_to_utf8 (filename), line_no);
       fclose (fp);
       return;
     }

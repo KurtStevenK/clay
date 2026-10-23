@@ -1,8 +1,8 @@
 ; -----------------------------------------------------------------------------
-; GIMP palette export toolkit -
+; Clay palette export toolkit -
 ; Written by Barak Itkin <lightningismyname@gmail.com>
 ;
-; This script includes various exporters for GIMP palettes, and other
+; This script includes various exporters for Clay palettes, and other
 ; utility function to help in exporting to other (text-based) formats.
 ; See instruction on adding new exporters at the end
 ;
@@ -69,7 +69,7 @@
 ; -----------------------------------------------------------------------------
 
 ; The standard way for representing a color would be a list of red
-; green and blue (GIMP's default)
+; green and blue (Clay's default)
 (define color-get-red car)
 (define color-get-green cadr)
 (define color-get-blue caddr)
@@ -159,11 +159,11 @@
   )
 
 (define (bad-file-name)
-  (gimp-message (string-append _"The filename you entered is not a suitable name for a file."
+  (clay-message (string-append _"The filename you entered is not a suitable name for a file."
 			       "\n\n"
 			       _"All characters in the name are either white-spaces or characters which can not appear in filenames.")))
 
-; Return path to a file, or abort with error to Gimp.
+; Return path to a file, or abort with error to Clay.
 ;
 ; IN filename is from a string widget.
 ; A user entered the filename.  It could be strange characters, empty, etc.
@@ -181,7 +181,7 @@
          (result-path ""))
     (if (not validated-file-name)
       (begin
-        (bad-file-name) ; gimp-message w translated text
+        (bad-file-name) ; clay-message w translated text
         (quit -1)))
       ; FUTURE: The above should be (error "Invalid file name"))
       ; with the existing translated text,  when ScriptFu error is fixed.
@@ -196,7 +196,7 @@
     ; Side effect.
     ; Tell the user the mangled path, might be different than user entered.
     ; The user should not need to search for the file.
-    (gimp-message (string-append _"Exported palette to file: " result-path))
+    (clay-message (string-append _"Exported palette to file: " result-path))
 
     result-path))
 
@@ -232,15 +232,15 @@
 
   (define (write-color-line index)
     (display name-pre)
-    (display (name-convertor (gimp-palette-get-entry-name palette index)))
+    (display (name-convertor (clay-palette-get-entry-name palette index)))
     (display name-after)
     (display name-color-seperator)
     (display color-pre)
-    (display (color-convertor (gimp-palette-get-entry-color palette index)))
+    (display (color-convertor (clay-palette-get-entry-color palette index)))
     (display color-after)
     )
 
-  (let ((color-count (gimp-palette-get-color-count palette))
+  (let ((color-count (clay-palette-get-color-count palette))
         (i 0))
 
     (display start)
@@ -261,16 +261,16 @@
 ; -----------
 ; Methods for getting palette and its name from context.
 ; These plugins are in the RMB pop-up menu of the Palettes dockable.
-; User clicking RMB on a palette puts it in the Gimp context i.e chooses it.
+; User clicking RMB on a palette puts it in the Clay context i.e chooses it.
 ; The palette is not actually passed as an arg to these plugins.
 ; -----------
 
 ; Return numeric ID of palette in context.
-(define (palette-in-context) (gimp-context-get-palette))
+(define (palette-in-context) (clay-context-get-palette))
 
 ; Return name of palette in context.
 ; Since v3, resources in ScriptFu have numeric ID, not a string
-(define (palette-name-in-context)(gimp-resource-get-name (palette-in-context)))
+(define (palette-name-in-context)(clay-resource-get-name (palette-in-context)))
 
 
 ; -----------
@@ -279,7 +279,7 @@
 
 (define (register-palette-exporter
 	        export-type export-name file-type description author copyright date)
-  (script-fu-register-procedure (string-append "gimp-palette-export-" export-type)
+  (script-fu-register-procedure (string-append "clay-palette-export-" export-type)
                       export-name
                       description
                       author
@@ -288,7 +288,7 @@
                       SF-STRING _"The name of the file to create (if a file with this name already exist, it will be replaced)"
                       (string-append "palette." file-type)
                       )
-  (script-fu-menu-register (string-append "gimp-palette-export-" export-type)
+  (script-fu-menu-register (string-append "clay-palette-export-" export-type)
                            "<Palettes>/Palettes Menu/Export as")
   )
 
@@ -297,14 +297,14 @@
 ; Run functions of the plugins.
 ; -----------------------------------------------------------------------------
 
-(define (gimp-palette-export-css directory-name file-name)
+(define (clay-palette-export-css directory-name file-name)
   (script-fu-use-v3)
   (let ((path (get-path-or-abort directory-name file-name)))
     (with-output-to-file path
       (lambda () (export-palette (palette-in-context)
                                   color-rgb-to-css
                                   name-alpha-numeric        ; name-convertor
-                                  "/* Generated with GIMP Palette Export */\n" ; start
+                                  "/* Generated with Clay Palette Export */\n" ; start
                                   "."                       ; name-pre
                                   ""                        ; name-after
                                   " { "                     ; name-color-seperator
@@ -318,14 +318,14 @@
                            (string-append _"Export the active palette as a CSS stylesheet with the color entry name as their class name, and the color itself as the color attribute")
                            "Barak Itkin" "Barak Itkin" "May 15, 2009")
 
-(define (gimp-palette-export-php directory-name file-name)
+(define (clay-palette-export-php directory-name file-name)
   (script-fu-use-v3)
   (let ((path (get-path-or-abort directory-name file-name)))
     (with-output-to-file path
       (lambda () (export-palette (palette-in-context)
                                   color-rgb-to-hexa-decimal
                                   name-standard             ; name-convertor
-                                  "<?php\n/* Generated with GIMP Palette Export */\n$colors={\n" ; start
+                                  "<?php\n/* Generated with Clay Palette Export */\n$colors={\n" ; start
                                   "'"                       ; name-pre
                                   "'"                       ; name-after
                                   " => "                    ; name-color-seperator
@@ -339,12 +339,12 @@
                            _"Export the active palette as a PHP dictionary (name => color)"
                            "Barak Itkin" "Barak Itkin" "May 15, 2009")
 
-(define (gimp-palette-export-python directory-name file-name)
+(define (clay-palette-export-python directory-name file-name)
   (script-fu-use-v3)
   (let ((path (get-path-or-abort directory-name file-name)))
     (with-output-to-file path
       (lambda ()
-        (displayln "# Generated with GIMP Palette Export")
+        (displayln "# Generated with Clay Palette Export")
         (displayln (string-append
           "# Based on the palette " (palette-name-in-context)))
         (export-palette (palette-in-context)
@@ -364,7 +364,7 @@
                            _"Export the active palette as a Python dictionary (name: color)"
                            "Barak Itkin" "Barak Itkin" "May 15, 2009")
 
-(define (gimp-palette-export-text directory-name file-name)
+(define (clay-palette-export-text directory-name file-name)
   (script-fu-use-v3)
   (let ((path (get-path-or-abort directory-name file-name)))
     (with-output-to-file path
@@ -386,7 +386,7 @@
                            _"Write all the colors in a palette to a text file, one hexadecimal value per line (no names)"
                            "Barak Itkin" "Barak Itkin" "May 15, 2009")
 
-(define (gimp-palette-export-java directory-name file-name)
+(define (clay-palette-export-java directory-name file-name)
   (script-fu-use-v3)
   (let ((path (get-path-or-abort directory-name file-name)))
     (with-output-to-file path
@@ -396,7 +396,7 @@
           (displayln "import java.awt.Color;")
           (displayln "import java.util.Hashtable;")
           (displayln "")
-          (displayln "// Generated with GIMP palette Export ")
+          (displayln "// Generated with Clay palette Export ")
           (displayln (string-append
             "// Based on the palette " palette-name))
           (displayln (string-append

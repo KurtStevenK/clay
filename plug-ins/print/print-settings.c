@@ -17,8 +17,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "print.h"
 #include "print-settings.h"
@@ -39,7 +39,7 @@ static void       print_settings_add_to_key_file             (const gchar       
 
 static GKeyFile * print_settings_key_file_from_resource_file (void);
 
-static GKeyFile * print_settings_key_file_from_parasite      (GimpImage         *image);
+static GKeyFile * print_settings_key_file_from_parasite      (ClayImage         *image);
 
 static gboolean   print_settings_load_from_key_file          (PrintData         *data,
                                                               GKeyFile          *key_file);
@@ -79,15 +79,15 @@ print_settings_save (PrintData *data)
   GKeyFile *key_file = print_settings_key_file_from_settings (data);
 
   /* image setup */
-  if (gimp_image_is_valid (data->image))
+  if (clay_image_is_valid (data->image))
     {
       gdouble xres;
       gdouble yres;
 
-      gimp_image_get_resolution (data->image, &xres, &yres);
+      clay_image_get_resolution (data->image, &xres, &yres);
 
       g_key_file_set_integer (key_file, "image-setup",
-                              "unit", gimp_unit_get_id (data->unit));
+                              "unit", clay_unit_get_id (data->unit));
       /* Do not save the print resolution when it is the expected image
        * resolution so that changing it (i.e. in "print size" dialog)
        * is not overridden by any previous prints.
@@ -197,7 +197,7 @@ print_settings_key_file_from_resource_file (void)
  * NULL otherwise
  */
 static GKeyFile *
-print_settings_key_file_from_parasite (GimpImage *image)
+print_settings_key_file_from_parasite (ClayImage *image)
 {
   GKeyFile *key_file;
 
@@ -250,7 +250,7 @@ print_settings_load_from_key_file (PrintData *data,
 
   if (g_key_file_has_key (key_file, "image-setup", "unit", NULL))
     {
-      data->unit = gimp_unit_get_by_id (g_key_file_get_integer (key_file, "image-setup",
+      data->unit = clay_unit_get_by_id (g_key_file_get_integer (key_file, "image-setup",
                                                                "unit", NULL));
     }
 

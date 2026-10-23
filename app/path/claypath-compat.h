@@ -1,0 +1,44 @@
+/* xyz.kainzmayer.ClayDesign
+ * Copyright (C) 1995 Spencer Kimball and Peter Mattis
+ *
+ * claypath-compat.h
+ * Copyright (C) 2003 Michael Natterer <mitch@gimp.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+
+typedef struct _ClayPathCompatPoint ClayPathCompatPoint;
+
+struct _ClayPathCompatPoint
+{
+  guint32 type;
+  gdouble x;
+  gdouble y;
+};
+
+
+ClayPath *    clay_path_compat_new (ClayImage              *image,
+                                    const gchar            *name,
+                                    ClayPathCompatPoint    *points,
+                                    gint                    n_points,
+                                    gboolean                closed);
+
+gboolean              clay_path_compat_is_compatible (ClayImage   *image);
+
+ClayPathCompatPoint * clay_path_compat_get_points    (ClayPath    *path,
+                                                      gint32      *n_points,
+                                                      gint32      *closed);

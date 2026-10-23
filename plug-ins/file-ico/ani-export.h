@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,10 +22,10 @@
 #define __ANI_EXPORT_H__
 
 
-GimpPDBStatusType ani_export_image (GFile               *file,
-                                    GimpImage           *image,
-                                    GimpProcedure       *procedure,
-                                    GimpProcedureConfig *config,
+ClayPDBStatusType ani_export_image (GFile               *file,
+                                    ClayImage           *image,
+                                    ClayProcedure       *procedure,
+                                    ClayProcedureConfig *config,
                                     gint32               run_mode,
                                     gsize               *n_hot_spot_x,
                                     const gint32        *hot_spot_x,

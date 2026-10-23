@@ -4,7 +4,7 @@
   <menu id="/brush-editor-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="brush-editor-action">Brush Editor Menu</attribute>
-      <attribute name="icon">gimp-tool-paintbrush</attribute>
+      <attribute name="icon">clay-tool-paintbrush</attribute>
       <item><attribute name="action">brush-editor.brush-editor-edit-active</attribute></item>
     </submenu>
   </menu>

@@ -25,12 +25,12 @@ gboolean               screenshot_osx_available        (void);
 
 ScreenshotCapabilities screenshot_osx_get_capabilities (void);
 
-GimpPDBStatusType      screenshot_osx_shoot            (ShootType   shoot_type,
+ClayPDBStatusType      screenshot_osx_shoot            (ShootType   shoot_type,
                                                         guint       select_delay,
                                                         guint       screenshot_delay,
                                                         gboolean    decorate,
                                                         gboolean    show_cursor,
-                                                        GimpImage **image,
+                                                        ClayImage **image,
                                                         GError    **error);
 
 #endif /* PLATFORM_OSX */

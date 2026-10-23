@@ -1,18 +1,18 @@
 plugin_name = 'help'
 
 plugin_sourcecode = [
-  # 'gimp-help-lookup.c',
-  'gimphelp.c',
-  'gimphelpdomain.c',
-  'gimphelpitem.c',
-  'gimphelplocale.c',
-  'gimphelpprogress.c',
+  # 'clay-help-lookup.c',
+  'clayhelp.c',
+  'clayhelpdomain.c',
+  'clayhelpitem.c',
+  'clayhelplocale.c',
+  'clayhelpprogress.c',
 ]
 plugin_sources = plugin_sourcecode
 
 if platform_windows
   plugin_sources += windows.compile_resources(
-    gimp_plugins_rc,
+    clay_plugins_rc,
     args: [
       rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', plugin_name+'.exe'),
       rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', plugin_name),
@@ -27,7 +27,7 @@ help_plugin_lib = static_library('help_plugin',
   plugin_sources,
   include_directories: [ rootInclude, ],
   dependencies: [
-    libgimpui_dep, gio,
+    libclayui_dep, gio,
   ],
   install: false,
 )
@@ -35,7 +35,7 @@ help_plugin_lib = static_library('help_plugin',
 plugin_exe = executable(plugin_name,
                         'help.c',
                         dependencies: [
-                          libgimpui_dep,
+                          libclayui_dep,
                           gio,
                           gdk_pixbuf,
                         ],
@@ -44,12 +44,12 @@ plugin_exe = executable(plugin_name,
                         ],
                         win_subsystem: 'windows',
                         install: true,
-                        install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                        install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
 # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
 plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)

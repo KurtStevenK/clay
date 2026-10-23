@@ -21,14 +21,14 @@
  #ifndef __SCRIPT_FU_DIALOG_H__
  #define __SCRIPT_FU_DIALOG_H__
 
-GimpValueArray *script_fu_dialog_run_image_proc (
-                                      GimpProcedure        *procedure,
+ClayValueArray *script_fu_dialog_run_image_proc (
+                                      ClayProcedure        *procedure,
                                       SFScript             *script,
-                                      GimpImage            *image,
-                                      GimpDrawable        **drawables,
-                                      GimpProcedureConfig  *config);
-GimpValueArray *script_fu_dialog_run_regular_proc (
-                                      GimpProcedure        *procedure,
+                                      ClayImage            *image,
+                                      ClayDrawable        **drawables,
+                                      ClayProcedureConfig  *config);
+ClayValueArray *script_fu_dialog_run_regular_proc (
+                                      ClayProcedure        *procedure,
                                       SFScript             *script,
-                                      GimpProcedureConfig  *config);
+                                      ClayProcedureConfig  *config);
 #endif /* __SCRIPT_FU_DIALOG_H__ */

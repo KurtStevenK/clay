@@ -19,20 +19,20 @@
 #define __JPEG_EXPORT_H__
 
 
-extern GimpImage       *orig_image_global;
-extern GimpDrawable    *drawable_global;
+extern ClayImage       *orig_image_global;
+extern ClayDrawable    *drawable_global;
 
 
 gboolean    export_image       (GFile                *file,
-                                GimpProcedureConfig *config,
-                                GimpImage            *image,
-                                GimpDrawable         *drawable,
-                                GimpImage            *orig_image,
+                                ClayProcedureConfig *config,
+                                ClayImage            *image,
+                                ClayDrawable         *drawable,
+                                ClayImage            *orig_image,
                                 gboolean              preview,
                                 GError              **error);
-gboolean    save_dialog        (GimpProcedure        *procedure,
-                                GimpProcedureConfig  *config,
-                                GimpDrawable         *drawable,
-                                GimpImage            *image);
+gboolean    save_dialog        (ClayProcedure        *procedure,
+                                ClayProcedureConfig  *config,
+                                ClayDrawable         *drawable,
+                                ClayImage            *image);
 
 #endif /* __JPEG_EXPORT_H__ */

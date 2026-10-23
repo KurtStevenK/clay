@@ -20,8 +20,8 @@
 void   print_page_setup_dialog (GtkPrintOperation *operation);
 #endif
 void   print_page_setup_load   (GtkPrintOperation *operation,
-                                GimpImage         *image);
+                                ClayImage         *image);
 void   print_page_setup_save   (GtkPrintOperation *operation,
-                                GimpImage         *image);
+                                ClayImage         *image);
 
 

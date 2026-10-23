@@ -20,48 +20,48 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimpcontext.h"
+#include "core/claycontext.h"
 
-#include "text/gimpfont.h"
+#include "text/clayfont.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "actions.h"
 #include "data-commands.h"
 #include "fonts-actions.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry fonts_actions[] =
+static const ClayActionEntry fonts_actions[] =
 {
-  { "fonts-refresh", GIMP_ICON_VIEW_REFRESH,
+  { "fonts-refresh", CLAY_ICON_VIEW_REFRESH,
     NC_("fonts-action", "_Rescan Font List"), NULL, { NULL },
     NC_("fonts-action", "Rescan the installed fonts"),
     data_refresh_cmd_callback,
-    GIMP_HELP_FONT_REFRESH }
+    CLAY_HELP_FONT_REFRESH }
 };
 
 
 void
-fonts_actions_setup (GimpActionGroup *group)
+fonts_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "fonts-action",
+  clay_action_group_add_actions (group, "fonts-action",
                                  fonts_actions,
                                  G_N_ELEMENTS (fonts_actions));
 }
 
 void
-fonts_actions_update (GimpActionGroup *group,
+fonts_actions_update (ClayActionGroup *group,
                       gpointer         data)
 {
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 
   SET_SENSITIVE ("fonts-refresh", TRUE);
 

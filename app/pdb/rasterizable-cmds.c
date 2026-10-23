@@ -25,196 +25,196 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpparamspecs.h"
-#include "core/gimprasterizable.h"
+#include "core/clayparamspecs.h"
+#include "core/clayrasterizable.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-rasterizable_rasterize_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+rasterizable_rasterize_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpRasterizable *item;
+  ClayRasterizable *item;
 
-  item = g_value_get_object (gimp_value_array_index (args, 0));
+  item = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (! gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (item)))
+      if (! clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (item)))
         {
-          gimp_rasterizable_rasterize (GIMP_RASTERIZABLE (item), TRUE);
+          clay_rasterizable_rasterize (CLAY_RASTERIZABLE (item), TRUE);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("This item has already been rasterized."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-rasterizable_restore_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+rasterizable_restore_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpRasterizable *item;
+  ClayRasterizable *item;
 
-  item = g_value_get_object (gimp_value_array_index (args, 0));
+  item = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (item)))
+      if (clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (item)))
         {
-          gimp_rasterizable_restore (GIMP_RASTERIZABLE (item));
+          clay_rasterizable_restore (CLAY_RASTERIZABLE (item));
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("This item has not been rasterized."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-rasterizable_is_rasterized_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+rasterizable_is_rasterized_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpRasterizable *item;
+  ClayValueArray *return_vals;
+  ClayRasterizable *item;
   gboolean is_rasterized = FALSE;
 
-  item = g_value_get_object (gimp_value_array_index (args, 0));
+  item = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      is_rasterized = gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (item));
+      is_rasterized = clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (item));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), is_rasterized);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), is_rasterized);
 
   return return_vals;
 }
 
 void
-register_rasterizable_procs (GimpPDB *pdb)
+register_rasterizable_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-rasterizable-rasterize
+   * clay-rasterizable-rasterize
    */
-  procedure = gimp_procedure_new (rasterizable_rasterize_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-rasterizable-rasterize");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (rasterizable_rasterize_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-rasterizable-rasterize");
+  clay_procedure_set_static_help (procedure,
                                   "Rasterize the object.",
                                   "This procedure makes the item behave like a typical raster layer.\n"
                                   "\n"
-                                  "Note that the source information (text contents and properties for a text layer, source file for a link layer, path and render properties for a vector layer, etc.) are not actually discarded, and it is possible to retrieve the original behavior with [method@Gimp.Rasterizable.restore].",
+                                  "Note that the source information (text contents and properties for a text layer, source file for a link layer, path and render properties for a vector layer, etc.) are not actually discarded, and it is possible to retrieve the original behavior with [method@Clay.Rasterizable.restore].",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_rasterizable ("item",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_rasterizable ("item",
                                                              "item",
                                                              "The rasterizable item",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-rasterizable-restore
+   * clay-rasterizable-restore
    */
-  procedure = gimp_procedure_new (rasterizable_restore_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-rasterizable-restore");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (rasterizable_restore_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-rasterizable-restore");
+  clay_procedure_set_static_help (procedure,
                                   "Revert the rasterization of @item.",
                                   "Restore the information making the item non-destructive, such as text contents and properties of a text layer, source file of a link layer, path and render properties of a vector layer, etc.\n"
                                   "This item won't behave anymore like a raster item. In particular, it will prevent direct modification of its pixels and will be rendered when its properties are updated.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_rasterizable ("item",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_rasterizable ("item",
                                                              "item",
                                                              "The rasterizable item",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-rasterizable-is-rasterized
+   * clay-rasterizable-is-rasterized
    */
-  procedure = gimp_procedure_new (rasterizable_is_rasterized_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-rasterizable-is-rasterized");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (rasterizable_is_rasterized_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-rasterizable-is-rasterized");
+  clay_procedure_set_static_help (procedure,
                                   "Return whether @item has been rasterized.",
                                   "This procedure returns %TRUE if the specified @item has been previously rasterized. In this case, you should treat this @item as the generic raster variant.\n"
                                   "\n"
-                                  "For instance, a [class@Gimp.TextLayer] object implements the %GimpRasterizable interface. If a text layer instance were to return %TRUE, you should only consider its rendering as returned by [method@Gimp.Drawable.get_buffer].\n"
+                                  "For instance, a [class@Clay.TextLayer] object implements the %ClayRasterizable interface. If a text layer instance were to return %TRUE, you should only consider its rendering as returned by [method@Clay.Drawable.get_buffer].\n"
                                   "\n"
-                                  "On the other hand, if this returned %FALSE, depending on your intents, you may prefer to use the text contents and its properties with the various procedures provided by the [class@Gimp.TextLayer] class interface.",
+                                  "On the other hand, if this returned %FALSE, depending on your intents, you may prefer to use the text contents and its properties with the various procedures provided by the [class@Clay.TextLayer] class interface.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_rasterizable ("item",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_rasterizable ("item",
                                                              "item",
                                                              "The rasterizable item",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("is-rasterized",
                                                          "is rasterized",
                                                          "TRUE if @item is rasterized",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

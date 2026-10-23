@@ -28,7 +28,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "tw_platform.h"
 #include "tw_func.h"

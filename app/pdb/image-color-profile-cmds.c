@@ -27,133 +27,133 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpimage-color-profile.h"
-#include "core/gimpimage.h"
-#include "core/gimpparamspecs.h"
+#include "core/clayimage-color-profile.h"
+#include "core/clayimage.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-image_get_color_profile_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+image_get_color_profile_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   GBytes *profile_data = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_image_get_color_profile (image);
+      profile = clay_image_get_color_profile (image);
 
       if (profile)
         {
           const guint8 *data;
           gsize         length;
 
-          data = gimp_color_profile_get_icc_profile (profile, &length);
+          data = clay_color_profile_get_icc_profile (profile, &length);
 
           profile_data = g_bytes_new (data, length);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), profile_data);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), profile_data);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_get_effective_color_profile_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+image_get_effective_color_profile_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   GBytes *profile_data = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_color_managed_get_color_profile (GIMP_COLOR_MANAGED (image));
+      profile = clay_color_managed_get_color_profile (CLAY_COLOR_MANAGED (image));
 
       if (profile)
         {
           const guint8 *data;
           gsize         length;
 
-          data = gimp_color_profile_get_icc_profile (profile, &length);
+          data = clay_color_profile_get_icc_profile (profile, &length);
 
           profile_data = g_bytes_new (data, length);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), profile_data);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), profile_data);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_set_color_profile_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+image_set_color_profile_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GBytes *color_profile;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  color_profile = g_value_get_boxed (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  color_profile = g_value_get_boxed (clay_value_array_index (args, 1));
 
   if (success)
     {
       if (color_profile && g_bytes_get_size (color_profile) > 0)
         {
-          GimpColorProfile *profile;
+          ClayColorProfile *profile;
 
-          profile = gimp_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
+          profile = clay_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
                                                              g_bytes_get_size (color_profile),
                                                              error);
 
           if (profile)
             {
-              success = gimp_image_assign_color_profile (image, profile,
+              success = clay_image_assign_color_profile (image, profile,
                                                          progress, error);
               g_object_unref (profile);
             }
@@ -162,41 +162,41 @@ image_set_color_profile_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          success = gimp_image_assign_color_profile (image, NULL,
+          success = clay_image_assign_color_profile (image, NULL,
                                                      progress, error);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_set_color_profile_from_file_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+image_set_color_profile_from_file_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GFile *file;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
       if (file)
         {
-          GimpColorProfile *profile;
+          ClayColorProfile *profile;
 
-          profile = gimp_color_profile_new_from_file (file, error);
+          profile = clay_color_profile_new_from_file (file, error);
 
           if (profile)
             {
-              success = gimp_image_assign_color_profile (image, profile,
+              success = clay_image_assign_color_profile (image, profile,
                                                          progress, error);
               g_object_unref (profile);
             }
@@ -205,84 +205,84 @@ image_set_color_profile_from_file_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          success = gimp_image_assign_color_profile (image, NULL,
+          success = clay_image_assign_color_profile (image, NULL,
                                                      progress, error);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_get_simulation_profile_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+image_get_simulation_profile_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   GBytes *profile_data = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_image_get_simulation_profile (image);
+      profile = clay_image_get_simulation_profile (image);
 
       if (profile)
         {
           const guint8 *data;
           gsize         length;
 
-          data = gimp_color_profile_get_icc_profile (profile, &length);
+          data = clay_color_profile_get_icc_profile (profile, &length);
 
           profile_data = g_bytes_new (data, length);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), profile_data);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), profile_data);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_set_simulation_profile_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+image_set_simulation_profile_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GBytes *color_profile;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  color_profile = g_value_get_boxed (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  color_profile = g_value_get_boxed (clay_value_array_index (args, 1));
 
   if (success)
     {
       if (color_profile && g_bytes_get_size (color_profile) > 0)
         {
-          GimpColorProfile *profile;
+          ClayColorProfile *profile;
 
-          profile = gimp_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
+          profile = clay_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
                                                              g_bytes_get_size (color_profile),
                                                              error);
 
           if (profile)
             {
-              gimp_image_set_simulation_profile (image, profile);
+              clay_image_set_simulation_profile (image, profile);
               g_object_unref (profile);
             }
           else
@@ -292,40 +292,40 @@ image_set_simulation_profile_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          gimp_image_set_simulation_profile (image, NULL);
+          clay_image_set_simulation_profile (image, NULL);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_set_simulation_profile_from_file_invoker (GimpProcedure         *procedure,
-                                                Gimp                  *gimp,
-                                                GimpContext           *context,
-                                                GimpProgress          *progress,
-                                                const GimpValueArray  *args,
+static ClayValueArray *
+image_set_simulation_profile_from_file_invoker (ClayProcedure         *procedure,
+                                                Clay                  *clay,
+                                                ClayContext           *context,
+                                                ClayProgress          *progress,
+                                                const ClayValueArray  *args,
                                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GFile *file;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
       if (file)
         {
-          GimpColorProfile *profile;
+          ClayColorProfile *profile;
 
-          profile = gimp_color_profile_new_from_file (file, error);
+          profile = clay_color_profile_new_from_file (file, error);
 
           if (profile)
             {
-              gimp_image_set_simulation_profile (image, profile);
+              clay_image_set_simulation_profile (image, profile);
               g_object_unref (profile);
             }
           else
@@ -335,158 +335,158 @@ image_set_simulation_profile_from_file_invoker (GimpProcedure         *procedure
         }
       else
         {
-          gimp_image_set_simulation_profile (image, NULL);
+          clay_image_set_simulation_profile (image, NULL);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_get_simulation_intent_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+image_get_simulation_intent_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint intent = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      intent = gimp_image_get_simulation_intent (image);
+      intent = clay_image_get_simulation_intent (image);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), intent);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), intent);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_set_simulation_intent_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+image_set_simulation_intent_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint intent;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  intent = g_value_get_enum (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  intent = g_value_get_enum (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_image_set_simulation_intent (image, intent);
+      clay_image_set_simulation_intent (image, intent);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_get_simulation_bpc_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+image_get_simulation_bpc_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gboolean bpc = FALSE;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      bpc = gimp_image_get_simulation_bpc (image);
+      bpc = clay_image_get_simulation_bpc (image);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), bpc);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), bpc);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_set_simulation_bpc_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+image_set_simulation_bpc_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gboolean bpc;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  bpc = g_value_get_boolean (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  bpc = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_image_set_simulation_bpc (image, bpc);
+      clay_image_set_simulation_bpc (image, bpc);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_convert_color_profile_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+image_convert_color_profile_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GBytes *color_profile;
   gint intent;
   gboolean bpc;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  color_profile = g_value_get_boxed (gimp_value_array_index (args, 1));
-  intent = g_value_get_enum (gimp_value_array_index (args, 2));
-  bpc = g_value_get_boolean (gimp_value_array_index (args, 3));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  color_profile = g_value_get_boxed (clay_value_array_index (args, 1));
+  intent = g_value_get_enum (clay_value_array_index (args, 2));
+  bpc = g_value_get_boolean (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
       if (color_profile && g_bytes_get_size (color_profile) > 0)
         {
-          profile = gimp_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
+          profile = clay_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
                                                              g_bytes_get_size (color_profile),
                                                              error);
         }
       else
         {
-          profile = gimp_image_get_builtin_color_profile (image);
+          profile = clay_image_get_builtin_color_profile (image);
           g_object_ref (profile);
         }
 
       if (profile)
         {
-          success = gimp_image_convert_color_profile (image, profile,
+          success = clay_image_convert_color_profile (image, profile,
                                                       intent, bpc,
                                                       progress, error);
           g_object_unref (profile);
@@ -497,40 +497,40 @@ image_convert_color_profile_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_convert_color_profile_from_file_invoker (GimpProcedure         *procedure,
-                                               Gimp                  *gimp,
-                                               GimpContext           *context,
-                                               GimpProgress          *progress,
-                                               const GimpValueArray  *args,
+static ClayValueArray *
+image_convert_color_profile_from_file_invoker (ClayProcedure         *procedure,
+                                               Clay                  *clay,
+                                               ClayContext           *context,
+                                               ClayProgress          *progress,
+                                               const ClayValueArray  *args,
                                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GFile *file;
   gint intent;
   gboolean bpc;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  file = g_value_get_object (gimp_value_array_index (args, 1));
-  intent = g_value_get_enum (gimp_value_array_index (args, 2));
-  bpc = g_value_get_boolean (gimp_value_array_index (args, 3));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  file = g_value_get_object (clay_value_array_index (args, 1));
+  intent = g_value_get_enum (clay_value_array_index (args, 2));
+  bpc = g_value_get_boolean (clay_value_array_index (args, 3));
 
   if (success)
     {
       if (file)
         {
-          GimpColorProfile *profile;
+          ClayColorProfile *profile;
 
-          profile = gimp_color_profile_new_from_file (file, error);
+          profile = clay_color_profile_new_from_file (file, error);
 
           if (profile)
             {
-              success = gimp_image_convert_color_profile (image, profile,
+              success = clay_image_convert_color_profile (image, profile,
                                                           intent, bpc,
                                                           progress, error);
               g_object_unref (profile);
@@ -542,417 +542,417 @@ image_convert_color_profile_from_file_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_image_color_profile_procs (GimpPDB *pdb)
+register_image_color_profile_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-image-get-color-profile
+   * clay-image-get-color-profile
    */
-  procedure = gimp_procedure_new (image_get_color_profile_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-color-profile");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_color_profile_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-color-profile");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the image's color profile",
                                   "This procedure returns the image's color profile, or NULL if the image has no color profile assigned.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("profile-data",
                                                        "profile data",
                                                        "The image's serialized color profile.",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-get-effective-color-profile
+   * clay-image-get-effective-color-profile
    */
-  procedure = gimp_procedure_new (image_get_effective_color_profile_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-effective-color-profile");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_effective_color_profile_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-effective-color-profile");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the color profile that is used for the image",
-                                  "This procedure returns the color profile that is actually used for this image, which is the profile returned by 'gimp-image-get-color-profile' if the image has a profile assigned, or a generated default RGB or grayscale profile, according to the image's type.",
+                                  "This procedure returns the color profile that is actually used for this image, which is the profile returned by 'clay-image-get-color-profile' if the image has a profile assigned, or a generated default RGB or grayscale profile, according to the image's type.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("profile-data",
                                                        "profile data",
                                                        "The image's serialized color profile.",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-set-color-profile
+   * clay-image-set-color-profile
    */
-  procedure = gimp_procedure_new (image_set_color_profile_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-set-color-profile");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_set_color_profile_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-set-color-profile");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the image's color profile",
                                   "This procedure sets the image's color profile, or unsets it if NULL is passed as 'color_profile'. This procedure does no color conversion. However, it will change the pixel format of all layers to contain the babl space matching the profile. You must call this procedure before adding layers to the image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("color-profile",
                                                    "color profile",
                                                    "The new serialized color profile",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-set-color-profile-from-file
+   * clay-image-set-color-profile-from-file
    */
-  procedure = gimp_procedure_new (image_set_color_profile_from_file_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-set-color-profile-from-file");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_set_color_profile_from_file_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-set-color-profile-from-file");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the image's color profile from an ICC file",
                                   "This procedure sets the image's color profile from a file containing an ICC profile, or unsets it if NULL is passed as 'file'. This procedure does no color conversion. However, it will change the pixel format of all layers to contain the babl space matching the profile. You must call this procedure before adding layers to the image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "file",
                                                     "The file containing the new color profile",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-get-simulation-profile
+   * clay-image-get-simulation-profile
    */
-  procedure = gimp_procedure_new (image_get_simulation_profile_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-simulation-profile");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_simulation_profile_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-simulation-profile");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the image's simulation color profile",
                                   "This procedure returns the image's simulation color profile, or NULL if the image has no simulation color profile assigned.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("profile-data",
                                                        "profile data",
                                                        "The image's serialized simulation color profile.",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-set-simulation-profile
+   * clay-image-set-simulation-profile
    */
-  procedure = gimp_procedure_new (image_set_simulation_profile_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-set-simulation-profile");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_set_simulation_profile_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-set-simulation-profile");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the image's simulation color profile",
                                   "This procedure sets the image's simulation color profile, or unsets it if NULL is passed as 'color_profile'. This procedure does no color conversion.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("color-profile",
                                                    "color profile",
                                                    "The new serialized simulation color profile",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-set-simulation-profile-from-file
+   * clay-image-set-simulation-profile-from-file
    */
-  procedure = gimp_procedure_new (image_set_simulation_profile_from_file_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-set-simulation-profile-from-file");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_set_simulation_profile_from_file_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-set-simulation-profile-from-file");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the image's simulation color profile from an ICC file",
                                   "This procedure sets the image's simulation color profile from a file containing an ICC profile, or unsets it if NULL is passed as 'file'. This procedure does no color conversion.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "file",
                                                     "The file containing the new simulation color profile",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-get-simulation-intent
+   * clay-image-get-simulation-intent
    */
-  procedure = gimp_procedure_new (image_get_simulation_intent_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-simulation-intent");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_simulation_intent_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-simulation-intent");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the image's simulation rendering intent",
                                   "This procedure returns the image's simulation rendering intent.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("intent",
                                                       "intent",
                                                       "The image's simulation rendering intent.",
-                                                      GIMP_TYPE_COLOR_RENDERING_INTENT,
-                                                      GIMP_COLOR_RENDERING_INTENT_PERCEPTUAL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_COLOR_RENDERING_INTENT,
+                                                      CLAY_COLOR_RENDERING_INTENT_PERCEPTUAL,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-set-simulation-intent
+   * clay-image-set-simulation-intent
    */
-  procedure = gimp_procedure_new (image_set_simulation_intent_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-set-simulation-intent");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_set_simulation_intent_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-set-simulation-intent");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the image's simulation rendering intent",
                                   "This procedure sets the image's simulation rendering intent.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("intent",
                                                   "intent",
-                                                  "A GimpColorRenderingIntent",
-                                                  GIMP_TYPE_COLOR_RENDERING_INTENT,
-                                                  GIMP_COLOR_RENDERING_INTENT_PERCEPTUAL,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  "A ClayColorRenderingIntent",
+                                                  CLAY_TYPE_COLOR_RENDERING_INTENT,
+                                                  CLAY_COLOR_RENDERING_INTENT_PERCEPTUAL,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-get-simulation-bpc
+   * clay-image-get-simulation-bpc
    */
-  procedure = gimp_procedure_new (image_get_simulation_bpc_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-simulation-bpc");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_simulation_bpc_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-simulation-bpc");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether the image has Black Point Compensation enabled for its simulation",
                                   "This procedure returns whether the image has Black Point Compensation enabled for its simulation",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("bpc",
                                                          "bpc",
                                                          "The Black Point Compensation status.",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-set-simulation-bpc
+   * clay-image-set-simulation-bpc
    */
-  procedure = gimp_procedure_new (image_set_simulation_bpc_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-set-simulation-bpc");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_set_simulation_bpc_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-set-simulation-bpc");
+  clay_procedure_set_static_help (procedure,
                                   "Sets whether the image has Black Point Compensation enabled for its simulation",
                                   "This procedure whether the image has Black Point Compensation enabled for its simulation",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("bpc",
                                                      "bpc",
                                                      "The Black Point Compensation status.",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-convert-color-profile
+   * clay-image-convert-color-profile
    */
-  procedure = gimp_procedure_new (image_convert_color_profile_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-convert-color-profile");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_convert_color_profile_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-convert-color-profile");
+  clay_procedure_set_static_help (procedure,
                                   "Convert the image's layers to a color profile",
                                   "This procedure converts from the image's color profile (or the built-in RGB or grayscale profile if none is set) to the given color profile. Only RGB and grayscale color profiles are accepted, according to the image's type.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("color-profile",
                                                    "color profile",
                                                    "The serialized color profile",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                   CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("intent",
                                                   "intent",
                                                   "Rendering intent",
-                                                  GIMP_TYPE_COLOR_RENDERING_INTENT,
-                                                  GIMP_COLOR_RENDERING_INTENT_PERCEPTUAL,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_COLOR_RENDERING_INTENT,
+                                                  CLAY_COLOR_RENDERING_INTENT_PERCEPTUAL,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("bpc",
                                                      "bpc",
                                                      "Black point compensation",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-convert-color-profile-from-file
+   * clay-image-convert-color-profile-from-file
    */
-  procedure = gimp_procedure_new (image_convert_color_profile_from_file_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-convert-color-profile-from-file");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_convert_color_profile_from_file_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-convert-color-profile-from-file");
+  clay_procedure_set_static_help (procedure,
                                   "Convert the image's layers to a color profile",
                                   "This procedure converts from the image's color profile (or the default RGB or grayscale profile if none is set) to an ICC profile specified by 'file'. Only RGB and grayscale color profiles are accepted, according to the image's type.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "file",
                                                     "The file containing the new color profile",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("intent",
                                                   "intent",
                                                   "Rendering intent",
-                                                  GIMP_TYPE_COLOR_RENDERING_INTENT,
-                                                  GIMP_COLOR_RENDERING_INTENT_PERCEPTUAL,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_COLOR_RENDERING_INTENT,
+                                                  CLAY_COLOR_RENDERING_INTENT_PERCEPTUAL,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("bpc",
                                                      "bpc",
                                                      "Black point compensation",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

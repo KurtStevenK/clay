@@ -1,4 +1,4 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; A script that fails at query/registration time: ill-formed args in registration data
 
@@ -11,7 +11,7 @@
 ; putting each case to the top: the failing top case stops interpretation.
 
 ; Install this script.
-; Start Gimp
+; Start Clay
 ; Expect:
 ;   - an error in the stderr console, errors from SF re args
 ;       e.g. "adjustment default must be list"
@@ -19,7 +19,7 @@
 ;   - the interpreter must not crash !!!
 ;   - the procedure is not in ProcedureBrowser
 
-; Note errors come before Gimp Error Console is ready
+; Note errors come before Clay Error Console is ready
 
 ; moot run func
 (define (script-fu-test-registration-fail ) ())
@@ -57,7 +57,7 @@
 
 ; Case: SF-ADJUSTMENT wrong list length
 ; At query time, SF throws error.
-; At query time, a critical from Gimp re arg default not in range
+; At query time, a critical from Clay re arg default not in range
 (script-fu-register "script-fu-test-registration-fail"
   "Moot" "Moot" "lkk" "lkk" "2023" ""  ; requires no image
 

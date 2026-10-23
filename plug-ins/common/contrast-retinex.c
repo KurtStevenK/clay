@@ -19,15 +19,15 @@
 
 #include <string.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC        "plug-in-retinex"
 #define PLUG_IN_BINARY      "contrast-retinex"
-#define PLUG_IN_ROLE        "gimp-contrast-retinex"
+#define PLUG_IN_ROLE        "clay-contrast-retinex"
 #define MAX_RETINEX_SCALES    8
 #define MIN_GAUSSIAN_SCALE   16
 #define MAX_GAUSSIAN_SCALE  250
@@ -65,12 +65,12 @@ typedef struct _RetinexClass RetinexClass;
 
 struct _Retinex
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _RetinexClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -79,23 +79,23 @@ struct _RetinexClass
 
 GType                   retinex_get_type         (void);
 
-static GList          * retinex_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * retinex_create_procedure (GimpPlugIn           *plug_in,
+static GList          * retinex_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * retinex_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * retinex_run              (GimpProcedure        *procedure,
-                                                  GimpRunMode           run_mode,
-                                                  GimpImage            *image,
-                                                  GimpDrawable        **drawables,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray * retinex_run              (ClayProcedure        *procedure,
+                                                  ClayRunMode           run_mode,
+                                                  ClayImage            *image,
+                                                  ClayDrawable        **drawables,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
-static gboolean retinex_dialog              (GimpProcedure *procedure,
+static gboolean retinex_dialog              (ClayProcedure *procedure,
                                              GObject       *config,
-                                             GimpDrawable  *drawable);
+                                             ClayDrawable  *drawable);
 static void     retinex                     (GObject       *config,
-                                             GimpDrawable  *drawable,
-                                             GimpPreview   *preview);
+                                             ClayDrawable  *drawable,
+                                             ClayPreview   *preview);
 static void     retinex_preview             (GtkWidget     *widget,
                                              GObject       *config);
 
@@ -131,16 +131,16 @@ static void     MSRCR                       (GObject      *config,
                                              gboolean      preview_mode);
 
 
-G_DEFINE_TYPE (Retinex, retinex, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Retinex, retinex, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (RETINEX_TYPE)
+CLAY_MAIN (RETINEX_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 retinex_class_init (RetinexClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = retinex_query_procedures;
   plug_in_class->create_procedure = retinex_create_procedure;
@@ -153,31 +153,31 @@ retinex_init (Retinex *retinex)
 }
 
 static GList *
-retinex_query_procedures (GimpPlugIn *plug_in)
+retinex_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-retinex_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+retinex_create_procedure (ClayPlugIn  *plug_in,
                                const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             retinex_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("Retine_x..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Tone Mapping");
+      clay_procedure_set_menu_label (procedure, _("Retine_x..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Tone Mapping");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Enhance contrast using the "
                                           "Retinex method"),
                                         _("The Retinex Image Enhancement "
@@ -189,34 +189,34 @@ retinex_create_procedure (GimpPlugIn  *plug_in,
                                           "scene illuminant, and color/lightness "
                                           "rendition."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Fabien Pelisson",
                                       "Fabien Pelisson",
                                       "2003");
 
-      gimp_procedure_add_int_argument (procedure, "scale",
+      clay_procedure_add_int_argument (procedure, "scale",
                                        _("Scal_e"),
                                        _("Biggest scale value"),
                                        MIN_GAUSSIAN_SCALE, MAX_GAUSSIAN_SCALE, 240,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "nscales",
+      clay_procedure_add_int_argument (procedure, "nscales",
                                        _("Scale _division"),
                                        _("Number of scales"),
                                        0, MAX_RETINEX_SCALES, 3,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "scales-mode",
+      clay_procedure_add_choice_argument (procedure, "scales-mode",
                                           _("Le_vel"),
                                           _("Retinex distribution through scales"),
-                                          gimp_choice_new_with_values ("uniform", filter_uniform,  _("Uniform"), NULL,
+                                          clay_choice_new_with_values ("uniform", filter_uniform,  _("Uniform"), NULL,
                                                                        "low",     filter_low,      _("Low"),     NULL,
                                                                        "high",    filter_high,     _("High"),    NULL,
                                                                        NULL),
                                           "uniform",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "cvar",
+      clay_procedure_add_double_argument (procedure, "cvar",
                                           _("Dy_namic"),
                                           _("Variance value"),
                                           0, 4, 1.2,
@@ -226,29 +226,29 @@ retinex_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-retinex_run (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
-             GimpDrawable        **drawables,
-             GimpProcedureConfig  *config,
+static ClayValueArray *
+retinex_run (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
+             ClayDrawable        **drawables,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gint          x, y, width, height;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -256,42 +256,42 @@ retinex_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (! gimp_drawable_mask_intersect (drawable, &x, &y, &width, &height) ||
+  if (! clay_drawable_mask_intersect (drawable, &x, &y, &width, &height) ||
       width  < MIN_GAUSSIAN_SCALE ||
       height < MIN_GAUSSIAN_SCALE)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! retinex_dialog (procedure, G_OBJECT (config), drawable))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! retinex_dialog (procedure, G_OBJECT (config), drawable))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
-      gimp_progress_init (_("Retinex"));
+      clay_progress_init (_("Retinex"));
 
       retinex (G_OBJECT (config), drawable, NULL);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 
 static gboolean
-retinex_dialog (GimpProcedure *procedure,
+retinex_dialog (ClayProcedure *procedure,
                 GObject       *config,
-                GimpDrawable  *drawable)
+                ClayDrawable  *drawable)
 {
   GtkWidget    *dialog;
   GtkWidget    *preview;
@@ -299,35 +299,35 @@ retinex_dialog (GimpProcedure *procedure,
   GtkWidget    *scale;
   gboolean      run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Retinex Image Enhancement"));
 
-  preview = gimp_zoom_preview_new_from_drawable (drawable);
+  preview = clay_zoom_preview_new_from_drawable (drawable);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       preview, TRUE, TRUE, 0);
   gtk_widget_set_margin_bottom (preview, 12);
   gtk_widget_set_visible (preview, TRUE);
 
-  combo = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  combo = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                             "scales-mode", G_TYPE_NONE);
   gtk_widget_set_margin_bottom (combo, 12);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "scale", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "nscales", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "cvar", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "retinex-vbox", "scales-mode",
                                   "scale", "nscales", "cvar", NULL);
 
@@ -338,16 +338,16 @@ retinex_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "retinex-vbox",
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -359,8 +359,8 @@ retinex_dialog (GimpProcedure *procedure,
  */
 static void
 retinex (GObject      *config,
-         GimpDrawable *drawable,
-         GimpPreview  *preview)
+         ClayDrawable *drawable,
+         ClayPreview  *preview)
 {
   GeglBuffer *src_buffer = NULL;
   GeglBuffer *dest_buffer;
@@ -375,16 +375,16 @@ retinex (GObject      *config,
    */
   if (preview)
     {
-      src = gimp_zoom_preview_get_source (GIMP_ZOOM_PREVIEW (preview),
+      src = clay_zoom_preview_get_source (CLAY_ZOOM_PREVIEW (preview),
                                           &width, &height, &bytes);
     }
   else
     {
-      if (! gimp_drawable_mask_intersect (drawable,
+      if (! clay_drawable_mask_intersect (drawable,
                                           &x, &y, &width, &height))
         return;
 
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format ("R'G'B'A u8");
       else
         format = babl_format ("R'G'B' u8");
@@ -404,7 +404,7 @@ retinex (GObject      *config,
       memset (src, 0, sizeof (guchar) * size);
 
       /* Fill allocated memory with pixel data */
-      src_buffer = gimp_drawable_get_buffer (drawable);
+      src_buffer = clay_drawable_get_buffer (drawable);
 
       gegl_buffer_get (src_buffer, GEGL_RECTANGLE (x, y, width, height), 1.0,
                        format, src,
@@ -419,11 +419,11 @@ retinex (GObject      *config,
 
   if (preview)
     {
-      gimp_preview_draw_buffer (preview, psrc, width * bytes);
+      clay_preview_draw_buffer (preview, psrc, width * bytes);
     }
   else
     {
-      dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+      dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
       gegl_buffer_set (dest_buffer, GEGL_RECTANGLE (x, y, width, height), 0,
                        format, psrc,
@@ -433,10 +433,10 @@ retinex (GObject      *config,
         g_object_unref (src_buffer);
       g_object_unref (dest_buffer);
 
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
 
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, x, y, width, height);
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, x, y, width, height);
     }
 
   g_free (src);
@@ -446,8 +446,8 @@ static void
 retinex_preview (GtkWidget *widget,
                  GObject   *config)
 {
-  GimpPreview  *preview  = GIMP_PREVIEW (widget);
-  GimpDrawable *drawable = g_object_get_data (config, "drawable");
+  ClayPreview  *preview  = CLAY_PREVIEW (widget);
+  ClayDrawable *drawable = g_object_get_data (config, "drawable");
 
   retinex (config, drawable, preview);
 }
@@ -639,12 +639,12 @@ MSRCR (GObject *config,
                 "nscales", &nscales,
                 "cvar",    &cvar,
                 NULL);
-  scales_mode = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  scales_mode = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                      "scales-mode");
 
   if (!preview_mode)
     {
-      gimp_progress_init (_("Retinex: filtering"));
+      clay_progress_init (_("Retinex: filtering"));
       max_preview = 3 * nscales;
     }
 
@@ -743,7 +743,7 @@ MSRCR (GObject *config,
             }
 
            if (!preview_mode)
-             gimp_progress_update ((channel * nscales + scale) /
+             clay_progress_update ((channel * nscales + scale) /
                                    max_preview);
         }
     }
@@ -775,7 +775,7 @@ MSRCR (GObject *config,
     }
 
 /*  if (!preview_mode)
-    gimp_progress_update ((2.0 + (nscales * 3)) /
+    clay_progress_update ((2.0 + (nscales * 3)) /
                           ((nscales * 3) + 3));*/
 
   /*

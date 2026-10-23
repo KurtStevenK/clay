@@ -19,5 +19,5 @@
 
 
 gboolean   xcf_save_image (XcfInfo    *info,
-                           GimpImage  *image,
+                           ClayImage  *image,
                            GError    **error);

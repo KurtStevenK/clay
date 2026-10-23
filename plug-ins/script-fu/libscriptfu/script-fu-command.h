@@ -21,14 +21,14 @@
 gboolean        script_fu_run_command          (const gchar  *command,
                                                 GError      **error);
 
-GimpValueArray *script_fu_interpret_image_proc (GimpProcedure        *procedure,
+ClayValueArray *script_fu_interpret_image_proc (ClayProcedure        *procedure,
                                                 SFScript             *script,
-                                                GimpImage            *image,
-                                                GimpDrawable        **drawables,
-                                                GimpProcedureConfig  *config);
-GimpValueArray *script_fu_interpret_regular_proc (
-                                                GimpProcedure        *procedure,
+                                                ClayImage            *image,
+                                                ClayDrawable        **drawables,
+                                                ClayProcedureConfig  *config);
+ClayValueArray *script_fu_interpret_regular_proc (
+                                                ClayProcedure        *procedure,
                                                 SFScript             *script,
-                                                GimpProcedureConfig  *config);
+                                                ClayProcedureConfig  *config);
 
 #endif /* __SCRIPT_FU_COMMAND_H__ */

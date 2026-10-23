@@ -24,9 +24,9 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "file-raw-formats.h"
 #include "file-raw-utils.h"
@@ -44,12 +44,12 @@ typedef struct _RawtherapeeClass RawtherapeeClass;
 
 struct _Rawtherapee
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _RawtherapeeClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -58,41 +58,41 @@ struct _RawtherapeeClass
 
 GType                   rawtherapee_get_type         (void);
 
-static GList          * rawtherapee_init_procedures  (GimpPlugIn            *plug_in);
-static GimpProcedure  * rawtherapee_create_procedure (GimpPlugIn            *plug_in,
+static GList          * rawtherapee_init_procedures  (ClayPlugIn            *plug_in);
+static ClayProcedure  * rawtherapee_create_procedure (ClayPlugIn            *plug_in,
                                                       const gchar           *name);
 
-static GimpValueArray * rawtherapee_load             (GimpProcedure         *procedure,
-                                                      GimpRunMode            run_mode,
+static ClayValueArray * rawtherapee_load             (ClayProcedure         *procedure,
+                                                      ClayRunMode            run_mode,
                                                       GFile                 *file,
-                                                      GimpMetadata          *metadata,
-                                                      GimpMetadataLoadFlags *flags,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayMetadata          *metadata,
+                                                      ClayMetadataLoadFlags *flags,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
-static GimpValueArray * rawtherapee_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * rawtherapee_load_thumb       (ClayProcedure         *procedure,
                                                       GFile                 *file,
                                                       gint                   size,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
 
-static GimpImage      * load_image                   (GFile                *file,
-                                                      GimpRunMode           run_mode,
+static ClayImage      * load_image                   (GFile                *file,
+                                                      ClayRunMode           run_mode,
                                                       GError              **error);
-static GimpImage      * load_thumbnail_image         (GFile                *file,
+static ClayImage      * load_thumbnail_image         (GFile                *file,
                                                       gint                  thumb_size,
                                                       GError              **error);
 
 
-G_DEFINE_TYPE (Rawtherapee, rawtherapee, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Rawtherapee, rawtherapee, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (RAWTHERAPEE_TYPE)
+CLAY_MAIN (RAWTHERAPEE_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 rawtherapee_class_init (RawtherapeeClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->init_procedures  = rawtherapee_init_procedures;
   plug_in_class->create_procedure = rawtherapee_create_procedure;
@@ -105,7 +105,7 @@ rawtherapee_init (Rawtherapee *rawtherapee)
 }
 
 static GList *
-rawtherapee_init_procedures (GimpPlugIn *plug_in)
+rawtherapee_init_procedures (ClayPlugIn *plug_in)
 {
   /* check if rawtherapee is installed
    * TODO: allow setting the location of the executable in preferences
@@ -183,26 +183,26 @@ rawtherapee_init_procedures (GimpPlugIn *plug_in)
   return NULL;
 }
 
-static GimpProcedure *
-rawtherapee_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+rawtherapee_create_procedure (ClayPlugIn  *plug_in,
                             const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 rawtherapee_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Load thumbnail from a raw image "
                                         "via rawtherapee",
                                         "This plug-in loads a thumbnail "
                                         "from a raw image by calling "
                                         "rawtherapee-cli.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alberto Griggio",
                                       "Alberto Griggio",
                                       "2017");
@@ -229,28 +229,28 @@ rawtherapee_create_procedure (GimpPlugIn  *plug_in,
           load_blurb = g_strdup_printf (format->load_blurb_format, "rawtherapee");
           load_help  = g_strdup_printf (format->load_help_format,  "rawtherapee");
 
-          procedure = gimp_load_procedure_new (plug_in, name,
-                                               GIMP_PDB_PROC_TYPE_PLUGIN,
+          procedure = clay_load_procedure_new (plug_in, name,
+                                               CLAY_PDB_PROC_TYPE_PLUGIN,
                                                rawtherapee_load,
                                                (gpointer) format, NULL);
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             load_blurb, load_help, name);
-          gimp_procedure_set_attribution (procedure,
+          clay_procedure_set_attribution (procedure,
                                           "Alberto Griggio",
                                           "Alberto Griggio",
                                           "2017");
 
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               format->mime_type);
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               format->extensions);
-          gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                           format->magic);
 
-          gimp_load_procedure_set_handles_raw (GIMP_LOAD_PROCEDURE (procedure),
+          clay_load_procedure_set_handles_raw (CLAY_LOAD_PROCEDURE (procedure),
                                                TRUE);
-          gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+          clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                     LOAD_THUMB_PROC);
 
           g_free (load_proc);
@@ -264,75 +264,75 @@ rawtherapee_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-rawtherapee_load (GimpProcedure         *procedure,
-                  GimpRunMode            run_mode,
+static ClayValueArray *
+rawtherapee_load (ClayProcedure         *procedure,
+                  ClayRunMode            run_mode,
                   GFile                 *file,
-                  GimpMetadata          *metadata,
-                  GimpMetadataLoadFlags *flags,
-                  GimpProcedureConfig   *config,
+                  ClayMetadata          *metadata,
+                  ClayMetadataLoadFlags *flags,
+                  ClayProcedureConfig   *config,
                   gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   image = load_image (file, run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-rawtherapee_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+rawtherapee_load_thumb (ClayProcedure       *procedure,
                         GFile               *file,
                         gint                 size,
-                        GimpProcedureConfig *config,
+                        ClayProcedureConfig *config,
                         gpointer             run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   image = load_thumbnail_image (file, size, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, 0);
-  GIMP_VALUES_SET_INT   (return_vals, 3, 0);
-  GIMP_VALUES_SET_ENUM  (return_vals, 4, GIMP_RGB_IMAGE);
-  GIMP_VALUES_SET_INT   (return_vals, 5, 1);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, 0);
+  CLAY_VALUES_SET_INT   (return_vals, 3, 0);
+  CLAY_VALUES_SET_ENUM  (return_vals, 4, CLAY_RGB_IMAGE);
+  CLAY_VALUES_SET_INT   (return_vals, 5, 1);
 
-  gimp_value_array_truncate (return_vals, 6);
+  clay_value_array_truncate (return_vals, 6);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage *image              = NULL;
-  GFile     *file_out           = gimp_temp_file ("tif");
+  ClayImage *image              = NULL;
+  GFile     *file_out           = clay_temp_file ("tif");
   gchar     *rawtherapee_stdout = NULL;
 
   gboolean   search_path        = FALSE;
@@ -342,18 +342,18 @@ load_image (GFile        *file,
                                                                REGISTRY_KEY_BASE,
                                                                &search_path);
 
-  /* linear sRGB for now as GIMP uses that internally in many places anyway */
+  /* linear sRGB for now as Clay uses that internally in many places anyway */
   gchar *argv[] =
     {
       exec_path,
-      "-gimp",
+      "-clay",
       (gchar *) g_file_peek_path (file),
       (gchar *) g_file_peek_path (file_out),
       NULL
     };
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   if (g_spawn_sync (NULL,
                     argv,
@@ -368,7 +368,7 @@ load_image (GFile        *file,
                     NULL,
                     error))
     {
-      image = gimp_file_load (run_mode, file_out);
+      image = clay_file_load (run_mode, file_out);
     }
 
   /*if (rawtherapee_stdout) printf ("%s\n", rawtherapee_stdout);*/
@@ -377,19 +377,19 @@ load_image (GFile        *file,
 
   g_file_delete (file_out, NULL, NULL);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
 
-static GimpImage *
+static ClayImage *
 load_thumbnail_image (GFile   *file,
                       gint     thumb_size,
                       GError **error)
 {
-  GimpImage *image            = NULL;
-  GFile     *file_out         = gimp_temp_file ("jpg");
-  GFile     *thumb_pp3_file   = gimp_temp_file ("pp3");
+  ClayImage *image            = NULL;
+  GFile     *file_out         = clay_temp_file ("jpg");
+  GFile     *thumb_pp3_file   = clay_temp_file ("pp3");
   FILE      *thumb_pp3_f      = g_fopen (g_file_peek_path (thumb_pp3_file), "w");
   gchar     *rawtherapee_stdout = NULL;
   const char *pp3_content =
@@ -466,8 +466,8 @@ load_thumbnail_image (GFile   *file,
         }
     }
 
-  gimp_progress_init_printf (_("Opening thumbnail for '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening thumbnail for '%s'"),
+                             clay_file_get_utf8_name (file));
 
   if (thumb_pp3_f &&
       g_spawn_sync (NULL,
@@ -482,12 +482,12 @@ load_thumbnail_image (GFile   *file,
                     NULL,
                     error))
     {
-      gimp_progress_update (0.5);
+      clay_progress_update (0.5);
 
-      image = gimp_file_load (GIMP_RUN_NONINTERACTIVE, file_out);
+      image = clay_file_load (CLAY_RUN_NONINTERACTIVE, file_out);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   if (thumb_pp3_f)
     fclose (thumb_pp3_f);

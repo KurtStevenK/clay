@@ -198,12 +198,12 @@ foreach plugin : common_plugins_list
   if platform_windows
     plugin_rc = custom_target(
       plugin_name + '-rc',
-      input: gimp_plugins_rc,
+      input: clay_plugins_rc,
       output: plugin_name + '.rc',
       command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@']
     )
 
-    # See https://gitlab.gnome.org/GNOME/gimp/-/issues/8537
+    # See https://github.com/KurtStevenK/clay/-/issues/8537
     if generate_version_h
       compile_resources_depfiles = []
       compile_resources_depends  = [ gitversion_h ]
@@ -230,25 +230,25 @@ foreach plugin : common_plugins_list
                           plugin_sources,
                           include_directories: [ rootInclude, ],
                           link_with : [
-                            libgimp,
-                            libgimpbase,
-                            libgimpcolor,
-                            libgimpconfig,
-                            libgimpmath,
-                            libgimpui,
-                            libgimpwidgets,
+                            libclay,
+                            libclaybase,
+                            libclaycolor,
+                            libclayconfig,
+                            libclaymath,
+                            libclayui,
+                            libclaywidgets,
                           ],
-                          dependencies: [ plugin_deps, math, libgimpui_dep ],
+                          dependencies: [ plugin_deps, math, libclayui_dep ],
                           c_args: plugin_cflags,
                           win_subsystem: 'windows',
                           install: true,
-                          install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                          install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
   # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
   plugin_custom_targets += custom_target('dummy-' + plugin_name,
                                          input: plugin_exe,
                                          output: 'dummy-' + plugin_name + '.dummy',
                                          command: [python, '-c',
-                                                   'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                                                   'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
                                          build_by_default: true)
 endforeach

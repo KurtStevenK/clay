@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -47,7 +47,7 @@ typedef struct {
   gint        nr_off_mru_items;
 } Menu_t;
 
-Menu_t    *make_menu              (GimpImap       *imap);
+Menu_t    *make_menu              (ClayImap       *imap);
 void menu_build_mru_items         (MRU_t          *mru);
 void menu_set_zoom_sensitivity    (gpointer        data,
                                    gint            factor);
@@ -60,6 +60,6 @@ void menu_shapes_selected         (gint            count,
 void do_main_popup_menu           (GdkEventButton *event,
                                    gpointer        data);
 
-GtkWidget *make_selection_toolbar (GimpImap       *imap);
+GtkWidget *make_selection_toolbar (ClayImap       *imap);
 
 #endif /* _IMAP_MENU_H */

@@ -21,4 +21,4 @@
 #pragma once
 
 
-GtkWidget * module_dialog_new (Gimp *gimp);
+GtkWidget * module_dialog_new (Clay *clay);

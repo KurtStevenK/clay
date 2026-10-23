@@ -23,28 +23,28 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp-user-install.h"
+#include "core/clay-user-install.h"
 
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
 
 #include "user-install-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GtkWidget * user_install_dialog_new (GimpUserInstall *install);
+static GtkWidget * user_install_dialog_new (ClayUserInstall *install);
 static void        user_install_dialog_log (const gchar     *message,
                                             gboolean         error,
                                             gpointer         data);
 
 
 gboolean
-user_install_dialog_run (GimpUserInstall *install)
+user_install_dialog_run (ClayUserInstall *install)
 {
   GtkWidget *dialog;
   gboolean   success;
@@ -53,7 +53,7 @@ user_install_dialog_run (GimpUserInstall *install)
 
   dialog = user_install_dialog_new (install);
 
-  success = gimp_user_install_run (install,
+  success = clay_user_install_run (install,
                                    gtk_widget_get_scale_factor (dialog));
 
   if (! success)
@@ -73,7 +73,7 @@ user_install_dialog_run (GimpUserInstall *install)
 }
 
 static GtkWidget *
-user_install_dialog_new (GimpUserInstall *install)
+user_install_dialog_new (ClayUserInstall *install)
 {
   GtkWidget     *dialog;
   GtkWidget     *frame;
@@ -81,23 +81,23 @@ user_install_dialog_new (GimpUserInstall *install)
   GtkTextBuffer *buffer;
   GtkWidget     *view;
 
-  gimp_icons_init ();
+  clay_icons_init ();
 
-  dialog = gimp_message_dialog_new (_("Clay User Installation"),
-                                    GIMP_ICON_WILBER_EEK,
+  dialog = clay_message_dialog_new (_("Clay User Installation"),
+                                    CLAY_ICON_WILBER_EEK,
                                     NULL, 0, NULL, NULL,
 
                                     _("_Quit"), GTK_RESPONSE_OK,
 
                                     NULL);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("User installation failed!"));
-  gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                              _("The Clay user installation failed; "
                                "see the log for details."));
 
-  frame = gimp_frame_new (_("Installation Log"));
+  frame = clay_frame_new (_("Installation Log"));
   gtk_container_set_border_width (GTK_CONTAINER (frame), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       frame, TRUE, TRUE, 0);
@@ -125,7 +125,7 @@ user_install_dialog_new (GimpUserInstall *install)
 
   g_object_unref (buffer);
 
-  gimp_user_install_set_log_handler (install, user_install_dialog_log, buffer);
+  clay_user_install_set_log_handler (install, user_install_dialog_log, buffer);
 
   return dialog;
 }

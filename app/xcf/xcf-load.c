@@ -25,73 +25,73 @@
 #include <gegl-plugin.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "core/core-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "gegl/gimp-babl.h"
-#include "gegl/gimp-gegl-tile-compat.h"
-#include "gegl/gimp-gegl-utils.h"
+#include "gegl/clay-babl.h"
+#include "gegl/clay-gegl-tile-compat.h"
+#include "gegl/clay-gegl-utils.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdashpattern.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpdrawable-filters.h"
-#include "core/gimpdrawable-private.h" /* eek */
-#include "core/gimpdrawablefilter.h"
-#include "core/gimpfilloptions.h"
-#include "core/gimpfilterstack.h"
-#include "core/gimpgradient.h"
-#include "core/gimpgrid.h"
-#include "core/gimpgrouplayer.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-color-profile.h"
-#include "core/gimpimage-colormap.h"
-#include "core/gimpimage-grid.h"
-#include "core/gimpimage-guides.h"
-#include "core/gimpimage-metadata.h"
-#include "core/gimpimage-private.h"
-#include "core/gimpimage-sample-points.h"
-#include "core/gimpimage-symmetry.h"
-#include "core/gimpimage-undo.h"
-#include "core/gimpitemlist.h"
-#include "core/gimpitemstack.h"
-#include "core/gimplayer-floating-selection.h"
-#include "core/gimplayer-new.h"
-#include "core/gimplayer-xcf.h"
-#include "core/gimplayermask.h"
-#include "core/gimplink.h"
-#include "core/gimplinklayer.h"
-#include "core/gimpparasitelist.h"
-#include "core/gimppattern.h"
-#include "core/gimpprogress.h"
-#include "core/gimprasterizable.h"
-#include "core/gimpselection.h"
-#include "core/gimpstrokeoptions.h"
-#include "core/gimpsymmetry.h"
-#include "core/gimptemplate.h"
-#include "core/gimpunit.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claydashpattern.h"
+#include "core/claydatafactory.h"
+#include "core/claydrawable-filters.h"
+#include "core/claydrawable-private.h" /* eek */
+#include "core/claydrawablefilter.h"
+#include "core/clayfilloptions.h"
+#include "core/clayfilterstack.h"
+#include "core/claygradient.h"
+#include "core/claygrid.h"
+#include "core/claygrouplayer.h"
+#include "core/clayimage.h"
+#include "core/clayimage-color-profile.h"
+#include "core/clayimage-colormap.h"
+#include "core/clayimage-grid.h"
+#include "core/clayimage-guides.h"
+#include "core/clayimage-metadata.h"
+#include "core/clayimage-private.h"
+#include "core/clayimage-sample-points.h"
+#include "core/clayimage-symmetry.h"
+#include "core/clayimage-undo.h"
+#include "core/clayitemlist.h"
+#include "core/clayitemstack.h"
+#include "core/claylayer-floating-selection.h"
+#include "core/claylayer-new.h"
+#include "core/claylayer-xcf.h"
+#include "core/claylayermask.h"
+#include "core/claylink.h"
+#include "core/claylinklayer.h"
+#include "core/clayparasitelist.h"
+#include "core/claypattern.h"
+#include "core/clayprogress.h"
+#include "core/clayrasterizable.h"
+#include "core/clayselection.h"
+#include "core/claystrokeoptions.h"
+#include "core/claysymmetry.h"
+#include "core/claytemplate.h"
+#include "core/clayunit.h"
 
-#include "operations/layer-modes/gimp-layer-modes.h"
+#include "operations/layer-modes/clay-layer-modes.h"
 
-#include "path/gimpanchor.h"
-#include "path/gimpstroke.h"
-#include "path/gimpbezierstroke.h"
-#include "path/gimppath.h"
-#include "path/gimppath-compat.h"
-#include "path/gimpvectorlayer.h"
-#include "path/gimpvectorlayeroptions.h"
+#include "path/clayanchor.h"
+#include "path/claystroke.h"
+#include "path/claybezierstroke.h"
+#include "path/claypath.h"
+#include "path/claypath-compat.h"
+#include "path/clayvectorlayer.h"
+#include "path/clayvectorlayeroptions.h"
 
-#include "plug-in/gimppluginmanager-file.h"
-#include "plug-in/gimppluginprocedure.h"
+#include "plug-in/claypluginmanager-file.h"
+#include "plug-in/claypluginprocedure.h"
 
-#include "text/gimptextlayer.h"
-#include "text/gimptextlayer-xcf.h"
+#include "text/claytextlayer.h"
+#include "text/claytextlayer-xcf.h"
 
 #include "xcf-private.h"
 #include "xcf-load.h"
@@ -99,13 +99,13 @@
 #include "xcf-seek.h"
 #include "xcf-utils.h"
 
-#include "gimp-log.h"
-#include "gimp-intl.h"
+#include "clay-log.h"
+#include "clay-intl.h"
 
 
 #define MAX_XCF_PARASITE_DATA_LEN (256L * 1024 * 1024)
 
-/* #define GIMP_XCF_PATH_DEBUG */
+/* #define CLAY_XCF_PATH_DEBUG */
 
 /* Filters can not be created until a layer is attached
  * to an image, so we use this struct to store relevant
@@ -117,38 +117,38 @@ typedef struct
   gchar                 *icon_name;
   gchar                 *operation_name;
   gchar                 *op_version;
-  GimpChannel           *mask;
+  ClayChannel           *mask;
   gboolean               is_visible;
   gdouble                opacity;
-  GimpLayerMode          paint_mode;
-  GimpLayerColorSpace    blend_space;
-  GimpLayerColorSpace    composite_space;
-  GimpLayerCompositeMode composite_mode;
+  ClayLayerMode          paint_mode;
+  ClayLayerColorSpace    blend_space;
+  ClayLayerColorSpace    composite_space;
+  ClayLayerCompositeMode composite_mode;
   gboolean               clip;
-  GimpFilterRegion       region;
+  ClayFilterRegion       region;
 
   gboolean               unsupported_operation;
 } FilterData;
 
 typedef struct
 {
-  GimpTattoo       path_tattoo;
+  ClayTattoo       path_tattoo;
   gboolean         modified;
   gboolean         enable_fill;
   gboolean         enable_stroke;
 
-  GimpCustomStyle  fill_style;
+  ClayCustomStyle  fill_style;
   gboolean         fill_antialias;
   GeglColor       *fill_color;
-  GimpPattern     *fill_pattern;
+  ClayPattern     *fill_pattern;
 
-  GimpCustomStyle  stroke_style;
+  ClayCustomStyle  stroke_style;
   gboolean         stroke_antialias;
   GeglColor       *stroke_color;
-  GimpPattern     *stroke_pattern;
+  ClayPattern     *stroke_pattern;
   gdouble          stroke_width;
-  GimpCapStyle     stroke_cap_style;
-  GimpJoinStyle    stroke_join_style;
+  ClayCapStyle     stroke_cap_style;
+  ClayJoinStyle    stroke_join_style;
   gdouble          stroke_miter_limit;
   gsize            n_stroke_dashes;
   gdouble         *stroke_dashes;
@@ -158,20 +158,20 @@ typedef struct
 {
   gint                  offset_x;
   gint                  offset_y;
-  GimpInterpolationType interpolation;
-  GimpMatrix3           matrix;
+  ClayInterpolationType interpolation;
+  ClayMatrix3           matrix;
 } LayerTransformData;
 
-static void            xcf_load_add_masks     (GimpImage     *image);
+static void            xcf_load_add_masks     (ClayImage     *image);
 static void            xcf_load_add_effects   (XcfInfo       *info,
-                                               GimpImage     *image);
-static void            xcf_load_create_effect (GimpDrawable  *drawable,
+                                               ClayImage     *image);
+static void            xcf_load_create_effect (ClayDrawable  *drawable,
                                                const gchar   *effect_id);
 static gboolean        xcf_load_image_props   (XcfInfo       *info,
-                                               GimpImage     *image);
+                                               ClayImage     *image);
 static gboolean        xcf_load_layer_props   (XcfInfo       *info,
-                                               GimpImage     *image,
-                                               GimpLayer    **layer,
+                                               ClayImage     *image,
+                                               ClayLayer    **layer,
                                                GList         *loop_files,
                                                GList        **item_path,
                                                gboolean      *apply_mask,
@@ -185,45 +185,45 @@ static gboolean        xcf_check_layer_props  (XcfInfo       *info,
                                                gboolean      *is_text_layer,
                                                gboolean      *is_link_layer);
 static gboolean        xcf_load_channel_props (XcfInfo       *info,
-                                               GimpImage     *image,
-                                               GimpChannel  **channel,
+                                               ClayImage     *image,
+                                               ClayChannel  **channel,
                                                gboolean       is_mask);
 static gboolean        xcf_load_effect_props  (XcfInfo       *info,
                                                FilterData    *filter);
 static gboolean        xcf_load_path_props    (XcfInfo       *info,
-                                               GimpImage     *image,
-                                               GimpPath     **paths);
+                                               ClayImage     *image,
+                                               ClayPath     **paths);
 static gboolean        xcf_load_prop          (XcfInfo       *info,
                                                PropType      *prop_type,
                                                guint32       *prop_size);
-static GimpLayer     * xcf_load_layer         (XcfInfo       *info,
-                                               GimpImage     *image,
+static ClayLayer     * xcf_load_layer         (XcfInfo       *info,
+                                               ClayImage     *image,
                                                GList         *loop_files,
                                                GList        **item_path,
                                                gint          *n_broken_effects);
-static GimpChannel   * xcf_load_channel       (XcfInfo       *info,
-                                               GimpImage     *image,
+static ClayChannel   * xcf_load_channel       (XcfInfo       *info,
+                                               ClayImage     *image,
                                                gint          *n_broken_effects);
 static FilterData    * xcf_load_effect        (XcfInfo       *info,
-                                               GimpImage     *image,
-                                               GimpDrawable  *drawable);
+                                               ClayImage     *image,
+                                               ClayDrawable  *drawable);
 static void            xcf_load_free_effect   (FilterData    *data);
 static void            xcf_load_free_effects  (GList         *effects);
 static GeglColor     * xcf_load_color         (XcfInfo       *info,
                                                goffset        next_prop,
                                                gboolean      *valid_prop_value,
                                                GError       **error);
-static GimpData      * xcf_load_data          (XcfInfo       *info,
+static ClayData      * xcf_load_data          (XcfInfo       *info,
                                                GType          data_type,
                                                GError       **error);
-static GimpGradient  * xcf_load_gradient      (XcfInfo       *info,
+static ClayGradient  * xcf_load_gradient      (XcfInfo       *info,
                                                goffset        next_prop,
                                                gboolean      *valid_prop_value,
                                                GError       **error);
-static GimpPath      * xcf_load_path          (XcfInfo       *info,
-                                               GimpImage     *image);
-static GimpLayerMask * xcf_load_layer_mask    (XcfInfo       *info,
-                                               GimpImage     *image,
+static ClayPath      * xcf_load_path          (XcfInfo       *info,
+                                               ClayImage     *image);
+static ClayLayerMask * xcf_load_layer_mask    (XcfInfo       *info,
+                                               ClayImage     *image,
                                                gint          *n_broken_effects);
 static gboolean        xcf_load_buffer        (XcfInfo       *info,
                                                GeglBuffer    *buffer);
@@ -243,24 +243,24 @@ static gboolean        xcf_load_tile_zlib     (XcfInfo       *info,
                                                GeglRectangle *tile_rect,
                                                const Babl    *format,
                                                gint           data_length);
-static GimpParasite  * xcf_load_parasite      (XcfInfo       *info);
+static ClayParasite  * xcf_load_parasite      (XcfInfo       *info);
 static gboolean        xcf_load_old_paths     (XcfInfo       *info,
-                                               GimpImage     *image);
+                                               ClayImage     *image);
 static gboolean        xcf_load_old_path      (XcfInfo       *info,
-                                               GimpImage     *image);
+                                               ClayImage     *image);
 static gboolean        xcf_load_old_vectors   (XcfInfo       *info,
-                                               GimpImage     *image);
+                                               ClayImage     *image);
 static gboolean        xcf_load_old_vector    (XcfInfo       *info,
-                                               GimpImage     *image);
+                                               ClayImage     *image);
 
 static void            xcf_load_user_init     (XcfInfo       *info,
-                                               GimpImage     *image);
+                                               ClayImage     *image);
 static gboolean        xcf_skip_unknown_prop  (XcfInfo       *info,
                                                gsize          size);
 
 static gboolean        xcf_item_path_is_parent (GList        *path,
                                                 GList        *parent_path);
-static void            xcf_fix_item_path       (GimpLayer    *layer,
+static void            xcf_fix_item_path       (ClayLayer    *layer,
                                                 GList       **path,
                                                 GList        *broken_paths);
 
@@ -270,25 +270,25 @@ static void            xcf_load_free_vector_data (VectorLayerData *data);
 #define xcf_progress_update(info) G_STMT_START  \
   {                                             \
     if (info->progress)                         \
-      gimp_progress_pulse (info->progress);     \
+      clay_progress_pulse (info->progress);     \
   } G_STMT_END
 
 
 gboolean
-xcf_load_magic_version (Gimp          *gimp,
+xcf_load_magic_version (Clay          *clay,
                         GInputStream  *input,
                         GFile         *input_file,
-                        GimpProgress  *progress,
+                        ClayProgress  *progress,
                         XcfInfo       *info)
 {
   gchar id[14];
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (G_IS_INPUT_STREAM (input), FALSE);
   g_return_val_if_fail (input_file == NULL || G_IS_FILE (input_file), FALSE);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), FALSE);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), FALSE);
 
-  info->gimp             = gimp;
+  info->clay             = clay;
   info->input            = input;
   info->seekable         = G_SEEKABLE (input);
   info->bytes_per_offset = 4;
@@ -330,12 +330,12 @@ xcf_load_magic_version (Gimp          *gimp,
  * being used in recursive calls to stop earlier.
  */
 gboolean
-xcf_load_image_header (Gimp           *gimp,
+xcf_load_image_header (Clay           *clay,
                        XcfInfo        *info,
                        gint           *width,
                        gint           *height,
                        gint           *image_type,
-                       GimpPrecision  *precision,
+                       ClayPrecision  *precision,
                        GList          *prev_files,
                        GList         **loop_files,
                        gboolean       *loop_found,
@@ -347,7 +347,7 @@ xcf_load_image_header (Gimp           *gimp,
   xcf_read_int32 (info, (guint32 *) width, 1);
   xcf_read_int32 (info, (guint32 *) height, 1);
   xcf_read_int32 (info, (guint32 *) image_type, 1);
-  if (*image_type < GIMP_RGB || *image_type > GIMP_INDEXED)
+  if (*image_type < CLAY_RGB || *image_type > CLAY_INDEXED)
     {
       if (error)
         g_set_error_literal (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
@@ -359,14 +359,14 @@ xcf_load_image_header (Gimp           *gimp,
   /* Be lenient with corrupt image dimensions.
    * Hopefully layer dimensions will be valid. */
   if (*width <= 0 || *height <= 0 ||
-      *width > GIMP_MAX_IMAGE_SIZE || *height > GIMP_MAX_IMAGE_SIZE)
+      *width > CLAY_MAX_IMAGE_SIZE || *height > CLAY_MAX_IMAGE_SIZE)
     {
-      GIMP_LOG (XCF, "Invalid image size %d x %d, setting to 1x1.", *width, *height);
+      CLAY_LOG (XCF, "Invalid image size %d x %d, setting to 1x1.", *width, *height);
       *width  = 1;
       *height = 1;
     }
 
-  *precision = GIMP_PRECISION_U8_NON_LINEAR;
+  *precision = CLAY_PRECISION_U8_NON_LINEAR;
   if (info->file_version >= 4)
     {
       gint p;
@@ -378,19 +378,19 @@ xcf_load_image_header (Gimp           *gimp,
           switch (p)
             {
             case 0:
-              *precision = GIMP_PRECISION_U8_NON_LINEAR;
+              *precision = CLAY_PRECISION_U8_NON_LINEAR;
               break;
             case 1:
-              *precision = GIMP_PRECISION_U16_NON_LINEAR;
+              *precision = CLAY_PRECISION_U16_NON_LINEAR;
               break;
             case 2:
-              *precision = GIMP_PRECISION_U32_LINEAR;
+              *precision = CLAY_PRECISION_U32_LINEAR;
               break;
             case 3:
-              *precision = GIMP_PRECISION_HALF_LINEAR;
+              *precision = CLAY_PRECISION_HALF_LINEAR;
               break;
             case 4:
-              *precision = GIMP_PRECISION_FLOAT_LINEAR;
+              *precision = CLAY_PRECISION_FLOAT_LINEAR;
               break;
             default:
               if (error)
@@ -407,34 +407,34 @@ xcf_load_image_header (Gimp           *gimp,
           switch (p)
             {
             case 100:
-              *precision = GIMP_PRECISION_U8_LINEAR;
+              *precision = CLAY_PRECISION_U8_LINEAR;
               break;
             case 150:
-              *precision = GIMP_PRECISION_U8_NON_LINEAR;
+              *precision = CLAY_PRECISION_U8_NON_LINEAR;
               break;
             case 200:
-              *precision = GIMP_PRECISION_U16_LINEAR;
+              *precision = CLAY_PRECISION_U16_LINEAR;
               break;
             case 250:
-              *precision = GIMP_PRECISION_U16_NON_LINEAR;
+              *precision = CLAY_PRECISION_U16_NON_LINEAR;
               break;
             case 300:
-              *precision = GIMP_PRECISION_U32_LINEAR;
+              *precision = CLAY_PRECISION_U32_LINEAR;
               break;
             case 350:
-              *precision = GIMP_PRECISION_U32_NON_LINEAR;
+              *precision = CLAY_PRECISION_U32_NON_LINEAR;
               break;
             case 400:
-              *precision = GIMP_PRECISION_HALF_LINEAR;
+              *precision = CLAY_PRECISION_HALF_LINEAR;
               break;
             case 450:
-              *precision = GIMP_PRECISION_HALF_NON_LINEAR;
+              *precision = CLAY_PRECISION_HALF_NON_LINEAR;
               break;
             case 500:
-              *precision = GIMP_PRECISION_FLOAT_LINEAR;
+              *precision = CLAY_PRECISION_FLOAT_LINEAR;
               break;
             case 550:
-              *precision = GIMP_PRECISION_FLOAT_NON_LINEAR;
+              *precision = CLAY_PRECISION_FLOAT_NON_LINEAR;
               break;
             default:
               if (error)
@@ -451,10 +451,10 @@ xcf_load_image_header (Gimp           *gimp,
         }
     }
 
-  GIMP_LOG (XCF, "version=%d, width=%d, height=%d, image_type=%d, precision=%d",
+  CLAY_LOG (XCF, "version=%d, width=%d, height=%d, image_type=%d, precision=%d",
             info->file_version, *width, *height, *image_type, *precision);
 
-  if (! gimp_babl_is_valid (*image_type, *precision))
+  if (! clay_babl_is_valid (*image_type, *precision))
     {
       if (error)
         g_set_error_literal (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
@@ -567,7 +567,7 @@ xcf_load_image_header (Gimp           *gimp,
                 {
                   GFile               *folder;
                   GFile               *link_file;
-                  GimpPlugInProcedure *file_proc;
+                  ClayPlugInProcedure *file_proc;
                   GList               *iter;
 
                   folder    = g_file_get_parent (info->file);
@@ -597,10 +597,10 @@ xcf_load_image_header (Gimp           *gimp,
                       break;
                     }
 
-                  file_proc = gimp_plug_in_manager_file_procedure_find (gimp->plug_in_manager,
-                                                                        GIMP_FILE_PROCEDURE_GROUP_OPEN,
+                  file_proc = clay_plug_in_manager_file_procedure_find (clay->plug_in_manager,
+                                                                        CLAY_FILE_PROCEDURE_GROUP_OPEN,
                                                                         link_file, error);
-                  if (file_proc && gimp_plug_in_procedure_is_xcf_load (file_proc))
+                  if (file_proc && clay_plug_in_procedure_is_xcf_load (file_proc))
                     {
                       GInputStream  *input;
                       GList         *parent_files;
@@ -608,15 +608,15 @@ xcf_load_image_header (Gimp           *gimp,
                       gint           width2;
                       gint           height2;
                       gint           type2;
-                      GimpPrecision  precision2;
+                      ClayPrecision  precision2;
                       gboolean       subloop_found = FALSE;
 
                       parent_files = g_list_copy (prev_files);
                       parent_files = g_list_prepend (parent_files, link_file);
 
                       input = G_INPUT_STREAM (g_file_read (link_file, NULL, NULL));
-                      if (input && xcf_load_magic_version (gimp, input, link_file, NULL, &info2))
-                        xcf_load_image_header (gimp, &info2, &width2, &height2, &type2, &precision2,
+                      if (input && xcf_load_magic_version (clay, input, link_file, NULL, &info2))
+                        xcf_load_image_header (clay, &info2, &width2, &height2, &type2, &precision2,
                                                parent_files, loop_files, &subloop_found, NULL);
 
                       g_clear_object (&input);
@@ -659,20 +659,20 @@ xcf_load_image_header (Gimp           *gimp,
   return TRUE;
 }
 
-GimpImage *
-xcf_load_image (Gimp     *gimp,
+ClayImage *
+xcf_load_image (Clay     *clay,
                 XcfInfo  *info,
                 GError  **error)
 {
-  GimpImage          *image = NULL;
-  const GimpParasite *parasite;
+  ClayImage          *image = NULL;
+  const ClayParasite *parasite;
   gboolean            has_metadata = FALSE;
   goffset             saved_pos;
   goffset             offset;
   gint                width;
   gint                height;
   gint                image_type;
-  GimpPrecision       precision = GIMP_PRECISION_U8_NON_LINEAR;
+  ClayPrecision       precision = CLAY_PRECISION_U8_NON_LINEAR;
   gint                num_successful_elements = 0;
   gint                n_broken_layers         = 0;
   gint                n_broken_channels       = 0;
@@ -687,7 +687,7 @@ xcf_load_image (Gimp     *gimp,
   GList              *loop_files              = NULL;
 
   parent_files = g_list_prepend (parent_files, info->file);
-  if (! xcf_load_image_header (gimp, info, &width, &height,
+  if (! xcf_load_image_header (clay, info, &width, &height,
                                &image_type, &precision,
                                parent_files, &loop_files, NULL,
                                error))
@@ -695,10 +695,10 @@ xcf_load_image (Gimp     *gimp,
 
   g_clear_pointer (&parent_files, g_list_free);
 
-  image = gimp_create_image (gimp, width, height, image_type, precision,
+  image = clay_create_image (clay, width, height, image_type, precision,
                              FALSE);
 
-  gimp_image_undo_disable (image);
+  clay_image_undo_disable (image);
 
   xcf_progress_update (info);
 
@@ -706,199 +706,199 @@ xcf_load_image (Gimp     *gimp,
   if (! xcf_load_image_props (info, image))
     goto hard_error;
 
-  GIMP_LOG (XCF, "image props loaded");
+  CLAY_LOG (XCF, "image props loaded");
 
   /* Order matters for item sets. */
   info->layer_sets = g_list_reverse (info->layer_sets);
   info->channel_sets = g_list_reverse (info->channel_sets);
 
   /* check for simulation intent parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
                                        "image-simulation-intent");
   if (parasite)
     {
       guint32                   parasite_size;
-      GimpImagePrivate         *private = GIMP_IMAGE_GET_PRIVATE (image);
+      ClayImagePrivate         *private = CLAY_IMAGE_GET_PRIVATE (image);
       const guint8             *data;
-      GimpColorRenderingIntent  intent;
+      ClayColorRenderingIntent  intent;
 
-      data = (const guint8 *) gimp_parasite_get_data (parasite,
+      data = (const guint8 *) clay_parasite_get_data (parasite,
                                                       &parasite_size);
       if (parasite_size == 1)
         {
-          intent = (GimpColorRenderingIntent) *data;
+          intent = (ClayColorRenderingIntent) *data;
 
-          if (intent != GIMP_COLOR_RENDERING_INTENT_PERCEPTUAL            &&
-              intent != GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC &&
-              intent != GIMP_COLOR_RENDERING_INTENT_SATURATION            &&
-              intent != GIMP_COLOR_RENDERING_INTENT_ABSOLUTE_COLORIMETRIC)
+          if (intent != CLAY_COLOR_RENDERING_INTENT_PERCEPTUAL            &&
+              intent != CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC &&
+              intent != CLAY_COLOR_RENDERING_INTENT_SATURATION            &&
+              intent != CLAY_COLOR_RENDERING_INTENT_ABSOLUTE_COLORIMETRIC)
             {
-              gimp_message (info->gimp, G_OBJECT (info->progress),
-                            GIMP_MESSAGE_ERROR,
+              clay_message (info->clay, G_OBJECT (info->progress),
+                            CLAY_MESSAGE_ERROR,
                             "Unknown simulation rendering intent: %d",
                             intent);
             }
           else
             {
-              gimp_image_set_simulation_intent (image, intent);
+              clay_image_set_simulation_intent (image, intent);
             }
         }
       else
         {
-          gimp_message (info->gimp, G_OBJECT (info->progress),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (info->clay, G_OBJECT (info->progress),
+                        CLAY_MESSAGE_ERROR,
                         "Invalid simulation intent data");
         }
 
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
     }
 
 
   /* check for simulation bpc parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
                                        "image-simulation-bpc");
   if (parasite)
     {
       guint32           parasite_size;
-      GimpImagePrivate *private = GIMP_IMAGE_GET_PRIVATE (image);
+      ClayImagePrivate *private = CLAY_IMAGE_GET_PRIVATE (image);
       const guint8     *data;
       gboolean          bpc;
 
-      data = (const guint8 *) gimp_parasite_get_data (parasite,
+      data = (const guint8 *) clay_parasite_get_data (parasite,
                                                       &parasite_size);
       if (parasite_size == 1)
         {
           bpc = *data ? TRUE : FALSE;
 
-          gimp_image_set_simulation_bpc (image, bpc);
+          clay_image_set_simulation_bpc (image, bpc);
         }
       else
         {
-          gimp_message (info->gimp, G_OBJECT (info->progress),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (info->clay, G_OBJECT (info->progress),
+                        CLAY_MESSAGE_ERROR,
                         "Invalid simulation bpc data");
         }
 
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
     }
 
-  /* check for a GimpGrid parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
-                                       gimp_grid_parasite_name ());
+  /* check for a ClayGrid parasite */
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
+                                       clay_grid_parasite_name ());
   if (parasite)
     {
-      GimpGrid *grid = gimp_grid_from_parasite (parasite);
+      ClayGrid *grid = clay_grid_from_parasite (parasite);
 
       if (grid)
         {
-          GimpImagePrivate *private = GIMP_IMAGE_GET_PRIVATE (image);
+          ClayImagePrivate *private = CLAY_IMAGE_GET_PRIVATE (image);
 
-          gimp_parasite_list_remove (private->parasites,
-                                     gimp_parasite_get_name (parasite));
+          clay_parasite_list_remove (private->parasites,
+                                     clay_parasite_get_name (parasite));
 
-          gimp_image_set_grid (GIMP_IMAGE (image), grid, FALSE);
+          clay_image_set_grid (CLAY_IMAGE (image), grid, FALSE);
           g_object_unref (grid);
         }
     }
 
   /* check for a metadata parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
-                                       "gimp-image-metadata");
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
+                                       "clay-image-metadata");
   if (parasite)
     {
-      GimpImagePrivate *private  = GIMP_IMAGE_GET_PRIVATE (image);
-      GimpMetadata     *metadata = NULL;
+      ClayImagePrivate *private  = CLAY_IMAGE_GET_PRIVATE (image);
+      ClayMetadata     *metadata = NULL;
       gchar            *meta_string;
       guint32           parasite_data_size;
 
-      meta_string = (gchar *) gimp_parasite_get_data (parasite, &parasite_data_size);
+      meta_string = (gchar *) clay_parasite_get_data (parasite, &parasite_data_size);
       if (meta_string)
         {
           meta_string = g_strndup (meta_string, parasite_data_size);
-          metadata = gimp_metadata_deserialize (meta_string);
+          metadata = clay_metadata_deserialize (meta_string);
           g_free (meta_string);
         }
 
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
 
       if (metadata)
         {
           has_metadata = TRUE;
 
-          gimp_image_set_metadata (image, metadata, FALSE);
+          clay_image_set_metadata (image, metadata, FALSE);
           g_object_unref (metadata);
         }
     }
 
   /* check for symmetry parasites */
-  syms = gimp_image_symmetry_list ();
+  syms = clay_image_symmetry_list ();
   for (iter = syms; iter; iter = g_list_next (iter))
     {
       GType  type = (GType) iter->data;
-      gchar *parasite_name = gimp_symmetry_parasite_name (type);
+      gchar *parasite_name = clay_symmetry_parasite_name (type);
 
-      parasite = gimp_image_parasite_find (image,
+      parasite = clay_image_parasite_find (image,
                                            parasite_name);
       g_free (parasite_name);
       if (parasite)
         {
-          GimpSymmetry *sym = gimp_symmetry_from_parasite (parasite,
+          ClaySymmetry *sym = clay_symmetry_from_parasite (parasite,
                                                            image,
                                                            type);
 
           if (sym)
             {
-              GimpImagePrivate *private = GIMP_IMAGE_GET_PRIVATE (image);
+              ClayImagePrivate *private = CLAY_IMAGE_GET_PRIVATE (image);
 
-              gimp_parasite_list_remove (private->parasites,
-                                         gimp_parasite_get_name (parasite));
+              clay_parasite_list_remove (private->parasites,
+                                         clay_parasite_get_name (parasite));
 
-              gimp_image_symmetry_add (image, sym);
+              clay_image_symmetry_add (image, sym);
 
               g_signal_emit_by_name (sym, "active-changed", NULL);
               if (sym->active)
-                gimp_image_set_active_symmetry (image, type);
+                clay_image_set_active_symmetry (image, type);
             }
         }
     }
   g_list_free (syms);
 
   /* migrate the old "exif-data" parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
                                        "exif-data");
   if (parasite)
     {
-      GimpImagePrivate *private = GIMP_IMAGE_GET_PRIVATE (image);
+      ClayImagePrivate *private = CLAY_IMAGE_GET_PRIVATE (image);
 
       if (has_metadata)
         {
           g_printerr ("xcf-load: inconsistent metadata discovered: XCF file "
-                      "has both 'gimp-image-metadata' and 'exif-data' "
+                      "has both 'clay-image-metadata' and 'exif-data' "
                       "parasites, dropping old 'exif-data'\n");
         }
       else
         {
-          GimpMetadata *metadata = gimp_image_get_metadata (image);
+          ClayMetadata *metadata = clay_image_get_metadata (image);
           GError       *my_error = NULL;
           const guchar *parasite_data;
           guint32       parasite_data_size;
 
-          parasite_data = (const guchar *) gimp_parasite_get_data (parasite, &parasite_data_size);
+          parasite_data = (const guchar *) clay_parasite_get_data (parasite, &parasite_data_size);
 
           if (metadata)
             g_object_ref (metadata);
           else
-            metadata = gimp_metadata_new ();
+            metadata = clay_metadata_new ();
 
-          if (! gimp_metadata_set_from_exif (metadata,
+          if (! clay_metadata_set_from_exif (metadata,
                                              parasite_data, parasite_data_size,
                                              &my_error))
             {
-              gimp_message (gimp, G_OBJECT (info->progress),
-                            GIMP_MESSAGE_WARNING,
+              clay_message (clay, G_OBJECT (info->progress),
+                            CLAY_MESSAGE_WARNING,
                             _("Corrupt 'exif-data' parasite discovered.\n"
                               "Exif data could not be migrated: %s"),
                             my_error->message);
@@ -906,52 +906,52 @@ xcf_load_image (Gimp     *gimp,
             }
           else
             {
-              gimp_image_set_metadata (image, metadata, FALSE);
+              clay_image_set_metadata (image, metadata, FALSE);
             }
 
           g_object_unref (metadata);
         }
 
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
     }
 
-  /* migrate the old "gimp-metadata" parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
-                                       "gimp-metadata");
+  /* migrate the old "clay-metadata" parasite */
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
+                                       "clay-metadata");
   if (parasite)
     {
-      GimpImagePrivate *private    = GIMP_IMAGE_GET_PRIVATE (image);
+      ClayImagePrivate *private    = CLAY_IMAGE_GET_PRIVATE (image);
       const gchar      *xmp_data;
       guint32           xmp_length;
 
-      xmp_data = (gchar *) gimp_parasite_get_data (parasite, &xmp_length);
+      xmp_data = (gchar *) clay_parasite_get_data (parasite, &xmp_length);
 
       if (has_metadata)
         {
           g_printerr ("xcf-load: inconsistent metadata discovered: XCF file "
-                      "has both 'gimp-image-metadata' and 'gimp-metadata' "
-                      "parasites, dropping old 'gimp-metadata'\n");
+                      "has both 'clay-image-metadata' and 'clay-metadata' "
+                      "parasites, dropping old 'clay-metadata'\n");
         }
       else if (xmp_length < 14 ||
-               strncmp (xmp_data, "GIMP_XMP_1", 10) != 0)
+               strncmp (xmp_data, "CLAY_XMP_1", 10) != 0)
         {
-          gimp_message (gimp, G_OBJECT (info->progress),
-                        GIMP_MESSAGE_WARNING,
-                        _("Corrupt 'gimp-metadata' parasite discovered.\n"
+          clay_message (clay, G_OBJECT (info->progress),
+                        CLAY_MESSAGE_WARNING,
+                        _("Corrupt 'clay-metadata' parasite discovered.\n"
                           "XMP data could not be migrated."));
         }
       else
         {
-          GimpMetadata *metadata = gimp_image_get_metadata (image);
+          ClayMetadata *metadata = clay_image_get_metadata (image);
           GError       *my_error = NULL;
 
           if (metadata)
             g_object_ref (metadata);
           else
-            metadata = gimp_metadata_new ();
+            metadata = clay_metadata_new ();
 
-          if (! gimp_metadata_set_from_xmp (metadata,
+          if (! clay_metadata_set_from_xmp (metadata,
                                             (const guint8 *) xmp_data + 10,
                                             xmp_length - 10,
                                             &my_error))
@@ -960,8 +960,8 @@ xcf_load_image (Gimp     *gimp,
                * Let's make the message more user friendly so they will
                * understand that we can't do anything about it.
                * See issue #987. */
-              gimp_message (gimp, G_OBJECT (info->progress),
-                            GIMP_MESSAGE_WARNING,
+              clay_message (clay, G_OBJECT (info->progress),
+                            CLAY_MESSAGE_WARNING,
                             _("Corrupt XMP metadata saved by an older version of "
                               "Clay could not be converted and will be ignored.\n"
                               "If you don't know what XMP is, you most likely don't "
@@ -971,39 +971,39 @@ xcf_load_image (Gimp     *gimp,
             }
           else
             {
-              gimp_image_set_metadata (image, metadata, FALSE);
+              clay_image_set_metadata (image, metadata, FALSE);
             }
 
           g_object_unref (metadata);
         }
 
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
     }
 
-  /* check for a gimp-xcf-compatibility-mode parasite */
-  parasite = gimp_image_parasite_find (GIMP_IMAGE (image),
-                                       "gimp-xcf-compatibility-mode");
+  /* check for a clay-xcf-compatibility-mode parasite */
+  parasite = clay_image_parasite_find (CLAY_IMAGE (image),
+                                       "clay-xcf-compatibility-mode");
   if (parasite)
     {
-      GimpImagePrivate *private = GIMP_IMAGE_GET_PRIVATE (image);
+      ClayImagePrivate *private = CLAY_IMAGE_GET_PRIVATE (image);
 
       /* just ditch it, it's unused but shouldn't be re-saved */
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
     }
 
   xcf_progress_update (info);
 
   while (TRUE)
     {
-      GimpLayer *layer;
+      ClayLayer *layer;
       GList     *item_path = NULL;
 
       /* read in the offset of the next layer */
       if (xcf_read_offset (info, &offset, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read layer offset"
+          CLAY_LOG (XCF, "Failed to read layer offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           break;
         }
@@ -1021,7 +1021,7 @@ xcf_load_image (Gimp     *gimp,
 
       if (offset < saved_pos)
         {
-          GIMP_LOG (XCF, "Invalid layer offset: %" G_GOFFSET_FORMAT
+          CLAY_LOG (XCF, "Invalid layer offset: %" G_GOFFSET_FORMAT
                     " at offset: %" G_GOFFSET_FORMAT, offset, saved_pos);
           goto error;
         }
@@ -1049,10 +1049,10 @@ xcf_load_image (Gimp     *gimp,
            */
           if (! item_path)
             {
-              GimpContainer *layers = gimp_image_get_layers (image);
+              ClayContainer *layers = clay_image_get_layers (image);
 
               item_path = g_list_prepend (NULL,
-                                          GUINT_TO_POINTER (gimp_container_get_n_children (layers)));
+                                          GUINT_TO_POINTER (clay_container_get_n_children (layers)));
 
               broken_paths = g_list_prepend (broken_paths, item_path);
             }
@@ -1071,21 +1071,21 @@ xcf_load_image (Gimp     *gimp,
       xcf_progress_update (info);
 
       /* suspend layer-group size updates */
-      if (GIMP_IS_GROUP_LAYER (layer))
+      if (CLAY_IS_GROUP_LAYER (layer))
         {
-          GimpGroupLayer *group = GIMP_GROUP_LAYER (layer);
+          ClayGroupLayer *group = CLAY_GROUP_LAYER (layer);
 
           group_layers = g_list_prepend (group_layers, group);
 
-          gimp_group_layer_suspend_resize (group, FALSE);
+          clay_group_layer_suspend_resize (group, FALSE);
         }
 
       /* add the layer to the image if its not the floating selection */
       if (layer != info->floating_sel)
         {
-          GimpContainer *layers = gimp_image_get_layers (image);
-          GimpContainer *container;
-          GimpLayer     *parent;
+          ClayContainer *layers = clay_image_get_layers (image);
+          ClayContainer *container;
+          ClayLayer     *parent;
 
           if (item_path)
             {
@@ -1105,12 +1105,12 @@ xcf_load_image (Gimp     *gimp,
                   item_path->data = GUINT_TO_POINTER (toplevel_index);
                 }
 
-              parent = GIMP_LAYER
-                (gimp_item_stack_get_parent_by_path (GIMP_ITEM_STACK (layers),
+              parent = CLAY_LAYER
+                (clay_item_stack_get_parent_by_path (CLAY_ITEM_STACK (layers),
                                                      item_path,
                                                      NULL));
 
-              container = gimp_viewable_get_children (GIMP_VIEWABLE (parent));
+              container = clay_viewable_get_children (CLAY_VIEWABLE (parent));
 
               g_list_free (item_path);
             }
@@ -1120,9 +1120,9 @@ xcf_load_image (Gimp     *gimp,
               container = layers;
             }
 
-          gimp_image_add_layer (image, layer,
+          clay_image_add_layer (image, layer,
                                 parent,
-                                gimp_container_get_n_children (container),
+                                clay_container_get_n_children (container),
                                 FALSE);
         }
 
@@ -1138,9 +1138,9 @@ xcf_load_image (Gimp     *gimp,
   /* resume layer-group size updates, in reverse order */
   for (iter = group_layers; iter; iter = g_list_next (iter))
     {
-      GimpGroupLayer *group = iter->data;
+      ClayGroupLayer *group = iter->data;
 
-      gimp_group_layer_resume_resize (group, FALSE);
+      clay_group_layer_resume_resize (group, FALSE);
     }
   g_clear_pointer (&group_layers, g_list_free);
 
@@ -1152,12 +1152,12 @@ xcf_load_image (Gimp     *gimp,
 
   while (TRUE)
     {
-      GimpChannel *channel;
+      ClayChannel *channel;
 
       /* read in the offset of the next channel */
       if (xcf_read_offset (info, &offset, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read channel offset"
+          CLAY_LOG (XCF, "Failed to read channel offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           break;
         }
@@ -1175,7 +1175,7 @@ xcf_load_image (Gimp     *gimp,
 
       if (offset < saved_pos)
         {
-          GIMP_LOG (XCF, "Invalid channel offset: %" G_GOFFSET_FORMAT
+          CLAY_LOG (XCF, "Invalid channel offset: %" G_GOFFSET_FORMAT
                     " at offset: % "G_GOFFSET_FORMAT, offset, saved_pos);
           goto error;
         }
@@ -1189,7 +1189,7 @@ xcf_load_image (Gimp     *gimp,
       if (!channel)
         {
           n_broken_channels++;
-          GIMP_LOG (XCF, "Failed to load channel.");
+          CLAY_LOG (XCF, "Failed to load channel.");
 
           if (! xcf_seek_pos (info, saved_pos, NULL))
             goto error;
@@ -1202,10 +1202,10 @@ xcf_load_image (Gimp     *gimp,
       xcf_progress_update (info);
 
       /* add the channel to the image if its not the selection */
-      if (channel != gimp_image_get_mask (image))
-        gimp_image_add_channel (image, channel,
+      if (channel != clay_image_get_mask (image))
+        clay_image_add_channel (image, channel,
                                 NULL, /* FIXME tree */
-                                gimp_container_get_n_children (gimp_image_get_channels (image)),
+                                clay_container_get_n_children (clay_image_get_channels (image)),
                                 FALSE);
 
       /* restore the saved position so we'll be ready to
@@ -1220,9 +1220,9 @@ xcf_load_image (Gimp     *gimp,
       /* we didn't fix the loaded floating selection's format before
        * because we didn't know if it needed the layer space
        */
-      if (GIMP_IS_LAYER (info->floating_sel_drawable) &&
-          gimp_drawable_is_gray (GIMP_DRAWABLE (info->floating_sel)))
-        gimp_layer_fix_format_space (info->floating_sel, TRUE, FALSE);
+      if (CLAY_IS_LAYER (info->floating_sel_drawable) &&
+          clay_drawable_is_gray (CLAY_DRAWABLE (info->floating_sel)))
+        clay_layer_fix_format_space (info->floating_sel, TRUE, FALSE);
 
       floating_sel_attach (info->floating_sel, info->floating_sel_drawable);
     }
@@ -1231,12 +1231,12 @@ xcf_load_image (Gimp     *gimp,
     {
       while (TRUE)
         {
-          GimpPath *path;
+          ClayPath *path;
 
           /* read in the offset of the next path */
           if (xcf_read_offset (info, &offset, 1) < info->bytes_per_offset)
             {
-              GIMP_LOG (XCF, "Failed to read path offset"
+              CLAY_LOG (XCF, "Failed to read path offset"
                         " at offset: %" G_GOFFSET_FORMAT, info->cp);
               break;
             }
@@ -1254,7 +1254,7 @@ xcf_load_image (Gimp     *gimp,
 
           if (offset < saved_pos)
             {
-              GIMP_LOG (XCF, "Invalid path offset: %" G_GOFFSET_FORMAT
+              CLAY_LOG (XCF, "Invalid path offset: %" G_GOFFSET_FORMAT
                         " at offset: % "G_GOFFSET_FORMAT, offset, saved_pos);
               goto error;
             }
@@ -1268,7 +1268,7 @@ xcf_load_image (Gimp     *gimp,
           if (! path)
             {
               n_broken_paths++;
-              GIMP_LOG (XCF, "Failed to load path.");
+              CLAY_LOG (XCF, "Failed to load path.");
 
               if (! xcf_seek_pos (info, saved_pos, NULL))
                 goto error;
@@ -1280,9 +1280,9 @@ xcf_load_image (Gimp     *gimp,
 
           xcf_progress_update (info);
 
-          gimp_image_add_path (image, path,
+          clay_image_add_path (image, path,
                                NULL, /* can't be a tree */
-                               gimp_container_get_n_children (gimp_image_get_paths (image)),
+                               clay_container_get_n_children (clay_image_get_paths (image)),
                                FALSE);
 
           /* restore the saved position so we'll be ready to
@@ -1293,10 +1293,10 @@ xcf_load_image (Gimp     *gimp,
         }
     }
 
-  layers = gimp_image_get_layer_list (image);
+  layers = clay_image_get_layer_list (image);
   for (iter = layers; iter; iter = g_list_next (iter))
     {
-      GimpLayer          *layer = iter->data;
+      ClayLayer          *layer = iter->data;
       VectorLayerData    *vdata;
       LayerTransformData *tdata;
 
@@ -1304,13 +1304,13 @@ xcf_load_image (Gimp     *gimp,
        * waiting. We could not create vector layers directly because we
        * needed the paths to be loaded first.
        */
-      vdata = g_object_get_data (G_OBJECT (layer), "gimp-vector-layer-data");
+      vdata = g_object_get_data (G_OBJECT (layer), "clay-vector-layer-data");
 
       if (vdata != NULL)
         {
-          GimpVectorLayerOptions *options;
-          GimpPath               *path;
-          GimpLayerMask          *mask;
+          ClayVectorLayerOptions *options;
+          ClayPath               *path;
+          ClayLayerMask          *mask;
           gboolean                apply_mask       = FALSE;
           gboolean                edit_mask        = FALSE;
           gboolean                show_mask        = FALSE;
@@ -1326,35 +1326,35 @@ xcf_load_image (Gimp     *gimp,
           selected = g_list_find (info->selected_layers, layer);
           linked   = g_list_find (info->linked_layers, layer);
           floating = (info->floating_sel == layer);
-          name     = g_strdup (gimp_object_get_name (layer));
+          name     = g_strdup (clay_object_get_name (layer));
 
-          path = gimp_image_get_path_by_tattoo (image, vdata->path_tattoo);
+          path = clay_image_get_path_by_tattoo (image, vdata->path_tattoo);
           if (path == NULL)
             {
-              GIMP_LOG (XCF,
+              CLAY_LOG (XCF,
                         "Failed to load path associated with vector layer \"%s\". "
                         "The vector layer is downgraded to a raster layer.",
-                        gimp_object_get_name (layer));
-              g_object_set_data (G_OBJECT (layer), "gimp-vector-layer-data", NULL);
+                        clay_object_get_name (layer));
+              g_object_set_data (G_OBJECT (layer), "clay-vector-layer-data", NULL);
               continue;
             }
-          options = gimp_vector_layer_options_new (image, path,
-                                                   gimp_get_user_context (info->gimp));
+          options = clay_vector_layer_options_new (image, path,
+                                                   clay_get_user_context (info->clay));
           options->enable_fill   = vdata->enable_fill;
           options->enable_stroke = vdata->enable_stroke;
 
-          gimp_fill_options_set_custom_style (options->fill_options, vdata->fill_style);
-          gimp_fill_options_set_antialias (options->fill_options, vdata->fill_antialias);
-          gimp_context_set_foreground (GIMP_CONTEXT (options->fill_options), vdata->fill_color);
-          gimp_context_set_pattern (GIMP_CONTEXT (options->fill_options), vdata->fill_pattern);
+          clay_fill_options_set_custom_style (options->fill_options, vdata->fill_style);
+          clay_fill_options_set_antialias (options->fill_options, vdata->fill_antialias);
+          clay_context_set_foreground (CLAY_CONTEXT (options->fill_options), vdata->fill_color);
+          clay_context_set_pattern (CLAY_CONTEXT (options->fill_options), vdata->fill_pattern);
 
-          gimp_fill_options_set_custom_style (GIMP_FILL_OPTIONS (options->stroke_options), vdata->stroke_style);
-          gimp_fill_options_set_antialias (GIMP_FILL_OPTIONS (options->stroke_options), vdata->stroke_antialias);
-          gimp_context_set_foreground (GIMP_CONTEXT (options->stroke_options), vdata->stroke_color);
-          gimp_context_set_pattern (GIMP_CONTEXT (options->stroke_options), vdata->stroke_pattern);
+          clay_fill_options_set_custom_style (CLAY_FILL_OPTIONS (options->stroke_options), vdata->stroke_style);
+          clay_fill_options_set_antialias (CLAY_FILL_OPTIONS (options->stroke_options), vdata->stroke_antialias);
+          clay_context_set_foreground (CLAY_CONTEXT (options->stroke_options), vdata->stroke_color);
+          clay_context_set_pattern (CLAY_CONTEXT (options->stroke_options), vdata->stroke_pattern);
 
-          dash_pattern = gimp_dash_pattern_from_double_array (vdata->n_stroke_dashes, vdata->stroke_dashes);
-          gimp_stroke_options_take_dash_pattern (options->stroke_options, GIMP_DASH_CUSTOM, dash_pattern);
+          dash_pattern = clay_dash_pattern_from_double_array (vdata->n_stroke_dashes, vdata->stroke_dashes);
+          clay_stroke_options_take_dash_pattern (options->stroke_options, CLAY_DASH_CUSTOM, dash_pattern);
 
           g_object_set (G_OBJECT (options->stroke_options),
                         "width",       vdata->stroke_width,
@@ -1366,28 +1366,28 @@ xcf_load_image (Gimp     *gimp,
           /* Store original layer data for processing after conversion */
           modified         = vdata->modified;
           filter_data_list = g_object_steal_data (G_OBJECT (layer),
-                                                  "gimp-layer-effects");
+                                                  "clay-layer-effects");
 
           mask       = g_object_steal_data (G_OBJECT (layer),
-                                            "gimp-layer-mask");
+                                            "clay-layer-mask");
           apply_mask =
             GPOINTER_TO_INT (g_object_get_data (G_OBJECT (layer),
-                                                "gimp-layer-mask-apply"));
+                                                "clay-layer-mask-apply"));
           edit_mask  =
             GPOINTER_TO_INT (g_object_get_data (G_OBJECT (layer),
-                                                "gimp-layer-mask-edit"));
+                                                "clay-layer-mask-edit"));
           show_mask  =
             GPOINTER_TO_INT (g_object_get_data (G_OBJECT (layer),
-                                                "gimp-layer-mask-show"));
+                                                "clay-layer-mask-show"));
 
           if (modified)
             /* Duplicate GEGL buffer so we retain any raster edits. This
-             * must happen before gimp_layer_from_layer() as the source
+             * must happen before clay_layer_from_layer() as the source
              * layer will be invalid after.
              */
-            raster_buffer = gimp_gegl_buffer_dup (gimp_drawable_get_buffer (iter->data), NULL);
+            raster_buffer = clay_gegl_buffer_dup (clay_drawable_get_buffer (iter->data), NULL);
 
-          gimp_layer_from_layer (&layer, GIMP_TYPE_VECTOR_LAYER,
+          clay_layer_from_layer (&layer, CLAY_TYPE_VECTOR_LAYER,
                                  "image",                image,
                                  "vector-layer-options", options,
                                  NULL);
@@ -1395,29 +1395,29 @@ xcf_load_image (Gimp     *gimp,
 
           if (raster_buffer)
             {
-              gimp_rasterizable_rasterize (GIMP_RASTERIZABLE (layer), FALSE);
-              gimp_drawable_set_buffer (GIMP_DRAWABLE (layer), FALSE, NULL,
+              clay_rasterizable_rasterize (CLAY_RASTERIZABLE (layer), FALSE);
+              clay_drawable_set_buffer (CLAY_DRAWABLE (layer), FALSE, NULL,
                                         raster_buffer);
               g_object_unref (raster_buffer);
             }
 
-          gimp_object_set_name (GIMP_OBJECT (layer), name);
+          clay_object_set_name (CLAY_OBJECT (layer), name);
           g_free (name);
 
           if (mask)
             {
-              g_object_set_data_full (G_OBJECT (layer), "gimp-layer-mask",
+              g_object_set_data_full (G_OBJECT (layer), "clay-layer-mask",
                                       mask, (GDestroyNotify) g_object_unref);
 
-              g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-apply",
+              g_object_set_data (G_OBJECT (layer), "clay-layer-mask-apply",
                                  GINT_TO_POINTER (apply_mask));
-              g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-edit",
+              g_object_set_data (G_OBJECT (layer), "clay-layer-mask-edit",
                                  GINT_TO_POINTER (edit_mask));
-              g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-show",
+              g_object_set_data (G_OBJECT (layer), "clay-layer-mask-show",
                                  GINT_TO_POINTER (show_mask));
             }
           if (filter_data_list)
-            g_object_set_data_full (G_OBJECT (layer), "gimp-layer-effects",
+            g_object_set_data_full (G_OBJECT (layer), "clay-layer-effects",
                                     filter_data_list,
                                     (GDestroyNotify) xcf_load_free_effects);
 
@@ -1445,31 +1445,31 @@ xcf_load_image (Gimp     *gimp,
        * as a lesser-destruction edit when applying several
        * transformations.
        */
-      tdata = g_object_get_data (G_OBJECT (layer), "gimp-layer-transform-data");
+      tdata = g_object_get_data (G_OBJECT (layer), "clay-layer-transform-data");
       if (tdata != NULL)
         {
-          if (! GIMP_IS_LINK_LAYER (layer))
+          if (! CLAY_IS_LINK_LAYER (layer))
             {
-              GIMP_LOG (XCF,
+              CLAY_LOG (XCF,
                         "PROP_TRANSFORM property can only be applied on link layers. "
                         "The transformation on layer \"%s\" was dropped.",
-                        gimp_object_get_name (layer));
-              g_object_set_data (G_OBJECT (layer), "gimp-layer-transform-data", NULL);
+                        clay_object_get_name (layer));
+              g_object_set_data (G_OBJECT (layer), "clay-layer-transform-data", NULL);
               continue;
             }
-          else if (! gimp_link_layer_is_monitored (GIMP_LINK_LAYER (layer)) ||
-                   gimp_link_is_broken (gimp_link_layer_get_link (GIMP_LINK_LAYER (layer))))
+          else if (! clay_link_layer_is_monitored (CLAY_LINK_LAYER (layer)) ||
+                   clay_link_is_broken (clay_link_layer_get_link (CLAY_LINK_LAYER (layer))))
             {
               /* The loaded buffer from XCF will already be transformed.
                * It's not an error.
                */
-              g_object_set_data (G_OBJECT (layer), "gimp-layer-transform-data", NULL);
+              g_object_set_data (G_OBJECT (layer), "clay-layer-transform-data", NULL);
               continue;
             }
 
-          gimp_item_set_offset (GIMP_ITEM (layer), tdata->offset_x, tdata->offset_y);
-          gimp_link_layer_set_transform (GIMP_LINK_LAYER (layer), &tdata->matrix, tdata->interpolation, FALSE);
-          g_object_set_data (G_OBJECT (layer), "gimp-layer-transform-data", NULL);
+          clay_item_set_offset (CLAY_ITEM (layer), tdata->offset_x, tdata->offset_y);
+          clay_link_layer_set_transform (CLAY_LINK_LAYER (layer), &tdata->matrix, tdata->interpolation, FALSE);
+          g_object_set_data (G_OBJECT (layer), "clay-layer-transform-data", NULL);
         }
     }
   g_list_free (layers);
@@ -1482,37 +1482,37 @@ xcf_load_image (Gimp     *gimp,
 
   if (info->selected_layers)
     {
-      gimp_image_set_selected_layers (image, info->selected_layers);
+      clay_image_set_selected_layers (image, info->selected_layers);
       g_clear_pointer (&info->selected_layers, g_list_free);
     }
 
   if (info->selected_channels)
-    gimp_image_set_selected_channels (image, info->selected_channels);
+    clay_image_set_selected_channels (image, info->selected_channels);
 
   if (info->selected_paths)
-    gimp_image_set_selected_paths (image, info->selected_paths);
+    clay_image_set_selected_paths (image, info->selected_paths);
 
   /* We don't have linked items concept anymore. We transform formerly
    * linked items into stored sets of named items instead.
    */
   if (info->linked_layers)
     {
-      GimpItemList *set;
+      ClayItemList *set;
 
-      set = gimp_item_list_named_new (image, GIMP_TYPE_LAYER,
+      set = clay_item_list_named_new (image, CLAY_TYPE_LAYER,
                                       _("Linked Layers"),
                                       info->linked_layers);
-      gimp_image_store_item_set (image, set);
+      clay_image_store_item_set (image, set);
       g_clear_pointer (&info->linked_layers, g_list_free);
     }
   if (info->linked_channels)
     {
-      GimpItemList *set;
+      ClayItemList *set;
 
-      set = gimp_item_list_named_new (image, GIMP_TYPE_CHANNEL,
+      set = clay_item_list_named_new (image, CLAY_TYPE_CHANNEL,
                                       _("Linked Channels"),
                                       info->linked_channels);
-      gimp_image_store_item_set (image, set);
+      clay_image_store_item_set (image, set);
       g_clear_pointer (&info->linked_channels, g_list_free);
     }
   if (info->linked_paths)
@@ -1532,12 +1532,12 @@ xcf_load_image (Gimp     *gimp,
                     "Clay does not support linked paths since version 3.0.\n");
 
 #if 0
-      GimpItemList *set;
+      ClayItemList *set;
 
-      set = gimp_item_list_named_new (image, GIMP_TYPE_PATH,
+      set = clay_item_list_named_new (image, CLAY_TYPE_PATH,
                                       _("Linked Paths"),
                                       info->linked_paths);
-      gimp_image_store_item_set (image, set);
+      clay_image_store_item_set (image, set);
 #endif
       g_clear_pointer (&info->linked_paths, g_list_free);
     }
@@ -1545,27 +1545,27 @@ xcf_load_image (Gimp     *gimp,
   for (iter = g_list_last (info->layer_sets); iter; iter = iter->prev)
     {
       if (iter->data)
-        gimp_image_store_item_set (image, iter->data);
+        clay_image_store_item_set (image, iter->data);
     }
   g_list_free (info->layer_sets);
 
   for (iter = g_list_last (info->channel_sets); iter; iter = iter->prev)
     {
       if (iter->data)
-        gimp_image_store_item_set (image, iter->data);
+        clay_image_store_item_set (image, iter->data);
     }
   g_list_free (info->channel_sets);
 
   if (info->file)
-    gimp_image_set_file (image, info->file);
+    clay_image_set_file (image, info->file);
 
   if (info->tattoo_state > 0)
-    gimp_image_set_tattoo_state (image, info->tattoo_state);
+    clay_image_set_tattoo_state (image, info->tattoo_state);
 
   if (n_broken_layers > 0 || n_broken_channels > 0 || n_broken_paths > 0 || n_broken_effects)
     goto error;
 
-  gimp_image_undo_enable (image);
+  clay_image_undo_enable (image);
 
   return image;
 
@@ -1582,14 +1582,14 @@ error:
       broken_paths = NULL;
     }
 
-  gimp_message_literal (gimp, G_OBJECT (info->progress), GIMP_MESSAGE_WARNING,
+  clay_message_literal (clay, G_OBJECT (info->progress), CLAY_MESSAGE_WARNING,
                         _("This XCF file is corrupt!  I have loaded as much "
                           "of it as I can, but it is incomplete."));
 
   xcf_load_add_masks (image);
   xcf_load_add_effects (info, image);
 
-  gimp_image_undo_enable (image);
+  clay_image_undo_enable (image);
 
   return image;
 
@@ -1656,19 +1656,19 @@ xcf_load_file_equal (GFile *file1,
 }
 
 static void
-xcf_load_add_masks (GimpImage *image)
+xcf_load_add_masks (ClayImage *image)
 {
   GList *layers;
   GList *list;
 
-  layers = gimp_image_get_layer_list (image);
+  layers = clay_image_get_layer_list (image);
 
   for (list = layers; list; list = g_list_next (list))
     {
-      GimpLayer     *layer = list->data;
-      GimpLayerMask *mask;
+      ClayLayer     *layer = list->data;
+      ClayLayerMask *mask;
 
-      mask = g_object_get_data (G_OBJECT (layer), "gimp-layer-mask");
+      mask = g_object_get_data (G_OBJECT (layer), "clay-layer-mask");
 
       if (mask)
         {
@@ -1677,21 +1677,21 @@ xcf_load_add_masks (GimpImage *image)
           gboolean show_mask;
 
           apply_mask = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (layer),
-                                                           "gimp-layer-mask-apply"));
+                                                           "clay-layer-mask-apply"));
           edit_mask = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (layer),
-                                                          "gimp-layer-mask-edit"));
+                                                          "clay-layer-mask-edit"));
           show_mask = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (layer),
-                                                          "gimp-layer-mask-show"));
+                                                          "clay-layer-mask-show"));
 
-          gimp_layer_add_mask (layer, mask, edit_mask, FALSE, NULL);
+          clay_layer_add_mask (layer, mask, edit_mask, FALSE, NULL);
 
-          gimp_layer_set_apply_mask (layer, apply_mask, FALSE);
-          gimp_layer_set_show_mask  (layer, show_mask, FALSE);
+          clay_layer_set_apply_mask (layer, apply_mask, FALSE);
+          clay_layer_set_show_mask  (layer, show_mask, FALSE);
 
-          g_object_set_data (G_OBJECT (layer), "gimp-layer-mask",       NULL);
-          g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-apply", NULL);
-          g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-edit",  NULL);
-          g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-show",  NULL);
+          g_object_set_data (G_OBJECT (layer), "clay-layer-mask",       NULL);
+          g_object_set_data (G_OBJECT (layer), "clay-layer-mask-apply", NULL);
+          g_object_set_data (G_OBJECT (layer), "clay-layer-mask-edit",  NULL);
+          g_object_set_data (G_OBJECT (layer), "clay-layer-mask-show",  NULL);
         }
     }
 
@@ -1700,42 +1700,42 @@ xcf_load_add_masks (GimpImage *image)
 
 static void
 xcf_load_add_effects (XcfInfo   *info,
-                      GimpImage *image)
+                      ClayImage *image)
 {
   GList *layers;
   GList *channels;
   GList *list;
 
-  layers   = gimp_image_get_layer_list (image);
-  channels = gimp_image_get_channel_list (image);
+  layers   = clay_image_get_layer_list (image);
+  channels = clay_image_get_channel_list (image);
 
   for (list = layers; list; list = g_list_next (list))
     {
-      GimpDrawable *drawable = list->data;
+      ClayDrawable *drawable = list->data;
 
-      xcf_load_create_effect (drawable, "gimp-layer-effects");
+      xcf_load_create_effect (drawable, "clay-layer-effects");
 
-      if (gimp_layer_get_mask (list->data))
+      if (clay_layer_get_mask (list->data))
         {
-          GimpLayerMask *mask = gimp_layer_get_mask (list->data);
+          ClayLayerMask *mask = clay_layer_get_mask (list->data);
 
-          xcf_load_create_effect (GIMP_DRAWABLE (mask),
-                                  "gimp-channel-effects");
+          xcf_load_create_effect (CLAY_DRAWABLE (mask),
+                                  "clay-channel-effects");
         }
     }
   g_list_free (layers);
 
   for (list = channels; list; list = g_list_next (list))
     {
-      GimpDrawable *drawable = list->data;
+      ClayDrawable *drawable = list->data;
 
-      xcf_load_create_effect (drawable, "gimp-channel-effects");
+      xcf_load_create_effect (drawable, "clay-channel-effects");
     }
   g_list_free (channels);
 }
 
 static void
-xcf_load_create_effect (GimpDrawable *drawable,
+xcf_load_create_effect (ClayDrawable *drawable,
                         const gchar  *effect_id)
 {
   GList *effects_nodes;
@@ -1752,35 +1752,35 @@ xcf_load_create_effect (GimpDrawable *drawable,
 
           if (! data->unsupported_operation)
             {
-              GimpDrawableFilter *filter = NULL;
+              ClayDrawableFilter *filter = NULL;
 
               if (! data->icon_name)
-                data->icon_name = g_strdup ("gimp-gegl");
+                data->icon_name = g_strdup ("clay-gegl");
 
-              filter = gimp_drawable_filter_new (drawable,
+              filter = clay_drawable_filter_new (drawable,
                                                  data->name, data->operation,
                                                  data->icon_name);
 
-              gimp_drawable_filter_set_opacity (filter, data->opacity);
-              gimp_drawable_filter_set_mode (filter, data->paint_mode,
+              clay_drawable_filter_set_opacity (filter, data->opacity);
+              clay_drawable_filter_set_mode (filter, data->paint_mode,
                                              data->blend_space,
                                              data->composite_space,
                                              data->composite_mode);
-              gimp_drawable_filter_set_clip (filter, data->clip);
-              gimp_drawable_filter_set_region (filter, data->region);
+              clay_drawable_filter_set_clip (filter, data->clip);
+              clay_drawable_filter_set_region (filter, data->region);
 
               g_object_set (filter,
                             "mask", data->mask,
                             NULL);
 
-              gimp_drawable_filter_apply_with_mask (filter, data->mask,
+              clay_drawable_filter_apply_with_mask (filter, data->mask,
                                                     NULL);
 
-              gimp_drawable_filter_commit (filter, TRUE, NULL, FALSE);
+              clay_drawable_filter_commit (filter, TRUE, NULL, FALSE);
 
-              gimp_drawable_filter_layer_mask_freeze (filter);
+              clay_drawable_filter_layer_mask_freeze (filter);
 
-              gimp_filter_set_active (GIMP_FILTER (filter), data->is_visible);
+              clay_filter_set_active (CLAY_FILTER (filter), data->is_visible);
 
               g_object_unref (filter);
             }
@@ -1791,7 +1791,7 @@ xcf_load_create_effect (GimpDrawable *drawable,
 
 static gboolean
 xcf_load_image_props (XcfInfo   *info,
-                      GimpImage *image)
+                      ClayImage *image)
 {
   PropType prop_type;
   guint32  prop_size;
@@ -1809,16 +1809,16 @@ xcf_load_image_props (XcfInfo   *info,
         case PROP_COLORMAP:
             {
               guint32 n_colors;
-              guchar  cmap[GIMP_IMAGE_COLORMAP_SIZE];
+              guchar  cmap[CLAY_IMAGE_COLORMAP_SIZE];
 
               xcf_read_int32 (info, &n_colors, 1);
 
-              if (n_colors > (GIMP_IMAGE_COLORMAP_SIZE / 3))
+              if (n_colors > (CLAY_IMAGE_COLORMAP_SIZE / 3))
                 {
-                  gimp_message (info->gimp, G_OBJECT (info->progress),
-                                GIMP_MESSAGE_ERROR,
+                  clay_message (info->clay, G_OBJECT (info->progress),
+                                CLAY_MESSAGE_ERROR,
                                 "Maximum colormap size (%d) exceeded",
-                                GIMP_IMAGE_COLORMAP_SIZE);
+                                CLAY_IMAGE_COLORMAP_SIZE);
                   return FALSE;
                 }
 
@@ -1826,8 +1826,8 @@ xcf_load_image_props (XcfInfo   *info,
                 {
                   gint i;
 
-                  gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                        GIMP_MESSAGE_WARNING,
+                  clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                        CLAY_MESSAGE_WARNING,
                                         _("XCF warning: version 0 of XCF file format\n"
                                           "did not save indexed colormaps correctly.\n"
                                           "Substituting grayscale map."));
@@ -1848,13 +1848,13 @@ xcf_load_image_props (XcfInfo   *info,
                 }
 
               /* only set color map if image is indexed, this is just
-               * sanity checking to make sure gimp doesn't end up with
+               * sanity checking to make sure clay doesn't end up with
                * an image state that is impossible.
                */
-              if (gimp_image_get_base_type (image) == GIMP_INDEXED)
-                _gimp_image_set_colormap (image, cmap, n_colors, FALSE);
+              if (clay_image_get_base_type (image) == CLAY_INDEXED)
+                _clay_image_set_colormap (image, cmap, n_colors, FALSE);
 
-              GIMP_LOG (XCF, "prop colormap n_colors=%d", n_colors);
+              CLAY_LOG (XCF, "prop colormap n_colors=%d", n_colors);
             }
           break;
 
@@ -1869,8 +1869,8 @@ xcf_load_image_props (XcfInfo   *info,
                   (compression != COMPRESS_ZLIB) &&
                   (compression != COMPRESS_FRACTAL))
                 {
-                  gimp_message (info->gimp, G_OBJECT (info->progress),
-                                GIMP_MESSAGE_ERROR,
+                  clay_message (info->clay, G_OBJECT (info->progress),
+                                CLAY_MESSAGE_ERROR,
                                 "Unknown compression type: %d",
                                 (gint) compression);
                   return FALSE;
@@ -1878,16 +1878,16 @@ xcf_load_image_props (XcfInfo   *info,
 
               info->compression = compression;
 
-              gimp_image_set_xcf_compression (image,
+              clay_image_set_xcf_compression (image,
                                               compression >= COMPRESS_ZLIB);
 
-              GIMP_LOG (XCF, "prop compression=%d", compression);
+              CLAY_LOG (XCF, "prop compression=%d", compression);
             }
           break;
 
         case PROP_GUIDES:
             {
-              GimpImagePrivate *private = GIMP_IMAGE_GET_PRIVATE (image);
+              ClayImagePrivate *private = CLAY_IMAGE_GET_PRIVATE (image);
               gint32            position;
               gint8             orientation;
               gint              i, nguides;
@@ -1902,40 +1902,40 @@ xcf_load_image_props (XcfInfo   *info,
                    * skipped since 2003 (commit 909a28ced2).
                    * Then XCF up to version 14 only had positive guide
                    * positions.
-                   * Since XCF 15 (GIMP 3.0), off-canvas guides became a
+                   * Since XCF 15 (Clay 3.0), off-canvas guides became a
                    * thing.
                    */
                   if (info->file_version < 15 && position < 0)
                     continue;
 
-                  GIMP_LOG (XCF, "prop guide orientation=%d position=%d",
+                  CLAY_LOG (XCF, "prop guide orientation=%d position=%d",
                             orientation, position);
 
                   switch (orientation)
                     {
                     case XCF_ORIENTATION_HORIZONTAL:
-                      if (info->file_version < 15 && position > gimp_image_get_height (image))
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                      if (info->file_version < 15 && position > clay_image_get_height (image))
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "Ignoring off-canvas horizontal guide (position %d) in XCF %d file",
                                       position, info->file_version);
                       else
-                        gimp_image_add_hguide (image, position, FALSE);
+                        clay_image_add_hguide (image, position, FALSE);
                       break;
 
                     case XCF_ORIENTATION_VERTICAL:
-                      if (info->file_version < 15 && position > gimp_image_get_width (image))
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                      if (info->file_version < 15 && position > clay_image_get_width (image))
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "Ignoring off-canvas vertical guide (position %d) in XCF %d file",
                                       position, info->file_version);
                       else
-                        gimp_image_add_vguide (image, position, FALSE);
+                        clay_image_add_vguide (image, position, FALSE);
                       break;
 
                     default:
-                      gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                            GIMP_MESSAGE_WARNING,
+                      clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                            CLAY_MESSAGE_WARNING,
                                             "Guide orientation out of range in XCF file");
                       continue;
                     }
@@ -1956,9 +1956,9 @@ xcf_load_image_props (XcfInfo   *info,
               n_sample_points = prop_size / (5 * 4);
               for (i = 0; i < n_sample_points; i++)
                 {
-                  GimpSamplePoint   *sample_point;
+                  ClaySamplePoint   *sample_point;
                   gint32             x, y;
-                  GimpColorPickMode  pick_mode;
+                  ClayColorPickMode  pick_mode;
                   guint32            padding[2] = { 0, };
 
                   xcf_read_int32 (info, (guint32 *) &x,         1);
@@ -1966,15 +1966,15 @@ xcf_load_image_props (XcfInfo   *info,
                   xcf_read_int32 (info, (guint32 *) &pick_mode, 1);
                   xcf_read_int32 (info, (guint32 *) padding,    2);
 
-                  GIMP_LOG (XCF, "prop sample point x=%d y=%d mode=%d",
+                  CLAY_LOG (XCF, "prop sample point x=%d y=%d mode=%d",
                             x, y, pick_mode);
 
-                  if (pick_mode > GIMP_COLOR_PICK_MODE_LAST)
-                    pick_mode = GIMP_COLOR_PICK_MODE_PIXEL;
+                  if (pick_mode > CLAY_COLOR_PICK_MODE_LAST)
+                    pick_mode = CLAY_COLOR_PICK_MODE_PIXEL;
 
-                  sample_point = gimp_image_add_sample_point_at_pos (image,
+                  sample_point = clay_image_add_sample_point_at_pos (image,
                                                                      x, y, FALSE);
-                  gimp_image_set_sample_point_pick_mode (image, sample_point,
+                  clay_image_set_sample_point_pick_mode (image, sample_point,
                                                          pick_mode, FALSE);
                 }
             }
@@ -1988,7 +1988,7 @@ xcf_load_image_props (XcfInfo   *info,
               /* if there are already sample points, we loaded the new
                * prop before
                */
-              if (gimp_image_get_sample_points (image))
+              if (clay_image_get_sample_points (image))
                 {
                   if (! xcf_skip_unknown_prop (info, prop_size))
                     return FALSE;
@@ -2002,9 +2002,9 @@ xcf_load_image_props (XcfInfo   *info,
                   xcf_read_int32 (info, (guint32 *) &x, 1);
                   xcf_read_int32 (info, (guint32 *) &y, 1);
 
-                  GIMP_LOG (XCF, "prop old sample point x=%d y=%d", x, y);
+                  CLAY_LOG (XCF, "prop old sample point x=%d y=%d", x, y);
 
-                  gimp_image_add_sample_point_at_pos (image, x, y, FALSE);
+                  clay_image_add_sample_point_at_pos (image, x, y, FALSE);
                 }
             }
           break;
@@ -2016,21 +2016,21 @@ xcf_load_image_props (XcfInfo   *info,
               xcf_read_float (info, &xres, 1);
               xcf_read_float (info, &yres, 1);
 
-              GIMP_LOG (XCF, "prop resolution x=%f y=%f", xres, yres);
+              CLAY_LOG (XCF, "prop resolution x=%f y=%f", xres, yres);
 
-              if (xres < GIMP_MIN_RESOLUTION || xres > GIMP_MAX_RESOLUTION ||
-                  yres < GIMP_MIN_RESOLUTION || yres > GIMP_MAX_RESOLUTION)
+              if (xres < CLAY_MIN_RESOLUTION || xres > CLAY_MAX_RESOLUTION ||
+                  yres < CLAY_MIN_RESOLUTION || yres > CLAY_MAX_RESOLUTION)
                 {
-                  GimpTemplate *template = image->gimp->config->default_image;
+                  ClayTemplate *template = image->clay->config->default_image;
 
-                  gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                        GIMP_MESSAGE_WARNING,
+                  clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                        CLAY_MESSAGE_WARNING,
                                         "Warning, resolution out of range in XCF file");
-                  xres = gimp_template_get_resolution_x (template);
-                  yres = gimp_template_get_resolution_y (template);
+                  xres = clay_template_get_resolution_x (template);
+                  yres = clay_template_get_resolution_y (template);
                 }
 
-              gimp_image_set_resolution (image, xres, yres);
+              clay_image_set_resolution (image, xres, yres);
             }
           break;
 
@@ -2038,7 +2038,7 @@ xcf_load_image_props (XcfInfo   *info,
             {
               xcf_read_int32 (info, &info->tattoo_state, 1);
 
-              GIMP_LOG (XCF, "prop tattoo state=%d", info->tattoo_state);
+              CLAY_LOG (XCF, "prop tattoo state=%d", info->tattoo_state);
             }
           break;
 
@@ -2048,13 +2048,13 @@ xcf_load_image_props (XcfInfo   *info,
 
               while (info->cp - base < prop_size)
                 {
-                  GimpParasite *p     = xcf_load_parasite (info);
+                  ClayParasite *p     = xcf_load_parasite (info);
                   GError       *error = NULL;
 
                   if (! p)
                     {
-                      gimp_message (info->gimp, G_OBJECT (info->progress),
-                                    GIMP_MESSAGE_WARNING,
+                      clay_message (info->clay, G_OBJECT (info->progress),
+                                    CLAY_MESSAGE_WARNING,
                                     "Invalid image parasite found. "
                                     "Possibly corrupt XCF file.");
 
@@ -2062,25 +2062,25 @@ xcf_load_image_props (XcfInfo   *info,
                       continue;
                     }
 
-                  if (! gimp_image_parasite_validate (image, p, &error))
+                  if (! clay_image_parasite_validate (image, p, &error))
                     {
-                      gimp_message (info->gimp, G_OBJECT (info->progress),
-                                    GIMP_MESSAGE_WARNING,
+                      clay_message (info->clay, G_OBJECT (info->progress),
+                                    CLAY_MESSAGE_WARNING,
                                     "Warning, invalid image parasite in XCF file: %s",
                                     error->message);
                       g_clear_error (&error);
                     }
                   else
                     {
-                      gimp_image_parasite_attach (image, p, FALSE);
+                      clay_image_parasite_attach (image, p, FALSE);
                     }
 
-                  gimp_parasite_free (p);
+                  clay_parasite_free (p);
                 }
 
               if (info->cp - base != prop_size)
-                gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "Error while loading an image's parasites");
             }
           break;
@@ -2091,18 +2091,18 @@ xcf_load_image_props (XcfInfo   *info,
 
               xcf_read_int32 (info, &unit_index, 1);
 
-              GIMP_LOG (XCF, "prop unit=%d", unit_index);
+              CLAY_LOG (XCF, "prop unit=%d", unit_index);
 
-              if (unit_index <= GIMP_UNIT_PIXEL || unit_index >= GIMP_UNIT_END)
+              if (unit_index <= CLAY_UNIT_PIXEL || unit_index >= CLAY_UNIT_END)
                 {
-                  gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                        GIMP_MESSAGE_WARNING,
+                  clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                        CLAY_MESSAGE_WARNING,
                                         "Warning, unit out of range in XCF file, "
                                         "falling back to inches");
-                  unit_index = GIMP_UNIT_INCH;
+                  unit_index = CLAY_UNIT_INCH;
                 }
 
-              gimp_image_set_unit (image, gimp_unit_get_by_id (unit_index));
+              clay_image_set_unit (image, clay_unit_get_by_id (unit_index));
             }
           break;
 
@@ -2111,8 +2111,8 @@ xcf_load_image_props (XcfInfo   *info,
               goffset base = info->cp;
 
               if (info->file_version >= 18)
-                gimp_message (info->gimp, G_OBJECT (info->progress),
-                              GIMP_MESSAGE_WARNING,
+                clay_message (info->clay, G_OBJECT (info->progress),
+                              CLAY_MESSAGE_WARNING,
                               "XCF %d file should not contain PROP_PATHS image properties",
                               info->file_version);
 
@@ -2130,8 +2130,8 @@ xcf_load_image_props (XcfInfo   *info,
               goffset base = info->cp;
 
               if (info->file_version >= 18)
-                gimp_message (info->gimp, G_OBJECT (info->progress),
-                              GIMP_MESSAGE_WARNING,
+                clay_message (info->clay, G_OBJECT (info->progress),
+                              CLAY_MESSAGE_WARNING,
                               "XCF %d file should not contain PROP_VECTORS image properties",
                               info->file_version);
 
@@ -2157,7 +2157,7 @@ xcf_load_image_props (XcfInfo   *info,
 
         case PROP_ITEM_SET:
             {
-              GimpItemList *set       = NULL;
+              ClayItemList *set       = NULL;
               gchar        *label;
               GType         item_type = 0;
               guint32       itype;
@@ -2168,9 +2168,9 @@ xcf_load_image_props (XcfInfo   *info,
               xcf_read_string (info, &label, 1);
 
               if (itype == 0)
-                item_type = GIMP_TYPE_LAYER;
+                item_type = CLAY_TYPE_LAYER;
               else
-                item_type = GIMP_TYPE_CHANNEL;
+                item_type = CLAY_TYPE_CHANNEL;
 
               if (itype > 1)
                 {
@@ -2184,7 +2184,7 @@ xcf_load_image_props (XcfInfo   *info,
                 {
                   g_printerr ("xcf: item set without a name or pattern (skipping)\n");
                 }
-              else if (method != G_MAXUINT32 && method > GIMP_SELECT_GLOB_PATTERN)
+              else if (method != G_MAXUINT32 && method > CLAY_SELECT_GLOB_PATTERN)
                 {
                   g_printerr ("xcf: unsupported item set '%s' selection method attribute: 0x%x (skipping)\n",
                               label, method);
@@ -2193,11 +2193,11 @@ xcf_load_image_props (XcfInfo   *info,
                 {
                   if (method == G_MAXUINT32)
                     {
-                      /* Don't use gimp_item_list_named_new() because it
+                      /* Don't use clay_item_list_named_new() because it
                        * doesn't allow NULL items (it would try to get the
                        * selected items instead).
                        */
-                      set = g_object_new (GIMP_TYPE_ITEM_LIST,
+                      set = g_object_new (CLAY_TYPE_ITEM_LIST,
                                           "image",      image,
                                           "name",       label,
                                           "is-pattern", FALSE,
@@ -2207,7 +2207,7 @@ xcf_load_image_props (XcfInfo   *info,
                     }
                   else
                     {
-                      set = gimp_item_list_pattern_new (image, item_type,
+                      set = clay_item_list_pattern_new (image, item_type,
                                                         method, label);
                     }
                 }
@@ -2216,7 +2216,7 @@ xcf_load_image_props (XcfInfo   *info,
                * purpose, in order not to break order-base association
                * between PROP_ITEM_SET and PROP_ITEM_SET_ITEM.
                */
-              if (item_type == GIMP_TYPE_LAYER)
+              if (item_type == CLAY_TYPE_LAYER)
                 info->layer_sets = g_list_prepend (info->layer_sets, set);
               else
                 info->channel_sets = g_list_prepend (info->channel_sets, set);
@@ -2224,7 +2224,7 @@ xcf_load_image_props (XcfInfo   *info,
           break;
 
         default:
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
           g_printerr ("unexpected/unknown image property: %d (skipping)\n",
                       prop_type);
 #endif
@@ -2239,8 +2239,8 @@ xcf_load_image_props (XcfInfo   *info,
 
 static gboolean
 xcf_load_layer_props (XcfInfo    *info,
-                      GimpImage  *image,
-                      GimpLayer **layer,
+                      ClayImage  *image,
+                      ClayLayer **layer,
                       GList      *loop_files,
                       GList     **item_path,
                       gboolean   *apply_mask,
@@ -2267,8 +2267,8 @@ xcf_load_layer_props (XcfInfo    *info,
             if (g_list_index (info->selected_layers, *layer) < 0)
               info->selected_layers = g_list_prepend (info->selected_layers, *layer);
             else
-              gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                    GIMP_MESSAGE_WARNING,
+              clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                    CLAY_MESSAGE_WARNING,
                                     "Invalid duplicate selected layer detected");
           }
           break;
@@ -2284,7 +2284,7 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_int32 (info, &opacity, 1);
 
-            gimp_layer_set_opacity (*layer, (gdouble) opacity / 255.0, FALSE);
+            clay_layer_set_opacity (*layer, (gdouble) opacity / 255.0, FALSE);
           }
           break;
 
@@ -2294,7 +2294,7 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_float (info, &opacity, 1);
 
-            gimp_layer_set_opacity (*layer, opacity, FALSE);
+            clay_layer_set_opacity (*layer, opacity, FALSE);
           }
           break;
 
@@ -2304,7 +2304,7 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &visible, 1);
 
-            gimp_item_set_visible (GIMP_ITEM (*layer), visible, FALSE);
+            clay_item_set_visible (CLAY_ITEM (*layer), visible, FALSE);
           }
           break;
 
@@ -2321,11 +2321,11 @@ xcf_load_layer_props (XcfInfo    *info,
 
         case PROP_COLOR_TAG:
           {
-            GimpColorTag color_tag;
+            ClayColorTag color_tag;
 
             xcf_read_int32 (info, (guint32 *) &color_tag, 1);
 
-            gimp_item_set_color_tag (GIMP_ITEM (*layer), color_tag, FALSE);
+            clay_item_set_color_tag (CLAY_ITEM (*layer), color_tag, FALSE);
           }
           break;
 
@@ -2335,8 +2335,8 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_content, 1);
 
-            if (gimp_item_can_lock_content (GIMP_ITEM (*layer)))
-              gimp_item_set_lock_content (GIMP_ITEM (*layer),
+            if (clay_item_can_lock_content (CLAY_ITEM (*layer)))
+              clay_item_set_lock_content (CLAY_ITEM (*layer),
                                           lock_content, FALSE);
           }
           break;
@@ -2347,8 +2347,8 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_alpha, 1);
 
-            if (gimp_layer_can_lock_alpha (*layer))
-              gimp_layer_set_lock_alpha (*layer, lock_alpha, FALSE);
+            if (clay_layer_can_lock_alpha (*layer))
+              clay_layer_set_lock_alpha (*layer, lock_alpha, FALSE);
           }
           break;
 
@@ -2358,8 +2358,8 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_position, 1);
 
-            if (gimp_item_can_lock_position (GIMP_ITEM (*layer)))
-              gimp_item_set_lock_position (GIMP_ITEM (*layer),
+            if (clay_item_can_lock_position (CLAY_ITEM (*layer)))
+              clay_item_set_lock_position (CLAY_ITEM (*layer),
                                            lock_position, FALSE);
           }
           break;
@@ -2370,8 +2370,8 @@ xcf_load_layer_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_visibility, 1);
 
-            if (gimp_item_can_lock_visibility (GIMP_ITEM (*layer)))
-              gimp_item_set_lock_visibility (GIMP_ITEM (*layer),
+            if (clay_item_can_lock_visibility (CLAY_ITEM (*layer)))
+              clay_item_set_lock_visibility (CLAY_ITEM (*layer),
                                              lock_visibility, FALSE);
           }
           break;
@@ -2396,36 +2396,36 @@ xcf_load_layer_props (XcfInfo    *info,
             xcf_read_int32 (info, (guint32 *) &offset_x, 1);
             xcf_read_int32 (info, (guint32 *) &offset_y, 1);
 
-            if (offset_x < -GIMP_MAX_IMAGE_SIZE ||
-                offset_x > GIMP_MAX_IMAGE_SIZE)
+            if (offset_x < -CLAY_MAX_IMAGE_SIZE ||
+                offset_x > CLAY_MAX_IMAGE_SIZE)
               {
                 g_printerr ("unexpected item offset_x (%d) in XCF, "
                             "setting to 0\n", offset_x);
                 offset_x = 0;
               }
 
-            if (offset_y < -GIMP_MAX_IMAGE_SIZE ||
-                offset_y > GIMP_MAX_IMAGE_SIZE)
+            if (offset_y < -CLAY_MAX_IMAGE_SIZE ||
+                offset_y > CLAY_MAX_IMAGE_SIZE)
               {
                 g_printerr ("unexpected item offset_y (%d) in XCF, "
                             "setting to 0\n", offset_y);
                 offset_y = 0;
               }
 
-            gimp_item_set_offset (GIMP_ITEM (*layer), offset_x, offset_y);
+            clay_item_set_offset (CLAY_ITEM (*layer), offset_x, offset_y);
           }
           break;
 
         case PROP_MODE:
           {
-            GimpLayerMode mode;
+            ClayLayerMode mode;
 
             xcf_read_int32 (info, (guint32 *) &mode, 1);
 
-            if (mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-              mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+            if (mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+              mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
-            gimp_layer_set_mode (*layer, mode, FALSE);
+            clay_layer_set_mode (*layer, mode, FALSE);
           }
           break;
 
@@ -2442,17 +2442,17 @@ xcf_load_layer_props (XcfInfo    *info,
              */
             if (blend_space < 0)
               {
-                GimpLayerMode mode = gimp_layer_get_mode (*layer);
+                ClayLayerMode mode = clay_layer_get_mode (*layer);
 
                 blend_space = -blend_space;
 
-                if (blend_space == gimp_layer_mode_get_blend_space (mode))
-                  blend_space = GIMP_LAYER_COLOR_SPACE_AUTO;
+                if (blend_space == clay_layer_mode_get_blend_space (mode))
+                  blend_space = CLAY_LAYER_COLOR_SPACE_AUTO;
                 else
-                  GIMP_LOG (XCF, "BLEND_SPACE: AUTO => %d", blend_space);
+                  CLAY_LOG (XCF, "BLEND_SPACE: AUTO => %d", blend_space);
               }
 
-            gimp_layer_set_blend_space (*layer, blend_space, FALSE);
+            clay_layer_set_blend_space (*layer, blend_space, FALSE);
           }
           break;
 
@@ -2469,17 +2469,17 @@ xcf_load_layer_props (XcfInfo    *info,
              */
             if (composite_space < 0)
               {
-                GimpLayerMode mode = gimp_layer_get_mode (*layer);
+                ClayLayerMode mode = clay_layer_get_mode (*layer);
 
                 composite_space = -composite_space;
 
-                if (composite_space == gimp_layer_mode_get_composite_space (mode))
-                  composite_space = GIMP_LAYER_COLOR_SPACE_AUTO;
+                if (composite_space == clay_layer_mode_get_composite_space (mode))
+                  composite_space = CLAY_LAYER_COLOR_SPACE_AUTO;
                 else
-                  GIMP_LOG (XCF, "COMPOSITE_SPACE: AUTO => %d", composite_space);
+                  CLAY_LOG (XCF, "COMPOSITE_SPACE: AUTO => %d", composite_space);
               }
 
-            gimp_layer_set_composite_space (*layer, composite_space, FALSE);
+            clay_layer_set_composite_space (*layer, composite_space, FALSE);
           }
           break;
 
@@ -2496,27 +2496,27 @@ xcf_load_layer_props (XcfInfo    *info,
              */
             if (composite_mode < 0)
               {
-                GimpLayerMode mode = gimp_layer_get_mode (*layer);
+                ClayLayerMode mode = clay_layer_get_mode (*layer);
 
                 composite_mode = -composite_mode;
 
-                if (composite_mode == gimp_layer_mode_get_composite_mode (mode))
-                  composite_mode = GIMP_LAYER_COMPOSITE_AUTO;
+                if (composite_mode == clay_layer_mode_get_composite_mode (mode))
+                  composite_mode = CLAY_LAYER_COMPOSITE_AUTO;
                 else
-                  GIMP_LOG (XCF, "COMPOSITE_MODE: AUTO => %d", composite_mode);
+                  CLAY_LOG (XCF, "COMPOSITE_MODE: AUTO => %d", composite_mode);
               }
 
-            gimp_layer_set_composite_mode (*layer, composite_mode, FALSE);
+            clay_layer_set_composite_mode (*layer, composite_mode, FALSE);
           }
           break;
 
         case PROP_TATTOO:
           {
-            GimpTattoo tattoo;
+            ClayTattoo tattoo;
 
             xcf_read_int32 (info, (guint32 *) &tattoo, 1);
 
-            gimp_item_set_tattoo (GIMP_ITEM (*layer), tattoo);
+            clay_item_set_tattoo (CLAY_ITEM (*layer), tattoo);
           }
           break;
 
@@ -2526,31 +2526,31 @@ xcf_load_layer_props (XcfInfo    *info,
 
             while (info->cp - base < prop_size)
               {
-                GimpParasite *p     = xcf_load_parasite (info);
+                ClayParasite *p     = xcf_load_parasite (info);
                 GError       *error = NULL;
 
                 if (! p)
                   return FALSE;
 
-                if (! gimp_item_parasite_validate (GIMP_ITEM (*layer), p, &error))
+                if (! clay_item_parasite_validate (CLAY_ITEM (*layer), p, &error))
                   {
-                    gimp_message (info->gimp, G_OBJECT (info->progress),
-                                  GIMP_MESSAGE_WARNING,
+                    clay_message (info->clay, G_OBJECT (info->progress),
+                                  CLAY_MESSAGE_WARNING,
                                   "Warning, invalid layer parasite in XCF file: %s",
                                   error->message);
                     g_clear_error (&error);
                   }
                 else
                   {
-                    gimp_item_parasite_attach (GIMP_ITEM (*layer), p, FALSE);
+                    clay_item_parasite_attach (CLAY_ITEM (*layer), p, FALSE);
                   }
 
-                gimp_parasite_free (p);
+                clay_parasite_free (p);
               }
 
             if (info->cp - base != prop_size)
-              gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                    GIMP_MESSAGE_WARNING,
+              clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                    CLAY_MESSAGE_WARNING,
                                     "Error while loading a layer's parasites");
           }
           break;
@@ -2576,56 +2576,56 @@ xcf_load_layer_props (XcfInfo    *info,
             data->modified = (gboolean) uint_val;
 
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
-            data->path_tattoo = (GimpTattoo) uint_val;
+            data->path_tattoo = (ClayTattoo) uint_val;
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
             data->enable_fill = (gboolean) uint_val;
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
             data->enable_stroke = (gboolean) uint_val;
 
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
-            data->fill_style = (GimpCustomStyle) uint_val;
+            data->fill_style = (ClayCustomStyle) uint_val;
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
             data->fill_antialias = (gboolean) uint_val;
 
             data->fill_color = xcf_load_color (info, next_prop, &valid_color, &error);
             if (error)
               {
-                gimp_message (info->gimp, G_OBJECT (info->progress),
-                              GIMP_MESSAGE_WARNING,
+                clay_message (info->clay, G_OBJECT (info->progress),
+                              CLAY_MESSAGE_WARNING,
                               "Warning, invalid color in XCF file: %s",
                               error->message);
                 g_clear_error (&error);
                 valid_color = TRUE;
               }
-            data->fill_pattern = GIMP_PATTERN (xcf_load_data (info, GIMP_TYPE_PATTERN, &error));
+            data->fill_pattern = CLAY_PATTERN (xcf_load_data (info, CLAY_TYPE_PATTERN, &error));
             /* Just ignore errors here? */
             g_clear_error (&error);
 
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
-            data->stroke_style = (GimpCustomStyle) uint_val;
+            data->stroke_style = (ClayCustomStyle) uint_val;
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
             data->stroke_antialias = (gboolean) uint_val;
 
             data->stroke_color = xcf_load_color (info, next_prop, &valid_color, &error);
             if (error)
               {
-                gimp_message (info->gimp, G_OBJECT (info->progress),
-                              GIMP_MESSAGE_WARNING,
+                clay_message (info->clay, G_OBJECT (info->progress),
+                              CLAY_MESSAGE_WARNING,
                               "Warning, invalid color in XCF file: %s",
                               error->message);
                 g_clear_error (&error);
                 valid_color = TRUE;
               }
             /* Just ignore errors here? */
-            data->stroke_pattern = GIMP_PATTERN (xcf_load_data (info, GIMP_TYPE_PATTERN, &error));
+            data->stroke_pattern = CLAY_PATTERN (xcf_load_data (info, CLAY_TYPE_PATTERN, &error));
             g_clear_error (&error);
 
             xcf_read_float (info, (gfloat *) &float_val, 1);
             data->stroke_width = (gfloat) float_val;
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
-            data->stroke_cap_style = (GimpCapStyle) uint_val;
+            data->stroke_cap_style = (ClayCapStyle) uint_val;
             xcf_read_int32 (info, (guint32 *) &uint_val, 1);
-            data->stroke_join_style = (GimpJoinStyle) uint_val;
+            data->stroke_join_style = (ClayJoinStyle) uint_val;
             xcf_read_float (info, (gfloat *) &float_val, 1);
             data->stroke_miter_limit = (gfloat) float_val;
 
@@ -2640,7 +2640,7 @@ xcf_load_layer_props (XcfInfo    *info,
               }
 
             g_object_set_data_full (G_OBJECT (*layer),
-                                    "gimp-vector-layer-data", data,
+                                    "clay-vector-layer-data", data,
                                     (GDestroyNotify) xcf_load_free_vector_data);
           }
           break;
@@ -2657,11 +2657,11 @@ xcf_load_layer_props (XcfInfo    *info,
 
               if (path == NULL)
                 {
-                  gimp_message (info->gimp, G_OBJECT (info->progress),
-                                GIMP_MESSAGE_WARNING,
+                  clay_message (info->clay, G_OBJECT (info->progress),
+                                CLAY_MESSAGE_WARNING,
                                 _("XCF Warning: invalid link in XCF file. "
                                   "The link layer \"%s\" is downgraded to a raster layer."),
-                                gimp_object_get_name (*layer));
+                                clay_object_get_name (*layer));
                 }
               else
                 {
@@ -2677,11 +2677,11 @@ xcf_load_layer_props (XcfInfo    *info,
                     {
                       if (xcf_load_file_equal (iter->data, link_file))
                         {
-                          gimp_message (info->gimp, G_OBJECT (info->progress),
-                                        GIMP_MESSAGE_WARNING,
+                          clay_message (info->clay, G_OBJECT (info->progress),
+                                        CLAY_MESSAGE_WARNING,
                                         _("XCF Warning: circular reference detected in XCF file. "
                                           "The link layer \"%s\" is downgraded to a raster layer."),
-                                        gimp_object_get_name (*layer));
+                                        clay_object_get_name (*layer));
                           ignore = TRUE;
                           break;
                         }
@@ -2689,32 +2689,32 @@ xcf_load_layer_props (XcfInfo    *info,
 
                   if (! ignore)
                     {
-                      GimpLink *link;
+                      ClayLink *link;
                       GList    *selected;
                       GList    *linked;
                       gboolean  floating;
                       gint      raster_width;
                       gint      raster_height;
 
-                      raster_width  = gimp_item_get_width (GIMP_ITEM (*layer));
-                      raster_height = gimp_item_get_height (GIMP_ITEM (*layer));
+                      raster_width  = clay_item_get_width (CLAY_ITEM (*layer));
+                      raster_height = clay_item_get_height (CLAY_ITEM (*layer));
 
                       floating = (info->floating_sel == *layer);
                       selected = g_list_find (info->selected_layers, *layer);
                       linked   = g_list_find (info->linked_layers, *layer);
 
-                      link   = gimp_link_new (info->gimp, link_file,
+                      link   = clay_link_new (info->clay, link_file,
                                               (gint) dimensions[0], (gint) dimensions[1],
                                               FALSE, NULL, NULL);
-                      gimp_layer_from_layer (layer, GIMP_TYPE_LINK_LAYER,
+                      clay_layer_from_layer (layer, CLAY_TYPE_LINK_LAYER,
                                              "image", image,
                                              NULL);
 
-                      gimp_link_layer_set_link (GIMP_LINK_LAYER (*layer), link, FALSE);
-                      gimp_link_layer_set_xcf_flags (GIMP_LINK_LAYER (*layer), flags);
+                      clay_link_layer_set_link (CLAY_LINK_LAYER (*layer), link, FALSE);
+                      clay_link_layer_set_xcf_flags (CLAY_LINK_LAYER (*layer), flags);
 
-                      if (! gimp_link_layer_is_monitored (GIMP_LINK_LAYER (*layer)) ||
-                          gimp_link_is_broken (gimp_link_layer_get_link (GIMP_LINK_LAYER (*layer))))
+                      if (! clay_link_layer_is_monitored (CLAY_LINK_LAYER (*layer)) ||
+                          clay_link_is_broken (clay_link_layer_get_link (CLAY_LINK_LAYER (*layer))))
                         {
                           GeglColor *color = gegl_color_new ("transparent");
 
@@ -2724,12 +2724,12 @@ xcf_load_layer_props (XcfInfo    *info,
                            * We don't care about proper scaling here,
                            * the buffer will be the real content.
                            */
-                          gimp_item_resize (GIMP_ITEM (*layer),
-                                            gimp_get_user_context (info->gimp),
-                                            GIMP_FILL_WHITE,
+                          clay_item_resize (CLAY_ITEM (*layer),
+                                            clay_get_user_context (info->clay),
+                                            CLAY_FILL_WHITE,
                                             raster_width, raster_height,
                                             0, 0);
-                          gegl_buffer_set_color (gimp_drawable_get_buffer (GIMP_DRAWABLE (*layer)),
+                          gegl_buffer_set_color (clay_drawable_get_buffer (CLAY_DRAWABLE (*layer)),
                                                  NULL, color);
                           g_object_unref (color);
                         }
@@ -2771,7 +2771,7 @@ xcf_load_layer_props (XcfInfo    *info,
               data->offset_y = (gint) int_val[1];
 
               xcf_read_int32 (info, &uint_val, 1);
-              data->interpolation = (GimpInterpolationType) uint_val;
+              data->interpolation = (ClayInterpolationType) uint_val;
 
               xcf_read_float (info, mfloat, 9);
               data->matrix.coeff[0][0] = (gdouble) mfloat[0];
@@ -2785,14 +2785,14 @@ xcf_load_layer_props (XcfInfo    *info,
               data->matrix.coeff[2][2] = (gdouble) mfloat[8];
 
               g_object_set_data_full (G_OBJECT (*layer),
-                                      "gimp-layer-transform-data", data,
+                                      "clay-layer-transform-data", data,
                                       (GDestroyNotify) g_free);
             }
           break;
 
         case PROP_GROUP_ITEM:
           {
-            GimpLayer *group;
+            ClayLayer *group;
             gboolean   is_selected_layer;
             gboolean   is_linked_layer;
 
@@ -2811,10 +2811,10 @@ xcf_load_layer_props (XcfInfo    *info,
             if (*layer == info->floating_sel)
               info->floating_sel = NULL;
 
-            group = gimp_group_layer_new (image);
+            group = clay_group_layer_new (image);
 
-            gimp_object_set_name (GIMP_OBJECT (group),
-                                  gimp_object_get_name (*layer));
+            clay_object_set_name (CLAY_OBJECT (group),
+                                  clay_object_get_name (*layer));
 
             g_object_ref_sink (*layer);
             g_object_unref (*layer);
@@ -2859,29 +2859,29 @@ xcf_load_layer_props (XcfInfo    *info,
 
         case PROP_ITEM_SET_ITEM:
             {
-              GimpItemList *set;
+              ClayItemList *set;
               guint32       n;
 
               xcf_read_int32 (info, &n, 1);
               set = g_list_nth_data (info->layer_sets, n);
               if (set == NULL)
                 g_printerr ("xcf: layer '%s' cannot be added to unknown layer set at index %d (skipping)\n",
-                            gimp_object_get_name (*layer), n);
+                            clay_object_get_name (*layer), n);
               else if (! g_type_is_a (G_TYPE_FROM_INSTANCE (*layer),
-                                      gimp_item_list_get_item_type (set)))
+                                      clay_item_list_get_item_type (set)))
                 g_printerr ("xcf: layer '%s' cannot be added to item set '%s' with item type %s (skipping)\n",
-                            gimp_object_get_name (*layer), gimp_object_get_name (set),
-                            g_type_name (gimp_item_list_get_item_type (set)));
-              else if (gimp_item_list_is_pattern (set, NULL))
+                            clay_object_get_name (*layer), clay_object_get_name (set),
+                            g_type_name (clay_item_list_get_item_type (set)));
+              else if (clay_item_list_is_pattern (set, NULL))
                 g_printerr ("xcf: layer '%s' cannot be added to pattern item set '%s' (skipping)\n",
-                            gimp_object_get_name (*layer), gimp_object_get_name (set));
+                            clay_object_get_name (*layer), clay_object_get_name (set));
               else
-                gimp_item_list_add (set, GIMP_ITEM (*layer));
+                clay_item_list_add (set, CLAY_ITEM (*layer));
             }
           break;
 
         default:
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
           g_printerr ("unexpected/unknown layer property: %d (skipping)\n",
                       prop_type);
 #endif
@@ -2990,7 +2990,7 @@ xcf_check_layer_props (XcfInfo    *info,
           break;
 
         default:
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
           g_printerr ("unexpected/unknown layer property: %d (skipping)\n",
                       prop_type);
 #endif
@@ -3005,8 +3005,8 @@ xcf_check_layer_props (XcfInfo    *info,
 
 static gboolean
 xcf_load_channel_props (XcfInfo      *info,
-                        GimpImage    *image,
-                        GimpChannel **channel,
+                        ClayImage    *image,
+                        ClayChannel **channel,
                         gboolean      is_mask)
 {
   PropType prop_type;
@@ -3028,7 +3028,7 @@ xcf_load_channel_props (XcfInfo      *info,
 
         case PROP_SELECTION:
           {
-            GimpChannel *mask;
+            ClayChannel *mask;
             GList       *iter;
 
             if (is_mask)
@@ -3039,7 +3039,7 @@ xcf_load_channel_props (XcfInfo      *info,
                 continue;
               }
 
-            if (*channel == gimp_image_get_mask (image))
+            if (*channel == clay_image_get_mask (image))
               {
                 /* PROP_SELECTION was already seen once for this
                  * channel. Let's silently ignore the second identical
@@ -3047,8 +3047,8 @@ xcf_load_channel_props (XcfInfo      *info,
                  */
                 continue;
               }
-            else if (gimp_image_get_mask (image) != NULL &&
-                     ! gimp_channel_is_empty (gimp_image_get_mask (image)))
+            else if (clay_image_get_mask (image) != NULL &&
+                     ! clay_channel_is_empty (clay_image_get_mask (image)))
               {
                 /* This would happen when PROP_SELECTION was already set
                  * on a previous channel. This is a minor case of data
@@ -3073,13 +3073,13 @@ xcf_load_channel_props (XcfInfo      *info,
             info->linked_channels = g_list_remove (info->linked_channels, channel);
 
             mask =
-              gimp_selection_new (image,
-                                  gimp_item_get_width  (GIMP_ITEM (*channel)),
-                                  gimp_item_get_height (GIMP_ITEM (*channel)));
-            gimp_image_take_mask (image, mask);
+              clay_selection_new (image,
+                                  clay_item_get_width  (CLAY_ITEM (*channel)),
+                                  clay_item_get_height (CLAY_ITEM (*channel)));
+            clay_image_take_mask (image, mask);
 
-            gimp_drawable_steal_buffer (GIMP_DRAWABLE (mask),
-                                        (GimpDrawable **) channel);
+            clay_drawable_steal_buffer (CLAY_DRAWABLE (mask),
+                                        (ClayDrawable **) channel);
             *channel = mask;
 
             /* Don't restore info->selected_channels because the
@@ -3094,7 +3094,7 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_int32 (info, &opacity, 1);
 
-            gimp_channel_set_opacity (*channel, opacity / 255.0, FALSE);
+            clay_channel_set_opacity (*channel, opacity / 255.0, FALSE);
           }
           break;
 
@@ -3104,7 +3104,7 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_float (info, &opacity, 1);
 
-            gimp_channel_set_opacity (*channel, opacity, FALSE);
+            clay_channel_set_opacity (*channel, opacity, FALSE);
           }
           break;
 
@@ -3114,17 +3114,17 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_int32 (info, (guint32 *) &visible, 1);
 
-            gimp_item_set_visible (GIMP_ITEM (*channel), visible, FALSE);
+            clay_item_set_visible (CLAY_ITEM (*channel), visible, FALSE);
           }
           break;
 
         case PROP_COLOR_TAG:
           {
-            GimpColorTag color_tag;
+            ClayColorTag color_tag;
 
             xcf_read_int32 (info, (guint32 *) &color_tag, 1);
 
-            gimp_item_set_color_tag (GIMP_ITEM (*channel), color_tag, FALSE);
+            clay_item_set_color_tag (CLAY_ITEM (*channel), color_tag, FALSE);
           }
           break;
 
@@ -3145,8 +3145,8 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_content, 1);
 
-            if (gimp_item_can_lock_content (GIMP_ITEM (*channel)))
-              gimp_item_set_lock_content (GIMP_ITEM (*channel),
+            if (clay_item_can_lock_content (CLAY_ITEM (*channel)))
+              clay_item_set_lock_content (CLAY_ITEM (*channel),
                                           lock_content, FALSE);
           }
           break;
@@ -3157,8 +3157,8 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_position, 1);
 
-            if (gimp_item_can_lock_position (GIMP_ITEM (*channel)))
-              gimp_item_set_lock_position (GIMP_ITEM (*channel),
+            if (clay_item_can_lock_position (CLAY_ITEM (*channel)))
+              clay_item_set_lock_position (CLAY_ITEM (*channel),
                                            lock_position, FALSE);
           }
           break;
@@ -3169,8 +3169,8 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_visibility, 1);
 
-            if (gimp_item_can_lock_visibility (GIMP_ITEM (*channel)))
-              gimp_item_set_lock_visibility (GIMP_ITEM (*channel),
+            if (clay_item_can_lock_visibility (CLAY_ITEM (*channel)))
+              clay_item_set_lock_visibility (CLAY_ITEM (*channel),
                                              lock_visibility, FALSE);
           }
           break;
@@ -3181,7 +3181,7 @@ xcf_load_channel_props (XcfInfo      *info,
 
             xcf_read_int32 (info, (guint32 *) &show_masked, 1);
 
-            gimp_channel_set_show_masked (*channel, show_masked);
+            clay_channel_set_show_masked (*channel, show_masked);
           }
           break;
 
@@ -3191,13 +3191,13 @@ xcf_load_channel_props (XcfInfo      *info,
             gdouble opacity;
 
             /* Load existing opacity */
-            opacity = gimp_channel_get_opacity (*channel);
+            opacity = clay_channel_get_opacity (*channel);
 
             xcf_read_int8 (info, (guint8 *) col, 3);
 
             gegl_color_set_pixel ((*channel)->color, babl_format ("R'G'B' u8"), col);
 
-            gimp_channel_set_opacity (*channel, opacity, FALSE);
+            clay_channel_set_opacity (*channel, opacity, FALSE);
           }
           break;
 
@@ -3207,24 +3207,24 @@ xcf_load_channel_props (XcfInfo      *info,
             gdouble opacity;
 
             /* Load existing opacity */
-            opacity = gimp_channel_get_opacity (*channel);
+            opacity = clay_channel_get_opacity (*channel);
 
             xcf_read_float (info, col, 3);
 
             /* TODO: is the channel color in sRGB or in the image's color space? */
             gegl_color_set_pixel ((*channel)->color, babl_format ("R'G'B' float"), col);
 
-            gimp_channel_set_opacity (*channel, opacity, FALSE);
+            clay_channel_set_opacity (*channel, opacity, FALSE);
           }
           break;
 
         case PROP_TATTOO:
           {
-            GimpTattoo tattoo;
+            ClayTattoo tattoo;
 
             xcf_read_int32 (info, (guint32 *) &tattoo, 1);
 
-            gimp_item_set_tattoo (GIMP_ITEM (*channel), tattoo);
+            clay_item_set_tattoo (CLAY_ITEM (*channel), tattoo);
           }
           break;
 
@@ -3234,39 +3234,39 @@ xcf_load_channel_props (XcfInfo      *info,
 
             while ((info->cp - base) < prop_size)
               {
-                GimpParasite *p     = xcf_load_parasite (info);
+                ClayParasite *p     = xcf_load_parasite (info);
                 GError       *error = NULL;
 
                 if (! p)
                   return FALSE;
 
-                if (! gimp_item_parasite_validate (GIMP_ITEM (*channel), p,
+                if (! clay_item_parasite_validate (CLAY_ITEM (*channel), p,
                                                     &error))
                   {
-                    gimp_message (info->gimp, G_OBJECT (info->progress),
-                                  GIMP_MESSAGE_WARNING,
+                    clay_message (info->clay, G_OBJECT (info->progress),
+                                  CLAY_MESSAGE_WARNING,
                                   "Warning, invalid channel parasite in XCF file: %s",
                                   error->message);
                     g_clear_error (&error);
                   }
                 else
                   {
-                    gimp_item_parasite_attach (GIMP_ITEM (*channel), p, FALSE);
+                    clay_item_parasite_attach (CLAY_ITEM (*channel), p, FALSE);
                   }
 
-                gimp_parasite_free (p);
+                clay_parasite_free (p);
               }
 
             if (info->cp - base != prop_size)
-              gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                    GIMP_MESSAGE_WARNING,
+              clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                    CLAY_MESSAGE_WARNING,
                                     "Error while loading a channel's parasites");
           }
           break;
 
         case PROP_ITEM_SET_ITEM:
             {
-              GimpItemList *set;
+              ClayItemList *set;
               guint32       n;
 
               xcf_read_int32 (info, &n, 1);
@@ -3274,17 +3274,17 @@ xcf_load_channel_props (XcfInfo      *info,
               if (set == NULL)
                 g_printerr ("xcf: unknown channel set: %d (skipping)\n", n);
               else if (! g_type_is_a (G_TYPE_FROM_INSTANCE (*channel),
-                                      gimp_item_list_get_item_type (set)))
+                                      clay_item_list_get_item_type (set)))
                 g_printerr ("xcf: channel '%s' cannot be added to item set '%s' with item type %s (skipping)\n",
-                            gimp_object_get_name (*channel), gimp_object_get_name (set),
-                            g_type_name (gimp_item_list_get_item_type (set)));
+                            clay_object_get_name (*channel), clay_object_get_name (set),
+                            g_type_name (clay_item_list_get_item_type (set)));
               else
-                gimp_item_list_add (set, GIMP_ITEM (*channel));
+                clay_item_list_add (set, CLAY_ITEM (*channel));
             }
           break;
 
         default:
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
           g_printerr ("unexpected/unknown channel property: %d (skipping)\n",
                       prop_type);
 #endif
@@ -3338,12 +3338,12 @@ xcf_load_effect_props (XcfInfo      *info,
 
         case PROP_MODE:
           {
-            GimpLayerMode mode;
+            ClayLayerMode mode;
 
             xcf_read_int32 (info, (guint32 *) &mode, 1);
 
-            if (mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-              mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+            if (mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+              mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
             filter->paint_mode = mode;
           }
@@ -3357,7 +3357,7 @@ xcf_load_effect_props (XcfInfo      *info,
 
             /* TODO: Revisit when blend space can be set
              * on filter effects */
-            blend_space = GIMP_LAYER_COLOR_SPACE_AUTO;
+            blend_space = CLAY_LAYER_COLOR_SPACE_AUTO;
 
             filter->blend_space = blend_space;
           }
@@ -3371,7 +3371,7 @@ xcf_load_effect_props (XcfInfo      *info,
 
             /* TODO: Revisit when composite space can be set
              * on filter effects */
-            composite_space = GIMP_LAYER_COLOR_SPACE_AUTO;
+            composite_space = CLAY_LAYER_COLOR_SPACE_AUTO;
 
             filter->composite_space = composite_space;
           }
@@ -3385,7 +3385,7 @@ xcf_load_effect_props (XcfInfo      *info,
 
             /* TODO: Revisit when composite mode can be set
              * on filter effects */
-            composite_mode = GIMP_LAYER_COMPOSITE_AUTO;
+            composite_mode = CLAY_LAYER_COMPOSITE_AUTO;
 
             filter->composite_mode = composite_mode;
           }
@@ -3393,7 +3393,7 @@ xcf_load_effect_props (XcfInfo      *info,
 
         case PROP_FILTER_REGION:
           {
-            GimpFilterRegion region;
+            ClayFilterRegion region;
 
             xcf_read_int32 (info, (guint32 *) &region, 1);
 
@@ -3416,8 +3416,8 @@ xcf_load_effect_props (XcfInfo      *info,
             if (! (pspec = gegl_operation_find_property (filter->operation_name,
                                                          filter_prop_name)))
               {
-                gimp_message (info->gimp, G_OBJECT (info->progress),
-                              GIMP_MESSAGE_WARNING,
+                clay_message (info->clay, G_OBJECT (info->progress),
+                              CLAY_MESSAGE_WARNING,
                               _("XCF Warning: version %s of filter \"%s\" does not "
                                 "have the %s property. The property was ignored and "
                                 "the filter may not render properly.\n"
@@ -3486,11 +3486,11 @@ xcf_load_effect_props (XcfInfo      *info,
                     gchar   *serialized;
                     GError  *error = NULL;
 
-                    if (! g_type_is_a (pspec->value_type, GIMP_TYPE_CONFIG))
+                    if (! g_type_is_a (pspec->value_type, CLAY_TYPE_CONFIG))
                       {
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
-                                      "XCF Warning: property '%s' of filter '%s' is a %s, which does not implement GimpConfig interface.\n",
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
+                                      "XCF Warning: property '%s' of filter '%s' is a %s, which does not implement ClayConfig interface.\n",
                                       filter_prop_name, filter->operation_name, g_type_name (pspec->value_type));
                         valid_prop_value = FALSE;
                         break;
@@ -3499,8 +3499,8 @@ xcf_load_effect_props (XcfInfo      *info,
                     xcf_read_string (info, &serialized, 1);
                     if (! (serialized && strlen (serialized)))
                       {
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "XCF Warning: failure to deserialize config object for property '%s' of filter '%s'.\n"
                                       "Serialized config could not be read.",
                                       filter_prop_name, filter->operation_name);
@@ -3510,14 +3510,14 @@ xcf_load_effect_props (XcfInfo      *info,
 
                     g_value_init (&filter_prop_value, pspec->value_type);
                     config = g_object_new (pspec->value_type, NULL);
-                    if (gimp_config_deserialize_string (GIMP_CONFIG (config), serialized, -1, NULL, &error))
+                    if (clay_config_deserialize_string (CLAY_CONFIG (config), serialized, -1, NULL, &error))
                       {
                         g_value_set_object (&filter_prop_value, config);
                       }
                     else
                       {
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "XCF Warning: failure to deserialize config object for property '%s' of filter '%s': %s\n"
                                       "Serialized config was: %s",
                                       filter_prop_name, filter->operation_name,
@@ -3544,8 +3544,8 @@ xcf_load_effect_props (XcfInfo      *info,
 
                         if (color == NULL)
                           {
-                            gimp_message (info->gimp, G_OBJECT (info->progress),
-                                          GIMP_MESSAGE_WARNING,
+                            clay_message (info->clay, G_OBJECT (info->progress),
+                                          CLAY_MESSAGE_WARNING,
                                           "XCF Warning: NULL value for color "
                                           "property '%s' of filter '%s' is "
                                           "invalid.",
@@ -3556,8 +3556,8 @@ xcf_load_effect_props (XcfInfo      *info,
                       }
                     else if (error != NULL)
                       {
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "XCF Warning: invalid value for color "
                                       "property '%s' of filter '%s': %s",
                                       filter->operation_name,
@@ -3571,10 +3571,10 @@ xcf_load_effect_props (XcfInfo      *info,
 
                 case FILTER_PROP_GRADIENT:
                   {
-                    GimpGradient *gradient;
+                    ClayGradient *gradient;
                     GError       *error = NULL;
 
-                    g_value_init (&filter_prop_value, GIMP_TYPE_GRADIENT);
+                    g_value_init (&filter_prop_value, CLAY_TYPE_GRADIENT);
 
                     gradient = xcf_load_gradient (info, next_prop,
                                                   &valid_prop_value, &error);
@@ -3585,8 +3585,8 @@ xcf_load_effect_props (XcfInfo      *info,
 
                         if (gradient == NULL)
                           {
-                            gimp_message (info->gimp, G_OBJECT (info->progress),
-                                          GIMP_MESSAGE_WARNING,
+                            clay_message (info->clay, G_OBJECT (info->progress),
+                                          CLAY_MESSAGE_WARNING,
                                           "XCF Warning: NULL value for gradient "
                                           "property '%s' of filter '%s' is "
                                           "invalid.",
@@ -3597,8 +3597,8 @@ xcf_load_effect_props (XcfInfo      *info,
                       }
                     else if (error != NULL)
                       {
-                        gimp_message (info->gimp, G_OBJECT (info->progress),
-                                      GIMP_MESSAGE_WARNING,
+                        clay_message (info->clay, G_OBJECT (info->progress),
+                                      CLAY_MESSAGE_WARNING,
                                       "XCF Warning: invalid value for gradient "
                                       "property '%s' of filter '%s': %s",
                                       filter->operation_name,
@@ -3611,8 +3611,8 @@ xcf_load_effect_props (XcfInfo      *info,
                 break;
 
                 default:
-                  gimp_message (info->gimp, G_OBJECT (info->progress),
-                                GIMP_MESSAGE_WARNING,
+                  clay_message (info->clay, G_OBJECT (info->progress),
+                                CLAY_MESSAGE_WARNING,
                                 "XCF Warning: property '%s' of filter '%s' holds unsupported type %s.\n",
                                 filter_prop_name, filter->operation_name, g_type_name (pspec->value_type));
                   valid_prop_value = FALSE;
@@ -3641,7 +3641,7 @@ set_or_seek_node_property:
           break;
 
         default:
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
           g_printerr ("unexpected/unknown effect property: %d (skipping)\n",
                       prop_type);
 #endif
@@ -3655,8 +3655,8 @@ set_or_seek_node_property:
 
 static gboolean
 xcf_load_path_props (XcfInfo    *info,
-                     GimpImage  *image,
-                     GimpPath  **path)
+                     ClayImage  *image,
+                     ClayPath  **path)
 {
   PropType prop_type;
   guint32  prop_size;
@@ -3675,8 +3675,8 @@ xcf_load_path_props (XcfInfo    *info,
           if (g_list_index (info->selected_paths, *path) < 0)
             info->selected_paths = g_list_prepend (info->selected_paths, *path);
           else
-            gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                  GIMP_MESSAGE_WARNING,
+            clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                  CLAY_MESSAGE_WARNING,
                                   "Invalid duplicate selected path detected");
           break;
 
@@ -3686,17 +3686,17 @@ xcf_load_path_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &visible, 1);
 
-            gimp_item_set_visible (GIMP_ITEM (*path), visible, FALSE);
+            clay_item_set_visible (CLAY_ITEM (*path), visible, FALSE);
           }
           break;
 
         case PROP_COLOR_TAG:
           {
-            GimpColorTag color_tag;
+            ClayColorTag color_tag;
 
             xcf_read_int32 (info, (guint32 *) &color_tag, 1);
 
-            gimp_item_set_color_tag (GIMP_ITEM (*path), color_tag, FALSE);
+            clay_item_set_color_tag (CLAY_ITEM (*path), color_tag, FALSE);
           }
           break;
 
@@ -3706,8 +3706,8 @@ xcf_load_path_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_content, 1);
 
-            if (gimp_item_can_lock_content (GIMP_ITEM (*path)))
-              gimp_item_set_lock_content (GIMP_ITEM (*path),
+            if (clay_item_can_lock_content (CLAY_ITEM (*path)))
+              clay_item_set_lock_content (CLAY_ITEM (*path),
                                           lock_content, FALSE);
           }
           break;
@@ -3718,8 +3718,8 @@ xcf_load_path_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_position, 1);
 
-            if (gimp_item_can_lock_position (GIMP_ITEM (*path)))
-              gimp_item_set_lock_position (GIMP_ITEM (*path),
+            if (clay_item_can_lock_position (CLAY_ITEM (*path)))
+              clay_item_set_lock_position (CLAY_ITEM (*path),
                                            lock_position, FALSE);
           }
           break;
@@ -3730,19 +3730,19 @@ xcf_load_path_props (XcfInfo    *info,
 
             xcf_read_int32 (info, (guint32 *) &lock_visibility, 1);
 
-            if (gimp_item_can_lock_visibility (GIMP_ITEM (*path)))
-              gimp_item_set_lock_visibility (GIMP_ITEM (*path),
+            if (clay_item_can_lock_visibility (CLAY_ITEM (*path)))
+              clay_item_set_lock_visibility (CLAY_ITEM (*path),
                                              lock_visibility, FALSE);
           }
           break;
 
         case PROP_TATTOO:
           {
-            GimpTattoo tattoo;
+            ClayTattoo tattoo;
 
             xcf_read_int32 (info, (guint32 *) &tattoo, 1);
 
-            gimp_item_set_tattoo (GIMP_ITEM (*path), tattoo);
+            clay_item_set_tattoo (CLAY_ITEM (*path), tattoo);
           }
           break;
 
@@ -3752,32 +3752,32 @@ xcf_load_path_props (XcfInfo    *info,
 
             while ((info->cp - base) < prop_size)
               {
-                GimpParasite *p     = xcf_load_parasite (info);
+                ClayParasite *p     = xcf_load_parasite (info);
                 GError       *error = NULL;
 
                 if (! p)
                   return FALSE;
 
-                if (! gimp_item_parasite_validate (GIMP_ITEM (*path), p,
+                if (! clay_item_parasite_validate (CLAY_ITEM (*path), p,
                                                     &error))
                   {
-                    gimp_message (info->gimp, G_OBJECT (info->progress),
-                                  GIMP_MESSAGE_WARNING,
+                    clay_message (info->clay, G_OBJECT (info->progress),
+                                  CLAY_MESSAGE_WARNING,
                                   "Warning, invalid path parasite in XCF file: %s",
                                   error->message);
                     g_clear_error (&error);
                   }
                 else
                   {
-                    gimp_item_parasite_attach (GIMP_ITEM (*path), p, FALSE);
+                    clay_item_parasite_attach (CLAY_ITEM (*path), p, FALSE);
                   }
 
-                gimp_parasite_free (p);
+                clay_parasite_free (p);
               }
 
             if (info->cp - base != prop_size)
-              gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                    GIMP_MESSAGE_WARNING,
+              clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                    CLAY_MESSAGE_WARNING,
                                     "Error while loading a path's parasites");
           }
           break;
@@ -3785,7 +3785,7 @@ xcf_load_path_props (XcfInfo    *info,
 #if 0
         case PROP_ITEM_SET_ITEM:
             {
-              GimpItemList *set;
+              ClayItemList *set;
               guint32       n;
 
               xcf_read_int32 (info, &n, 1);
@@ -3793,18 +3793,18 @@ xcf_load_path_props (XcfInfo    *info,
               if (set == NULL)
                 g_printerr ("xcf: unknown path set: %d (skipping)\n", n);
               else if (! g_type_is_a (G_TYPE_FROM_INSTANCE (*path),
-                                      gimp_item_list_get_item_type (set)))
+                                      clay_item_list_get_item_type (set)))
                 g_printerr ("xcf: path '%s' cannot be added to item set '%s' with item type %s (skipping)\n",
-                            gimp_object_get_name (*path), gimp_object_get_name (set),
-                            g_type_name (gimp_item_list_get_item_type (set)));
+                            clay_object_get_name (*path), clay_object_get_name (set),
+                            g_type_name (clay_item_list_get_item_type (set)));
               else
-                gimp_item_list_add (set, GIMP_ITEM (*path));
+                clay_item_list_add (set, CLAY_ITEM (*path));
             }
           break;
 #endif
 
         default:
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
           g_printerr ("unexpected/unknown path property: %d (skipping)\n",
                       prop_type);
 #endif
@@ -3828,20 +3828,20 @@ xcf_load_prop (XcfInfo  *info,
   if (G_UNLIKELY (xcf_read_int32 (info, (guint32 *) prop_size, 1) != 4))
     return FALSE;
 
-  GIMP_LOG (XCF, "prop type=%d size=%u", *prop_type, *prop_size);
+  CLAY_LOG (XCF, "prop type=%d size=%u", *prop_type, *prop_size);
 
   return TRUE;
 }
 
-static GimpLayer *
+static ClayLayer *
 xcf_load_layer (XcfInfo    *info,
-                GimpImage  *image,
+                ClayImage  *image,
                 GList      *loop_files,
                 GList     **item_path,
                 gint       *n_broken_effects)
 {
-  GimpLayer         *layer;
-  GimpLayerMask     *layer_mask;
+  ClayLayer         *layer;
+  ClayLayerMask     *layer_mask;
   goffset            hierarchy_offset;
   goffset            effects_offset = 0;
   goffset            layer_mask_offset;
@@ -3858,7 +3858,7 @@ xcf_load_layer (XcfInfo    *info,
   gint               width;
   gint               height;
   gint               type;
-  GimpImageBaseType  base_type;
+  ClayImageBaseType  base_type;
   gboolean           has_alpha;
   const Babl        *format;
   gboolean           is_fs_drawable;
@@ -3876,38 +3876,38 @@ xcf_load_layer (XcfInfo    *info,
   xcf_read_int32  (info, (guint32 *) &type,   1);
   xcf_read_string (info,             &name,   1);
 
-  GIMP_LOG (XCF, "width=%d, height=%d, type=%d, name='%s'",
+  CLAY_LOG (XCF, "width=%d, height=%d, type=%d, name='%s'",
             width, height, type, name);
 
   switch (type)
     {
-    case GIMP_RGB_IMAGE:
-      base_type = GIMP_RGB;
+    case CLAY_RGB_IMAGE:
+      base_type = CLAY_RGB;
       has_alpha = FALSE;
       break;
 
-    case GIMP_RGBA_IMAGE:
-      base_type = GIMP_RGB;
+    case CLAY_RGBA_IMAGE:
+      base_type = CLAY_RGB;
       has_alpha = TRUE;
       break;
 
-    case GIMP_GRAY_IMAGE:
-      base_type = GIMP_GRAY;
+    case CLAY_GRAY_IMAGE:
+      base_type = CLAY_GRAY;
       has_alpha = FALSE;
       break;
 
-    case GIMP_GRAYA_IMAGE:
-      base_type = GIMP_GRAY;
+    case CLAY_GRAYA_IMAGE:
+      base_type = CLAY_GRAY;
       has_alpha = TRUE;
       break;
 
-    case GIMP_INDEXED_IMAGE:
-      base_type = GIMP_INDEXED;
+    case CLAY_INDEXED_IMAGE:
+      base_type = CLAY_INDEXED;
       has_alpha = FALSE;
       break;
 
-    case GIMP_INDEXEDA_IMAGE:
-      base_type = GIMP_INDEXED;
+    case CLAY_INDEXEDA_IMAGE:
+      base_type = CLAY_INDEXED;
       has_alpha = TRUE;
       break;
 
@@ -3917,7 +3917,7 @@ xcf_load_layer (XcfInfo    *info,
     }
 
   if (width <= 0 || height <= 0 ||
-      width > GIMP_MAX_IMAGE_SIZE || height > GIMP_MAX_IMAGE_SIZE)
+      width > CLAY_MAX_IMAGE_SIZE || height > CLAY_MAX_IMAGE_SIZE)
     {
       gboolean is_group_layer = FALSE;
       gboolean is_text_layer  = FALSE;
@@ -3944,25 +3944,25 @@ xcf_load_layer (XcfInfo    *info,
         }
     }
 
-  if (base_type == GIMP_GRAY)
+  if (base_type == CLAY_GRAY)
     {
-      /* do not use gimp_image_get_layer_format() because it might
+      /* do not use clay_image_get_layer_format() because it might
        * be the floating selection of a channel or mask
        */
-      format = gimp_image_get_format (image, base_type,
-                                      gimp_image_get_precision (image),
+      format = clay_image_get_format (image, base_type,
+                                      clay_image_get_precision (image),
                                       has_alpha,
                                       NULL /* we will fix the space later */);
     }
   else
     {
-      format = gimp_image_get_layer_format (image, has_alpha);
+      format = clay_image_get_layer_format (image, has_alpha);
     }
 
   /* create a new layer */
-  layer = gimp_layer_new (image, width, height,
+  layer = clay_layer_new (image, width, height,
                           format, name,
-                          GIMP_OPACITY_OPAQUE, GIMP_LAYER_MODE_NORMAL);
+                          CLAY_OPACITY_OPAQUE, CLAY_LAYER_MODE_NORMAL);
   g_free (name);
   if (! layer)
     return NULL;
@@ -3973,7 +3973,7 @@ xcf_load_layer (XcfInfo    *info,
                               &text_layer_flags, &group_layer_flags))
     goto error;
 
-  GIMP_LOG (XCF, "layer props loaded");
+  CLAY_LOG (XCF, "layer props loaded");
 
   xcf_progress_update (info);
 
@@ -3982,9 +3982,9 @@ xcf_load_layer (XcfInfo    *info,
   linked   = g_list_find (info->linked_layers, layer);
   floating = (info->floating_sel == layer);
 
-  if (gimp_text_layer_xcf_load_hack (&layer))
+  if (clay_text_layer_xcf_load_hack (&layer))
     {
-      gimp_text_layer_set_xcf_flags (GIMP_TEXT_LAYER (layer),
+      clay_text_layer_set_xcf_flags (CLAY_TEXT_LAYER (layer),
                                      text_layer_flags);
 
       if (selected)
@@ -4005,8 +4005,8 @@ xcf_load_layer (XcfInfo    *info,
    * space already now, the function will do nothing if we already
    * created the layer with the right format
    */
-  if (! floating && base_type == GIMP_GRAY)
-    gimp_layer_fix_format_space (layer, FALSE, FALSE);
+  if (! floating && base_type == CLAY_GRAY)
+    clay_layer_fix_format_space (layer, FALSE, FALSE);
 
   /* read the hierarchy and layer mask offsets */
   cur_offset = info->cp;
@@ -4019,29 +4019,29 @@ xcf_load_layer (XcfInfo    *info,
    * optimization and because the hierarchy's extents don't match
    * the group layer's tiles)
    */
-  if (! gimp_viewable_get_children (GIMP_VIEWABLE (layer)) &&
+  if (! clay_viewable_get_children (CLAY_VIEWABLE (layer)) &&
       /* Link layers are loaded from XCF only if they are not monitored
        * or if the link is broken.
        */
-      (! GIMP_IS_LINK_LAYER (layer)                             ||
-       ! gimp_link_layer_is_monitored (GIMP_LINK_LAYER (layer)) ||
-       gimp_link_is_broken (gimp_link_layer_get_link (GIMP_LINK_LAYER (layer)))))
+      (! CLAY_IS_LINK_LAYER (layer)                             ||
+       ! clay_link_layer_is_monitored (CLAY_LINK_LAYER (layer)) ||
+       clay_link_is_broken (clay_link_layer_get_link (CLAY_LINK_LAYER (layer)))))
     {
       if (hierarchy_offset < cur_offset)
         {
-          GIMP_LOG (XCF, "Invalid layer hierarchy offset!");
+          CLAY_LOG (XCF, "Invalid layer hierarchy offset!");
           goto error;
         }
       if (! xcf_seek_pos (info, hierarchy_offset, NULL))
         goto error;
 
-      GIMP_LOG (XCF, "loading buffer");
+      CLAY_LOG (XCF, "loading buffer");
 
       if (! xcf_load_buffer (info,
-                             gimp_drawable_get_buffer (GIMP_DRAWABLE (layer))))
+                             clay_drawable_get_buffer (CLAY_DRAWABLE (layer))))
         goto error;
 
-      GIMP_LOG (XCF, "buffer loaded");
+      CLAY_LOG (XCF, "buffer loaded");
 
       xcf_progress_update (info);
     }
@@ -4049,7 +4049,7 @@ xcf_load_layer (XcfInfo    *info,
     {
       gboolean expanded = group_layer_flags & XCF_GROUP_ITEM_EXPANDED;
 
-      gimp_viewable_set_expanded (GIMP_VIEWABLE (layer), expanded);
+      clay_viewable_set_expanded (CLAY_VIEWABLE (layer), expanded);
     }
 
   cur_offset += info->bytes_per_offset;
@@ -4059,7 +4059,7 @@ xcf_load_layer (XcfInfo    *info,
     {
       if (layer_mask_offset < cur_offset)
         {
-          GIMP_LOG (XCF, "Invalid layer mask offset!");
+          CLAY_LOG (XCF, "Invalid layer mask offset!");
           goto error;
         }
       if (! xcf_seek_pos (info, layer_mask_offset, NULL))
@@ -4077,14 +4077,14 @@ xcf_load_layer (XcfInfo    *info,
        * layers which update their size automatically; instead
        * attach it so it can be added when all layers are loaded
        */
-      g_object_set_data_full (G_OBJECT (layer), "gimp-layer-mask",
+      g_object_set_data_full (G_OBJECT (layer), "clay-layer-mask",
                               g_object_ref_sink (layer_mask),
                               (GDestroyNotify) g_object_unref);
-      g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-apply",
+      g_object_set_data (G_OBJECT (layer), "clay-layer-mask-apply",
                          GINT_TO_POINTER (apply_mask));
-      g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-edit",
+      g_object_set_data (G_OBJECT (layer), "clay-layer-mask-edit",
                          GINT_TO_POINTER (edit_mask));
-      g_object_set_data (G_OBJECT (layer), "gimp-layer-mask-show",
+      g_object_set_data (G_OBJECT (layer), "clay-layer-mask-show",
                          GINT_TO_POINTER (show_mask));
     }
   else
@@ -4100,7 +4100,7 @@ xcf_load_layer (XcfInfo    *info,
 
       if (effects_offset < cur_offset)
         {
-          GIMP_LOG (XCF, "Invalid effect offset: %" G_GOFFSET_FORMAT
+          CLAY_LOG (XCF, "Invalid effect offset: %" G_GOFFSET_FORMAT
                     " at offset: %" G_GOFFSET_FORMAT, effects_offset, cur_offset);
           goto error;
         }
@@ -4109,7 +4109,7 @@ xcf_load_layer (XcfInfo    *info,
       if (! xcf_seek_pos (info, effects_offset, NULL))
         goto error;
 
-      filter_data = xcf_load_effect (info, image, GIMP_DRAWABLE (layer));
+      filter_data = xcf_load_effect (info, image, CLAY_DRAWABLE (layer));
       if (! filter_data)
         {
           (*n_broken_effects)++;
@@ -4131,19 +4131,19 @@ xcf_load_layer (XcfInfo    *info,
       /* read in the offset of the next effect */
       if (xcf_read_offset (info, &effects_offset, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read effects offset"
+          CLAY_LOG (XCF, "Failed to read effects offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           break;
         }
     }
 
   if (filter_count > 0)
-    g_object_set_data_full (G_OBJECT (layer), "gimp-layer-effects", filter_data_list,
+    g_object_set_data_full (G_OBJECT (layer), "clay-layer-effects", filter_data_list,
                             (GDestroyNotify) xcf_load_free_effects);
 
   /* attach the floating selection... */
   if (is_fs_drawable)
-    info->floating_sel_drawable = GIMP_DRAWABLE (layer);
+    info->floating_sel_drawable = CLAY_DRAWABLE (layer);
 
   return layer;
 
@@ -4154,7 +4154,7 @@ xcf_load_layer (XcfInfo    *info,
   if (info->floating_sel == layer)
     info->floating_sel = NULL;
 
-  if (info->floating_sel_drawable == GIMP_DRAWABLE (layer))
+  if (info->floating_sel_drawable == CLAY_DRAWABLE (layer))
     info->floating_sel_drawable = NULL;
 
   g_object_unref (layer);
@@ -4162,12 +4162,12 @@ xcf_load_layer (XcfInfo    *info,
   return NULL;
 }
 
-static GimpChannel *
+static ClayChannel *
 xcf_load_channel (XcfInfo   *info,
-                  GimpImage *image,
+                  ClayImage *image,
                   gint      *n_broken_effects)
 {
-  GimpChannel *channel;
+  ClayChannel *channel;
   goffset      hierarchy_offset;
   goffset      effects_offset   = 0;
   GList       *filter_data_list = NULL;
@@ -4187,18 +4187,18 @@ xcf_load_channel (XcfInfo   *info,
   xcf_read_int32 (info, (guint32 *) &width,  1);
   xcf_read_int32 (info, (guint32 *) &height, 1);
   if (width <= 0 || height <= 0 ||
-      width > GIMP_MAX_IMAGE_SIZE || height > GIMP_MAX_IMAGE_SIZE)
+      width > CLAY_MAX_IMAGE_SIZE || height > CLAY_MAX_IMAGE_SIZE)
     {
-      GIMP_LOG (XCF, "Invalid channel size %d x %d.", width, height);
+      CLAY_LOG (XCF, "Invalid channel size %d x %d.", width, height);
       return NULL;
     }
 
   xcf_read_string (info, &name, 1);
-  GIMP_LOG (XCF, "Channel width=%d, height=%d, name='%s'",
+  CLAY_LOG (XCF, "Channel width=%d, height=%d, name='%s'",
             width, height, name);
 
   /* create a new channel */
-  channel = gimp_channel_new (image, width, height, name, NULL);
+  channel = clay_channel_new (image, width, height, name, NULL);
   g_free (name);
   if (!channel)
     return NULL;
@@ -4217,7 +4217,7 @@ xcf_load_channel (XcfInfo   *info,
 
   if (hierarchy_offset < cur_offset)
     {
-      GIMP_LOG (XCF, "Invalid hierarchy offset!");
+      CLAY_LOG (XCF, "Invalid hierarchy offset!");
       goto error;
     }
 
@@ -4226,7 +4226,7 @@ xcf_load_channel (XcfInfo   *info,
     goto error;
 
   if (! xcf_load_buffer (info,
-                         gimp_drawable_get_buffer (GIMP_DRAWABLE (channel))))
+                         clay_drawable_get_buffer (CLAY_DRAWABLE (channel))))
     goto error;
 
   cur_offset += info->bytes_per_offset;
@@ -4238,7 +4238,7 @@ xcf_load_channel (XcfInfo   *info,
 
       if (effects_offset < cur_offset)
         {
-          GIMP_LOG (XCF, "Invalid effect offset: %" G_GOFFSET_FORMAT
+          CLAY_LOG (XCF, "Invalid effect offset: %" G_GOFFSET_FORMAT
                     " at offset: %" G_GOFFSET_FORMAT, effects_offset, cur_offset);
           goto error;
         }
@@ -4247,7 +4247,7 @@ xcf_load_channel (XcfInfo   *info,
       if (! xcf_seek_pos (info, effects_offset, NULL))
         goto error;
 
-      filter_data = xcf_load_effect (info, image, GIMP_DRAWABLE (channel));
+      filter_data = xcf_load_effect (info, image, CLAY_DRAWABLE (channel));
       if (! filter_data)
         {
           (*n_broken_effects)++;
@@ -4269,24 +4269,24 @@ xcf_load_channel (XcfInfo   *info,
       /* read in the offset of the next effect */
       if (xcf_read_offset (info, &effects_offset, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read effects offset"
+          CLAY_LOG (XCF, "Failed to read effects offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           break;
         }
     }
 
   if (filter_count > 0)
-    g_object_set_data_full (G_OBJECT (channel), "gimp-channel-effects", filter_data_list,
+    g_object_set_data_full (G_OBJECT (channel), "clay-channel-effects", filter_data_list,
                             (GDestroyNotify) xcf_load_free_effects);
 
   if (is_fs_drawable)
-    info->floating_sel_drawable = GIMP_DRAWABLE (channel);
+    info->floating_sel_drawable = CLAY_DRAWABLE (channel);
 
   return channel;
 
  error:
   /* don't unref the selection of a partially loaded XCF */
-  if (channel != gimp_image_get_mask (image))
+  if (channel != clay_image_get_mask (image))
     {
       GList *iter;
 
@@ -4298,7 +4298,7 @@ xcf_load_channel (XcfInfo   *info,
           }
       info->linked_channels = g_list_remove (info->linked_channels, channel);
 
-      if (info->floating_sel_drawable == GIMP_DRAWABLE (channel))
+      if (info->floating_sel_drawable == CLAY_DRAWABLE (channel))
         info->floating_sel_drawable = NULL;
 
       g_object_unref (channel);
@@ -4309,11 +4309,11 @@ xcf_load_channel (XcfInfo   *info,
 
 static FilterData *
 xcf_load_effect (XcfInfo      *info,
-                 GimpImage    *image,
-                 GimpDrawable *drawable)
+                 ClayImage    *image,
+                 ClayDrawable *drawable)
 {
   FilterData  *filter;
-  GimpChannel *effect_mask = NULL;
+  ClayChannel *effect_mask = NULL;
   goffset      mask_offset = 0;
   gchar       *string;
   GError      *error = NULL;
@@ -4332,19 +4332,19 @@ xcf_load_effect (XcfInfo      *info,
   xcf_read_string (info, &string, 1);
   filter->operation_name = string;
 
-  if (! gimp_gegl_op_nde_allowed (filter->operation_name, &error))
+  if (! clay_gegl_op_nde_allowed (filter->operation_name, &error))
     {
       filter->unsupported_operation = TRUE;
 
       if (filter->name)
-        gimp_message (info->gimp, G_OBJECT (info->progress),
-                      GIMP_MESSAGE_WARNING,
+        clay_message (info->clay, G_OBJECT (info->progress),
+                      CLAY_MESSAGE_WARNING,
                       /* TODO: localize after string freeze. */
                       "XCF Warning: the filter \"%s\" (%s) was discarded. %s",
                       filter->name, filter->operation_name, error->message);
       else
-        gimp_message (info->gimp, G_OBJECT (info->progress),
-                      GIMP_MESSAGE_WARNING,
+        clay_message (info->clay, G_OBJECT (info->progress),
+                      CLAY_MESSAGE_WARNING,
                       /* TODO: localize after string freeze. */
                       "XCF Warning: an unnamed filter (%s) was discarded. %s",
                       filter->operation_name, error->message);
@@ -4365,8 +4365,8 @@ xcf_load_effect (XcfInfo      *info,
     {
       filter->unsupported_operation = TRUE;
 
-      gimp_message (info->gimp, G_OBJECT (info->progress),
-                    GIMP_MESSAGE_WARNING,
+      clay_message (info->clay, G_OBJECT (info->progress),
+                    CLAY_MESSAGE_WARNING,
                     _("XCF Warning: version '%s' of filter '%s' is unsupported. "
                       "The filter was discarded.\n"
                       "It either means that you are using an old version of the filter or "
@@ -4449,7 +4449,7 @@ xcf_load_color (XcfInfo   *info,
   *valid_prop_value = TRUE;
 
   if (info->cp == next_prop)
-    /* Up to GIMP 3.2, a NULL color would just be empty data. Though
+    /* Up to Clay 3.2, a NULL color would just be empty data. Though
      * it's ugly, we keep this code to load 3.0 files which may have got
      * into this edge case.
      */
@@ -4495,20 +4495,20 @@ xcf_load_color (XcfInfo   *info,
   if (profile_data_length > 0)
     {
       const Babl       *space = NULL;
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
       guint8           *profile_data;
 
       profile_data = g_new (guint8, profile_data_length);
       xcf_read_int8 (info, profile_data, profile_data_length);
-      profile = gimp_color_profile_new_from_icc_profile (profile_data,
+      profile = clay_color_profile_new_from_icc_profile (profile_data,
                                                          profile_data_length,
                                                          error);
       g_free (profile_data);
 
       if (profile)
         {
-          space = gimp_color_profile_get_space (profile,
-                                                GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+          space = clay_color_profile_get_space (profile,
+                                                CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                                 error);
           g_object_unref (profile);
         }
@@ -4531,13 +4531,13 @@ xcf_load_color (XcfInfo   *info,
   return color;
 }
 
-static GimpData *
+static ClayData *
 xcf_load_data (XcfInfo  *info,
                GType     data_type,
                GError  **error)
 {
-  GimpData        *data = NULL;
-  GimpDataFactory *factory;
+  ClayData        *data = NULL;
+  ClayDataFactory *factory;
   gchar           *name;
   gchar           *collection;
   gboolean         is_internal;
@@ -4550,8 +4550,8 @@ xcf_load_data (XcfInfo  *info,
       xcf_read_int32 (info, (guint32 *) &uint_val, 1);
       is_internal = (gboolean) uint_val;
 
-      factory = gimp_get_data_factory (info->gimp, data_type);
-      data = gimp_data_factory_get_data (factory, name, collection, is_internal);
+      factory = clay_get_data_factory (info->clay, data_type);
+      data = clay_data_factory_get_data (factory, name, collection, is_internal);
       g_free (name);
       g_free (collection);
     }
@@ -4559,34 +4559,34 @@ xcf_load_data (XcfInfo  *info,
   return data;
 }
 
-static GimpGradient *
+static ClayGradient *
 xcf_load_gradient (XcfInfo   *info,
                    goffset    next_prop,
                    gboolean  *valid_prop_value,
                    GError   **error)
 {
-  GimpGradient        *gradient = NULL;
-  GimpGradientSegment *prev     = NULL;
+  ClayGradient        *gradient = NULL;
+  ClayGradientSegment *prev     = NULL;
   guint32              version  = 1;
   gchar               *name     = NULL;
   guint32              num_segments;
 
   *valid_prop_value = TRUE;
 
-  gradient = g_object_new (GIMP_TYPE_GRADIENT,
-                           "mime-type", "application/x-gimp-gradient",
+  gradient = g_object_new (CLAY_TYPE_GRADIENT,
+                           "mime-type", "application/x-clay-gradient",
                            NULL);
 
   xcf_read_int32 (info, &version, 1);
   xcf_read_string (info, &name, 1);
   xcf_read_int32 (info, &num_segments, 1);
 
-  gimp_object_set_name_safe (GIMP_OBJECT (gradient), name);
+  clay_object_set_name_safe (CLAY_OBJECT (gradient), name);
   g_free (name);
 
   for (gint i = 0; i < num_segments; i++)
     {
-      GimpGradientSegment *seg;
+      ClayGradientSegment *seg;
       gfloat               left;
       gfloat               right;
       gfloat               middle;
@@ -4598,7 +4598,7 @@ xcf_load_gradient (XcfInfo   *info,
       GeglColor           *right_color = NULL;
       gboolean             valid_color = FALSE;
 
-      seg = gimp_gradient_segment_new ();
+      seg = clay_gradient_segment_new ();
 
       seg->prev = prev;
 
@@ -4631,10 +4631,10 @@ xcf_load_gradient (XcfInfo   *info,
       xcf_read_int32 (info, &right_color_type, 1);
 
       /* Ensuring all enum are within range */
-      if (left_color_type > GIMP_GRADIENT_COLOR_BACKGROUND_TRANSPARENT  ||
-          right_color_type > GIMP_GRADIENT_COLOR_BACKGROUND_TRANSPARENT ||
-          type > GIMP_GRADIENT_SEGMENT_STEP                             ||
-          color > GIMP_GRADIENT_SEGMENT_HSV_CW)
+      if (left_color_type > CLAY_GRADIENT_COLOR_BACKGROUND_TRANSPARENT  ||
+          right_color_type > CLAY_GRADIENT_COLOR_BACKGROUND_TRANSPARENT ||
+          type > CLAY_GRADIENT_SEGMENT_STEP                             ||
+          color > CLAY_GRADIENT_SEGMENT_HSV_CW)
         {
           *valid_prop_value = FALSE;
           g_clear_object (&left_color);
@@ -4642,20 +4642,20 @@ xcf_load_gradient (XcfInfo   *info,
           return gradient;
         }
 
-      gimp_gradient_segment_set_left_pos (gradient, seg, left);
-      gimp_gradient_segment_set_middle_pos (gradient, seg, middle);
-      gimp_gradient_segment_set_right_pos (gradient, seg, right);
+      clay_gradient_segment_set_left_pos (gradient, seg, left);
+      clay_gradient_segment_set_middle_pos (gradient, seg, middle);
+      clay_gradient_segment_set_right_pos (gradient, seg, right);
 
-      gimp_gradient_segment_set_left_color (gradient, seg, left_color);
-      gimp_gradient_segment_set_right_color (gradient, seg, right_color);
+      clay_gradient_segment_set_left_color (gradient, seg, left_color);
+      clay_gradient_segment_set_right_color (gradient, seg, right_color);
 
-      gimp_gradient_segment_set_left_color_type (gradient, seg,
-                                                 (GimpGradientColor) left_color_type);
-      gimp_gradient_segment_set_right_color_type (gradient, seg,
-                                                  (GimpGradientColor) right_color_type);
+      clay_gradient_segment_set_left_color_type (gradient, seg,
+                                                 (ClayGradientColor) left_color_type);
+      clay_gradient_segment_set_right_color_type (gradient, seg,
+                                                  (ClayGradientColor) right_color_type);
 
-      seg->type  = (GimpGradientSegmentType) type;
-      seg->color = (GimpGradientSegmentColor) color;
+      seg->type  = (ClayGradientSegmentType) type;
+      seg->color = (ClayGradientSegmentColor) color;
 
       g_clear_object (&left_color);
       g_clear_object (&right_color);
@@ -4667,11 +4667,11 @@ xcf_load_gradient (XcfInfo   *info,
 }
 
 /* The new path structure since XCF 18. */
-static GimpPath *
+static ClayPath *
 xcf_load_path (XcfInfo   *info,
-               GimpImage *image)
+               ClayImage *image)
 {
-  GimpPath *path = NULL;
+  ClayPath *path = NULL;
   gchar    *name;
   guint32   version;
   guint32   plength;
@@ -4682,10 +4682,10 @@ xcf_load_path (XcfInfo   *info,
   /* read in the path name. */
   xcf_read_string (info, &name,   1);
 
-  GIMP_LOG (XCF, "Path name='%s'", name);
+  CLAY_LOG (XCF, "Path name='%s'", name);
 
   /* create a new path */
-  path = gimp_path_new (image, name);
+  path = clay_path_new (image, name);
   g_free (name);
   if (! path)
     return NULL;
@@ -4698,7 +4698,7 @@ xcf_load_path (XcfInfo   *info,
   if (! xcf_load_path_props (info, image, &path))
     goto error;
 
-  GIMP_LOG (XCF, "path props loaded");
+  CLAY_LOG (XCF, "path props loaded");
 
   xcf_progress_update (info);
 
@@ -4706,8 +4706,8 @@ xcf_load_path (XcfInfo   *info,
 
   if (version != 1)
     {
-      gimp_message (info->gimp, G_OBJECT (info->progress),
-                    GIMP_MESSAGE_WARNING,
+      clay_message (info->clay, G_OBJECT (info->progress),
+                    CLAY_MESSAGE_WARNING,
                     "Unknown path version: %d (skipping)", version);
       goto error;
     }
@@ -4722,23 +4722,23 @@ xcf_load_path (XcfInfo   *info,
       guint32      num_axes;
       guint32      num_control_points;
       guint32      type;
-      gfloat       coords[13] = GIMP_COORDS_DEFAULT_VALUES;
-      GimpStroke  *stroke;
+      gfloat       coords[13] = CLAY_COORDS_DEFAULT_VALUES;
+      ClayStroke  *stroke;
       gint         j;
 
-      GimpValueArray *control_points;
+      ClayValueArray *control_points;
       GValue          value  = G_VALUE_INIT;
-      GimpAnchor      anchor = { { 0, } };
+      ClayAnchor      anchor = { { 0, } };
       GType           stroke_type;
 
-      g_value_init (&value, GIMP_TYPE_ANCHOR);
+      g_value_init (&value, CLAY_TYPE_ANCHOR);
 
       xcf_read_int32 (info, &stroke_type_id,     1);
       xcf_read_int32 (info, &closed,             1);
       xcf_read_int32 (info, &num_axes,           1);
       xcf_read_int32 (info, &num_control_points, 1);
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
       g_printerr ("stroke_type: %d, closed: %d, num_axes %d, len %d\n",
                   stroke_type_id, closed, num_axes, num_control_points);
 #endif
@@ -4746,7 +4746,7 @@ xcf_load_path (XcfInfo   *info,
       switch (stroke_type_id)
         {
         case XCF_STROKETYPE_BEZIER_STROKE:
-          stroke_type = GIMP_TYPE_BEZIER_STROKE;
+          stroke_type = CLAY_TYPE_BEZIER_STROKE;
           break;
 
         default:
@@ -4763,7 +4763,7 @@ xcf_load_path (XcfInfo   *info,
           goto error;
         }
 
-      control_points = gimp_value_array_new (num_control_points);
+      control_points = clay_value_array_new (num_control_points);
 
       anchor.selected = FALSE;
 
@@ -4781,9 +4781,9 @@ xcf_load_path (XcfInfo   *info,
           anchor.position.wheel    = coords[5];
 
           g_value_set_boxed (&value, &anchor);
-          gimp_value_array_append (control_points, &value);
+          clay_value_array_append (control_points, &value);
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
           g_printerr ("Anchor: %d, (%f, %f, %f, %f, %f, %f)\n", type,
                       coords[0], coords[1], coords[2], coords[3],
                       coords[4], coords[5]);
@@ -4797,17 +4797,17 @@ xcf_load_path (XcfInfo   *info,
                              "control-points", control_points,
                              NULL);
 
-      gimp_path_stroke_add (path, stroke);
+      clay_path_stroke_add (path, stroke);
 
       g_object_unref (stroke);
-      gimp_value_array_unref (control_points);
+      clay_value_array_unref (control_points);
     }
 
 
   if (plength != info->cp - base)
     {
-      gimp_message (info->gimp, G_OBJECT (info->progress),
-                    GIMP_MESSAGE_WARNING,
+      clay_message (info->clay, G_OBJECT (info->progress),
+                    CLAY_MESSAGE_WARNING,
                     "Path payload size does not match stored size (skipping)");
       goto error;
     }
@@ -4824,13 +4824,13 @@ error:
   return NULL;
 }
 
-static GimpLayerMask *
+static ClayLayerMask *
 xcf_load_layer_mask (XcfInfo   *info,
-                     GimpImage *image,
+                     ClayImage *image,
                      gint      *n_broken_effects)
 {
-  GimpLayerMask *layer_mask;
-  GimpChannel   *channel;
+  ClayLayerMask *layer_mask;
+  ClayChannel   *channel;
   GList         *iter;
   goffset        hierarchy_offset;
   goffset        effects_offset   = 0;
@@ -4852,25 +4852,25 @@ xcf_load_layer_mask (XcfInfo   *info,
   xcf_read_int32 (info, (guint32 *) &width,  1);
   xcf_read_int32 (info, (guint32 *) &height, 1);
   if (width <= 0 || height <= 0 ||
-      width > GIMP_MAX_IMAGE_SIZE || height > GIMP_MAX_IMAGE_SIZE)
+      width > CLAY_MAX_IMAGE_SIZE || height > CLAY_MAX_IMAGE_SIZE)
     {
-      GIMP_LOG (XCF, "Invalid layer mask size %d x %d.", width, height);
+      CLAY_LOG (XCF, "Invalid layer mask size %d x %d.", width, height);
       return NULL;
     }
 
   xcf_read_string (info, &name, 1);
-  GIMP_LOG (XCF, "Layer mask width=%d, height=%d, name='%s'",
+  CLAY_LOG (XCF, "Layer mask width=%d, height=%d, name='%s'",
             width, height, name);
 
   /* create a new layer mask */
-  layer_mask = gimp_layer_mask_new (image, width, height, name, color);
+  layer_mask = clay_layer_mask_new (image, width, height, name, color);
   g_object_unref (color);
   g_free (name);
   if (! layer_mask)
     return NULL;
 
   /* read in the layer_mask properties */
-  channel = GIMP_CHANNEL (layer_mask);
+  channel = CLAY_CHANNEL (layer_mask);
   if (! xcf_load_channel_props (info, image, &channel, TRUE))
     goto error;
 
@@ -4884,7 +4884,7 @@ xcf_load_layer_mask (XcfInfo   *info,
 
   if (hierarchy_offset < cur_offset)
     {
-      GIMP_LOG (XCF, "Invalid hierarchy offset!");
+      CLAY_LOG (XCF, "Invalid hierarchy offset!");
       goto error;
     }
 
@@ -4893,7 +4893,7 @@ xcf_load_layer_mask (XcfInfo   *info,
     goto error;
 
   if (! xcf_load_buffer (info,
-                         gimp_drawable_get_buffer (GIMP_DRAWABLE (layer_mask))))
+                         clay_drawable_get_buffer (CLAY_DRAWABLE (layer_mask))))
     goto error;
 
   cur_offset += info->bytes_per_offset;
@@ -4905,7 +4905,7 @@ xcf_load_layer_mask (XcfInfo   *info,
 
       if (effects_offset < cur_offset)
         {
-          GIMP_LOG (XCF, "Invalid effect offset: %" G_GOFFSET_FORMAT
+          CLAY_LOG (XCF, "Invalid effect offset: %" G_GOFFSET_FORMAT
                     " at offset: %" G_GOFFSET_FORMAT, effects_offset, cur_offset);
           goto error;
         }
@@ -4914,7 +4914,7 @@ xcf_load_layer_mask (XcfInfo   *info,
       if (! xcf_seek_pos (info, effects_offset, NULL))
         goto error;
 
-      filter_data = xcf_load_effect (info, image, GIMP_DRAWABLE (channel));
+      filter_data = xcf_load_effect (info, image, CLAY_DRAWABLE (channel));
       if (! filter_data)
         {
           (*n_broken_effects)++;
@@ -4936,19 +4936,19 @@ xcf_load_layer_mask (XcfInfo   *info,
       /* read in the offset of the next effect */
       if (xcf_read_offset (info, &effects_offset, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read effects offset"
+          CLAY_LOG (XCF, "Failed to read effects offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           break;
         }
     }
 
   if (filter_count > 0)
-    g_object_set_data_full (G_OBJECT (channel), "gimp-channel-effects", filter_data_list,
+    g_object_set_data_full (G_OBJECT (channel), "clay-channel-effects", filter_data_list,
                             (GDestroyNotify) xcf_load_free_effects);
 
   /* attach the floating selection... */
   if (is_fs_drawable)
-    info->floating_sel_drawable = GIMP_DRAWABLE (layer_mask);
+    info->floating_sel_drawable = CLAY_DRAWABLE (layer_mask);
 
   return layer_mask;
 
@@ -4961,7 +4961,7 @@ xcf_load_layer_mask (XcfInfo   *info,
       }
   info->linked_channels = g_list_remove (info->linked_channels, layer_mask);
 
-  if (info->floating_sel_drawable == GIMP_DRAWABLE (layer_mask))
+  if (info->floating_sel_drawable == CLAY_DRAWABLE (layer_mask))
     info->floating_sel_drawable = NULL;
 
   g_object_unref (layer_mask);
@@ -4999,7 +4999,7 @@ xcf_load_buffer (XcfInfo    *info,
 
   if (offset < cur_offset)
     {
-      GIMP_LOG (XCF, "Invalid buffer offset!");
+      CLAY_LOG (XCF, "Invalid buffer offset!");
       return FALSE;
     }
 
@@ -5059,15 +5059,15 @@ xcf_load_level (XcfInfo    *info,
    */
   if (xcf_read_offset (info, &offset, 1) < info->bytes_per_offset)
     {
-      GIMP_LOG (XCF, "Failed to read tile offset"
+      CLAY_LOG (XCF, "Failed to read tile offset"
                 " at offset: %" G_GOFFSET_FORMAT, info->cp);
       return FALSE;
     }
   if (offset == 0)
     return TRUE;
 
-  n_tile_rows = gimp_gegl_buffer_get_n_tile_rows (buffer, XCF_TILE_HEIGHT);
-  n_tile_cols = gimp_gegl_buffer_get_n_tile_cols (buffer, XCF_TILE_WIDTH);
+  n_tile_rows = clay_gegl_buffer_get_n_tile_rows (buffer, XCF_TILE_HEIGHT);
+  n_tile_cols = clay_gegl_buffer_get_n_tile_cols (buffer, XCF_TILE_WIDTH);
 
   ntiles = n_tile_rows * n_tile_cols;
   for (i = 0; i < ntiles; i++)
@@ -5078,8 +5078,8 @@ xcf_load_level (XcfInfo    *info,
 
       if (offset == 0)
         {
-          gimp_message_literal (info->gimp, G_OBJECT (info->progress),
-                                GIMP_MESSAGE_ERROR,
+          clay_message_literal (info->clay, G_OBJECT (info->progress),
+                                CLAY_MESSAGE_ERROR,
                                 "not enough tiles found in level");
           return FALSE;
         }
@@ -5094,7 +5094,7 @@ xcf_load_level (XcfInfo    *info,
        */
       if (xcf_read_offset (info, &offset2, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read tile offset"
+          CLAY_LOG (XCF, "Failed to read tile offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           return FALSE;
         }
@@ -5111,19 +5111,19 @@ xcf_load_level (XcfInfo    *info,
 
       if (offset2 < offset || offset2 - offset > max_data_length)
         {
-          gimp_message (info->gimp, G_OBJECT (info->progress),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (info->clay, G_OBJECT (info->progress),
+                        CLAY_MESSAGE_ERROR,
                         "invalid tile data length: %" G_GOFFSET_FORMAT,
                         offset2 - offset);
           return FALSE;
         }
 
       /* get buffer rectangle to write to */
-      gimp_gegl_buffer_get_tile_rect (buffer,
+      clay_gegl_buffer_get_tile_rect (buffer,
                                       XCF_TILE_WIDTH, XCF_TILE_HEIGHT,
                                       i, &rect);
 
-      GIMP_LOG (XCF, "loading tile %d/%d", i + 1, ntiles);
+      CLAY_LOG (XCF, "loading tile %d/%d", i + 1, ntiles);
 
       /* read in the tile */
       switch (info->compression)
@@ -5157,7 +5157,7 @@ xcf_load_level (XcfInfo    *info,
       if (fail)
         return FALSE;
 
-      GIMP_LOG (XCF, "loaded tile %d/%d", i + 1, ntiles);
+      CLAY_LOG (XCF, "loaded tile %d/%d", i + 1, ntiles);
 
       /* restore the saved position so we'll be ready to
        *  read the next offset.
@@ -5168,7 +5168,7 @@ xcf_load_level (XcfInfo    *info,
       /* read in the offset of the next tile */
       if (xcf_read_offset (info, &offset, 1) < info->bytes_per_offset)
         {
-          GIMP_LOG (XCF, "Failed to read tile offset"
+          CLAY_LOG (XCF, "Failed to read tile offset"
                     " at offset: %" G_GOFFSET_FORMAT, info->cp);
           return FALSE;
         }
@@ -5176,7 +5176,7 @@ xcf_load_level (XcfInfo    *info,
 
   if (offset != 0)
     {
-      gimp_message (info->gimp, G_OBJECT (info->progress), GIMP_MESSAGE_ERROR,
+      clay_message (info->clay, G_OBJECT (info->progress), CLAY_MESSAGE_ERROR,
                     "encountered garbage after reading level: %" G_GOFFSET_FORMAT,
                     offset);
       return FALSE;
@@ -5468,10 +5468,10 @@ xcf_load_tile_zlib (XcfInfo       *info,
   return TRUE;
 }
 
-static GimpParasite *
+static ClayParasite *
 xcf_load_parasite (XcfInfo *info)
 {
-  GimpParasite *parasite = NULL;
+  ClayParasite *parasite = NULL;
   gchar        *name;
   guint32       flags;
   guint32       size, size_read;
@@ -5481,7 +5481,7 @@ xcf_load_parasite (XcfInfo *info)
   xcf_read_int32  (info, &flags, 1);
   xcf_read_int32  (info, &size,  1);
 
-  GIMP_LOG (XCF, "Parasite name: %s, flags: %d, size: %d", name, flags, size);
+  CLAY_LOG (XCF, "Parasite name: %s, flags: %d, size: %d", name, flags, size);
 
   if (size > MAX_XCF_PARASITE_DATA_LEN)
     {
@@ -5511,7 +5511,7 @@ xcf_load_parasite (XcfInfo *info)
       /* Ensure the parasite_data is NULL-terminated */
       GString *parasite_data = g_string_new_len (data, size);
 
-      parasite = gimp_parasite_new (name, flags, parasite_data->len,
+      parasite = clay_parasite_new (name, flags, parasite_data->len,
                                     parasite_data->str);
       g_string_free (parasite_data, FALSE);
     }
@@ -5525,29 +5525,29 @@ xcf_load_parasite (XcfInfo *info)
 /* Old paths are the PROP_PATHS property, even older than PROP_VECTORS. */
 static gboolean
 xcf_load_old_paths (XcfInfo   *info,
-                    GimpImage *image)
+                    ClayImage *image)
 {
   guint32   num_paths;
   guint32   last_selected_row;
-  GimpPath *active_path;
+  ClayPath *active_path;
 
   xcf_read_int32 (info, &last_selected_row, 1);
   xcf_read_int32 (info, &num_paths,         1);
 
-  GIMP_LOG (XCF, "Number of old paths: %u", num_paths);
+  CLAY_LOG (XCF, "Number of old paths: %u", num_paths);
 
   while (num_paths-- > 0)
     if (! xcf_load_old_path (info, image))
       return FALSE;
 
   active_path =
-    GIMP_PATH (gimp_container_get_child_by_index (gimp_image_get_paths (image),
+    CLAY_PATH (clay_container_get_child_by_index (clay_image_get_paths (image),
                                                      last_selected_row));
 
   if (active_path)
     {
       GList *list = g_list_prepend (NULL, active_path);
-      gimp_image_set_selected_paths (image, list);
+      clay_image_set_selected_paths (image, list);
       g_list_free (list);
     }
 
@@ -5556,7 +5556,7 @@ xcf_load_old_paths (XcfInfo   *info,
 
 static gboolean
 xcf_load_old_path (XcfInfo   *info,
-                   GimpImage *image)
+                   ClayImage *image)
 {
   gchar                  *name;
   guint32                 locked;
@@ -5564,9 +5564,9 @@ xcf_load_old_path (XcfInfo   *info,
   guint32                 closed;
   guint32                 num_points;
   guint32                 version; /* changed from num_paths */
-  GimpTattoo              tattoo = 0;
-  GimpPath               *path;
-  GimpPathCompatPoint    *points;
+  ClayTattoo              tattoo = 0;
+  ClayPath               *path;
+  ClayPathCompatPoint    *points;
   gint                    i;
 
   xcf_read_string (info, &name,       1);
@@ -5606,7 +5606,7 @@ xcf_load_old_path (XcfInfo   *info,
       return FALSE;
     }
 
-  points = g_new0 (GimpPathCompatPoint, num_points);
+  points = g_new0 (ClayPathCompatPoint, num_points);
 
   for (i = 0; i < num_points; i++)
     {
@@ -5636,7 +5636,7 @@ xcf_load_old_path (XcfInfo   *info,
         }
     }
 
-  path = gimp_path_compat_new (image, name, points, num_points, closed);
+  path = clay_path_compat_new (image, name, points, num_points, closed);
 
   g_free (name);
   g_free (points);
@@ -5645,27 +5645,27 @@ xcf_load_old_path (XcfInfo   *info,
     info->linked_paths = g_list_prepend (info->linked_paths, path);
 
   if (tattoo)
-    gimp_item_set_tattoo (GIMP_ITEM (path), tattoo);
+    clay_item_set_tattoo (CLAY_ITEM (path), tattoo);
 
-  gimp_image_add_path (image, path,
+  clay_image_add_path (image, path,
                        NULL, /* can't be a tree */
-                       gimp_container_get_n_children (gimp_image_get_paths (image)),
+                       clay_container_get_n_children (clay_image_get_paths (image)),
                        FALSE);
 
   return TRUE;
 }
 
-/* Old vectors are the PROP_VECTORS property up to all GIMP 2.10 versions. */
+/* Old vectors are the PROP_VECTORS property up to all Clay 2.10 versions. */
 static gboolean
 xcf_load_old_vectors (XcfInfo   *info,
-                      GimpImage *image)
+                      ClayImage *image)
 {
   guint32   version;
   guint32   active_index;
   guint32   num_paths;
-  GimpPath *active_path;
+  ClayPath *active_path;
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
   g_printerr ("xcf_load_old_vectors\n");
 #endif
 
@@ -5673,8 +5673,8 @@ xcf_load_old_vectors (XcfInfo   *info,
 
   if (version != 1)
     {
-      gimp_message (info->gimp, G_OBJECT (info->progress),
-                    GIMP_MESSAGE_WARNING,
+      clay_message (info->clay, G_OBJECT (info->progress),
+                    CLAY_MESSAGE_WARNING,
                     "Unknown path version: %d (skipping)", version);
       return FALSE;
     }
@@ -5682,7 +5682,7 @@ xcf_load_old_vectors (XcfInfo   *info,
   xcf_read_int32 (info, &active_index, 1);
   xcf_read_int32 (info, &num_paths,    1);
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
   g_printerr ("%d paths (active: %d)\n", num_paths, active_index);
 #endif
 
@@ -5692,17 +5692,17 @@ xcf_load_old_vectors (XcfInfo   *info,
 
   /* FIXME tree */
   active_path =
-    GIMP_PATH (gimp_container_get_child_by_index (gimp_image_get_paths (image),
+    CLAY_PATH (clay_container_get_child_by_index (clay_image_get_paths (image),
                                                   active_index));
 
   if (active_path)
     {
       GList *list = g_list_prepend (NULL, active_path);
-      gimp_image_set_selected_paths (image, list);
+      clay_image_set_selected_paths (image, list);
       g_list_free (list);
     }
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
   g_printerr ("xcf_load_old_vectors: loaded %d bytes\n", info->cp - base);
 #endif
   return TRUE;
@@ -5710,18 +5710,18 @@ xcf_load_old_vectors (XcfInfo   *info,
 
 static gboolean
 xcf_load_old_vector (XcfInfo   *info,
-                     GimpImage *image)
+                     ClayImage *image)
 {
   gchar      *name;
-  GimpTattoo  tattoo = 0;
+  ClayTattoo  tattoo = 0;
   guint32     visible;
   guint32     linked;
   guint32     num_parasites;
   guint32     num_strokes;
-  GimpPath   *path;
+  ClayPath   *path;
   gint        i;
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
   g_printerr ("xcf_load_old_vector\n");
 #endif
 
@@ -5732,44 +5732,44 @@ xcf_load_old_vector (XcfInfo   *info,
   xcf_read_int32  (info, &num_parasites, 1);
   xcf_read_int32  (info, &num_strokes,   1);
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
   g_printerr ("name: %s, tattoo: %d, visible: %d, linked: %d, "
               "num_parasites %d, num_strokes %d\n",
               name, tattoo, visible, linked, num_parasites, num_strokes);
 #endif
 
-  path = gimp_path_new (image, name);
+  path = clay_path_new (image, name);
   g_free (name);
 
-  gimp_item_set_visible (GIMP_ITEM (path), visible, FALSE);
+  clay_item_set_visible (CLAY_ITEM (path), visible, FALSE);
   if (linked)
     info->linked_paths = g_list_prepend (info->linked_paths, path);
 
   if (tattoo)
-    gimp_item_set_tattoo (GIMP_ITEM (path), tattoo);
+    clay_item_set_tattoo (CLAY_ITEM (path), tattoo);
 
   for (i = 0; i < num_parasites; i++)
     {
-      GimpParasite *parasite = xcf_load_parasite (info);
+      ClayParasite *parasite = xcf_load_parasite (info);
       GError       *error    = NULL;
 
       if (! parasite)
         return FALSE;
 
-      if (! gimp_item_parasite_validate (GIMP_ITEM (path), parasite, &error))
+      if (! clay_item_parasite_validate (CLAY_ITEM (path), parasite, &error))
         {
-          gimp_message (info->gimp, G_OBJECT (info->progress),
-                        GIMP_MESSAGE_WARNING,
+          clay_message (info->clay, G_OBJECT (info->progress),
+                        CLAY_MESSAGE_WARNING,
                         "Warning, invalid vectors parasite in XCF file: %s",
                         error->message);
           g_clear_error (&error);
         }
       else
         {
-          gimp_item_parasite_attach (GIMP_ITEM (path), parasite, FALSE);
+          clay_item_parasite_attach (CLAY_ITEM (path), parasite, FALSE);
         }
 
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
     }
 
   for (i = 0; i < num_strokes; i++)
@@ -5779,23 +5779,23 @@ xcf_load_old_vector (XcfInfo   *info,
       guint32      num_axes;
       guint32      num_control_points;
       guint32      type;
-      gfloat       coords[13] = GIMP_COORDS_DEFAULT_VALUES;
-      GimpStroke  *stroke;
+      gfloat       coords[13] = CLAY_COORDS_DEFAULT_VALUES;
+      ClayStroke  *stroke;
       gint         j;
 
-      GimpValueArray *control_points;
+      ClayValueArray *control_points;
       GValue          value  = G_VALUE_INIT;
-      GimpAnchor      anchor = { { 0, } };
+      ClayAnchor      anchor = { { 0, } };
       GType           stroke_type;
 
-      g_value_init (&value, GIMP_TYPE_ANCHOR);
+      g_value_init (&value, CLAY_TYPE_ANCHOR);
 
       xcf_read_int32 (info, &stroke_type_id,     1);
       xcf_read_int32 (info, &closed,             1);
       xcf_read_int32 (info, &num_axes,           1);
       xcf_read_int32 (info, &num_control_points, 1);
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
       g_printerr ("stroke_type: %d, closed: %d, num_axes %d, len %d\n",
                   stroke_type_id, closed, num_axes, num_control_points);
 #endif
@@ -5803,7 +5803,7 @@ xcf_load_old_vector (XcfInfo   *info,
       switch (stroke_type_id)
         {
         case XCF_STROKETYPE_BEZIER_STROKE:
-          stroke_type = GIMP_TYPE_BEZIER_STROKE;
+          stroke_type = CLAY_TYPE_BEZIER_STROKE;
           break;
 
         default:
@@ -5820,7 +5820,7 @@ xcf_load_old_vector (XcfInfo   *info,
           return FALSE;
         }
 
-      control_points = gimp_value_array_new (num_control_points);
+      control_points = clay_value_array_new (num_control_points);
 
       anchor.selected = FALSE;
 
@@ -5838,9 +5838,9 @@ xcf_load_old_vector (XcfInfo   *info,
           anchor.position.wheel    = coords[5];
 
           g_value_set_boxed (&value, &anchor);
-          gimp_value_array_append (control_points, &value);
+          clay_value_array_append (control_points, &value);
 
-#ifdef GIMP_XCF_PATH_DEBUG
+#ifdef CLAY_XCF_PATH_DEBUG
           g_printerr ("Anchor: %d, (%f, %f, %f, %f, %f, %f)\n", type,
                       coords[0], coords[1], coords[2], coords[3],
                       coords[4], coords[5]);
@@ -5854,15 +5854,15 @@ xcf_load_old_vector (XcfInfo   *info,
                              "control-points", control_points,
                              NULL);
 
-      gimp_path_stroke_add (path, stroke);
+      clay_path_stroke_add (path, stroke);
 
       g_object_unref (stroke);
-      gimp_value_array_unref (control_points);
+      clay_value_array_unref (control_points);
     }
 
-  gimp_image_add_path (image, path,
+  clay_image_add_path (image, path,
                        NULL, /* FIXME tree */
-                       gimp_container_get_n_children (gimp_image_get_paths (image)),
+                       clay_container_get_n_children (clay_image_get_paths (image)),
                        FALSE);
 
   return TRUE;
@@ -5870,7 +5870,7 @@ xcf_load_old_vector (XcfInfo   *info,
 
 static void
 xcf_load_user_init (XcfInfo   *info,
-                    GimpImage *image)
+                    ClayImage *image)
 {
   gchar   *unit_strings[5] = { 0 };
   gint     n_fields        = 3;
@@ -5892,9 +5892,9 @@ xcf_load_user_init (XcfInfo   *info,
 
   if (image != NULL)
     {
-      GimpUnit *unit;
+      ClayUnit *unit;
 
-      unit = _gimp_unit_get (info->gimp,
+      unit = _clay_unit_get (info->clay,
                              unit_strings[0],
                              (gdouble) factor, digits,
                              unit_strings[1],
@@ -5902,7 +5902,7 @@ xcf_load_user_init (XcfInfo   *info,
                              info->file_version < 21,
                              info->file_version < 21 ? unit_strings[4] : NULL);
 
-      gimp_image_set_unit (image, unit);
+      clay_image_set_unit (image, unit);
     }
 
   for (i = 0; i < n_fields; i++)
@@ -5955,7 +5955,7 @@ xcf_item_path_is_parent (GList *path,
 }
 
 static void
-xcf_fix_item_path (GimpLayer  *layer,
+xcf_fix_item_path (ClayLayer  *layer,
                    GList     **path,
                    GList      *broken_paths)
 {
@@ -5967,7 +5967,7 @@ xcf_fix_item_path (GimpLayer  *layer,
         {
           /* Not much to do when the absent path is a parent. */
           g_printerr ("%s: layer '%s' moved to layer tree root because of missing parent.",
-                      G_STRFUNC, gimp_object_get_name (layer));
+                      G_STRFUNC, clay_object_get_name (layer));
           g_clear_pointer (path, g_list_free);
           return;
         }

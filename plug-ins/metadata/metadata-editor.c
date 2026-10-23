@@ -34,10 +34,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "metadata-tags.h"
 #include "metadata-xml.h"
@@ -47,9 +47,9 @@
 
 #define PLUG_IN_PROC            "plug-in-metadata-editor"
 #define PLUG_IN_BINARY          "metadata-editor"
-#define PLUG_IN_ROLE            "gimp-metadata"
+#define PLUG_IN_ROLE            "clay-metadata"
 
-#define DEFAULT_TEMPLATE_FILE   "gimp_metadata_template.xml"
+#define DEFAULT_TEMPLATE_FILE   "clay_metadata_template.xml"
 
 
 typedef struct _Metadata      Metadata;
@@ -57,12 +57,12 @@ typedef struct _MetadataClass MetadataClass;
 
 struct _Metadata
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _MetadataClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -71,15 +71,15 @@ struct _MetadataClass
 
 GType                   metadata_get_type         (void);
 
-static GList          * metadata_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * metadata_create_procedure (GimpPlugIn           *plug_in,
+static GList          * metadata_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * metadata_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * metadata_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * metadata_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
 
@@ -145,9 +145,9 @@ static void     metadata_editor_create_tree_grid (const me_column_info *tree_inf
 static void     metadata_editor_create_table     (const me_table_info  *table_data,
                                                   GtkWidget            *grid);
 
-static gboolean metadata_editor_dialog           (GimpImage           *image,
-                                                  GimpMetadata        *metadata,
-                                                  GimpProcedureConfig *config,
+static gboolean metadata_editor_dialog           (ClayImage           *image,
+                                                  ClayMetadata        *metadata,
+                                                  ClayProcedureConfig *config,
                                                   GError             **error);
 
 static void metadata_dialog_editor_set_metadata  (metadata_editor     *meta_info);
@@ -164,21 +164,21 @@ static void     add_to_store                    (gchar                *value,
                                                  GtkListStore         *liststore,
                                                  gint                  store_column);
 
-static void     set_tag_string                  (GimpMetadata         *metadata,
+static void     set_tag_string                  (ClayMetadata         *metadata,
                                                  const gchar          *name,
                                                  const gchar          *value,
                                                  gboolean              clear_tag);
 
-static gboolean set_gps_longitude_latitude      (GimpMetadata         *metadata,
+static gboolean set_gps_longitude_latitude      (ClayMetadata         *metadata,
                                                  const gchar          *tag,
                                                  const gchar          *value);
 
 static void     write_metadata_tag              (metadata_editor      *meta_info,
-                                                 GimpMetadata         *metadata,
+                                                 ClayMetadata         *metadata,
                                                  gchar                *tag);
 
 static void     write_metadata_tag_multiple     (metadata_editor      *meta_info,
-                                                 GimpMetadata         *metadata,
+                                                 ClayMetadata         *metadata,
                                                  GExiv2StructureType   type,
                                                  const gchar          *header_tag,
                                                  gint                  n_columns,
@@ -187,21 +187,21 @@ static void     write_metadata_tag_multiple     (metadata_editor      *meta_info
                                                  const list_combo     *special_handling);
 
 static void write_info_tag_alternates           (metadata_editor      *meta_info,
-                                                 GimpMetadata         *g_metadata,
+                                                 ClayMetadata         *g_metadata,
                                                  const TranslateTag   *info_tags,
                                                  gint                  n_items);
 
-static void replace_deprecated_info_tags        (GimpMetadata         *metadata,
+static void replace_deprecated_info_tags        (ClayMetadata         *metadata,
                                                  const TranslateTag   *info_tags,
                                                  gint                  n_items);
 
-static void convert_deprecated_tags             (GimpMetadata         *metadata);
+static void convert_deprecated_tags             (ClayMetadata         *metadata);
 
-static void remove_deprecated_info_tags         (GimpMetadata         *metadata,
+static void remove_deprecated_info_tags         (ClayMetadata         *metadata,
                                                  const TranslateTag   *info_tags,
                                                  gint                  n_items);
 
-static void remove_deprecated_tags              (GimpMetadata         *metadata);
+static void remove_deprecated_tags              (ClayMetadata         *metadata);
 
 static void on_date_button_clicked              (GtkButton            *widget,
                                                  GtkWidget            *entry_widget);
@@ -316,9 +316,9 @@ static void combo_type_cell_edited_callback     (GtkCellRendererCombo *cell,
                                                  gpointer              data);
 
 
-G_DEFINE_TYPE (Metadata, metadata, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Metadata, metadata, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (METADATA_TYPE)
+CLAY_MAIN (METADATA_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -367,7 +367,7 @@ static const me_widget_info iptc_tab_data[] =
   { 8, N_("Website(s)"),              ME_WIDGET_TEXT,       "Xmp.iptc.CiUrlWork" },
   { 9, "",                            ME_WIDGET_SEPARATOR,  "" },
   { 10, N_("Creation Date"),          ME_WIDGET_DATE_BOX,   "Xmp.photoshop.DateCreated",
-        "create_date_button",         "gimp-grid" },
+        "create_date_button",         "clay-grid" },
   { 11, N_("Intellectual Genre"),     ME_WIDGET_ENTRY,      "Xmp.iptc.IntellectualGenre" },
   { 12, N_("IPTC Scene Code"),        ME_WIDGET_TEXT,       "Xmp.iptc.Scene" },
   { 13, "",                           ME_WIDGET_SEPARATOR,  "" },
@@ -579,18 +579,18 @@ static const me_widget_info dicom_info_labels[] =
   { 0, N_("Patient"),                 ME_WIDGET_ENTRY,      "Xmp.DICOM.PatientName" },
   { 1, N_("Patient ID"),              ME_WIDGET_ENTRY,      "Xmp.DICOM.PatientID" },
   { 2, N_("Date of Birth"),           ME_WIDGET_DATE_BOX,   "Xmp.DICOM.PatientDOB",
-      "dob_date_button",              "gimp-grid" },
+      "dob_date_button",              "clay-grid" },
   { 3, N_("Patient Sex"),             ME_WIDGET_COMBO,      "Xmp.DICOM.PatientSex" },
   { 4, "",                            ME_WIDGET_SEPARATOR,  "" },
   { 5, N_("Study ID"),                ME_WIDGET_ENTRY,      "Xmp.DICOM.StudyID" },
   { 6, N_("Referring Physician"),     ME_WIDGET_ENTRY,      "Xmp.DICOM.StudyPhysician" },
   { 7, N_("Study Date"),              ME_WIDGET_DATE_BOX,   "Xmp.DICOM.StudyDateTime",
-      "study_date_button",            "gimp-grid" },
+      "study_date_button",            "clay-grid" },
   { 8, N_("Study Description"),       ME_WIDGET_TEXT ,      "Xmp.DICOM.StudyDescription" },
   { 9, N_("Series Number"),           ME_WIDGET_ENTRY,      "Xmp.DICOM.SeriesNumber" },
   { 10, N_("Modality"),               ME_WIDGET_ENTRY,      "Xmp.DICOM.SeriesModality" },
   { 11, N_("Series Date"),            ME_WIDGET_DATE_BOX,   "Xmp.DICOM.SeriesDateTime",
-      "series_date_button",           "gimp-grid" },
+      "series_date_button",           "clay-grid" },
   { 12, N_("Series Description"),     ME_WIDGET_TEXT ,      "Xmp.DICOM.SeriesDescription" },
   { 13, "",                           ME_WIDGET_SEPARATOR,  "" },
   { 14, N_("Equipment Institution"),  ME_WIDGET_ENTRY,      "Xmp.DICOM.EquipmentInstitution" },
@@ -602,7 +602,7 @@ static const gint n_dicom_info_labels = G_N_ELEMENTS (dicom_info_labels);
 static void
 metadata_class_init (MetadataClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = metadata_query_procedures;
   plug_in_class->create_procedure = metadata_create_procedure;
@@ -615,33 +615,33 @@ metadata_init (Metadata *metadata)
 }
 
 static GList *
-metadata_query_procedures (GimpPlugIn *plug_in)
+metadata_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-metadata_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+metadata_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             metadata_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("_Edit Metadata"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Image/Metadata");
+      clay_procedure_set_menu_label (procedure, _("_Edit Metadata"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Image/Metadata");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Edit metadata (IPTC, EXIF, XMP)"),
                                         "Edit metadata information attached "
                                         "to the current image. Some or all "
@@ -649,34 +649,34 @@ metadata_create_procedure (GimpPlugIn  *plug_in,
                                         "the file, depending on the output "
                                         "file format.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Ben Touchette",
                                       "Ben Touchette",
                                       "2017");
 
-      gimp_procedure_add_bytes_argument (procedure, "parent-handle",
+      clay_procedure_add_bytes_argument (procedure, "parent-handle",
                                          _("Parent's window handle"),
                                          _("The opaque handle of the window to set this plug-in's dialog transient to"),
-                                         G_PARAM_READWRITE | GIMP_PARAM_DONT_SERIALIZE);
+                                         G_PARAM_READWRITE | CLAY_PARAM_DONT_SERIALIZE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-metadata_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+metadata_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpMetadata *metadata;
+  ClayMetadata *metadata;
   GError       *error  = NULL;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  metadata = gimp_image_get_metadata (image);
+  metadata = clay_image_get_metadata (image);
 
   /* Always show metadata dialog so we can add appropriate iptc data
    * as needed. Sometimes license data needs to be added after the
@@ -685,14 +685,14 @@ metadata_run (GimpProcedure        *procedure,
    */
   if (! metadata)
     {
-      metadata = gimp_metadata_new ();
-      gimp_image_set_metadata (image, metadata);
+      metadata = clay_metadata_new ();
+      clay_image_set_metadata (image, metadata);
     }
 
   if (metadata_editor_dialog (image, metadata, config, &error))
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
   else
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR, error);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR, error);
 }
 
 
@@ -1061,9 +1061,9 @@ metadata_editor_create_table (const me_table_info *table_data,
 }
 
 static gboolean
-metadata_editor_dialog (GimpImage            *image,
-                        GimpMetadata         *g_metadata,
-                        GimpProcedureConfig  *config,
+metadata_editor_dialog (ClayImage            *image,
+                        ClayMetadata         *g_metadata,
+                        ClayProcedureConfig  *config,
                         GError              **error)
 {
   GtkWidget      *dialog;
@@ -1091,14 +1091,14 @@ metadata_editor_dialog (GimpImage            *image,
   meta_args.widgets  = g_hash_table_new (g_str_hash, g_str_equal);
   meta_args.metadata = g_metadata;
 
-  name = gimp_image_get_name (image);
+  name = clay_image_get_name (image);
   title = g_strdup_printf (_("Metadata Editor: %s"), name);
   g_free (name);
 
-  dialog = gimp_dialog_new (title,
-                            "gimp-metadata-editor-dialog",
+  dialog = clay_dialog_new (title,
+                            "clay-metadata-editor-dialog",
                             NULL, 0,
-                            gimp_standard_help_func, PLUG_IN_PROC,
+                            clay_standard_help_func, PLUG_IN_PROC,
                             _("_Cancel"),         GTK_RESPONSE_CANCEL,
                             _("_Write Metadata"), GTK_RESPONSE_OK,
                             NULL);
@@ -1109,15 +1109,15 @@ metadata_editor_dialog (GimpImage            *image,
   meta_args.dialog = dialog;
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
 
   if (parent_handle && g_bytes_get_size (parent_handle) != 0)
-    gimp_window_set_transient_for (GTK_WINDOW (dialog), parent_handle);
+    clay_window_set_transient_for (GTK_WINDOW (dialog), parent_handle);
   else
-    gimp_window_set_transient (GTK_WINDOW (dialog));
+    clay_window_set_transient (GTK_WINDOW (dialog));
 
   gtk_window_set_destroy_with_parent (GTK_WINDOW (dialog), TRUE);
   g_bytes_unref (parent_handle);
@@ -1204,7 +1204,7 @@ metadata_editor_dialog (GimpImage            *image,
 
   metadata_dialog_editor_set_metadata (&meta_args);
 
-  if (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_OK)
+  if (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_OK)
     {
       metadata_editor_write_callback (dialog, &meta_args, image);
     }
@@ -1551,9 +1551,9 @@ on_date_button_clicked (GtkButton *widget,
     }
 
   calendar_dialog =
-    gimp_dialog_new (_("Choose Date"), "metadata-calendar",
+    clay_dialog_new (_("Choose Date"), "metadata-calendar",
                      NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                     gimp_standard_help_func, NULL,
+                     clay_standard_help_func, NULL,
 
                      _("_Cancel"),  GTK_RESPONSE_CANCEL,
                      _("Set Date"), GTK_RESPONSE_OK,
@@ -1562,12 +1562,12 @@ on_date_button_clicked (GtkButton *widget,
 
   gtk_dialog_set_default_response (GTK_DIALOG (calendar_dialog),
                                    GTK_RESPONSE_OK);
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (calendar_dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (calendar_dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
 
-  gimp_window_set_transient (GTK_WINDOW (calendar_dialog));
+  clay_window_set_transient (GTK_WINDOW (calendar_dialog));
 
   calendar_content_area = gtk_dialog_get_content_area (GTK_DIALOG (calendar_dialog));
 
@@ -1604,7 +1604,7 @@ on_date_button_clicked (GtkButton *widget,
 
 static void
 write_info_tag_alternates (metadata_editor    *meta_info,
-                           GimpMetadata       *g_metadata,
+                           ClayMetadata       *g_metadata,
                            const TranslateTag *info_tags,
                            gint                n_items)
 {
@@ -1738,7 +1738,7 @@ set_combined_tag_values (GExiv2Metadata     *metadata,
 }
 
 static void
-replace_deprecated_info_tags (GimpMetadata       *metadata,
+replace_deprecated_info_tags (ClayMetadata       *metadata,
                               const TranslateTag *info_tags,
                               gint                n_items)
 {
@@ -1769,7 +1769,7 @@ replace_deprecated_info_tags (GimpMetadata       *metadata,
 }
 
 static void
-convert_deprecated_tags (GimpMetadata *metadata)
+convert_deprecated_tags (ClayMetadata *metadata)
 {
   /* For now hardcoded deprecated tags that we convert to their more
    * accepted version.
@@ -1783,7 +1783,7 @@ convert_deprecated_tags (GimpMetadata *metadata)
 }
 
 static void
-remove_deprecated_info_tags (GimpMetadata       *metadata,
+remove_deprecated_info_tags (ClayMetadata       *metadata,
                              const TranslateTag *info_tags,
                              gint                n_items)
 {
@@ -1795,7 +1795,7 @@ remove_deprecated_info_tags (GimpMetadata       *metadata,
 }
 
 static void
-remove_deprecated_tags (GimpMetadata *metadata)
+remove_deprecated_tags (ClayMetadata *metadata)
 {
   remove_deprecated_info_tags (metadata, creatorContactInfoTags,   n_creatorContactInfoTags);
   remove_deprecated_info_tags (metadata, locationCreationInfoTags, n_locationCreationInfoTags);
@@ -2334,8 +2334,8 @@ metadata_dialog_editor_set_metadata (metadata_editor *meta_info)
 
       index = default_metadata_tags[i].other_tag_index;
 
-      if (default_metadata_tags[i].xmp_type == GIMP_XMP_BAG ||
-          default_metadata_tags[i].xmp_type == GIMP_XMP_SEQ)
+      if (default_metadata_tags[i].xmp_type == CLAY_XMP_BAG ||
+          default_metadata_tags[i].xmp_type == CLAY_XMP_SEQ)
         {
           gchar **values;
 
@@ -2898,7 +2898,7 @@ set_tag_failed (const gchar *tag, gchar *error_message)
 }
 
 static void
-set_tag_string (GimpMetadata *metadata,
+set_tag_string (ClayMetadata *metadata,
                 const gchar  *name,
                 const gchar  *value,
                 gboolean      clear_tag)
@@ -2951,7 +2951,7 @@ metadata_editor_get_list_combo_value (gchar                  *cur_ui_value,
 
 static void
 write_metadata_tag (metadata_editor *meta_info,
-                    GimpMetadata    *metadata,
+                    ClayMetadata    *metadata,
                     gchar           *tag)
 {
   GtkWidget     *list_widget;
@@ -3001,7 +3001,7 @@ write_metadata_tag (metadata_editor *meta_info,
 
 static void
 write_metadata_tag_multiple (metadata_editor      *meta_info,
-                             GimpMetadata         *metadata,
+                             ClayMetadata         *metadata,
                              GExiv2StructureType   type,
                              const gchar          *header_tag,
                              gint                  n_columns,
@@ -3103,7 +3103,7 @@ write_metadata_tag_multiple (metadata_editor      *meta_info,
 }
 
 static gboolean
-set_gps_longitude_latitude (GimpMetadata *metadata,
+set_gps_longitude_latitude (ClayMetadata *metadata,
                             const gchar  *tag,
                             const gchar  *value)
 {
@@ -3325,14 +3325,14 @@ metadata_editor_set_value (metadata_editor *args,
 void
 metadata_editor_write_callback (GtkWidget       *dialog,
                                 metadata_editor *meta_info,
-                                GimpImage       *image)
+                                ClayImage       *image)
 {
-  GimpMetadata  *g_metadata;
+  ClayMetadata  *g_metadata;
   gint           i = 0;
 
-  g_metadata = gimp_image_get_metadata (image);
+  g_metadata = clay_image_get_metadata (image);
 
-  gimp_metadata_add_xmp_history (g_metadata, "metadata");
+  clay_metadata_add_xmp_history (g_metadata, "metadata");
 
   /* Start with writing the mode list (table/grid) metadata */
   for (i = 0; i < n_list_metadata; i++)
@@ -3409,7 +3409,7 @@ metadata_editor_write_callback (GtkWidget       *dialog,
                   gtk_combo_box_set_active (GTK_COMBO_BOX (combo_widget), 1);
                   g_snprintf (alt_str, sizeof (alt_str),
                               _("GPS Longitude Reference not set. Selected choice: %s"), _(gpslngref[1].display));
-                  gimp_message (alt_str);
+                  clay_message (alt_str);
                 }
               else if (! valid && combo_idx > 0)
                 {
@@ -3436,7 +3436,7 @@ metadata_editor_write_callback (GtkWidget       *dialog,
                   gtk_combo_box_set_active (GTK_COMBO_BOX (combo_widget), 1);
                   g_snprintf (alt_str, sizeof (alt_str),
                               _("GPS Latitude Reference not set. Selected choice: %s"), _(gpslatref[1].display));
-                  gimp_message (alt_str);
+                  clay_message (alt_str);
                 }
               else if (! valid && combo_idx > 0)
                 {
@@ -3487,7 +3487,7 @@ metadata_editor_write_callback (GtkWidget       *dialog,
                           g_snprintf (alt_str, sizeof (alt_str),
                                       _("GPS Altitude Reference inconsistent with negative value. Changed choice to: %s"),
                                       _(gpsaltref[2].display));
-                          gimp_message (alt_str);
+                          clay_message (alt_str);
                         }
                     }
 
@@ -3511,7 +3511,7 @@ metadata_editor_write_callback (GtkWidget       *dialog,
                   g_snprintf (alt_str, sizeof (alt_str),
                               _("GPS Altitude Reference not set. Selected choice: %s"),
                               _(gpsaltref[choice].display));
-                  gimp_message (alt_str);
+                  clay_message (alt_str);
                 }
               else if (! valid && combo_idx > 0)
                 {
@@ -3523,8 +3523,8 @@ metadata_editor_write_callback (GtkWidget       *dialog,
               gint         index;
               const gchar *text_value = gtk_entry_get_text (entry);
 
-              if (default_metadata_tags[i].xmp_type == GIMP_XMP_TEXT ||
-                  default_metadata_tags[i].xmp_type == GIMP_XMP_NONE)
+              if (default_metadata_tags[i].xmp_type == CLAY_XMP_TEXT ||
+                  default_metadata_tags[i].xmp_type == CLAY_XMP_NONE)
                 {
                   gexiv2_metadata_try_clear_tag (GEXIV2_METADATA (g_metadata),
                                                  default_metadata_tags[i].tag,
@@ -3656,8 +3656,8 @@ metadata_editor_write_callback (GtkWidget       *dialog,
 
           if (text && *text)
             {
-              if (default_metadata_tags[i].xmp_type == GIMP_XMP_TEXT ||
-                  default_metadata_tags[i].xmp_type == GIMP_XMP_NONE)
+              if (default_metadata_tags[i].xmp_type == CLAY_XMP_TEXT ||
+                  default_metadata_tags[i].xmp_type == CLAY_XMP_NONE)
                 {
                   gexiv2_metadata_try_set_xmp_tag_struct (GEXIV2_METADATA (g_metadata),
                                                           default_metadata_tags[i].tag,
@@ -3797,7 +3797,7 @@ metadata_editor_write_callback (GtkWidget       *dialog,
     }
 
   remove_deprecated_tags (g_metadata);
-  gimp_image_set_metadata (image, g_metadata);
+  clay_image_set_metadata (image, g_metadata);
 }
 
 /* ============================================================================

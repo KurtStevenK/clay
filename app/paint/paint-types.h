@@ -23,49 +23,49 @@
 
 /*  paint cores  */
 
-typedef struct _GimpPaintCore        GimpPaintCore;
-typedef struct _GimpBrushCore        GimpBrushCore;
-typedef struct _GimpSourceCore       GimpSourceCore;
+typedef struct _ClayPaintCore        ClayPaintCore;
+typedef struct _ClayBrushCore        ClayBrushCore;
+typedef struct _ClaySourceCore       ClaySourceCore;
 
-typedef struct _GimpAirbrush         GimpAirbrush;
-typedef struct _GimpClone            GimpClone;
-typedef struct _GimpConvolve         GimpConvolve;
-typedef struct _GimpDodgeBurn        GimpDodgeBurn;
-typedef struct _GimpEraser           GimpEraser;
-typedef struct _GimpHeal             GimpHeal;
-typedef struct _GimpInk              GimpInk;
-typedef struct _GimpMybrushCore      GimpMybrushCore;
-typedef struct _GimpPaintbrush       GimpPaintbrush;
-typedef struct _GimpPencil           GimpPencil;
-typedef struct _GimpPerspectiveClone GimpPerspectiveClone;
-typedef struct _GimpSmudge           GimpSmudge;
+typedef struct _ClayAirbrush         ClayAirbrush;
+typedef struct _ClayClone            ClayClone;
+typedef struct _ClayConvolve         ClayConvolve;
+typedef struct _ClayDodgeBurn        ClayDodgeBurn;
+typedef struct _ClayEraser           ClayEraser;
+typedef struct _ClayHeal             ClayHeal;
+typedef struct _ClayInk              ClayInk;
+typedef struct _ClayMybrushCore      ClayMybrushCore;
+typedef struct _ClayPaintbrush       ClayPaintbrush;
+typedef struct _ClayPencil           ClayPencil;
+typedef struct _ClayPerspectiveClone ClayPerspectiveClone;
+typedef struct _ClaySmudge           ClaySmudge;
 
 
 /*  paint options  */
 
-typedef struct _GimpPaintOptions            GimpPaintOptions;
-typedef struct _GimpSourceOptions           GimpSourceOptions;
+typedef struct _ClayPaintOptions            ClayPaintOptions;
+typedef struct _ClaySourceOptions           ClaySourceOptions;
 
-typedef struct _GimpAirbrushOptions         GimpAirbrushOptions;
-typedef struct _GimpCloneOptions            GimpCloneOptions;
-typedef struct _GimpConvolveOptions         GimpConvolveOptions;
-typedef struct _GimpDodgeBurnOptions        GimpDodgeBurnOptions;
-typedef struct _GimpEraserOptions           GimpEraserOptions;
-typedef struct _GimpInkOptions              GimpInkOptions;
-typedef struct _GimpMybrushOptions          GimpMybrushOptions;
-typedef struct _GimpPencilOptions           GimpPencilOptions;
-typedef struct _GimpPerspectiveCloneOptions GimpPerspectiveCloneOptions;
-typedef struct _GimpSmudgeOptions           GimpSmudgeOptions;
+typedef struct _ClayAirbrushOptions         ClayAirbrushOptions;
+typedef struct _ClayCloneOptions            ClayCloneOptions;
+typedef struct _ClayConvolveOptions         ClayConvolveOptions;
+typedef struct _ClayDodgeBurnOptions        ClayDodgeBurnOptions;
+typedef struct _ClayEraserOptions           ClayEraserOptions;
+typedef struct _ClayInkOptions              ClayInkOptions;
+typedef struct _ClayMybrushOptions          ClayMybrushOptions;
+typedef struct _ClayPencilOptions           ClayPencilOptions;
+typedef struct _ClayPerspectiveCloneOptions ClayPerspectiveCloneOptions;
+typedef struct _ClaySmudgeOptions           ClaySmudgeOptions;
 
 
 /*  functions  */
 
-typedef void (* GimpPaintRegisterCallback) (Gimp        *gimp,
+typedef void (* ClayPaintRegisterCallback) (Clay        *clay,
                                             GType        paint_type,
                                             GType        paint_options_type,
                                             const gchar *identifier,
                                             const gchar *blurb,
                                             const gchar *icon_name);
 
-typedef void (* GimpPaintRegisterFunc)     (Gimp                      *gimp,
-                                            GimpPaintRegisterCallback  callback);
+typedef void (* ClayPaintRegisterFunc)     (Clay                      *clay,
+                                            ClayPaintRegisterCallback  callback);

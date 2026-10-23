@@ -31,7 +31,7 @@ void          metadata_editor_add_empty_rows       (GtkListStore           *list
 
 void          metadata_editor_write_callback       (GtkWidget              *dialog,
                                                     metadata_editor        *meta_info,
-                                                    GimpImage              *image);
+                                                    ClayImage              *image);
 
 GtkWidget   * metadata_editor_get_widget           (metadata_editor        *meta_info,
                                                     const gchar            *name);

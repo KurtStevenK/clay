@@ -2,7 +2,7 @@
 # Build executable plugins that define several PDB procs.
 # An executable is not versioned since installed private in /plug-ins
 
-# Not define include_directories; no higher gimp source references scriptfu
+# Not define include_directories; no higher clay source references scriptfu
 
 # Not using c_args: -DSTANDALONE=0','-DUSE_INTERFACE=1','-DUSE_STRLWR=0',
 # since those are compile time switches for tinyscheme, not present in this dir
@@ -12,7 +12,7 @@ subdir('scripts')
 subdir('server')
 subdir('interpreter')
 subdir('console')
-if not stable or not release or gimp_version.endswith('+git')
+if not stable or not release or clay_version.endswith('+git')
   subdir('test')
 endif
 
@@ -45,23 +45,23 @@ if not meson.is_cross_build()
       ],
     )
 
-    #.interp file read by gimp_interpreter_db_load_interp_file in gimpinterpreterdb.c
+    #.interp file read by clay_interpreter_db_load_interp_file in clayinterpreterdb.c
     scriptfu_config = configuration_data()
     scriptfu_config.set('SCRIPTFU_PATH', '')
     configure_file(
-      input : 'gimp-script-fu-interpreter.interp.in',
-      output: 'gimp-script-fu-interpreter.interp',
+      input : 'clay-script-fu-interpreter.interp.in',
+      output: 'clay-script-fu-interpreter.interp',
       configuration: scriptfu_config,
       install: true,
-      install_dir: gimpplugindir / 'interpreters',
+      install_dir: clayplugindir / 'interpreters',
     )
 
     configure_file(
-      input : 'gimp-script-fu-interpreter.interp.in',
-      output: 'gimp-script-fu-interpreter_win.interp',
+      input : 'clay-script-fu-interpreter.interp.in',
+      output: 'clay-script-fu-interpreter_win.interp',
       configuration: scriptfu_config,
       install: true,
-      install_dir: gimpplugindir / 'interpreters',
+      install_dir: clayplugindir / 'interpreters',
     )
   endif
 
@@ -72,7 +72,7 @@ if not meson.is_cross_build()
   plugin_exe = executable(plugin_name,
                           plugin_sources,
                           dependencies: [
-                            libgimpui_dep,
+                            libclayui_dep,
                             math,
                             gi,
                           ],
@@ -85,13 +85,13 @@ if not meson.is_cross_build()
                           link_with : [libscriptfuconsole, libscriptfu ],
                           win_subsystem: 'windows',
                           install: true,
-                          install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                          install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
   # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
   plugin_custom_targets += custom_target('dummy-' + plugin_name,
                 input: plugin_exe,
                 output: 'dummy-' + plugin_name + '.dummy',
                 command: [python, '-c',
-                          'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                          'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
                 build_by_default: true)
 endif

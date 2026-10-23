@@ -18,18 +18,18 @@
 #pragma once
 
 
-void        xcf_init        (Gimp           *gimp);
-void        xcf_exit        (Gimp           *gimp);
+void        xcf_init        (Clay           *clay);
+void        xcf_exit        (Clay           *clay);
 
-GimpImage * xcf_load_stream (Gimp           *gimp,
+ClayImage * xcf_load_stream (Clay           *clay,
                              GInputStream   *input,
                              GFile          *input_file,
-                             GimpProgress   *progress,
+                             ClayProgress   *progress,
                              GError        **error);
 
-gboolean    xcf_save_stream (Gimp           *gimp,
-                             GimpImage      *image,
+gboolean    xcf_save_stream (Clay           *clay,
+                             ClayImage      *image,
                              GOutputStream  *output,
                              GFile          *output_file,
-                             GimpProgress   *progress,
+                             ClayProgress   *progress,
                              GError        **error);

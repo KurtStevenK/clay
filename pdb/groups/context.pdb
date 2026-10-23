@@ -29,7 +29,7 @@ sub context_push {
     $help = <<'HELP';
 Creates a new context by copying the current context.
 The copy becomes the new current context for the calling plug-in until it is
-popped again using gimp_context_pop().
+popped again using clay_context_pop().
 HELP
 
     &pdb_misc;
@@ -37,10 +37,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
-    success = gimp_plug_in_context_push (plug_in);
+    success = clay_plug_in_context_push (plug_in);
   else
     success = FALSE;
 }
@@ -54,7 +54,7 @@ sub context_pop {
     $help = <<'HELP';
 Removes the topmost context from the plug-in's context stack.
 The next context on the stack becomes the new current context of the plug-in,
-that is, the context that was active before the corresponding call to gimp_context_push()
+that is, the context that was active before the corresponding call to clay_context_push()
 HELP
 
     &pdb_misc;
@@ -62,10 +62,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
-    success = gimp_plug_in_context_pop (plug_in);
+    success = clay_plug_in_context_pop (plug_in);
   else
     success = FALSE;
 }
@@ -91,7 +91,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-    gimp_config_reset (GIMP_CONFIG (context));
+    clay_config_reset (CLAY_CONFIG (context));
 }
 CODE
     );
@@ -102,7 +102,7 @@ sub context_list_paint_methods {
 
     $help = <<'HELP';
 Lists the names of the available paint methods.
-Any of the names can be used for gimp_context_set_paint_method().
+Any of the names can be used for clay_context_set_paint_method().
 HELP
 
     &simon_pdb_misc('2007', '2.4');
@@ -115,7 +115,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  paint_methods = gimp_container_get_name_array (gimp->paint_info_list);
+  paint_methods = clay_container_get_name_array (clay->paint_info_list);
 }
 CODE
     );
@@ -138,10 +138,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintInfo *paint_info = gimp_context_get_paint_info (context);
+  ClayPaintInfo *paint_info = clay_context_get_paint_info (context);
 
   if (paint_info)
-    name = g_strdup (gimp_object_get_name (paint_info));
+    name = g_strdup (clay_object_get_name (paint_info));
   else
     success = FALSE;
 }
@@ -169,10 +169,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintInfo *paint_info = gimp_pdb_get_paint_info (gimp, name, error);
+  ClayPaintInfo *paint_info = clay_pdb_get_paint_info (clay, name, error);
 
   if (paint_info)
-    gimp_context_set_paint_info (context, paint_info);
+    clay_context_set_paint_info (context, paint_info);
   else
     success = FALSE;
 }
@@ -190,15 +190,15 @@ HELP
     &mitch_pdb_misc('2015', '2.10');
 
     @outargs = (
-	{ name  => 'stroke_method', type  => 'enum GimpStrokeMethod',
+	{ name  => 'stroke_method', type  => 'enum ClayStrokeMethod',
 	  desc  => 'The active stroke method' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "method", &stroke_method,
@@ -219,15 +219,15 @@ HELP
     &mitch_pdb_misc('2015', '2.10');
 
     @inargs = (
-        { name => 'stroke_method', type => 'enum GimpStrokeMethod',
+        { name => 'stroke_method', type => 'enum ClayStrokeMethod',
           desc => 'The new stroke method' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "method", stroke_method,
@@ -238,10 +238,10 @@ CODE
 }
 
 sub context_get_foreground {
-    $blurb = "Get the current GIMP foreground color.";
+    $blurb = "Get the current Clay foreground color.";
 
     $help = <<'HELP';
-Returns the current GIMP foreground color. The foreground
+Returns the current Clay foreground color. The foreground
 color is used in a variety of tools such as paint tools, blending, and bucket
 fill.
 HELP
@@ -256,18 +256,18 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  foreground = gegl_color_duplicate (gimp_context_get_foreground (context));
-  gimp_color_set_alpha (foreground, 1.0);
+  foreground = gegl_color_duplicate (clay_context_get_foreground (context));
+  clay_color_set_alpha (foreground, 1.0);
 }
 CODE
     );
 }
 
 sub context_set_foreground {
-    $blurb = "Set the current GIMP foreground color.";
+    $blurb = "Set the current Clay foreground color.";
 
     $help = <<'HELP';
-Sets the current GIMP foreground color. After this is set,
+Sets the current Clay foreground color. After this is set,
 operations which use foreground such as paint tools, blending, and bucket fill
 will use the new value.
 HELP
@@ -282,18 +282,18 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_color_set_alpha (foreground, 1.0);
-  gimp_context_set_foreground (context, foreground);
+  clay_color_set_alpha (foreground, 1.0);
+  clay_context_set_foreground (context, foreground);
 }
 CODE
     );
 }
 
 sub context_get_background {
-    $blurb = "Get the current GIMP background color.";
+    $blurb = "Get the current Clay background color.";
 
     $help = <<'HELP';
-Returns the current GIMP background color. The background
+Returns the current Clay background color. The background
 color is used in a variety of tools such as blending, erasing (with non-alpha
 images), and image filling.
 HELP
@@ -308,18 +308,18 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  background = gegl_color_duplicate (gimp_context_get_background (context));
-  gimp_color_set_alpha (background, 1.0);
+  background = gegl_color_duplicate (clay_context_get_background (context));
+  clay_color_set_alpha (background, 1.0);
 }
 CODE
     );
 }
 
 sub context_set_background {
-    $blurb = "Set the current GIMP background color.";
+    $blurb = "Set the current Clay background color.";
 
     $help = <<'HELP';
-Sets the current GIMP background color. After this is set,
+Sets the current Clay background color. After this is set,
 operations which use background such as blending, filling images, clearing,
 and erasing (in non-alpha images) will use the new value.
 HELP
@@ -334,8 +334,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_color_set_alpha (background, 1.0);
-  gimp_context_set_background (context, background);
+  clay_color_set_alpha (background, 1.0);
+  clay_context_set_background (context, background);
 }
 CODE
     );
@@ -345,7 +345,7 @@ sub context_get_image {
     $blurb = "Get the current active image.";
 
     $help = <<'HELP';
-Returns the current active image in the GIMP workspace.
+Returns the current active image in the Clay workspace.
 HELP
 
     &alxsa_pdb_misc('2026', '3.4');
@@ -358,7 +358,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  image = gimp_context_get_image (context);
+  image = clay_context_get_image (context);
 }
 CODE
     );
@@ -368,7 +368,7 @@ sub context_set_image {
     $blurb = "Set the current active image.";
 
     $help = <<'HELP';
-Sets the current active image in the GIMP workspace. After this is set,
+Sets the current active image in the Clay workspace. After this is set,
 operations will work on the new image.
 HELP
 
@@ -382,7 +382,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_context_set_image (context, image);
+  clay_context_set_image (context, image);
 }
 CODE
     );
@@ -390,11 +390,11 @@ CODE
 
 sub context_set_default_colors {
     $blurb = <<'BLURB';
-Set the current GIMP foreground and background colors to black and white.
+Set the current Clay foreground and background colors to black and white.
 BLURB
 
     $help = <<'HELP';
-Sets the current GIMP foreground and background colors to their
+Sets the current Clay foreground and background colors to their
 initial default values, black and white.
 HELP
 
@@ -403,17 +403,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_context_set_default_colors (context);
+  clay_context_set_default_colors (context);
 }
 CODE
     );
 }
 
 sub context_swap_colors {
-    $blurb = 'Swap the current GIMP foreground and background colors.';
+    $blurb = 'Swap the current Clay foreground and background colors.';
 
     $help = <<'HELP';
-Swaps the current GIMP foreground and background colors, so that
+Swaps the current Clay foreground and background colors, so that
 the new foreground color becomes the old background color and vice versa.
 HELP
 
@@ -422,7 +422,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_context_swap_colors (context);
+  clay_context_swap_colors (context);
 }
 CODE
     );
@@ -446,7 +446,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  opacity = gimp_context_get_opacity (context) * 100.0;
+  opacity = clay_context_get_opacity (context) * 100.0;
 }
 CODE
     );
@@ -470,7 +470,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_context_set_opacity (context, opacity / 100.0);
+  clay_context_set_opacity (context, opacity / 100.0);
 }
 CODE
     );
@@ -488,15 +488,15 @@ HELP
     &pdb_misc;
 
     @outargs = (
-        { name => 'paint_mode', type => 'enum GimpLayerMode',
-          default => 'GIMP_LAYER_MODE_NORMAL',
+        { name => 'paint_mode', type => 'enum ClayLayerMode',
+          default => 'CLAY_LAYER_MODE_NORMAL',
           desc => 'The paint mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  paint_mode = gimp_context_get_paint_mode (context);
+  paint_mode = clay_context_get_paint_mode (context);
 }
 CODE
     );
@@ -512,18 +512,18 @@ HELP
     &pdb_misc;
 
     @inargs = (
-        { name => 'paint_mode', type => 'enum GimpLayerMode',
-          default => 'GIMP_LAYER_MODE_NORMAL',
+        { name => 'paint_mode', type => 'enum ClayLayerMode',
+          default => 'CLAY_LAYER_MODE_NORMAL',
           desc => 'The paint mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  if (paint_mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-    paint_mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+  if (paint_mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+    paint_mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
-  gimp_context_set_paint_mode (context, paint_mode);
+  clay_context_set_paint_mode (context, paint_mode);
 }
 CODE
     );
@@ -546,8 +546,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "width", &line_width,
@@ -565,7 +565,7 @@ Modifies the line width setting for stroking lines.
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
@@ -578,8 +578,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "width", line_width,
@@ -606,8 +606,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "unit", &line_width_unit,
@@ -625,7 +625,7 @@ Modifies the line width unit setting for stroking lines.
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
@@ -638,8 +638,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "unit", line_width_unit,
@@ -659,15 +659,15 @@ HELP
     &mitch_pdb_misc('2015', '2.10');
 
     @outargs = (
-        { name => 'cap_style', type => 'enum GimpCapStyle',
+        { name => 'cap_style', type => 'enum ClayCapStyle',
           desc => 'The line cap style setting' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "cap-style", &cap_style,
@@ -685,21 +685,21 @@ Modifies the line cap style setting for stroking lines.
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
 
     @inargs = (
-        { name => 'cap_style', type => 'enum GimpCapStyle',
+        { name => 'cap_style', type => 'enum ClayCapStyle',
           desc => 'The line cap style setting' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "cap-style", cap_style,
@@ -719,15 +719,15 @@ HELP
     &mitch_pdb_misc('2015', '2.10');
 
     @outargs = (
-        { name => 'join_style', type => 'enum GimpJoinStyle',
+        { name => 'join_style', type => 'enum ClayJoinStyle',
           desc => 'The line join style setting' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "join-style", &join_style,
@@ -744,21 +744,21 @@ sub context_set_line_join_style {
 Modifies the line join style setting for stroking lines.
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
 
     @inargs = (
-        { name => 'join_style', type => 'enum GimpJoinStyle',
+        { name => 'join_style', type => 'enum ClayJoinStyle',
           desc => 'The line join style setting' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "join-style", join_style,
@@ -785,8 +785,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "miter-limit", &miter_limit,
@@ -808,7 +808,7 @@ actual join point.
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
@@ -821,8 +821,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "miter-limit", miter_limit,
@@ -849,8 +849,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "dash-offset", &dash_offset,
@@ -868,7 +868,7 @@ Modifies the line dash offset setting for stroking lines.
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
@@ -881,8 +881,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "dash-offset", dash_offset,
@@ -910,12 +910,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
-  GArray *pattern = gimp_stroke_options_get_dash_info (options);
+  GArray *pattern = clay_stroke_options_get_dash_info (options);
 
-  dashes = gimp_dash_pattern_to_double_array (pattern, &num_dashes);
+  dashes = clay_dash_pattern_to_double_array (pattern, &num_dashes);
 }
 CODE
     );
@@ -934,7 +934,7 @@ results in a square segment shape (or gap shape).
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_stroke_selection(), gimp_drawable_edit_stroke_item().
+clay_drawable_edit_stroke_selection(), clay_drawable_edit_stroke_item().
 HELP
 
     &mitch_pdb_misc('2015', '2.10');
@@ -948,21 +948,21 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   GArray *pattern = NULL;
 
   if (num_dashes > 0)
     {
-      pattern = gimp_dash_pattern_from_double_array (num_dashes, dashes);
+      pattern = clay_dash_pattern_from_double_array (num_dashes, dashes);
 
       if (! pattern)
         success = FALSE;
     }
 
   if (success)
-    gimp_stroke_options_take_dash_pattern (options, GIMP_DASH_CUSTOM, pattern);
+    clay_stroke_options_take_dash_pattern (options, CLAY_DASH_CUSTOM, pattern);
 }
 CODE
     );
@@ -987,7 +987,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  brush = gimp_context_get_brush (context);
+  brush = clay_context_get_brush (context);
 }
 CODE
     );
@@ -1014,7 +1014,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_context_set_brush (context, brush);
+  clay_context_set_brush (context, brush);
 }
 CODE
     );
@@ -1035,9 +1035,9 @@ sub context_get_brush_size {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1067,7 +1067,7 @@ sub context_set_brush_size {
   GList *options;
   GList *list;
 
-  options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
   for (list = options; list; list = g_list_next (list))
     g_object_set (list->data,
@@ -1092,17 +1092,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpBrush *brush = gimp_context_get_brush (context);
+  ClayBrush *brush = clay_context_get_brush (context);
 
   if (brush)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
-        gimp_paint_options_set_default_brush_size (list->data, brush);
+        clay_paint_options_set_default_brush_size (list->data, brush);
 
       g_list_free (options);
     }
@@ -1132,7 +1132,7 @@ sub context_set_brush_aspect_ratio {
   GList *options;
   GList *list;
 
-  options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
   for (list = options; list; list = g_list_next (list))
     g_object_set (list->data,
@@ -1160,9 +1160,9 @@ sub context_get_brush_aspect_ratio {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1192,7 +1192,7 @@ sub context_set_brush_angle {
   GList *options;
   GList *list;
 
-  options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
   for (list = options; list; list = g_list_next (list))
     g_object_set (list->data,
@@ -1220,9 +1220,9 @@ sub context_get_brush_angle {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1250,9 +1250,9 @@ sub context_get_brush_spacing {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1282,7 +1282,7 @@ sub context_set_brush_spacing {
   GList *options;
   GList *list;
 
-  options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
   for (list = options; list; list = g_list_next (list))
     g_object_set (list->data,
@@ -1307,17 +1307,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpBrush *brush = gimp_context_get_brush (context);
+  ClayBrush *brush = clay_context_get_brush (context);
 
   if (brush)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
-        gimp_paint_options_set_default_brush_spacing (list->data, brush);
+        clay_paint_options_set_default_brush_spacing (list->data, brush);
 
       g_list_free (options);
     }
@@ -1345,9 +1345,9 @@ sub context_get_brush_hardness {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1377,7 +1377,7 @@ sub context_set_brush_hardness {
   GList *options;
   GList *list;
 
-  options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
   for (list = options; list; list = g_list_next (list))
     g_object_set (list->data,
@@ -1402,17 +1402,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpBrush *brush = gimp_context_get_brush (context);
+  ClayBrush *brush = clay_context_get_brush (context);
 
   if (brush)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
-        gimp_paint_options_set_default_brush_hardness (list->data, brush);
+        clay_paint_options_set_default_brush_hardness (list->data, brush);
 
       g_list_free (options);
     }
@@ -1440,9 +1440,9 @@ sub context_get_brush_force {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1472,7 +1472,7 @@ sub context_set_brush_force {
   GList *options;
   GList *list;
 
-  options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
   for (list = options; list; list = g_list_next (list))
     g_object_set (list->data,
@@ -1494,7 +1494,7 @@ If enabled, all paint operations and stroke operations use
 this paint dynamics to control the application of paint to the image.
 If disabled, the dynamics will be ignored during paint actions.
 
-See gimp_context_are_dynamics_enabled() to enquire whether dynamics are
+See clay_context_are_dynamics_enabled() to enquire whether dynamics are
 used or ignored.
 HELP
 
@@ -1508,10 +1508,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpDynamics *dynamics = gimp_context_get_dynamics (context);
+  ClayDynamics *dynamics = clay_context_get_dynamics (context);
 
   if (dynamics)
-    name = g_strdup (gimp_object_get_name (dynamics));
+    name = g_strdup (clay_object_get_name (dynamics));
   else
     success = FALSE;
 }
@@ -1540,10 +1540,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpDynamics *dynamics = GIMP_DYNAMICS (gimp_pdb_get_resource (gimp, GIMP_TYPE_DYNAMICS, name, GIMP_PDB_DATA_ACCESS_READ, error));
+  ClayDynamics *dynamics = CLAY_DYNAMICS (clay_pdb_get_resource (clay, CLAY_TYPE_DYNAMICS, name, CLAY_PDB_DATA_ACCESS_READ, error));
 
   if (dynamics)
-    gimp_context_set_dynamics (context, dynamics);
+    clay_context_set_dynamics (context, dynamics);
   else
     success = FALSE;
 }
@@ -1556,7 +1556,7 @@ sub context_are_dynamics_enabled {
 
     $help = <<'HELP';
 Returns whether the currently active paint dynamics (as
-returned by gimp_context_get_dynamics()) is enabled.
+returned by clay_context_get_dynamics()) is enabled.
 HELP
 
     &jehan_pdb_misc('2022', '3.0');
@@ -1570,12 +1570,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
-    enabled = gimp_paint_options_are_dynamics_enabled (options);
+    enabled = clay_paint_options_are_dynamics_enabled (options);
   else
     success = FALSE;
 }
@@ -1600,12 +1600,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
-    gimp_paint_options_enable_dynamics (options, enable);
+    clay_paint_options_enable_dynamics (options, enable);
   else
     success = FALSE;
 }
@@ -1633,8 +1633,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   if (options)
     g_object_get (options,
@@ -1669,8 +1669,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_set (options,
                 "emulate-brush-dynamics", emulate_dynamics,
@@ -1700,9 +1700,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1735,9 +1735,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   g_object_set (options,
                 "fade-length", fade_length,
@@ -1760,16 +1760,16 @@ HELP
     $since = '3.2';
 
     @outargs = (
-	{ name  => 'fade_repeat', type  => 'enum GimpRepeatMode',
+	{ name  => 'fade_repeat', type  => 'enum ClayRepeatMode',
 	  desc  => 'The paint fade repeat type setting' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1795,16 +1795,16 @@ HELP
     $since = '3.2';
 
     @inargs = (
-        { name => 'fade_repeat', type => 'enum GimpRepeatMode',
+        { name => 'fade_repeat', type => 'enum ClayRepeatMode',
           desc => 'The paint fade repeat type setting' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
   g_object_set (options,
                 "fade-repeat", fade_repeat,
 		NULL);
@@ -1830,10 +1830,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpMybrush *brush = gimp_context_get_mybrush (context);
+  ClayMybrush *brush = clay_context_get_mybrush (context);
 
   if (brush)
-    name = g_strdup (gimp_object_get_name (brush));
+    name = g_strdup (clay_object_get_name (brush));
   else
     success = FALSE;
 }
@@ -1861,11 +1861,11 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpMybrush *brush = GIMP_MYBRUSH (gimp_pdb_get_resource (gimp, GIMP_TYPE_MYBRUSH, name,
-                                                            GIMP_PDB_DATA_ACCESS_READ, error));
+  ClayMybrush *brush = CLAY_MYBRUSH (clay_pdb_get_resource (clay, CLAY_TYPE_MYBRUSH, name,
+                                                            CLAY_PDB_DATA_ACCESS_READ, error));
 
   if (brush)
-    gimp_context_set_mybrush (context, brush);
+    clay_context_set_mybrush (context, brush);
   else
     success = FALSE;
 }
@@ -1893,7 +1893,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  pattern = gimp_context_get_pattern (context);
+  pattern = clay_context_get_pattern (context);
 
   if (!pattern)
     success = FALSE;
@@ -1923,7 +1923,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_context_set_pattern (context, pattern);
+  clay_context_set_pattern (context, pattern);
 }
 CODE
     );
@@ -1947,7 +1947,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gradient = gimp_context_get_gradient (context);
+  gradient = clay_context_get_gradient (context);
 
   if (!gradient)
     success = FALSE;
@@ -1977,7 +1977,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_gradient (context, gradient);
+  clay_context_set_gradient (context, gradient);
 }
 CODE
     );
@@ -1996,8 +1996,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_bg_rgb (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_bg_rgb (clay));
 }
 CODE
     );
@@ -2016,8 +2016,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_bg_hsv_cw (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_bg_hsv_cw (clay));
 }
 CODE
     );
@@ -2036,8 +2036,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_bg_hsv_ccw (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_bg_hsv_ccw (clay));
 }
 CODE
     );
@@ -2056,8 +2056,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_transparent (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_transparent (clay));
 }
 CODE
     );
@@ -2070,19 +2070,19 @@ sub context_set_gradient_blend_color_space {
     &mitch_pdb_misc('2018', '2.10');
 
     @inargs = (
-	{ name => "blend_color_space", type => 'enum GimpGradientBlendColorSpace',
+	{ name => "blend_color_space", type => 'enum ClayGradientBlendColorSpace',
 	  desc => "Blend color space" }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *options;
+  ClayContainer *options;
   GList         *list;
 
-  options = gimp_pdb_context_get_paint_options_list (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_paint_options_list (CLAY_PDB_CONTEXT (context));
 
-  for (list = GIMP_LIST (options)->queue->head; list; list = g_list_next (list))
+  for (list = CLAY_LIST (options)->queue->head; list; list = g_list_next (list))
     g_object_set (list->data,
                   "gradient-blend-color-space", blend_color_space,
                    NULL);
@@ -2098,7 +2098,7 @@ sub context_get_gradient_blend_color_space {
     &mitch_pdb_misc('2018', '2.10');
 
     @outargs = (
-	{ name => "blend_color_space", type => 'enum GimpGradientBlendColorSpace',
+	{ name => "blend_color_space", type => 'enum ClayGradientBlendColorSpace',
 	  desc => "Color blend space" }
     );
 
@@ -2106,9 +2106,9 @@ sub context_get_gradient_blend_color_space {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -2128,19 +2128,19 @@ sub context_set_gradient_repeat_mode {
     &mitch_pdb_misc('2018', '2.10');
 
     @inargs = (
-	{ name => "repeat_mode", type => 'enum GimpRepeatMode',
+	{ name => "repeat_mode", type => 'enum ClayRepeatMode',
 	  desc => "Repeat mode" }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *options;
+  ClayContainer *options;
   GList         *list;
 
-  options = gimp_pdb_context_get_paint_options_list (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_paint_options_list (CLAY_PDB_CONTEXT (context));
 
-  for (list = GIMP_LIST (options)->queue->head; list; list = g_list_next (list))
+  for (list = CLAY_LIST (options)->queue->head; list; list = g_list_next (list))
     g_object_set (list->data,
                   "gradient-repeat", repeat_mode,
                    NULL);
@@ -2156,7 +2156,7 @@ sub context_get_gradient_repeat_mode {
     &mitch_pdb_misc('2018', '2.10');
 
     @outargs = (
-	{ name => "repeat_mode", type => 'enum GimpRepeatMode',
+	{ name => "repeat_mode", type => 'enum ClayRepeatMode',
 	  desc => "Repeat mode" }
     );
 
@@ -2164,9 +2164,9 @@ sub context_get_gradient_repeat_mode {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -2193,12 +2193,12 @@ sub context_set_gradient_reverse {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *options;
+  ClayContainer *options;
   GList         *list;
 
-  options = gimp_pdb_context_get_paint_options_list (GIMP_PDB_CONTEXT (context));
+  options = clay_pdb_context_get_paint_options_list (CLAY_PDB_CONTEXT (context));
 
-  for (list = GIMP_LIST (options)->queue->head; list; list = g_list_next (list))
+  for (list = CLAY_LIST (options)->queue->head; list; list = g_list_next (list))
     g_object_set (list->data,
                   "gradient-reverse", reverse,
                    NULL);
@@ -2222,9 +2222,9 @@ sub context_get_gradient_reverse {
 	code => <<'CODE'
 {
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -2255,7 +2255,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  palette = gimp_context_get_palette (context);
+  palette = clay_context_get_palette (context);
 
   if (!palette)
     success = FALSE;
@@ -2285,7 +2285,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_palette (context, palette);
+  clay_context_set_palette (context, palette);
 }
 CODE
     );
@@ -2310,16 +2310,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (! gimp_data_factory_data_wait (gimp->font_factory))
+  if (! clay_data_factory_data_wait (clay->font_factory))
     {
       success = FALSE;
-      g_set_error_literal (error, GIMP_PDB_ERROR,
-                           GIMP_PDB_ERROR_INTERNAL_ERROR,
+      g_set_error_literal (error, CLAY_PDB_ERROR,
+                           CLAY_PDB_ERROR_INTERNAL_ERROR,
                            _("Failed waiting for the loading of fonts."));
     }
   else
     {
-      font = gimp_context_get_font (context);
+      font = clay_context_get_font (context);
     }
 }
 CODE
@@ -2347,7 +2347,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_context_set_font (context, font);
+  clay_context_set_font (context, font);
 }
 CODE
     );
@@ -2390,11 +2390,11 @@ selection is wanted.
 
 
 This setting affects the following procedures:
-gimp_image_select_color(), gimp_image_select_contiguous_color(),
-gimp_image_select_round_rectangle(), gimp_image_select_ellipse(),
-gimp_image_select_polygon(), gimp_image_select_item(),
-gimp_drawable_edit_bucket_fill(), gimp_drawable_edit_stroke_item(),
-gimp_drawable_edit_stroke_selection().
+clay_image_select_color(), clay_image_select_contiguous_color(),
+clay_image_select_round_rectangle(), clay_image_select_ellipse(),
+clay_image_select_polygon(), clay_image_select_item(),
+clay_drawable_edit_bucket_fill(), clay_drawable_edit_stroke_item(),
+clay_drawable_edit_stroke_selection().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -2447,14 +2447,14 @@ sub context_set_feather {
 Modifies the feather setting. If the feather option is
 enabled, selections will be blurred before combining. The blur is a
 gaussian blur; its radii can be controlled using
-gimp_context_set_feather_radius().
+clay_context_set_feather_radius().
 
 
 This setting affects the following procedures:
-gimp_image_select_color(), gimp_image_select_contiguous_color(),
-gimp_image_select_rectangle(), gimp_image_select_round_rectangle(),
-gimp_image_select_ellipse(), gimp_image_select_polygon(),
-gimp_image_select_item().
+clay_image_select_color(), clay_image_select_contiguous_color(),
+clay_image_select_rectangle(), clay_image_select_round_rectangle(),
+clay_image_select_ellipse(), clay_image_select_polygon(),
+clay_image_select_item().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -2511,7 +2511,7 @@ Modifies the feather radius setting.
 
 
 This setting affects all procedures that are affected
-by gimp_context_set_feather().
+by clay_context_set_feather().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -2573,8 +2573,8 @@ equivalent to sampling for colors after merging all visible layers).
 
 
 This setting affects the following procedures:
-gimp_image_select_color(), gimp_image_select_contiguous_color(),
-gimp_drawable_edit_bucket_fill().
+clay_image_select_color(), clay_image_select_contiguous_color(),
+clay_drawable_edit_bucket_fill().
 HELP
 
     &mitch_pdb_misc('2011', '2.8');
@@ -2605,7 +2605,7 @@ HELP
     &mitch_pdb_misc('2011', '2.8');
 
     @outargs = (
-        { name => 'sample_criterion', type => 'enum GimpSelectCriterion',
+        { name => 'sample_criterion', type => 'enum ClaySelectCriterion',
           desc => 'The sample criterion setting' }
     );
 
@@ -2631,14 +2631,14 @@ determined. SELECT_CRITERION_COMPOSITE is the default value.
 
 
 This setting affects the following procedures:
-gimp_image_select_color(), gimp_image_select_contiguous_color(),
-gimp_drawable_edit_bucket_fill().
+clay_image_select_color(), clay_image_select_contiguous_color(),
+clay_drawable_edit_bucket_fill().
 HELP
 
     &mitch_pdb_misc('2011', '2.8');
 
     @inargs = (
-        { name => 'sample_criterion', type => 'enum GimpSelectCriterion',
+        { name => 'sample_criterion', type => 'enum ClaySelectCriterion',
           desc => 'The sample criterion setting' }
     );
 
@@ -2686,12 +2686,12 @@ Modifies the sample threshold setting. If an operation
 depends on the colors of the pixels present in a drawable, like when
 doing a seed fill, this setting controls what is "sufficiently close"
 to be considered a similar color. If the sample threshold has not been
-set explicitly, the default threshold set in gimprc will be used.
+set explicitly, the default threshold set in clayrc will be used.
 
 
 This setting affects the following procedures:
-gimp_image_select_color(), gimp_image_select_contiguous_color(),
-gimp_drawable_edit_bucket_fill().
+clay_image_select_color(), clay_image_select_contiguous_color(),
+clay_drawable_edit_bucket_fill().
 HELP
 
     &mitch_pdb_misc('2011', '2.8');
@@ -2717,7 +2717,7 @@ sub context_get_sample_threshold_int {
 
     $help = <<'HELP';
 Returns the sample threshold setting as an integer
-value. See gimp_context_get_sample_threshold().
+value. See clay_context_get_sample_threshold().
 HELP
 
     &mitch_pdb_misc('2011', '2.8');
@@ -2747,7 +2747,7 @@ sub context_set_sample_threshold_int {
 
     $help = <<'HELP';
 Modifies the sample threshold setting as an integer
-value. See gimp_context_set_sample_threshold().
+value. See clay_context_set_sample_threshold().
 HELP
 
     &mitch_pdb_misc('2011', '2.8');
@@ -2805,8 +2805,8 @@ setting is TRUE, transparent areas can be selected or filled.
 
 
 This setting affects the following procedures:
-gimp_image_select_color(), gimp_image_select_contiguous_color(),
-gimp_drawable_edit_bucket_fill().
+clay_image_select_color(), clay_image_select_contiguous_color(),
+clay_drawable_edit_bucket_fill().
 HELP
 
     &mitch_pdb_misc('2011', '2.8');
@@ -2868,7 +2868,7 @@ are considered.
 
 
 This setting affects the following procedures:
-gimp_image_select_contiguous_color(), gimp_drawable_edit_bucket_fill().
+clay_image_select_contiguous_color(), clay_drawable_edit_bucket_fill().
 HELP
 
     $author = 'Ell';
@@ -2897,7 +2897,7 @@ sub context_get_distance_metric {
 
     $help = <<'HELP';
 Returns the distance metric in the current context.
-See gimp_context_set_distance_metric() to know more about its usage.
+See clay_context_set_distance_metric() to know more about its usage.
 HELP
 
     &jehan_pdb_misc('2018', '2.10');
@@ -2923,13 +2923,13 @@ sub context_set_distance_metric {
 
     $help = <<'HELP';
 Modifies the distance metric used in some computations,
-such as gimp_drawable_edit_gradient_fill(). In particular, it does not
+such as clay_drawable_edit_gradient_fill(). In particular, it does not
 change the metric used in generic distance computation on canvas, as
 in the Measure tool.
 
 
 This setting affects the following procedures:
-gimp_drawable_edit_gradient_fill().
+clay_drawable_edit_gradient_fill().
 HELP
 
     &jehan_pdb_misc('2018', '2.10');
@@ -2957,14 +2957,14 @@ sub context_get_interpolation {
 Returns the interpolation setting. The return value
 is an integer which corresponds to the values listed in the argument
 description. If the interpolation has not been set explicitly by
-gimp_context_set_interpolation(), the default interpolation set in
-gimprc will be used.
+clay_context_set_interpolation(), the default interpolation set in
+clayrc will be used.
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
 
     @outargs = (
-        { name => 'interpolation', type => 'enum GimpInterpolationType',
+        { name => 'interpolation', type => 'enum ClayInterpolationType',
           desc => 'The interpolation type' }
     );
 
@@ -2987,16 +2987,16 @@ Modifies the interpolation setting.
 
 
 This setting affects affects the following procedures:
-gimp_item_transform_flip(), gimp_item_transform_perspective(),
-gimp_item_transform_rotate(), gimp_item_transform_scale(),
-gimp_item_transform_shear(), gimp_item_transform_2d(),
-gimp_item_transform_matrix(), gimp_image_scale(), gimp_layer_scale().
+clay_item_transform_flip(), clay_item_transform_perspective(),
+clay_item_transform_rotate(), clay_item_transform_scale(),
+clay_item_transform_shear(), clay_item_transform_2d(),
+clay_item_transform_matrix(), clay_image_scale(), clay_layer_scale().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
 
     @inargs = (
-        { name => 'interpolation', type => 'enum GimpInterpolationType',
+        { name => 'interpolation', type => 'enum ClayInterpolationType',
           desc => 'The interpolation type' }
     );
 
@@ -3023,7 +3023,7 @@ HELP
     &mitch_pdb_misc('2010', '2.8');
 
     @outargs = (
-        { name => 'transform_direction', type => 'enum GimpTransformDirection',
+        { name => 'transform_direction', type => 'enum ClayTransformDirection',
           desc => 'The transform direction' }
     );
 
@@ -3046,16 +3046,16 @@ Modifies the transform direction setting.
 
 
 This setting affects affects the following procedures:
-gimp_item_transform_flip(), gimp_item_transform_perspective(),
-gimp_item_transform_rotate(), gimp_item_transform_scale(),
-gimp_item_transform_shear(), gimp_item_transform_2d(),
-gimp_item_transform_matrix().
+clay_item_transform_flip(), clay_item_transform_perspective(),
+clay_item_transform_rotate(), clay_item_transform_scale(),
+clay_item_transform_shear(), clay_item_transform_2d(),
+clay_item_transform_matrix().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
 
     @inargs = (
-        { name => 'transform_direction', type => 'enum GimpTransformDirection',
+        { name => 'transform_direction', type => 'enum ClayTransformDirection',
           desc => 'The transform direction' }
     );
 
@@ -3082,7 +3082,7 @@ HELP
     &mitch_pdb_misc('2010', '2.8');
 
     @outargs = (
-        { name => 'transform_resize', type => 'enum GimpTransformResize',
+        { name => 'transform_resize', type => 'enum ClayTransformResize',
           desc => 'The transform resize type' }
     );
 
@@ -3108,17 +3108,17 @@ is sized.
 
 
 This setting affects affects the following procedures:
-gimp_item_transform_flip(), gimp_item_transform_flip_simple(),
-gimp_item_transform_perspective(), gimp_item_transform_rotate(),
-gimp_item_transform_rotate_simple(), gimp_item_transform_scale(),
-gimp_item_transform_shear(), gimp_item_transform_2d(),
-gimp_item_transform_matrix().
+clay_item_transform_flip(), clay_item_transform_flip_simple(),
+clay_item_transform_perspective(), clay_item_transform_rotate(),
+clay_item_transform_rotate_simple(), clay_item_transform_scale(),
+clay_item_transform_shear(), clay_item_transform_2d(),
+clay_item_transform_matrix().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
 
     @inargs = (
-        { name => 'transform_resize', type => 'enum GimpTransformResize',
+        { name => 'transform_resize', type => 'enum ClayTransformResize',
           desc => 'The transform resize type' }
     );
 
@@ -3147,9 +3147,9 @@ sub context_get_ink_size {
     %invoke = (
         code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3177,9 +3177,9 @@ sub context_set_ink_size {
     %invoke = (
         code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3207,9 +3207,9 @@ sub context_get_ink_angle {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3237,9 +3237,9 @@ sub context_set_ink_angle {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3267,9 +3267,9 @@ sub context_get_ink_size_sensitivity {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3297,9 +3297,9 @@ sub context_set_ink_size_sensitivity {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3327,9 +3327,9 @@ sub context_get_ink_tilt_sensitivity {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3357,9 +3357,9 @@ sub context_set_ink_tilt_sensitivity {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3387,9 +3387,9 @@ sub context_get_ink_speed_sensitivity {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3417,9 +3417,9 @@ sub context_set_ink_speed_sensitivity {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3440,16 +3440,16 @@ sub context_get_ink_blob_type {
     &ejs_pdb_misc('2012', '2.8');
 
     @outargs = (
-        { name => "type", type => "enum GimpInkBlobType",
+        { name => "type", type => "enum ClayInkBlobType",
           desc => "Ink blob type" }
     );
 
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3470,16 +3470,16 @@ sub context_set_ink_blob_type {
     &ejs_pdb_misc('2012', '2.8');
 
     @inargs = (
-        { name => "type", type => "enum GimpInkBlobType",
+        { name => "type", type => "enum ClayInkBlobType",
           desc => "Ink blob type" }
     );
 
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3507,9 +3507,9 @@ sub context_get_ink_blob_aspect_ratio {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3537,9 +3537,9 @@ sub context_set_ink_blob_aspect_ratio {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3567,9 +3567,9 @@ sub context_get_ink_blob_angle {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     {
@@ -3600,9 +3600,9 @@ sub context_set_ink_blob_angle {
     %invoke = (
     code => <<'CODE'
 {
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_set (options,
@@ -3641,18 +3641,18 @@ HELP
 {
   GType type = g_type_from_name (type_name);
 
-  if (g_type_is_a (type, GIMP_TYPE_RESOURCE))
+  if (g_type_is_a (type, CLAY_TYPE_RESOURCE))
     {
-      if (type == GIMP_TYPE_BRUSH)
-        resource = GIMP_RESOURCE (gimp_context_get_brush (context));
-      else if (type == GIMP_TYPE_FONT)
-        resource = GIMP_RESOURCE (gimp_context_get_font (context));
-      else if (type == GIMP_TYPE_GRADIENT)
-        resource = GIMP_RESOURCE (gimp_context_get_gradient (context));
-      else if (type == GIMP_TYPE_PATTERN)
-        resource = GIMP_RESOURCE (gimp_context_get_pattern (context));
-      else if (type == GIMP_TYPE_PALETTE)
-        resource = GIMP_RESOURCE (gimp_context_get_palette (context));
+      if (type == CLAY_TYPE_BRUSH)
+        resource = CLAY_RESOURCE (clay_context_get_brush (context));
+      else if (type == CLAY_TYPE_FONT)
+        resource = CLAY_RESOURCE (clay_context_get_font (context));
+      else if (type == CLAY_TYPE_GRADIENT)
+        resource = CLAY_RESOURCE (clay_context_get_gradient (context));
+      else if (type == CLAY_TYPE_PATTERN)
+        resource = CLAY_RESOURCE (clay_context_get_pattern (context));
+      else if (type == CLAY_TYPE_PALETTE)
+        resource = CLAY_RESOURCE (clay_context_get_palette (context));
       else
         /* Should not be reached. */
         success = FALSE;
@@ -3667,25 +3667,25 @@ CODE
 }
 
 @headers = qw(<cairo.h>
-              "core/gimp.h"
-              "core/gimp-gradients.h"
-              "core/gimpcontainer.h"
-              "core/gimpdashpattern.h"
-              "core/gimpdatafactory.h"
-              "core/gimpdynamics.h"
-              "core/gimplist.h"
-              "core/gimpmybrush.h"
-              "core/gimpstrokeoptions.h"
-              "paint/gimppaintoptions.h"
-              "libgimpcolor/gimpcolor.h"
-              "libgimpconfig/gimpconfig.h"
-              "plug-in/gimpplugin.h"
-              "plug-in/gimpplugin-context.h"
-              "plug-in/gimppluginmanager.h"
-              "gimp-intl.h"
-              "gimppdb-utils.h"
-              "gimppdbcontext.h"
-              "gimppdberror.h");
+              "core/clay.h"
+              "core/clay-gradients.h"
+              "core/claycontainer.h"
+              "core/claydashpattern.h"
+              "core/claydatafactory.h"
+              "core/claydynamics.h"
+              "core/claylist.h"
+              "core/claymybrush.h"
+              "core/claystrokeoptions.h"
+              "paint/claypaintoptions.h"
+              "libclaycolor/claycolor.h"
+              "libclayconfig/clayconfig.h"
+              "plug-in/clayplugin.h"
+              "plug-in/clayplugin-context.h"
+              "plug-in/claypluginmanager.h"
+              "clay-intl.h"
+              "claypdb-utils.h"
+              "claypdbcontext.h"
+              "claypdberror.h");
 
 @procs = qw(context_push context_pop context_set_defaults
             context_list_paint_methods
@@ -3759,7 +3759,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Context';
-$doc_title = 'gimpcontext';
+$doc_title = 'claycontext';
 $doc_short_desc = "Functions to manipulate a plug-in's context.";
 $doc_long_desc = "Functions to manipulate a plug-in's context.";
 

@@ -28,15 +28,15 @@ gchar *      script_fu_user_init_directory       (void);
 gchar *      script_fu_get_init_subdirectory     (GFile *dir);
 gboolean     script_fu_is_init_directory         (GFile *dir);
 
-void         script_fu_find_and_register_scripts (GimpPlugIn     *plugin,
+void         script_fu_find_and_register_scripts (ClayPlugIn     *plugin,
                                                   GList          *paths);
 
-void         script_fu_set_run_mode              (GimpRunMode     run_mode);
+void         script_fu_set_run_mode              (ClayRunMode     run_mode);
 void         script_fu_init_embedded_interpreter (GList          *paths,
                                                   gboolean        allow_register,
-                                                  GimpRunMode     run_mode,
+                                                  ClayRunMode     run_mode,
                                                   gboolean        report_progress);
-void         script_fu_load_scripts_into_tree    (GimpPlugIn     *plugin,
+void         script_fu_load_scripts_into_tree    (ClayPlugIn     *plugin,
                                                   GList          *paths);
 gboolean     script_fu_is_scripts_loaded         (void);
 
@@ -55,10 +55,10 @@ void         script_fu_run_read_eval_print_loop  (void);
 void         script_fu_register_quit_callback         (void (*func) (void));
 void         script_fu_register_post_command_callback (void (*func) (void));
 
-GList         *script_fu_find_scripts_list_proc_names        (GimpPlugIn  *plug_in,
+GList         *script_fu_find_scripts_list_proc_names        (ClayPlugIn  *plug_in,
                                                               GList       *paths);
 
-GimpProcedure *script_fu_create_PDB_proc_plugin (GimpPlugIn  *plug_in,
+ClayProcedure *script_fu_create_PDB_proc_plugin (ClayPlugIn  *plug_in,
                                                  const gchar *name);
 void           script_fu_get_i18n_for_proc      (const gchar *proc_name,
                                                  gchar      **declared_i18n_domain,

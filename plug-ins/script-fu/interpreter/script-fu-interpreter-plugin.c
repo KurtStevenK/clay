@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* This file understands how to make a GimpPlugin of the interpreter.
+/* This file understands how to make a ClayPlugin of the interpreter.
  * This is mostly boilerplate for any plugin.
  * It understands little about ScriptFu internals,
  * hidden by script-fu-interpreter.[ch] and libscriptfu.
@@ -26,27 +26,27 @@
 #include <windows.h>
 #endif
 #include <glib.h>
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>  /* gimp_ui_init */
+#include <libclay/clay.h>
+#include <libclay/clayui.h>  /* clay_ui_init */
 
 #include "script-fu-interpreter.h"
 
 
-/* ScriptFuInterpreter subclasses GimpPlugIn */
+/* ScriptFuInterpreter subclasses ClayPlugIn */
 
 #define SCRIPT_FU_INTERPRETER_TYPE (script_fu_interpreter_get_type ())
-G_DECLARE_FINAL_TYPE (ScriptFuInterpreter, script_fu_interpreter, SCRIPT, FU_INTERPRETER, GimpPlugIn)
+G_DECLARE_FINAL_TYPE (ScriptFuInterpreter, script_fu_interpreter, SCRIPT, FU_INTERPRETER, ClayPlugIn)
 
 struct _ScriptFuInterpreter
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
-static GList          * script_fu_interpreter_query_procedures (GimpPlugIn  *plug_in);
-static GimpProcedure  * script_fu_interpreter_create_procedure (GimpPlugIn  *plug_in,
+static GList          * script_fu_interpreter_query_procedures (ClayPlugIn  *plug_in);
+static ClayProcedure  * script_fu_interpreter_create_procedure (ClayPlugIn  *plug_in,
                                                                 const gchar *name);
 
-G_DEFINE_TYPE (ScriptFuInterpreter, script_fu_interpreter, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ScriptFuInterpreter, script_fu_interpreter, CLAY_TYPE_PLUG_IN)
 
 /* An alias to argv[1], which is the path to the .scm file.
  * Each instance of ScriptFuInterpreter is specialized by the script passed in argv[1]
@@ -62,22 +62,22 @@ static gchar * path_to_this_script;
  *    plugin name is plugin-<foo>
  *    PDB procedure name is plugin-<foo>
  *    run_func in Scheme is named plugin-<foo> (not script-fu-<foo>)
- *    C run func called by GIMP is e.g. script_fu_run_image_procedure
+ *    C run func called by Clay is e.g. script_fu_run_image_procedure
  */
 
 
 
-/* Connect to Gimp.  See libgimp/gimp.c.
+/* Connect to Clay.  See libclay/clay.c.
  *
- * Can't use GIMP_MAIN macro, it doesn't omit argv[0].
+ * Can't use CLAY_MAIN macro, it doesn't omit argv[0].
  *
  * First arg is app cited in the shebang.
  * Second arg is the .scm file containing the shebang.
  * Second to last arg is the "phase" e.g. -query or -run
  * Last arg is the mode for crash dumps.
  * Typical argv:
- *   gimp-script-fu-interpreter-3.0 ~/.config/GIMP/2.99/plug-ins/fu/fu
- *          -gimp 270 12 11 -query 1
+ *   clay-script-fu-interpreter-3.0 ~/.config/Clay/2.99/plug-ins/fu/fu
+ *          -clay 270 12 11 -query 1
  */
 int main (int argc, char *argv[])
 {
@@ -86,15 +86,15 @@ int main (int argc, char *argv[])
   /* Alias path to this plugin's script file. */
   path_to_this_script = argv[1];
 
-  /* gimp_main will create an instance of the class given by the first arg, a GType.
-   * The class is a subclass of GimpPlugIn (with overridden query and create methods.)
-   * GIMP will subsequently callback the query or create methods,
+  /* clay_main will create an instance of the class given by the first arg, a GType.
+   * The class is a subclass of ClayPlugIn (with overridden query and create methods.)
+   * Clay will subsequently callback the query or create methods,
    * or the run_func of the PDB procedure of the plugin,
    * depending on the "phase" arg in argv,
-   * which is set by the gimp plugin manager, which is invoking this interpreter.
+   * which is set by the clay plugin manager, which is invoking this interpreter.
    */
-  /* Omit argv[0] when passing to gimp */
-  gimp_main (SCRIPT_FU_INTERPRETER_TYPE, argc-1, &argv[1] );
+  /* Omit argv[0] when passing to clay */
+  clay_main (SCRIPT_FU_INTERPRETER_TYPE, argc-1, &argv[1] );
 
   g_debug ("Exit script-fu-interpreter.");
 }
@@ -110,9 +110,9 @@ WinMain (HINSTANCE hInstance,
 }
 #endif
 
-/* A callback from GIMP.
- * A method of GimpPlugin.
- * GIMP calls often, before any phase (query, create, init, run.)
+/* A callback from Clay.
+ * A method of ClayPlugin.
+ * Clay calls often, before any phase (query, create, init, run.)
  *
  * It is only necessary before the create phase,
  * when we declare args and menu item possibly requiring i18n.
@@ -124,7 +124,7 @@ WinMain (HINSTANCE hInstance,
  * We must do that to get the declared i18n domain and catalog.
  */
 static gboolean
-script_fu_set_i18n (GimpPlugIn   *plug_in,
+script_fu_set_i18n (ClayPlugIn   *plug_in,
                     const gchar  *procedure_name,
                     gchar       **gettext_domain,
                     gchar       **catalog_dir)
@@ -158,7 +158,7 @@ script_fu_set_i18n (GimpPlugIn   *plug_in,
   else if ( g_strcmp0 (declared_i18n_domain, "Standard") == 0)
     {
       /* Script author wants default domain name and catalog.
-       * Set to NULL, and return TRUE tells GimpPlugin to use default.
+       * Set to NULL, and return TRUE tells ClayPlugin to use default.
        */
       *gettext_domain = NULL;
       *catalog_dir    = NULL;
@@ -186,14 +186,14 @@ script_fu_set_i18n (GimpPlugIn   *plug_in,
 static void
 script_fu_interpreter_class_init (ScriptFuInterpreterClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = script_fu_interpreter_query_procedures;
   plug_in_class->create_procedure = script_fu_interpreter_create_procedure;
 
   /* Override virtual method set_i18n.
    * Default implementation finds translations in:
-   * GIMP's .../plug-ins/<plugin_name>/locale/<lang>/LC_MESSAGES/<plugin_name>.mo
+   * Clay's .../plug-ins/<plugin_name>/locale/<lang>/LC_MESSAGES/<plugin_name>.mo
    * and throws error to console when not exists.
    */
   plug_in_class->set_i18n = script_fu_set_i18n;
@@ -205,13 +205,13 @@ static void
 script_fu_interpreter_init (ScriptFuInterpreter *script_fu)
 {
   /* Nothing to do. */
-  /* You can't call gimp_ui_init here, must be later. */
+  /* You can't call clay_ui_init here, must be later. */
 }
 
 
-/* Return the names of PDB procedures implemented. A callback from GIMP. */
+/* Return the names of PDB procedures implemented. A callback from Clay. */
 static GList *
-script_fu_interpreter_query_procedures (GimpPlugIn *plug_in)
+script_fu_interpreter_query_procedures (ClayPlugIn *plug_in)
 {
   GList *result = NULL;
 
@@ -221,20 +221,20 @@ script_fu_interpreter_query_procedures (GimpPlugIn *plug_in)
   if (g_list_length (result) < 1)
     g_warning ("No procedures defined in %s", path_to_this_script);
 
-  /* Caller is GIMP and it will free the list. */
+  /* Caller is Clay and it will free the list. */
   return result;
 }
 
 
-/* Create and return a GimpPDBProcedure,
+/* Create and return a ClayPDBProcedure,
  * for the named one of the PDB procedures that the script implements.
- * A callback from GIMP.
+ * A callback from Clay.
  *
  * Also set attributes on the procedure, most importantly, menu items (optional.)
  * Also create any menus/submenus that the script defines e.g. Filters>My
  */
-static GimpProcedure *
-script_fu_interpreter_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+script_fu_interpreter_create_procedure (ClayPlugIn  *plug_in,
                                         const gchar *proc_name)
 {
   return script_fu_interpreter_create_proc (plug_in, proc_name, path_to_this_script);

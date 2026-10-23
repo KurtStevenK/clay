@@ -19,23 +19,23 @@
 
 #include "config.h"
 
-#include <libgimp/gimpui.h>
+#include <libclay/clayui.h>
 
 #include "script-fu-types.h"
 #include "script-fu-widgets-custom.h"
 
-/* Widgets in GimpProcedureDialog *custom* to ScriptFu.
+/* Widgets in ClayProcedureDialog *custom* to ScriptFu.
  *
- * GimpProcedureDialog provides stock widgets
+ * ClayProcedureDialog provides stock widgets
  * based on the type of a procedure argument.
  * A custom widget is the same kind of widget as stock, but specialized.
  *
  * Both stock and custom widgets are keyed to a property name
- * of the GimpProcedure for the script.
- * You add custom widgets, then call gimp_procedure_dialog_fill_list()
+ * of the ClayProcedure for the script.
+ * You add custom widgets, then call clay_procedure_dialog_fill_list()
  * which adds a stock widget for any property name not having a custom widget.
  *
- * FUTURE: implement these in GimpProcedureDialog.
+ * FUTURE: implement these in ClayProcedureDialog.
  * That can't be done now because GParamSpecs are limited
  * in the types they can describe.
  * E.G. SF-OPTION describes an enumerated type
@@ -60,7 +60,7 @@
  *
  * SF-OPTION is custom.
  * Is an int combo box widget, for an enumeration defined by the script
- * (versus SF-ENUM for enums defined by GIMP.)
+ * (versus SF-ENUM for enums defined by Clay.)
  * Note SF-OPTION does not create symbols in the interpreter.
  * The script itself, and all other plugins, must use integer literals
  * to denote values.
@@ -111,7 +111,7 @@ sf_widget_custom_new_int_store (SFArg *arg)
   guint         counter = 0; /* SF enumerations start at 0. */
 
   /* Create empty store. */
-  result = g_object_new (GIMP_TYPE_INT_STORE, NULL);
+  result = g_object_new (CLAY_TYPE_INT_STORE, NULL);
 
   /* Iterate over list of names of enumerated values,
    * appending each to store having value equal to the iteration index.
@@ -128,8 +128,8 @@ sf_widget_custom_new_int_store (SFArg *arg)
 
       gtk_list_store_append (result, &iter);
       gtk_list_store_set (result, &iter,
-                          GIMP_INT_STORE_VALUE, counter,
-                          GIMP_INT_STORE_LABEL, list->data,
+                          CLAY_INT_STORE_VALUE, counter,
+                          CLAY_INT_STORE_LABEL, list->data,
                           -1);
       counter++;
     }
@@ -143,18 +143,18 @@ sf_widget_custom_new_int_store (SFArg *arg)
  * derived from the arg's declaration.
  */
 static void
-sf_widget_custom_option (GimpProcedureDialog *dialog,
+sf_widget_custom_option (ClayProcedureDialog *dialog,
                          SFArg               *arg)
 {
   GtkListStore *store;
 
   store = sf_widget_custom_new_int_store (arg);
-  gimp_procedure_dialog_get_int_combo (dialog,
+  clay_procedure_dialog_get_int_combo (dialog,
                                        arg->property_name,
-                                       GIMP_INT_STORE (store));
+                                       CLAY_INT_STORE (store));
 }
 
-/* Customize a stock GimpLabelSpin using script author's declared values.
+/* Customize a stock ClayLabelSpin using script author's declared values.
  * For SF-ADJUSTMENT:SF-SLIDER or SF-ADJUSTMENT:SF-SPINNER.
  * The stock widget has already computed increments and digits based on the range,
  * which is not what the script author declared for increments and digits.
@@ -163,19 +163,19 @@ sf_widget_custom_option (GimpProcedureDialog *dialog,
  * "arg->default_value.sfa_adjustment" is what the author declared.
  */
 static void
-sf_widget_adjustment_set_digits_and_increments (GimpLabelSpin *label_spin,
+sf_widget_adjustment_set_digits_and_increments (ClayLabelSpin *label_spin,
                                                 SFArg         *arg)
 {
   g_return_if_fail (label_spin != NULL);
-  g_return_if_fail (GIMP_IS_LABEL_SPIN (label_spin));
+  g_return_if_fail (CLAY_IS_LABEL_SPIN (label_spin));
   g_return_if_fail (arg->type == SF_ADJUSTMENT);
 
   /* Order important: set digits before increments
    * since setting digits auto recomputes and sets increments.
    */
-  gimp_label_spin_set_digits (label_spin,
+  clay_label_spin_set_digits (label_spin,
                               arg->default_value.sfa_adjustment.digits);
-  gimp_label_spin_set_increments (label_spin,
+  clay_label_spin_set_increments (label_spin,
                                   arg->default_value.sfa_adjustment.step,
                                   arg->default_value.sfa_adjustment.page);
 }
@@ -186,7 +186,7 @@ sf_widget_adjustment_set_digits_and_increments (GimpLabelSpin *label_spin,
  *  - sets digits and increments from the author's declaration, in arg
  */
 static void
-sf_widget_custom_slider (GimpProcedureDialog *dialog,
+sf_widget_custom_slider (ClayProcedureDialog *dialog,
                          SFArg               *arg)
 {
   GtkWidget *scale_entry;
@@ -194,12 +194,12 @@ sf_widget_custom_slider (GimpProcedureDialog *dialog,
   /* Widget belongs to dialog,
    * retain ref only long enough to set increments and digits.
    */
-  scale_entry = gimp_procedure_dialog_get_widget (dialog,
+  scale_entry = clay_procedure_dialog_get_widget (dialog,
                                                   arg->property_name,
-                                                  GIMP_TYPE_SCALE_ENTRY);
+                                                  CLAY_TYPE_SCALE_ENTRY);
 
-  /* A GimpScaleEntry is-a GimpLabelSpin, so just cast to GimpLabelSpin */
-  sf_widget_adjustment_set_digits_and_increments (GIMP_LABEL_SPIN (scale_entry),
+  /* A ClayScaleEntry is-a ClayLabelSpin, so just cast to ClayLabelSpin */
+  sf_widget_adjustment_set_digits_and_increments (CLAY_LABEL_SPIN (scale_entry),
                                                   arg);
 }
 
@@ -207,14 +207,14 @@ sf_widget_custom_slider (GimpProcedureDialog *dialog,
  * Similar to sf_widget_custom_slider, but for spinner widget.
  */
 static void
-sf_widget_custom_spinner (GimpProcedureDialog *dialog,
+sf_widget_custom_spinner (ClayProcedureDialog *dialog,
                           SFArg               *arg)
 {
-  GimpLabelSpin * label_spin;
+  ClayLabelSpin * label_spin;
 
-  label_spin = GIMP_LABEL_SPIN (gimp_procedure_dialog_get_widget (dialog,
+  label_spin = CLAY_LABEL_SPIN (clay_procedure_dialog_get_widget (dialog,
                                                                   arg->property_name,
-                                                                  GIMP_TYPE_LABEL_SPIN));
+                                                                  CLAY_TYPE_LABEL_SPIN));
 
   sf_widget_adjustment_set_digits_and_increments (label_spin, arg);
 }
@@ -227,7 +227,7 @@ sf_widget_custom_spinner (GimpProcedureDialog *dialog,
  * The widget will be positioned in the dialog by order of property.
  */
 static void
-sf_widget_custom_add_to_dialog (GimpProcedureDialog *dialog,
+sf_widget_custom_add_to_dialog (ClayProcedureDialog *dialog,
                                 SFArg               *arg)
 {
   /* Handles same cases as sf_arg_type_is_custom() */
@@ -313,7 +313,7 @@ script_fu_widgets_grab_focus_on_first_entry (GtkWidget *dialog)
 
 /* Add custom widgets to dialog, for certain type of args of script. */
 void
-script_fu_widgets_custom_add (GimpProcedureDialog *dialog,
+script_fu_widgets_custom_add (ClayProcedureDialog *dialog,
                               SFScript            *script)
 {
   for (int arg_index=0; arg_index < script->n_args; arg_index++)

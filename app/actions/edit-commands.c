@@ -22,59 +22,59 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimp-edit.h"
-#include "core/gimpbuffer.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpdrawable-edit.h"
-#include "core/gimpfilloptions.h"
-#include "core/gimplayer.h"
-#include "core/gimplayer-new.h"
-#include "core/gimplayermask.h"
-#include "core/gimplinklayer.h"
-#include "core/gimplist.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-undo.h"
-#include "core/gimprasterizable.h"
+#include "core/clay.h"
+#include "core/clay-edit.h"
+#include "core/claybuffer.h"
+#include "core/claycontainer.h"
+#include "core/claydrawable.h"
+#include "core/claydrawable-edit.h"
+#include "core/clayfilloptions.h"
+#include "core/claylayer.h"
+#include "core/claylayer-new.h"
+#include "core/claylayermask.h"
+#include "core/claylinklayer.h"
+#include "core/claylist.h"
+#include "core/clayimage.h"
+#include "core/clayimage-undo.h"
+#include "core/clayrasterizable.h"
 
-#include "path/gimppath-import.h"
-#include "path/gimpvectorlayer.h"
+#include "path/claypath-import.h"
+#include "path/clayvectorlayer.h"
 
-#include "text/gimptextlayer.h"
+#include "text/claytextlayer.h"
 
-#include "widgets/gimpclipboard.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
-#include "widgets/gimpwidgets-utils.h"
-#include "widgets/gimpwindowstrategy.h"
+#include "widgets/clayclipboard.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
+#include "widgets/claywidgets-utils.h"
+#include "widgets/claywindowstrategy.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpdisplayshell-transform.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/claydisplayshell-transform.h"
 
-#include "tools/gimptools-utils.h"
+#include "tools/claytools-utils.h"
 #include "tools/tool_manager.h"
 
 #include "actions.h"
 #include "edit-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static gboolean   check_drawable_alpha               (GimpDrawable  *drawable,
+static gboolean   check_drawable_alpha               (ClayDrawable  *drawable,
                                                       gpointer       data);
-static void       edit_paste                         (GimpDisplay   *display,
-                                                      GimpPasteType  paste_type,
+static void       edit_paste                         (ClayDisplay   *display,
+                                                      ClayPasteType  paste_type,
                                                       gboolean       merged,
                                                       gboolean       try_svg);
 static void       cut_named_buffer_callback          (GtkWidget     *widget,
@@ -91,71 +91,71 @@ static void       copy_named_visible_buffer_callback (GtkWidget     *widget,
 /*  public functions  */
 
 void
-edit_undo_cmd_callback (GimpAction *action,
+edit_undo_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  GimpImage   *image;
-  GimpDisplay *display;
+  ClayImage   *image;
+  ClayDisplay *display;
   return_if_no_image (image, data);
   return_if_no_display (display, data);
 
-  if (tool_manager_undo_active (image->gimp, display) ||
-      gimp_image_undo (image))
+  if (tool_manager_undo_active (image->clay, display) ||
+      clay_image_undo (image))
     {
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
 }
 
 void
-edit_redo_cmd_callback (GimpAction *action,
+edit_redo_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  GimpImage   *image;
-  GimpDisplay *display;
+  ClayImage   *image;
+  ClayDisplay *display;
   return_if_no_image (image, data);
   return_if_no_display (display, data);
 
-  if (tool_manager_redo_active (image->gimp, display) ||
-      gimp_image_redo (image))
+  if (tool_manager_redo_active (image->clay, display) ||
+      clay_image_redo (image))
     {
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
 }
 
 void
-edit_strong_undo_cmd_callback (GimpAction *action,
+edit_strong_undo_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   return_if_no_image (image, data);
 
-  if (gimp_image_strong_undo (image))
-    gimp_image_flush (image);
+  if (clay_image_strong_undo (image))
+    clay_image_flush (image);
 }
 
 void
-edit_strong_redo_cmd_callback (GimpAction *action,
+edit_strong_redo_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   return_if_no_image (image, data);
 
-  if (gimp_image_strong_redo (image))
-    gimp_image_flush (image);
+  if (clay_image_strong_redo (image))
+    clay_image_flush (image);
 }
 
 void
-edit_undo_clear_cmd_callback (GimpAction *action,
+edit_undo_clear_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpImage     *image;
-  GimpUndoStack *undo_stack;
-  GimpUndoStack *redo_stack;
+  ClayImage     *image;
+  ClayUndoStack *undo_stack;
+  ClayUndoStack *redo_stack;
   GtkWidget     *widget;
   GtkWidget     *dialog;
   gchar         *size;
@@ -164,20 +164,20 @@ edit_undo_clear_cmd_callback (GimpAction *action,
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-  dialog = gimp_message_dialog_new (_("Clear Undo History"),
-                                    GIMP_ICON_DIALOG_WARNING,
+  dialog = clay_message_dialog_new (_("Clear Undo History"),
+                                    CLAY_ICON_DIALOG_WARNING,
                                     widget,
                                     GTK_DIALOG_MODAL |
                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-                                    gimp_standard_help_func,
-                                    GIMP_HELP_EDIT_UNDO_CLEAR,
+                                    clay_standard_help_func,
+                                    CLAY_HELP_EDIT_UNDO_CLEAR,
 
                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
                                     _("Cl_ear"),  GTK_RESPONSE_OK,
 
                                     NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -190,43 +190,43 @@ edit_undo_clear_cmd_callback (GimpAction *action,
                            G_CALLBACK (gtk_widget_destroy),
                            dialog, G_CONNECT_SWAPPED);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("Really clear image's undo history?"));
 
-  undo_stack = gimp_image_get_undo_stack (image);
-  redo_stack = gimp_image_get_redo_stack (image);
+  undo_stack = clay_image_get_undo_stack (image);
+  redo_stack = clay_image_get_redo_stack (image);
 
-  memsize =  gimp_object_get_memsize (GIMP_OBJECT (undo_stack), &guisize);
+  memsize =  clay_object_get_memsize (CLAY_OBJECT (undo_stack), &guisize);
   memsize += guisize;
-  memsize += gimp_object_get_memsize (GIMP_OBJECT (redo_stack), &guisize);
+  memsize += clay_object_get_memsize (CLAY_OBJECT (redo_stack), &guisize);
   memsize += guisize;
 
   size = g_format_size (memsize);
 
-  gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                              _("Clearing the undo history of this "
                                "image will gain %s of memory."), size);
   g_free (size);
 
-  if (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_OK)
+  if (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_OK)
     {
-      gimp_image_undo_disable (image);
-      gimp_image_undo_enable (image);
-      gimp_image_flush (image);
+      clay_image_undo_disable (image);
+      clay_image_undo_enable (image);
+      clay_image_flush (image);
     }
 
   gtk_widget_destroy (dialog);
 }
 
 void
-edit_cut_cmd_callback (GimpAction *action,
+edit_cut_cmd_callback (ClayAction *action,
                        GVariant   *value,
                        gpointer    data)
 {
-  GimpImage    *image;
+  ClayImage    *image;
   GList        *drawables;
   GList        *iter;
-  GimpObject   *cut;
+  ClayObject   *cut;
   GError       *error = NULL;
   return_if_no_drawables (image, drawables, data);
 
@@ -237,17 +237,17 @@ edit_cut_cmd_callback (GimpAction *action,
         return;
       }
 
-  cut = gimp_edit_cut (image, drawables, action_data_get_context (data), &error);
+  cut = clay_edit_cut (image, drawables, action_data_get_context (data), &error);
 
   if (cut)
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
         {
           gchar *msg;
 
-          if (GIMP_IS_IMAGE (cut))
+          if (CLAY_IS_IMAGE (cut))
             msg = g_strdup_printf (ngettext ("Cut layer to the clipboard.",
                                              "Cut %d layers to the clipboard.",
                                              g_list_length (drawables)),
@@ -255,19 +255,19 @@ edit_cut_cmd_callback (GimpAction *action,
           else
             msg = g_strdup (_("Cut pixels to the clipboard."));
 
-          gimp_message_literal (image->gimp,
-                                G_OBJECT (display), GIMP_MESSAGE_INFO,
+          clay_message_literal (image->clay,
+                                G_OBJECT (display), CLAY_MESSAGE_INFO,
                                 msg);
           g_free (msg);
         }
 
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp,
+      clay_message_literal (image->clay,
                             G_OBJECT (action_data_get_display (data)),
-                            GIMP_MESSAGE_WARNING,
+                            CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }
@@ -275,37 +275,37 @@ edit_cut_cmd_callback (GimpAction *action,
 }
 
 void
-edit_copy_cmd_callback (GimpAction *action,
+edit_copy_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  GimpImage    *image;
+  ClayImage    *image;
   GList        *drawables;
-  GimpObject   *copy;
+  ClayObject   *copy;
   GError       *error = NULL;
   return_if_no_drawables (image, drawables, data);
 
-  copy = gimp_edit_copy (image, drawables, action_data_get_context (data),
+  copy = clay_edit_copy (image, drawables, action_data_get_context (data),
                          FALSE, &error);
 
   if (copy)
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
-        gimp_message_literal (image->gimp,
-                              G_OBJECT (display), GIMP_MESSAGE_INFO,
-                              GIMP_IS_IMAGE (copy) ?
+        clay_message_literal (image->clay,
+                              G_OBJECT (display), CLAY_MESSAGE_INFO,
+                              CLAY_IS_IMAGE (copy) ?
                               _("Copied layer to the clipboard.") :
                               _("Copied pixels to the clipboard."));
 
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp,
+      clay_message_literal (image->clay,
                             G_OBJECT (action_data_get_display (data)),
-                            GIMP_MESSAGE_WARNING,
+                            CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }
@@ -314,50 +314,50 @@ edit_copy_cmd_callback (GimpAction *action,
 }
 
 void
-edit_copy_visible_cmd_callback (GimpAction *action,
+edit_copy_visible_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GError    *error = NULL;
   return_if_no_image (image, data);
 
-  if (gimp_edit_copy_visible (image, action_data_get_context (data), &error))
+  if (clay_edit_copy_visible (image, action_data_get_context (data), &error))
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
-        gimp_message_literal (image->gimp,
-                              G_OBJECT (display), GIMP_MESSAGE_INFO,
+        clay_message_literal (image->clay,
+                              G_OBJECT (display), CLAY_MESSAGE_INFO,
                               _("Copied pixels to the clipboard."));
 
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp,
+      clay_message_literal (image->clay,
                             G_OBJECT (action_data_get_display (data)),
-                            GIMP_MESSAGE_WARNING,
+                            CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }
 }
 
 void
-edit_paste_cmd_callback (GimpAction *action,
+edit_paste_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpImage     *image;
-  GimpDisplay   *display    = action_data_get_display (data);
-  GimpPasteType  paste_type = (GimpPasteType) g_variant_get_int32 (value);
-  GimpPasteType  converted_type;
+  ClayImage     *image;
+  ClayDisplay   *display    = action_data_get_display (data);
+  ClayPasteType  paste_type = (ClayPasteType) g_variant_get_int32 (value);
+  ClayPasteType  converted_type;
   GList         *drawables;
   gboolean       merged     = FALSE;
 
-  if (paste_type == GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING)
+  if (paste_type == CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING)
     {
-      if (! display || ! gimp_display_get_image (display))
+      if (! display || ! clay_display_get_image (display))
         {
           edit_paste_as_new_image_cmd_callback (action, value, data);
           return;
@@ -371,42 +371,42 @@ edit_paste_cmd_callback (GimpAction *action,
 
   switch (paste_type)
     {
-    case GIMP_PASTE_TYPE_FLOATING:
-    case GIMP_PASTE_TYPE_FLOATING_IN_PLACE:
-    case GIMP_PASTE_TYPE_FLOATING_INTO:
-    case GIMP_PASTE_TYPE_FLOATING_INTO_IN_PLACE:
+    case CLAY_PASTE_TYPE_FLOATING:
+    case CLAY_PASTE_TYPE_FLOATING_IN_PLACE:
+    case CLAY_PASTE_TYPE_FLOATING_INTO:
+    case CLAY_PASTE_TYPE_FLOATING_INTO_IN_PLACE:
       edit_paste (display, paste_type, merged, TRUE);
       break;
 
-    case GIMP_PASTE_TYPE_NEW_LAYER:
-    case GIMP_PASTE_TYPE_NEW_LAYER_IN_PLACE:
+    case CLAY_PASTE_TYPE_NEW_LAYER:
+    case CLAY_PASTE_TYPE_NEW_LAYER_IN_PLACE:
       edit_paste (display, paste_type, merged, FALSE);
       break;
 
-    case GIMP_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING:
-    case GIMP_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING_IN_PLACE:
+    case CLAY_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING:
+    case CLAY_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING_IN_PLACE:
       merged = TRUE;
-    case GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING:
-    case GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING_IN_PLACE:
-      drawables = gimp_image_get_selected_drawables (image);
+    case CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING:
+    case CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING_IN_PLACE:
+      drawables = clay_image_get_selected_drawables (image);
 
       if (drawables &&
          (g_list_length (drawables) == 1) &&
-          GIMP_IS_LAYER_MASK (drawables->data))
+          CLAY_IS_LAYER_MASK (drawables->data))
         {
-          converted_type = (paste_type == GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING ||
-                            paste_type == GIMP_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING) ?
-                            GIMP_PASTE_TYPE_FLOATING :
-                            GIMP_PASTE_TYPE_FLOATING_IN_PLACE;
+          converted_type = (paste_type == CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING ||
+                            paste_type == CLAY_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING) ?
+                            CLAY_PASTE_TYPE_FLOATING :
+                            CLAY_PASTE_TYPE_FLOATING_IN_PLACE;
 
           edit_paste (display, converted_type, merged, TRUE);
         }
       else
         {
-          converted_type = (paste_type == GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING ||
-                            paste_type == GIMP_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING) ?
-                            GIMP_PASTE_TYPE_NEW_LAYER :
-                            GIMP_PASTE_TYPE_NEW_LAYER_IN_PLACE;
+          converted_type = (paste_type == CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING ||
+                            paste_type == CLAY_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING) ?
+                            CLAY_PASTE_TYPE_NEW_LAYER :
+                            CLAY_PASTE_TYPE_NEW_LAYER_IN_PLACE;
 
           edit_paste (display, converted_type, merged, TRUE);
         }
@@ -417,54 +417,54 @@ edit_paste_cmd_callback (GimpAction *action,
 }
 
 void
-edit_paste_as_new_image_cmd_callback (GimpAction *action,
+edit_paste_as_new_image_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  Gimp       *gimp;
+  Clay       *clay;
   GtkWidget  *widget;
-  GimpObject *paste;
-  GimpImage  *image = NULL;
-  return_if_no_gimp (gimp, data);
+  ClayObject *paste;
+  ClayImage  *image = NULL;
+  return_if_no_clay (clay, data);
   return_if_no_widget (widget, data);
 
-  paste = gimp_clipboard_get_object (gimp);
+  paste = clay_clipboard_get_object (clay);
 
   if (paste)
     {
-      image = gimp_edit_paste_as_new_image (gimp, paste,
+      image = clay_edit_paste_as_new_image (clay, paste,
                                             action_data_get_context (data));
       g_object_unref (paste);
     }
 
   if (image)
     {
-      gimp_create_display (gimp, image, gimp_unit_pixel (), 1.0,
-                           G_OBJECT (gimp_widget_get_monitor (widget)));
+      clay_create_display (clay, image, clay_unit_pixel (), 1.0,
+                           G_OBJECT (clay_widget_get_monitor (widget)));
       g_object_unref (image);
     }
   else
     {
-      gimp_message_literal (gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (clay, NULL, CLAY_MESSAGE_WARNING,
                             _("There is no image data in the clipboard "
                               "to paste."));
     }
 }
 
 void
-edit_named_cut_cmd_callback (GimpAction *action,
+edit_named_cut_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GtkWidget *widget;
   GtkWidget *dialog;
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-  dialog = gimp_query_string_box (_("Cut Named"), widget,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_BUFFER_CUT,
+  dialog = clay_query_string_box (_("Cut Named"), widget,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_BUFFER_CUT,
                                   _("Enter a name for this buffer"),
                                   NULL,
                                   G_OBJECT (image), "disconnect",
@@ -474,19 +474,19 @@ edit_named_cut_cmd_callback (GimpAction *action,
 }
 
 void
-edit_named_copy_cmd_callback (GimpAction *action,
+edit_named_copy_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GtkWidget *widget;
   GtkWidget *dialog;
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-  dialog = gimp_query_string_box (_("Copy Named"), widget,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_BUFFER_COPY,
+  dialog = clay_query_string_box (_("Copy Named"), widget,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_BUFFER_COPY,
                                   _("Enter a name for this buffer"),
                                   NULL,
                                   G_OBJECT (image), "disconnect",
@@ -496,19 +496,19 @@ edit_named_copy_cmd_callback (GimpAction *action,
 }
 
 void
-edit_named_copy_visible_cmd_callback (GimpAction *action,
+edit_named_copy_visible_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GtkWidget *widget;
   GtkWidget *dialog;
   return_if_no_image (image, data);
   return_if_no_widget (widget, data);
 
-  dialog = gimp_query_string_box (_("Copy Visible Named"), widget,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_BUFFER_COPY,
+  dialog = clay_query_string_box (_("Copy Visible Named"), widget,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_BUFFER_COPY,
                                   _("Enter a name for this buffer"),
                                   NULL,
                                   G_OBJECT (image), "disconnect",
@@ -518,28 +518,28 @@ edit_named_copy_visible_cmd_callback (GimpAction *action,
 }
 
 void
-edit_named_paste_cmd_callback (GimpAction *action,
+edit_named_paste_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  Gimp      *gimp;
+  Clay      *clay;
   GtkWidget *widget;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
   return_if_no_widget (widget, data);
 
-  gimp_window_strategy_show_dockable_dialog (GIMP_WINDOW_STRATEGY (gimp_get_window_strategy (gimp)),
-                                             gimp,
-                                             gimp_dialog_factory_get_singleton (),
-                                             gimp_widget_get_monitor (widget),
-                                             "gimp-buffer-list|gimp-buffer-grid");
+  clay_window_strategy_show_dockable_dialog (CLAY_WINDOW_STRATEGY (clay_get_window_strategy (clay)),
+                                             clay,
+                                             clay_dialog_factory_get_singleton (),
+                                             clay_widget_get_monitor (widget),
+                                             "clay-buffer-list|clay-buffer-grid");
 }
 
 void
-edit_clear_cmd_callback (GimpAction *action,
+edit_clear_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpImage *image;
+  ClayImage *image;
   GList     *drawables;
   GList     *iter;
 
@@ -553,111 +553,111 @@ edit_clear_cmd_callback (GimpAction *action,
         return;
       }
 
-  gimp_image_undo_group_start (image, GIMP_UNDO_GROUP_PAINT,
+  clay_image_undo_group_start (image, CLAY_UNDO_GROUP_PAINT,
                                _("Clear"));
 
   for (iter = drawables; iter; iter = iter->next)
-    if (! gimp_viewable_get_children (GIMP_VIEWABLE (iter->data))    &&
-        ! gimp_item_is_content_locked (GIMP_ITEM (iter->data), NULL) &&
-        ! (GIMP_IS_RASTERIZABLE (iter->data) &&
-          ! gimp_rasterizable_is_rasterized (iter->data)))
-      gimp_drawable_edit_clear (iter->data, action_data_get_context (data));
+    if (! clay_viewable_get_children (CLAY_VIEWABLE (iter->data))    &&
+        ! clay_item_is_content_locked (CLAY_ITEM (iter->data), NULL) &&
+        ! (CLAY_IS_RASTERIZABLE (iter->data) &&
+          ! clay_rasterizable_is_rasterized (iter->data)))
+      clay_drawable_edit_clear (iter->data, action_data_get_context (data));
 
-  gimp_image_undo_group_end (image);
-  gimp_image_flush (image);
+  clay_image_undo_group_end (image);
+  clay_image_flush (image);
   g_list_free (drawables);
 }
 
 void
-edit_fill_cmd_callback (GimpAction *action,
+edit_fill_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  GimpImage       *image;
+  ClayImage       *image;
   GList           *drawables;
   GList           *iter;
-  GimpFillType     fill_type;
-  GimpFillOptions *options;
+  ClayFillType     fill_type;
+  ClayFillOptions *options;
   GError          *error = NULL;
   return_if_no_drawables (image, drawables, data);
 
-  fill_type = (GimpFillType) g_variant_get_int32 (value);
+  fill_type = (ClayFillType) g_variant_get_int32 (value);
 
-  options = gimp_fill_options_new (action_data_get_gimp (data), NULL, FALSE);
+  options = clay_fill_options_new (action_data_get_clay (data), NULL, FALSE);
 
-  if (gimp_fill_options_set_by_fill_type (options,
+  if (clay_fill_options_set_by_fill_type (options,
                                           action_data_get_context (data),
                                           fill_type, &error))
     {
-      gimp_image_undo_group_start (image, GIMP_UNDO_GROUP_PAINT,
-                                   gimp_fill_options_get_undo_desc (options));
+      clay_image_undo_group_start (image, CLAY_UNDO_GROUP_PAINT,
+                                   clay_fill_options_get_undo_desc (options));
 
       for (iter = drawables; iter; iter = iter->next)
         {
           /* Skip layers that can't be filled, like pixel-locked layers */
-          if (gimp_item_is_content_locked (GIMP_ITEM (iter->data), NULL) ||
-              gimp_item_is_link_layer (GIMP_ITEM (iter->data)))
+          if (clay_item_is_content_locked (CLAY_ITEM (iter->data), NULL) ||
+              clay_item_is_link_layer (CLAY_ITEM (iter->data)))
             continue;
 
-          if (gimp_item_is_text_layer (iter->data) ||
-              gimp_item_is_vector_layer (iter->data))
+          if (clay_item_is_text_layer (iter->data) ||
+              clay_item_is_vector_layer (iter->data))
             {
-              GimpPattern *pattern = NULL;
+              ClayPattern *pattern = NULL;
               GeglColor   *color   = NULL;
 
-              if (gimp_fill_options_get_style (options) == GIMP_FILL_STYLE_FG_COLOR)
-                color = gimp_context_get_foreground (GIMP_CONTEXT (options));
-              else if (gimp_fill_options_get_style (options) == GIMP_FILL_STYLE_BG_COLOR)
-                color = gimp_context_get_background (GIMP_CONTEXT (options));
+              if (clay_fill_options_get_style (options) == CLAY_FILL_STYLE_FG_COLOR)
+                color = clay_context_get_foreground (CLAY_CONTEXT (options));
+              else if (clay_fill_options_get_style (options) == CLAY_FILL_STYLE_BG_COLOR)
+                color = clay_context_get_background (CLAY_CONTEXT (options));
               else
-                pattern = gimp_context_get_pattern (GIMP_CONTEXT (options));
+                pattern = clay_context_get_pattern (CLAY_CONTEXT (options));
 
               if (color)
                 {
-                  if (gimp_item_is_vector_layer (iter->data))
+                  if (clay_item_is_vector_layer (iter->data))
                     {
-                      gimp_vector_layer_set (GIMP_VECTOR_LAYER (iter->data),
+                      clay_vector_layer_set (CLAY_VECTOR_LAYER (iter->data),
                                              NULL,
                                              "enable-fill",
                                              TRUE,
                                              "fill-style",
-                                             GIMP_CUSTOM_STYLE_SOLID_COLOR,
+                                             CLAY_CUSTOM_STYLE_SOLID_COLOR,
                                              "fill-color",
                                              color, NULL);
-                      gimp_vector_layer_refresh (iter->data);
+                      clay_vector_layer_refresh (iter->data);
                     }
                   else
                     {
-                      gimp_text_layer_set (iter->data, NULL, "color", color,
+                      clay_text_layer_set (iter->data, NULL, "color", color,
                                            NULL);
                     }
                 }
               else if (pattern &&
-                       gimp_item_is_vector_layer (iter->data))
+                       clay_item_is_vector_layer (iter->data))
                 {
-                  gimp_vector_layer_set (GIMP_VECTOR_LAYER (iter->data), NULL,
+                  clay_vector_layer_set (CLAY_VECTOR_LAYER (iter->data), NULL,
                                          "enable-fill",
                                          TRUE,
                                          "fill-style",
-                                         GIMP_CUSTOM_STYLE_PATTERN,
+                                         CLAY_CUSTOM_STYLE_PATTERN,
                                          "fill-pattern",
                                          pattern,
                                          NULL);
-                  gimp_vector_layer_refresh (iter->data);
+                  clay_vector_layer_refresh (iter->data);
                 }
             }
           else
             {
-              gimp_drawable_edit_fill (iter->data, options, NULL);
+              clay_drawable_edit_fill (iter->data, options, NULL);
             }
         }
 
-      gimp_image_undo_group_end (image);
-      gimp_image_flush (image);
+      clay_image_undo_group_end (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay, NULL, CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }
@@ -670,25 +670,25 @@ edit_fill_cmd_callback (GimpAction *action,
 /*  private functions  */
 
 static gboolean
-check_drawable_alpha (GimpDrawable *drawable,
+check_drawable_alpha (ClayDrawable *drawable,
                       gpointer      data)
 {
-  GimpLayer *locked_layer = NULL;
+  ClayLayer *locked_layer = NULL;
 
-  if (gimp_drawable_has_alpha (drawable) &&
-      GIMP_IS_LAYER (drawable)           &&
-      gimp_layer_is_alpha_locked (GIMP_LAYER (drawable), &locked_layer))
+  if (clay_drawable_has_alpha (drawable) &&
+      CLAY_IS_LAYER (drawable)           &&
+      clay_layer_is_alpha_locked (CLAY_LAYER (drawable), &locked_layer))
     {
-      Gimp        *gimp    = action_data_get_gimp    (data);
-      GimpDisplay *display = action_data_get_display (data);
+      Clay        *clay    = action_data_get_clay    (data);
+      ClayDisplay *display = action_data_get_display (data);
 
-      if (gimp && display)
+      if (clay && display)
         {
-          gimp_message_literal (
-            gimp, G_OBJECT (display), GIMP_MESSAGE_WARNING,
+          clay_message_literal (
+            clay, G_OBJECT (display), CLAY_MESSAGE_WARNING,
             _("A selected layer's alpha channel is locked."));
 
-          gimp_tools_blink_lock_box (gimp, GIMP_ITEM (locked_layer));
+          clay_tools_blink_lock_box (clay, CLAY_ITEM (locked_layer));
         }
 
       return FALSE;
@@ -698,34 +698,34 @@ check_drawable_alpha (GimpDrawable *drawable,
 }
 
 static void
-edit_paste (GimpDisplay   *display,
-            GimpPasteType  paste_type,
+edit_paste (ClayDisplay   *display,
+            ClayPasteType  paste_type,
             gboolean       merged,
             gboolean       try_svg)
 {
-  GimpImage  *image = gimp_display_get_image (display);
-  GimpObject *paste;
+  ClayImage  *image = clay_display_get_image (display);
+  ClayObject *paste;
 
-  g_return_if_fail (paste_type != GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING          &&
-                    paste_type != GIMP_PASTE_TYPE_NEW_LAYER_OR_FLOATING_IN_PLACE &&
-                    paste_type != GIMP_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING   &&
-                    paste_type != GIMP_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING_IN_PLACE);
+  g_return_if_fail (paste_type != CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING          &&
+                    paste_type != CLAY_PASTE_TYPE_NEW_LAYER_OR_FLOATING_IN_PLACE &&
+                    paste_type != CLAY_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING   &&
+                    paste_type != CLAY_PASTE_TYPE_NEW_MERGED_LAYER_OR_FLOATING_IN_PLACE);
 
   if (try_svg)
     {
       gchar *svg;
       gsize  svg_size;
 
-      svg = gimp_clipboard_get_svg (display->gimp, &svg_size);
+      svg = clay_clipboard_get_svg (display->clay, &svg_size);
 
       if (svg)
         {
-          if (gimp_path_import_buffer (image, svg, svg_size,
+          if (clay_path_import_buffer (image, svg, svg_size,
                                        TRUE, FALSE,
-                                       GIMP_IMAGE_ACTIVE_PARENT, -1,
+                                       CLAY_IMAGE_ACTIVE_PARENT, -1,
                                        NULL, NULL))
             {
-              gimp_image_flush (image);
+              clay_image_flush (image);
             }
 
           g_free (svg);
@@ -734,58 +734,58 @@ edit_paste (GimpDisplay   *display,
         }
     }
 
-  paste = gimp_clipboard_get_object (display->gimp);
+  paste = clay_clipboard_get_object (display->clay);
 
   if (paste)
     {
-      GimpDisplayShell *shell     = gimp_display_get_shell (display);
-      GList            *drawables = gimp_image_get_selected_drawables (image);
+      ClayDisplayShell *shell     = clay_display_get_shell (display);
+      GList            *drawables = clay_image_get_selected_drawables (image);
       GList            *pasted_layers;
       gint              x, y;
       gint              width, height;
 
       if (g_list_length (drawables) != 1 ||
-          (paste_type != GIMP_PASTE_TYPE_NEW_LAYER &&
-           paste_type != GIMP_PASTE_TYPE_NEW_LAYER_IN_PLACE))
+          (paste_type != CLAY_PASTE_TYPE_NEW_LAYER &&
+           paste_type != CLAY_PASTE_TYPE_NEW_LAYER_IN_PLACE))
         {
           if (g_list_length (drawables) != 1)
             {
-              gimp_message_literal (display->gimp, G_OBJECT (display),
-                                    GIMP_MESSAGE_INFO,
+              clay_message_literal (display->clay, G_OBJECT (display),
+                                    CLAY_MESSAGE_INFO,
                                     _("Pasted as new layer because the "
                                       "target is not a single layer or layer mask."));
             }
-          else if (gimp_viewable_get_children (GIMP_VIEWABLE (drawables->data)))
+          else if (clay_viewable_get_children (CLAY_VIEWABLE (drawables->data)))
             {
-              gimp_message_literal (display->gimp, G_OBJECT (display),
-                                    GIMP_MESSAGE_INFO,
+              clay_message_literal (display->clay, G_OBJECT (display),
+                                    CLAY_MESSAGE_INFO,
                                     _("Pasted as new layer because the "
                                       "target is a layer group."));
             }
-          else if (gimp_item_is_content_locked (GIMP_ITEM (drawables->data), NULL))
+          else if (clay_item_is_content_locked (CLAY_ITEM (drawables->data), NULL))
             {
-              gimp_message_literal (display->gimp, G_OBJECT (display),
-                                    GIMP_MESSAGE_INFO,
+              clay_message_literal (display->clay, G_OBJECT (display),
+                                    CLAY_MESSAGE_INFO,
                                     _("Pasted as new layer because the "
                                       "target's pixels are locked."));
             }
 
-          /* the actual paste-type conversion happens in gimp_edit_paste() */
+          /* the actual paste-type conversion happens in clay_edit_paste() */
         }
 
-      gimp_display_shell_untransform_viewport (
+      clay_display_shell_untransform_viewport (
         shell,
-        ! gimp_display_shell_get_infinite_canvas (shell),
+        ! clay_display_shell_get_infinite_canvas (shell),
         &x, &y, &width, &height);
 
-      if ((pasted_layers = gimp_edit_paste (image, drawables, paste, paste_type,
-                                            gimp_get_user_context (display->gimp),
+      if ((pasted_layers = clay_edit_paste (image, drawables, paste, paste_type,
+                                            clay_get_user_context (display->clay),
                                             merged, x, y, width, height)))
         {
-          gimp_image_set_selected_layers (image, pasted_layers);
+          clay_image_set_selected_layers (image, pasted_layers);
 
           g_list_free (pasted_layers);
-          gimp_image_flush (image);
+          clay_image_flush (image);
         }
 
       g_list_free (drawables);
@@ -793,8 +793,8 @@ edit_paste (GimpDisplay   *display,
     }
   else
     {
-      gimp_message_literal (display->gimp, G_OBJECT (display),
-                            GIMP_MESSAGE_WARNING,
+      clay_message_literal (display->clay, G_OBJECT (display),
+                            CLAY_MESSAGE_WARNING,
                             _("There is no image data in the clipboard "
                               "to paste."));
     }
@@ -805,13 +805,13 @@ cut_named_buffer_callback (GtkWidget   *widget,
                            const gchar *name,
                            gpointer     data)
 {
-  GimpImage *image     = GIMP_IMAGE (data);
-  GList     *drawables = gimp_image_get_selected_drawables (image);
+  ClayImage *image     = CLAY_IMAGE (data);
+  GList     *drawables = clay_image_get_selected_drawables (image);
   GError    *error     = NULL;
 
   if (! drawables)
     {
-      gimp_message_literal (image->gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay, NULL, CLAY_MESSAGE_WARNING,
                             _("There are no selected layers or channels to cut from."));
       return;
     }
@@ -819,14 +819,14 @@ cut_named_buffer_callback (GtkWidget   *widget,
   if (! (name && strlen (name)))
     name = _("(Unnamed Buffer)");
 
-  if (gimp_edit_named_cut (image, name, drawables,
-                           gimp_get_user_context (image->gimp), &error))
+  if (clay_edit_named_cut (image, name, drawables,
+                           clay_get_user_context (image->clay), &error))
     {
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay, NULL, CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }
@@ -838,13 +838,13 @@ copy_named_buffer_callback (GtkWidget   *widget,
                             const gchar *name,
                             gpointer     data)
 {
-  GimpImage *image     = GIMP_IMAGE (data);
-  GList     *drawables = gimp_image_get_selected_drawables (image);
+  ClayImage *image     = CLAY_IMAGE (data);
+  GList     *drawables = clay_image_get_selected_drawables (image);
   GError    *error     = NULL;
 
   if (! drawables)
     {
-      gimp_message_literal (image->gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay, NULL, CLAY_MESSAGE_WARNING,
                             _("There are no selected layers or channels to copy from."));
       return;
     }
@@ -852,14 +852,14 @@ copy_named_buffer_callback (GtkWidget   *widget,
   if (! (name && strlen (name)))
     name = _("(Unnamed Buffer)");
 
-  if (gimp_edit_named_copy (image, name, drawables,
-                            gimp_get_user_context (image->gimp), &error))
+  if (clay_edit_named_copy (image, name, drawables,
+                            clay_get_user_context (image->clay), &error))
     {
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay, NULL, CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }
@@ -871,21 +871,21 @@ copy_named_visible_buffer_callback (GtkWidget   *widget,
                                     const gchar *name,
                                     gpointer     data)
 {
-  GimpImage *image = GIMP_IMAGE (data);
+  ClayImage *image = CLAY_IMAGE (data);
   GError    *error = NULL;
 
   if (! (name && strlen (name)))
     name = _("(Unnamed Buffer)");
 
-  if (gimp_edit_named_copy_visible (image, name,
-                                    gimp_get_user_context (image->gimp),
+  if (clay_edit_named_copy_visible (image, name,
+                                    clay_get_user_context (image->clay),
                                     &error))
     {
-      gimp_image_flush (image);
+      clay_image_flush (image);
     }
   else
     {
-      gimp_message_literal (image->gimp, NULL, GIMP_MESSAGE_WARNING,
+      clay_message_literal (image->clay, NULL, CLAY_MESSAGE_WARNING,
                             error->message);
       g_clear_error (&error);
     }

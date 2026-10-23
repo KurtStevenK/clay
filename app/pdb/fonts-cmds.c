@@ -25,71 +25,71 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer-filter.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
-#include "text/gimpfont.h"
-#include "text/gimpfontfactory.h"
+#include "core/clay.h"
+#include "core/claycontainer-filter.h"
+#include "core/claycontainer.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
+#include "text/clayfont.h"
+#include "text/clayfontfactory.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-fonts_refresh_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+fonts_refresh_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  gimp_data_factory_data_refresh (gimp->font_factory, context);
-  gimp_data_factory_data_wait (gimp->font_factory);
+  clay_data_factory_data_refresh (clay->font_factory, context);
+  clay_data_factory_data_wait (clay->font_factory);
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-fonts_get_custom_configs_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+fonts_get_custom_configs_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar *config = NULL;
   gchar *sysconfig = NULL;
   gchar **renaming_config = NULL;
   gchar **dirs = NULL;
 
-  if (! gimp_data_factory_data_wait (gimp->font_factory))
+  if (! clay_data_factory_data_wait (clay->font_factory))
     {
       success = FALSE;
-      g_set_error_literal (error, GIMP_PDB_ERROR,
-                           GIMP_PDB_ERROR_INTERNAL_ERROR,
+      g_set_error_literal (error, CLAY_PDB_ERROR,
+                           CLAY_PDB_ERROR_INTERNAL_ERROR,
                            _("Failed waiting for the loading of fonts."));
     }
 
   if (success)
     {
-      GList  *list                  = gimp_font_factory_get_custom_fonts_dirs (GIMP_FONT_FACTORY (gimp->font_factory));
-      GSList *fonts_renaming_config = gimp_font_factory_get_fonts_renaming_config (GIMP_FONT_FACTORY (gimp->font_factory));
+      GList  *list                  = clay_font_factory_get_custom_fonts_dirs (CLAY_FONT_FACTORY (clay->font_factory));
+      GSList *fonts_renaming_config = clay_font_factory_get_fonts_renaming_config (CLAY_FONT_FACTORY (clay->font_factory));
       guint   length                = g_list_length (list);
       gint    i;
 
-      gimp_font_factory_get_custom_config_path (GIMP_FONT_FACTORY (gimp->font_factory),
+      clay_font_factory_get_custom_config_path (CLAY_FONT_FACTORY (clay->font_factory),
                                                 &config,
                                                 &sysconfig);
       config    = g_strdup (config);
@@ -110,152 +110,152 @@ fonts_get_custom_configs_invoker (GimpProcedure         *procedure,
         renaming_config[i] = g_strdup (fonts_renaming_config->data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_string (gimp_value_array_index (return_vals, 1), config);
-      g_value_take_string (gimp_value_array_index (return_vals, 2), sysconfig);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 3), renaming_config);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 4), dirs);
+      g_value_take_string (clay_value_array_index (return_vals, 1), config);
+      g_value_take_string (clay_value_array_index (return_vals, 2), sysconfig);
+      g_value_take_boxed (clay_value_array_index (return_vals, 3), renaming_config);
+      g_value_take_boxed (clay_value_array_index (return_vals, 4), dirs);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-fonts_get_list_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+fonts_get_list_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *filter;
-  GimpFont **font_list = NULL;
+  ClayFont **font_list = NULL;
 
-  filter = g_value_get_string (gimp_value_array_index (args, 0));
+  filter = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (! gimp_data_factory_data_wait (gimp->font_factory))
+      if (! clay_data_factory_data_wait (clay->font_factory))
         {
           success = FALSE;
-          g_set_error_literal (error, GIMP_PDB_ERROR,
-                               GIMP_PDB_ERROR_INTERNAL_ERROR,
+          g_set_error_literal (error, CLAY_PDB_ERROR,
+                               CLAY_PDB_ERROR_INTERNAL_ERROR,
                                _("Failed waiting for the loading of fonts."));
         }
 
       if (success)
-        font_list = (GimpFont **) gimp_container_get_filtered_array (gimp_data_factory_get_container (gimp->font_factory),
+        font_list = (ClayFont **) clay_container_get_filtered_array (clay_data_factory_get_container (clay->font_factory),
                                                                      filter);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), font_list);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), font_list);
 
   return return_vals;
 }
 
 void
-register_fonts_procs (GimpPDB *pdb)
+register_fonts_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-fonts-refresh
+   * clay-fonts-refresh
    */
-  procedure = gimp_procedure_new (fonts_refresh_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-fonts-refresh");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (fonts_refresh_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-fonts-refresh");
+  clay_procedure_set_static_help (procedure,
                                   "Refresh current fonts. This function always succeeds.",
                                   "This procedure retrieves all fonts currently in the user's font path and updates the font dialogs accordingly. Depending on the amount of fonts on the system, this can take considerable time.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2003");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-fonts-get-custom-configs
+   * clay-fonts-get-custom-configs
    */
-  procedure = gimp_procedure_new (fonts_get_custom_configs_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-fonts-get-custom-configs");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (fonts_get_custom_configs_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-fonts-get-custom-configs");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve custom configs.",
                                   "This procedure returns custom FontConfig configs along with the fonts renaming config.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Idriss Fekir",
                                          "Idriss Fekir",
                                          "2023");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("config",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("config",
                                                            "config",
                                                            "config path",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("sysconfig",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("sysconfig",
                                                            "sysconfig",
                                                            "sysconfig path",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("renaming-config",
                                                        "renaming config",
                                                        "fonts renaming config",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("dirs",
                                                        "dirs",
                                                        "custom fonts directories",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-fonts-get-list
+   * clay-fonts-get-list
    */
-  procedure = gimp_procedure_new (fonts_get_list_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-fonts-get-list");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (fonts_get_list_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-fonts-get-list");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve the list of loaded fonts.",
                                   "This procedure returns a list of the fonts that are currently available.\n"
-                                  "Each font returned can be used as input to [func@Gimp.context_set_font].",
+                                  "Each font returned can be used as input to [func@Clay.context_set_font].",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("filter",
                                                        "filter",
                                                        "An optional regular expression used to filter the list",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_core_object_array ("font-list",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_core_object_array ("font-list",
                                                                       "font list",
                                                                       "The list of fonts",
-                                                                      GIMP_TYPE_FONT,
-                                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                      CLAY_TYPE_FONT,
+                                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

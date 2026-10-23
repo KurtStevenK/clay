@@ -23,8 +23,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "screenshot.h"
 #include "screenshot-freedesktop.h"
@@ -32,26 +32,26 @@
 #include "screenshot-x11.h"
 #include "screenshot-win32.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /* Defines */
 
 #define PLUG_IN_PROC   "plug-in-screenshot"
 #define PLUG_IN_BINARY "screenshot"
-#define PLUG_IN_ROLE   "gimp-screenshot"
+#define PLUG_IN_ROLE   "clay-screenshot"
 
 typedef struct _Screenshot      Screenshot;
 typedef struct _ScreenshotClass ScreenshotClass;
 
 struct _Screenshot
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _ScreenshotClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 #define SCREENSHOT_TYPE  (screenshot_get_type ())
@@ -59,29 +59,29 @@ struct _ScreenshotClass
 
 GType                   screenshot_get_type         (void);
 
-static GList          * screenshot_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * screenshot_create_procedure (GimpPlugIn           *plug_in,
+static GList          * screenshot_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * screenshot_create_procedure (ClayPlugIn           *plug_in,
                                                      const gchar          *name);
 
-static GimpValueArray * screenshot_run              (GimpProcedure        *procedure,
-                                                     GimpProcedureConfig  *config,
+static ClayValueArray * screenshot_run              (ClayProcedure        *procedure,
+                                                     ClayProcedureConfig  *config,
                                                      gpointer              run_data);
 
-static GimpPDBStatusType   shoot               (GdkMonitor           *monitor,
-                                                GimpImage           **image,
-                                                GimpProcedureConfig  *config,
+static ClayPDBStatusType   shoot               (GdkMonitor           *monitor,
+                                                ClayImage           **image,
+                                                ClayProcedureConfig  *config,
                                                 GError              **error);
 
-static gboolean            shoot_dialog        (GimpProcedure        *procedure,
-                                                GimpProcedureConfig  *config,
+static gboolean            shoot_dialog        (ClayProcedure        *procedure,
+                                                ClayProcedureConfig  *config,
                                                 GdkMonitor          **monitor);
 static gboolean            shoot_quit_timeout  (gpointer              data);
 static gboolean            shoot_delay_timeout (gpointer              data);
 
 
-G_DEFINE_TYPE (Screenshot, screenshot, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Screenshot, screenshot, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SCREENSHOT_TYPE)
+CLAY_MAIN (SCREENSHOT_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -91,7 +91,7 @@ static ScreenshotCapabilities  capabilities = 0;
 static void
 screenshot_class_init (ScreenshotClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = screenshot_query_procedures;
   plug_in_class->create_procedure = screenshot_create_procedure;
@@ -104,27 +104,27 @@ screenshot_init (Screenshot *screenshot)
 }
 
 static GList *
-screenshot_query_procedures (GimpPlugIn *plug_in)
+screenshot_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-screenshot_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+screenshot_create_procedure (ClayPlugIn  *plug_in,
                              const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       screenshot_run, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("_Screenshot..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/Create");
+      clay_procedure_set_menu_label (procedure, _("_Screenshot..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/File/Create");
 
-      gimp_procedure_set_documentation
+      clay_procedure_set_documentation
         (procedure,
          _("Create an image from an area of the screen"),
            "The plug-in takes screenshots of an "
@@ -143,29 +143,29 @@ screenshot_create_procedure (GimpPlugIn  *plug_in,
            "window, you need to use the interactive mode.",
          name);
 
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Sven Neumann <sven@gimp.org>, "
                                       "Henrik Brix Andersen <brix@gimp.org>,"
                                       "Simone Karin Lehmann",
                                       "1998 - 2008",
                                       "v1.1 (2008/04)");
 
-      gimp_procedure_set_icon_pixbuf (procedure,
-                                      gdk_pixbuf_new_from_resource ("/org/gimp/screenshot-icons/screenshot-icon.png", NULL));
+      clay_procedure_set_icon_pixbuf (procedure,
+                                      gdk_pixbuf_new_from_resource ("/org/clay/screenshot-icons/screenshot-icon.png", NULL));
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_NONINTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_NONINTERACTIVE,
                                         G_PARAM_READWRITE);
 
       /* TODO: Windows does not currently implement selecting by region to grab,
        * so we'll hide this option for now */
-      gimp_procedure_add_choice_argument (procedure, "shoot-type",
+      clay_procedure_add_choice_argument (procedure, "shoot-type",
                                           _("Shoot _area"),
                                           _("The shoot type"),
-                                          gimp_choice_new_with_values ("window",  SHOOT_WINDOW, _("Take a screenshot of a single window"),   NULL,
+                                          clay_choice_new_with_values ("window",  SHOOT_WINDOW, _("Take a screenshot of a single window"),   NULL,
                                                                        "screen",  SHOOT_ROOT,   _("Take a screenshot of the entire screen"), NULL,
 #ifndef G_OS_WIN32
                                                                        "region",  SHOOT_REGION, _("Select a region to grab"),                NULL,
@@ -174,31 +174,31 @@ screenshot_create_procedure (GimpPlugIn  *plug_in,
                                           "window",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "x1",
+      clay_procedure_add_int_argument (procedure, "x1",
                                        "X1",
                                        "Region left x coord for SHOOT-WINDOW",
                                        G_MININT, G_MAXINT, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "y1",
+      clay_procedure_add_int_argument (procedure, "y1",
                                        "Y1",
                                        "Region top y coord for SHOOT-WINDOW",
                                        G_MININT, G_MAXINT, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "x2",
+      clay_procedure_add_int_argument (procedure, "x2",
                                        "X2",
                                        "Region right x coord for SHOOT-WINDOW",
                                        G_MININT, G_MAXINT, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "y2",
+      clay_procedure_add_int_argument (procedure, "y2",
                                        "Y2",
                                        "Region bottom y coord for SHOOT-WINDOW",
                                        G_MININT, G_MAXINT, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-pointer",
+      clay_procedure_add_boolean_argument (procedure, "include-pointer",
                                            _("Include _mouse pointer"),
                                            _("Your pointing device's cursor will be part of the image"),
                                            FALSE,
@@ -207,7 +207,7 @@ screenshot_create_procedure (GimpPlugIn  *plug_in,
       /* Since no backends allow window screenshot non-interactively so far, no
        * need to expose this argument to the API.
        */
-      gimp_procedure_add_boolean_aux_argument (procedure, "include-decoration",
+      clay_procedure_add_boolean_aux_argument (procedure, "include-decoration",
                                                _("Include window _decoration"),
                                                _("Title bar, window borders and shadow will be part of the image"),
 #ifdef PLATFORM_OSX
@@ -217,26 +217,26 @@ screenshot_create_procedure (GimpPlugIn  *plug_in,
                                  TRUE,
 #endif
                                  G_PARAM_READWRITE);
-      gimp_procedure_add_int_aux_argument     (procedure, "selection-delay",
+      clay_procedure_add_int_aux_argument     (procedure, "selection-delay",
                                                _("Selection d_elay"),
                                                _("Delay before selection of the window or the region"),
                                                0, 20, 0,
                                                G_PARAM_READWRITE);
-      gimp_procedure_add_int_aux_argument     (procedure, "screenshot-delay",
+      clay_procedure_add_int_aux_argument     (procedure, "screenshot-delay",
                                                _("Screenshot dela_y"),
                                                _("Delay before snapping the screenshot"),
                                                0, 20, 0,
                                                G_PARAM_READWRITE);
-      gimp_procedure_add_choice_argument (procedure, "color-profile",
+      clay_procedure_add_choice_argument (procedure, "color-profile",
                                           _("Color _Profile"),
                                           "",
-                                          gimp_choice_new_with_values ("monitor", SCREENSHOT_PROFILE_POLICY_MONITOR, _("Tag image with monitor profile"), NULL,
+                                          clay_choice_new_with_values ("monitor", SCREENSHOT_PROFILE_POLICY_MONITOR, _("Tag image with monitor profile"), NULL,
                                                                        "srgb",    SCREENSHOT_PROFILE_POLICY_SRGB,    _("Convert image with sRGB"),        NULL,
                                                                        NULL),
                                           "monitor",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_image_return_value (procedure, "image",
+      clay_procedure_add_image_return_value (procedure, "image",
                                              "Image",
                                              "Output image",
                                              FALSE,
@@ -246,16 +246,16 @@ screenshot_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-screenshot_run (GimpProcedure        *procedure,
-                GimpProcedureConfig  *config,
+static ClayValueArray *
+screenshot_run (ClayProcedure        *procedure,
+                ClayProcedureConfig  *config,
                 gpointer              run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpRunMode        run_mode;
+  ClayValueArray    *return_vals;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayRunMode        run_mode;
   GdkMonitor        *monitor = NULL;
-  GimpImage         *image   = NULL;
+  ClayImage         *image   = NULL;
   GError            *error   = NULL;
 
   ShootType               shoot_type;
@@ -264,14 +264,14 @@ screenshot_run (GimpProcedure        *procedure,
   gegl_init (NULL, NULL);
 
   g_object_get (config, "run-mode", &run_mode, NULL);
-  shoot_type = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  shoot_type = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                     "shoot-type");
 
   if (! gdk_init_check (NULL, NULL))
     {
-      g_set_error_literal (&error, GIMP_PLUG_IN_ERROR, 0, _("GDK initialization failed."));
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      g_set_error_literal (&error, CLAY_PLUG_IN_ERROR, 0, _("GDK initialization failed."));
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
@@ -306,17 +306,17 @@ screenshot_run (GimpProcedure        *procedure,
 
   if (backend == SCREENSHOT_BACKEND_NONE)
     {
-      g_set_error_literal (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error_literal (&error, CLAY_PLUG_IN_ERROR, 0,
                            _("No screenshot backends available."));
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
   /* how are we running today? */
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
-      gimp_ui_init (PLUG_IN_BINARY);
+    case CLAY_RUN_INTERACTIVE:
+      clay_ui_init (PLUG_IN_BINARY);
 
       /* In interactive mode, coords are always reset. */
       g_object_set (config,
@@ -342,7 +342,7 @@ screenshot_run (GimpProcedure        *procedure,
       if (backend != SCREENSHOT_BACKEND_FREEDESKTOP)
         {
           if (! shoot_dialog (procedure, config, &monitor))
-            status = GIMP_PDB_CANCEL;
+            status = CLAY_PDB_CANCEL;
         }
       else
         {
@@ -354,74 +354,74 @@ screenshot_run (GimpProcedure        *procedure,
         }
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       if (backend == SCREENSHOT_BACKEND_FREEDESKTOP)
         {
           /* With portals, even the basic full screenshot is interactive. */
-          status = GIMP_PDB_CALLING_ERROR;
+          status = CLAY_PDB_CALLING_ERROR;
         }
       else if (! (capabilities & SCREENSHOT_CAN_PICK_NONINTERACTIVELY))
         {
           if (shoot_type == SHOOT_WINDOW ||
               shoot_type == SHOOT_REGION)
-            status = GIMP_PDB_CALLING_ERROR;
+            status = CLAY_PDB_CALLING_ERROR;
         }
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       break;
 
     default:
       break;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     status = shoot (monitor, &image, config, &error);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      gchar *comment = gimp_get_default_comment ();
+      gchar *comment = clay_get_default_comment ();
 
-      gimp_image_undo_disable (image);
+      clay_image_undo_disable (image);
 
-      profile_policy = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+      profile_policy = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                             "color-profile");
 
-      if (run_mode == GIMP_RUN_NONINTERACTIVE)
+      if (run_mode == CLAY_RUN_NONINTERACTIVE)
         profile_policy = SCREENSHOT_PROFILE_POLICY_MONITOR;
 
       if (profile_policy == SCREENSHOT_PROFILE_POLICY_SRGB)
         {
-          GimpColorProfile *srgb_profile = gimp_color_profile_new_rgb_srgb ();
+          ClayColorProfile *srgb_profile = clay_color_profile_new_rgb_srgb ();
 
-          gimp_image_convert_color_profile (image,
+          clay_image_convert_color_profile (image,
                                             srgb_profile,
-                                            GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+                                            CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                             TRUE);
           g_object_unref (srgb_profile);
         }
 
       if (comment)
         {
-          GimpParasite *parasite;
+          ClayParasite *parasite;
 
-          parasite = gimp_parasite_new ("gimp-comment",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("clay-comment",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (comment) + 1, comment);
 
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
 
           g_free (comment);
         }
 
-      gimp_image_undo_enable (image);
+      clay_image_undo_enable (image);
 
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         {
           guint select_delay;
 
-          gimp_display_new (image);
+          clay_display_new (image);
 
           g_object_get (config,
                         "selection-delay", &select_delay,
@@ -436,10 +436,10 @@ screenshot_run (GimpProcedure        *procedure,
         }
     }
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, error);
+  return_vals = clay_procedure_new_return_values (procedure, status, error);
 
-  if (status == GIMP_PDB_SUCCESS)
-    GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  if (status == CLAY_PDB_SUCCESS)
+    CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
@@ -447,10 +447,10 @@ screenshot_run (GimpProcedure        *procedure,
 
 /* The main Screenshot function */
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 shoot (GdkMonitor           *monitor,
-       GimpImage           **image,
-       GimpProcedureConfig  *config,
+       ClayImage           **image,
+       ClayProcedureConfig  *config,
        GError              **error)
 {
 #if defined(PLATFORM_OSX) || defined(G_OS_WIN32)
@@ -468,7 +468,7 @@ shoot (GdkMonitor           *monitor,
                 "include-pointer",    &show_cursor,
                 NULL);
 #if defined(PLATFORM_OSX) || defined(G_OS_WIN32)
-  shoot_type = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  shoot_type = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                     "shoot-type");
 #endif
 
@@ -494,74 +494,74 @@ shoot (GdkMonitor           *monitor,
     return screenshot_x11_shoot (config, monitor, image, error);
 #endif
 
-  return GIMP_PDB_CALLING_ERROR; /* silence compiler */
+  return CLAY_PDB_CALLING_ERROR; /* silence compiler */
 }
 
 
 /*  Screenshot dialog  */
 
 static gboolean
-shoot_dialog (GimpProcedure        *procedure,
-              GimpProcedureConfig  *config,
+shoot_dialog (ClayProcedure        *procedure,
+              ClayProcedureConfig  *config,
               GdkMonitor          **monitor)
 {
   GtkWidget      *dialog;
-  GimpValueArray *values;
+  ClayValueArray *values;
   GValue          value = G_VALUE_INIT;
   gboolean        run;
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Screenshot"));
-  gimp_procedure_dialog_set_ok_label (GIMP_PROCEDURE_DIALOG (dialog), _("S_nap"));
+  clay_procedure_dialog_set_ok_label (CLAY_PROCEDURE_DIALOG (dialog), _("S_nap"));
 
   if (capabilities & SCREENSHOT_CAN_SHOOT_POINTER ||
       capabilities & SCREENSHOT_CAN_SHOOT_DECORATIONS)
     {
       if (! (capabilities & SCREENSHOT_CAN_SHOOT_POINTER))
-        gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+        clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "contents-box",
                                         "include-decoration",
                                         NULL);
       else if (! (capabilities & SCREENSHOT_CAN_SHOOT_DECORATIONS))
-        gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+        clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "contents-box",
                                         "include-pointer",
                                         NULL);
       else
-        gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+        clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "contents-box",
                                         "include-decoration",
                                         "include-pointer",
                                         NULL);
 
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "contents-frame-title",
                                        _("Contents"), FALSE, FALSE);
-      gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                         "contents-frame", "contents-frame-title",
                                         FALSE, "contents-box");
 
       if (capabilities & SCREENSHOT_CAN_SHOOT_DECORATIONS)
         {
-          values = gimp_value_array_new (1);
+          values = clay_value_array_new (1);
           g_value_init (&value, G_TYPE_STRING);
           g_value_set_string (&value, "window");
-          gimp_value_array_append (values, &value);
+          clay_value_array_append (values, &value);
           g_value_unset (&value);
-          gimp_procedure_dialog_set_sensitive_if_in (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_set_sensitive_if_in (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "include-decoration",
                                                      NULL, "shoot-type",
                                                      values, TRUE);
         }
       if (capabilities & SCREENSHOT_CAN_SHOOT_POINTER)
         {
-          values = gimp_value_array_new (1);
+          values = clay_value_array_new (1);
           g_value_init (&value, G_TYPE_STRING);
           g_value_set_string (&value, "region");
-          gimp_value_array_append (values, &value);
+          clay_value_array_append (values, &value);
           g_value_unset (&value);
-          gimp_procedure_dialog_set_sensitive_if_in (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_set_sensitive_if_in (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "include-pointer",
                                                      NULL, "shoot-type",
                                                      values, FALSE);
@@ -572,51 +572,51 @@ shoot_dialog (GimpProcedure        *procedure,
     {
       if (capabilities & SCREENSHOT_CAN_PICK_WINDOW)
         {
-          gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                           "delay-box",
                                           "selection-delay",
                                           "screenshot-delay",
                                           NULL);
 
-          values = gimp_value_array_new (1);
+          values = clay_value_array_new (1);
           g_value_init (&value, G_TYPE_STRING);
           g_value_set_string (&value, "screen");
-          gimp_value_array_append (values, &value);
+          clay_value_array_append (values, &value);
           g_value_unset (&value);
-          gimp_procedure_dialog_set_sensitive_if_in (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_set_sensitive_if_in (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "selection-delay",
                                                      NULL, "shoot-type",
                                                      values, FALSE);
         }
       else
         {
-          gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                           "delay-box", "screenshot-delay", NULL);
         }
 
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "delay-frame-title",
                                        _("Delay"), FALSE, FALSE);
-      gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                         "delay-frame", "delay-frame-title",
                                         FALSE, "delay-box");
     }
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "shoot-type", NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "shoot-type", NULL);
 
   if ((capabilities & SCREENSHOT_CAN_SHOOT_POINTER) ||
       (capabilities & SCREENSHOT_CAN_SHOOT_DECORATIONS))
-    gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "contents-frame", NULL);
+    clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "contents-frame", NULL);
 
   if (capabilities & SCREENSHOT_CAN_DELAY_WINDOW_SHOT)
-    gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "delay-frame", NULL);
+    clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "delay-frame", NULL);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "color-profile", NULL);
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "color-profile", NULL);
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   /* Get the screen on which we are running */
   if (run)
-    *monitor = gimp_widget_get_monitor (dialog);
+    *monitor = clay_widget_get_monitor (dialog);
 
   gtk_widget_destroy (dialog);
 

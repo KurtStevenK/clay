@@ -25,220 +25,220 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppattern.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
+#include "core/claypattern.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-patterns_popup_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+patterns_popup_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
   const gchar *pattern_callback;
   const gchar *popup_title;
-  GimpPattern *initial_pattern;
+  ClayPattern *initial_pattern;
   GBytes *parent_window;
 
-  pattern_callback = g_value_get_string (gimp_value_array_index (args, 0));
-  popup_title = g_value_get_string (gimp_value_array_index (args, 1));
-  initial_pattern = g_value_get_object (gimp_value_array_index (args, 2));
-  parent_window = g_value_get_boxed (gimp_value_array_index (args, 3));
+  pattern_callback = g_value_get_string (clay_value_array_index (args, 0));
+  popup_title = g_value_get_string (clay_value_array_index (args, 1));
+  initial_pattern = g_value_get_object (clay_value_array_index (args, 2));
+  parent_window = g_value_get_boxed (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpContainer *container = gimp_data_factory_get_container (gimp->pattern_factory);
+      ClayContainer *container = clay_data_factory_get_container (clay->pattern_factory);
 
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, pattern_callback) ||
-          ! gimp_pdb_dialog_new (gimp, context, progress,
-                                 gimp_container_get_child_type (container),
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, pattern_callback) ||
+          ! clay_pdb_dialog_new (clay, context, progress,
+                                 clay_container_get_child_type (container),
                                  parent_window, popup_title, pattern_callback,
-                                 GIMP_OBJECT (initial_pattern), NULL))
+                                 CLAY_OBJECT (initial_pattern), NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-patterns_close_popup_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+patterns_close_popup_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
   const gchar *pattern_callback;
 
-  pattern_callback = g_value_get_string (gimp_value_array_index (args, 0));
+  pattern_callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpContainer *container = gimp_data_factory_get_container (gimp->pattern_factory);
+      ClayContainer *container = clay_data_factory_get_container (clay->pattern_factory);
 
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, pattern_callback) ||
-          ! gimp_pdb_dialog_close (gimp,
-                                   gimp_container_get_child_type (container),
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, pattern_callback) ||
+          ! clay_pdb_dialog_close (clay,
+                                   clay_container_get_child_type (container),
                                    pattern_callback))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-patterns_set_popup_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+patterns_set_popup_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
   const gchar *pattern_callback;
-  GimpPattern *pattern;
+  ClayPattern *pattern;
 
-  pattern_callback = g_value_get_string (gimp_value_array_index (args, 0));
-  pattern = g_value_get_object (gimp_value_array_index (args, 1));
+  pattern_callback = g_value_get_string (clay_value_array_index (args, 0));
+  pattern = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpContainer *container = gimp_data_factory_get_container (gimp->pattern_factory);
+      ClayContainer *container = clay_data_factory_get_container (clay->pattern_factory);
 
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, pattern_callback) ||
-          ! gimp_pdb_dialog_set (gimp,
-                                 gimp_container_get_child_type (container),
-                                 pattern_callback, GIMP_OBJECT (pattern), NULL))
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, pattern_callback) ||
+          ! clay_pdb_dialog_set (clay,
+                                 clay_container_get_child_type (container),
+                                 pattern_callback, CLAY_OBJECT (pattern), NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_pattern_select_procs (GimpPDB *pdb)
+register_pattern_select_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-patterns-popup
+   * clay-patterns-popup
    */
-  procedure = gimp_procedure_new (patterns_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-patterns-popup");
-  gimp_procedure_set_static_help (procedure,
-                                  "Invokes the Gimp pattern selection.",
+  procedure = clay_procedure_new (patterns_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-patterns-popup");
+  clay_procedure_set_static_help (procedure,
+                                  "Invokes the Clay pattern selection.",
                                   "Opens the pattern selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("pattern-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("pattern-callback",
                                                        "pattern callback",
                                                        "The callback PDB proc to call when the user chooses a pattern",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("popup-title",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("popup-title",
                                                        "popup title",
                                                        "Title of the pattern selection dialog",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_pattern ("initial-pattern",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_pattern ("initial-pattern",
                                                         "initial pattern",
                                                         "The pattern to set as the initial choice",
                                                         TRUE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("parent-window",
                                                    "parent window",
                                                    "An optional parent window handle for the popup to be set transient to",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-patterns-close-popup
+   * clay-patterns-close-popup
    */
-  procedure = gimp_procedure_new (patterns_close_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-patterns-close-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (patterns_close_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-patterns-close-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Close the pattern selection dialog.",
                                   "Closes an open pattern selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("pattern-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("pattern-callback",
                                                        "pattern callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-patterns-set-popup
+   * clay-patterns-set-popup
    */
-  procedure = gimp_procedure_new (patterns_set_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-patterns-set-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (patterns_set_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-patterns-set-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the current pattern in a pattern selection dialog.",
                                   "Sets the current pattern in a pattern selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("pattern-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("pattern-callback",
                                                        "pattern callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_pattern ("pattern",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_pattern ("pattern",
                                                         "pattern",
                                                         "The pattern to set as selected",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

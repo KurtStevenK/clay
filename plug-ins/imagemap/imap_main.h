@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -29,9 +29,9 @@
 #include "imap_preferences.h"
 #include "imap_preview.h"
 
-struct _GimpImap
+struct _ClayImap
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
   GtkApplication *app;
 
   GtkWidget      *dlg;
@@ -39,7 +39,7 @@ struct _GimpImap
 
   gpointer        grid_data;
   gchar          *tmp_filename;
-  GimpDrawable   *drawable;
+  ClayDrawable   *drawable;
   gboolean        success;
 
   GtkBuilder     *builder;
@@ -47,10 +47,10 @@ struct _GimpImap
 
 #define PLUG_IN_PROC   "plug-in-imagemap"
 #define PLUG_IN_BINARY "imagemap"
-#define PLUG_IN_ROLE   "gimp-imagemap"
+#define PLUG_IN_ROLE   "clay-imagemap"
 
-#define GIMP_TYPE_IMAP  (gimp_imap_get_type ())
-G_DECLARE_FINAL_TYPE (GimpImap, gimp_imap, GIMP, IMAP, GimpPlugIn)
+#define CLAY_TYPE_IMAP  (clay_imap_get_type ())
+G_DECLARE_FINAL_TYPE (ClayImap, clay_imap, CLAY, IMAP, ClayPlugIn)
 
 typedef enum {NCSA, CERN, CSIM} MapFormat_t;
 
@@ -171,7 +171,7 @@ void            do_move_to_front           (GSimpleAction *action,
 void            do_send_to_back            (GSimpleAction *action,
                                             GVariant      *parameter,
                                             gpointer       user_data);
-void            do_use_gimp_guides_dialog  (GSimpleAction *action,
+void            do_use_clay_guides_dialog  (GSimpleAction *action,
                                             GVariant      *parameter,
                                             gpointer       user_data);
 void            do_create_guides_dialog    (GSimpleAction *action,

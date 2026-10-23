@@ -1,4 +1,4 @@
-/* GIMP plug-in to load and export Paint Shop Pro files (.PSP and .TUB)
+/* Clay plug-in to load and export Paint Shop Pro files (.PSP and .TUB)
  *
  * Copyright (C) 1999 Tor Lillqvist
  *
@@ -28,7 +28,7 @@
 #define LOAD_PROC      "file-psp-load"
 #define EXPORT_PROC    "file-psp-export"
 #define PLUG_IN_BINARY "file-psp"
-#define PLUG_IN_ROLE   "gimp-file-psp"
+#define PLUG_IN_ROLE   "clay-file-psp"
 
 /* set to the level of debugging output you want, 0 for none */
 #define PSP_DEBUG 0
@@ -43,11 +43,11 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
-#include <libgimpbase/gimpparasiteio.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
+#include <libclaybase/clayparasiteio.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /* Note that the upcoming PSP version 6 writes PSP file format version
@@ -556,8 +556,8 @@ typedef struct
   guint32           active_layer;
   guint16           layer_count;
   guint16           bytes_per_sample;
-  GimpImageBaseType base_type;
-  GimpPrecision     precision;
+  ClayImageBaseType base_type;
+  ClayPrecision     precision;
 } PSPimage;
 
 
@@ -566,12 +566,12 @@ typedef struct _PspClass PspClass;
 
 struct _Psp
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PspClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -580,47 +580,47 @@ struct _PspClass
 
 GType                   psp_get_type         (void);
 
-static GList          * psp_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * psp_create_procedure (GimpPlugIn            *plug_in,
+static GList          * psp_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * psp_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * psp_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * psp_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * psp_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * psp_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GError               **error);
 static gboolean         export_image         (GFile                 *file,
-                                              GimpImage             *image,
+                                              ClayImage             *image,
                                               gint                   n_drawables,
                                               GList                 *drawables,
                                               GObject               *config,
                                               GError               **error);
-static gboolean         save_dialog          (GimpProcedure         *procedure,
+static gboolean         save_dialog          (ClayProcedure         *procedure,
                                               GObject               *config,
-                                              GimpImage             *image);
+                                              ClayImage             *image);
 
-static gboolean         create_adjustment    (GimpLayer             *layer,
+static gboolean         create_adjustment    (ClayLayer             *layer,
                                               FILE                  *f,
                                               gint64                 layer_extension_start,
                                               GError               **error);
 
 
-G_DEFINE_TYPE (Psp, psp, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Psp, psp, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PSP_TYPE)
+CLAY_MAIN (PSP_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -631,7 +631,7 @@ static guint16 psp_ver_minor;
 static void
 psp_class_init (PspClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = psp_query_procedures;
   plug_in_class->create_procedure = psp_create_procedure;
@@ -644,7 +644,7 @@ psp_init (Psp *psp)
 }
 
 static GList *
-psp_query_procedures (GimpPlugIn *plug_in)
+psp_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -656,21 +656,21 @@ psp_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-psp_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+psp_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            psp_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Paint Shop Pro image"));
+      clay_procedure_set_menu_label (procedure, _("Paint Shop Pro image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads images from the Paint Shop "
                                           "Pro PSP file format"),
                                         _("This plug-in loads and exports images "
@@ -678,30 +678,30 @@ psp_create_procedure (GimpPlugIn  *plug_in,
                                           "Vector layers aren't handled. "
                                           "Exporting isn't yet implemented."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tor Lillqvist",
                                       "Tor Lillqvist",
                                       "1999");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-psp");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "psp,tub,pspimage,psptube");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,Paint\\040Shop\\040Pro\\040Image\\040File\n\032");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, psp_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Paint Shop Pro image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("Paint Shop Pro image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "PSP");
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports images in the Paint Shop Pro "
                                         "PSP file format",
                                         "This plug-in loads and exports images "
@@ -709,28 +709,28 @@ psp_create_procedure (GimpPlugIn  *plug_in,
                                         "Vector layers aren't handled. "
                                         "Exporting isn't yet implemented.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tor Lillqvist",
                                       "Tor Lillqvist",
                                       "1999");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-psp");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "psp,tub");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "compression",
+      clay_procedure_add_choice_argument (procedure, "compression",
                                           _("_Data Compression"),
                                           _("Type of compression"),
-                                          gimp_choice_new_with_values ("none", PSP_COMP_NONE, _("none"), NULL,
+                                          clay_choice_new_with_values ("none", PSP_COMP_NONE, _("none"), NULL,
                                                                        "rle",  PSP_COMP_RLE,  _("rle"),  NULL,
                                                                        "lz77", PSP_COMP_LZ77, _("lz77"), NULL,
                                                                        NULL),
@@ -741,17 +741,17 @@ psp_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-psp_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+psp_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -759,87 +759,87 @@ psp_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-psp_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+psp_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   gint               n_drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export      = gimp_export_options_get_image (options, &image);
-  drawables   = gimp_image_list_layers (image);
+  export      = clay_export_options_get_image (options, &image);
+  drawables   = clay_image_list_layers (image);
   n_drawables = g_list_length (drawables);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, n_drawables, drawables,
                           G_OBJECT (config), &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static gboolean
-save_dialog (GimpProcedure *procedure,
+save_dialog (ClayProcedure *procedure,
              GObject       *config,
-             GimpImage     *image)
+             ClayImage     *image)
 {
   GtkWidget *dialog;
   GtkWidget *frame;
   gint       run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /*  file save type  */
-  frame = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "compression", GIMP_TYPE_INT_RADIO_FRAME);
+  frame = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "compression", CLAY_TYPE_INT_RADIO_FRAME);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -1033,11 +1033,11 @@ read_general_image_attribute_block (FILE     *f,
     {
       case 24:
       case 48:
-        ia->base_type = GIMP_RGB;
+        ia->base_type = CLAY_RGB;
         if (ia->depth == 24)
-          ia->precision = GIMP_PRECISION_U8_NON_LINEAR;
+          ia->precision = CLAY_PRECISION_U8_NON_LINEAR;
         else
-          ia->precision = GIMP_PRECISION_U16_NON_LINEAR;
+          ia->precision = CLAY_PRECISION_U16_NON_LINEAR;
         break;
 
       case 1:
@@ -1046,16 +1046,16 @@ read_general_image_attribute_block (FILE     *f,
       case 16:
         if (ia->grayscale && ia->depth >= 8)
           {
-            ia->base_type = GIMP_GRAY;
+            ia->base_type = CLAY_GRAY;
             if (ia->depth == 8)
-              ia->precision = GIMP_PRECISION_U8_NON_LINEAR;
+              ia->precision = CLAY_PRECISION_U8_NON_LINEAR;
             else
-              ia->precision = GIMP_PRECISION_U16_NON_LINEAR;
+              ia->precision = CLAY_PRECISION_U16_NON_LINEAR;
           }
         else if (ia->depth <= 8 && ! ia->grayscale)
           {
-            ia->base_type = GIMP_INDEXED;
-            ia->precision = GIMP_PRECISION_U8_NON_LINEAR;
+            ia->base_type = CLAY_INDEXED;
+            ia->precision = CLAY_PRECISION_U8_NON_LINEAR;
           }
         else
         {
@@ -1072,7 +1072,7 @@ read_general_image_attribute_block (FILE     *f,
         break;
     }
 
-    if (ia->precision == GIMP_PRECISION_U16_NON_LINEAR)
+    if (ia->precision == CLAY_PRECISION_U16_NON_LINEAR)
       ia->bytes_per_sample = 2;
     else
       ia->bytes_per_sample = 1;
@@ -1085,7 +1085,7 @@ read_general_image_attribute_block (FILE     *f,
 
 static gint
 read_creator_block (FILE      *f,
-                    GimpImage *image,
+                    ClayImage *image,
                     guint      total_len,
                     PSPimage  *ia,
                     GError   **error)
@@ -1103,7 +1103,7 @@ read_creator_block (FILE      *f,
   guint32       __attribute__((unused))appid;
   guint32       __attribute__((unused))appver;
   GString      *comment;
-  GimpParasite *comment_parasite;
+  ClayParasite *comment_parasite;
 
   data_start = ftell (f);
   comment = g_string_new (NULL);
@@ -1237,12 +1237,12 @@ read_creator_block (FILE      *f,
     }
   if (comment->len > 0)
     {
-      comment_parasite = gimp_parasite_new ("gimp-comment",
-                                            GIMP_PARASITE_PERSISTENT,
+      comment_parasite = clay_parasite_new ("clay-comment",
+                                            CLAY_PARASITE_PERSISTENT,
                                             strlen (comment->str) + 1,
                                             comment->str);
-      gimp_image_attach_parasite (image, comment_parasite);
-      gimp_parasite_free (comment_parasite);
+      clay_image_attach_parasite (image, comment_parasite);
+      clay_parasite_free (comment_parasite);
     }
 
   g_string_free (comment, TRUE);
@@ -1252,7 +1252,7 @@ read_creator_block (FILE      *f,
 
 static gint
 read_color_block (FILE      *f,
-                  GimpImage *image,
+                  ClayImage *image,
                   guint      total_len,
                   PSPimage  *ia,
                   GError   **error)
@@ -1262,7 +1262,7 @@ read_color_block (FILE      *f,
   guint32  color_palette_entries;
   guchar  *color_palette;
 
-  if (gimp_image_get_base_type (image) != GIMP_INDEXED)
+  if (clay_image_get_base_type (image) != CLAY_INDEXED)
     /* Skipping, but not an error, can happen for grayscale PSP images */
     return 0;
 
@@ -1298,7 +1298,7 @@ read_color_block (FILE      *f,
     }
 
   color_palette_entries = GUINT32_FROM_LE (entry_count);
-  /* TODO: GIMP currently only supports a maximum of 256 colors
+  /* TODO: Clay currently only supports a maximum of 256 colors
    * in an indexed image. If this changes, we can change this check */
   if (color_palette_entries > 256)
     {
@@ -1334,7 +1334,7 @@ read_color_block (FILE      *f,
       memcpy (color_palette, tmpmap, color_palette_entries * 3);
       g_free (tmpmap);
 
-      gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), color_palette, color_palette_entries * 3);
+      clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), color_palette, color_palette_entries * 3);
       g_free (color_palette);
     }
 
@@ -1350,73 +1350,73 @@ swab_rect (guint32 *rect)
   rect[3] = GUINT32_FROM_LE (rect[3]);
 }
 
-static GimpLayerMode
-gimp_layer_mode_from_psp_blend_mode (PSPBlendModes mode)
+static ClayLayerMode
+clay_layer_mode_from_psp_blend_mode (PSPBlendModes mode)
 {
   switch (mode)
     {
     case PSP_BLEND_NORMAL:
-      return GIMP_LAYER_MODE_NORMAL_LEGACY;
+      return CLAY_LAYER_MODE_NORMAL_LEGACY;
 
     case PSP_BLEND_DARKEN:
-      return GIMP_LAYER_MODE_DARKEN_ONLY_LEGACY;
+      return CLAY_LAYER_MODE_DARKEN_ONLY_LEGACY;
 
     case PSP_BLEND_LIGHTEN:
-      return GIMP_LAYER_MODE_LIGHTEN_ONLY_LEGACY;
+      return CLAY_LAYER_MODE_LIGHTEN_ONLY_LEGACY;
 
     case PSP_BLEND_HUE:
-      return GIMP_LAYER_MODE_HSV_HUE_LEGACY;
+      return CLAY_LAYER_MODE_HSV_HUE_LEGACY;
 
     case PSP_BLEND_SATURATION:
-      return GIMP_LAYER_MODE_HSV_SATURATION_LEGACY;
+      return CLAY_LAYER_MODE_HSV_SATURATION_LEGACY;
 
     case PSP_BLEND_COLOR:
-      return GIMP_LAYER_MODE_HSL_COLOR_LEGACY;
+      return CLAY_LAYER_MODE_HSL_COLOR_LEGACY;
 
     case PSP_BLEND_LUMINOSITY:
-      return GIMP_LAYER_MODE_HSV_VALUE_LEGACY;   /* ??? */
+      return CLAY_LAYER_MODE_HSV_VALUE_LEGACY;   /* ??? */
 
     case PSP_BLEND_MULTIPLY:
-      return GIMP_LAYER_MODE_MULTIPLY_LEGACY;
+      return CLAY_LAYER_MODE_MULTIPLY_LEGACY;
 
     case PSP_BLEND_SCREEN:
-      return GIMP_LAYER_MODE_SCREEN_LEGACY;
+      return CLAY_LAYER_MODE_SCREEN_LEGACY;
 
     case PSP_BLEND_DISSOLVE:
-      return GIMP_LAYER_MODE_DISSOLVE;
+      return CLAY_LAYER_MODE_DISSOLVE;
 
     case PSP_BLEND_OVERLAY:
-      return GIMP_LAYER_MODE_OVERLAY;
+      return CLAY_LAYER_MODE_OVERLAY;
 
     case PSP_BLEND_HARD_LIGHT:
-      return GIMP_LAYER_MODE_HARDLIGHT_LEGACY;
+      return CLAY_LAYER_MODE_HARDLIGHT_LEGACY;
 
     case PSP_BLEND_SOFT_LIGHT:
-      return GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+      return CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
     case PSP_BLEND_DIFFERENCE:
-      return GIMP_LAYER_MODE_DIFFERENCE_LEGACY;
+      return CLAY_LAYER_MODE_DIFFERENCE_LEGACY;
 
     case PSP_BLEND_DODGE:
-      return GIMP_LAYER_MODE_DODGE_LEGACY;
+      return CLAY_LAYER_MODE_DODGE_LEGACY;
 
     case PSP_BLEND_BURN:
-      return GIMP_LAYER_MODE_BURN_LEGACY;
+      return CLAY_LAYER_MODE_BURN_LEGACY;
 
     case PSP_BLEND_EXCLUSION:
-      return GIMP_LAYER_MODE_EXCLUSION;
+      return CLAY_LAYER_MODE_EXCLUSION;
 
     case PSP_BLEND_TRUE_HUE:
-      return GIMP_LAYER_MODE_HSV_HUE;
+      return CLAY_LAYER_MODE_HSV_HUE;
 
     case PSP_BLEND_TRUE_SATURATION:
-      return GIMP_LAYER_MODE_HSV_SATURATION;
+      return CLAY_LAYER_MODE_HSV_SATURATION;
 
     case PSP_BLEND_TRUE_COLOR:
-      return GIMP_LAYER_MODE_HSL_COLOR;
+      return CLAY_LAYER_MODE_HSL_COLOR;
 
     case PSP_BLEND_TRUE_LIGHTNESS:
-      return GIMP_LAYER_MODE_HSV_VALUE;
+      return CLAY_LAYER_MODE_HSV_VALUE;
 
     case PSP_BLEND_ADJUST:
       return -1;                /* ??? */
@@ -1804,7 +1804,7 @@ read_channel_data (FILE        *f,
       break;
     }
 
-  if (ia->base_type == GIMP_INDEXED && ia->depth < 8)
+  if (ia->base_type == CLAY_INDEXED && ia->depth < 8)
     {
       /* We need to convert 1 and 4 bit to 8 bit indexed */
       upscale_indexed_sub_8 (f, width, height, ia->depth, pixels[0]);
@@ -1883,9 +1883,9 @@ read_raster_layer_info (FILE      *f,
   return TRUE;
 }
 
-static GimpLayer *
+static ClayLayer *
 read_layer_block (FILE      *f,
-                  GimpImage *image,
+                  ClayImage *image,
                   guint      total_len,
                   PSPimage  *ia,
                   GError   **error)
@@ -1905,9 +1905,9 @@ read_layer_block (FILE      *f,
   gboolean        null_layer, can_handle_layer;
   gboolean        is_adjustment_layer;
   guint16         bitmap_count, channel_count;
-  GimpImageType   drawable_type;
-  GimpLayer      *layer = NULL;
-  GimpLayerMode   layer_mode;
+  ClayImageType   drawable_type;
+  ClayLayer      *layer = NULL;
+  ClayLayerMode   layer_mode;
   guint32         channel_init_len, channel_total_len;
   guint32         compressed_len, uncompressed_len;
   guint16         bitmap_type, channel_type;
@@ -2055,21 +2055,21 @@ read_layer_block (FILE      *f,
       bitmap_count = GUINT16_FROM_LE (bitmap_count);
       channel_count = GUINT16_FROM_LE (channel_count);
 
-      layer_mode = gimp_layer_mode_from_psp_blend_mode (blend_mode);
+      layer_mode = clay_layer_mode_from_psp_blend_mode (blend_mode);
       if ((int) layer_mode == -1)
         {
           g_message ("Unsupported PSP layer blend mode %s "
                      "for layer %s, setting layer invisible",
                      blend_mode_name (blend_mode), layer_name);
-          layer_mode = GIMP_LAYER_MODE_NORMAL_LEGACY;
+          layer_mode = CLAY_LAYER_MODE_NORMAL_LEGACY;
           visibility = FALSE;
         }
 
       width = saved_image_rect[2] - saved_image_rect[0];
       height = saved_image_rect[3] - saved_image_rect[1];
 
-      if ((width < 0) || (width > GIMP_MAX_IMAGE_SIZE)       /* w <= 2^18 */
-          || (height < 0) || (height > GIMP_MAX_IMAGE_SIZE)  /* h <= 2^18 */
+      if ((width < 0) || (width > CLAY_MAX_IMAGE_SIZE)       /* w <= 2^18 */
+          || (height < 0) || (height > CLAY_MAX_IMAGE_SIZE)  /* h <= 2^18 */
           || ((width / 256) * (height / 256) >= 8192))       /* w * h < 2^29 */
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
@@ -2108,26 +2108,26 @@ read_layer_block (FILE      *f,
           null_layer = TRUE;
         }
 
-      if (ia->base_type == GIMP_RGB)
+      if (ia->base_type == CLAY_RGB)
         if (bitmap_count == 1)
-          drawable_type = GIMP_RGB_IMAGE, bytespp = 3;
+          drawable_type = CLAY_RGB_IMAGE, bytespp = 3;
         else
-          drawable_type = GIMP_RGBA_IMAGE, bytespp = 4;
-      else if (ia->base_type == GIMP_GRAY)
+          drawable_type = CLAY_RGBA_IMAGE, bytespp = 4;
+      else if (ia->base_type == CLAY_GRAY)
         if (bitmap_count == 1)
-          drawable_type = GIMP_GRAY_IMAGE, bytespp = 1;
+          drawable_type = CLAY_GRAY_IMAGE, bytespp = 1;
         else
-          drawable_type = GIMP_GRAYA_IMAGE, bytespp = 2;
+          drawable_type = CLAY_GRAYA_IMAGE, bytespp = 2;
       else
         if (bitmap_count == 1)
-          drawable_type = GIMP_INDEXED_IMAGE, bytespp = 1;
+          drawable_type = CLAY_INDEXED_IMAGE, bytespp = 1;
         else
-          drawable_type = GIMP_INDEXEDA_IMAGE, bytespp = 2;
+          drawable_type = CLAY_INDEXEDA_IMAGE, bytespp = 2;
       bytespp *= ia->bytes_per_sample;
 
       if (can_handle_layer)
         {
-          layer = gimp_layer_new (image, layer_name,
+          layer = clay_layer_new (image, layer_name,
                                   width, height,
                                   drawable_type,
                                   100.0 * opacity / 255.0,
@@ -2135,9 +2135,9 @@ read_layer_block (FILE      *f,
         }
       else /* Adjustment Layers, Group Layers, etc */
         {
-          layer = GIMP_LAYER (gimp_group_layer_new (image, layer_name));
-          gimp_layer_set_opacity (layer, (100.0 * opacity) / 255.0);
-          gimp_layer_set_mode (layer, GIMP_LAYER_MODE_PASS_THROUGH);
+          layer = CLAY_LAYER (clay_group_layer_new (image, layer_name));
+          clay_layer_set_opacity (layer, (100.0 * opacity) / 255.0);
+          clay_layer_set_mode (layer, CLAY_LAYER_MODE_PASS_THROUGH);
         }
       g_free (layer_name);
       if (! layer)
@@ -2148,18 +2148,18 @@ read_layer_block (FILE      *f,
         }
 
       if (can_handle_layer)
-        gimp_image_insert_layer (image, layer, NULL, -1);
+        clay_image_insert_layer (image, layer, NULL, -1);
       else
-        gimp_image_insert_layer (image, layer, NULL, 0);
+        clay_image_insert_layer (image, layer, NULL, 0);
 
       if (image_rect[0] != 0 || image_rect[1] != 0 || saved_image_rect[0] != 0 || saved_image_rect[1] != 0)
-        gimp_layer_set_offsets (layer,
+        clay_layer_set_offsets (layer,
                                 image_rect[0] + saved_image_rect[0], image_rect[1] + saved_image_rect[1]);
 
       if (! visibility)
-        gimp_item_set_visible (GIMP_ITEM (layer), FALSE);
+        clay_item_set_visible (CLAY_ITEM (layer), FALSE);
 
-      gimp_layer_set_lock_alpha (layer, transparency_protected);
+      clay_layer_set_lock_alpha (layer, transparency_protected);
 
       if (can_handle_layer)
         {
@@ -2198,7 +2198,7 @@ read_layer_block (FILE      *f,
                 pixels[i] = pixel + (gsize) line_width * i;
             }
 
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
           /* Read the layer channel sub-blocks */
           while (ftell (f) < sub_block_start + sub_total_len)
@@ -2207,7 +2207,7 @@ read_layer_block (FILE      *f,
                                           &channel_total_len, error);
               if (sub_id == -1)
                 {
-                  gimp_image_delete (image);
+                  clay_image_delete (image);
                   return NULL;
                 }
 
@@ -2250,8 +2250,8 @@ read_layer_block (FILE      *f,
                 }
               else
                 {
-                  if ((ia->base_type == GIMP_RGB && channel_type > PSP_CHANNEL_BLUE) ||
-                      (ia->base_type != GIMP_RGB && channel_type >= PSP_CHANNEL_RED))
+                  if ((ia->base_type == CLAY_RGB && channel_type > PSP_CHANNEL_BLUE) ||
+                      (ia->base_type != CLAY_RGB && channel_type >= PSP_CHANNEL_RED))
                     {
                       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                    _("Invalid channel type %d in channel information chunk"),
@@ -2342,7 +2342,7 @@ read_layer_block (FILE      *f,
 
 static gint
 read_tube_block (FILE      *f,
-                 GimpImage *image,
+                 ClayImage *image,
                  guint      total_len,
                  PSPimage  *ia,
                  GError   **error)
@@ -2353,12 +2353,12 @@ read_tube_block (FILE      *f,
   guint32            placement_mode, selection_mode;
   guint32            chunk_len;
   gint               i;
-  GimpPixPipeParams  params;
-  GimpParasite      *pipe_parasite;
+  ClayPixPipeParams  params;
+  ClayParasite      *pipe_parasite;
   gchar             *parasite_text;
 
   G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-  gimp_pixpipe_params_init (&params);
+  clay_pixpipe_params_init (&params);
   G_GNUC_END_IGNORE_DEPRECATIONS
 
   if (psp_ver_major >= 4)
@@ -2406,13 +2406,13 @@ read_tube_block (FILE      *f,
   selection_mode = GUINT32_FROM_LE (selection_mode);
 
   for (i = 1; i < params.cols; i++)
-    gimp_image_add_vguide (image, (ia->width * i)/params.cols);
+    clay_image_add_vguide (image, (ia->width * i)/params.cols);
   for (i = 1; i < params.rows; i++)
-    gimp_image_add_hguide (image, (ia->height * i)/params.rows);
+    clay_image_add_hguide (image, (ia->height * i)/params.rows);
 
   /* We use a parasite to pass in the tube (pipe) parameters in
    * case we will have any use of those, for instance in the gpb
-   * plug-in that exports a GIMP image pipe.
+   * plug-in that exports a Clay image pipe.
    */
   params.dim = 1;
   params.cellwidth = ia->width / params.cols;
@@ -2428,16 +2428,16 @@ read_tube_block (FILE      *f,
                             (selection_mode == tsmVelocity ? "velocity" :
                              "default")))));
   G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-  parasite_text = gimp_pixpipe_params_build (&params);
+  parasite_text = clay_pixpipe_params_build (&params);
   G_GNUC_END_IGNORE_DEPRECATIONS
 
   IFDBG(2) g_message ("parasite: %s", parasite_text);
 
-  pipe_parasite = gimp_parasite_new ("gimp-brush-pipe-parameters",
-                                     GIMP_PARASITE_PERSISTENT,
+  pipe_parasite = clay_parasite_new ("clay-brush-pipe-parameters",
+                                     CLAY_PARASITE_PERSISTENT,
                                      strlen (parasite_text) + 1, parasite_text);
-  gimp_image_attach_parasite (image, pipe_parasite);
-  gimp_parasite_free (pipe_parasite);
+  clay_image_attach_parasite (image, pipe_parasite);
+  clay_parasite_free (pipe_parasite);
   g_free (parasite_text);
 
   return 0;
@@ -2462,7 +2462,7 @@ compression_name (gint compression)
 
 static gint
 read_selection_block (FILE      *f,
-                      GimpImage *image,
+                      ClayImage *image,
                       guint      total_len,
                       PSPimage  *ia,
                       GError   **error)
@@ -2481,7 +2481,7 @@ read_selection_block (FILE      *f,
   guint32         uncompressed_len;
   guint16         bitmap_type;
   guint16         channel_type;
-  GimpSelection  *selection;
+  ClaySelection  *selection;
   GeglBuffer     *buffer;
   guchar         *pixels;
   gint            width;
@@ -2588,8 +2588,8 @@ read_selection_block (FILE      *f,
       return -1;
     }
 
-  selection = gimp_image_get_selection (image);
-  buffer    = gimp_drawable_get_buffer (GIMP_DRAWABLE (selection));
+  selection = clay_image_get_selection (image);
+  buffer    = clay_drawable_get_buffer (CLAY_DRAWABLE (selection));
 
   pixels = g_try_malloc0 ((gsize) gegl_buffer_get_width (buffer) *
                           gegl_buffer_get_height (buffer));
@@ -2622,7 +2622,7 @@ read_selection_block (FILE      *f,
   g_object_unref (buffer);
   g_free (pixels);
 
-  gimp_selection_translate (image, rect[0], rect[1]);
+  clay_selection_translate (image, rect[0], rect[1]);
 
   if (try_fseek (f, total_len, SEEK_SET, error) < 0)
     {
@@ -2636,7 +2636,7 @@ read_selection_block (FILE      *f,
 
 static gint
 read_extended_block (FILE      *f,
-                     GimpImage *image,
+                     ClayImage *image,
                      guint      total_len,
                      PSPimage  *ia,
                      GError   **error)
@@ -2697,12 +2697,12 @@ read_extended_block (FILE      *f,
 
             h_spacing = GUINT32_FROM_LE (h_spacing);
             v_spacing = GUINT32_FROM_LE (v_spacing);
-            gimp_image_grid_set_spacing (image, h_spacing, v_spacing);
+            clay_image_grid_set_spacing (image, h_spacing, v_spacing);
 
             color = gegl_color_new (NULL);
             gegl_color_set_pixel (color, babl_format ("R'G'B' u8"), rgb);
-            gimp_image_grid_set_foreground_color (image, color);
-            gimp_image_grid_set_background_color (image, color);
+            clay_image_grid_set_foreground_color (image, color);
+            clay_image_grid_set_background_color (image, color);
             g_object_unref (color);
           }
           break;
@@ -2728,11 +2728,11 @@ read_extended_block (FILE      *f,
 
             if (orientation == keHorizontalGuide)
               {
-                gimp_image_add_hguide (image, offset);
+                clay_image_add_hguide (image, offset);
               }
             else if (orientation == keVerticalGuide)
               {
-                gimp_image_add_vguide (image, offset);
+                clay_image_add_vguide (image, offset);
               }
             else
               {
@@ -2764,7 +2764,7 @@ read_extended_block (FILE      *f,
 
 static gint
 read_colorprofile_block (FILE      *f,
-                         GimpImage *image,
+                         ClayImage *image,
                          guint      total_len,
                          PSPimage  *ia,
                          GError   **error)
@@ -2772,7 +2772,7 @@ read_colorprofile_block (FILE      *f,
   guint             psp_header_size;
   guint             icc_profile_size;
   gchar            *icc_profile;
-  GimpColorProfile *profile;
+  ClayColorProfile *profile;
 
   if (fread (&psp_header_size, 4, 1, f) < 1)
     {
@@ -2804,10 +2804,10 @@ read_colorprofile_block (FILE      *f,
       return -1;
     }
 
-  profile = gimp_color_profile_new_from_icc_profile ((guint8 *) icc_profile,
+  profile = clay_color_profile_new_from_icc_profile ((guint8 *) icc_profile,
                                                      icc_profile_size,
                                                      NULL);
-  gimp_image_set_color_profile (image, profile);
+  clay_image_set_color_profile (image, profile);
 
   g_object_unref (profile);
   g_free (icc_profile);
@@ -2817,7 +2817,7 @@ read_colorprofile_block (FILE      *f,
 
 /* The main function for loading PSP-images
  */
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
@@ -2830,7 +2830,7 @@ load_image (GFile   *file,
   PSPBlockID id = -1;
   gint       block_number;
 
-  GimpImage *image = NULL;
+  ClayImage *image = NULL;
 
   if (g_stat (g_file_peek_path (file), &st) == -1)
     {
@@ -2843,7 +2843,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -2893,7 +2893,7 @@ load_image (GFile   *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not open '%s' for reading: %s"),
-                       gimp_file_get_utf8_name (file),
+                       clay_file_get_utf8_name (file),
                        _("invalid block size"));
           goto error;
         }
@@ -2917,14 +2917,14 @@ load_image (GFile   *file,
                               ia.width, ia.height,
                               compression_name (ia.compression));
 
-          image = gimp_image_new_with_precision (ia.width, ia.height,
+          image = clay_image_new_with_precision (ia.width, ia.height,
                                                  ia.base_type, ia.precision);
           if (! image)
             {
               goto error;
             }
 
-          gimp_image_set_resolution (image, ia.resolution, ia.resolution);
+          clay_image_set_resolution (image, ia.resolution, ia.resolution);
         }
       else
         {
@@ -3038,7 +3038,7 @@ load_image (GFile   *file,
     error:
       fclose (f);
       if (image)
-        gimp_image_delete (image);
+        clay_image_delete (image);
       return NULL;
     }
 
@@ -3049,7 +3049,7 @@ load_image (GFile   *file,
 
 static gint
 export_image (GFile         *file,
-              GimpImage     *image,
+              ClayImage     *image,
               gint           n_drawables,
               GList         *drawables,
               GObject       *config,
@@ -3063,13 +3063,13 @@ export_image (GFile         *file,
 
 /* Helper methods */
 static gboolean
-create_adjustment (GimpLayer  *layer,
+create_adjustment (ClayLayer  *layer,
                    FILE       *f,
                    gint64      layer_extension_start,
                    GError    **error)
 {
-  GimpDrawableFilter       *filter   = NULL;
-  GimpDrawableFilterConfig *config   = NULL;
+  ClayDrawableFilter       *filter   = NULL;
+  ClayDrawableFilterConfig *config   = NULL;
   PSPAdjustmentLayerType    adj_type = keAdjNone;
   guchar                    header[4];
   gint                      block_id;
@@ -3120,7 +3120,7 @@ create_adjustment (GimpLayer  *layer,
     {
       case keAdjLevel:
         {
-          GimpHistogramChannel channel      = GIMP_HISTOGRAM_RED;
+          ClayHistogramChannel channel      = CLAY_HISTOGRAM_RED;
           gdouble              gamma[4]     = { 0 };
           guint32              ceil_in[4]   = { 0 };
           guint32              floor_in[4]  = { 0 };
@@ -3147,54 +3147,54 @@ create_adjustment (GimpLayer  *layer,
               floor_out[i] = GINT32_FROM_LE (floor_out[i]);
             }
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:levels",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:levels",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_REPLACE,
+                                                    CLAY_LAYER_MODE_REPLACE,
                                                     1.0,
-                                                    "channel",     GIMP_HISTOGRAM_VALUE,
-                                                    "trc",         GIMP_TRC_PERCEPTUAL,
+                                                    "channel",     CLAY_HISTOGRAM_VALUE,
+                                                    "trc",         CLAY_TRC_PERCEPTUAL,
                                                     "low-input",   floor_in[0] / 255.0,
                                                     "high-input",  ceil_in[0] / 255.0,
                                                     "low-output",  floor_out[0] / 255.0,
                                                     "high-output", ceil_out[0] / 255.0,
                                                     "gamma",       gamma[0],
                                                     NULL);
-          config = gimp_drawable_filter_get_config (filter);
+          config = clay_drawable_filter_get_config (filter);
 
           for (gint i = 1; i < 4; i++)
             {
               g_object_set (config, "channel", channel, NULL);
-              gimp_drawable_filter_update (filter);
+              clay_drawable_filter_update (filter);
               channel++;
 
               g_object_set (config,
-                            "trc",         GIMP_TRC_PERCEPTUAL,
+                            "trc",         CLAY_TRC_PERCEPTUAL,
                             "low-input",   floor_in[i] / 255.0,
                             "high-input",  ceil_in[i] / 255.0,
                             "low-output",  floor_out[i] / 255.0,
                             "high-output", ceil_out[i] / 255.0,
                             "gamma",       gamma[i],
                             NULL);
-              gimp_drawable_filter_update (filter);
+              clay_drawable_filter_update (filter);
             }
         }
         break;
 
       case keAdjCurve:
         {
-          GimpHistogramChannel channel = GIMP_HISTOGRAM_VALUE;
+          ClayHistogramChannel channel = CLAY_HISTOGRAM_VALUE;
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:curves",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:curves",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_REPLACE,
+                                                    CLAY_LAYER_MODE_REPLACE,
                                                     1.0, NULL);
-          config = gimp_drawable_filter_get_config (filter);
+          config = clay_drawable_filter_get_config (filter);
 
           for (gint i = 0; i < 4; i++)
             {
-              GimpCurve *curve       = NULL;
+              ClayCurve *curve       = NULL;
               guchar     is_freehand = FALSE;
               gushort    num_points;
               guchar     points[18 * 2];
@@ -3214,33 +3214,33 @@ create_adjustment (GimpLayer  *layer,
                 }
               num_points = MIN (GUINT16_FROM_LE (num_points), 18);
 
-              curve = gimp_curve_new ();
-              gimp_curve_set_curve_type (curve,
-                                         (is_freehand) ? GIMP_CURVE_FREE :
-                                                         GIMP_CURVE_SMOOTH);
+              curve = clay_curve_new ();
+              clay_curve_set_curve_type (curve,
+                                         (is_freehand) ? CLAY_CURVE_FREE :
+                                                         CLAY_CURVE_SMOOTH);
 
               if (is_freehand)
                 {
                   for (gint i = 0; i < 256; i++)
-                    gimp_curve_set_sample (curve, i / 255.0f,
+                    clay_curve_set_sample (curve, i / 255.0f,
                                            freehand_table[i] / 255.0f);
                 }
               else
                 {
                   for (gint i = 0; i < num_points; i++)
                     {
-                      gimp_curve_add_point (curve, points[i * 2] / 255.0f,
+                      clay_curve_add_point (curve, points[i * 2] / 255.0f,
                                             points[(i * 2) + 1] / 255.0f);
                     }
                 }
 
               g_object_set (config, "channel", channel, NULL);
-              gimp_drawable_filter_update (filter);
+              clay_drawable_filter_update (filter);
               g_object_set (config,
-                            "trc",   GIMP_TRC_PERCEPTUAL,
+                            "trc",   CLAY_TRC_PERCEPTUAL,
                             "curve", curve,
                             NULL);
-              gimp_drawable_filter_update (filter);
+              clay_drawable_filter_update (filter);
               channel++;
 
               /* Skip extension if it exists */
@@ -3276,10 +3276,10 @@ create_adjustment (GimpLayer  *layer,
           brightness = GINT32_FROM_LE (brightness);
           contrast   = GINT32_FROM_LE (contrast);
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:brightness-contrast",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:brightness-contrast",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_ADDITION,
+                                                    CLAY_LAYER_MODE_ADDITION,
                                                     1.0,
                                                     "brightness", (brightness / 127.0f),
                                                     "contrast",   (contrast / 127.0f),
@@ -3312,36 +3312,36 @@ create_adjustment (GimpLayer  *layer,
               shadows[i]    = GINT32_FROM_LE (shadows[i]);
             }
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:color-balance",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:color-balance",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_SOFTLIGHT,
+                                                    CLAY_LAYER_MODE_SOFTLIGHT,
                                                     1.0,
-                                                    "range",               GIMP_TRANSFER_HIGHLIGHTS,
+                                                    "range",               CLAY_TRANSFER_HIGHLIGHTS,
                                                     "cyan-red",            highlights[0] / 100.0f,
                                                     "magenta-green",       highlights[1] / 100.0f,
                                                     "yellow-blue",         highlights[2] / 100.0f,
                                                     "preserve-luminosity", preserve_lum,
                                                     NULL);
-          config = gimp_drawable_filter_get_config (filter);
+          config = clay_drawable_filter_get_config (filter);
 
-          g_object_set (config, "range", GIMP_TRANSFER_SHADOWS, NULL);
-          gimp_drawable_filter_update (filter);
+          g_object_set (config, "range", CLAY_TRANSFER_SHADOWS, NULL);
+          clay_drawable_filter_update (filter);
           g_object_set (config,
                         "cyan-red",      shadows[0] / 100.0f,
                         "magenta-green", shadows[1] / 100.0f,
                         "yellow-blue",   shadows[2] / 100.0f,
                         NULL);
-          gimp_drawable_filter_update (filter);
+          clay_drawable_filter_update (filter);
 
-          g_object_set (config, "range", GIMP_TRANSFER_MIDTONES, NULL);
-          gimp_drawable_filter_update (filter);
+          g_object_set (config, "range", CLAY_TRANSFER_MIDTONES, NULL);
+          clay_drawable_filter_update (filter);
           g_object_set (config,
                         "cyan-red",      midtones[0] / 100.0f,
                         "magenta-green", midtones[1] / 100.0f,
                         "yellow-blue",   midtones[2] / 100.0f,
                         NULL);
-          gimp_drawable_filter_update (filter);
+          clay_drawable_filter_update (filter);
         }
       break;
 
@@ -3371,10 +3371,10 @@ create_adjustment (GimpLayer  *layer,
             {
               GeglColor *color = gegl_color_new ("white");
 
-              filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                        "gimp:colorize",
+              filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                        "clay:colorize",
                                                         NULL,
-                                                        GIMP_LAYER_MODE_REPLACE,
+                                                        CLAY_LAYER_MODE_REPLACE,
                                                         1.0,
                                                         "hue",        master[3] / 180.0,
                                                         "saturation", master[4] / 100.0,
@@ -3386,13 +3386,13 @@ create_adjustment (GimpLayer  *layer,
             }
           else
             {
-              GimpHueRange range  = GIMP_HUE_RANGE_ALL;
+              ClayHueRange range  = CLAY_HUE_RANGE_ALL;
               gint         offset = 0;
 
-              filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                        "gimp:hue-saturation",
+              filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                        "clay:hue-saturation",
                                                         NULL,
-                                                        GIMP_LAYER_MODE_REPLACE,
+                                                        CLAY_LAYER_MODE_REPLACE,
                                                         1.0,
                                                         "range",      range,
                                                         "hue",        master[0] / 180.0,
@@ -3400,21 +3400,21 @@ create_adjustment (GimpLayer  *layer,
                                                         "lightness",  master[2] / 100.0,
                                                         NULL);
 
-              config = gimp_drawable_filter_get_config (filter);
+              config = clay_drawable_filter_get_config (filter);
               for (gint i = 0; i < 6; i++)
                 {
                   /* Sequence is red, yellow, green, cyan, blue, and magenta */
                   range++;
 
                   g_object_set (config, "range", range, NULL);
-                  gimp_drawable_filter_update (filter);
+                  clay_drawable_filter_update (filter);
 
                   g_object_set (config,
                                 "hue",        colors[offset] / 180.0,
                                 "saturation", colors[offset + 1] / 100.0,
                                 "lightness",  colors[offset + 2] / 100.0,
                                 NULL);
-                  gimp_drawable_filter_update (filter);
+                  clay_drawable_filter_update (filter);
 
                   offset += 7;
                 }
@@ -3449,10 +3449,10 @@ create_adjustment (GimpLayer  *layer,
 
           if (! is_mono)
             {
-              filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+              filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                         "gegl:channel-mixer",
                                                         NULL,
-                                                        GIMP_LAYER_MODE_REPLACE,
+                                                        CLAY_LAYER_MODE_REPLACE,
                                                         1.0,
                                                         "rr-gain", red[0] / 100.0f,
                                                         "rg-gain", red[1] / 100.0f,
@@ -3467,10 +3467,10 @@ create_adjustment (GimpLayer  *layer,
             }
           else
             {
-              filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+              filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                         "gegl:mono-mixer",
                                                         NULL,
-                                                        GIMP_LAYER_MODE_REPLACE,
+                                                        CLAY_LAYER_MODE_REPLACE,
                                                         1.0,
                                                         "red",   red[0] / 100.0f,
                                                         "green", red[1] / 100.0f,
@@ -3481,10 +3481,10 @@ create_adjustment (GimpLayer  *layer,
         break;
 
       case keAdjInvert:
-        filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
+        filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
                                                   "gegl:invert-gamma",
                                                   NULL,
-                                                  GIMP_LAYER_MODE_REPLACE,
+                                                  CLAY_LAYER_MODE_REPLACE,
                                                   1.0,
                                                   NULL);
 
@@ -3505,12 +3505,12 @@ create_adjustment (GimpLayer  *layer,
           chunk_size = GUINT32_FROM_LE (chunk_size);
           threshold  = GUINT32_FROM_LE (threshold);
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:threshold",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:threshold",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_REPLACE,
+                                                    CLAY_LAYER_MODE_REPLACE,
                                                     1.0,
-                                                    "channel", GIMP_HISTOGRAM_LUMINANCE,
+                                                    "channel", CLAY_HISTOGRAM_LUMINANCE,
                                                     "low",     threshold / 255.0f,
                                                     NULL);
         }
@@ -3531,10 +3531,10 @@ create_adjustment (GimpLayer  *layer,
           chunk_size = GUINT32_FROM_LE (chunk_size);
           posterize  = GUINT32_FROM_LE (posterize);
 
-          filter = gimp_drawable_append_new_filter (GIMP_DRAWABLE (layer),
-                                                    "gimp:posterize",
+          filter = clay_drawable_append_new_filter (CLAY_DRAWABLE (layer),
+                                                    "clay:posterize",
                                                     NULL,
-                                                    GIMP_LAYER_MODE_REPLACE,
+                                                    CLAY_LAYER_MODE_REPLACE,
                                                     1.0,
                                                     "levels", posterize,
                                                     NULL);

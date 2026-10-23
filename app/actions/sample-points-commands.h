@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   sample_points_sample_merged_cmd_callback (GimpAction *action,
+void   sample_points_sample_merged_cmd_callback (ClayAction *action,
                                                  GVariant   *value,
                                                  gpointer    data);

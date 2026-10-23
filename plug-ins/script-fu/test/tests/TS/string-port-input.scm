@@ -141,7 +141,7 @@
 ;               (begin
 ;                  (define aStringPort (open-input-string "foo"))
 ;                  (gc)
-;                  (gimp-message "here")
+;                  (clay-message "here")
 ;                  (read aStringPort)))
 ;             "foo")))
 

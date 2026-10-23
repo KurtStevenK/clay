@@ -1,0 +1,34 @@
+/* Autumn theme, dark scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(246,230,210);
+@define-color bg-color                   rgb(42,26,15);
+@define-color border-color               rgb(71,55,42);
+@define-color dimmed-fg-color            rgb(195,179,161);
+@define-color disabled-fg-color          rgb(154,138,122);
+@define-color disabled-button-color      rgb(107,91,77);
+@define-color hover-color                rgb(71,55,42);
+@define-color widget-bg-color            rgb(54,38,27);
+@define-color selected-color             rgb(83,67,54);
+@define-color extreme-bg-color           rgb(29,18,10);
+@define-color extreme-selected-color     rgb(71,55,42);
+@define-color strong-border-color        rgb(113,97,83);
+@define-color stronger-border-color      rgb(113,97,83);
+@define-color edge-border-color          rgb(113,97,83);
+@define-color scrollbar-slider-color     rgb(113,97,83);
+@define-color scrollbar-trough-color     rgb(29,18,10);
+@define-color ruler-color                rgba(71,55,42,0.3);
+@define-color accent-color               rgb(232,146,59);
+@define-color accent-hover-color         rgb(237,168,98);
+@define-color on-accent-color            rgb(21,13,8);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Georgia", "Palatino", "Times New Roman", serif; }

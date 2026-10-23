@@ -31,25 +31,25 @@
 
 /*
  * All redundant _256 versions of YCbCr* are here only for compatibility .
- * They can be dropped for GIMP 3.0
+ * They can be dropped for Clay 3.0
  */
 
 #include "config.h"
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimpbase/gimpversion-private.h"
-#include "libgimp/stdplugins-intl.h"
+#include "libclaybase/clayversion-private.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define COMPOSE_PROC          "plug-in-compose"
 #define DRAWABLE_COMPOSE_PROC "plug-in-drawable-compose"
 #define RECOMPOSE_PROC        "plug-in-recompose"
 #define PLUG_IN_BINARY        "compose"
-#define PLUG_IN_ROLE          "gimp-compose"
+#define PLUG_IN_ROLE          "clay-compose"
 
 /* Maximum number of images to compose */
 #define MAX_COMPOSE_IMAGES 4
@@ -93,7 +93,7 @@ typedef struct
   ComposeInput inputs[MAX_COMPOSE_IMAGES];  /* Image or mask value of input */
   gchar        compose_type[32];            /* type of composition */
   gboolean     do_recompose;
-  GimpLayer   *source_layer;                /* for recomposing */
+  ClayLayer   *source_layer;                /* for recomposing */
 } ComposeVals;
 
 /* Dialog structure */
@@ -117,12 +117,12 @@ typedef struct _ComposeClass ComposeClass;
 
 struct _Compose
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _ComposeClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -131,15 +131,15 @@ struct _ComposeClass
 
 GType                   compose_get_type         (void);
 
-static GList          * compose_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * compose_create_procedure (GimpPlugIn           *plug_in,
+static GList          * compose_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * compose_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * compose_run              (GimpProcedure        *procedure,
-                                                  GimpRunMode           run_mode,
-                                                  GimpImage            *image,
-                                                  GimpDrawable        **drawables,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray * compose_run              (ClayProcedure        *procedure,
+                                                  ClayRunMode           run_mode,
+                                                  ClayImage            *image,
+                                                  ClayDrawable        **drawables,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
 static void        cpn_affine_transform   (GeglBuffer          *buffer,
@@ -147,7 +147,7 @@ static void        cpn_affine_transform   (GeglBuffer          *buffer,
                                            gdouble              max);
 
 static GeglBuffer * get_buffer_with_filters
-                                          (GimpLayer           *layer);
+                                          (ClayLayer           *layer);
 
 static void   fill_buffer_from_components (GeglBuffer          *temp[MAX_COMPOSE_IMAGES],
                                            GeglBuffer          *dst,
@@ -161,44 +161,44 @@ static void        perform_composition    (COMPOSE_DSC          curr_compose_dsc
                                            ComposeInput        *inputs,
                                            gint                 num_images);
 
-static GimpImage * compose                (const gchar         *compose_type,
+static ClayImage * compose                (const gchar         *compose_type,
                                            ComposeInput        *inputs,
                                            gboolean             compose_by_drawable,
-                                           GimpProcedureConfig *config);
+                                           ClayProcedureConfig *config);
 
-static GimpImage * create_new_image       (GFile               *file,
+static ClayImage * create_new_image       (GFile               *file,
                                            guint                width,
                                            guint                height,
-                                           GimpImageType        gdtype,
-                                           GimpPrecision        precision,
-                                           GimpLayer          **layer,
+                                           ClayImageType        gdtype,
+                                           ClayPrecision        precision,
+                                           ClayLayer          **layer,
                                            GeglBuffer         **buffer);
 
-static gboolean    compose_dialog         (GimpProcedure       *procedure,
-                                           GimpProcedureConfig *config,
+static gboolean    compose_dialog         (ClayProcedure       *procedure,
+                                           ClayProcedureConfig *config,
                                            const gchar         *compose_type,
-                                           GimpDrawable        *drawable);
+                                           ClayDrawable        *drawable);
 
-static gboolean    check_gray             (GimpImage           *image,
-                                           GimpItem            *drawable,
+static gboolean    check_gray             (ClayImage           *image,
+                                           ClayItem            *drawable,
                                            gpointer             data);
 
-static void        combo_callback         (GimpIntComboBox     *cbox,
+static void        combo_callback         (ClayIntComboBox     *cbox,
                                            gpointer             data);
 
-static void        scale_callback         (GimpLabelSpin       *scale,
+static void        scale_callback         (ClayLabelSpin       *scale,
                                            ComposeInput        *input);
 
 static void        check_response         (GtkWidget           *dialog,
                                            gint                 response,
                                            gpointer             data);
 
-static void        type_combo_callback    (GimpProcedureConfig *config);
+static void        type_combo_callback    (ClayProcedureConfig *config);
 
 
-G_DEFINE_TYPE (Compose, compose, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Compose, compose, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (COMPOSE_TYPE)
+CLAY_MAIN (COMPOSE_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -206,10 +206,10 @@ DEFINE_STD_SET_I18N
  * All the following values have to be kept in sync with those of decompose.c
  */
 
-#define CPN_RGBA_R { "R", N_("_Red:"),   GIMP_ICON_CHANNEL_RED, 0.0, 1.0, FALSE}
-#define CPN_RGBA_G { "G", N_("_Green:"), GIMP_ICON_CHANNEL_GREEN, 0.0, 1.0, FALSE}
-#define CPN_RGBA_B { "B", N_("_Blue:"),  GIMP_ICON_CHANNEL_BLUE, 0.0, 1.0, FALSE}
-#define CPN_RGBA_A { "A", N_("_Alpha:"), GIMP_ICON_CHANNEL_ALPHA, 0.0, 1.0, TRUE}
+#define CPN_RGBA_R { "R", N_("_Red:"),   CLAY_ICON_CHANNEL_RED, 0.0, 1.0, FALSE}
+#define CPN_RGBA_G { "G", N_("_Green:"), CLAY_ICON_CHANNEL_GREEN, 0.0, 1.0, FALSE}
+#define CPN_RGBA_B { "B", N_("_Blue:"),  CLAY_ICON_CHANNEL_BLUE, 0.0, 1.0, FALSE}
+#define CPN_RGBA_A { "A", N_("_Alpha:"), CLAY_ICON_CHANNEL_ALPHA, 0.0, 1.0, TRUE}
 
 #define CPN_HSV_H  { "hue",        N_("_Hue:"),        NULL, 0.0, 1.0, TRUE}
 #define CPN_HSV_S  { "saturation", N_("_Saturation:"), NULL, 0.0, 1.0, TRUE}
@@ -346,7 +346,7 @@ static ComposeInterface composeint =
 static void
 compose_class_init (ComposeClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = compose_query_procedures;
   plug_in_class->create_procedure = compose_create_procedure;
@@ -359,7 +359,7 @@ compose_init (Compose *compose)
 }
 
 static GList *
-compose_query_procedures (GimpPlugIn *plug_in)
+compose_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -370,11 +370,11 @@ compose_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-compose_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+compose_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
   GString       *type_desc;
   gint           i;
 
@@ -393,52 +393,52 @@ compose_create_procedure (GimpPlugIn  *plug_in,
 
   if (! strcmp (name, COMPOSE_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             compose_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("C_ompose..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Components");
+      clay_procedure_set_menu_label (procedure, _("C_ompose..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Components");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create an image using multiple "
                                           "gray images as color channels"),
                                         _("This function creates a new image from "
                                           "multiple gray images"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Peter Kirchgessner",
                                       "Peter Kirchgessner (peter@kirchgessner.net)",
                                       "1997");
 
-      gimp_procedure_add_image_argument (procedure, "image-2",
+      clay_procedure_add_image_argument (procedure, "image-2",
                                          _("Image 2"),
                                          _("Second input image"),
                                          TRUE,
                                          G_PARAM_READWRITE);
 
-      gimp_procedure_add_image_argument (procedure, "image-3",
+      clay_procedure_add_image_argument (procedure, "image-3",
                                          _("Image 3"),
                                          _("Third input image"),
                                          TRUE,
                                          G_PARAM_READWRITE);
 
-      gimp_procedure_add_image_argument (procedure, "image-4",
+      clay_procedure_add_image_argument (procedure, "image-4",
                                          _("Image 4"),
                                          _("Fourth input image"),
                                          TRUE,
                                          G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "compose-type",
+      clay_procedure_add_choice_argument (procedure, "compose-type",
                                           _("Color _model"),
                                           type_desc->str,
-                                          gimp_choice_new_with_values ("rgb",        0, _("RGB"),                NULL,
+                                          clay_choice_new_with_values ("rgb",        0, _("RGB"),                NULL,
                                                                        "rgba",       1, _("RGBA"),               NULL,
                                                                        "hsv",        2, _("HSV"),                NULL,
                                                                        "hsl",        3, _("HSL"),                NULL,
@@ -453,7 +453,7 @@ compose_create_procedure (GimpPlugIn  *plug_in,
                                           "rgb",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_image_return_value (procedure, "new-image",
+      clay_procedure_add_image_return_value (procedure, "new-image",
                                              _("New image"),
                                              _("Output image"),
                                              FALSE,
@@ -461,47 +461,47 @@ compose_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, DRAWABLE_COMPOSE_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             compose_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Compose an image from multiple "
                                           "drawables of gray images"),
                                         _("This function creates a new image from "
                                           "multiple drawables of gray images"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Peter Kirchgessner",
                                       "Peter Kirchgessner (peter@kirchgessner.net)",
                                       "1998");
 
-      gimp_procedure_add_drawable_argument (procedure, "drawable-2",
+      clay_procedure_add_drawable_argument (procedure, "drawable-2",
                                             _("Drawable 2"),
                                             _("Second input drawable"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "drawable-3",
+      clay_procedure_add_drawable_argument (procedure, "drawable-3",
                                             _("Drawable 3"),
                                             _("Third input drawable"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "drawable-4",
+      clay_procedure_add_drawable_argument (procedure, "drawable-4",
                                             _("Drawable 4"),
                                             _("Fourth input drawable"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "compose-type",
+      clay_procedure_add_choice_argument (procedure, "compose-type",
                                           _("Color _model"),
                                           type_desc->str,
-                                          gimp_choice_new_with_values ("rgb",        0, _("RGB"),                NULL,
+                                          clay_choice_new_with_values ("rgb",        0, _("RGB"),                NULL,
                                                                        "rgba",       1, _("RGBA"),               NULL,
                                                                        "hsv",        2, _("HSV"),                NULL,
                                                                        "hsl",        3, _("HSL"),                NULL,
@@ -516,7 +516,7 @@ compose_create_procedure (GimpPlugIn  *plug_in,
                                           "rgb",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_image_return_value (procedure, "new-image",
+      clay_procedure_add_image_return_value (procedure, "new-image",
                                              _("New image"),
                                              _("Output image"),
                                              FALSE,
@@ -524,20 +524,20 @@ compose_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, RECOMPOSE_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             compose_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("R_ecompose"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Components");
+      clay_procedure_set_menu_label (procedure, _("R_ecompose"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Components");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Recompose an image that was "
                                           "previously decomposed"),
                                         _("This function recombines the grayscale "
@@ -546,7 +546,7 @@ compose_create_procedure (GimpPlugIn  *plug_in,
                                           "replaces the originally decomposed "
                                           "layer with the result."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Bill Skaggs",
                                       "Bill Skaggs",
                                       "2004");
@@ -557,17 +557,17 @@ compose_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-compose_run (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
-             GimpDrawable        **drawables,
-             GimpProcedureConfig  *config,
+static ClayValueArray *
+compose_run (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
+             ClayDrawable        **drawables,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpValueArray *return_vals;
-  GimpDrawable   *drawable = NULL;
-  const gchar    *name     = gimp_procedure_get_name (procedure);
+  ClayValueArray *return_vals;
+  ClayDrawable   *drawable = NULL;
+  const gchar    *name     = clay_procedure_get_name (procedure);
   gint            compose_by_drawable;
   gint            compose_idx;
   gint            i;
@@ -578,16 +578,16 @@ compose_run (GimpProcedure        *procedure,
 
   if (compose_by_drawable)
     {
-      if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+      if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
         {
           GError *error = NULL;
 
-          g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                        _("Procedure '%s' only works with one drawable."),
                        name);
 
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CALLING_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CALLING_ERROR,
                                                    error);
         }
       else
@@ -598,7 +598,7 @@ compose_run (GimpProcedure        *procedure,
 
   if (! strcmp (name, RECOMPOSE_PROC))
     {
-      GimpParasite *parasite = gimp_image_get_parasite (image,
+      ClayParasite *parasite = clay_image_get_parasite (image,
                                                         "decompose-data");
 
       if (! parasite)
@@ -606,8 +606,8 @@ compose_run (GimpProcedure        *procedure,
           g_message (_("You can only run 'Recompose' if the active image "
                        "was originally produced by 'Decompose'."));
 
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_EXECUTION_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_EXECUTION_ERROR,
                                                    NULL);
         }
       else
@@ -618,7 +618,7 @@ compose_run (GimpProcedure        *procedure,
           gint     input[4] = { 0, };
           gint     nret;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           parasite_data = g_strndup (parasite_data, parasite_size);
 #ifndef _UCRT
           nret = sscanf (parasite_data,
@@ -641,7 +641,7 @@ compose_run (GimpProcedure        *procedure,
                            input + 3);
 #endif
 
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
           g_free (parasite_data);
 
           if (nret < 5)
@@ -649,15 +649,15 @@ compose_run (GimpProcedure        *procedure,
               g_message (_("Error scanning 'decompose-data' parasite: "
                            "too few layers found"));
 
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_EXECUTION_ERROR,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_EXECUTION_ERROR,
                                                        NULL);
             }
 
           compose_by_drawable = TRUE;
 
           composevals.do_recompose = TRUE;
-          composevals.source_layer = gimp_layer_get_by_id (source);
+          composevals.source_layer = clay_layer_get_by_id (source);
 
           if (! composevals.source_layer)
             {
@@ -665,15 +665,15 @@ compose_run (GimpProcedure        *procedure,
                            "not found"),
                          source);
 
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_EXECUTION_ERROR,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_EXECUTION_ERROR,
                                                        NULL);
             }
 
           for (i = 0; i < MAX_COMPOSE_IMAGES; i++)
             {
               composevals.inputs[i].is_object   = TRUE;
-              composevals.inputs[i].comp.object = gimp_drawable_get_by_id (input[i]);
+              composevals.inputs[i].comp.object = clay_drawable_get_by_id (input[i]);
 
               /* fourth input is optional */
               if (i == 2 && nret == 5)
@@ -685,8 +685,8 @@ compose_run (GimpProcedure        *procedure,
                                "not found"),
                              i + 1, input[i]);
 
-                  return gimp_procedure_new_return_values (procedure,
-                                                           GIMP_PDB_EXECUTION_ERROR,
+                  return clay_procedure_new_return_values (procedure,
+                                                           CLAY_PDB_EXECUTION_ERROR,
                                                            NULL);
                 }
             }
@@ -698,39 +698,39 @@ compose_run (GimpProcedure        *procedure,
 
       switch (run_mode)
         {
-        case GIMP_RUN_INTERACTIVE:
+        case CLAY_RUN_INTERACTIVE:
           compose_by_drawable = TRUE;
 
           /* Get a drawable-ID of the image */
           if (! strcmp (name, COMPOSE_PROC))
             {
-              GimpLayer **layers;
+              ClayLayer **layers;
 
-              layers = gimp_image_get_layers (image);
+              layers = clay_image_get_layers (image);
 
               if (! layers)
                 {
                   g_message (_("Could not get layers for image %d"),
-                             (gint) gimp_image_get_id (image));
+                             (gint) clay_image_get_id (image));
 
-                  return gimp_procedure_new_return_values (procedure,
-                                                           GIMP_PDB_EXECUTION_ERROR,
+                  return clay_procedure_new_return_values (procedure,
+                                                           CLAY_PDB_EXECUTION_ERROR,
                                                            NULL);
                 }
 
-              drawable = GIMP_DRAWABLE (layers[0]);
+              drawable = CLAY_DRAWABLE (layers[0]);
 
               g_free (layers);
             }
 
           if (! compose_dialog (procedure, config, composevals.compose_type,
                                 drawable))
-            return gimp_procedure_new_return_values (procedure,
-                                                     GIMP_PDB_CANCEL,
+            return clay_procedure_new_return_values (procedure,
+                                                     CLAY_PDB_CANCEL,
                                                      NULL);
           break;
 
-        case GIMP_RUN_NONINTERACTIVE:
+        case CLAY_RUN_NONINTERACTIVE:
           if (compose_by_drawable)
             {
               composevals.inputs[0].comp.object = drawable;
@@ -766,7 +766,7 @@ compose_run (GimpProcedure        *procedure,
             }
           break;
 
-        case GIMP_RUN_WITH_LAST_VALS:
+        case CLAY_RUN_WITH_LAST_VALS:
           compose_by_drawable = TRUE;
           break;
 
@@ -777,7 +777,7 @@ compose_run (GimpProcedure        *procedure,
 
   if (strcmp (name, RECOMPOSE_PROC) != 0)
     {
-      compose_idx = gimp_procedure_config_get_choice_id (config, "compose-type");
+      compose_idx = clay_procedure_config_get_choice_id (config, "compose-type");
 
       if (compose_idx >= 0 && compose_idx < G_N_ELEMENTS (compose_dsc))
         {
@@ -787,7 +787,7 @@ compose_run (GimpProcedure        *procedure,
         }
     }
 
-  gimp_progress_init (_("Composing"));
+  clay_progress_init (_("Composing"));
 
   image = compose (composevals.compose_type,
                    composevals.inputs,
@@ -795,12 +795,12 @@ compose_run (GimpProcedure        *procedure,
                    config);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              NULL);
 
-  /* Save drawables/images in GimpProcedureConfig */
-  if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  /* Save drawables/images in ClayProcedureConfig */
+  if (run_mode == CLAY_RUN_NONINTERACTIVE)
     {
       if (compose_by_drawable)
         {
@@ -822,23 +822,23 @@ compose_run (GimpProcedure        *procedure,
 
   if (composevals.do_recompose)
     {
-      gimp_displays_flush ();
+      clay_displays_flush ();
     }
   else
     {
-      gimp_image_undo_enable (image);
-      gimp_image_clean_all (image);
+      clay_image_undo_enable (image);
+      clay_image_clean_all (image);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_display_new (image);
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_display_new (image);
     }
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
   if (strcmp (name, RECOMPOSE_PROC))
-    GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+    CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
@@ -871,31 +871,31 @@ cpn_affine_transform (GeglBuffer *buffer,
 }
 
 static GeglBuffer *
-get_buffer_with_filters (GimpLayer *layer)
+get_buffer_with_filters (ClayLayer *layer)
 {
-  GimpImage  *image = gimp_item_get_image (GIMP_ITEM (layer));
-  GimpImage  *tmp_image;
-  GimpLayer  *temp;
+  ClayImage  *image = clay_item_get_image (CLAY_ITEM (layer));
+  ClayImage  *tmp_image;
+  ClayLayer  *temp;
   GeglBuffer *src_buffer;
   GeglBuffer *dst_buffer;
 
-  tmp_image = gimp_image_new (gimp_image_get_width (image),
-                              gimp_image_get_height (image),
-                              gimp_image_get_base_type (image));
-  temp = gimp_layer_new_from_drawable (GIMP_DRAWABLE (layer), tmp_image);
+  tmp_image = clay_image_new (clay_image_get_width (image),
+                              clay_image_get_height (image),
+                              clay_image_get_base_type (image));
+  temp = clay_layer_new_from_drawable (CLAY_DRAWABLE (layer), tmp_image);
 
-  gimp_image_insert_layer (tmp_image, temp, NULL, 0);
+  clay_image_insert_layer (tmp_image, temp, NULL, 0);
 
-  gimp_drawable_merge_filters (GIMP_DRAWABLE (temp));
+  clay_drawable_merge_filters (CLAY_DRAWABLE (temp));
 
-  src_buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (temp));
+  src_buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (temp));
   dst_buffer = gegl_buffer_new (gegl_buffer_get_extent (src_buffer),
                                 gegl_buffer_get_format (src_buffer));
 
   gegl_buffer_copy (src_buffer, NULL, GEGL_ABYSS_NONE, dst_buffer, NULL);
 
   g_object_unref (src_buffer);
-  gimp_image_delete (tmp_image);
+  clay_image_delete (tmp_image);
 
   return dst_buffer;
 }
@@ -995,7 +995,7 @@ perform_composition (COMPOSE_DSC   curr_compose_dsc,
             cpn_affine_transform (temp[i], cpn_dsc.range_min, cpn_dsc.range_max);
         }
 
-      gimp_progress_update ((gdouble) i / (gdouble) (num_images + 1.0));
+      clay_progress_update ((gdouble) i / (gdouble) (num_images + 1.0));
     }
 
   dst_format = babl_format_new (babl_model (curr_compose_dsc.babl_model),
@@ -1012,9 +1012,9 @@ perform_composition (COMPOSE_DSC   curr_compose_dsc,
   /* Gather all individual components in the dst_format buffer */
   fill_buffer_from_components (temp, dst_temp, num_images, inputs, mask_vals);
 
-  gimp_progress_update ((gdouble) num_images / (gdouble) (num_images + 1.0));
+  clay_progress_update ((gdouble) num_images / (gdouble) (num_images + 1.0));
 
-  /* Copy back to the format GIMP wants (and perform the conversion in itself) */
+  /* Copy back to the format Clay wants (and perform the conversion in itself) */
   gegl_buffer_copy (dst_temp, NULL, GEGL_ABYSS_NONE, buffer_dst, NULL);
 
   for (i = 0; i< num_images; i++)
@@ -1025,22 +1025,22 @@ perform_composition (COMPOSE_DSC   curr_compose_dsc,
 }
 
 /* Compose an image from several gray-images */
-static GimpImage *
+static ClayImage *
 compose (const gchar         *compose_type,
          ComposeInput        *inputs,
          gboolean             compose_by_drawable,
-         GimpProcedureConfig *config)
+         ClayProcedureConfig *config)
 {
   gint           width, height;
   gint           num_images, compose_idx;
   gint           i, j;
-  GimpLayer     *layer_dst;
-  GimpImage     *image_dst;
+  ClayLayer     *layer_dst;
+  ClayImage     *image_dst;
   gint           first_object;
-  GimpImageType  gdtype_dst;
+  ClayImageType  gdtype_dst;
   GeglBuffer    *buffer_src[MAX_COMPOSE_IMAGES];
   GeglBuffer    *buffer_dst;
-  GimpPrecision  precision;
+  ClayPrecision  precision;
 
   /* Search type of composing */
   compose_idx = -1;
@@ -1053,7 +1053,7 @@ compose (const gchar         *compose_type,
         }
     }
 
-  GIMP_WARNING_API_BREAK("Update 'decompose-type' choices? See discussion in MR !2424.")
+  CLAY_WARNING_API_BREAK("Update 'decompose-type' choices? See discussion in MR !2424.")
   /* TODO: The strings used in decompose.c's "decompose-type" do not match
    * the values of compose_type for YCbCr values. We'll need to wait until
    * the next API break to fix. For now, we can do additional checks if the
@@ -1095,19 +1095,19 @@ compose (const gchar         *compose_type,
   /* Check image sizes */
   if (compose_by_drawable)
     {
-      GimpImage *first_image = gimp_item_get_image (inputs[first_object].comp.object);
+      ClayImage *first_image = clay_item_get_image (inputs[first_object].comp.object);
 
-      width  = gimp_drawable_get_width  (inputs[first_object].comp.object);
-      height = gimp_drawable_get_height (inputs[first_object].comp.object);
+      width  = clay_drawable_get_width  (inputs[first_object].comp.object);
+      height = clay_drawable_get_height (inputs[first_object].comp.object);
 
-      precision = gimp_image_get_precision (first_image);
+      precision = clay_image_get_precision (first_image);
 
       for (j = first_object + 1; j < num_images; j++)
         {
           if (inputs[j].is_object)
             {
-              if ((width  != gimp_drawable_get_width  (inputs[j].comp.object)) ||
-                  (height != gimp_drawable_get_height (inputs[j].comp.object)))
+              if ((width  != clay_drawable_get_width  (inputs[j].comp.object)) ||
+                  (height != clay_drawable_get_height (inputs[j].comp.object)))
                 {
                   g_message (_("Drawables have different size"));
                   return NULL;
@@ -1125,17 +1125,17 @@ compose (const gchar         *compose_type,
     }
   else    /* Compose by image */
     {
-      width  = gimp_image_get_width  (inputs[first_object].comp.object);
-      height = gimp_image_get_height (inputs[first_object].comp.object);
+      width  = clay_image_get_width  (inputs[first_object].comp.object);
+      height = clay_image_get_height (inputs[first_object].comp.object);
 
-      precision = gimp_image_get_precision (inputs[first_object].comp.object);
+      precision = clay_image_get_precision (inputs[first_object].comp.object);
 
       for (j = first_object + 1; j < num_images; j++)
         {
           if (inputs[j].is_object)
             {
-              if ((width  != gimp_image_get_width  (inputs[j].comp.object)) ||
-                  (height != gimp_image_get_height (inputs[j].comp.object)))
+              if ((width  != clay_image_get_width  (inputs[j].comp.object)) ||
+                  (height != clay_image_get_height (inputs[j].comp.object)))
                 {
                   g_message (_("Images have different size"));
                   return NULL;
@@ -1148,10 +1148,10 @@ compose (const gchar         *compose_type,
         {
           if (inputs[j].is_object)
             {
-              GimpLayer **layers;
+              ClayLayer **layers;
 
               /* Get first layer of image */
-              layers = gimp_image_get_layers (inputs[j].comp.object);
+              layers = clay_image_get_layers (inputs[j].comp.object);
 
               if (! layers)
                 {
@@ -1170,13 +1170,13 @@ compose (const gchar         *compose_type,
   if (composevals.do_recompose)
     {
       layer_dst  = composevals.source_layer;
-      image_dst  = gimp_item_get_image (GIMP_ITEM (layer_dst));
-      buffer_dst = gimp_drawable_get_shadow_buffer (GIMP_DRAWABLE (layer_dst));
+      image_dst  = clay_item_get_image (CLAY_ITEM (layer_dst));
+      buffer_dst = clay_drawable_get_shadow_buffer (CLAY_DRAWABLE (layer_dst));
     }
   else
     {
       gdtype_dst = ((babl_model (compose_dsc[compose_idx].babl_model) == babl_model ("RGBA")) ?
-                    GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE);
+                    CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE);
 
       image_dst = create_new_image (g_file_new_for_path (compose_dsc[compose_idx].filename),
                                     width, height, gdtype_dst, precision,
@@ -1187,8 +1187,8 @@ compose (const gchar         *compose_type,
     {
       gdouble  xres, yres;
 
-      gimp_image_get_resolution (inputs[first_object].comp.object, &xres, &yres);
-      gimp_image_set_resolution (image_dst, xres, yres);
+      clay_image_get_resolution (inputs[first_object].comp.object, &xres, &yres);
+      clay_image_set_resolution (image_dst, xres, yres);
     }
 
   perform_composition (compose_dsc[compose_idx],
@@ -1197,7 +1197,7 @@ compose (const gchar         *compose_type,
                        inputs,
                        num_images);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   for (j = 0; j < num_images; j++)
     {
@@ -1208,58 +1208,58 @@ compose (const gchar         *compose_type,
   g_object_unref (buffer_dst);
 
   if (composevals.do_recompose)
-    gimp_drawable_merge_shadow (GIMP_DRAWABLE (layer_dst), TRUE);
+    clay_drawable_merge_shadow (CLAY_DRAWABLE (layer_dst), TRUE);
 
-  gimp_drawable_update (GIMP_DRAWABLE (layer_dst), 0, 0,
-                        gimp_drawable_get_width  (GIMP_DRAWABLE (layer_dst)),
-                        gimp_drawable_get_height (GIMP_DRAWABLE (layer_dst)));
+  clay_drawable_update (CLAY_DRAWABLE (layer_dst), 0, 0,
+                        clay_drawable_get_width  (CLAY_DRAWABLE (layer_dst)),
+                        clay_drawable_get_height (CLAY_DRAWABLE (layer_dst)));
 
   return image_dst;
 }
 
 
 /* Create an image. Sets layer_ID, drawable and rgn. Returns image */
-static GimpImage *
+static ClayImage *
 create_new_image (GFile          *file,
                   guint           width,
                   guint           height,
-                  GimpImageType   gdtype,
-                  GimpPrecision   precision,
-                  GimpLayer     **layer,
+                  ClayImageType   gdtype,
+                  ClayPrecision   precision,
+                  ClayLayer     **layer,
                   GeglBuffer    **buffer)
 {
-  GimpImage         *image;
-  GimpImageBaseType  gitype;
+  ClayImage         *image;
+  ClayImageBaseType  gitype;
 
-  if ((gdtype == GIMP_GRAY_IMAGE) || (gdtype == GIMP_GRAYA_IMAGE))
-    gitype = GIMP_GRAY;
-  else if ((gdtype == GIMP_INDEXED_IMAGE) || (gdtype == GIMP_INDEXEDA_IMAGE))
-    gitype = GIMP_INDEXED;
+  if ((gdtype == CLAY_GRAY_IMAGE) || (gdtype == CLAY_GRAYA_IMAGE))
+    gitype = CLAY_GRAY;
+  else if ((gdtype == CLAY_INDEXED_IMAGE) || (gdtype == CLAY_INDEXEDA_IMAGE))
+    gitype = CLAY_INDEXED;
   else
-    gitype = GIMP_RGB;
+    gitype = CLAY_RGB;
 
-  image = gimp_image_new_with_precision (width, height, gitype, precision);
+  image = clay_image_new_with_precision (width, height, gitype, precision);
 
-  gimp_image_undo_disable (image);
-  gimp_image_set_file (image, file);
+  clay_image_undo_disable (image);
+  clay_image_set_file (image, file);
 
-  *layer = gimp_layer_new (image, _("Background"), width, height,
+  *layer = clay_layer_new (image, _("Background"), width, height,
                            gdtype,
                            100,
-                           gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, *layer, NULL, 0);
+                           clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, *layer, NULL, 0);
 
-  *buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (*layer));
+  *buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (*layer));
 
   return image;
 }
 
 
 static gboolean
-compose_dialog (GimpProcedure       *procedure,
-                GimpProcedureConfig *config,
+compose_dialog (ClayProcedure       *procedure,
+                ClayProcedureConfig *config,
                 const gchar         *compose_type,
-                GimpDrawable        *drawable)
+                ClayDrawable        *drawable)
 {
   GtkWidget    *dialog;
   GtkWidget    *main_vbox;
@@ -1268,29 +1268,29 @@ compose_dialog (GimpProcedure       *procedure,
   GtkWidget    *hbox;
   GtkWidget    *grid;
   GtkSizeGroup *size_group;
-  GimpLayer   **layer_list;
+  ClayLayer   **layer_list;
   gint          compose_idx;
   gint          nlayers;
   gint          j;
   gboolean      run;
 
   /* Check default compose type */
-  compose_idx = gimp_procedure_config_get_choice_id (config, "compose-type");
+  compose_idx = clay_procedure_config_get_choice_id (config, "compose-type");
 
   /* Save original image width/height */
-  composeint.width  = gimp_drawable_get_width  (drawable);
-  composeint.height = gimp_drawable_get_height (drawable);
+  composeint.width  = clay_drawable_get_width  (drawable);
+  composeint.height = clay_drawable_get_height (drawable);
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  layer_list = gimp_image_get_layers (gimp_item_get_image (GIMP_ITEM (drawable)));
-  nlayers    = gimp_core_object_array_get_length ((GObject **) layer_list);
+  layer_list = clay_image_get_layers (clay_item_get_image (CLAY_ITEM (drawable)));
+  nlayers    = clay_core_object_array_get_length ((GObject **) layer_list);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Compose"));
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
@@ -1299,26 +1299,26 @@ compose_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (check_response),
                     NULL);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   /* Compose type combo */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "compose-label", _("Compose Channels"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "compose-frame", "compose-label", FALSE,
                                     "compose-type");
 
-  main_vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  main_vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "compose-vbox", "compose-frame",
                                          NULL);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "compose-vbox", NULL);
 
   /* Channel representation grid */
 
-  frame = gimp_frame_new (_("Channel Representations"));
+  frame = clay_frame_new (_("Channel Representations"));
   gtk_box_pack_start (GTK_BOX (main_vbox), frame, TRUE, TRUE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -1371,22 +1371,22 @@ compose_dialog (GimpProcedure       *procedure,
 
       composeint.selected[j].is_object = TRUE;
 
-      combo = gimp_drawable_combo_box_new (check_gray, NULL, NULL);
+      combo = clay_drawable_combo_box_new (check_gray, NULL, NULL);
       composeint.channel_menu[j] = combo;
 
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
       gtk_list_store_append (GTK_LIST_STORE (model), &iter);
       gtk_list_store_set (GTK_LIST_STORE (model),   &iter,
-                          GIMP_INT_STORE_VALUE,     -1,
-                          GIMP_INT_STORE_LABEL,     _("Mask value"),
-                          GIMP_INT_STORE_ICON_NAME, GIMP_ICON_CHANNEL_GRAY,
+                          CLAY_INT_STORE_VALUE,     -1,
+                          CLAY_INT_STORE_LABEL,     _("Mask value"),
+                          CLAY_INT_STORE_ICON_NAME, CLAY_ICON_CHANNEL_GRAY,
                           -1);
       gtk_grid_attach (GTK_GRID (grid), combo, 1, j, 1, 1);
       gtk_widget_set_visible (combo, TRUE);
 
       gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo);
 
-      scale = gimp_color_scale_entry_new (NULL, 255.0, 0.0, 255.0, 0);
+      scale = clay_color_scale_entry_new (NULL, 255.0, 0.0, 255.0, 0);
       gtk_grid_attach (GTK_GRID (grid), scale, 2, j, 3, 1);
       gtk_widget_set_visible (scale, TRUE);
       composeint.scales[j] = scale;
@@ -1400,8 +1400,8 @@ compose_dialog (GimpProcedure       *procedure,
       /* This has to be connected last otherwise it will emit before
        * combo_callback has any scale and spinbutton to work with
        */
-      gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
-                                  gimp_item_get_id (composeint.selected[j].comp.object),
+      clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
+                                  clay_item_get_id (composeint.selected[j].comp.object),
                                   G_CALLBACK (combo_callback),
                                   GINT_TO_POINTER (j), NULL);
     }
@@ -1416,7 +1416,7 @@ compose_dialog (GimpProcedure       *procedure,
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -1445,14 +1445,14 @@ compose_dialog (GimpProcedure       *procedure,
 /*  Compose interface functions  */
 
 static gboolean
-check_gray (GimpImage *image,
-            GimpItem  *drawable,
+check_gray (ClayImage *image,
+            ClayItem  *drawable,
             gpointer   data)
 
 {
-  return ((gimp_image_get_base_type (image) == GIMP_GRAY) &&
-          (gimp_image_get_width  (image) == composeint.width) &&
-          (gimp_image_get_height (image) == composeint.height));
+  return ((clay_image_get_base_type (image) == CLAY_GRAY) &&
+          (clay_image_get_width  (image) == composeint.width) &&
+          (clay_image_get_height (image) == composeint.height));
 }
 
 static void
@@ -1503,13 +1503,13 @@ check_response (GtkWidget *dialog,
 }
 
 static void
-combo_callback (GimpIntComboBox *widget,
+combo_callback (ClayIntComboBox *widget,
                 gpointer         data)
 {
   gint id;
   gint n;
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), &id);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), &id);
   n = GPOINTER_TO_INT (data);
 
   if (id == -1)
@@ -1518,26 +1518,26 @@ combo_callback (GimpIntComboBox *widget,
 
       composeint.selected[n].is_object = FALSE;
       composeint.selected[n].comp.val  =
-        gimp_label_spin_get_value (GIMP_LABEL_SPIN (composeint.scales[n]));
+        clay_label_spin_get_value (CLAY_LABEL_SPIN (composeint.scales[n]));
     }
   else
     {
       gtk_widget_set_sensitive (composeint.scales[n], FALSE);
 
       composeint.selected[n].is_object   = TRUE;
-      composeint.selected[n].comp.object = gimp_drawable_get_by_id (id);
+      composeint.selected[n].comp.object = clay_drawable_get_by_id (id);
     }
 }
 
 static void
-scale_callback (GimpLabelSpin *scale,
+scale_callback (ClayLabelSpin *scale,
                 ComposeInput  *input)
 {
-  input->comp.val = gimp_label_spin_get_value (scale);
+  input->comp.val = clay_label_spin_get_value (scale);
 }
 
 static void
-type_combo_callback (GimpProcedureConfig *config)
+type_combo_callback (ClayProcedureConfig *config)
 {
   gboolean combo4;
   gboolean scale4;
@@ -1545,7 +1545,7 @@ type_combo_callback (GimpProcedureConfig *config)
   gint     j;
 
   if (config)
-    compose_idx = gimp_procedure_config_get_choice_id (config, "compose-type");
+    compose_idx = clay_procedure_config_get_choice_id (config, "compose-type");
   else
     return;
 

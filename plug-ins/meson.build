@@ -25,7 +25,7 @@ complex_plugins_list = [
   { 'name': 'flame', },
   { 'name': 'fractal-explorer', },
   { 'name': 'gfig', },
-  { 'name': 'gimpressionist', },
+  { 'name': 'clayressionist', },
   { 'name': 'gradient-flare', },
   { 'name': 'help', },
   { 'name': 'ifs-compose', },
@@ -76,7 +76,7 @@ foreach plugin : complex_plugins_list
   foreach sourcecode : plugin_sourcecode
     if plugin.get('name').startswith('file-')
       #.ico files are handled in a special way by installer and msix scripts
-      #.lnk files are handled internally by GIMP, they are not image files
+      #.lnk files are handled internally by Clay, they are not image files
       if (plugin.get('name') == 'file-ico' and platform_windows) or plugin.get('name') == 'file-lnk'
         continue
       else

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -31,7 +31,7 @@ void d_spiral_object_class_init (void);
 
 void d_spiral_start             (GdkPoint  *pnt,
                                  gboolean   shift_down);
-void d_spiral_end               (GimpGfig  *gfig,
+void d_spiral_end               (ClayGfig  *gfig,
                                  GdkPoint  *pnt,
                                  gboolean   shift_down);
 

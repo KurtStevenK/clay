@@ -1,15 +1,15 @@
-desktopfilename = gimp_desktop_name + '.desktop'
+desktopfilename = clay_desktop_name + '.desktop'
 
 desktop_conf = configuration_data()
-desktop_conf.set('GIMP_COMMAND',      gimp_command)
-desktop_conf.set('GIMP_VERSION',      gimp_version)
-desktop_conf.set('GIMP_APP_VERSION',  gimp_app_version)
-desktop_conf.set('GIMP_DESKTOP_NAME', gimp_desktop_name)
+desktop_conf.set('CLAY_COMMAND',      clay_command)
+desktop_conf.set('CLAY_VERSION',      clay_version)
+desktop_conf.set('CLAY_APP_VERSION',  clay_app_version)
+desktop_conf.set('CLAY_DESKTOP_NAME', clay_desktop_name)
 desktop_conf.set('MIME_TYPES',        'image/x-xcf;' + MIMEtypes_dep.get_variable('MIMEtypes'))
 desktop_conf.set('BUG_REPORT_URL',    bug_report_url)
 
 desktopfilein = configure_file(
-  input : 'gimp.desktop.in.in',
+  input : 'clay.desktop.in.in',
   output: desktopfilename+'.in',
   configuration: desktop_conf,
 )
@@ -23,9 +23,9 @@ desktopfile = i18n.merge_file(
   install_dir: get_option('datadir') / 'applications',
 )
 
-appdatafilename = gimp_desktop_name + '.appdata.xml'
+appdatafilename = clay_desktop_name + '.appdata.xml'
 appdatafilein = configure_file(
-  input : 'org.gimp.GIMP.appdata.xml.in.in',
+  input : 'org.clay.Clay.appdata.xml.in.in',
   output: appdatafilename+'.in',
   configuration: desktop_conf,
 )
@@ -49,8 +49,8 @@ if appstreamcli.found()
   test('appdata_file',
     find_program('test-appdata.py', required: true, dirs: [meson.current_source_dir()]),
     env: [
-      'GIMP_TESTING_BUILDDIR=' + meson.current_build_dir(),
-      'GIMP_RELEASE=' + (release and not gimp_rc_git ? '1' : '0'),
+      'CLAY_TESTING_BUILDDIR=' + meson.current_build_dir(),
+      'CLAY_RELEASE=' + (release and not clay_rc_git ? '1' : '0'),
     ],
     suite: 'desktop',
   )

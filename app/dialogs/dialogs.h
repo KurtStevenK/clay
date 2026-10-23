@@ -18,15 +18,15 @@
 #pragma once
 
 
-extern GimpDialogFactory *global_dialog_factory;
-extern GimpContainer     *global_recent_docks;
+extern ClayDialogFactory *global_dialog_factory;
+extern ClayContainer     *global_recent_docks;
 
 
-void        dialogs_init                    (Gimp            *gimp);
-void        dialogs_exit                    (Gimp            *gimp);
+void        dialogs_init                    (Clay            *clay);
+void        dialogs_exit                    (Clay            *clay);
 
-void        dialogs_load_recent_docks       (Gimp            *gimp);
-void        dialogs_save_recent_docks       (Gimp            *gimp);
+void        dialogs_load_recent_docks       (Clay            *clay);
+void        dialogs_save_recent_docks       (Clay            *clay);
 
 GtkWidget * dialogs_get_toolbox             (void);
 

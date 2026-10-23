@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "script-fu-types.h"
 #include "script-fu-arg.h"
@@ -36,14 +36,14 @@
  * Like a GValue, it holds a value.
  * Like a GParamSpec, it is metadata and holds a default value.
  *
- * In GIMP 2, extension-script-fu stays running and keeps instances of SFArg in memory.
- * This is how ScriptFu "settings" aka "last values" are persistent for a session of GIMP.
+ * In Clay 2, extension-script-fu stays running and keeps instances of SFArg in memory.
+ * This is how ScriptFu "settings" aka "last values" are persistent for a session of Clay.
  *
- * In GIMP 2, in the GUI implemented by ScriptFu (script-fu-interface.c),
+ * In Clay 2, in the GUI implemented by ScriptFu (script-fu-interface.c),
  * initial values of widgets are taken from SFArg (s),
  * and result values of widgets are written back to SFArg.
  *
- * In GIMP 3, SFArg might be somewhat replaced with GimpConfig.
+ * In Clay 3, SFArg might be somewhat replaced with ClayConfig.
  * Then many of these methods are not needed.
  *
  * Roughly, the methods hide how to convert/represent SFArgs back/forth
@@ -69,7 +69,7 @@
  * SFArgType denotes not only a C type, but also a Scheme type.
  * For example, SF_ADJUSTMENT denotes the C type "float"
  * and the Scheme type "numeric" (which encompasses float and int.)
- * Another example, SF_PATTERN denotes the C type GimpPattern
+ * Another example, SF_PATTERN denotes the C type ClayPattern
  * and the Scheme type string (names of brushes are used in scripts.)
  */
 
@@ -224,14 +224,14 @@ script_fu_arg_reset (SFArg *arg, gboolean should_reset_ids)
 
 /* The type of a function that declares a formal, resource argument to a PDB procedure. */
 typedef void (*ResourceArgDeclareFunc) (
-  GimpProcedure*, const gchar*, const gchar*, const gchar*,
-  gboolean, GimpResource*, gboolean, GParamFlags);
+  ClayProcedure*, const gchar*, const gchar*, const gchar*,
+  gboolean, ClayResource*, gboolean, GParamFlags);
 
 
 
 static void
 script_fu_add_resource_arg_default_from_context (
-  GimpProcedure          *procedure,
+  ClayProcedure          *procedure,
   const gchar            *name,
   const gchar            *nick,
   const gchar            *blurb,
@@ -248,12 +248,12 @@ script_fu_add_resource_arg_default_from_context (
 
 static void
 script_fu_add_resource_arg_with_default (
-  GimpProcedure          *procedure,
+  ClayProcedure          *procedure,
   const gchar            *name,
   const gchar            *nick,
   const gchar            *blurb,
   ResourceArgDeclareFunc  func,
-  GimpResource           *default_resource)
+  ClayResource           *default_resource)
 {
   (*func) (procedure, name, nick, blurb,
             FALSE,  /* none OK */
@@ -268,7 +268,7 @@ script_fu_add_resource_arg_with_default (
  */
 static void
 script_fu_add_resource_arg (
-  GimpProcedure          *procedure,
+  ClayProcedure          *procedure,
   const gchar            *name,
   const gchar            *nick,
   const gchar            *blurb,
@@ -300,7 +300,7 @@ script_fu_add_resource_arg (
        * a non-NULL resource at call time (after GUI.)
        * In interactive mode, the GUI may default from context when passed a NULL default.
        */
-      GimpResource *default_resource = sf_resource_arg_get_default (arg);
+      ClayResource *default_resource = sf_resource_arg_get_default (arg);
 
       if (default_resource == NULL)
         {
@@ -310,14 +310,14 @@ script_fu_add_resource_arg (
            * anyway. And when the procedure will be actually called
            * later on, the fonts will likely have been loaded by then.
            */
-          if (arg->default_value.sfa_resource.resource_type != GIMP_TYPE_FONT)
+          if (arg->default_value.sfa_resource.resource_type != CLAY_TYPE_FONT)
             {
-              if (gimp_resources_loaded (arg->default_value.sfa_resource.resource_type))
+              if (clay_resources_loaded (arg->default_value.sfa_resource.resource_type))
                 g_warning ("%s declared resource name is invalid %s", G_STRFUNC, declared_name_of_default);
               else
                 g_printerr ("INFO: argument '%s' (value \"%s\") of procedure '%s' ignored "
                             "because resources of type %s are not loaded.\n",
-                            name, declared_name_of_default, gimp_procedure_get_name (procedure),
+                            name, declared_name_of_default, clay_procedure_get_name (procedure),
                             g_type_name (arg->default_value.sfa_resource.resource_type));
             }
           script_fu_add_resource_arg_default_from_context (procedure, name, nick, blurb, func);
@@ -367,66 +367,66 @@ script_fu_arg_get_blurb (SFArg *arg)
  *
  * Used to specify an arg to the PDB proc which this script implements.
  * The GParamSpec is "floating" meaning ownership will transfer
- * to the GimpPDBProcedure.
+ * to the ClayPDBProcedure.
  *
  * Ensure GParamSpec has a default except as noted below.
  * Default value from self.
  *
- * FUTURE: use GimpProcedureDialog
- * Because GimpProcedureDialog creates widgets from properties/paramspecs,
+ * FUTURE: use ClayProcedureDialog
+ * Because ClayProcedureDialog creates widgets from properties/paramspecs,
  * this should convey what SFArg denotes about desired widget kind,
  * but it doesn't fully do that yet.
  */
 void
 script_fu_arg_add_argument (SFArg         *arg,
-                            GimpProcedure *procedure,
+                            ClayProcedure *procedure,
                             const gchar   *name,
                             const gchar   *nick)
 {
   GString               *blurb_gstring = script_fu_arg_get_blurb (arg);
   gchar                 *blurb         = blurb_gstring->str;
-  GimpFileChooserAction  action        = GIMP_FILE_CHOOSER_ACTION_ANY;
+  ClayFileChooserAction  action        = CLAY_FILE_CHOOSER_ACTION_ANY;
 
   switch (arg->type)
     {
-      /* No defaults for GIMP objects: Image, Item subclasses, Display */
+      /* No defaults for Clay objects: Image, Item subclasses, Display */
     case SF_IMAGE:
-      gimp_procedure_add_image_argument (procedure, name,
+      clay_procedure_add_image_argument (procedure, name,
                                          nick, blurb,
                                          TRUE,  /* None is valid. */
                                          G_PARAM_READWRITE);
       break;
 
     case SF_DRAWABLE:
-      gimp_procedure_add_drawable_argument (procedure, name,
+      clay_procedure_add_drawable_argument (procedure, name,
                                             nick, blurb,
                                             TRUE,
                                             G_PARAM_READWRITE);
       break;
 
     case SF_LAYER:
-      gimp_procedure_add_layer_argument (procedure, name,
+      clay_procedure_add_layer_argument (procedure, name,
                                          nick, blurb,
                                          TRUE,
                                          G_PARAM_READWRITE);
       break;
 
     case SF_CHANNEL:
-      gimp_procedure_add_channel_argument (procedure, name,
+      clay_procedure_add_channel_argument (procedure, name,
                                            nick, blurb,
                                            TRUE,
                                            G_PARAM_READWRITE);
       break;
 
     case SF_VECTORS:
-      gimp_procedure_add_path_argument (procedure, name,
+      clay_procedure_add_path_argument (procedure, name,
                                         nick, blurb,
                                         TRUE,
                                         G_PARAM_READWRITE);
       break;
 
     case SF_DISPLAY:
-      gimp_procedure_add_display_argument (procedure, name,
+      clay_procedure_add_display_argument (procedure, name,
                                            nick, blurb,
                                            TRUE,
                                            G_PARAM_READWRITE);
@@ -436,7 +436,7 @@ script_fu_arg_add_argument (SFArg         *arg,
       {
         GeglColor *color = sf_color_arg_get_default_color (arg);
 
-        gimp_procedure_add_color_argument (procedure, name, nick, blurb, TRUE,
+        clay_procedure_add_color_argument (procedure, name, nick, blurb, TRUE,
                                            color, G_PARAM_READWRITE);
         g_object_unref (color);
       }
@@ -444,48 +444,48 @@ script_fu_arg_add_argument (SFArg         *arg,
 
     case SF_TOGGLE:
       /* Implicit conversion from gint32 to gboolean. */
-      gimp_procedure_add_boolean_argument (procedure, name,
+      clay_procedure_add_boolean_argument (procedure, name,
                                            nick, blurb,
                                            arg->default_value.sfa_toggle,
                                            G_PARAM_READWRITE);
       break;
 
     /* FUTURE special widgets for multiline text.
-     * script-fu-interface does, but GimpProcedureDialog does not.
+     * script-fu-interface does, but ClayProcedureDialog does not.
      */
     case SF_STRING:
     case SF_TEXT:
-      gimp_procedure_add_string_argument (procedure, name,
+      clay_procedure_add_string_argument (procedure, name,
                                           nick, blurb,
                                           arg->default_value.sfa_value,
                                           G_PARAM_READWRITE);
       break;
 
-    /* Subclasses of GimpResource.  Special widgets. */
+    /* Subclasses of ClayResource.  Special widgets. */
     case SF_FONT:
       /* Avoid compiler warning: cast a type specific function to a generic function. */
       script_fu_add_resource_arg (procedure, name, nick, blurb, arg,
-          (ResourceArgDeclareFunc) gimp_procedure_add_font_argument);
+          (ResourceArgDeclareFunc) clay_procedure_add_font_argument);
       break;
 
     case SF_PALETTE:
       script_fu_add_resource_arg (procedure, name, nick, blurb, arg,
-          (ResourceArgDeclareFunc) gimp_procedure_add_palette_argument);
+          (ResourceArgDeclareFunc) clay_procedure_add_palette_argument);
       break;
 
     case SF_PATTERN:
       script_fu_add_resource_arg (procedure, name, nick, blurb, arg,
-          (ResourceArgDeclareFunc) gimp_procedure_add_pattern_argument);
+          (ResourceArgDeclareFunc) clay_procedure_add_pattern_argument);
       break;
 
     case SF_GRADIENT:
       script_fu_add_resource_arg (procedure, name, nick, blurb, arg,
-          (ResourceArgDeclareFunc) gimp_procedure_add_gradient_argument);
+          (ResourceArgDeclareFunc) clay_procedure_add_gradient_argument);
       break;
 
     case SF_BRUSH:
       script_fu_add_resource_arg (procedure, name, nick, blurb, arg,
-          (ResourceArgDeclareFunc) gimp_procedure_add_brush_argument);
+          (ResourceArgDeclareFunc) clay_procedure_add_brush_argument);
       break;
 
     case SF_ADJUSTMENT:
@@ -494,13 +494,13 @@ script_fu_arg_add_argument (SFArg         *arg,
        * Decimal places == 0 means type integer, else float
        */
       if (arg->default_value.sfa_adjustment.digits == 0)
-        gimp_procedure_add_int_argument (procedure, name, nick, blurb,
+        clay_procedure_add_int_argument (procedure, name, nick, blurb,
                                          arg->default_value.sfa_adjustment.lower,
                                          arg->default_value.sfa_adjustment.upper,
                                          arg->default_value.sfa_adjustment.value,
                                          G_PARAM_READWRITE);
       else
-        gimp_procedure_add_double_argument (procedure, name, nick, blurb,
+        clay_procedure_add_double_argument (procedure, name, nick, blurb,
                                             arg->default_value.sfa_adjustment.lower,
                                             arg->default_value.sfa_adjustment.upper,
                                             arg->default_value.sfa_adjustment.value,
@@ -508,31 +508,31 @@ script_fu_arg_add_argument (SFArg         *arg,
       break;
 
     case SF_FILENAME:
-      action = GIMP_FILE_CHOOSER_ACTION_OPEN;
+      action = CLAY_FILE_CHOOSER_ACTION_OPEN;
     case SF_DIRNAME:
         {
           GParamSpec *pspec = NULL;
 
-          if (action == GIMP_FILE_CHOOSER_ACTION_ANY)
-            action = GIMP_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+          if (action == CLAY_FILE_CHOOSER_ACTION_ANY)
+            action = CLAY_FILE_CHOOSER_ACTION_SELECT_FOLDER;
 
-          gimp_procedure_add_file_argument (procedure, name,
+          clay_procedure_add_file_argument (procedure, name,
                                             nick, blurb,
                                             action, TRUE, NULL,
                                             G_PARAM_READWRITE |
-                                            GIMP_PARAM_NO_VALIDATE);
-          pspec = gimp_procedure_find_argument (procedure, name);
+                                            CLAY_PARAM_NO_VALIDATE);
+          pspec = clay_procedure_find_argument (procedure, name);
           pspec_set_default_file (pspec, arg->default_value.sfa_file.filename);
         }
       break;
 
       /* Not necessary to have a more specific pspec:
-       * pspec = gimp_param_spec_config_path (...GIMP_TYPE_CONFIG_PATH...)
+       * pspec = clay_param_spec_config_path (...CLAY_TYPE_CONFIG_PATH...)
        */
 
     case SF_ENUM:
       /* history is the last used value AND the default. */
-      gimp_procedure_add_enum_argument (procedure, name,
+      clay_procedure_add_enum_argument (procedure, name,
                                         nick, blurb,
                                         g_type_from_name (arg->default_value.sfa_enum.type_name),
                                         arg->default_value.sfa_enum.history,
@@ -540,7 +540,7 @@ script_fu_arg_add_argument (SFArg         *arg,
       break;
 
     case SF_OPTION:
-      gimp_procedure_add_int_argument (procedure, name,
+      clay_procedure_add_int_argument (procedure, name,
                                        nick, blurb,
                                        0,        /* Always zero based. */
                                        g_slist_length (arg->default_value.sfa_option.list) - 1,
@@ -576,7 +576,7 @@ sf_append_file_error_repr (gchar *err_message, GString *result_string )
  *
  * The repr comes from the value of the GValue, not the value of the SFArg.
  *
- * Used when GIMP is calling the PDB procedure implemented by the script,
+ * Used when Clay is calling the PDB procedure implemented by the script,
  * passing a GValueArray.
  */
 void
@@ -594,7 +594,7 @@ script_fu_arg_append_repr_from_gvalue (SFArg       *arg,
     case SF_VECTORS:
     case SF_DISPLAY:
 
-    /* The GValue is a GObject of type inheriting GimpResource, having id prop */
+    /* The GValue is a GObject of type inheriting ClayResource, having id prop */
     case SF_BRUSH:
     case SF_FONT:
     case SF_GRADIENT:
@@ -657,7 +657,7 @@ script_fu_arg_append_repr_from_gvalue (SFArg       *arg,
             GFile *file = g_value_get_object (gvalue);
 
             /* Catch: GValue initialized to hold a GFile, but not hold one.
-             * Specificially, GimpProcedureDialog can yield that condition;
+             * Specificially, ClayProcedureDialog can yield that condition;
              * the dialog shows "(None)" meaning user has not chosen a file yet.
              */
             if (G_IS_FILE (file))
@@ -721,7 +721,7 @@ script_fu_arg_append_repr_from_gvalue (SFArg       *arg,
         }
       else
         {
-          /* For now, occurs when GimpConfig or GimpProcedureDialog does not support GParamEnum. */
+          /* For now, occurs when ClayConfig or ClayProcedureDialog does not support GParamEnum. */
           g_warning ("Expecting GValue holding a GEnum.");
           /* Append arbitrary int, so no errors in signature of Scheme call.
            * The call might not yield result the user intended.
@@ -841,7 +841,7 @@ script_fu_arg_reset_name_generator (void)
  * It is unique among all names returned between resets of the generator.
  * Thus name meets uniquity for names of properties of one object.
  *
- * !!! GimpImageProcedures already have properties for convenience arguments,
+ * !!! ClayImageProcedures already have properties for convenience arguments,
  * e.g. a property named "image" and "drawables"
  * So we avoid that name clash by starting with "otherImage"
  *
@@ -978,7 +978,7 @@ pspec_set_default_file (GParamSpec *pspec, const gchar *filepath)
   if (filepath != NULL && strlen (filepath) > 0)
     gfile = g_file_new_for_path (filepath);
 
-  gimp_param_spec_object_set_default (pspec, G_OBJECT (gfile));
+  clay_param_spec_object_set_default (pspec, G_OBJECT (gfile));
 
   g_clear_object (&gfile);
 }

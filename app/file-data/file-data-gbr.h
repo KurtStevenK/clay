@@ -18,23 +18,23 @@
 #pragma once
 
 
-GimpValueArray * file_gbr_load_invoker      (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+ClayValueArray * file_gbr_load_invoker      (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error);
 
-GimpValueArray * file_gbr_save_invoker      (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+ClayValueArray * file_gbr_save_invoker      (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error);
 
-GimpLayer      * file_gbr_brush_to_layer    (GimpImage             *image,
-                                             GimpBrush             *brush);
-GimpBrush      * file_gbr_drawable_to_brush (GimpDrawable          *drawable,
+ClayLayer      * file_gbr_brush_to_layer    (ClayImage             *image,
+                                             ClayBrush             *brush);
+ClayBrush      * file_gbr_drawable_to_brush (ClayDrawable          *drawable,
                                              const GeglRectangle   *rect,
                                              const gchar           *name,
                                              gdouble                spacing);

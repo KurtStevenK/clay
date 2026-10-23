@@ -8,33 +8,33 @@
 
 
 ;              setup
-(define testImage (gimp-image-new 21 22 RGB))
+(define testImage (clay-image-new 21 22 RGB))
 
 
 (test! "image transformations")
 
 ; flip
-(assert `(gimp-image-flip ,testImage ORIENTATION-HORIZONTAL))
-(assert `(gimp-image-flip ,testImage ORIENTATION-VERTICAL))
+(assert `(clay-image-flip ,testImage ORIENTATION-HORIZONTAL))
+(assert `(clay-image-flip ,testImage ORIENTATION-VERTICAL))
 
-(assert-error `(gimp-image-flip ,testImage ORIENTATION-UNKNOWN)
+(assert-error `(clay-image-flip ,testImage ORIENTATION-UNKNOWN)
     (string-append
-      "Procedure execution of gimp-image-flip failed on invalid input arguments: "
-      "Procedure 'gimp-image-flip' has been called with value 'GIMP_ORIENTATION_UNKNOWN'"
-      " for argument 'flip-type' (#2, type GimpOrientationType). This value is out of range."))
+      "Procedure execution of clay-image-flip failed on invalid input arguments: "
+      "Procedure 'clay-image-flip' has been called with value 'CLAY_ORIENTATION_UNKNOWN'"
+      " for argument 'flip-type' (#2, type ClayOrientationType). This value is out of range."))
 
 ; rotate
 ; v2 ROTATE-90 => v3 ROTATE-DEGREES90
-(assert `(gimp-image-rotate ,testImage ROTATE-DEGREES90))
-(assert `(gimp-image-rotate ,testImage ROTATE-DEGREES180))
-(assert `(gimp-image-rotate ,testImage ROTATE-DEGREES270))
+(assert `(clay-image-rotate ,testImage ROTATE-DEGREES90))
+(assert `(clay-image-rotate ,testImage ROTATE-DEGREES180))
+(assert `(clay-image-rotate ,testImage ROTATE-DEGREES270))
 
 ; scale
 ; up
-(assert `(gimp-image-scale ,testImage 100 100))
+(assert `(clay-image-scale ,testImage 100 100))
 
 ; down to min
-(assert `(gimp-image-scale ,testImage 1 1))
+(assert `(clay-image-scale ,testImage 1 1))
 
 ; up to max
 ; Performance:
@@ -45,29 +45,29 @@
 ; FIXME throws GLib-GObject-CRITICAL value "524288.000000" of type 'gdouble'
 ; is invalid or out of range for property 'x' of type 'gdouble'
 ; but docs say 524288 is the max
-; (assert `(gimp-image-scale ,testImage 524288 524288))
+; (assert `(clay-image-scale ,testImage 524288 524288))
 
 ; down to min does not throw
-(assert `(gimp-image-scale ,testImage 1 1))
+(assert `(clay-image-scale ,testImage 1 1))
 ; effective
-(assert `(= (gimp-image-get-height ,testImage)
+(assert `(= (clay-image-get-height ,testImage)
             1))
 ; Note there is no get-size, only get-height and width, the origin is always (0,0)
 
 
 ; resize does not throw
-(assert `(gimp-image-resize ,testImage
+(assert `(clay-image-resize ,testImage
             30 30 ; width height
             0 0)) ; offset
 ; effective
-(assert `(= (gimp-image-get-height ,testImage)
+(assert `(= (clay-image-get-height ,testImage)
             30))
 
 ; resize to layers when image is empty of layers does not throw
-(assert `(gimp-image-resize-to-layers ,testImage))
+(assert `(clay-image-resize-to-layers ,testImage))
 ; not effective: height remains the same
 ; effective
-(assert `(= (gimp-image-get-height ,testImage)
+(assert `(= (clay-image-get-height ,testImage)
             30))
 
 ; TODO resize to layers when there is a layer smaller than canvas
@@ -78,7 +78,7 @@
 
 (test! "crop")
 
-(assert `(gimp-image-crop ,testImage
+(assert `(clay-image-crop ,testImage
     2 2 ; width height
     2 2 ; x y offset
     ))
@@ -89,31 +89,31 @@
 ; These perform operations (convert or rotate) using a policy in preferences
 
 ; 0 means non-interactive, else shows dialog in some cases
-(assert `(gimp-image-policy-color-profile ,testImage 0))
+(assert `(clay-image-policy-color-profile ,testImage 0))
 
-(assert `(gimp-image-policy-rotate ,testImage 0))
+(assert `(clay-image-policy-rotate ,testImage 0))
 
 
 
 (test! "freezing and unfreezing (avoid updates to dialogs)")
 
 ; Used for performance.
-(assert `(gimp-image-freeze-channels ,testImage))
-(assert `(gimp-image-freeze-layers ,testImage))
-(assert `(gimp-image-freeze-paths ,testImage))
-(assert `(gimp-image-thaw-channels ,testImage))
-(assert `(gimp-image-thaw-layers ,testImage))
-(assert `(gimp-image-thaw-paths ,testImage))
+(assert `(clay-image-freeze-channels ,testImage))
+(assert `(clay-image-freeze-layers ,testImage))
+(assert `(clay-image-freeze-paths ,testImage))
+(assert `(clay-image-thaw-channels ,testImage))
+(assert `(clay-image-thaw-layers ,testImage))
+(assert `(clay-image-thaw-paths ,testImage))
 
 (test! "clean-all makes image not dirty")
-(assert `(gimp-image-clean-all ,testImage))
-(assert `(not (gimp-image-is-dirty ,testImage)))
+(assert `(clay-image-clean-all ,testImage))
+(assert `(not (clay-image-is-dirty ,testImage)))
 
 
 ; flatten is tested in layer-ops.scm
 
 ; cannot flatten empty image
-(assert-error `(gimp-image-flatten ,testImage)
-  "Procedure execution of gimp-image-flatten failed: Cannot flatten an image without any visible layer.")
+(assert-error `(clay-image-flatten ,testImage)
+  "Procedure execution of clay-image-flatten failed: Cannot flatten an image without any visible layer.")
 
 (script-fu-use-v2)

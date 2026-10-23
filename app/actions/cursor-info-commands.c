@@ -22,7 +22,7 @@
 
 #include "actions-types.h"
 
-#include "display/gimpcursorview.h"
+#include "display/claycursorview.h"
 
 #include "cursor-info-commands.h"
 
@@ -30,12 +30,12 @@
 /*  public functions  */
 
 void
-cursor_info_sample_merged_cmd_callback (GimpAction *action,
+cursor_info_sample_merged_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpCursorView *view   = GIMP_CURSOR_VIEW (data);
+  ClayCursorView *view   = CLAY_CURSOR_VIEW (data);
   gboolean        active = g_variant_get_boolean (value);
 
-  gimp_cursor_view_set_sample_merged (view, active);
+  clay_cursor_view_set_sample_merged (view, active);
 }

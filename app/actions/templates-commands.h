@@ -18,18 +18,18 @@
 #pragma once
 
 
-void   templates_create_image_cmd_callback (GimpAction *action,
+void   templates_create_image_cmd_callback (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data);
-void   templates_new_cmd_callback          (GimpAction *action,
+void   templates_new_cmd_callback          (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data);
-void   templates_duplicate_cmd_callback    (GimpAction *action,
+void   templates_duplicate_cmd_callback    (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data);
-void   templates_edit_cmd_callback         (GimpAction *action,
+void   templates_edit_cmd_callback         (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data);
-void   templates_delete_cmd_callback       (GimpAction *action,
+void   templates_delete_cmd_callback       (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data);

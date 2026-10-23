@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -98,9 +98,9 @@ void        d_save_object            (GfigObject *obj,
 
 void        free_all_objs            (GList      *objs);
 
-void        clear_undo               (GimpGfig   *gfig);
+void        clear_undo               (ClayGfig   *gfig);
 
-void        new_obj_2edit            (GimpGfig   *gfig,
+void        new_obj_2edit            (ClayGfig   *gfig,
                                       GFigObj    *obj);
 
 void        gfig_init_object_classes (void);

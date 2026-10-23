@@ -19,7 +19,7 @@ diff=$(git diff -U0 --no-color --submodule=diff "${newest_common_ancestor_sha}" 
   ')
 
 ## List of commonly used utilities on Unix world
-## See the context: https://gitlab.gnome.org/GNOME/gimp/-/issues/11385
+## See the context: https://github.com/KurtStevenK/clay/-/issues/11385
 coreutils_list="
    \.sh \
    'sh' \

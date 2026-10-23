@@ -17,7 +17,7 @@
 
 #pragma once
 
-#ifndef GIMP_APP_GLUE_COMPILATION
+#ifndef CLAY_APP_GLUE_COMPILATION
 #error You must not #include "sanity.h" from an app/ subdir
 #endif
 

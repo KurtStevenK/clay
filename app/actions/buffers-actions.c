@@ -20,104 +20,104 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimpcontext.h"
+#include "core/claycontext.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "actions.h"
 #include "buffers-actions.h"
 #include "buffers-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry buffers_actions[] =
+static const ClayActionEntry buffers_actions[] =
 {
-  { "buffers-paste-as-new-image", GIMP_ICON_EDIT_PASTE_AS_NEW,
+  { "buffers-paste-as-new-image", CLAY_ICON_EDIT_PASTE_AS_NEW,
     NC_("buffers-action", "Paste Buffer as _New Image"), NULL, { NULL },
     NC_("buffers-action", "Paste the selected buffer as a new image"),
     buffers_paste_as_new_image_cmd_callback,
-    GIMP_HELP_BUFFER_PASTE_AS_NEW_IMAGE },
+    CLAY_HELP_BUFFER_PASTE_AS_NEW_IMAGE },
 
-  { "buffers-delete", GIMP_ICON_EDIT_DELETE,
+  { "buffers-delete", CLAY_ICON_EDIT_DELETE,
     NC_("buffers-action", "_Delete Buffer"), NULL, { NULL },
     NC_("buffers-action", "Delete the selected buffer"),
     buffers_delete_cmd_callback,
-    GIMP_HELP_BUFFER_DELETE }
+    CLAY_HELP_BUFFER_DELETE }
 };
 
-static const GimpEnumActionEntry buffers_paste_actions[] =
+static const ClayEnumActionEntry buffers_paste_actions[] =
 {
-  { "buffers-paste", GIMP_ICON_EDIT_PASTE,
+  { "buffers-paste", CLAY_ICON_EDIT_PASTE,
     NC_("buffers-action", "_Paste Buffer"), NULL, { NULL },
     NC_("buffers-action", "Paste the selected buffer"),
-    GIMP_PASTE_TYPE_FLOATING, FALSE,
-    GIMP_HELP_BUFFER_PASTE },
+    CLAY_PASTE_TYPE_FLOATING, FALSE,
+    CLAY_HELP_BUFFER_PASTE },
 
-  { "buffers-paste-in-place", GIMP_ICON_EDIT_PASTE,
+  { "buffers-paste-in-place", CLAY_ICON_EDIT_PASTE,
     NC_("buffers-action", "Paste Buffer In Pl_ace"), NULL, { NULL },
     NC_("buffers-action", "Paste the selected buffer at its original position"),
-    GIMP_PASTE_TYPE_FLOATING_IN_PLACE, FALSE,
-    GIMP_HELP_BUFFER_PASTE_IN_PLACE },
+    CLAY_PASTE_TYPE_FLOATING_IN_PLACE, FALSE,
+    CLAY_HELP_BUFFER_PASTE_IN_PLACE },
 
-  { "buffers-paste-into", GIMP_ICON_EDIT_PASTE_INTO,
+  { "buffers-paste-into", CLAY_ICON_EDIT_PASTE_INTO,
     NC_("buffers-action", "Paste Buffer _Into The Selection"), NULL, { NULL },
     NC_("buffers-action", "Paste the selected buffer into the selection"),
-    GIMP_PASTE_TYPE_FLOATING_INTO, FALSE,
-    GIMP_HELP_BUFFER_PASTE_INTO },
+    CLAY_PASTE_TYPE_FLOATING_INTO, FALSE,
+    CLAY_HELP_BUFFER_PASTE_INTO },
 
-  { "buffers-paste-into-in-place", GIMP_ICON_EDIT_PASTE_INTO,
+  { "buffers-paste-into-in-place", CLAY_ICON_EDIT_PASTE_INTO,
     NC_("buffers-action", "Paste Buffer Into The Selection In Place"), NULL, { NULL },
     NC_("buffers-action",
         "Paste the selected buffer into the selection at its original position"),
-    GIMP_PASTE_TYPE_FLOATING_INTO_IN_PLACE, FALSE,
-    GIMP_HELP_BUFFER_PASTE_INTO_IN_PLACE },
+    CLAY_PASTE_TYPE_FLOATING_INTO_IN_PLACE, FALSE,
+    CLAY_HELP_BUFFER_PASTE_INTO_IN_PLACE },
 
-  { "buffers-paste-as-new-layer", GIMP_ICON_EDIT_PASTE_AS_NEW,
+  { "buffers-paste-as-new-layer", CLAY_ICON_EDIT_PASTE_AS_NEW,
     NC_("buffers-action", "Paste Buffer as New _Layer"), NULL, { NULL },
     NC_("buffers-action", "Paste the selected buffer as a new layer"),
-    GIMP_PASTE_TYPE_NEW_LAYER, FALSE,
-    GIMP_HELP_BUFFER_PASTE_AS_NEW_LAYER },
+    CLAY_PASTE_TYPE_NEW_LAYER, FALSE,
+    CLAY_HELP_BUFFER_PASTE_AS_NEW_LAYER },
 
-  { "buffers-paste-as-new-layer-in-place", GIMP_ICON_EDIT_PASTE_AS_NEW,
+  { "buffers-paste-as-new-layer-in-place", CLAY_ICON_EDIT_PASTE_AS_NEW,
     NC_("buffers-action", "Paste Buffer as New Layer in Place"), NULL, { NULL },
     NC_("buffers-action",
         "Paste the selected buffer as a new layer at its original position"),
-    GIMP_PASTE_TYPE_NEW_LAYER_IN_PLACE, FALSE,
-    GIMP_HELP_BUFFER_PASTE_AS_NEW_LAYER_IN_PLACE },
+    CLAY_PASTE_TYPE_NEW_LAYER_IN_PLACE, FALSE,
+    CLAY_HELP_BUFFER_PASTE_AS_NEW_LAYER_IN_PLACE },
 };
 
 
 void
-buffers_actions_setup (GimpActionGroup *group)
+buffers_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "buffers-action",
+  clay_action_group_add_actions (group, "buffers-action",
                                  buffers_actions,
                                  G_N_ELEMENTS (buffers_actions));
 
-  gimp_action_group_add_enum_actions (group, "buffers-action",
+  clay_action_group_add_enum_actions (group, "buffers-action",
                                       buffers_paste_actions,
                                       G_N_ELEMENTS (buffers_paste_actions),
                                       buffers_paste_cmd_callback);
 }
 
 void
-buffers_actions_update (GimpActionGroup *group,
+buffers_actions_update (ClayActionGroup *group,
                         gpointer         data)
 {
-  GimpContext *context = action_data_get_context (data);
-  GimpBuffer  *buffer  = NULL;
+  ClayContext *context = action_data_get_context (data);
+  ClayBuffer  *buffer  = NULL;
 
   if (context)
-    buffer = gimp_context_get_buffer (context);
+    buffer = clay_context_get_buffer (context);
 
 #define SET_SENSITIVE(action,condition,reason) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, reason)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, reason)
 
   SET_SENSITIVE ("buffers-paste",                       buffer, _("No selected buffer"));
   SET_SENSITIVE ("buffers-paste-in-place",              buffer, _("No selected buffer"));

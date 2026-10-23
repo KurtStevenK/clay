@@ -1,0 +1,9 @@
+/* You can add your own Clay-specific GTK styles here */
+
+
+/* Adjust the size of previews in plug-in dialogs */
+/*
+ClayPreview {
+  -ClayPreview-size: 256;
+}
+*/

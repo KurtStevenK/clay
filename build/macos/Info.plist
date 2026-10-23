@@ -12,7 +12,7 @@
       %LOCALIZATIONS%
     </array>
     <key>CFBundleExecutable</key>
-    <string>gimp-%GIMP_APP_VERSION%</string>
+    <string>clay-%CLAY_APP_VERSION%</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon.icns</string>
     <key>CFBundleIconName</key>
@@ -21,6 +21,8 @@
     <string>%BUNDLE_IDENTIFIER%</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
+    <key>CFBundleDisplayName</key>
+    <string>Clay</string>
     <key>CFBundleName</key>
     <string>%BUNDLE_NAME%</string>
     <key>CFBundlePackageType</key>
@@ -30,11 +32,11 @@
       <string>MacOSX</string>
     </array>
     <key>CFBundleShortVersionString</key>
-    <string>%GIMP_VERSION%</string>
+    <string>%CLAY_VERSION%</string>
     <key>CFBundleSignature</key>
     <string>CLAY</string>
     <key>CFBundleVersion</key>
-    <string>%GIMP_VERSION%</string>
+    <string>%CLAY_VERSION%</string>
     <key>NSHumanReadableCopyright</key>
     <string>© 2026 ClayDesign Contributors. Based on GIMP © The GIMP Team.</string>
     <key>LSApplicationCategoryType</key>

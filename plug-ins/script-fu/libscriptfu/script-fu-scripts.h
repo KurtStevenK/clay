@@ -18,7 +18,7 @@
 #ifndef __SCRIPT_FU_SCRIPTS_H__
 #define __SCRIPT_FU_SCRIPTS_H__
 
-void      script_fu_find_scripts  (GimpPlugIn *plug_in,
+void      script_fu_find_scripts  (ClayPlugIn *plug_in,
                                    GList      *path);
 pointer   script_fu_add_script        (scheme     *sc,
                                        pointer     a);
@@ -31,7 +31,7 @@ pointer   script_fu_add_menu      (scheme     *sc,
 pointer   script_fu_add_i18n      (scheme     *sc,
                                    pointer     a);
 
-GTree          * script_fu_scripts_load_into_tree (GimpPlugIn  *plug_in,
+GTree          * script_fu_scripts_load_into_tree (ClayPlugIn  *plug_in,
                                                    GList       *path);
 gboolean         script_fu_scripts_are_loaded     (void);
 SFScript       * script_fu_find_script            (const gchar *name);

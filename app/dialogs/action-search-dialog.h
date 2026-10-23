@@ -24,4 +24,4 @@
 #pragma once
 
 
-GtkWidget * action_search_dialog_create (Gimp *gimp);
+GtkWidget * action_search_dialog_create (Clay *clay);

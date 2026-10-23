@@ -1,4 +1,4 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; Test mismatch between name of defined run function and name for PDB procedure
 ; Not a high priority: a rare syntax error in a plugin text.
@@ -24,12 +24,12 @@
 ; So script-fu-script-proc instead calls the PDB again, an infinite loop.
 
 (define (mismatch)
-  (gimp-message "mismatch")
+  (clay-message "mismatch")
 )
 
 (script-fu-register "script-fu-test8"
   "Test SF interpreter 8"
-  "Just gives a message from Gimp"
+  "Just gives a message from Clay"
   "lkk"
   "lkk"
   "2022"

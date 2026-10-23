@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GIMP PSD Plug-in
+ * Clay PSD Plug-in
  * Copyright 2007 by John Marshall
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,12 +24,12 @@
 #include <errno.h>
 
 #include <glib/gstdio.h>
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "psd.h"
 #include "psd-util.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /*  Local constants  */
 #define MIN_RUN     3
@@ -43,9 +43,9 @@ typedef struct
 {
   const gchar   *name;
   const gchar   *psd_mode;
-  GimpLayerMode  gimp_mode;
+  ClayLayerMode  clay_mode;
   gboolean       exact; /* does the modes behave (more-or-less) the same in
-                         * Photoshop and in GIMP?
+                         * Photoshop and in Clay?
                          */
 } LayerModeMapping;
 
@@ -134,124 +134,124 @@ static JsonNode * add_descriptor_float_list
 
 /*  Local variables  */
 
-/* mapping table between Photoshop and GIMP modes.  in case a mode matches more
+/* mapping table between Photoshop and Clay modes.  in case a mode matches more
  * than one entry (in either direction), the first entry wins.
  */
 static const LayerModeMapping layer_mode_map[] =
 {
-/*  Name             PSD     GIMP                                   Exact?  */
+/*  Name             PSD     Clay                                   Exact?  */
 
   /* Normal (ps3) */
-  { "Normal",        "norm", GIMP_LAYER_MODE_NORMAL,                TRUE },
-  { "Normal",        "norm", GIMP_LAYER_MODE_NORMAL_LEGACY,         TRUE },
+  { "Normal",        "norm", CLAY_LAYER_MODE_NORMAL,                TRUE },
+  { "Normal",        "norm", CLAY_LAYER_MODE_NORMAL_LEGACY,         TRUE },
 
   /* Dissolve (ps3) */
-  { "Dissolve",      "diss", GIMP_LAYER_MODE_DISSOLVE,              TRUE },
+  { "Dissolve",      "diss", CLAY_LAYER_MODE_DISSOLVE,              TRUE },
 
   /* Multiply (ps3) */
-  { "Multiply",      "mul ", GIMP_LAYER_MODE_MULTIPLY,              TRUE },
-  { "Multiply",      "mul ", GIMP_LAYER_MODE_MULTIPLY_LEGACY,       TRUE },
+  { "Multiply",      "mul ", CLAY_LAYER_MODE_MULTIPLY,              TRUE },
+  { "Multiply",      "mul ", CLAY_LAYER_MODE_MULTIPLY_LEGACY,       TRUE },
 
   /* Screen (ps3) */
-  { "Screen",        "scrn", GIMP_LAYER_MODE_SCREEN,                TRUE },
-  { "Screen",        "scrn", GIMP_LAYER_MODE_SCREEN_LEGACY,         TRUE },
+  { "Screen",        "scrn", CLAY_LAYER_MODE_SCREEN,                TRUE },
+  { "Screen",        "scrn", CLAY_LAYER_MODE_SCREEN_LEGACY,         TRUE },
 
   /* Overlay (ps3) */
-  { "Overlay",       "over", GIMP_LAYER_MODE_OVERLAY,               TRUE },
+  { "Overlay",       "over", CLAY_LAYER_MODE_OVERLAY,               TRUE },
 
   /* Difference (ps3) */
-  { "Difference",    "diff", GIMP_LAYER_MODE_DIFFERENCE,            TRUE },
-  { "Difference",    "diff", GIMP_LAYER_MODE_DIFFERENCE_LEGACY,     TRUE },
+  { "Difference",    "diff", CLAY_LAYER_MODE_DIFFERENCE,            TRUE },
+  { "Difference",    "diff", CLAY_LAYER_MODE_DIFFERENCE_LEGACY,     TRUE },
 
   /* Linear Dodge (cs2) */
-  { "Linear Dodge",  "lddg", GIMP_LAYER_MODE_ADDITION,              FALSE },
-  { "Linear Dodge",  "lddg", GIMP_LAYER_MODE_ADDITION_LEGACY,       TRUE },
+  { "Linear Dodge",  "lddg", CLAY_LAYER_MODE_ADDITION,              FALSE },
+  { "Linear Dodge",  "lddg", CLAY_LAYER_MODE_ADDITION_LEGACY,       TRUE },
 
   /* Subtract (??) */
-  { "Subtract",      "fsub", GIMP_LAYER_MODE_SUBTRACT,              FALSE },
-  { "Subtract",      "fsub", GIMP_LAYER_MODE_SUBTRACT_LEGACY,       TRUE },
+  { "Subtract",      "fsub", CLAY_LAYER_MODE_SUBTRACT,              FALSE },
+  { "Subtract",      "fsub", CLAY_LAYER_MODE_SUBTRACT_LEGACY,       TRUE },
 
   /* Darken (ps3) */
-  { "Darken",        "dark", GIMP_LAYER_MODE_DARKEN_ONLY,           TRUE },
-  { "Darken",        "dark", GIMP_LAYER_MODE_DARKEN_ONLY_LEGACY,    TRUE },
+  { "Darken",        "dark", CLAY_LAYER_MODE_DARKEN_ONLY,           TRUE },
+  { "Darken",        "dark", CLAY_LAYER_MODE_DARKEN_ONLY_LEGACY,    TRUE },
 
   /* Lighten (ps3) */
-  { "Ligten",        "lite", GIMP_LAYER_MODE_LIGHTEN_ONLY,          TRUE },
-  { "Ligten",        "lite", GIMP_LAYER_MODE_LIGHTEN_ONLY_LEGACY,   TRUE },
+  { "Ligten",        "lite", CLAY_LAYER_MODE_LIGHTEN_ONLY,          TRUE },
+  { "Ligten",        "lite", CLAY_LAYER_MODE_LIGHTEN_ONLY_LEGACY,   TRUE },
 
   /* Hue (ps3) */
-  { "Hue",           "hue ", GIMP_LAYER_MODE_LCH_HUE,               FALSE },
-  { "Hue",           "hue ", GIMP_LAYER_MODE_HSV_HUE,               FALSE },
-  { "Hue",           "hue ", GIMP_LAYER_MODE_HSV_HUE_LEGACY,        FALSE },
+  { "Hue",           "hue ", CLAY_LAYER_MODE_LCH_HUE,               FALSE },
+  { "Hue",           "hue ", CLAY_LAYER_MODE_HSV_HUE,               FALSE },
+  { "Hue",           "hue ", CLAY_LAYER_MODE_HSV_HUE_LEGACY,        FALSE },
 
   /* Saturation (ps3) */
-  { "Saturation",    "sat ", GIMP_LAYER_MODE_LCH_CHROMA,            FALSE },
-  { "Saturation",    "sat ", GIMP_LAYER_MODE_HSV_SATURATION,        FALSE },
-  { "Saturation",    "sat ", GIMP_LAYER_MODE_HSV_SATURATION_LEGACY, FALSE },
+  { "Saturation",    "sat ", CLAY_LAYER_MODE_LCH_CHROMA,            FALSE },
+  { "Saturation",    "sat ", CLAY_LAYER_MODE_HSV_SATURATION,        FALSE },
+  { "Saturation",    "sat ", CLAY_LAYER_MODE_HSV_SATURATION_LEGACY, FALSE },
 
   /* Color (ps3) */
-  { "Color",         "colr", GIMP_LAYER_MODE_LCH_COLOR,             FALSE },
-  { "Color",         "colr", GIMP_LAYER_MODE_HSL_COLOR,             FALSE },
-  { "Color",         "colr", GIMP_LAYER_MODE_HSL_COLOR_LEGACY,      FALSE },
+  { "Color",         "colr", CLAY_LAYER_MODE_LCH_COLOR,             FALSE },
+  { "Color",         "colr", CLAY_LAYER_MODE_HSL_COLOR,             FALSE },
+  { "Color",         "colr", CLAY_LAYER_MODE_HSL_COLOR_LEGACY,      FALSE },
 
   /* Luminosity (ps3) */
-  { "Luminosity",    "lum ", GIMP_LAYER_MODE_LCH_LIGHTNESS,         FALSE },
-  { "Luminosity",    "lum ", GIMP_LAYER_MODE_HSV_VALUE,             FALSE },
-  { "Luminosity",    "lum ", GIMP_LAYER_MODE_HSV_VALUE_LEGACY,      FALSE },
-  { "Luminosity",    "lum ", GIMP_LAYER_MODE_LUMINANCE,             FALSE },
+  { "Luminosity",    "lum ", CLAY_LAYER_MODE_LCH_LIGHTNESS,         FALSE },
+  { "Luminosity",    "lum ", CLAY_LAYER_MODE_HSV_VALUE,             FALSE },
+  { "Luminosity",    "lum ", CLAY_LAYER_MODE_HSV_VALUE_LEGACY,      FALSE },
+  { "Luminosity",    "lum ", CLAY_LAYER_MODE_LUMINANCE,             FALSE },
 
   /* Divide (??) */
-  { "Divide",        "fdiv", GIMP_LAYER_MODE_DIVIDE,                FALSE },
-  { "Divide",        "fdiv", GIMP_LAYER_MODE_DIVIDE_LEGACY,         TRUE },
+  { "Divide",        "fdiv", CLAY_LAYER_MODE_DIVIDE,                FALSE },
+  { "Divide",        "fdiv", CLAY_LAYER_MODE_DIVIDE_LEGACY,         TRUE },
 
   /* Color Dodge (ps6) */
-  { "Color Dodge",   "div ", GIMP_LAYER_MODE_DODGE,                 FALSE },
-  { "Color Dodge",   "div ", GIMP_LAYER_MODE_DODGE_LEGACY,          TRUE },
+  { "Color Dodge",   "div ", CLAY_LAYER_MODE_DODGE,                 FALSE },
+  { "Color Dodge",   "div ", CLAY_LAYER_MODE_DODGE_LEGACY,          TRUE },
 
   /* Color Burn (ps6) */
-  { "Color Burn",    "idiv", GIMP_LAYER_MODE_BURN,                  FALSE },
-  { "Color Burn",    "idiv", GIMP_LAYER_MODE_BURN_LEGACY,           TRUE },
+  { "Color Burn",    "idiv", CLAY_LAYER_MODE_BURN,                  FALSE },
+  { "Color Burn",    "idiv", CLAY_LAYER_MODE_BURN_LEGACY,           TRUE },
 
   /* Hard Light (ps3) */
-  { "Hard Light",    "hLit", GIMP_LAYER_MODE_HARDLIGHT,             TRUE },
-  { "Hard Light",    "hLit", GIMP_LAYER_MODE_HARDLIGHT_LEGACY,      TRUE },
+  { "Hard Light",    "hLit", CLAY_LAYER_MODE_HARDLIGHT,             TRUE },
+  { "Hard Light",    "hLit", CLAY_LAYER_MODE_HARDLIGHT_LEGACY,      TRUE },
 
   /* Soft Light (ps3) */
-  { "Soft Light",    "sLit", GIMP_LAYER_MODE_SOFTLIGHT,             FALSE },
-  { "Soft Light",    "sLit", GIMP_LAYER_MODE_SOFTLIGHT_LEGACY,      FALSE },
-  { "Soft Light",    "sLit", GIMP_LAYER_MODE_OVERLAY_LEGACY,        FALSE },
+  { "Soft Light",    "sLit", CLAY_LAYER_MODE_SOFTLIGHT,             FALSE },
+  { "Soft Light",    "sLit", CLAY_LAYER_MODE_SOFTLIGHT_LEGACY,      FALSE },
+  { "Soft Light",    "sLit", CLAY_LAYER_MODE_OVERLAY_LEGACY,        FALSE },
 
   /* Vivid Light (ps7)*/
-  { "Vivid Light",   "vLit", GIMP_LAYER_MODE_VIVID_LIGHT,           TRUE },
+  { "Vivid Light",   "vLit", CLAY_LAYER_MODE_VIVID_LIGHT,           TRUE },
 
   /* Pin Light (ps7)*/
-  { "Pin Light",     "pLit", GIMP_LAYER_MODE_PIN_LIGHT,             TRUE },
+  { "Pin Light",     "pLit", CLAY_LAYER_MODE_PIN_LIGHT,             TRUE },
 
   /* Linear Light (ps7)*/
-  { "Linear Light",  "lLit", GIMP_LAYER_MODE_LINEAR_LIGHT,          FALSE },
+  { "Linear Light",  "lLit", CLAY_LAYER_MODE_LINEAR_LIGHT,          FALSE },
 
   /* Hard Mix (CS)*/
-  { "Hard Mix",      "hMix", GIMP_LAYER_MODE_HARD_MIX,              FALSE },
+  { "Hard Mix",      "hMix", CLAY_LAYER_MODE_HARD_MIX,              FALSE },
 
   /* Exclusion (ps6) */
-  { "Exclusion",     "smud", GIMP_LAYER_MODE_EXCLUSION,             TRUE },
+  { "Exclusion",     "smud", CLAY_LAYER_MODE_EXCLUSION,             TRUE },
 
   /* Linear Burn (ps7)*/
-  { "Linear Burn",   "lbrn", GIMP_LAYER_MODE_LINEAR_BURN,           FALSE },
+  { "Linear Burn",   "lbrn", CLAY_LAYER_MODE_LINEAR_BURN,           FALSE },
 
   /* Darker Color (??)*/
-  { "Darker Color",  "dkCl", GIMP_LAYER_MODE_LUMA_DARKEN_ONLY,      FALSE },
+  { "Darker Color",  "dkCl", CLAY_LAYER_MODE_LUMA_DARKEN_ONLY,      FALSE },
 
   /* Lighter Color (??)*/
-  { "Lighter Color", "lgCl", GIMP_LAYER_MODE_LUMA_LIGHTEN_ONLY,     FALSE },
+  { "Lighter Color", "lgCl", CLAY_LAYER_MODE_LUMA_LIGHTEN_ONLY,     FALSE },
 
   /* Pass Through (CS)*/
-  { "Pass Through",  "pass", GIMP_LAYER_MODE_PASS_THROUGH,          TRUE },
+  { "Pass Through",  "pass", CLAY_LAYER_MODE_PASS_THROUGH,          TRUE },
 };
 
 /* Names of layer modes in descriptors */
 static const LayerModeMapping descriptor_mode_map[] =
-/*  Name             PSD     GIMP                                   Exact?  */
+/*  Name             PSD     Clay                                   Exact?  */
 {
   /* From SDK, apparently less possible values than regular blend mode?
    * typeBlendMode 'BlnM' // enumNormal, enumDissolve, enumBehind, enumClear,
@@ -260,28 +260,28 @@ static const LayerModeMapping descriptor_mode_map[] =
                              enumHue, enumSaturation, enumColor, enumLuminosity,
                              enumExclusion, enumColorDodge, enumColorBurn.
    */
-  { "Normal",        "Nrml", GIMP_LAYER_MODE_NORMAL,                TRUE },
-  { "Dissolve",      "Dslv", GIMP_LAYER_MODE_DISSOLVE,              TRUE },
-  { "Behind",        "Bhnd", GIMP_LAYER_MODE_BEHIND,                TRUE },
+  { "Normal",        "Nrml", CLAY_LAYER_MODE_NORMAL,                TRUE },
+  { "Dissolve",      "Dslv", CLAY_LAYER_MODE_DISSOLVE,              TRUE },
+  { "Behind",        "Bhnd", CLAY_LAYER_MODE_BEHIND,                TRUE },
   /* Cl(e)ar sounds like color erase, although according to Adobe it's not
    * available as a regular layer mode:
    * https://helpx.adobe.com/photoshop/using/blending-modes.html
    */
-  { "Color Erase",   "Clar", GIMP_LAYER_MODE_COLOR_ERASE,           TRUE },
-  { "Multiply",      "Mltp", GIMP_LAYER_MODE_MULTIPLY,              TRUE },
-  { "Screen",        "Scrn", GIMP_LAYER_MODE_SCREEN,                TRUE },
-  { "Overlay",       "Ovrl", GIMP_LAYER_MODE_OVERLAY,               TRUE },
-  { "Soft Light",    "SftL", GIMP_LAYER_MODE_SOFTLIGHT,             FALSE },
-  { "Hard Light",    "HrdL", GIMP_LAYER_MODE_HARDLIGHT,             TRUE },
-  { "Darken",        "Drkn", GIMP_LAYER_MODE_DARKEN_ONLY,           TRUE },
-  { "Difference",    "Dfrn", GIMP_LAYER_MODE_DIFFERENCE,            TRUE },
-  { "Hue",           "H   ", GIMP_LAYER_MODE_LCH_HUE,               FALSE },
-  { "Saturation",    "Strt", GIMP_LAYER_MODE_LCH_CHROMA,            FALSE },
-  { "Color",         "Clr ", GIMP_LAYER_MODE_LCH_COLOR,             FALSE },
-  { "Luminosity",    "Lmns", GIMP_LAYER_MODE_LCH_LIGHTNESS,         FALSE },
-  { "Exclusion",     "Xclu", GIMP_LAYER_MODE_EXCLUSION,             TRUE  },
-  { "Color Dodge",   "CDdg", GIMP_LAYER_MODE_DODGE,                 FALSE },
-  { "Color Burn",    "CBrn", GIMP_LAYER_MODE_BURN,                  FALSE },
+  { "Color Erase",   "Clar", CLAY_LAYER_MODE_COLOR_ERASE,           TRUE },
+  { "Multiply",      "Mltp", CLAY_LAYER_MODE_MULTIPLY,              TRUE },
+  { "Screen",        "Scrn", CLAY_LAYER_MODE_SCREEN,                TRUE },
+  { "Overlay",       "Ovrl", CLAY_LAYER_MODE_OVERLAY,               TRUE },
+  { "Soft Light",    "SftL", CLAY_LAYER_MODE_SOFTLIGHT,             FALSE },
+  { "Hard Light",    "HrdL", CLAY_LAYER_MODE_HARDLIGHT,             TRUE },
+  { "Darken",        "Drkn", CLAY_LAYER_MODE_DARKEN_ONLY,           TRUE },
+  { "Difference",    "Dfrn", CLAY_LAYER_MODE_DIFFERENCE,            TRUE },
+  { "Hue",           "H   ", CLAY_LAYER_MODE_LCH_HUE,               FALSE },
+  { "Saturation",    "Strt", CLAY_LAYER_MODE_LCH_CHROMA,            FALSE },
+  { "Color",         "Clr ", CLAY_LAYER_MODE_LCH_COLOR,             FALSE },
+  { "Luminosity",    "Lmns", CLAY_LAYER_MODE_LCH_LIGHTNESS,         FALSE },
+  { "Exclusion",     "Xclu", CLAY_LAYER_MODE_EXCLUSION,             TRUE  },
+  { "Color Dodge",   "CDdg", CLAY_LAYER_MODE_DODGE,                 FALSE },
+  { "Color Burn",    "CBrn", CLAY_LAYER_MODE_BURN,                  FALSE },
 };
 
 /* Utility function */
@@ -621,7 +621,7 @@ fread_pascal_string (gint32        *bytes_read,
         }
     }
 
-  utf8_str = gimp_any_to_utf8 (str, len, NULL);
+  utf8_str = clay_any_to_utf8 (str, len, NULL);
   *bytes_written = strlen (utf8_str);
   g_free (str);
 
@@ -2336,19 +2336,19 @@ load_type (GInputStream  *input,
 }
 
 void
-psd_to_gimp_blend_mode (PSDlayer      *psd_layer,
+psd_to_clay_blend_mode (PSDlayer      *psd_layer,
                         LayerModeInfo *mode_info)
 {
-  mode_info->mode  = GIMP_LAYER_MODE_NORMAL;
+  mode_info->mode  = CLAY_LAYER_MODE_NORMAL;
   /* FIXME: use the image mode to select the correct color spaces.  for now,
    * we use rgb-perceptual blending/compositing unconditionally.
    */
-  mode_info->blend_space     = GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL;
-  mode_info->composite_space = GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL;
+  mode_info->blend_space     = CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL;
+  mode_info->composite_space = CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL;
   if (psd_layer->clipping == 1)
-    mode_info->composite_mode  = GIMP_LAYER_COMPOSITE_CLIP_TO_BACKDROP;
+    mode_info->composite_mode  = CLAY_LAYER_COMPOSITE_CLIP_TO_BACKDROP;
   else
-    mode_info->composite_mode  = GIMP_LAYER_COMPOSITE_UNION;
+    mode_info->composite_mode  = CLAY_LAYER_COMPOSITE_UNION;
 
   if (! convert_psd_mode (psd_layer->blend_mode, &mode_info->mode))
     {
@@ -2364,9 +2364,9 @@ psd_to_gimp_blend_mode (PSDlayer      *psd_layer,
 
 gboolean
 convert_psd_mode (const gchar   *psd_mode,
-                  GimpLayerMode *mode)
+                  ClayLayerMode *mode)
 {
-  *mode = GIMP_LAYER_MODE_NORMAL;
+  *mode = CLAY_LAYER_MODE_NORMAL;
 
   for (gint i = 0; i < G_N_ELEMENTS (layer_mode_map); i++)
     {
@@ -2379,7 +2379,7 @@ convert_psd_mode (const gchar   *psd_mode,
                          layer_mode_map[i].name);
             }
 
-          *mode = layer_mode_map[i].gimp_mode;
+          *mode = layer_mode_map[i].clay_mode;
           return TRUE;
         }
     }
@@ -2389,9 +2389,9 @@ convert_psd_mode (const gchar   *psd_mode,
 
 gboolean
 convert_psd_effect_mode (const gchar   *psd_mode,
-                         GimpLayerMode *mode)
+                         ClayLayerMode *mode)
 {
-  *mode = GIMP_LAYER_MODE_REPLACE;
+  *mode = CLAY_LAYER_MODE_REPLACE;
 
   for (gint i = 0; i < G_N_ELEMENTS (descriptor_mode_map); i++)
     {
@@ -2404,7 +2404,7 @@ convert_psd_effect_mode (const gchar   *psd_mode,
                          descriptor_mode_map[i].name);
             }
 
-          *mode = descriptor_mode_map[i].gimp_mode;
+          *mode = descriptor_mode_map[i].clay_mode;
           return TRUE;
         }
     }
@@ -2413,53 +2413,53 @@ convert_psd_effect_mode (const gchar   *psd_mode,
 }
 
 const gchar *
-gimp_to_psd_blend_mode (const LayerModeInfo *mode_info)
+clay_to_psd_blend_mode (const LayerModeInfo *mode_info)
 {
   gint i;
 
   /* FIXME: select the image mode based on the layer mode color spaces.  for
    * now, we assume rgb-perceptual blending/compositing unconditionally.
    */
-  if (mode_info->blend_space != GIMP_LAYER_COLOR_SPACE_AUTO &&
-      mode_info->blend_space != GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL)
+  if (mode_info->blend_space != CLAY_LAYER_COLOR_SPACE_AUTO &&
+      mode_info->blend_space != CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL)
     {
       if (CONVERSION_WARNINGS)
         g_message ("Unsupported blend color space: %s. "
                    "Blend color space reverts to rgb-perceptual",
-                   get_enum_value_nick (GIMP_TYPE_LAYER_COLOR_SPACE,
+                   get_enum_value_nick (CLAY_TYPE_LAYER_COLOR_SPACE,
                                         mode_info->blend_space));
     }
 
-  if (mode_info->composite_space != GIMP_LAYER_COLOR_SPACE_AUTO &&
-      mode_info->composite_space != GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL)
+  if (mode_info->composite_space != CLAY_LAYER_COLOR_SPACE_AUTO &&
+      mode_info->composite_space != CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL)
     {
       if (CONVERSION_WARNINGS)
         g_message ("Unsupported composite color space: %s. "
                    "Composite color space reverts to rgb-perceptual",
-                   get_enum_value_nick (GIMP_TYPE_LAYER_COLOR_SPACE,
+                   get_enum_value_nick (CLAY_TYPE_LAYER_COLOR_SPACE,
                                         mode_info->composite_space));
     }
 
-  if (mode_info->composite_mode != GIMP_LAYER_COMPOSITE_AUTO &&
-      mode_info->composite_mode != GIMP_LAYER_COMPOSITE_UNION &&
-      mode_info->composite_mode != GIMP_LAYER_COMPOSITE_CLIP_TO_BACKDROP)
+  if (mode_info->composite_mode != CLAY_LAYER_COMPOSITE_AUTO &&
+      mode_info->composite_mode != CLAY_LAYER_COMPOSITE_UNION &&
+      mode_info->composite_mode != CLAY_LAYER_COMPOSITE_CLIP_TO_BACKDROP)
     {
       if (CONVERSION_WARNINGS)
         g_message ("Unsupported composite mode: %s. "
                    "Composite mode reverts to union",
-                   get_enum_value_nick (GIMP_TYPE_LAYER_COMPOSITE_MODE,
+                   get_enum_value_nick (CLAY_TYPE_LAYER_COMPOSITE_MODE,
                                         mode_info->composite_mode));
     }
 
   for (i = 0; i < G_N_ELEMENTS (layer_mode_map); i++)
     {
-      if (layer_mode_map[i].gimp_mode == mode_info->mode)
+      if (layer_mode_map[i].clay_mode == mode_info->mode)
         {
           if (! layer_mode_map[i].exact && CONVERSION_WARNINGS)
             {
               g_message ("Clay uses a different equation than Photoshop for "
                          "blend mode: %s. Results may differ.",
-                         get_enum_value_nick (GIMP_TYPE_LAYER_MODE,
+                         get_enum_value_nick (CLAY_TYPE_LAYER_MODE,
                                               mode_info->mode));
             }
 
@@ -2469,88 +2469,88 @@ gimp_to_psd_blend_mode (const LayerModeInfo *mode_info)
 
   if (CONVERSION_WARNINGS)
     g_message ("Unsupported blend mode: %s. Mode reverts to normal",
-               get_enum_value_nick (GIMP_TYPE_LAYER_MODE, mode_info->mode));
+               get_enum_value_nick (CLAY_TYPE_LAYER_MODE, mode_info->mode));
 
   return "norm";
 }
 
-GimpColorTag
-psd_to_gimp_layer_color_tag (guint16 layer_color_tag)
+ClayColorTag
+psd_to_clay_layer_color_tag (guint16 layer_color_tag)
 {
-  GimpColorTag colorTag;
+  ClayColorTag colorTag;
 
   switch (layer_color_tag)
     {
     case 1:
-      colorTag = GIMP_COLOR_TAG_RED;
+      colorTag = CLAY_COLOR_TAG_RED;
       break;
 
     case 2:
-      colorTag = GIMP_COLOR_TAG_ORANGE;
+      colorTag = CLAY_COLOR_TAG_ORANGE;
       break;
 
     case 3:
-      colorTag = GIMP_COLOR_TAG_YELLOW;
+      colorTag = CLAY_COLOR_TAG_YELLOW;
       break;
 
     case 4:
-      colorTag = GIMP_COLOR_TAG_GREEN;
+      colorTag = CLAY_COLOR_TAG_GREEN;
       break;
 
     case 5:
-      colorTag = GIMP_COLOR_TAG_BLUE;
+      colorTag = CLAY_COLOR_TAG_BLUE;
       break;
 
     case 6:
-      colorTag = GIMP_COLOR_TAG_VIOLET;
+      colorTag = CLAY_COLOR_TAG_VIOLET;
       break;
 
     case 7:
-      colorTag = GIMP_COLOR_TAG_GRAY;
+      colorTag = CLAY_COLOR_TAG_GRAY;
       break;
 
     default:
       if (CONVERSION_WARNINGS)
         g_message ("Unsupported Photoshop layer color tag: %i. Clay layer color tag set to none.",
                        layer_color_tag);
-      colorTag = GIMP_COLOR_TAG_NONE;
+      colorTag = CLAY_COLOR_TAG_NONE;
     }
 
   return colorTag;
 }
 
 guint16
-gimp_to_psd_layer_color_tag (GimpColorTag layer_color_tag)
+clay_to_psd_layer_color_tag (ClayColorTag layer_color_tag)
 {
   guint16 color_tag;
 
   switch (layer_color_tag)
     {
-    case GIMP_COLOR_TAG_RED:
+    case CLAY_COLOR_TAG_RED:
         color_tag = 1;
       break;
 
-    case GIMP_COLOR_TAG_ORANGE:
+    case CLAY_COLOR_TAG_ORANGE:
         color_tag = 2;
       break;
 
-    case GIMP_COLOR_TAG_YELLOW:
+    case CLAY_COLOR_TAG_YELLOW:
         color_tag = 3;
       break;
 
-    case GIMP_COLOR_TAG_GREEN:
+    case CLAY_COLOR_TAG_GREEN:
         color_tag = 4;
       break;
 
-    case GIMP_COLOR_TAG_BLUE:
+    case CLAY_COLOR_TAG_BLUE:
         color_tag = 5;
       break;
 
-    case GIMP_COLOR_TAG_VIOLET:
+    case CLAY_COLOR_TAG_VIOLET:
         color_tag = 6;
       break;
 
-    case GIMP_COLOR_TAG_GRAY:
+    case CLAY_COLOR_TAG_GRAY:
         color_tag = 7;
       break;
 
@@ -2571,7 +2571,7 @@ get_enum_value_nick (GType type,
 {
   const gchar *nick;
 
-  if (gimp_enum_get_value (type, value, NULL, &nick, NULL, NULL))
+  if (clay_enum_get_value (type, value, NULL, &nick, NULL, NULL))
     {
       return nick;
     }

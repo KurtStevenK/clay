@@ -1,4 +1,4 @@
-/* tiff saving for GIMP
+/* tiff saving for Clay
  *  -Peter Mattis
  *
  * The TIFF loading code has been completely revamped by Nick Lamb
@@ -24,14 +24,14 @@
 
 
 gboolean  export_image  (GFile         *file,
-                         GimpImage     *image,
-                         GimpImage     *orig_image,
+                         ClayImage     *image,
+                         ClayImage     *orig_image,
                          GObject       *config,
-                         GimpMetadata  *metadata,
+                         ClayMetadata  *metadata,
                          GError       **error);
 
-gboolean  export_dialog (GimpImage     *image,
-                         GimpProcedure *procedure,
+gboolean  export_dialog (ClayImage     *image,
+                         ClayProcedure *procedure,
                          GObject       *config,
                          gboolean       has_alpha,
                          gboolean       is_monochrome,

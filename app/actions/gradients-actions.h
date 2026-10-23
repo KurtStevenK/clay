@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   gradients_actions_setup  (GimpActionGroup *group);
-void   gradients_actions_update (GimpActionGroup *group,
+void   gradients_actions_setup  (ClayActionGroup *group);
+void   gradients_actions_update (ClayActionGroup *group,
                                  gpointer         user_data);

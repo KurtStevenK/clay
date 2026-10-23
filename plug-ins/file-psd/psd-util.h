@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GIMP PSD Plug-in
+ * Clay PSD Plug-in
  * Copyright 2007 by John Marshall
  *
  * This program is free software: you can redistribute it and/or modify
@@ -155,17 +155,17 @@ gint                    parse_tdta                  (guint32              len,
                                                      JsonNode           **tdta_root,
                                                      GError             **error);
 
-void                    psd_to_gimp_blend_mode      (PSDlayer             *psd_layer,
+void                    psd_to_clay_blend_mode      (PSDlayer             *psd_layer,
                                                      LayerModeInfo        *mode_info);
 
-const gchar *           gimp_to_psd_blend_mode      (const LayerModeInfo  *mode_info);
+const gchar *           clay_to_psd_blend_mode      (const LayerModeInfo  *mode_info);
 gboolean                convert_psd_mode            (const gchar          *psd_mode,
-                                                     GimpLayerMode        *mode);
+                                                     ClayLayerMode        *mode);
 gboolean                convert_psd_effect_mode     (const gchar          *psd_mode,
-                                                     GimpLayerMode        *mode);
+                                                     ClayLayerMode        *mode);
 
-GimpColorTag            psd_to_gimp_layer_color_tag (guint16               layer_color_tag);
+ClayColorTag            psd_to_clay_layer_color_tag (guint16               layer_color_tag);
 
-guint16                 gimp_to_psd_layer_color_tag (GimpColorTag          layer_color_tag);
+guint16                 clay_to_psd_layer_color_tag (ClayColorTag          layer_color_tag);
 
 #endif /* __PSD_UTIL_H__ */

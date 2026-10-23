@@ -33,10 +33,10 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define MAX_TRANSFORMS  36
@@ -45,7 +45,7 @@
 
 #define PLUG_IN_PROC    "plug-in-qbist"
 #define PLUG_IN_BINARY  "qbist"
-#define PLUG_IN_ROLE    "gimp-qbist"
+#define PLUG_IN_ROLE    "clay-qbist"
 #define PLUG_IN_VERSION "January 2001, 1.12"
 
 
@@ -89,12 +89,12 @@ typedef struct _QbistClass QbistClass;
 
 struct _Qbist
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _QbistClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -103,19 +103,19 @@ struct _QbistClass
 
 GType                   qbist_get_type         (void);
 
-static GList          * qbist_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * qbist_create_procedure (GimpPlugIn           *plug_in,
+static GList          * qbist_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * qbist_create_procedure (ClayPlugIn           *plug_in,
                                                 const gchar          *name);
 
-static GimpValueArray * qbist_run              (GimpProcedure        *procedure,
-                                                GimpRunMode           run_mode,
-                                                GimpImage            *image,
-                                                GimpDrawable        **drawables,
-                                                GimpProcedureConfig  *config,
+static ClayValueArray * qbist_run              (ClayProcedure        *procedure,
+                                                ClayRunMode           run_mode,
+                                                ClayImage            *image,
+                                                ClayDrawable        **drawables,
+                                                ClayProcedureConfig  *config,
                                                 gpointer              run_data);
 
-static gboolean         dialog_run             (GimpProcedure        *procedure,
-                                                GimpProcedureConfig  *config);
+static gboolean         dialog_run             (ClayProcedure        *procedure,
+                                                ClayProcedureConfig  *config);
 static void             dialog_new_variations  (GtkWidget            *widget,
                                                 gpointer              data);
 static void             dialog_update_previews (GtkWidget            *widget,
@@ -135,9 +135,9 @@ static void             qbist                  (ExpInfo              *info,
                                                 gint                  oversampling);
 
 
-G_DEFINE_TYPE (Qbist, qbist, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Qbist, qbist, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (QBIST_TYPE)
+CLAY_MAIN (QBIST_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -148,7 +148,7 @@ static GRand     *gr = NULL;
 static void
 qbist_class_init (QbistClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = qbist_query_procedures;
   plug_in_class->create_procedure = qbist_create_procedure;
@@ -161,32 +161,32 @@ qbist_init (Qbist *qbist)
 }
 
 static GList *
-qbist_query_procedures (GimpPlugIn *plug_in)
+qbist_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-qbist_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+qbist_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             qbist_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Qbist..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("_Qbist..."));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Render/Pattern");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Generate a huge variety of "
                                           "abstract patterns"),
                                         _("This Plug-in is based on an article by "
@@ -195,12 +195,12 @@ qbist_create_procedure (GimpPlugIn  *plug_in,
                                           "pictures from a random genetic "
                                           "formula."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Jörn Loviscach, Jens Ch. Restemeier",
                                       "Jörn Loviscach, Jens Ch. Restemeier",
                                       PLUG_IN_VERSION);
 
-      gimp_procedure_add_boolean_argument (procedure, "anti-aliasing",
+      clay_procedure_add_boolean_argument (procedure, "anti-aliasing",
                                            _("_Anti-aliasing"),
                                            _("Enable anti-aliasing using an oversampling "
                                              "algorithm"),
@@ -210,11 +210,11 @@ qbist_create_procedure (GimpPlugIn  *plug_in,
       /* Saving the pattern as a parasite is a trick allowing to store
        * random binary data.
        */
-      gimp_procedure_add_parasite_aux_argument (procedure, "pattern",
+      clay_procedure_add_parasite_aux_argument (procedure, "pattern",
                                                 "Qbist pattern", NULL,
                                                 G_PARAM_READWRITE);
 
-     gimp_procedure_add_string_aux_argument (procedure, "data-path",
+     clay_procedure_add_string_aux_argument (procedure, "data-path",
                                               "Path of data file",
                                               _("Any file which will be used as source for pattern generation"),
                                               NULL,
@@ -224,20 +224,20 @@ qbist_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-qbist_run (GimpProcedure        *procedure,
-           GimpRunMode           run_mode,
-           GimpImage            *image,
-           GimpDrawable        **drawables,
-           GimpProcedureConfig  *config,
+static ClayValueArray *
+qbist_run (ClayProcedure        *procedure,
+           ClayRunMode           run_mode,
+           ClayImage            *image,
+           ClayDrawable        **drawables,
+           ClayProcedureConfig  *config,
            gpointer              run_data)
 {
   gint                sel_x1, sel_y1, sel_width, sel_height;
   gint                img_height, img_width;
   GeglBuffer         *buffer;
   GeglBufferIterator *iter;
-  GimpDrawable       *drawable;
-  GimpParasite       *pattern_parasite;
+  ClayDrawable       *drawable;
+  ClayParasite       *pattern_parasite;
   gconstpointer       pattern_data;
   guint32             pattern_data_length;
   gint                total_pixels;
@@ -246,16 +246,16 @@ qbist_run (GimpProcedure        *procedure,
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -263,22 +263,22 @@ qbist_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  img_width  = gimp_drawable_get_width (drawable);
-  img_height = gimp_drawable_get_height (drawable);
+  img_width  = clay_drawable_get_width (drawable);
+  img_height = clay_drawable_get_height (drawable);
 
-  if (! gimp_drawable_is_rgb (drawable))
+  if (! clay_drawable_is_rgb (drawable))
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                NULL);
     }
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &sel_x1, &sel_y1,
                                       &sel_width, &sel_height))
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_SUCCESS,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_SUCCESS,
                                                NULL);
     }
 
@@ -289,44 +289,44 @@ qbist_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       g_object_get (config,
                     "data-path",    &qbist_info.path,
                     "pattern",      &pattern_parasite,
                     NULL);
       if (pattern_parasite)
         {
-          pattern_data = gimp_parasite_get_data (pattern_parasite,
+          pattern_data = clay_parasite_get_data (pattern_parasite,
                                                  &pattern_data_length);
           memcpy (&qbist_info.info, pattern_data, pattern_data_length);
-          gimp_parasite_free (pattern_parasite);
+          clay_parasite_free (pattern_parasite);
           pattern_parasite = NULL;
         }
 
       if (! dialog_run (procedure, config))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
 
       g_object_get (config, "anti-aliasing", &anti_aliasing, NULL);
 
-      pattern_parasite = gimp_parasite_new ("pattern", 0,
+      pattern_parasite = clay_parasite_new ("pattern", 0,
                                             sizeof (qbist_info.info),
                                             &qbist_info.info);
       g_object_set (config,
                     "data-path",    qbist_info.path,
                     "pattern",      pattern_parasite,
                     NULL);
-      gimp_parasite_free (pattern_parasite);
+      clay_parasite_free (pattern_parasite);
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+    case CLAY_RUN_NONINTERACTIVE:
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                NULL);
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       g_object_get (config,
                     "data-path",     &qbist_info.path,
                     "anti-aliasing", &anti_aliasing,
@@ -335,10 +335,10 @@ qbist_run (GimpProcedure        *procedure,
 
       if (pattern_parasite)
         {
-          pattern_data = gimp_parasite_get_data (pattern_parasite,
+          pattern_data = clay_parasite_get_data (pattern_parasite,
                                                  &pattern_data_length);
           memcpy (&qbist_info.info, pattern_data, pattern_data_length);
-          gimp_parasite_free (pattern_parasite);
+          clay_parasite_free (pattern_parasite);
           pattern_parasite = NULL;
         }
       break;
@@ -349,7 +349,7 @@ qbist_run (GimpProcedure        *procedure,
 
   qbist_info.oversampling = anti_aliasing ? 4 : 1;
 
-  buffer = gimp_drawable_get_shadow_buffer (drawable);
+  buffer = clay_drawable_get_shadow_buffer (drawable);
 
   iter = gegl_buffer_iterator_new (buffer,
                                    GEGL_RECTANGLE (0, 0,
@@ -360,7 +360,7 @@ qbist_run (GimpProcedure        *procedure,
 
   optimize (&qbist_info.info);
 
-  gimp_progress_init (_("Qbist"));
+  clay_progress_init (_("Qbist"));
 
   while (gegl_buffer_iterator_next (iter))
     {
@@ -382,23 +382,23 @@ qbist_run (GimpProcedure        *procedure,
 
       done_pixels += roi.width * roi.height;
 
-      gimp_progress_update ((gdouble) done_pixels /
+      clay_progress_update ((gdouble) done_pixels /
                             (gdouble) total_pixels);
     }
 
   g_object_unref (buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, sel_x1, sel_y1,
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, sel_x1, sel_y1,
                         sel_width, sel_height);
 
-  gimp_displays_flush ();
+  clay_displays_flush ();
 
   g_rand_free (gr);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 
@@ -707,9 +707,9 @@ dialog_update_previews (GtkWidget *widget,
 
       babl_process (fish, buf, u8_buf, size * size);
 
-      gimp_preview_area_draw (GIMP_PREVIEW_AREA (preview[j]),
+      clay_preview_area_draw (CLAY_PREVIEW_AREA (preview[j]),
                               0, 0, size, size,
-                              GIMP_RGBA_IMAGE,
+                              CLAY_RGBA_IMAGE,
                               u8_buf,
                               size * 4);
     }
@@ -913,8 +913,8 @@ dialog_save (GtkWidget *widget,
 }
 
 static gboolean
-dialog_run (GimpProcedure       *procedure,
-            GimpProcedureConfig *config)
+dialog_run (ClayProcedure       *procedure,
+            ClayProcedureConfig *config)
 {
   GtkWidget *dialog;
   GtkWidget *vbox;
@@ -925,13 +925,13 @@ dialog_run (GimpProcedure       *procedure,
   gint       i;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Qbist"));
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "qbist-vbox", "anti-aliasing",
                                          NULL);
 
@@ -978,7 +978,7 @@ dialog_run (GimpProcedure       *procedure,
                         G_CALLBACK (dialog_select_preview),
                         (gpointer) & (info[(i + 5) % 9]));
 
-      preview[i] = gimp_preview_area_new ();
+      preview[i] = clay_preview_area_new ();
       gtk_widget_set_size_request (preview[i], preview_size, preview_size);
       gtk_container_add (GTK_CONTAINER (button), preview[i]);
       gtk_widget_set_visible (preview[i], TRUE);
@@ -1014,12 +1014,12 @@ dialog_run (GimpProcedure       *procedure,
                     G_CALLBACK (dialog_save),
                     NULL);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "qbist-vbox", NULL);
   gtk_widget_set_visible (dialog, TRUE);
   dialog_update_previews (NULL, preview_size);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   if (run)
     qbist_info.info = info[0];

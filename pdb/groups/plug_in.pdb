@@ -44,7 +44,7 @@ sub plug_ins_query {
     %invoke = (
 	code => <<'CODE'
 {
-  num_install_times = gimp_plug_in_manager_query (gimp->plug_in_manager,
+  num_install_times = clay_plug_in_manager_query (clay->plug_in_manager,
                                                   search_string,
                                                   &procedures,
                                                   &accelerators,
@@ -76,7 +76,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in)
     root_folder = g_object_ref (plug_in->root_folder);
@@ -93,9 +93,9 @@ sub plug_in_help_register {
     $help = <<HELP;
 
 This procedure registers user documentation for the calling plug-in
-with the GIMP help system. The domain_uri parameter points to the root
+with the Clay help system. The domain_uri parameter points to the root
 directory where the plug-in help is installed. For each supported
-language there should be a file called 'gimp-help.xml' that maps the
+language there should be a file called 'clay-help.xml' that maps the
 help IDs to the actual help files.
 HELP
 
@@ -113,13 +113,13 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
-  if (plug_in && plug_in->call_mode == GIMP_PLUG_IN_CALL_QUERY)
+  if (plug_in && plug_in->call_mode == CLAY_PLUG_IN_CALL_QUERY)
     {
       gchar *domain_uri = domain_file ? g_file_get_uri (domain_file) : NULL;
 
-      gimp_plug_in_def_set_help_domain (plug_in->plug_in_def,
+      clay_plug_in_def_set_help_domain (plug_in->plug_in_def,
                                         domain_name, domain_uri);
 
       g_free (domain_uri);
@@ -166,11 +166,11 @@ sub plug_in_set_pdb_error_handler {
 
     $help = <<HELP;
 This procedure changes the way that errors in procedure calls are
-handled. By default GIMP will raise an error dialog if a procedure
+handled. By default Clay will raise an error dialog if a procedure
 call made by a plug-in fails. Using this procedure the plug-in can
 change this behavior. If the error handler is set to
-%GIMP_PDB_ERROR_HANDLER_PLUGIN, then the plug-in is responsible for
-calling gimp_get_pdb_error() and handling the error whenever one if
+%CLAY_PDB_ERROR_HANDLER_PLUGIN, then the plug-in is responsible for
+calling clay_get_pdb_error() and handling the error whenever one if
 its procedure calls fails. It can do this by displaying the error
 message or by forwarding it in its own return values.
 HELP
@@ -180,18 +180,18 @@ HELP
     $lib_private = 1;
 
     @inargs = (
-	{ name => 'handler', type => 'enum GimpPDBErrorHandler',
+	{ name => 'handler', type => 'enum ClayPDBErrorHandler',
 	  desc => "Who is responsible for handling procedure call errors" }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in)
     {
-      gimp_plug_in_set_error_handler (plug_in, handler);
+      clay_plug_in_set_error_handler (plug_in, handler);
     }
   else
     success = FALSE;
@@ -206,7 +206,7 @@ sub plug_in_get_pdb_error_handler {
     $help = <<HELP;
 This procedure retrieves the currently active error handler for
 procedure calls made by the calling plug-in. See
-gimp_plugin_set_pdb_error_handler() for details.
+clay_plugin_set_pdb_error_handler() for details.
 HELP
 
     &neo_pdb_misc('2008', '2.6');
@@ -214,18 +214,18 @@ HELP
     $lib_private = 1;
 
     @outargs = (
-	{ name => 'handler', type => 'enum GimpPDBErrorHandler',
+	{ name => 'handler', type => 'enum ClayPDBErrorHandler',
 	  desc => "Who is responsible for handling procedure call errors" }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in)
     {
-      handler = gimp_plug_in_get_error_handler (plug_in);
+      handler = clay_plug_in_get_error_handler (plug_in);
     }
   else
     success = FALSE;
@@ -236,14 +236,14 @@ CODE
 
 @headers = qw(<string.h>
               <stdlib.h>
-              "libgimpbase/gimpbase.h"
-              "core/gimp.h"
-              "plug-in/gimpplugin.h"
-              "plug-in/gimpplugindef.h"
-              "plug-in/gimppluginmanager.h"
-              "plug-in/gimppluginmanager-query.h"
-              "plug-in/gimppluginprocedure.h"
-              "gimppdb-utils.h");
+              "libclaybase/claybase.h"
+              "core/clay.h"
+              "plug-in/clayplugin.h"
+              "plug-in/clayplugindef.h"
+              "plug-in/claypluginmanager.h"
+              "plug-in/claypluginmanager-query.h"
+              "plug-in/claypluginprocedure.h"
+              "claypdb-utils.h");
 
 @procs = qw(plug_ins_query
             plug_in_get_root_folder

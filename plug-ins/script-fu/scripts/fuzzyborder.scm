@@ -35,38 +35,38 @@
         )
 
   (define (chris-color-edge inImage inLayer inColor inSize)
-    (gimp-selection-all inImage)
-    (gimp-selection-shrink inImage inSize)
-    (gimp-selection-invert inImage)
-    (gimp-context-set-background inColor)
-    (gimp-drawable-edit-fill inLayer FILL-BACKGROUND)
-    (gimp-selection-none inImage)
+    (clay-selection-all inImage)
+    (clay-selection-shrink inImage inSize)
+    (clay-selection-invert inImage)
+    (clay-context-set-background inColor)
+    (clay-drawable-edit-fill inLayer FILL-BACKGROUND)
+    (clay-selection-none inImage)
   )
 
   (let (
-       (theWidth (car (gimp-image-get-width inImage)))
-       (theHeight (car (gimp-image-get-height inImage)))
-       (theImage (if (= inCopy TRUE) (car (gimp-image-duplicate inImage))
+       (theWidth (car (clay-image-get-width inImage)))
+       (theHeight (car (clay-image-get-height inImage)))
+       (theImage (if (= inCopy TRUE) (car (clay-image-duplicate inImage))
                                       inImage))
        (inLayer (vector-ref inLayers 0))
        (theLayer 0)
        )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
     (if (= inCopy TRUE)
-        (gimp-image-undo-disable theImage)
-        (gimp-image-undo-group-start theImage)
+        (clay-image-undo-disable theImage)
+        (clay-image-undo-group-start theImage)
     )
 
-    (gimp-selection-all theImage)
+    (clay-selection-all theImage)
 
-    (if (> (car (gimp-drawable-type inLayer)) 1)
-        (gimp-image-convert-rgb theImage)
+    (if (> (car (clay-drawable-type inLayer)) 1)
+        (clay-image-convert-rgb theImage)
     )
 
-    (set! theLayer (car (gimp-layer-new theImage
+    (set! theLayer (car (clay-layer-new theImage
                                         "layer 1"
                                         theWidth
                                         theHeight
@@ -74,67 +74,67 @@
                                         100
                                         LAYER-MODE-NORMAL)))
 
-    (gimp-image-insert-layer theImage theLayer 0 0)
+    (clay-image-insert-layer theImage theLayer 0 0)
 
 
-    (gimp-drawable-edit-clear theLayer)
+    (clay-drawable-edit-clear theLayer)
     (chris-color-edge theImage theLayer inColor inSize)
 
-    (gimp-layer-scale theLayer
+    (clay-layer-scale theLayer
                       (/ theWidth inGranu)
                       (/ theHeight inGranu)
                       TRUE)
 
-    (gimp-drawable-merge-new-filter theLayer "gegl:noise-spread" 0 LAYER-MODE-REPLACE 1.0 "amount-x" (/ inSize inGranu) "amount-y" (/ inSize inGranu) "seed" (msrg-rand))
+    (clay-drawable-merge-new-filter theLayer "gegl:noise-spread" 0 LAYER-MODE-REPLACE 1.0 "amount-x" (/ inSize inGranu) "amount-y" (/ inSize inGranu) "seed" (msrg-rand))
     (chris-color-edge theImage theLayer inColor 1)
-    (gimp-layer-scale theLayer theWidth theHeight TRUE)
+    (clay-layer-scale theLayer theWidth theHeight TRUE)
 
-    (gimp-image-select-item theImage CHANNEL-OP-REPLACE theLayer)
-    (gimp-selection-invert theImage)
-    (gimp-drawable-edit-clear theLayer)
-    (gimp-selection-invert theImage)
-    (gimp-drawable-edit-clear theLayer)
-    (gimp-context-set-background inColor)
-    (gimp-drawable-edit-fill theLayer FILL-BACKGROUND)
-    (gimp-selection-none theImage)
+    (clay-image-select-item theImage CHANNEL-OP-REPLACE theLayer)
+    (clay-selection-invert theImage)
+    (clay-drawable-edit-clear theLayer)
+    (clay-selection-invert theImage)
+    (clay-drawable-edit-clear theLayer)
+    (clay-context-set-background inColor)
+    (clay-drawable-edit-fill theLayer FILL-BACKGROUND)
+    (clay-selection-none theImage)
     (chris-color-edge theImage theLayer inColor 1)
 
     (if (= inBlur TRUE)
-        (gimp-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 inSize) "std-dev-y" (* 0.32 inSize) "filter" "auto")
+        (clay-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 inSize) "std-dev-y" (* 0.32 inSize) "filter" "auto")
     )
     (if (= inShadow TRUE)
         (begin
-          (gimp-image-insert-layer theImage
-                                   (car (gimp-layer-copy theLayer)) 0 -1)
-          (gimp-layer-scale theLayer
+          (clay-image-insert-layer theImage
+                                   (car (clay-layer-copy theLayer)) 0 -1)
+          (clay-layer-scale theLayer
                             (- theWidth inSize) (- theHeight inSize) TRUE)
-          (gimp-drawable-merge-new-filter theLayer "gimp:desaturate" 0 LAYER-MODE-REPLACE 1.0 "mode" DESATURATE-LIGHTNESS)
-          (gimp-drawable-merge-new-filter theLayer "gimp:brightness-contrast" 0 LAYER-MODE-REPLACE 1.0
+          (clay-drawable-merge-new-filter theLayer "clay:desaturate" 0 LAYER-MODE-REPLACE 1.0 "mode" DESATURATE-LIGHTNESS)
+          (clay-drawable-merge-new-filter theLayer "clay:brightness-contrast" 0 LAYER-MODE-REPLACE 1.0
                  "brightness" 0.5
                  "contrast"   0.5)
-          (gimp-drawable-merge-new-filter theLayer "gegl:invert-gamma" 0 LAYER-MODE-REPLACE 1.0)
-          (gimp-layer-resize theLayer
+          (clay-drawable-merge-new-filter theLayer "gegl:invert-gamma" 0 LAYER-MODE-REPLACE 1.0)
+          (clay-layer-resize theLayer
                              theWidth
                              theHeight
                              (/ inSize 2)
                              (/ inSize 2))
-          (gimp-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 (/ inSize 2)) "std-dev-y" (* 0.32 (/ inSize 2)) "filter" "auto")
-          (gimp-layer-set-opacity theLayer inShadWeight)
+          (clay-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 (/ inSize 2)) "std-dev-y" (* 0.32 (/ inSize 2)) "filter" "auto")
+          (clay-layer-set-opacity theLayer inShadWeight)
         )
     )
     (if (= inFlatten TRUE)
-        (gimp-image-flatten theImage)
+        (clay-image-flatten theImage)
     )
     (if (= inCopy TRUE)
-        (begin  (gimp-image-clean-all theImage)
-                (gimp-display-new theImage)
-                (gimp-image-undo-enable theImage)
+        (begin  (clay-image-clean-all theImage)
+                (clay-display-new theImage)
+                (clay-image-undo-enable theImage)
          )
-        (gimp-image-undo-group-end theImage)
+        (clay-image-undo-group-end theImage)
     )
-    (gimp-displays-flush)
+    (clay-displays-flush)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

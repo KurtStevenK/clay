@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 
 #include <config.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 /* #define ICO_DBG */
 
@@ -31,7 +31,7 @@
 #include "ico-dialog.h"
 #include "ico-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static void   ico_dialog_bpp_changed     (GtkWidget   *combo,
                                           GObject     *hbox);
@@ -46,9 +46,9 @@ static void   ico_dialog_ani_update_iart (GtkEntry    *entry,
 
 
 GtkWidget *
-ico_dialog_new (GimpImage           *image,
-                GimpProcedure       *procedure,
-                GimpProcedureConfig *config,
+ico_dialog_new (ClayImage           *image,
+                ClayProcedure       *procedure,
+                ClayProcedureConfig *config,
                 IcoSaveInfo         *info,
                 AniFileHeader       *ani_header,
                 AniSaveInfo         *ani_info)
@@ -61,7 +61,7 @@ ico_dialog_new (GimpImage           *image,
   GtkWidget     *viewport;
   GtkWidget     *warning;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
                                              config, image);
 
   /* We store an array that holds each icon's requested bit depth
@@ -95,7 +95,7 @@ ico_dialog_new (GimpImage           *image,
       GtkWidget     *hbox;
       GtkWidget     *entry;
 
-      frame = gimp_frame_new (_("Animated Cursor Settings"));
+      frame = clay_frame_new (_("Animated Cursor Settings"));
       gtk_box_pack_start (GTK_BOX (main_vbox), frame, FALSE, FALSE, 0);
       gtk_widget_set_visible (frame, TRUE);
 
@@ -107,7 +107,7 @@ ico_dialog_new (GimpImage           *image,
 
       /* Cursor Name */
       hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                                 _("_Cursor Name (Optional)"),
                                 0.0, 0.5,
                                 hbox, 1);
@@ -124,7 +124,7 @@ ico_dialog_new (GimpImage           *image,
 
       /* Author Name */
       hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 3,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 3,
                                 _("_Author Name (Optional)"),
                                 0.0, 0.5,
                                 hbox, 1);
@@ -141,14 +141,14 @@ ico_dialog_new (GimpImage           *image,
 
       /* Default delay spin */
       hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 5,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 5,
                                 _("_Delay between frames:"),
                                 0.0, 0.5,
                                 hbox, 1);
 
       adjustment = gtk_adjustment_new (ani_header->jif_rate, 1, G_MAXINT,
                                        1, 10, 0);
-      spin = gimp_spin_button_new (adjustment, 1, 0);
+      spin = clay_spin_button_new (adjustment, 1, 0);
       gtk_box_pack_start (GTK_BOX (hbox), spin, FALSE, FALSE, 0);
       gtk_widget_set_visible (spin, TRUE);
 
@@ -157,12 +157,12 @@ ico_dialog_new (GimpImage           *image,
       gtk_widget_set_visible (label, TRUE);
 
       g_signal_connect (adjustment, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &ani_header->jif_rate);
     }
 
   /* Cursor */
-  frame = gimp_frame_new (_("Icon Details"));
+  frame = clay_frame_new (_("Icon Details"));
   gtk_box_pack_start (GTK_BOX (main_vbox), frame, TRUE, TRUE, 4);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -182,8 +182,8 @@ ico_dialog_new (GimpImage           *image,
   gtk_container_add (GTK_CONTAINER (viewport), vbox);
   gtk_widget_set_visible (vbox, TRUE);
 
-  warning = g_object_new (GIMP_TYPE_HINT_BOX,
-                          "icon-name", GIMP_ICON_DIALOG_WARNING,
+  warning = g_object_new (CLAY_TYPE_HINT_BOX,
+                          "icon-name", CLAY_ICON_DIALOG_WARNING,
                           "hint",
                           _("Large icons and compression are not supported "
                             "by all programs. Older applications may not "
@@ -198,16 +198,16 @@ ico_dialog_new (GimpImage           *image,
 }
 
 static GtkWidget *
-ico_preview_new (GimpDrawable *layer)
+ico_preview_new (ClayDrawable *layer)
 {
   GtkWidget *image;
   GdkPixbuf *pixbuf;
-  gint       width  = gimp_drawable_get_width (layer);
-  gint       height = gimp_drawable_get_height (layer);
+  gint       width  = clay_drawable_get_width (layer);
+  gint       height = clay_drawable_get_height (layer);
 
-  pixbuf = gimp_drawable_get_thumbnail (layer,
+  pixbuf = clay_drawable_get_thumbnail (layer,
                                         MIN (width, 128), MIN (height, 128),
-                                        GIMP_PIXBUF_SMALL_CHECKS);
+                                        CLAY_PIXBUF_SMALL_CHECKS);
   image = gtk_image_new_from_pixbuf (pixbuf);
   g_object_unref (pixbuf);
 
@@ -218,7 +218,7 @@ ico_preview_new (GimpDrawable *layer)
    which then gets added to the dialog's main vbox. */
 static GtkWidget *
 ico_create_icon_hbox (GtkWidget    *icon_preview,
-                      GimpDrawable *layer,
+                      ClayDrawable *layer,
                       gint          layer_num,
                       IcoSaveInfo  *info)
 {
@@ -230,14 +230,14 @@ ico_create_icon_hbox (GtkWidget    *icon_preview,
   GtkWidget *combo;
   GtkWidget *checkbox;
   gchar     *frame_header;
-  gint       width  = gimp_drawable_get_width (layer);
-  gint       height = gimp_drawable_get_height (layer);
+  gint       width  = clay_drawable_get_width (layer);
+  gint       height = clay_drawable_get_height (layer);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
   frame_header = g_strdup_printf ("%dx%d", width, height);
 
-  frame = gimp_frame_new (frame_header);
+  frame = clay_frame_new (frame_header);
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
   g_free (frame_header);
@@ -265,13 +265,13 @@ ico_create_icon_hbox (GtkWidget    *icon_preview,
   gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  combo = gimp_int_combo_box_new (_("1 bpp, 1-bit alpha, 2-slot palette"),   1,
+  combo = clay_int_combo_box_new (_("1 bpp, 1-bit alpha, 2-slot palette"),   1,
                                   _("4 bpp, 1-bit alpha, 16-slot palette"),  4,
                                   _("8 bpp, 1-bit alpha, 256-slot palette"), 8,
                                   _("24 bpp, 1-bit alpha, no palette"),     24,
                                   _("32 bpp, 8-bit alpha, no palette"),     32,
                                   NULL);
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo),
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo),
                                  info->depths[layer_num]);
   gtk_widget_set_margin_top (GTK_WIDGET (combo), 6);
 
@@ -297,14 +297,14 @@ ico_create_icon_hbox (GtkWidget    *icon_preview,
 
 static GtkWidget *
 ico_dialog_get_layer_preview (GtkWidget    *dialog,
-                              GimpDrawable *layer)
+                              ClayDrawable *layer)
 {
   GtkWidget *preview;
   GtkWidget *icon_hbox;
   gchar      key[ICO_MAXBUF];
 
   g_snprintf (key, sizeof (key), "layer_%i_hbox",
-              gimp_item_get_id (GIMP_ITEM (layer)));
+              clay_item_get_id (CLAY_ITEM (layer)));
   icon_hbox = g_object_get_data (G_OBJECT (dialog), key);
 
   if (!icon_hbox)
@@ -326,39 +326,39 @@ ico_dialog_get_layer_preview (GtkWidget    *dialog,
 
 static void
 ico_dialog_update_icon_preview (GtkWidget    *dialog,
-                                GimpDrawable *layer,
+                                ClayDrawable *layer,
                                 gint          bpp)
 {
   GtkWidget  *preview = ico_dialog_get_layer_preview (dialog, layer);
   GdkPixbuf  *pixbuf;
   const Babl *format;
-  gint        w       = gimp_drawable_get_width (layer);
-  gint        h       = gimp_drawable_get_height (layer);
+  gint        w       = clay_drawable_get_width (layer);
+  gint        h       = clay_drawable_get_height (layer);
 
   if (! preview)
     return;
 
-  switch (gimp_drawable_type (layer))
+  switch (clay_drawable_type (layer))
     {
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       format = babl_format ("R'G'B' u8");
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       format = babl_format ("R'G'B'A u8");
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       format = babl_format ("Y' u8");
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       format = babl_format ("Y'A u8");
       break;
 
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
-      format = gimp_drawable_get_format (layer);
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
+      format = clay_drawable_get_format (layer);
       break;
 
     default:
@@ -369,28 +369,28 @@ ico_dialog_update_icon_preview (GtkWidget    *dialog,
     {
       GeglBuffer  *buffer;
       GeglBuffer  *tmp;
-      GimpImage   *image;
-      GimpImage   *tmp_image;
-      GimpLayer   *tmp_layer;
+      ClayImage   *image;
+      ClayImage   *tmp_image;
+      ClayLayer   *tmp_layer;
       guchar      *buf;
-      GimpPalette *palette;
+      ClayPalette *palette;
 
-      image = gimp_item_get_image (GIMP_ITEM (layer));
+      image = clay_item_get_image (CLAY_ITEM (layer));
 
-      tmp_image = gimp_image_new (w, h, gimp_image_get_base_type (image));
-      gimp_image_undo_disable (tmp_image);
+      tmp_image = clay_image_new (w, h, clay_image_get_base_type (image));
+      clay_image_undo_disable (tmp_image);
 
-      if (gimp_drawable_is_indexed (layer))
-        gimp_image_set_palette (tmp_image, gimp_image_get_palette (image));
+      if (clay_drawable_is_indexed (layer))
+        clay_image_set_palette (tmp_image, clay_image_get_palette (image));
 
-      tmp_layer = gimp_layer_new (tmp_image, "temporary", w, h,
-                                  gimp_drawable_type (layer),
+      tmp_layer = clay_layer_new (tmp_image, "temporary", w, h,
+                                  clay_drawable_type (layer),
                                   100,
-                                  gimp_image_get_default_new_layer_mode (tmp_image));
-      gimp_image_insert_layer (tmp_image, tmp_layer, NULL, 0);
+                                  clay_image_get_default_new_layer_mode (tmp_image));
+      clay_image_insert_layer (tmp_image, tmp_layer, NULL, 0);
 
-      buffer = gimp_drawable_get_buffer (layer);
-      tmp    = gimp_drawable_get_buffer (GIMP_DRAWABLE (tmp_layer));
+      buffer = clay_drawable_get_buffer (layer);
+      tmp    = clay_drawable_get_buffer (CLAY_DRAWABLE (tmp_layer));
 
       buf = g_malloc (w * h * 4);
 
@@ -403,109 +403,109 @@ ico_dialog_update_icon_preview (GtkWidget    *dialog,
       g_object_unref (tmp);
       g_object_unref (buffer);
 
-      if (gimp_drawable_is_indexed (layer))
-        gimp_image_convert_rgb (tmp_image);
+      if (clay_drawable_is_indexed (layer))
+        clay_image_convert_rgb (tmp_image);
 
-      gimp_image_convert_indexed (tmp_image,
-                                  GIMP_CONVERT_DITHER_FS,
-                                  GIMP_CONVERT_PALETTE_GENERATE,
+      clay_image_convert_indexed (tmp_image,
+                                  CLAY_CONVERT_DITHER_FS,
+                                  CLAY_CONVERT_PALETTE_GENERATE,
                                   1 << bpp, TRUE, FALSE, "dummy");
 
-      palette = gimp_image_get_palette (tmp_image);
+      palette = clay_image_get_palette (tmp_image);
 
-      if (gimp_palette_get_color_count (palette) == (1 << bpp) &&
+      if (clay_palette_get_color_count (palette) == (1 << bpp) &&
           ! ico_cmap_contains_black (palette))
         {
           /* Windows icons with color maps need the color black.
            * We need to eliminate one more color to make room for black.
            */
-          if (gimp_drawable_is_indexed (layer))
+          if (clay_drawable_is_indexed (layer))
             {
-              gimp_image_set_palette (tmp_image, gimp_image_get_palette (image));
+              clay_image_set_palette (tmp_image, clay_image_get_palette (image));
             }
-          else if (gimp_drawable_is_gray (layer))
+          else if (clay_drawable_is_gray (layer))
             {
-              gimp_image_convert_grayscale (tmp_image);
+              clay_image_convert_grayscale (tmp_image);
             }
           else
             {
-              gimp_image_convert_rgb (tmp_image);
+              clay_image_convert_rgb (tmp_image);
             }
 
-          tmp = gimp_drawable_get_buffer (GIMP_DRAWABLE (tmp_layer));
+          tmp = clay_drawable_get_buffer (CLAY_DRAWABLE (tmp_layer));
 
           gegl_buffer_set (tmp, GEGL_RECTANGLE (0, 0, w, h), 0,
                            format, buf, GEGL_AUTO_ROWSTRIDE);
 
           g_object_unref (tmp);
 
-          if (!gimp_drawable_is_rgb (layer))
-            gimp_image_convert_rgb (tmp_image);
+          if (!clay_drawable_is_rgb (layer))
+            clay_image_convert_rgb (tmp_image);
 
-          gimp_image_convert_indexed (tmp_image,
-                                      GIMP_CONVERT_DITHER_FS,
-                                      GIMP_CONVERT_PALETTE_GENERATE,
+          clay_image_convert_indexed (tmp_image,
+                                      CLAY_CONVERT_DITHER_FS,
+                                      CLAY_CONVERT_PALETTE_GENERATE,
                                       (1 << bpp) - 1, TRUE, FALSE, "dummy");
         }
 
       g_free (buf);
 
-      pixbuf = gimp_drawable_get_thumbnail (GIMP_DRAWABLE (tmp_layer),
+      pixbuf = clay_drawable_get_thumbnail (CLAY_DRAWABLE (tmp_layer),
                                             MIN (w, 128), MIN (h, 128),
-                                            GIMP_PIXBUF_SMALL_CHECKS);
+                                            CLAY_PIXBUF_SMALL_CHECKS);
 
-      gimp_image_delete (tmp_image);
+      clay_image_delete (tmp_image);
     }
   else if (bpp == 24)
     {
       GeglBuffer     *buffer;
       GeglBuffer     *tmp;
-      GimpImage      *image;
-      GimpImage      *tmp_image;
-      GimpLayer      *tmp_layer;
+      ClayImage      *image;
+      ClayImage      *tmp_image;
+      ClayLayer      *tmp_layer;
 
-      image = gimp_item_get_image (GIMP_ITEM (layer));
+      image = clay_item_get_image (CLAY_ITEM (layer));
 
-      tmp_image = gimp_image_new (w, h, gimp_image_get_base_type (image));
-      gimp_image_undo_disable (tmp_image);
+      tmp_image = clay_image_new (w, h, clay_image_get_base_type (image));
+      clay_image_undo_disable (tmp_image);
 
-      if (gimp_drawable_is_indexed (layer))
-        gimp_image_set_palette (tmp_image, gimp_image_get_palette (image));
+      if (clay_drawable_is_indexed (layer))
+        clay_image_set_palette (tmp_image, clay_image_get_palette (image));
 
-      tmp_layer = gimp_layer_new (tmp_image, "temporary", w, h,
-                                  gimp_drawable_type (layer),
+      tmp_layer = clay_layer_new (tmp_image, "temporary", w, h,
+                                  clay_drawable_type (layer),
                                   100,
-                                  gimp_image_get_default_new_layer_mode (tmp_image));
-      gimp_image_insert_layer (tmp_image, tmp_layer, NULL, 0);
+                                  clay_image_get_default_new_layer_mode (tmp_image));
+      clay_image_insert_layer (tmp_image, tmp_layer, NULL, 0);
 
-      buffer = gimp_drawable_get_buffer (layer);
-      tmp    = gimp_drawable_get_buffer (GIMP_DRAWABLE (tmp_layer));
+      buffer = clay_drawable_get_buffer (layer);
+      tmp    = clay_drawable_get_buffer (CLAY_DRAWABLE (tmp_layer));
 
       gegl_buffer_copy (buffer, NULL, GEGL_ABYSS_NONE, tmp, NULL);
 
       g_object_unref (tmp);
       g_object_unref (buffer);
 
-      if (gimp_drawable_is_indexed (layer))
-        gimp_image_convert_rgb (tmp_image);
+      if (clay_drawable_is_indexed (layer))
+        clay_image_convert_rgb (tmp_image);
 
-      gimp_drawable_merge_new_filter (GIMP_DRAWABLE (tmp_layer),
-                                      "gimp:threshold-alpha", NULL,
-                                      GIMP_LAYER_MODE_REPLACE, 1.0,
+      clay_drawable_merge_new_filter (CLAY_DRAWABLE (tmp_layer),
+                                      "clay:threshold-alpha", NULL,
+                                      CLAY_LAYER_MODE_REPLACE, 1.0,
                                       "value", ICO_ALPHA_THRESHOLD / 255.0,
                                       NULL);
 
-      pixbuf = gimp_drawable_get_thumbnail (GIMP_DRAWABLE (tmp_layer),
+      pixbuf = clay_drawable_get_thumbnail (CLAY_DRAWABLE (tmp_layer),
                                             MIN (w, 128), MIN (h, 128),
-                                            GIMP_PIXBUF_SMALL_CHECKS);
+                                            CLAY_PIXBUF_SMALL_CHECKS);
 
-      gimp_image_delete (tmp_image);
+      clay_image_delete (tmp_image);
     }
   else
     {
-      pixbuf = gimp_drawable_get_thumbnail (layer,
+      pixbuf = clay_drawable_get_thumbnail (layer,
                                             MIN (w, 128), MIN (h, 128),
-                                            GIMP_PIXBUF_SMALL_CHECKS);
+                                            CLAY_PIXBUF_SMALL_CHECKS);
     }
 
   gtk_image_set_from_pixbuf (GTK_IMAGE (preview), pixbuf);
@@ -514,7 +514,7 @@ ico_dialog_update_icon_preview (GtkWidget    *dialog,
 
 void
 ico_dialog_add_icon (GtkWidget    *dialog,
-                     GimpDrawable *layer,
+                     ClayDrawable *layer,
                      gint          layer_num)
 {
   GtkWidget   *vbox;
@@ -533,7 +533,7 @@ ico_dialog_add_icon (GtkWidget    *dialog,
 
   /* Let's make the hbox accessible through the layer ID */
   g_snprintf (key, sizeof (key), "layer_%i_hbox",
-              gimp_item_get_id (GIMP_ITEM (layer)));
+              clay_item_get_id (CLAY_ITEM (layer)));
   g_object_set_data (G_OBJECT (dialog), key, hbox);
 
   ico_dialog_update_icon_preview (dialog, layer, info->depths[layer_num]);
@@ -556,27 +556,27 @@ ico_dialog_add_icon (GtkWidget    *dialog,
       adj = (GtkAdjustment *)
              gtk_adjustment_new (info->hot_spot_x[layer_num], 0,
                                  G_MAXUINT16, 1, 10, 0);
-      spinbutton = gimp_spin_button_new (adj, 1.0, 0);
+      spinbutton = clay_spin_button_new (adj, 1.0, 0);
       gtk_spin_button_set_range (GTK_SPIN_BUTTON (spinbutton),
                                  0, G_MAXUINT16);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 0,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 0,
                                 _("Hot spot _X:"), 0.0, 0.5,
                                 spinbutton, 1);
       g_signal_connect (adj, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &info->hot_spot_x[layer_num]);
 
       adj = (GtkAdjustment *)
              gtk_adjustment_new (info->hot_spot_y[layer_num], 0,
                                  G_MAXUINT16, 1, 10, 0);
-      spinbutton = gimp_spin_button_new (adj, 1.0, 0);
+      spinbutton = clay_spin_button_new (adj, 1.0, 0);
       gtk_spin_button_set_range (GTK_SPIN_BUTTON (spinbutton),
                                  0, G_MAXUINT16);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                                 _("Hot spot _Y:"), 0.0, 0.5,
                                 spinbutton, 1);
       g_signal_connect (adj, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &info->hot_spot_y[layer_num]);
     }
 }
@@ -586,14 +586,14 @@ ico_dialog_bpp_changed (GtkWidget *combo,
                         GObject   *hbox)
 {
   GtkWidget    *dialog;
-  GimpDrawable *layer;
+  ClayDrawable *layer;
   gint          layer_num;
   gint          bpp;
   IcoSaveInfo  *info;
 
   dialog = gtk_widget_get_toplevel (combo);
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (combo), &bpp);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (combo), &bpp);
 
   info = g_object_get_data (G_OBJECT (dialog), "save_info");
   g_assert (info);
@@ -639,8 +639,8 @@ ico_dialog_check_compat (GtkWidget   *dialog,
 
   for (iter = info->layers, i = 0; iter; iter = iter->next, i++)
     {
-      if (gimp_drawable_get_width (iter->data) > 255  ||
-          gimp_drawable_get_height (iter->data) > 255 ||
+      if (clay_drawable_get_width (iter->data) > 255  ||
+          clay_drawable_get_height (iter->data) > 255 ||
           info->compress[i])
         {
           warn = TRUE;

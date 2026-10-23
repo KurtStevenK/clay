@@ -2,7 +2,7 @@
 
 (define (script-fu-guides-from-selection image drawables)
   (let* (
-        (boundaries (gimp-selection-bounds image))
+        (boundaries (clay-selection-bounds image))
         ;; non-empty INT32 TRUE if there is a selection
         (selection (car boundaries))
         (x1 (cadr boundaries))
@@ -14,17 +14,17 @@
     ;; need to check for a selection or we get guides right at edges of the image
     (if (= selection TRUE)
       (begin
-        (gimp-image-undo-group-start image)
+        (clay-image-undo-group-start image)
 
-        (gimp-image-add-vguide image x1)
-        (gimp-image-add-hguide image y1)
-        (gimp-image-add-vguide image x2)
-        (gimp-image-add-hguide image y2)
+        (clay-image-add-vguide image x1)
+        (clay-image-add-hguide image y1)
+        (clay-image-add-vguide image x2)
+        (clay-image-add-hguide image y2)
 
-        (gimp-image-undo-group-end image)
-        (gimp-displays-flush)
+        (clay-image-undo-group-end image)
+        (clay-displays-flush)
       )
-      (gimp-message _"No selection to base guides on.\nMake a selection first!")
+      (clay-message _"No selection to base guides on.\nMake a selection first!")
     )
   )
 )

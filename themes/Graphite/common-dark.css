@@ -1,0 +1,72 @@
+/* The specific light theme interface styles for Clay 3.0 */
+/* Theme specific colors are defined in clay-dark.css */
+
+/* Hint for debugging themes:
+ * first enable the GTK inspector with
+   gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
+ * then (after restarting Clay) call it up with ctrl+shift+i
+ * or from Clay's UI: File > Debug > Start GtkInspector
+ */
+
+@import url("common.css");
+
+/*
+ * Paned separator handles
+ */
+paned.horizontal > separator {
+  background-image: url("ui/separator-handle-v-dark.svg");
+}
+
+paned.vertical > separator {
+  background-image: url("ui/separator-handle-h-dark.svg");
+}
+
+/* Lane chrome: no inset highlight on buttons */
+button:not(.flat) {
+  box-shadow: none;
+}
+button:not(.flat):hover {
+  box-shadow: none;
+}
+
+/* Define ClaySpinScale slider colors */
+ClaySpinScale entry {
+  background-color: @widget-bg-color;
+}
+
+ClaySpinScale entry progress {
+  background-color: @hover-color;
+}
+
+/* progressbar color */
+progressbar trough progress {
+  background-color: @hover-color;
+}
+
+buttonbox button.radio:not(:checked) {
+  background-color: @stronger-border-color;
+}
+
+/* Lane palette: the six tag colours, lightened for dark backgrounds */
+@define-color lane-rust    rgb(224,123,74);
+@define-color lane-maroon  rgb(217,139,163);
+@define-color lane-mustard rgb(230,195,92);
+@define-color lane-purple  rgb(167,139,219);
+@define-color lane-blue    rgb(127,168,230);
+@define-color lane-green   rgb(111,191,138);
+
+/* Icons carry the six colours: every row of tool and dock buttons cycles through them */
+image, button image, .image-button image, toolbutton button image, menuitem image,
+notebook header tabs tab image, treeview.view image {
+  color: @lane-blue;
+}
+toolbutton:nth-child(6n+1) image, button:nth-child(6n+1) image, notebook header tabs tab:nth-child(6n+1) image { color: @lane-rust; }
+toolbutton:nth-child(6n+2) image, button:nth-child(6n+2) image, notebook header tabs tab:nth-child(6n+2) image { color: @lane-mustard; }
+toolbutton:nth-child(6n+3) image, button:nth-child(6n+3) image, notebook header tabs tab:nth-child(6n+3) image { color: @lane-green; }
+toolbutton:nth-child(6n+4) image, button:nth-child(6n+4) image, notebook header tabs tab:nth-child(6n+4) image { color: @lane-blue; }
+toolbutton:nth-child(6n+5) image, button:nth-child(6n+5) image, notebook header tabs tab:nth-child(6n+5) image { color: @lane-purple; }
+toolbutton:nth-child(6n+6) image, button:nth-child(6n+6) image, notebook header tabs tab:nth-child(6n+6) image { color: @lane-maroon; }
+
+button:disabled image, menuitem:disabled image { color: @disabled-button-color; }
+button.suggested-action image, button.default image,
+treeview.view:selected image, row:selected image { color: @on-accent-color; }

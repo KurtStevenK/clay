@@ -23,28 +23,28 @@
 #include "tools/tools-enums.h"
 
 
-typedef struct _GimpTool                     GimpTool;
-typedef struct _GimpToolControl              GimpToolControl;
+typedef struct _ClayTool                     ClayTool;
+typedef struct _ClayToolControl              ClayToolControl;
 
-typedef struct _GimpBrushTool                GimpBrushTool;
-typedef struct _GimpColorTool                GimpColorTool;
-typedef struct _GimpDrawTool                 GimpDrawTool;
-typedef struct _GimpFilterTool               GimpFilterTool;
-typedef struct _GimpGenericTransformTool     GimpGenericTransformTool;
-typedef struct _GimpPaintTool                GimpPaintTool;
-typedef struct _GimpTransformGridTool        GimpTransformGridTool;
-typedef struct _GimpTransformTool            GimpTransformTool;
+typedef struct _ClayBrushTool                ClayBrushTool;
+typedef struct _ClayColorTool                ClayColorTool;
+typedef struct _ClayDrawTool                 ClayDrawTool;
+typedef struct _ClayFilterTool               ClayFilterTool;
+typedef struct _ClayGenericTransformTool     ClayGenericTransformTool;
+typedef struct _ClayPaintTool                ClayPaintTool;
+typedef struct _ClayTransformGridTool        ClayTransformGridTool;
+typedef struct _ClayTransformTool            ClayTransformTool;
 
-typedef struct _GimpColorOptions             GimpColorOptions;
-typedef struct _GimpFilterOptions            GimpFilterOptions;
+typedef struct _ClayColorOptions             ClayColorOptions;
+typedef struct _ClayFilterOptions            ClayFilterOptions;
 
 
 /*  functions  */
 
-typedef void (* GimpToolRegisterCallback) (GType                     tool_type,
+typedef void (* ClayToolRegisterCallback) (GType                     tool_type,
                                            GType                     tool_option_type,
-                                           GimpToolOptionsGUIFunc    options_gui_func,
-                                           GimpContextPropMask       context_props,
+                                           ClayToolOptionsGUIFunc    options_gui_func,
+                                           ClayContextPropMask       context_props,
                                            const gchar              *identifier,
                                            const gchar              *label,
                                            const gchar              *tooltip,
@@ -55,5 +55,5 @@ typedef void (* GimpToolRegisterCallback) (GType                     tool_type,
                                            const gchar              *icon_name,
                                            gpointer                  register_data);
 
-typedef void (* GimpToolRegisterFunc)     (GimpToolRegisterCallback  callback,
+typedef void (* ClayToolRegisterFunc)     (ClayToolRegisterCallback  callback,
                                            gpointer                  register_data);

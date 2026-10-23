@@ -1,5 +1,5 @@
 /*
- * GIMP plug-in for browsing available GEGL filters.
+ * Clay plug-in for browsing available GEGL filters.
  *
  * Copyright (C) 2025 Ondřej Míchal <harrymichal@seznam.cz>
  *

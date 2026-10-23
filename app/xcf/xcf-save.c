@@ -24,62 +24,62 @@
 #include <gegl.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
 
-#include "config/gimpgeglconfig.h"
+#include "config/claygeglconfig.h"
 
 #include "core/core-types.h"
 
-#include "gegl/gimp-babl-compat.h"
-#include "gegl/gimp-gegl-tile-compat.h"
+#include "gegl/clay-babl-compat.h"
+#include "gegl/clay-gegl-tile-compat.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpchannel.h"
-#include "core/gimpdashpattern.h"
-#include "core/gimpdata.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpdrawable-filters.h"
-#include "core/gimpdrawablefilter.h"
-#include "core/gimpfilloptions.h"
-#include "core/gimpgradient.h"
-#include "core/gimpgrid.h"
-#include "core/gimpguide.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-colormap.h"
-#include "core/gimpimage-grid.h"
-#include "core/gimpimage-guides.h"
-#include "core/gimpimage-metadata.h"
-#include "core/gimpimage-private.h"
-#include "core/gimpimage-sample-points.h"
-#include "core/gimpimage-symmetry.h"
-#include "core/gimpitemlist.h"
-#include "core/gimplayer.h"
-#include "core/gimplayermask.h"
-#include "core/gimplink.h"
-#include "core/gimplinklayer.h"
-#include "core/gimplist.h"
-#include "core/gimpparasitelist.h"
-#include "core/gimpprogress.h"
-#include "core/gimprasterizable.h"
-#include "core/gimpsamplepoint.h"
-#include "core/gimpstrokeoptions.h"
-#include "core/gimpsymmetry.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claychannel.h"
+#include "core/claydashpattern.h"
+#include "core/claydata.h"
+#include "core/claydrawable.h"
+#include "core/claydrawable-filters.h"
+#include "core/claydrawablefilter.h"
+#include "core/clayfilloptions.h"
+#include "core/claygradient.h"
+#include "core/claygrid.h"
+#include "core/clayguide.h"
+#include "core/clayimage.h"
+#include "core/clayimage-colormap.h"
+#include "core/clayimage-grid.h"
+#include "core/clayimage-guides.h"
+#include "core/clayimage-metadata.h"
+#include "core/clayimage-private.h"
+#include "core/clayimage-sample-points.h"
+#include "core/clayimage-symmetry.h"
+#include "core/clayitemlist.h"
+#include "core/claylayer.h"
+#include "core/claylayermask.h"
+#include "core/claylink.h"
+#include "core/claylinklayer.h"
+#include "core/claylist.h"
+#include "core/clayparasitelist.h"
+#include "core/clayprogress.h"
+#include "core/clayrasterizable.h"
+#include "core/claysamplepoint.h"
+#include "core/claystrokeoptions.h"
+#include "core/claysymmetry.h"
 
-#include "operations/layer-modes/gimp-layer-modes.h"
+#include "operations/layer-modes/clay-layer-modes.h"
 
-#include "path/gimpanchor.h"
-#include "path/gimpbezierstroke.h"
-#include "path/gimppath.h"
-#include "path/gimpstroke.h"
-#include "path/gimppath-compat.h"
-#include "path/gimpvectorlayer.h"
-#include "path/gimpvectorlayeroptions.h"
+#include "path/clayanchor.h"
+#include "path/claybezierstroke.h"
+#include "path/claypath.h"
+#include "path/claystroke.h"
+#include "path/claypath-compat.h"
+#include "path/clayvectorlayer.h"
+#include "path/clayvectorlayeroptions.h"
 
-#include "text/gimptextlayer.h"
-#include "text/gimptextlayer-xcf.h"
+#include "text/claytextlayer.h"
+#include "text/claytextlayer-xcf.h"
 
 #include "xcf-private.h"
 #include "xcf-read.h"
@@ -87,7 +87,7 @@
 #include "xcf-seek.h"
 #include "xcf-write.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 typedef void (* CompressTileFunc) (GeglRectangle  *tile_rect,
                                    guchar         *tile_data,
@@ -118,63 +118,63 @@ typedef struct
 } XcfJobData;
 
 static gboolean xcf_save_image_props   (XcfInfo           *info,
-                                        GimpImage         *image,
+                                        ClayImage         *image,
                                         GError           **error);
 static gboolean xcf_save_layer_props   (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpLayer         *layer,
+                                        ClayImage         *image,
+                                        ClayLayer         *layer,
                                         GError           **error);
 static gboolean xcf_save_channel_props (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpChannel       *channel,
+                                        ClayImage         *image,
+                                        ClayChannel       *channel,
                                         GError           **error);
 static gboolean xcf_save_effect_props  (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpFilter        *filter,
+                                        ClayImage         *image,
+                                        ClayFilter        *filter,
                                         GError           **error);
 static gboolean xcf_save_path_props    (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpPath          *path,
+                                        ClayImage         *image,
+                                        ClayPath          *path,
                                         GError           **error);
 static gboolean xcf_save_prop          (XcfInfo           *info,
-                                        GimpImage         *image,
+                                        ClayImage         *image,
                                         PropType           prop_type,
                                         GError           **error,
                                         ...);
 static gboolean xcf_save_layer         (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpLayer         *layer,
+                                        ClayImage         *image,
+                                        ClayLayer         *layer,
                                         GError           **error);
 static gboolean xcf_save_channel       (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpChannel       *channel,
+                                        ClayImage         *image,
+                                        ClayChannel       *channel,
                                         GError           **error);
 static gboolean xcf_save_effect        (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpFilter        *filter,
+                                        ClayImage         *image,
+                                        ClayFilter        *filter,
                                         GError           **error);
 static gboolean xcf_save_color         (XcfInfo           *info,
                                         GeglColor         *color,
                                         GError           **error);
 static gboolean xcf_save_gradient      (XcfInfo           *info,
-                                        GimpGradient      *gradient,
+                                        ClayGradient      *gradient,
                                         GError           **error);
 static gboolean xcf_save_fill_options  (XcfInfo           *info,
-                                        GimpFillOptions   *fill_options,
+                                        ClayFillOptions   *fill_options,
                                         GError           **error);
 static gboolean xcf_save_stroke_options (XcfInfo          *info,
-                                        GimpStrokeOptions *stroke_options,
+                                        ClayStrokeOptions *stroke_options,
                                         GError           **error);
 static gboolean xcf_save_path          (XcfInfo           *info,
-                                        GimpImage         *image,
-                                        GimpPath          *path,
+                                        ClayImage         *image,
+                                        ClayPath          *path,
                                         GError           **error);
 static gboolean xcf_save_buffer        (XcfInfo           *info,
-                                        GimpImage         *image,
+                                        ClayImage         *image,
                                         GeglBuffer        *buffer,
                                         GError           **error);
 static gboolean xcf_save_level         (XcfInfo           *info,
-                                        GimpImage         *image,
+                                        ClayImage         *image,
                                         GeglBuffer        *buffer,
                                         GError           **error);
 static gboolean xcf_save_tile          (XcfInfo           *info,
@@ -201,16 +201,16 @@ static void     xcf_save_tile_zlib     (GeglRectangle     *tile_rect,
                                         gint               zlib_data_max_len,
                                         gint              *lenptr);
 static gboolean xcf_save_parasite      (XcfInfo           *info,
-                                        GimpParasite      *parasite,
+                                        ClayParasite      *parasite,
                                         GError           **error);
 static gboolean xcf_save_parasite_list (XcfInfo           *info,
-                                        GimpParasiteList  *parasite,
+                                        ClayParasiteList  *parasite,
                                         GError           **error);
 static gboolean xcf_save_old_paths     (XcfInfo           *info,
-                                        GimpImage         *image,
+                                        ClayImage         *image,
                                         GError           **error);
 static gboolean xcf_save_old_vectors   (XcfInfo           *info,
-                                        GimpImage         *image,
+                                        ClayImage         *image,
                                         GError           **error);
 
 
@@ -302,14 +302,14 @@ static gboolean xcf_save_old_vectors   (XcfInfo           *info,
   {                                             \
     progress++;                                 \
     if (info->progress)                         \
-      gimp_progress_set_value (info->progress,  \
+      clay_progress_set_value (info->progress,  \
                                (gdouble) progress / (gdouble) max_progress); \
   } G_STMT_END
 
 
 gboolean
 xcf_save_image (XcfInfo    *info,
-                GimpImage  *image,
+                ClayImage  *image,
                 GError    **error)
 {
   GList   *all_layers;
@@ -346,18 +346,18 @@ xcf_save_image (XcfInfo    *info,
   xcf_write_int8_check_error (info, (guint8 *) version_tag, 14, ;);
 
   /* write out the width, height and image type information for the image */
-  value = gimp_image_get_width (image);
+  value = clay_image_get_width (image);
   xcf_write_int32_check_error (info, (guint32 *) &value, 1, ;);
 
-  value = gimp_image_get_height (image);
+  value = clay_image_get_height (image);
   xcf_write_int32_check_error (info, (guint32 *) &value, 1, ;);
 
-  value = gimp_image_get_base_type (image);
+  value = clay_image_get_base_type (image);
   xcf_write_int32_check_error (info, &value, 1, ;);
 
   if (info->file_version >= 4)
     {
-      value = gimp_image_get_precision (image);
+      value = clay_image_get_precision (image);
       xcf_write_int32_check_error (info, &value, 1, ;);
     }
 
@@ -365,13 +365,13 @@ xcf_save_image (XcfInfo    *info,
     write_paths = TRUE;
 
   /* determine the number of layers and channels in the image */
-  all_layers   = gimp_image_get_layer_list (image);
-  all_channels = gimp_image_get_channel_list (image);
+  all_layers   = clay_image_get_layer_list (image);
+  all_channels = clay_image_get_channel_list (image);
 
   /* check and see if we have to save out the selection */
-  if (! gimp_channel_is_empty (gimp_image_get_mask (image)))
+  if (! clay_channel_is_empty (clay_image_get_mask (image)))
     {
-      all_channels = g_list_append (all_channels, gimp_image_get_mask (image));
+      all_channels = g_list_append (all_channels, clay_image_get_mask (image));
     }
 
   n_layers   = (guint) g_list_length (all_layers);
@@ -379,7 +379,7 @@ xcf_save_image (XcfInfo    *info,
 
   if (write_paths)
     {
-      all_paths = gimp_image_get_path_list (image);
+      all_paths = clay_image_get_path_list (image);
       n_paths   = (guint) g_list_length (all_paths);
     }
 
@@ -403,7 +403,7 @@ xcf_save_image (XcfInfo    *info,
 
   for (list = all_layers; list; list = g_list_next (list))
     {
-      GimpLayer *layer = list->data;
+      ClayLayer *layer = list->data;
 
       /* seek back to the next slot in the offset table and write the
        * offset of the layer
@@ -431,7 +431,7 @@ xcf_save_image (XcfInfo    *info,
 
   for (list = all_channels; list; list = g_list_next (list))
     {
-      GimpChannel *channel = list->data;
+      ClayChannel *channel = list->data;
 
       /* seek back to the next slot in the offset table and write the
        * offset of the channel
@@ -461,7 +461,7 @@ xcf_save_image (XcfInfo    *info,
 
       for (list = all_paths; list; list = g_list_next (list))
         {
-          GimpPath *path = list->data;
+          ClayPath *path = list->data;
 
           /* seek back to the next slot in the offset table and write the
            * offset of the channel
@@ -496,25 +496,25 @@ xcf_save_image (XcfInfo    *info,
 
 static gboolean
 xcf_save_image_props (XcfInfo    *info,
-                      GimpImage  *image,
+                      ClayImage  *image,
                       GError    **error)
 {
-  GimpImagePrivate *private       = GIMP_IMAGE_GET_PRIVATE (image);
-  GimpParasite     *grid_parasite = NULL;
-  GimpParasite     *meta_parasite = NULL;
+  ClayImagePrivate *private       = CLAY_IMAGE_GET_PRIVATE (image);
+  ClayParasite     *grid_parasite = NULL;
+  ClayParasite     *meta_parasite = NULL;
   GList            *symmetry_parasites = NULL;
   GList            *iter;
-  GimpUnit         *unit          = gimp_image_get_unit (image);
+  ClayUnit         *unit          = clay_image_get_unit (image);
   gdouble           xres;
   gdouble           yres;
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
   /* check and see if we should save the colormap property */
-  if (gimp_image_get_colormap_palette (image))
+  if (clay_image_get_colormap_palette (image))
     {
       gint    n_colors;
-      guint8 *colormap = _gimp_image_get_colormap (image, &n_colors);
+      guint8 *colormap = _clay_image_get_colormap (image, &n_colors);
       xcf_check_error (xcf_save_prop (info, image, PROP_COLORMAP, error,
                                       n_colors, colormap), ;);
       g_free (colormap);
@@ -524,89 +524,89 @@ xcf_save_image_props (XcfInfo    *info,
     xcf_check_error (xcf_save_prop (info, image, PROP_COMPRESSION, error,
                                     info->compression), ;);
 
-  if (gimp_image_get_guides (image))
+  if (clay_image_get_guides (image))
     xcf_check_error (xcf_save_prop (info, image, PROP_GUIDES, error,
-                                    gimp_image_get_guides (image)), ;);
+                                    clay_image_get_guides (image)), ;);
 
-  if (gimp_image_get_sample_points (image))
+  if (clay_image_get_sample_points (image))
     {
       /* save the new property before the old one, so loading can skip
        * the latter
        */
       xcf_check_error (xcf_save_prop (info, image, PROP_SAMPLE_POINTS, error,
-                                      gimp_image_get_sample_points (image)), ;);
+                                      clay_image_get_sample_points (image)), ;);
       xcf_check_error (xcf_save_prop (info, image, PROP_OLD_SAMPLE_POINTS, error,
-                                      gimp_image_get_sample_points (image)), ;);
+                                      clay_image_get_sample_points (image)), ;);
     }
 
   xcf_check_error (xcf_save_prop (info, image, PROP_RESOLUTION, error,
                                   xres, yres), ;);
 
   xcf_check_error (xcf_save_prop (info, image, PROP_TATTOO, error,
-                                  gimp_image_get_tattoo_state (image)), ;);
+                                  clay_image_get_tattoo_state (image)), ;);
 
-  if (gimp_unit_is_built_in (unit))
+  if (clay_unit_is_built_in (unit))
     xcf_check_error (xcf_save_prop (info, image, PROP_UNIT, error, unit), ;);
 
-  if (gimp_container_get_n_children (gimp_image_get_paths (image)) > 0 &&
+  if (clay_container_get_n_children (clay_image_get_paths (image)) > 0 &&
       info->file_version < 18)
     {
-      if (gimp_path_compat_is_compatible (image))
+      if (clay_path_compat_is_compatible (image))
         xcf_check_error (xcf_save_prop (info, image, PROP_PATHS, error), ;);
       else
         xcf_check_error (xcf_save_prop (info, image, PROP_VECTORS, error), ;);
     }
 
-  if (! gimp_unit_is_built_in (unit))
+  if (! clay_unit_is_built_in (unit))
     xcf_check_error (xcf_save_prop (info, image, PROP_USER_UNIT, error, unit), ;);
 
-  if (gimp_image_get_grid (image))
+  if (clay_image_get_grid (image))
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
-      /* Set the XCF version so that the grid colors are written as GimpRGB
+      /* Set the XCF version so that the grid colors are written as ClayRGB
        * values when saving in legacy (2.10 and below) XCF formats */
-      gimp_config_set_xcf_version (GIMP_CONFIG (grid), info->file_version);
-      grid_parasite = gimp_grid_to_parasite (grid);
-      gimp_parasite_list_add (private->parasites, grid_parasite);
+      clay_config_set_xcf_version (CLAY_CONFIG (grid), info->file_version);
+      grid_parasite = clay_grid_to_parasite (grid);
+      clay_parasite_list_add (private->parasites, grid_parasite);
     }
 
-  if (gimp_image_get_metadata (image))
+  if (clay_image_get_metadata (image))
     {
-      GimpMetadata *metadata = gimp_image_get_metadata (image);
+      ClayMetadata *metadata = clay_image_get_metadata (image);
       gchar        *meta_string;
 
-      meta_string = gimp_metadata_serialize (metadata);
+      meta_string = clay_metadata_serialize (metadata);
 
       if (meta_string)
         {
-          meta_parasite = gimp_parasite_new ("gimp-image-metadata",
-                                             GIMP_PARASITE_PERSISTENT,
+          meta_parasite = clay_parasite_new ("clay-image-metadata",
+                                             CLAY_PARASITE_PERSISTENT,
                                              strlen (meta_string) + 1,
                                              meta_string);
-          gimp_parasite_list_add (private->parasites, meta_parasite);
+          clay_parasite_list_add (private->parasites, meta_parasite);
           g_free (meta_string);
         }
     }
 
-  if (g_list_length (gimp_image_symmetry_get (image)))
+  if (g_list_length (clay_image_symmetry_get (image)))
     {
-      GimpParasite *parasite  = NULL;
-      GimpSymmetry *symmetry;
+      ClayParasite *parasite  = NULL;
+      ClaySymmetry *symmetry;
 
-      for (iter = gimp_image_symmetry_get (image); iter; iter = g_list_next (iter))
+      for (iter = clay_image_symmetry_get (image); iter; iter = g_list_next (iter))
         {
-          symmetry = GIMP_SYMMETRY (iter->data);
-          if (G_TYPE_FROM_INSTANCE (symmetry) == GIMP_TYPE_SYMMETRY)
+          symmetry = CLAY_SYMMETRY (iter->data);
+          if (G_TYPE_FROM_INSTANCE (symmetry) == CLAY_TYPE_SYMMETRY)
             /* Do not save the identity symmetry. */
             continue;
-          parasite = gimp_symmetry_to_parasite (GIMP_SYMMETRY (iter->data));
-          gimp_parasite_list_add (private->parasites, parasite);
+          parasite = clay_symmetry_to_parasite (CLAY_SYMMETRY (iter->data));
+          clay_parasite_list_add (private->parasites, parasite);
           symmetry_parasites = g_list_prepend (symmetry_parasites, parasite);
         }
     }
 
-  if (gimp_parasite_list_length (private->parasites) > 0)
+  if (clay_parasite_list_length (private->parasites) > 0)
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_PARASITES, error,
                                       private->parasites), ;);
@@ -614,30 +614,30 @@ xcf_save_image_props (XcfInfo    *info,
 
   if (grid_parasite)
     {
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (grid_parasite));
-      gimp_parasite_free (grid_parasite);
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (grid_parasite));
+      clay_parasite_free (grid_parasite);
     }
 
   if (meta_parasite)
     {
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (meta_parasite));
-      gimp_parasite_free (meta_parasite);
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (meta_parasite));
+      clay_parasite_free (meta_parasite);
     }
 
   for (iter = symmetry_parasites; iter; iter = g_list_next (iter))
     {
-      GimpParasite *parasite = iter->data;
+      ClayParasite *parasite = iter->data;
 
-      gimp_parasite_list_remove (private->parasites,
-                                 gimp_parasite_get_name (parasite));
+      clay_parasite_list_remove (private->parasites,
+                                 clay_parasite_get_name (parasite));
     }
   g_list_free_full (symmetry_parasites,
-                    (GDestroyNotify) gimp_parasite_free);
+                    (GDestroyNotify) clay_parasite_free);
 
-  info->layer_sets = gimp_image_get_stored_item_sets (image, GIMP_TYPE_LAYER);
-  info->channel_sets = gimp_image_get_stored_item_sets (image, GIMP_TYPE_CHANNEL);
+  info->layer_sets = clay_image_get_stored_item_sets (image, CLAY_TYPE_LAYER);
+  info->channel_sets = clay_image_get_stored_item_sets (image, CLAY_TYPE_CHANNEL);
 
   for (iter = info->layer_sets; iter; iter = iter->next)
     xcf_check_error (xcf_save_prop (info, image, PROP_ITEM_SET, error, iter->data), ;);
@@ -651,63 +651,63 @@ xcf_save_image_props (XcfInfo    *info,
 
 static gboolean
 xcf_save_layer_props (XcfInfo    *info,
-                      GimpImage  *image,
-                      GimpLayer  *layer,
+                      ClayImage  *image,
+                      ClayLayer  *layer,
                       GError    **error)
 {
-  GimpParasiteList *parasites;
+  ClayParasiteList *parasites;
   GList            *iter;
   gint              offset_x;
   gint              offset_y;
 
-  if (gimp_viewable_get_children (GIMP_VIEWABLE (layer)))
+  if (clay_viewable_get_children (CLAY_VIEWABLE (layer)))
     xcf_check_error (xcf_save_prop (info, image, PROP_GROUP_ITEM, error), ;);
 
-  if (gimp_viewable_get_parent (GIMP_VIEWABLE (layer)))
+  if (clay_viewable_get_parent (CLAY_VIEWABLE (layer)))
     {
       GList *path;
 
-      path = gimp_item_get_path (GIMP_ITEM (layer));
+      path = clay_item_get_path (CLAY_ITEM (layer));
       xcf_check_error (xcf_save_prop (info, image, PROP_ITEM_PATH, error,
                                       path), ;);
       g_list_free (path);
     }
 
-  if (g_list_find (gimp_image_get_selected_layers (image), layer))
+  if (g_list_find (clay_image_get_selected_layers (image), layer))
     xcf_check_error (xcf_save_prop (info, image, PROP_ACTIVE_LAYER, error), ;);
 
-  if (layer == gimp_image_get_floating_selection (image))
+  if (layer == clay_image_get_floating_selection (image))
     {
-      info->floating_sel_drawable = gimp_layer_get_floating_sel_drawable (layer);
+      info->floating_sel_drawable = clay_layer_get_floating_sel_drawable (layer);
       xcf_check_error (xcf_save_prop (info, image, PROP_FLOATING_SELECTION,
                                       error), ;);
     }
 
   xcf_check_error (xcf_save_prop (info, image, PROP_OPACITY, error,
-                                  gimp_layer_get_opacity (layer)), ;);
+                                  clay_layer_get_opacity (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_FLOAT_OPACITY, error,
-                                  gimp_layer_get_opacity (layer)), ;);
+                                  clay_layer_get_opacity (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_VISIBLE, error,
-                                  gimp_item_get_visible (GIMP_ITEM (layer))), ;);
+                                  clay_item_get_visible (CLAY_ITEM (layer))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COLOR_TAG, error,
-                                  gimp_item_get_color_tag (GIMP_ITEM (layer))), ;);
+                                  clay_item_get_color_tag (CLAY_ITEM (layer))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_CONTENT, error,
-                                  gimp_item_get_lock_content (GIMP_ITEM (layer))), ;);
+                                  clay_item_get_lock_content (CLAY_ITEM (layer))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_ALPHA, error,
-                                  gimp_layer_get_lock_alpha (layer)), ;);
+                                  clay_layer_get_lock_alpha (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_POSITION, error,
-                                  gimp_item_get_lock_position (GIMP_ITEM (layer))), ;);
+                                  clay_item_get_lock_position (CLAY_ITEM (layer))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_VISIBILITY, error,
-                                  gimp_item_get_lock_visibility (GIMP_ITEM (layer))), ;);
+                                  clay_item_get_lock_visibility (CLAY_ITEM (layer))), ;);
 
-  if (gimp_layer_get_mask (layer))
+  if (clay_layer_get_mask (layer))
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_APPLY_MASK, error,
-                                      gimp_layer_get_apply_mask (layer)), ;);
+                                      clay_layer_get_apply_mask (layer)), ;);
       xcf_check_error (xcf_save_prop (info, image, PROP_EDIT_MASK, error,
-                                      gimp_layer_get_edit_mask (layer)), ;);
+                                      clay_layer_get_edit_mask (layer)), ;);
       xcf_check_error (xcf_save_prop (info, image, PROP_SHOW_MASK, error,
-                                      gimp_layer_get_show_mask (layer)), ;);
+                                      clay_layer_get_show_mask (layer)), ;);
     }
   else
     {
@@ -719,52 +719,52 @@ xcf_save_layer_props (XcfInfo    *info,
                                       FALSE), ;);
     }
 
-  gimp_item_get_offset (GIMP_ITEM (layer), &offset_x, &offset_y);
+  clay_item_get_offset (CLAY_ITEM (layer), &offset_x, &offset_y);
 
   xcf_check_error (xcf_save_prop (info, image, PROP_OFFSETS, error,
                                   offset_x, offset_y), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_MODE, error,
-                                  gimp_layer_get_mode (layer)), ;);
+                                  clay_layer_get_mode (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_BLEND_SPACE, error,
-                                  gimp_layer_get_mode (layer),
-                                  gimp_layer_get_blend_space (layer)), ;);
+                                  clay_layer_get_mode (layer),
+                                  clay_layer_get_blend_space (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COMPOSITE_SPACE, error,
-                                  gimp_layer_get_mode (layer),
-                                  gimp_layer_get_composite_space (layer)), ;);
+                                  clay_layer_get_mode (layer),
+                                  clay_layer_get_composite_space (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COMPOSITE_MODE, error,
-                                  gimp_layer_get_mode (layer),
-                                  gimp_layer_get_composite_mode (layer)), ;);
+                                  clay_layer_get_mode (layer),
+                                  clay_layer_get_composite_mode (layer)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_TATTOO, error,
-                                  gimp_item_get_tattoo (GIMP_ITEM (layer))), ;);
+                                  clay_item_get_tattoo (CLAY_ITEM (layer))), ;);
 
-  if (GIMP_IS_TEXT_LAYER (layer) && GIMP_TEXT_LAYER (layer)->text)
+  if (CLAY_IS_TEXT_LAYER (layer) && CLAY_TEXT_LAYER (layer)->text)
     {
-      GimpTextLayer *text_layer = GIMP_TEXT_LAYER (layer);
-      guint32        flags      = gimp_text_layer_get_xcf_flags (text_layer);
+      ClayTextLayer *text_layer = CLAY_TEXT_LAYER (layer);
+      guint32        flags      = clay_text_layer_get_xcf_flags (text_layer);
 
-      gimp_text_layer_xcf_save_prepare (text_layer);
+      clay_text_layer_xcf_save_prepare (text_layer);
 
       if (flags)
         xcf_check_error (xcf_save_prop (info,
                                         image, PROP_TEXT_LAYER_FLAGS, error,
                                         flags), ;);
     }
-  else if (GIMP_IS_VECTOR_LAYER (layer))
+  else if (CLAY_IS_VECTOR_LAYER (layer))
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_VECTOR_LAYER, error, layer), ;);
     }
-  else if (GIMP_IS_LINK_LAYER (layer))
+  else if (CLAY_IS_LINK_LAYER (layer))
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_LINK_LAYER, error, layer), ;);
-      if (gimp_link_layer_get_transform (GIMP_LINK_LAYER (layer), NULL, NULL, NULL, NULL))
+      if (clay_link_layer_get_transform (CLAY_LINK_LAYER (layer), NULL, NULL, NULL, NULL))
         xcf_check_error (xcf_save_prop (info, image, PROP_TRANSFORM, error, layer), ;);
     }
 
-  if (gimp_viewable_get_children (GIMP_VIEWABLE (layer)))
+  if (clay_viewable_get_children (CLAY_VIEWABLE (layer)))
     {
       gint32 flags = 0;
 
-      if (gimp_viewable_get_expanded (GIMP_VIEWABLE (layer)))
+      if (clay_viewable_get_expanded (CLAY_VIEWABLE (layer)))
         flags |= XCF_GROUP_ITEM_EXPANDED;
 
       xcf_check_error (xcf_save_prop (info,
@@ -772,9 +772,9 @@ xcf_save_layer_props (XcfInfo    *info,
                                       flags), ;);
     }
 
-  parasites = gimp_item_get_parasites (GIMP_ITEM (layer));
+  parasites = clay_item_get_parasites (CLAY_ITEM (layer));
 
-  if (gimp_parasite_list_length (parasites) > 0)
+  if (clay_parasite_list_length (parasites) > 0)
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_PARASITES, error,
                                       parasites), ;);
@@ -782,13 +782,13 @@ xcf_save_layer_props (XcfInfo    *info,
 
   for (iter = info->layer_sets; iter; iter = iter->next)
     {
-      GimpItemList *set = iter->data;
+      ClayItemList *set = iter->data;
 
-      if (! gimp_item_list_is_pattern (set, NULL))
+      if (! clay_item_list_is_pattern (set, NULL))
         {
-          GList *items = gimp_item_list_get_items (set, NULL);
+          GList *items = clay_item_list_get_items (set, NULL);
 
-          if (g_list_find (items, GIMP_ITEM (layer)))
+          if (g_list_find (items, CLAY_ITEM (layer)))
             xcf_check_error (xcf_save_prop (info, image, PROP_ITEM_SET_ITEM, error,
                                             g_list_position (info->layer_sets, iter)), ;);
 
@@ -803,45 +803,45 @@ xcf_save_layer_props (XcfInfo    *info,
 
 static gboolean
 xcf_save_channel_props (XcfInfo      *info,
-                        GimpImage    *image,
-                        GimpChannel  *channel,
+                        ClayImage    *image,
+                        ClayChannel  *channel,
                         GError      **error)
 {
-  GimpParasiteList *parasites;
+  ClayParasiteList *parasites;
   GList            *iter;
 
-  if (g_list_find (gimp_image_get_selected_channels (image), channel))
+  if (g_list_find (clay_image_get_selected_channels (image), channel))
     xcf_check_error (xcf_save_prop (info, image, PROP_ACTIVE_CHANNEL, error), ;);
 
-  if (channel == gimp_image_get_mask (image))
+  if (channel == clay_image_get_mask (image))
     xcf_check_error (xcf_save_prop (info, image, PROP_SELECTION, error), ;);
 
   xcf_check_error (xcf_save_prop (info, image, PROP_OPACITY, error,
-                                  gimp_channel_get_opacity (channel)), ;);
+                                  clay_channel_get_opacity (channel)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_FLOAT_OPACITY, error,
-                                  gimp_channel_get_opacity (channel)), ;);
+                                  clay_channel_get_opacity (channel)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_VISIBLE, error,
-                                  gimp_item_get_visible (GIMP_ITEM (channel))), ;);
+                                  clay_item_get_visible (CLAY_ITEM (channel))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COLOR_TAG, error,
-                                  gimp_item_get_color_tag (GIMP_ITEM (channel))), ;);
+                                  clay_item_get_color_tag (CLAY_ITEM (channel))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_CONTENT, error,
-                                  gimp_item_get_lock_content (GIMP_ITEM (channel))), ;);
+                                  clay_item_get_lock_content (CLAY_ITEM (channel))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_POSITION, error,
-                                  gimp_item_get_lock_position (GIMP_ITEM (channel))), ;);
+                                  clay_item_get_lock_position (CLAY_ITEM (channel))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_VISIBILITY, error,
-                                  gimp_item_get_lock_visibility (GIMP_ITEM (channel))), ;);
+                                  clay_item_get_lock_visibility (CLAY_ITEM (channel))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_SHOW_MASKED, error,
-                                  gimp_channel_get_show_masked (channel)), ;);
+                                  clay_channel_get_show_masked (channel)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COLOR, error,
                                   channel->color), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_FLOAT_COLOR, error,
                                   channel->color), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_TATTOO, error,
-                                  gimp_item_get_tattoo (GIMP_ITEM (channel))), ;);
+                                  clay_item_get_tattoo (CLAY_ITEM (channel))), ;);
 
-  parasites = gimp_item_get_parasites (GIMP_ITEM (channel));
+  parasites = clay_item_get_parasites (CLAY_ITEM (channel));
 
-  if (gimp_parasite_list_length (parasites) > 0)
+  if (clay_parasite_list_length (parasites) > 0)
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_PARASITES, error,
                                       parasites), ;);
@@ -849,13 +849,13 @@ xcf_save_channel_props (XcfInfo      *info,
 
   for (iter = info->channel_sets; iter; iter = iter->next)
     {
-      GimpItemList *set = iter->data;
+      ClayItemList *set = iter->data;
 
-      if (! gimp_item_list_is_pattern (set, NULL))
+      if (! clay_item_list_is_pattern (set, NULL))
         {
-          GList *items = gimp_item_list_get_items (set, NULL);
+          GList *items = clay_item_list_get_items (set, NULL);
 
-          if (g_list_find (items, GIMP_ITEM (channel)))
+          if (g_list_find (items, CLAY_ITEM (channel)))
             xcf_check_error (xcf_save_prop (info, image, PROP_ITEM_SET_ITEM, error,
                                             g_list_position (info->channel_sets, iter)), ;);
 
@@ -870,8 +870,8 @@ xcf_save_channel_props (XcfInfo      *info,
 
 static gboolean
 xcf_save_effect_props (XcfInfo      *info,
-                       GimpImage    *image,
-                       GimpFilter   *filter,
+                       ClayImage    *image,
+                       ClayFilter   *filter,
                        GError      **error)
 {
   GParamSpec **pspecs;
@@ -880,24 +880,24 @@ xcf_save_effect_props (XcfInfo      *info,
   gchar       *operation;
 
   xcf_check_error (xcf_save_prop (info, image, PROP_VISIBLE, error,
-                                  gimp_filter_get_active (filter)), ;);
+                                  clay_filter_get_active (filter)), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_FLOAT_OPACITY, error,
-                                  gimp_drawable_filter_get_opacity (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_opacity (CLAY_DRAWABLE_FILTER (filter))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_MODE, error,
-                                  gimp_drawable_filter_get_paint_mode (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_paint_mode (CLAY_DRAWABLE_FILTER (filter))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_BLEND_SPACE, error,
-                                  gimp_drawable_filter_get_blend_space (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_blend_space (CLAY_DRAWABLE_FILTER (filter))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COMPOSITE_SPACE, error,
-                                  gimp_drawable_filter_get_composite_space (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_composite_space (CLAY_DRAWABLE_FILTER (filter))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COMPOSITE_MODE, error,
-                                  gimp_drawable_filter_get_composite_mode (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_composite_mode (CLAY_DRAWABLE_FILTER (filter))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_FILTER_CLIP, error,
-                                  gimp_drawable_filter_get_clip (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_clip (CLAY_DRAWABLE_FILTER (filter))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_FILTER_REGION, error,
-                                  gimp_drawable_filter_get_region (GIMP_DRAWABLE_FILTER (filter))), ;);
+                                  clay_drawable_filter_get_region (CLAY_DRAWABLE_FILTER (filter))), ;);
 
   /* Save each GEGL property individually */
-  node = gimp_drawable_filter_get_operation (GIMP_DRAWABLE_FILTER (filter));
+  node = clay_drawable_filter_get_operation (CLAY_DRAWABLE_FILTER (filter));
 
   gegl_node_get (node,
                  "operation", &operation,
@@ -939,15 +939,15 @@ xcf_save_effect_props (XcfInfo      *info,
             break;
 
           default:
-            if (g_type_is_a (G_VALUE_TYPE (&value), GIMP_TYPE_CONTEXT))
+            if (g_type_is_a (G_VALUE_TYPE (&value), CLAY_TYPE_CONTEXT))
               {
                 /* No need to save the context - we'll set it on load */
               }
-            else if (g_type_is_a (G_VALUE_TYPE (&value), GIMP_TYPE_GRADIENT))
+            else if (g_type_is_a (G_VALUE_TYPE (&value), CLAY_TYPE_GRADIENT))
               {
                 filter_type = FILTER_PROP_GRADIENT;
               }
-            else if (g_type_is_a (G_VALUE_TYPE (&value), GIMP_TYPE_CONFIG))
+            else if (g_type_is_a (G_VALUE_TYPE (&value), CLAY_TYPE_CONFIG))
               {
                 filter_type = FILTER_PROP_CONFIG;
               }
@@ -961,8 +961,8 @@ xcf_save_effect_props (XcfInfo      *info,
               }
             else
               {
-                gimp_message (info->gimp, G_OBJECT (info->progress),
-                              GIMP_MESSAGE_WARNING,
+                clay_message (info->clay, G_OBJECT (info->progress),
+                              CLAY_MESSAGE_WARNING,
                               "XCF Warning: argument \"%s\" of filter %s has "
                               "unsupported type %s. It was discarded.",
                               pspec->name, operation,
@@ -987,32 +987,32 @@ xcf_save_effect_props (XcfInfo      *info,
 
 static gboolean
 xcf_save_path_props (XcfInfo      *info,
-                     GimpImage    *image,
-                     GimpPath     *path,
+                     ClayImage    *image,
+                     ClayPath     *path,
                      GError      **error)
 {
-  GimpParasiteList *parasites;
+  ClayParasiteList *parasites;
 
-  if (g_list_find (gimp_image_get_selected_paths (image), path))
+  if (g_list_find (clay_image_get_selected_paths (image), path))
     xcf_check_error (xcf_save_prop (info, image, PROP_SELECTED_PATH, error), ;);
 
   xcf_check_error (xcf_save_prop (info, image, PROP_VISIBLE, error,
-                                  gimp_item_get_visible (GIMP_ITEM (path))), ;);
+                                  clay_item_get_visible (CLAY_ITEM (path))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_COLOR_TAG, error,
-                                  gimp_item_get_color_tag (GIMP_ITEM (path))), ;);
+                                  clay_item_get_color_tag (CLAY_ITEM (path))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_CONTENT, error,
-                                  gimp_item_get_lock_content (GIMP_ITEM (path))), ;);
+                                  clay_item_get_lock_content (CLAY_ITEM (path))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_POSITION, error,
-                                  gimp_item_get_lock_position (GIMP_ITEM (path))), ;);
+                                  clay_item_get_lock_position (CLAY_ITEM (path))), ;);
   xcf_check_error (xcf_save_prop (info, image, PROP_LOCK_VISIBILITY, error,
-                                  gimp_item_get_lock_visibility (GIMP_ITEM (path))), ;);
+                                  clay_item_get_lock_visibility (CLAY_ITEM (path))), ;);
 
   xcf_check_error (xcf_save_prop (info, image, PROP_TATTOO, error,
-                                  gimp_item_get_tattoo (GIMP_ITEM (path))), ;);
+                                  clay_item_get_tattoo (CLAY_ITEM (path))), ;);
 
-  parasites = gimp_item_get_parasites (GIMP_ITEM (path));
+  parasites = clay_item_get_parasites (CLAY_ITEM (path));
 
-  if (gimp_parasite_list_length (parasites) > 0)
+  if (clay_parasite_list_length (parasites) > 0)
     {
       xcf_check_error (xcf_save_prop (info, image, PROP_PARASITES, error,
                                       parasites), ;);
@@ -1021,13 +1021,13 @@ xcf_save_path_props (XcfInfo      *info,
 #if 0
   for (iter = info->path_sets; iter; iter = iter->next)
     {
-      GimpItemList *set = iter->data;
+      ClayItemList *set = iter->data;
 
-      if (! gimp_item_list_is_pattern (set, NULL))
+      if (! clay_item_list_is_pattern (set, NULL))
         {
-          GList *items = gimp_item_list_get_items (set, NULL);
+          GList *items = clay_item_list_get_items (set, NULL);
 
-          if (g_list_find (items, GIMP_ITEM (path)))
+          if (g_list_find (items, CLAY_ITEM (path)))
             xcf_check_error (xcf_save_prop (info, image, PROP_ITEM_SET_ITEM, error,
                                             g_list_position (info->layer_sets, iter)), ;);
 
@@ -1043,7 +1043,7 @@ xcf_save_path_props (XcfInfo      *info,
 
 static gboolean
 xcf_save_prop (XcfInfo    *info,
-               GimpImage  *image,
+               ClayImage  *image,
                PropType    prop_type,
                GError    **error,
                ...)
@@ -1132,8 +1132,8 @@ xcf_save_prop (XcfInfo    *info,
 
         size = 4;
 
-        if (mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-          mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+        if (mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+          mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
         xcf_write_prop_type_check_error (info, prop_type, va_end (args));
         xcf_write_int32_check_error (info, &size, 1, va_end (args));
@@ -1144,17 +1144,17 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_BLEND_SPACE:
       {
-        GimpLayerMode mode        = va_arg (args, GimpLayerMode);
+        ClayLayerMode mode        = va_arg (args, ClayLayerMode);
         gint32        blend_space = va_arg (args, gint32);
 
-        G_STATIC_ASSERT (GIMP_LAYER_COLOR_SPACE_AUTO == 0);
+        G_STATIC_ASSERT (CLAY_LAYER_COLOR_SPACE_AUTO == 0);
 
         /* if blend_space is AUTO, save the negative of the actual value AUTO
          * maps to for the given mode, so that we can correctly load it even if
          * the mapping changes in the future.
          */
-        if (blend_space == GIMP_LAYER_COLOR_SPACE_AUTO)
-          blend_space = -gimp_layer_mode_get_blend_space (mode);
+        if (blend_space == CLAY_LAYER_COLOR_SPACE_AUTO)
+          blend_space = -clay_layer_mode_get_blend_space (mode);
 
         size = 4;
 
@@ -1167,17 +1167,17 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_COMPOSITE_SPACE:
       {
-        GimpLayerMode mode            = va_arg (args, GimpLayerMode);
+        ClayLayerMode mode            = va_arg (args, ClayLayerMode);
         gint32        composite_space = va_arg (args, gint32);
 
-        G_STATIC_ASSERT (GIMP_LAYER_COLOR_SPACE_AUTO == 0);
+        G_STATIC_ASSERT (CLAY_LAYER_COLOR_SPACE_AUTO == 0);
 
         /* if composite_space is AUTO, save the negative of the actual value
          * AUTO maps to for the given mode, so that we can correctly load it
          * even if the mapping changes in the future.
          */
-        if (composite_space == GIMP_LAYER_COLOR_SPACE_AUTO)
-          composite_space = -gimp_layer_mode_get_composite_space (mode);
+        if (composite_space == CLAY_LAYER_COLOR_SPACE_AUTO)
+          composite_space = -clay_layer_mode_get_composite_space (mode);
 
         size = 4;
 
@@ -1190,17 +1190,17 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_COMPOSITE_MODE:
       {
-        GimpLayerMode mode           = va_arg (args, GimpLayerMode);
+        ClayLayerMode mode           = va_arg (args, ClayLayerMode);
         gint32        composite_mode = va_arg (args, gint32);
 
-        G_STATIC_ASSERT (GIMP_LAYER_COMPOSITE_AUTO == 0);
+        G_STATIC_ASSERT (CLAY_LAYER_COMPOSITE_AUTO == 0);
 
         /* if composite_mode is AUTO, save the negative of the actual value
          * AUTO maps to for the given mode, so that we can correctly load it
          * even if the mapping changes in the future.
          */
-        if (composite_mode == GIMP_LAYER_COMPOSITE_AUTO)
-          composite_mode = -gimp_layer_mode_get_composite_mode (mode);
+        if (composite_mode == CLAY_LAYER_COMPOSITE_AUTO)
+          composite_mode = -clay_layer_mode_get_composite_mode (mode);
 
         size = 4;
 
@@ -1428,7 +1428,7 @@ xcf_save_prop (XcfInfo    *info,
         for (iter = guides; iter; iter = g_list_next (iter))
           {
             /* Do not save custom guides. */
-            if (gimp_guide_is_custom (GIMP_GUIDE (iter->data)))
+            if (clay_guide_is_custom (CLAY_GUIDE (iter->data)))
               n_guides--;
           }
 
@@ -1441,20 +1441,20 @@ xcf_save_prop (XcfInfo    *info,
 
             for (; guides; guides = g_list_next (guides))
               {
-                GimpGuide *guide    = guides->data;
-                gint32     position = gimp_guide_get_position (guide);
+                ClayGuide *guide    = guides->data;
+                gint32     position = clay_guide_get_position (guide);
                 gint8      orientation;
 
-                if (gimp_guide_is_custom (guide))
+                if (clay_guide_is_custom (guide))
                   continue;
 
-                switch (gimp_guide_get_orientation (guide))
+                switch (clay_guide_get_orientation (guide))
                   {
-                  case GIMP_ORIENTATION_HORIZONTAL:
+                  case CLAY_ORIENTATION_HORIZONTAL:
                     orientation = XCF_ORIENTATION_HORIZONTAL;
                     break;
 
-                  case GIMP_ORIENTATION_VERTICAL:
+                  case CLAY_ORIENTATION_VERTICAL:
                     orientation = XCF_ORIENTATION_VERTICAL;
                     break;
 
@@ -1483,13 +1483,13 @@ xcf_save_prop (XcfInfo    *info,
 
         for (; sample_points; sample_points = g_list_next (sample_points))
           {
-            GimpSamplePoint   *sample_point = sample_points->data;
+            ClaySamplePoint   *sample_point = sample_points->data;
             gint32             x, y;
-            GimpColorPickMode  pick_mode;
+            ClayColorPickMode  pick_mode;
             guint32            padding[2] = { 0, };
 
-            gimp_sample_point_get_position (sample_point, &x, &y);
-            pick_mode = gimp_sample_point_get_pick_mode (sample_point);
+            clay_sample_point_get_position (sample_point, &x, &y);
+            pick_mode = clay_sample_point_get_pick_mode (sample_point);
 
             xcf_write_int32_check_error (info, (guint32 *) &x,         1, va_end (args));
             xcf_write_int32_check_error (info, (guint32 *) &y,         1, va_end (args));
@@ -1511,10 +1511,10 @@ xcf_save_prop (XcfInfo    *info,
 
         for (; sample_points; sample_points = g_list_next (sample_points))
           {
-            GimpSamplePoint *sample_point = sample_points->data;
+            ClaySamplePoint *sample_point = sample_points->data;
             gint32           x, y;
 
-            gimp_sample_point_get_position (sample_point, &x, &y);
+            clay_sample_point_get_position (sample_point, &x, &y);
 
             xcf_write_int32_check_error (info, (guint32 *) &x, 1, va_end (args));
             xcf_write_int32_check_error (info, (guint32 *) &y, 1, va_end (args));
@@ -1553,9 +1553,9 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_PARASITES:
       {
-        GimpParasiteList *list = va_arg (args, GimpParasiteList *);
+        ClayParasiteList *list = va_arg (args, ClayParasiteList *);
 
-        if (gimp_parasite_list_persistent_length (list) > 0)
+        if (clay_parasite_list_persistent_length (list) > 0)
           {
             goffset base;
             goffset pos;
@@ -1588,8 +1588,8 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_UNIT:
       {
-        GimpUnit *unit       = va_arg (args, GimpUnit *);
-        guint32   unit_index = gimp_unit_get_id (unit);
+        ClayUnit *unit       = va_arg (args, ClayUnit *);
+        guint32   unit_index = clay_unit_get_id (unit);
 
         size = 4;
 
@@ -1631,22 +1631,22 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_USER_UNIT:
       {
-        GimpUnit    *unit = va_arg (args, GimpUnit *);
+        ClayUnit    *unit = va_arg (args, ClayUnit *);
         const gchar *unit_strings[5];
         gfloat       factor;
         guint32      digits;
 
         /* write the entire unit definition */
-        unit_strings[0] = gimp_unit_get_name (unit);
-        factor          = gimp_unit_get_factor (unit);
-        digits          = gimp_unit_get_digits (unit);
-        unit_strings[1] = gimp_unit_get_symbol (unit);
-        unit_strings[2] = gimp_unit_get_abbreviation (unit);
+        unit_strings[0] = clay_unit_get_name (unit);
+        factor          = clay_unit_get_factor (unit);
+        digits          = clay_unit_get_digits (unit);
+        unit_strings[1] = clay_unit_get_symbol (unit);
+        unit_strings[2] = clay_unit_get_abbreviation (unit);
         /* Singular and plural forms were deprecated in XCF 21. Just use
          * the unit name as bogus (yet reasonable) replacements.
          */
-        unit_strings[3] = gimp_unit_get_name (unit);
-        unit_strings[4] = gimp_unit_get_name (unit);
+        unit_strings[3] = clay_unit_get_name (unit);
+        unit_strings[4] = clay_unit_get_name (unit);
 
         size =
           2 * 4 +
@@ -1715,13 +1715,13 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_VECTOR_LAYER:
       {
-        GimpVectorLayer        *vector_layer;
-        GimpVectorLayerOptions *options;
+        ClayVectorLayer        *vector_layer;
+        ClayVectorLayerOptions *options;
         guint32                 uint_val;
         goffset                 base;
         goffset                 pos;
 
-        vector_layer = va_arg (args, GimpVectorLayer *);
+        vector_layer = va_arg (args, ClayVectorLayer *);
         options      = vector_layer->options;
 
         xcf_write_prop_type_check_error (info, prop_type, va_end (args));
@@ -1731,10 +1731,10 @@ xcf_save_prop (XcfInfo    *info,
         xcf_write_int32_check_error (info, &size, 1, va_end (args));
         base = info->cp;
 
-        uint_val = (guint32) gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (vector_layer));
+        uint_val = (guint32) clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (vector_layer));
         xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, va_end (args));
 
-        uint_val = gimp_item_get_tattoo (GIMP_ITEM (options->path));
+        uint_val = clay_item_get_tattoo (CLAY_ITEM (options->path));
         xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, va_end (args));
 
         uint_val = (guint32) options->enable_fill;
@@ -1756,15 +1756,15 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_LINK_LAYER:
       {
-        GimpLinkLayer *layer = va_arg (args, GimpLinkLayer *);
+        ClayLinkLayer *layer = va_arg (args, ClayLinkLayer *);
         gchar         *path  = NULL;
         gint           width;
         gint           height;
         guint32        dimensions[2];
         guint32        flags;
 
-        flags = gimp_link_layer_get_xcf_flags (layer);
-        gimp_link_get_file (gimp_link_layer_get_link (layer), info->file, &path);
+        flags = clay_link_layer_get_xcf_flags (layer);
+        clay_link_get_file (clay_link_layer_get_link (layer), info->file, &path);
 
         size = 3 * 4 + (strlen (path) ? strlen (path) + 1 : 4);
 
@@ -1774,7 +1774,7 @@ xcf_save_prop (XcfInfo    *info,
         xcf_write_int32_check_error (info, &flags, 1, va_end (args));
         xcf_write_string_check_error (info, (gchar **) &path, 1, va_end (args));
 
-        gimp_link_get_size (gimp_link_layer_get_link (layer), &width, &height);
+        clay_link_get_size (clay_link_layer_get_link (layer), &width, &height);
         dimensions[0] = width;
         dimensions[1] = height;
         xcf_write_int32_check_error (info, dimensions, 2, va_end (args));
@@ -1785,16 +1785,16 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_TRANSFORM:
       {
-        GimpLinkLayer         *layer = va_arg (args, GimpLinkLayer *);
-        GimpMatrix3            matrix;
+        ClayLinkLayer         *layer = va_arg (args, ClayLinkLayer *);
+        ClayMatrix3            matrix;
         gint                   offset_x;
         gint                   offset_y;
-        GimpInterpolationType  interpolation;
+        ClayInterpolationType  interpolation;
         gint32                 int_val;
         guint32                uint_val;
         gfloat                 mfloat[9];
 
-        gimp_link_layer_get_transform (layer, &matrix, &offset_x, &offset_y, &interpolation);
+        clay_link_layer_get_transform (layer, &matrix, &offset_x, &offset_y, &interpolation);
 
         size = 4 * 12;
 
@@ -1855,7 +1855,7 @@ xcf_save_prop (XcfInfo    *info,
 
     case PROP_ITEM_SET:
       {
-        GimpItemList *set = va_arg (args, GimpItemList *);
+        ClayItemList *set = va_arg (args, ClayItemList *);
         const gchar  *string;
         guint32       method;
         guint32       item_type;
@@ -1869,21 +1869,21 @@ xcf_save_prop (XcfInfo    *info,
         xcf_write_int32_check_error (info, &size, 1, va_end (args));
         base = info->cp;
 
-        if (gimp_item_list_get_item_type (set) == GIMP_TYPE_LAYER)
+        if (clay_item_list_get_item_type (set) == CLAY_TYPE_LAYER)
           item_type = 0;
-        else if (gimp_item_list_get_item_type (set) == GIMP_TYPE_CHANNEL)
+        else if (clay_item_list_get_item_type (set) == CLAY_TYPE_CHANNEL)
           item_type = 1;
-        else if (gimp_item_list_get_item_type (set) == GIMP_TYPE_PATH)
+        else if (clay_item_list_get_item_type (set) == CLAY_TYPE_PATH)
           item_type = 2;
         else
           g_return_val_if_reached (FALSE);
         xcf_write_int32_check_error (info, &item_type, 1, va_end (args));
 
-        if (! gimp_item_list_is_pattern (set, (GimpSelectMethod *) &method))
+        if (! clay_item_list_is_pattern (set, (ClaySelectMethod *) &method))
           method = G_MAXUINT32;
         xcf_write_int32_check_error (info, &method, 1, va_end (args));
 
-        string = gimp_object_get_name (set);
+        string = clay_object_get_name (set);
         xcf_write_string_check_error (info, (gchar **) &string, 1, va_end (args));
 
         /* go back to the saved position and write the length */
@@ -1991,7 +1991,7 @@ xcf_save_prop (XcfInfo    *info,
 
             case FILTER_PROP_GRADIENT:
               {
-                GimpGradient *gradient = g_value_get_object (&filter_value);
+                ClayGradient *gradient = g_value_get_object (&filter_value);
 
                 xcf_check_error (xcf_save_gradient (info, gradient, error),
                                  va_end (args));
@@ -2000,8 +2000,8 @@ xcf_save_prop (XcfInfo    *info,
 
             case FILTER_PROP_CONFIG:
               {
-                GimpConfig *config = g_value_get_object (&filter_value);
-                gchar      *value  = gimp_config_serialize_to_string (config, NULL);
+                ClayConfig *config = g_value_get_object (&filter_value);
+                gchar      *value  = clay_config_serialize_to_string (config, NULL);
 
                 xcf_write_string_check_error (info, (gchar **) &value, 1, va_end (args));
                 g_free (value);
@@ -2042,15 +2042,15 @@ xcf_save_prop (XcfInfo    *info,
 
 static gboolean
 xcf_save_layer (XcfInfo    *info,
-                GimpImage  *image,
-                GimpLayer  *layer,
+                ClayImage  *image,
+                ClayLayer  *layer,
                 GError    **error)
 {
   goffset        saved_pos;
   goffset        offset;
   guint32        value;
   const gchar   *string;
-  GimpContainer *filters;
+  ClayContainer *filters;
   GList         *filter_list;
   guint32        num_effects = 0;
   GList         *list;
@@ -2059,7 +2059,7 @@ xcf_save_layer (XcfInfo    *info,
   /* check and see if this is the drawable that the floating
    *  selection is attached to.
    */
-  if (GIMP_DRAWABLE (layer) == info->floating_sel_drawable)
+  if (CLAY_DRAWABLE (layer) == info->floating_sel_drawable)
     {
       saved_pos = info->cp;
       xcf_check_error (xcf_seek_pos (info, info->floating_sel_offset, error), ;);
@@ -2068,21 +2068,21 @@ xcf_save_layer (XcfInfo    *info,
     }
 
   /* Get filter information */
-  filters = gimp_drawable_get_filters (GIMP_DRAWABLE (layer));
+  filters = clay_drawable_get_filters (CLAY_DRAWABLE (layer));
   /* Since floating selections are also stored in the filter stack,
    * we need to verify what's in there to get the correct count */
-  for (filter_list = GIMP_LIST (filters)->queue->tail; filter_list;
+  for (filter_list = CLAY_LIST (filters)->queue->tail; filter_list;
        filter_list = g_list_previous (filter_list))
     {
-      if (GIMP_IS_DRAWABLE_FILTER (filter_list->data) &&
-          ! gimp_drawable_filter_get_temporary (filter_list->data))
+      if (CLAY_IS_DRAWABLE_FILTER (filter_list->data) &&
+          ! clay_drawable_filter_get_temporary (filter_list->data))
         {
-          GimpDrawableFilter     *filter  = filter_list->data;
-          GimpDrawableFilterMask *mask    = NULL;
+          ClayDrawableFilter     *filter  = filter_list->data;
+          ClayDrawableFilterMask *mask    = NULL;
           GeglNode               *op_node = NULL;
 
-          mask    = gimp_drawable_filter_get_mask (filter);
-          op_node = gimp_drawable_filter_get_operation (filter);
+          mask    = clay_drawable_filter_get_mask (filter);
+          op_node = clay_drawable_filter_get_operation (filter);
 
           /* For now, prevent tool-based filters from being saved */
           if (mask    != NULL &&
@@ -2093,17 +2093,17 @@ xcf_save_layer (XcfInfo    *info,
     }
 
   /* write out the width, height and image type information for the layer */
-  value = gimp_item_get_width (GIMP_ITEM (layer));
+  value = clay_item_get_width (CLAY_ITEM (layer));
   xcf_write_int32_check_error (info, &value, 1, ;);
 
-  value = gimp_item_get_height (GIMP_ITEM (layer));
+  value = clay_item_get_height (CLAY_ITEM (layer));
   xcf_write_int32_check_error (info, &value, 1, ;);
 
-  value = gimp_babl_format_get_image_type (gimp_drawable_get_format (GIMP_DRAWABLE (layer)));
+  value = clay_babl_format_get_image_type (clay_drawable_get_format (CLAY_DRAWABLE (layer)));
   xcf_write_int32_check_error (info, &value, 1, ;);
 
   /* write out the layers name */
-  string = gimp_object_get_name (layer);
+  string = clay_object_get_name (layer);
   xcf_write_string_check_error (info, (gchar **) &string, 1, ;);
 
   /* write out the layer properties */
@@ -2123,21 +2123,21 @@ xcf_save_layer (XcfInfo    *info,
     xcf_write_zero_offset_check_error (info, 1, ;);
 
   xcf_check_error (xcf_save_buffer (info, image,
-                                    gimp_drawable_get_buffer (GIMP_DRAWABLE (layer)),
+                                    clay_drawable_get_buffer (CLAY_DRAWABLE (layer)),
                                     error), ;);
 
   offset = info->cp;
 
   /* write out the layer mask */
-  if (gimp_layer_get_mask (layer))
+  if (clay_layer_get_mask (layer))
     {
-      GimpLayerMask *mask = gimp_layer_get_mask (layer);
+      ClayLayerMask *mask = clay_layer_get_mask (layer);
 
       xcf_check_error (xcf_seek_pos (info, saved_pos, error), ;);
       xcf_write_offset_check_error (info, &offset, 1, ;);
 
       xcf_check_error (xcf_seek_pos (info, offset, error), ;);
-      xcf_check_error (xcf_save_channel (info, image, GIMP_CHANNEL (mask),
+      xcf_check_error (xcf_save_channel (info, image, CLAY_CHANNEL (mask),
                                          error), ;);
     }
 
@@ -2146,18 +2146,18 @@ xcf_save_layer (XcfInfo    *info,
     {
       saved_pos += info->bytes_per_offset;
 
-      for (list = GIMP_LIST (filters)->queue->head; list;
+      for (list = CLAY_LIST (filters)->queue->head; list;
            list = g_list_next (list))
         {
-          if (GIMP_IS_DRAWABLE_FILTER (list->data) &&
-              ! gimp_drawable_filter_get_temporary (list->data))
+          if (CLAY_IS_DRAWABLE_FILTER (list->data) &&
+              ! clay_drawable_filter_get_temporary (list->data))
             {
-              GimpDrawableFilter     *filter  = list->data;
-              GimpDrawableFilterMask *mask    = NULL;
+              ClayDrawableFilter     *filter  = list->data;
+              ClayDrawableFilterMask *mask    = NULL;
               GeglNode               *op_node = NULL;
 
-              mask    = gimp_drawable_filter_get_mask (filter);
-              op_node = gimp_drawable_filter_get_operation (filter);
+              mask    = clay_drawable_filter_get_mask (filter);
+              op_node = clay_drawable_filter_get_operation (filter);
 
                /* For now, prevent tool-based filters from being saved */
               if (mask    != NULL &&
@@ -2173,7 +2173,7 @@ xcf_save_layer (XcfInfo    *info,
 
                   xcf_check_error (xcf_seek_pos (info, offset, error), ;);
                   xcf_check_error (xcf_save_effect (info, image,
-                                                    GIMP_FILTER (filter),
+                                                    CLAY_FILTER (filter),
                                                     error), ;);
                 }
             }
@@ -2185,15 +2185,15 @@ xcf_save_layer (XcfInfo    *info,
 
 static gboolean
 xcf_save_channel (XcfInfo      *info,
-                  GimpImage    *image,
-                  GimpChannel  *channel,
+                  ClayImage    *image,
+                  ClayChannel  *channel,
                   GError      **error)
 {
   goffset        saved_pos;
   goffset        offset;
   guint32        value;
   const gchar   *string;
-  GimpContainer *filters;
+  ClayContainer *filters;
   GList         *filter_list;
   guint32        num_effects = 0;
   GList         *list;
@@ -2202,7 +2202,7 @@ xcf_save_channel (XcfInfo      *info,
   /* check and see if this is the drawable that the floating
    * selection is attached to.
    */
-  if (GIMP_DRAWABLE (channel) == info->floating_sel_drawable)
+  if (CLAY_DRAWABLE (channel) == info->floating_sel_drawable)
     {
       saved_pos = info->cp;
       xcf_check_error (xcf_seek_pos (info, info->floating_sel_offset, error), ;);
@@ -2211,21 +2211,21 @@ xcf_save_channel (XcfInfo      *info,
     }
 
   /* Get filter information */
-  filters = gimp_drawable_get_filters (GIMP_DRAWABLE (channel));
+  filters = clay_drawable_get_filters (CLAY_DRAWABLE (channel));
   /* Since floating selections are also stored in the filter stack,
    * we need to verify what's in there to get the correct count */
-  for (filter_list = GIMP_LIST (filters)->queue->tail; filter_list;
+  for (filter_list = CLAY_LIST (filters)->queue->tail; filter_list;
        filter_list = g_list_previous (filter_list))
     {
-      if (GIMP_IS_DRAWABLE_FILTER (filter_list->data) &&
-          ! gimp_drawable_filter_get_temporary (filter_list->data))
+      if (CLAY_IS_DRAWABLE_FILTER (filter_list->data) &&
+          ! clay_drawable_filter_get_temporary (filter_list->data))
         {
-          GimpDrawableFilter     *filter  = filter_list->data;
-          GimpDrawableFilterMask *mask    = NULL;
+          ClayDrawableFilter     *filter  = filter_list->data;
+          ClayDrawableFilterMask *mask    = NULL;
           GeglNode               *op_node = NULL;
 
-          mask    = gimp_drawable_filter_get_mask (filter);
-          op_node = gimp_drawable_filter_get_operation (filter);
+          mask    = clay_drawable_filter_get_mask (filter);
+          op_node = clay_drawable_filter_get_operation (filter);
 
           /* For now, prevent tool-based filters from being saved */
           if (mask    != NULL &&
@@ -2236,14 +2236,14 @@ xcf_save_channel (XcfInfo      *info,
     }
 
   /* write out the width and height information for the channel */
-  value = gimp_item_get_width (GIMP_ITEM (channel));
+  value = clay_item_get_width (CLAY_ITEM (channel));
   xcf_write_int32_check_error (info, &value, 1, ;);
 
-  value = gimp_item_get_height (GIMP_ITEM (channel));
+  value = clay_item_get_height (CLAY_ITEM (channel));
   xcf_write_int32_check_error (info, &value, 1, ;);
 
   /* write out the channels name */
-  string = gimp_object_get_name (channel);
+  string = clay_object_get_name (channel);
   xcf_write_string_check_error (info, (gchar **) &string, 1, ;);
 
   /* write out the channel properties */
@@ -2260,7 +2260,7 @@ xcf_save_channel (XcfInfo      *info,
     xcf_write_zero_offset_check_error (info, 1, ;);
 
   xcf_check_error (xcf_save_buffer (info, image,
-                                    gimp_drawable_get_buffer (GIMP_DRAWABLE (channel)),
+                                    clay_drawable_get_buffer (CLAY_DRAWABLE (channel)),
                                     error), ;);
 
   offset = info->cp;
@@ -2268,18 +2268,18 @@ xcf_save_channel (XcfInfo      *info,
   /* write out any channel effects and effect masks */
   if (num_effects > 0)
     {
-      for (list = GIMP_LIST (filters)->queue->head; list;
+      for (list = CLAY_LIST (filters)->queue->head; list;
            list = g_list_next (list))
         {
-          if (GIMP_IS_DRAWABLE_FILTER (list->data) &&
-              ! gimp_drawable_filter_get_temporary (list->data))
+          if (CLAY_IS_DRAWABLE_FILTER (list->data) &&
+              ! clay_drawable_filter_get_temporary (list->data))
             {
-              GimpDrawableFilter     *filter  = list->data;
-              GimpDrawableFilterMask *mask    = NULL;
+              ClayDrawableFilter     *filter  = list->data;
+              ClayDrawableFilterMask *mask    = NULL;
               GeglNode               *op_node = NULL;
 
-              mask    = gimp_drawable_filter_get_mask (filter);
-              op_node = gimp_drawable_filter_get_operation (filter);
+              mask    = clay_drawable_filter_get_mask (filter);
+              op_node = clay_drawable_filter_get_operation (filter);
 
                /* For now, prevent tool-based filters from being saved */
               if (mask    != NULL &&
@@ -2295,7 +2295,7 @@ xcf_save_channel (XcfInfo      *info,
 
                   xcf_check_error (xcf_seek_pos (info, offset, error), ;);
                   xcf_check_error (xcf_save_effect (info, image,
-                                                    GIMP_FILTER (filter),
+                                                    CLAY_FILTER (filter),
                                                     error), ;);
                 }
             }
@@ -2307,23 +2307,23 @@ xcf_save_channel (XcfInfo      *info,
 
 static gboolean
 xcf_save_effect (XcfInfo     *info,
-                 GimpImage   *image,
-                 GimpFilter  *filter,
+                 ClayImage   *image,
+                 ClayFilter  *filter,
                  GError     **error)
 {
   gchar              *name;
   gchar              *icon;
   gboolean            has_custom_name;
-  GimpDrawableFilter *filter_drawable;
+  ClayDrawableFilter *filter_drawable;
   GeglNode           *node;
   gchar              *operation;
   const gchar        *op_version;
-  GimpChannel        *effect_mask;
+  ClayChannel        *effect_mask;
   goffset             offset;
   GError             *tmp_error = NULL;
 
-  filter_drawable = GIMP_DRAWABLE_FILTER (filter);
-  node            = gimp_drawable_filter_get_operation (filter_drawable);
+  filter_drawable = CLAY_DRAWABLE_FILTER (filter);
+  node            = clay_drawable_filter_get_operation (filter_drawable);
 
   gegl_node_get (node,
                  "operation", &operation,
@@ -2370,7 +2370,7 @@ xcf_save_effect (XcfInfo     *info,
   offset = info->cp + info->bytes_per_offset;
   xcf_write_offset_check_error (info, &offset, 1, ;);
 
-  effect_mask = GIMP_CHANNEL (gimp_drawable_filter_get_mask (filter_drawable));
+  effect_mask = CLAY_CHANNEL (clay_drawable_filter_get_mask (filter_drawable));
   xcf_check_error (xcf_save_channel (info, image, effect_mask,
                                      error), ;);
 
@@ -2452,7 +2452,7 @@ xcf_save_color (XcfInfo    *info,
 
 static gboolean
 xcf_save_gradient (XcfInfo       *info,
-                   GimpGradient  *gradient,
+                   ClayGradient  *gradient,
                    GError       **error)
 {
   GError *tmp_error = NULL;
@@ -2461,10 +2461,10 @@ xcf_save_gradient (XcfInfo       *info,
     {
       guint32              version  = 1;
       const gchar         *name;
-      GimpGradientSegment *seg;
+      ClayGradientSegment *seg;
       guint32              num_segments;
 
-      name         = gimp_object_get_name (GIMP_OBJECT (gradient));
+      name         = clay_object_get_name (CLAY_OBJECT (gradient));
       num_segments = 0;
       seg          = gradient->segments;
 
@@ -2509,12 +2509,12 @@ xcf_save_gradient (XcfInfo       *info,
 
 static gboolean
 xcf_save_data_id (XcfInfo   *info,
-                  GimpData  *data,
+                  ClayData  *data,
                   GError   **error)
 {
   /* XXX Fonts may want to be special-cased because there may be more
-   * than just the standard GimpData ID which would make reasonable
-   * heuristic to retrieve a font. See gimp_font_serialize().
+   * than just the standard ClayData ID which would make reasonable
+   * heuristic to retrieve a font. See clay_font_serialize().
    *
    * TODO: in future updates of XCF, embedding the full data itself
    * rather than just point to it may be a worthy option too.
@@ -2527,7 +2527,7 @@ xcf_save_data_id (XcfInfo   *info,
 
   if (data)
     {
-      gimp_data_get_identifiers  (data, &name, &collection_id, &is_internal);
+      clay_data_get_identifiers  (data, &name, &collection_id, &is_internal);
 
       xcf_write_string_check_error (info, (gchar **) &name, 1, ;);
       xcf_write_string_check_error (info, (gchar **) &collection_id, 1, ;);
@@ -2549,36 +2549,36 @@ xcf_save_data_id (XcfInfo   *info,
 
 static gboolean
 xcf_save_fill_options (XcfInfo          *info,
-                       GimpFillOptions  *options,
+                       ClayFillOptions  *options,
                        GError          **error)
 {
   GeglColor   *color;
-  GimpPattern *pattern;
+  ClayPattern *pattern;
   guint32      uint_val;
   GError      *tmp_error = NULL;
 
-  uint_val = (guint32) gimp_fill_options_get_custom_style (options);
+  uint_val = (guint32) clay_fill_options_get_custom_style (options);
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
-  uint_val = (guint32) gimp_fill_options_get_antialias (options);
+  uint_val = (guint32) clay_fill_options_get_antialias (options);
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
-  color = gimp_context_get_foreground (GIMP_CONTEXT (options));
+  color = clay_context_get_foreground (CLAY_CONTEXT (options));
   xcf_check_error (xcf_save_color (info, color, error), ;);
 
-  pattern = gimp_context_get_pattern (GIMP_CONTEXT (options));
-  xcf_check_error (xcf_save_data_id (info, GIMP_DATA (pattern), error), ;);
+  pattern = clay_context_get_pattern (CLAY_CONTEXT (options));
+  xcf_check_error (xcf_save_data_id (info, CLAY_DATA (pattern), error), ;);
 
   return TRUE;
 }
 
 static gboolean
 xcf_save_stroke_options (XcfInfo            *info,
-                         GimpStrokeOptions  *options,
+                         ClayStrokeOptions  *options,
                          GError            **error)
 {
   GeglColor   *color;
-  GimpPattern *pattern;
+  ClayPattern *pattern;
   guint32      uint_val;
   gfloat       float_val;
   GError      *tmp_error = NULL;
@@ -2586,32 +2586,32 @@ xcf_save_stroke_options (XcfInfo            *info,
   gdouble     *dashes;
   gsize        n_dashes  = 0;
 
-  uint_val = (guint32) gimp_fill_options_get_custom_style (GIMP_FILL_OPTIONS (options));
+  uint_val = (guint32) clay_fill_options_get_custom_style (CLAY_FILL_OPTIONS (options));
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
-  uint_val = (guint32) gimp_fill_options_get_antialias (GIMP_FILL_OPTIONS (options));
+  uint_val = (guint32) clay_fill_options_get_antialias (CLAY_FILL_OPTIONS (options));
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
-  color = gimp_context_get_foreground (GIMP_CONTEXT (options));
+  color = clay_context_get_foreground (CLAY_CONTEXT (options));
   xcf_check_error (xcf_save_color (info, color, error), ;);
 
-  pattern = gimp_context_get_pattern (GIMP_CONTEXT (options));
-  xcf_check_error (xcf_save_data_id (info, GIMP_DATA (pattern), error), ;);
+  pattern = clay_context_get_pattern (CLAY_CONTEXT (options));
+  xcf_check_error (xcf_save_data_id (info, CLAY_DATA (pattern), error), ;);
 
-  float_val = (gfloat) gimp_stroke_options_get_width (options);
+  float_val = (gfloat) clay_stroke_options_get_width (options);
   xcf_write_float_check_error (info, (gfloat *) &float_val, 1, ;);
 
-  uint_val = (guint32) gimp_stroke_options_get_cap_style (options);
+  uint_val = (guint32) clay_stroke_options_get_cap_style (options);
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
-  uint_val = (guint32) gimp_stroke_options_get_join_style (options);
+  uint_val = (guint32) clay_stroke_options_get_join_style (options);
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
-  float_val = (gfloat) gimp_stroke_options_get_miter_limit (options);
+  float_val = (gfloat) clay_stroke_options_get_miter_limit (options);
   xcf_write_float_check_error (info, (gfloat *) &float_val, 1, ;);
 
-  dash_info = gimp_stroke_options_get_dash_info (options);
-  dashes = gimp_dash_pattern_to_double_array (dash_info, &n_dashes);
+  dash_info = clay_stroke_options_get_dash_info (options);
+  dashes = clay_dash_pattern_to_double_array (dash_info, &n_dashes);
   uint_val = (guint32) n_dashes;
   xcf_write_int32_check_error (info, (guint32 *) &uint_val, 1, ;);
 
@@ -2644,7 +2644,7 @@ xcf_calc_levels (gint size,
 
 static gboolean
 xcf_save_buffer (XcfInfo     *info,
-                 GimpImage   *image,
+                 ClayImage   *image,
                  GeglBuffer  *buffer,
                  GError     **error)
 {
@@ -2734,7 +2734,7 @@ xcf_save_buffer (XcfInfo     *info,
 
 static gboolean
 xcf_save_level (XcfInfo     *info,
-                GimpImage   *image,
+                ClayImage   *image,
                 GeglBuffer  *buffer,
                 GError     **error)
 {
@@ -2754,7 +2754,7 @@ xcf_save_level (XcfInfo     *info,
   gint        i, j, k;
   GError     *tmp_error = NULL;
 
-  num_processors = GIMP_GEGL_CONFIG (image->gimp->config)->num_processors;
+  num_processors = CLAY_GEGL_CONFIG (image->clay->config)->num_processors;
 
   format = gegl_buffer_get_format (buffer);
 
@@ -2774,8 +2774,8 @@ xcf_save_level (XcfInfo     *info,
   max_data_length = XCF_TILE_WIDTH * XCF_TILE_HEIGHT * bpp *
                     XCF_TILE_MAX_DATA_LENGTH_FACTOR /* = 1.5, currently */;
 
-  n_tile_rows = gimp_gegl_buffer_get_n_tile_rows (buffer, XCF_TILE_HEIGHT);
-  n_tile_cols = gimp_gegl_buffer_get_n_tile_cols (buffer, XCF_TILE_WIDTH);
+  n_tile_rows = clay_gegl_buffer_get_n_tile_rows (buffer, XCF_TILE_HEIGHT);
+  n_tile_cols = clay_gegl_buffer_get_n_tile_cols (buffer, XCF_TILE_WIDTH);
 
   ntiles = n_tile_rows * n_tile_cols;
 
@@ -2965,7 +2965,7 @@ xcf_save_level (XcfInfo     *info,
           /* store the offset in the table and increment the next pointer */
           *next_offset++ = offset;
 
-          gimp_gegl_buffer_get_tile_rect (buffer,
+          clay_gegl_buffer_get_tile_rect (buffer,
                                           XCF_TILE_WIDTH, XCF_TILE_HEIGHT,
                                           i, &rect);
 
@@ -3078,7 +3078,7 @@ xcf_save_tile_parallel (XcfJobData  *job_data,
 
   for (gint i = 0; i < job_data->batch_size; ++i)
     {
-      gimp_gegl_buffer_get_tile_rect (job_data->buffer,
+      clay_gegl_buffer_get_tile_rect (job_data->buffer,
                                       XCF_TILE_WIDTH,
                                       XCF_TILE_HEIGHT,
                                       job_data->tile + i,
@@ -3292,23 +3292,23 @@ xcf_save_tile_zlib (GeglRectangle  *tile_rect,
 
 static gboolean
 xcf_save_parasite (XcfInfo       *info,
-                   GimpParasite  *parasite,
+                   ClayParasite  *parasite,
                    GError       **error)
 {
-  if (gimp_parasite_is_persistent (parasite))
+  if (clay_parasite_is_persistent (parasite))
     {
       guint32        value;
       const gchar   *string;
       GError        *tmp_error = NULL;
       gconstpointer  parasite_data;
 
-      string = gimp_parasite_get_name (parasite);
+      string = clay_parasite_get_name (parasite);
       xcf_write_string_check_error (info, (gchar **) &string, 1, ;);
 
-      value = gimp_parasite_get_flags (parasite);
+      value = clay_parasite_get_flags (parasite);
       xcf_write_int32_check_error (info, &value, 1, ;);
 
-      parasite_data = gimp_parasite_get_data (parasite, &value);
+      parasite_data = clay_parasite_get_data (parasite, &value);
       xcf_write_int32_check_error (info, &value, 1, ;);
 
       xcf_write_int8_check_error (info, parasite_data, value, ;);
@@ -3325,7 +3325,7 @@ typedef struct
 
 static void
 xcf_save_parasite_func (gchar           *key,
-                        GimpParasite    *parasite,
+                        ClayParasite    *parasite,
                         XcfParasiteData *data)
 {
   if (! data->error)
@@ -3334,7 +3334,7 @@ xcf_save_parasite_func (gchar           *key,
 
 static gboolean
 xcf_save_parasite_list (XcfInfo           *info,
-                        GimpParasiteList  *list,
+                        ClayParasiteList  *list,
                         GError           **error)
 {
   XcfParasiteData data;
@@ -3342,7 +3342,7 @@ xcf_save_parasite_list (XcfInfo           *info,
   data.info  = info;
   data.error = NULL;
 
-  gimp_parasite_list_foreach (list, (GHFunc) xcf_save_parasite_func, &data);
+  clay_parasite_list_foreach (list, (GHFunc) xcf_save_parasite_func, &data);
 
   if (data.error)
     {
@@ -3356,10 +3356,10 @@ xcf_save_parasite_list (XcfInfo           *info,
 /* This is the oldest way to save paths. */
 static gboolean
 xcf_save_old_paths (XcfInfo    *info,
-                    GimpImage  *image,
+                    ClayImage  *image,
                     GError    **error)
 {
-  GimpPath *active_path = NULL;
+  ClayPath *active_path = NULL;
   guint32   num_paths;
   guint32   active_index = 0;
   GList    *list;
@@ -3373,38 +3373,38 @@ xcf_save_old_paths (XcfInfo    *info,
    * then each path:-
    */
 
-  num_paths = gimp_container_get_n_children (gimp_image_get_paths (image));
+  num_paths = clay_container_get_n_children (clay_image_get_paths (image));
 
-  if (gimp_image_get_selected_paths (image))
+  if (clay_image_get_selected_paths (image))
     {
-      active_path = gimp_image_get_selected_paths (image)->data;
+      active_path = clay_image_get_selected_paths (image)->data;
       /* Having more than 1 selected paths should not have happened in this
        * code path but let's not break saving, only produce a critical.
        */
-      if (g_list_length (gimp_image_get_selected_paths (image)) > 1)
+      if (g_list_length (clay_image_get_selected_paths (image)) > 1)
         g_critical ("%s: this code path should not happen with multiple paths selected",
                     G_STRFUNC);
     }
 
   if (active_path)
-    active_index = gimp_container_get_child_index (gimp_image_get_paths (image),
-                                                   GIMP_OBJECT (active_path));
+    active_index = clay_container_get_child_index (clay_image_get_paths (image),
+                                                   CLAY_OBJECT (active_path));
 
   xcf_write_int32_check_error (info, &active_index, 1, ;);
   xcf_write_int32_check_error (info, &num_paths,    1, ;);
 
-  for (list = gimp_image_get_path_iter (image);
+  for (list = clay_image_get_path_iter (image);
        list;
        list = g_list_next (list))
     {
-      GimpPath               *path = list->data;
+      ClayPath               *path = list->data;
       gchar                  *name;
       guint32                 locked;
       guint8                  state;
       guint32                 version;
       guint32                 pathtype;
       guint32                 tattoo;
-      GimpPathCompatPoint    *points;
+      ClayPathCompatPoint    *points;
       guint32                 num_points;
       guint32                 closed;
       gint                    i;
@@ -3421,7 +3421,7 @@ xcf_save_old_paths (XcfInfo    *info,
        * then each point.
        */
 
-      points = gimp_path_compat_get_points (path,
+      points = clay_path_compat_get_points (path,
                                             (gint32 *) &num_points,
                                             (gint32 *) &closed);
 
@@ -3430,13 +3430,13 @@ xcf_save_old_paths (XcfInfo    *info,
        * we already saved the number of paths and I won't start seeking
        * around to fix that cruft  */
 
-      name     = (gchar *) gimp_object_get_name (path);
-      /* The 'linked' concept does not exist anymore in GIMP 3.0 and over. */
+      name     = (gchar *) clay_object_get_name (path);
+      /* The 'linked' concept does not exist anymore in Clay 3.0 and over. */
       locked   = 0;
       state    = closed ? 4 : 2;  /* EDIT : ADD  (editing state, 1.2 compat) */
       version  = 3;
       pathtype = 1;  /* BEZIER  (1.2 compat) */
-      tattoo   = gimp_item_get_tattoo (GIMP_ITEM (path));
+      tattoo   = clay_item_get_tattoo (CLAY_ITEM (path));
 
       xcf_write_string_check_error (info, &name,       1, ;);
       xcf_write_int32_check_error  (info, &locked,     1, ;);
@@ -3474,14 +3474,14 @@ xcf_save_old_paths (XcfInfo    *info,
 
 /* This is an older way to save paths, though more recent than
  * xcf_save_old_paths(). It used to be the normal path storing format until all
- * 2.10 versions. It changed with GIMP 3.0.
+ * 2.10 versions. It changed with Clay 3.0.
  */
 static gboolean
 xcf_save_old_vectors (XcfInfo    *info,
-                      GimpImage  *image,
+                      ClayImage  *image,
                       GError    **error)
 {
-  GimpPath *active_path = NULL;
+  ClayPath *active_path = NULL;
   guint32   version        = 1;
   guint32   active_index   = 0;
   guint32   num_paths;
@@ -3498,33 +3498,33 @@ xcf_save_old_vectors (XcfInfo    *info,
    * then each path:-
    */
 
-  if (gimp_image_get_selected_paths (image))
+  if (clay_image_get_selected_paths (image))
     {
-      active_path = gimp_image_get_selected_paths (image)->data;
+      active_path = clay_image_get_selected_paths (image)->data;
       /* Having more than 1 selected paths should not have happened in this
        * code path but let's not break saving, only produce a critical.
        */
-      if (g_list_length (gimp_image_get_selected_paths (image)) > 1)
+      if (g_list_length (clay_image_get_selected_paths (image)) > 1)
         g_critical ("%s: this code path should not happen with multiple paths selected",
                     G_STRFUNC);
     }
 
   if (active_path)
-    active_index = gimp_container_get_child_index (gimp_image_get_paths (image),
-                                                   GIMP_OBJECT (active_path));
+    active_index = clay_container_get_child_index (clay_image_get_paths (image),
+                                                   CLAY_OBJECT (active_path));
 
-  num_paths = gimp_container_get_n_children (gimp_image_get_paths (image));
+  num_paths = clay_container_get_n_children (clay_image_get_paths (image));
 
   xcf_write_int32_check_error (info, &version,      1, ;);
   xcf_write_int32_check_error (info, &active_index, 1, ;);
   xcf_write_int32_check_error (info, &num_paths,    1, ;);
 
-  for (list = gimp_image_get_path_iter (image);
+  for (list = clay_image_get_path_iter (image);
        list;
        list = g_list_next (list))
     {
-      GimpPath         *path = list->data;
-      GimpParasiteList *parasites;
+      ClayPath         *path = list->data;
+      ClayParasiteList *parasites;
       const gchar      *name;
       guint32           tattoo;
       guint32           visible;
@@ -3544,13 +3544,13 @@ xcf_save_old_vectors (XcfInfo    *info,
        * then each stroke
        */
 
-      name          = gimp_object_get_name (path);
-      visible       = gimp_item_get_visible (GIMP_ITEM (path));
-      /* The 'linked' concept does not exist anymore in GIMP 3.0 and over. */
+      name          = clay_object_get_name (path);
+      visible       = clay_item_get_visible (CLAY_ITEM (path));
+      /* The 'linked' concept does not exist anymore in Clay 3.0 and over. */
       linked        = 0;
-      tattoo        = gimp_item_get_tattoo (GIMP_ITEM (path));
-      parasites     = gimp_item_get_parasites (GIMP_ITEM (path));
-      num_parasites = gimp_parasite_list_persistent_length (parasites);
+      tattoo        = clay_item_get_tattoo (CLAY_ITEM (path));
+      parasites     = clay_item_get_parasites (CLAY_ITEM (path));
+      num_parasites = clay_parasite_list_persistent_length (parasites);
       num_strokes   = g_queue_get_length (path->strokes);
 
       xcf_write_string_check_error (info, (gchar **) &name, 1, ;);
@@ -3566,7 +3566,7 @@ xcf_save_old_vectors (XcfInfo    *info,
            stroke_list;
            stroke_list = g_list_next (stroke_list))
         {
-          GimpStroke *stroke = stroke_list->data;
+          ClayStroke *stroke = stroke_list->data;
           guint32     stroke_type;
           guint32     closed;
           guint32     num_axes;
@@ -3585,7 +3585,7 @@ xcf_save_old_vectors (XcfInfo    *info,
            * then each control point.
            */
 
-          if (GIMP_IS_BEZIER_STROKE (stroke))
+          if (CLAY_IS_BEZIER_STROKE (stroke))
             {
               stroke_type = XCF_STROKETYPE_BEZIER_STROKE;
               num_axes = 2;   /* hardcoded, might be increased later */
@@ -3596,7 +3596,7 @@ xcf_save_old_vectors (XcfInfo    *info,
               continue;
             }
 
-          control_points = gimp_stroke_control_points_get (stroke,
+          control_points = clay_stroke_control_points_get (stroke,
                                                            (gint32 *) &closed);
 
           xcf_write_int32_check_error (info, &stroke_type,         1, ;);
@@ -3606,9 +3606,9 @@ xcf_save_old_vectors (XcfInfo    *info,
 
           for (i = 0; i < control_points->len; i++)
             {
-              GimpAnchor *anchor;
+              ClayAnchor *anchor;
 
-              anchor = & (g_array_index (control_points, GimpAnchor, i));
+              anchor = & (g_array_index (control_points, ClayAnchor, i));
 
               type      = anchor->type;
               coords[0] = anchor->position.x;
@@ -3643,8 +3643,8 @@ xcf_save_old_vectors (XcfInfo    *info,
 
 static gboolean
 xcf_save_path (XcfInfo      *info,
-               GimpImage    *image,
-               GimpPath     *path,
+               ClayImage    *image,
+               ClayPath     *path,
                GError      **error)
 {
   const gchar *string;
@@ -3658,7 +3658,7 @@ xcf_save_path (XcfInfo      *info,
   goffset      pos;
 
   /* write out the path name */
-  string = gimp_object_get_name (path);
+  string = clay_object_get_name (path);
   xcf_write_string_check_error (info, (gchar **) &string, 1, ;);
 
   /* Payload size */
@@ -3681,7 +3681,7 @@ xcf_save_path (XcfInfo      *info,
        stroke_list;
        stroke_list = g_list_next (stroke_list))
     {
-      GimpStroke *stroke = stroke_list->data;
+      ClayStroke *stroke = stroke_list->data;
       guint32     stroke_type;
       guint32     closed;
       guint32     num_axes;
@@ -3700,7 +3700,7 @@ xcf_save_path (XcfInfo      *info,
        * then each control point.
        */
 
-      if (GIMP_IS_BEZIER_STROKE (stroke))
+      if (CLAY_IS_BEZIER_STROKE (stroke))
         {
           stroke_type = XCF_STROKETYPE_BEZIER_STROKE;
           num_axes = 2;   /* hardcoded, might be increased later */
@@ -3711,7 +3711,7 @@ xcf_save_path (XcfInfo      *info,
           continue;
         }
 
-      control_points = gimp_stroke_control_points_get (stroke,
+      control_points = clay_stroke_control_points_get (stroke,
                                                        (gint32 *) &closed);
 
       /* Stroke type. */
@@ -3725,9 +3725,9 @@ xcf_save_path (XcfInfo      *info,
 
       for (i = 0; i < control_points->len; i++)
         {
-          GimpAnchor *anchor;
+          ClayAnchor *anchor;
 
-          anchor = & (g_array_index (control_points, GimpAnchor, i));
+          anchor = & (g_array_index (control_points, ClayAnchor, i));
 
           type      = anchor->type;
           coords[0] = anchor->position.x;

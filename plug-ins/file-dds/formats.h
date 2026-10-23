@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -32,7 +32,7 @@ typedef struct
   gboolean          use_alpha;
   gboolean          is_float;
   gboolean          is_signed;
-  GimpImageBaseType gimp_type;
+  ClayImageBaseType clay_type;
 } fmt_read_info_t;
 
 

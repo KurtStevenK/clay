@@ -18,77 +18,77 @@
 #pragma once
 
 
-void       tool_manager_init                       (Gimp             *gimp);
-void       tool_manager_exit                       (Gimp             *gimp);
+void       tool_manager_init                       (Clay             *clay);
+void       tool_manager_exit                       (Clay             *clay);
 
-GimpTool * tool_manager_get_active                 (Gimp             *gimp);
+ClayTool * tool_manager_get_active                 (Clay             *clay);
 
-void       tool_manager_push_tool                  (Gimp             *gimp,
-                                                    GimpTool         *tool);
-void       tool_manager_pop_tool                   (Gimp             *gimp);
+void       tool_manager_push_tool                  (Clay             *clay,
+                                                    ClayTool         *tool);
+void       tool_manager_pop_tool                   (Clay             *clay);
 
-void       tool_manager_swap_tools                 (Gimp             *gimp,
+void       tool_manager_swap_tools                 (Clay             *clay,
                                                     gboolean          block_initialization);
 
-gboolean   tool_manager_initialize_active          (Gimp             *gimp,
-                                                    GimpDisplay      *display);
-void       tool_manager_control_active             (Gimp             *gimp,
-                                                    GimpToolAction    action,
-                                                    GimpDisplay      *display);
-void       tool_manager_button_press_active        (Gimp             *gimp,
-                                                    const GimpCoords *coords,
+gboolean   tool_manager_initialize_active          (Clay             *clay,
+                                                    ClayDisplay      *display);
+void       tool_manager_control_active             (Clay             *clay,
+                                                    ClayToolAction    action,
+                                                    ClayDisplay      *display);
+void       tool_manager_button_press_active        (Clay             *clay,
+                                                    const ClayCoords *coords,
                                                     guint32           time,
                                                     GdkModifierType   state,
-                                                    GimpButtonPressType press_type,
-                                                    GimpDisplay      *display);
-void       tool_manager_button_release_active      (Gimp             *gimp,
-                                                    const GimpCoords *coords,
+                                                    ClayButtonPressType press_type,
+                                                    ClayDisplay      *display);
+void       tool_manager_button_release_active      (Clay             *clay,
+                                                    const ClayCoords *coords,
                                                     guint32           time,
                                                     GdkModifierType   state,
-                                                    GimpDisplay      *display);
-void       tool_manager_motion_active              (Gimp             *gimp,
-                                                    const GimpCoords *coords,
+                                                    ClayDisplay      *display);
+void       tool_manager_motion_active              (Clay             *clay,
+                                                    const ClayCoords *coords,
                                                     guint32           time,
                                                     GdkModifierType   state,
-                                                    GimpDisplay      *display);
-gboolean   tool_manager_key_press_active           (Gimp             *gimp,
+                                                    ClayDisplay      *display);
+gboolean   tool_manager_key_press_active           (Clay             *clay,
                                                     GdkEventKey      *kevent,
-                                                    GimpDisplay      *display);
-gboolean   tool_manager_key_release_active         (Gimp             *gimp,
+                                                    ClayDisplay      *display);
+gboolean   tool_manager_key_release_active         (Clay             *clay,
                                                     GdkEventKey      *kevent,
-                                                    GimpDisplay      *display);
+                                                    ClayDisplay      *display);
 
-void       tool_manager_focus_display_active       (Gimp             *gimp,
-                                                    GimpDisplay      *display);
-void       tool_manager_modifier_state_active      (Gimp             *gimp,
+void       tool_manager_focus_display_active       (Clay             *clay,
+                                                    ClayDisplay      *display);
+void       tool_manager_modifier_state_active      (Clay             *clay,
                                                     GdkModifierType   state,
-                                                    GimpDisplay      *display);
+                                                    ClayDisplay      *display);
 
-void     tool_manager_active_modifier_state_active (Gimp             *gimp,
+void     tool_manager_active_modifier_state_active (Clay             *clay,
                                                     GdkModifierType   state,
-                                                    GimpDisplay      *display);
+                                                    ClayDisplay      *display);
 
-void       tool_manager_oper_update_active         (Gimp             *gimp,
-                                                    const GimpCoords *coords,
+void       tool_manager_oper_update_active         (Clay             *clay,
+                                                    const ClayCoords *coords,
                                                     GdkModifierType   state,
                                                     gboolean          proximity,
-                                                    GimpDisplay      *display);
-void       tool_manager_cursor_update_active       (Gimp             *gimp,
-                                                    const GimpCoords *coords,
+                                                    ClayDisplay      *display);
+void       tool_manager_cursor_update_active       (Clay             *clay,
+                                                    const ClayCoords *coords,
                                                     GdkModifierType   state,
-                                                    GimpDisplay      *display);
+                                                    ClayDisplay      *display);
 
-const gchar   * tool_manager_can_undo_active       (Gimp             *gimp,
-                                                    GimpDisplay      *display);
-const gchar   * tool_manager_can_redo_active       (Gimp             *gimp,
-                                                    GimpDisplay      *display);
-gboolean        tool_manager_undo_active           (Gimp             *gimp,
-                                                    GimpDisplay      *display);
-gboolean        tool_manager_redo_active           (Gimp             *gimp,
-                                                    GimpDisplay      *display);
+const gchar   * tool_manager_can_undo_active       (Clay             *clay,
+                                                    ClayDisplay      *display);
+const gchar   * tool_manager_can_redo_active       (Clay             *clay,
+                                                    ClayDisplay      *display);
+gboolean        tool_manager_undo_active           (Clay             *clay,
+                                                    ClayDisplay      *display);
+gboolean        tool_manager_redo_active           (Clay             *clay,
+                                                    ClayDisplay      *display);
 
-GimpUIManager * tool_manager_get_popup_active      (Gimp             *gimp,
-                                                    const GimpCoords *coords,
+ClayUIManager * tool_manager_get_popup_active      (Clay             *clay,
+                                                    const ClayCoords *coords,
                                                     GdkModifierType   state,
-                                                    GimpDisplay      *display,
+                                                    ClayDisplay      *display,
                                                     const gchar     **ui_path);

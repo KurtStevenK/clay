@@ -18,12 +18,12 @@
 #pragma once
 
 
-void   images_raise_views_cmd_callback  (GimpAction *action,
+void   images_raise_views_cmd_callback  (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data);
-void   images_new_view_cmd_callback     (GimpAction *action,
+void   images_new_view_cmd_callback     (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data);
-void   images_delete_image_cmd_callback (GimpAction *action,
+void   images_delete_image_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data);

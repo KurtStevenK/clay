@@ -18,11 +18,11 @@
 #include "config.h"
 #include <glib.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "gegl-filter-info.h"
 
-typedef struct _GimpGeglFilterInfo
+typedef struct _ClayGeglFilterInfo
 {
   GObject parent_instance;
 
@@ -31,8 +31,8 @@ typedef struct _GimpGeglFilterInfo
   gchar          *description;
   gchar          *categories;
   gchar          *license;
-  GimpValueArray *pspecs;
-} GimpGeglFilterInfo;
+  ClayValueArray *pspecs;
+} ClayGeglFilterInfo;
 
 enum
 {
@@ -48,13 +48,13 @@ enum
 
 static GParamSpec *properties[N_PROPERTIES] = { 0 };
 
-G_DEFINE_FINAL_TYPE (GimpGeglFilterInfo, gimp_gegl_filter_info, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (ClayGeglFilterInfo, clay_gegl_filter_info, G_TYPE_OBJECT)
 
 static void
-gimp_gegl_filter_info_get_property (GObject *object, guint prop_id,
+clay_gegl_filter_info_get_property (GObject *object, guint prop_id,
                                     GValue *value, GParamSpec *pspec)
 {
-  GimpGeglFilterInfo *self = GIMP_GEGL_FILTER_INFO (object);
+  ClayGeglFilterInfo *self = CLAY_GEGL_FILTER_INFO (object);
 
   switch (prop_id)
     {
@@ -82,10 +82,10 @@ gimp_gegl_filter_info_get_property (GObject *object, guint prop_id,
 }
 
 static void
-gimp_gegl_filter_info_set_property (GObject *object, guint prop_id,
+clay_gegl_filter_info_set_property (GObject *object, guint prop_id,
                                     const GValue *value, GParamSpec *pspec)
 {
-  GimpGeglFilterInfo *self = GIMP_GEGL_FILTER_INFO (object);
+  ClayGeglFilterInfo *self = CLAY_GEGL_FILTER_INFO (object);
 
   switch (prop_id)
     {
@@ -113,12 +113,12 @@ gimp_gegl_filter_info_set_property (GObject *object, guint prop_id,
 }
 
 static void
-gimp_gegl_filter_info_class_init (GimpGeglFilterInfoClass *klass)
+clay_gegl_filter_info_class_init (ClayGeglFilterInfoClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->get_property = gimp_gegl_filter_info_get_property;
-  object_class->set_property = gimp_gegl_filter_info_set_property;
+  object_class->get_property = clay_gegl_filter_info_get_property;
+  object_class->set_property = clay_gegl_filter_info_set_property;
 
   properties[PROP_NAME]        = g_param_spec_string ("name", "Name",
                                                       "", NULL,
@@ -146,7 +146,7 @@ gimp_gegl_filter_info_class_init (GimpGeglFilterInfoClass *klass)
                                                       G_PARAM_READWRITE      |
                                                       G_PARAM_STATIC_STRINGS);
   properties[PROP_PSPECS]      = g_param_spec_boxed ("pspecs", "Parameter Specifications",
-                                                     "", GIMP_TYPE_VALUE_ARRAY,
+                                                     "", CLAY_TYPE_VALUE_ARRAY,
                                                      G_PARAM_CONSTRUCT_ONLY |
                                                      G_PARAM_READWRITE      |
                                                      G_PARAM_STATIC_STRINGS);
@@ -155,6 +155,6 @@ gimp_gegl_filter_info_class_init (GimpGeglFilterInfoClass *klass)
 }
 
 static void
-gimp_gegl_filter_info_init (GimpGeglFilterInfo *self)
+clay_gegl_filter_info_init (ClayGeglFilterInfo *self)
 {
 }

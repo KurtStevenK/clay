@@ -33,7 +33,7 @@
 
 
 void
-image_menu_setup (GimpUIManager *manager,
+image_menu_setup (ClayUIManager *manager,
                   const gchar   *ui_path)
 {
   gchar *path;

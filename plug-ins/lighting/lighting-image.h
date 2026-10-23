@@ -1,20 +1,20 @@
 #ifndef __LIGHTING_IMAGE_H__
 #define __LIGHTING_IMAGE_H__
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 
-extern GimpDrawable *input_drawable;
-extern GimpDrawable *output_drawable;
+extern ClayDrawable *input_drawable;
+extern ClayDrawable *output_drawable;
 extern GeglBuffer   *source_buffer;
 extern GeglBuffer   *dest_buffer;
 
-extern GimpDrawable *bump_drawable;
+extern ClayDrawable *bump_drawable;
 extern GeglBuffer   *bump_buffer;
 extern const Babl   *bump_format;
 
-extern GimpDrawable *env_drawable;
+extern ClayDrawable *env_drawable;
 extern GeglBuffer   *env_buffer;
 
 extern guchar          *preview_rgb_data;
@@ -45,9 +45,9 @@ void           poke            (gint          x,
                                 gdouble      *color);
 gint           check_bounds    (gint          x,
                                 gint          y);
-GimpVector3    int_to_pos      (gint          x,
+ClayVector3    int_to_pos      (gint          x,
                                 gint          y);
-GimpVector3    int_to_posf     (gdouble       x,
+ClayVector3    int_to_posf     (gdouble       x,
                                 gdouble       y);
 void           pos_to_int      (gdouble       x,
                                 gdouble       y,
@@ -66,10 +66,10 @@ gdouble        get_map_value   (GeglBuffer   *buffer,
                                 gdouble       u,
                                 gdouble       v,
                                 gint         *inside);
-gint           image_setup     (GimpDrawable *drawable,
+gint           image_setup     (ClayDrawable *drawable,
                                 gint          interactive);
-void           bumpmap_setup   (GimpDrawable *bumpmap);
-void           envmap_setup    (GimpDrawable *envmap);
+void           bumpmap_setup   (ClayDrawable *bumpmap);
+void           envmap_setup    (ClayDrawable *envmap);
 
 
 #endif  /* __LIGHTING_IMAGE_H__ */

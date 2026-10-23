@@ -1,0 +1,29 @@
+/* Clay colour scheme "Sepia": a palette laid over the selected theme's light variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(61,46,26);
+@define-color bg-color                   rgb(241,228,200);
+@define-color border-color               rgb(216,203,176);
+@define-color dimmed-fg-color            rgb(106,92,70);
+@define-color disabled-fg-color          rgb(142,128,104);
+@define-color disabled-button-color      rgb(183,170,144);
+@define-color hover-color                rgb(219,206,179);
+@define-color widget-bg-color            rgb(232,219,191);
+@define-color selected-color             rgb(209,195,169);
+@define-color extreme-bg-color           rgb(248,242,228);
+@define-color extreme-selected-color     rgb(216,203,176);
+@define-color strong-border-color        rgb(178,164,139);
+@define-color stronger-border-color      rgb(178,164,139);
+@define-color edge-border-color          rgb(178,164,139);
+@define-color scrollbar-slider-color     rgb(178,164,139);
+@define-color scrollbar-trough-color     rgb(241,228,200);
+@define-color ruler-color                rgba(216,203,176,0.3);
+@define-color accent-color               rgb(139,90,43);
+@define-color accent-hover-color         rgb(160,120,81);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(132,54,26);
+@define-color good-color                 rgb(47,94,66);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;

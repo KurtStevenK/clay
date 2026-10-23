@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * file-webp - WebP file format plug-in for the GIMP
+ * file-webp - WebP file format plug-in for the Clay
  * Copyright (C) 2015  Nathan Osman
  * Copyright (C) 2016  Ben Touchette
  *
@@ -26,7 +26,7 @@
 #define LOAD_PROC      "file-webp-load"
 #define EXPORT_PROC    "file-webp-export"
 #define PLUG_IN_BINARY "file-webp"
-#define PLUG_IN_ROLE   "gimp-file-webp"
+#define PLUG_IN_ROLE   "clay-file-webp"
 
 
 #endif /* __FILE_WEBP_H__ */

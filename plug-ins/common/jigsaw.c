@@ -1,5 +1,5 @@
 /*
- * jigsaw - a plug-in for GIMP
+ * jigsaw - a plug-in for Clay
  *
  * Copyright (C) Nigel Wetten
  *
@@ -36,15 +36,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-jigsaw"
 #define PLUG_IN_BINARY "jigsaw"
-#define PLUG_IN_ROLE   "gimp-jigsaw"
+#define PLUG_IN_ROLE   "clay-jigsaw"
 
 
 typedef enum
@@ -180,12 +180,12 @@ typedef struct _JigsawClass JigsawClass;
 
 struct _Jigsaw
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _JigsawClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -194,26 +194,26 @@ struct _JigsawClass
 
 GType                   jigsaw_get_type         (void);
 
-static GList          * jigsaw_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * jigsaw_create_procedure (GimpPlugIn           *plug_in,
+static GList          * jigsaw_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * jigsaw_create_procedure (ClayPlugIn           *plug_in,
                                                  const gchar          *name);
 
-static GimpValueArray * jigsaw_run              (GimpProcedure        *procedure,
-                                                 GimpRunMode           run_mode,
-                                                 GimpImage            *image,
-                                                 GimpDrawable        **drawables,
-                                                 GimpProcedureConfig  *config,
+static ClayValueArray * jigsaw_run              (ClayProcedure        *procedure,
+                                                 ClayRunMode           run_mode,
+                                                 ClayImage            *image,
+                                                 ClayDrawable        **drawables,
+                                                 ClayProcedureConfig  *config,
                                                  gpointer              run_data);
 
 static void     jigsaw                          (GObject              *config,
-                                                 GimpDrawable         *drawable,
-                                                 GimpPreview          *preview);
+                                                 ClayDrawable         *drawable,
+                                                 ClayPreview          *preview);
 static void     jigsaw_preview                  (GtkWidget            *widget,
                                                  GObject              *config);
 
-static gboolean jigsaw_dialog                    (GimpProcedure       *procedure,
+static gboolean jigsaw_dialog                    (ClayProcedure       *procedure,
                                                   GObject             *config,
-                                                  GimpDrawable        *drawable);
+                                                  ClayDrawable        *drawable);
 
 static void     draw_jigsaw                      (GObject             *config,
                                                   guchar              *buffer,
@@ -419,9 +419,9 @@ static void draw_bezier_horizontal_border (guchar   *buffer,
                                            gint      steps);
 
 
-G_DEFINE_TYPE (Jigsaw, jigsaw, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Jigsaw, jigsaw, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (JIGSAW_TYPE)
+CLAY_MAIN (JIGSAW_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -431,7 +431,7 @@ static globals_t globals;
 static void
 jigsaw_class_init (JigsawClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = jigsaw_query_procedures;
   plug_in_class->create_procedure = jigsaw_create_procedure;
@@ -444,69 +444,69 @@ jigsaw_init (Jigsaw *jigsaw)
 }
 
 static GList *
-jigsaw_query_procedures (GimpPlugIn *plug_in)
+jigsaw_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-jigsaw_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+jigsaw_create_procedure (ClayPlugIn  *plug_in,
                                const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             jigsaw_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Jigsaw..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("_Jigsaw..."));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Render/Pattern");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Add a jigsaw-puzzle pattern "
                                           "to the image"),
                                         _("Jigsaw puzzle look"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nigel Wetten",
                                       "Nigel Wetten",
                                       "May 2000");
 
-      gimp_procedure_add_int_argument (procedure, "x",
+      clay_procedure_add_int_argument (procedure, "x",
                                        _("_Horizontal"),
                                        _("Number of pieces going across"),
                                        MIN_XTILES, MAX_XTILES, 5,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "y",
+      clay_procedure_add_int_argument (procedure, "y",
                                        _("_Vertical"),
                                        _("Number of pieces going down"),
                                        MIN_YTILES, MAX_YTILES, 5,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "style",
+      clay_procedure_add_choice_argument (procedure, "style",
                                           _("_Jigsaw Style"),
                                           _("The style/shape of the jigsaw puzzle"),
-                                          gimp_choice_new_with_values ("square", BEZIER_1, _("Square"), NULL,
+                                          clay_choice_new_with_values ("square", BEZIER_1, _("Square"), NULL,
                                                                        "curved", BEZIER_2, _("Curved"), NULL,
                                                                        NULL),
                                           "square",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "blend-lines",
+      clay_procedure_add_int_argument (procedure, "blend-lines",
                                        _("_Blend width"),
                                        _("Degree of slope of each piece's edge"),
                                        MIN_BLEND_LINES, MAX_BLEND_LINES, 3,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "blend-amount",
+      clay_procedure_add_double_argument (procedure, "blend-amount",
                                           _("Hi_ghlight"),
                                           _("The amount of highlighting on the edges "
                                             "of each piece"),
@@ -517,28 +517,28 @@ jigsaw_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-jigsaw_run (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
-            GimpDrawable        **drawables,
-            GimpProcedureConfig  *config,
+static ClayValueArray *
+jigsaw_run (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
+            ClayDrawable        **drawables,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -546,25 +546,25 @@ jigsaw_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! jigsaw_dialog (procedure, G_OBJECT (config), drawable))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! jigsaw_dialog (procedure, G_OBJECT (config), drawable))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
-  gimp_progress_init (_("Assembling jigsaw"));
+  clay_progress_init (_("Assembling jigsaw"));
 
   jigsaw (G_OBJECT (config), drawable, NULL);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static void
 jigsaw (GObject      *config,
-        GimpDrawable *drawable,
-        GimpPreview  *preview)
+        ClayDrawable *drawable,
+        ClayPreview  *preview)
 {
   GeglBuffer *gegl_buffer = NULL;
   const Babl *format      = NULL;
@@ -584,14 +584,14 @@ jigsaw (GObject      *config,
                 "blend-lines", &blend_lines,
                 NULL);
 
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
   if (preview)
     {
       GBytes *buffer_bytes;
 
-      gimp_preview_get_size (preview, &width, &height);
+      clay_preview_get_size (preview, &width, &height);
 
-      buffer_bytes = gimp_drawable_get_thumbnail_data (drawable,
+      buffer_bytes = clay_drawable_get_thumbnail_data (drawable,
                                                        width, height,
                                                        &width, &height,
                                                        &bytes);
@@ -600,12 +600,12 @@ jigsaw (GObject      *config,
     }
   else
     {
-      gegl_buffer = gimp_drawable_get_buffer (drawable);
+      gegl_buffer = clay_drawable_get_buffer (drawable);
 
-      width  = gimp_drawable_get_width  (drawable);
-      height = gimp_drawable_get_height (drawable);
+      width  = clay_drawable_get_width  (drawable);
+      height = clay_drawable_get_height (drawable);
 
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format ("R'G'B'A u8");
       else
         format = babl_format ("R'G'B' u8");
@@ -632,24 +632,24 @@ jigsaw (GObject      *config,
   free_cache (blend_lines);
 
   /* cleanup */
-  if (preview && GIMP_IS_PREVIEW (preview))
+  if (preview && CLAY_IS_PREVIEW (preview))
     {
-      gimp_preview_draw_buffer (preview, buffer, width * bytes);
+      clay_preview_draw_buffer (preview, buffer, width * bytes);
 
-      gimp_preview_set_bounds (preview, 0, 0, width, height);
-      gimp_preview_set_size (preview, width, height);
+      clay_preview_set_bounds (preview, 0, 0, width, height);
+      clay_preview_set_size (preview, width, height);
     }
   else
     {
-      gegl_buffer = gimp_drawable_get_shadow_buffer (drawable);
+      gegl_buffer = clay_drawable_get_shadow_buffer (drawable);
 
       gegl_buffer_set (gegl_buffer, GEGL_RECTANGLE (0, 0, width, height), 0,
                        format, buffer,
                        GEGL_AUTO_ROWSTRIDE);
       g_object_unref (gegl_buffer);
 
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, 0, 0, width, height);
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, 0, 0, width, height);
     }
 
   g_free (buffer);
@@ -659,13 +659,13 @@ static void
 jigsaw_preview (GtkWidget *widget,
                 GObject   *config)
 {
-  GimpDrawablePreview *preview;
-  GimpDrawable        *drawable;
+  ClayDrawablePreview *preview;
+  ClayDrawable        *drawable;
 
-  preview  = GIMP_DRAWABLE_PREVIEW (widget);
-  drawable = gimp_drawable_preview_get_drawable (preview);
+  preview  = CLAY_DRAWABLE_PREVIEW (widget);
+  drawable = clay_drawable_preview_get_drawable (preview);
 
-  jigsaw (config, drawable, GIMP_PREVIEW (widget));
+  jigsaw (config, drawable, CLAY_PREVIEW (widget));
 }
 
 static void
@@ -730,7 +730,7 @@ draw_jigsaw (GObject  *config,
                 "blend-lines",  &blend_lines,
                 "blend-amount", &blend_amount,
                 NULL);
-  style = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  style = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                "style");
 
   xlines = xtiles - 1;
@@ -757,14 +757,14 @@ draw_jigsaw (GObject  *config,
                                 x[i], ytiles, has_alpha,
                                 blend_lines, blend_amount);
           if (! preview_mode)
-            gimp_progress_update ((gdouble) i / (gdouble) progress_total);
+            clay_progress_update ((gdouble) i / (gdouble) progress_total);
         }
       for (i = 0; i < ylines; i++)
         {
           draw_horizontal_border (buffer, bufsize, width, bytes, y[i], xtiles,
                                   has_alpha, blend_lines, blend_amount);
           if (! preview_mode)
-            gimp_progress_update ((gdouble) (i + xlines) / (gdouble) progress_total);
+            clay_progress_update ((gdouble) (i + xlines) / (gdouble) progress_total);
         }
     }
   else if (style == BEZIER_2)
@@ -775,7 +775,7 @@ draw_jigsaw (GObject  *config,
                                        x[i], xtiles, ytiles, has_alpha,
                                        blend_lines, blend_amount, steps);
           if (! preview_mode)
-            gimp_progress_update ((gdouble) i / (gdouble) progress_total);
+            clay_progress_update ((gdouble) i / (gdouble) progress_total);
         }
       for (i = 0; i < ylines; i++)
         {
@@ -783,7 +783,7 @@ draw_jigsaw (GObject  *config,
                                          y[i], xtiles, ytiles, has_alpha,
                                          blend_lines, blend_amount, steps);
           if (!preview_mode)
-            gimp_progress_update ((gdouble) (i + xlines) / (gdouble) progress_total);
+            clay_progress_update ((gdouble) (i + xlines) / (gdouble) progress_total);
         }
     }
   else
@@ -793,7 +793,7 @@ draw_jigsaw (GObject  *config,
     }
 
   if (! preview_mode)
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 
   g_free (globals.gridx);
   g_free (globals.gridy);
@@ -2553,9 +2553,9 @@ draw_bezier_horizontal_border (guchar   *buffer,
 ********************************************************/
 
 static gboolean
-jigsaw_dialog (GimpProcedure *procedure,
+jigsaw_dialog (ClayProcedure *procedure,
                GObject       *config,
-               GimpDrawable  *drawable)
+               ClayDrawable  *drawable)
 {
   GtkWidget     *dialog;
   GtkWidget     *preview;
@@ -2563,59 +2563,59 @@ jigsaw_dialog (GimpProcedure *procedure,
   GtkWidget     *scale;
   gboolean       run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Jigsaw"));
 
   /* xtiles */
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "x", 1.0);
 
   /* ytiles */
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "y", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "num-tiles-label", _("Number of Tiles"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "num-tiles-vbox", "x", "y", NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "num-tiles-frame", "num-tiles-label",
                                     FALSE, "num-tiles-vbox");
 
   /* number of blending lines */
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "blend-lines", 1.0);
 
   /* blending amount */
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "blend-amount", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "bevel-label", _("Bevel Edges"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "bevel-vbox", "blend-lines", "blend-amount",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "bevel-frame", "bevel-label", FALSE,
                                     "bevel-vbox");
 
   /* frame for primitive radio buttons */
-  frame = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "style", GIMP_TYPE_INT_RADIO_FRAME);
+  frame = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "style", CLAY_TYPE_INT_RADIO_FRAME);
   gtk_widget_set_margin_bottom (frame, 12);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "jigsaw-vbox", "num-tiles-frame",
                                   "bevel-frame", "style", NULL);
 
-  preview = gimp_procedure_dialog_get_drawable_preview (GIMP_PROCEDURE_DIALOG (dialog),
+  preview = clay_procedure_dialog_get_drawable_preview (CLAY_PROCEDURE_DIALOG (dialog),
                                                         "preview", drawable);
   gtk_widget_set_margin_bottom (preview, 12);
 
@@ -2624,15 +2624,15 @@ jigsaw_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "preview", "jigsaw-vbox", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

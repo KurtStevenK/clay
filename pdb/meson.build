@@ -22,8 +22,8 @@ pdb_names = [
   'font',
   'font_select',
   'fonts',
-  'gimp',
-  'gimprc',
+  'clay',
+  'clayrc',
   'gradient_select',
   'gradient',
   'gradients',
@@ -72,8 +72,8 @@ endforeach
 
 
 enum_headers = [
-  meson.project_source_root() + '/libgimpbase/gimpbaseenums.h',
-  meson.project_source_root() + '/libgimpconfig/gimpconfigenums.h',
+  meson.project_source_root() + '/libclaybase/claybaseenums.h',
+  meson.project_source_root() + '/libclayconfig/clayconfigenums.h',
   meson.project_source_root() + '/app/operations/operations-enums.h',
   meson.project_source_root() + '/app/core/core-enums.h',
   meson.project_source_root() + '/app/paint/paint-enums.h'
@@ -149,7 +149,7 @@ pdbgen = custom_target('stamp-pdbgen.h',
   build_by_default: true,
 )
 
-stamp_enumcode = custom_target('gimpenums.h',
+stamp_enumcode = custom_target('clayenums.h',
   input : [
     files(
       'meson-enumcode.py',

@@ -20,27 +20,27 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage-new.h"
-#include "core/gimptemplate.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage-new.h"
+#include "core/claytemplate.h"
 
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
-#include "widgets/gimptemplateeditor.h"
-#include "widgets/gimptemplateview.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
+#include "widgets/claytemplateeditor.h"
+#include "widgets/claytemplateview.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "dialogs/dialogs.h"
 #include "dialogs/template-options-dialog.h"
@@ -48,28 +48,28 @@
 #include "actions.h"
 #include "templates-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct
 {
-  GimpContext   *context;
-  GimpContainer *container;
-  GimpTemplate  *template;
+  ClayContext   *context;
+  ClayContainer *container;
+  ClayTemplate  *template;
 } TemplateDeleteData;
 
 
 /*  local function prototypes  */
 
 static void   templates_new_callback     (GtkWidget          *dialog,
-                                          GimpTemplate       *template,
-                                          GimpTemplate       *edit_template,
-                                          GimpContext        *context,
+                                          ClayTemplate       *template,
+                                          ClayTemplate       *edit_template,
+                                          ClayContext        *context,
                                           gpointer            user_data);
 static void   templates_edit_callback    (GtkWidget          *dialog,
-                                          GimpTemplate       *template,
-                                          GimpTemplate       *edit_template,
-                                          GimpContext        *context,
+                                          ClayTemplate       *template,
+                                          ClayTemplate       *edit_template,
+                                          ClayContext        *context,
                                           gpointer            user_data);
 static void   templates_delete_response  (GtkWidget          *dialog,
                                           gint                response_id,
@@ -80,94 +80,94 @@ static void   templates_delete_data_free (TemplateDeleteData *delete_data);
 /*  public functions */
 
 void
-templates_create_image_cmd_callback (GimpAction *action,
+templates_create_image_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  Gimp                *gimp;
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpTemplate        *template;
-  return_if_no_gimp (gimp, data);
+  Clay                *clay;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayTemplate        *template;
+  return_if_no_clay (clay, data);
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  template = gimp_context_get_template (context);
+  template = clay_context_get_template (context);
 
-  if (template && gimp_container_have (container, GIMP_OBJECT (template)))
+  if (template && clay_container_have (container, CLAY_OBJECT (template)))
     {
       GtkWidget *widget = GTK_WIDGET (editor);
-      GimpImage *image;
+      ClayImage *image;
 
-      image = gimp_image_new_from_template (gimp, template, context);
-      gimp_create_display (gimp, image, gimp_template_get_unit (template), 1.0,
-                           G_OBJECT (gimp_widget_get_monitor (widget)));
+      image = clay_image_new_from_template (clay, template, context);
+      clay_create_display (clay, image, clay_template_get_unit (template), 1.0,
+                           G_OBJECT (clay_widget_get_monitor (widget)));
       g_object_unref (image);
 
-      gimp_image_new_set_last_template (gimp, template);
+      clay_image_new_set_last_template (clay, template);
     }
 }
 
 void
-templates_new_cmd_callback (GimpAction *action,
+templates_new_cmd_callback (ClayAction *action,
                             GVariant   *value,
                             gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
   GtkWidget           *dialog;
 
-  context = gimp_container_view_get_context (editor->view);
+  context = clay_container_view_get_context (editor->view);
 
-#define NEW_DIALOG_KEY "gimp-template-new-dialog"
+#define NEW_DIALOG_KEY "clay-template-new-dialog"
 
-  dialog = dialogs_get_dialog (G_OBJECT (context->gimp), NEW_DIALOG_KEY);
+  dialog = dialogs_get_dialog (G_OBJECT (context->clay), NEW_DIALOG_KEY);
 
   if (! dialog)
     {
       dialog = template_options_dialog_new (NULL, context,
                                             GTK_WIDGET (editor),
                                             _("New Template"),
-                                            "gimp-template-new",
-                                            GIMP_ICON_TEMPLATE,
+                                            "clay-template-new",
+                                            CLAY_ICON_TEMPLATE,
                                             _("Create a New Template"),
-                                            GIMP_HELP_TEMPLATE_NEW,
+                                            CLAY_HELP_TEMPLATE_NEW,
                                             templates_new_callback,
                                             NULL);
 
-      dialogs_attach_dialog (G_OBJECT (context->gimp), NEW_DIALOG_KEY, dialog);
+      dialogs_attach_dialog (G_OBJECT (context->clay), NEW_DIALOG_KEY, dialog);
     }
 
   gtk_window_present (GTK_WINDOW (dialog));
 }
 
 void
-templates_duplicate_cmd_callback (GimpAction *action,
+templates_duplicate_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpTemplate        *template;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayTemplate        *template;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  template = gimp_context_get_template (context);
+  template = clay_context_get_template (context);
 
-  if (template && gimp_container_have (container, GIMP_OBJECT (template)))
+  if (template && clay_container_have (container, CLAY_OBJECT (template)))
     {
-      GimpTemplate *new_template;
+      ClayTemplate *new_template;
 
-      new_template = gimp_config_duplicate (GIMP_CONFIG (template));
+      new_template = clay_config_duplicate (CLAY_CONFIG (template));
 
-      gimp_container_add (container, GIMP_OBJECT (new_template));
-      gimp_context_set_by_type (context,
-                                gimp_container_get_child_type (container),
-                                GIMP_OBJECT (new_template));
+      clay_container_add (container, CLAY_OBJECT (new_template));
+      clay_context_set_by_type (context,
+                                clay_container_get_child_type (container),
+                                CLAY_OBJECT (new_template));
       g_object_unref (new_template);
 
       templates_edit_cmd_callback (action, value, data);
@@ -175,25 +175,25 @@ templates_duplicate_cmd_callback (GimpAction *action,
 }
 
 void
-templates_edit_cmd_callback (GimpAction *action,
+templates_edit_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpTemplate        *template;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayTemplate        *template;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  template = gimp_context_get_template (context);
+  template = clay_context_get_template (context);
 
-  if (template && gimp_container_have (container, GIMP_OBJECT (template)))
+  if (template && clay_container_have (container, CLAY_OBJECT (template)))
     {
       GtkWidget *dialog;
 
-#define EDIT_DIALOG_KEY "gimp-template-edit-dialog"
+#define EDIT_DIALOG_KEY "clay-template-edit-dialog"
 
       dialog = dialogs_get_dialog (G_OBJECT (template), EDIT_DIALOG_KEY);
 
@@ -202,10 +202,10 @@ templates_edit_cmd_callback (GimpAction *action,
           dialog = template_options_dialog_new (template, context,
                                                 GTK_WIDGET (editor),
                                                 _("Edit Template"),
-                                                "gimp-template-edit",
-                                                GIMP_ICON_EDIT,
+                                                "clay-template-edit",
+                                                CLAY_ICON_EDIT,
                                                 _("Edit Template"),
-                                                GIMP_HELP_TEMPLATE_EDIT,
+                                                CLAY_HELP_TEMPLATE_EDIT,
                                                 templates_edit_callback,
                                                 NULL);
 
@@ -217,21 +217,21 @@ templates_edit_cmd_callback (GimpAction *action,
 }
 
 void
-templates_delete_cmd_callback (GimpAction *action,
+templates_delete_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpTemplate        *template;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayTemplate        *template;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  template = gimp_context_get_template (context);
+  template = clay_context_get_template (context);
 
-  if (template && gimp_container_have (container, GIMP_OBJECT (template)))
+  if (template && clay_container_have (container, CLAY_OBJECT (template)))
     {
       TemplateDeleteData *delete_data = g_slice_new (TemplateDeleteData);
       GtkWidget          *dialog;
@@ -241,16 +241,16 @@ templates_delete_cmd_callback (GimpAction *action,
       delete_data->template  = template;
 
       dialog =
-        gimp_message_dialog_new (_("Delete Template"), GIMP_ICON_EDIT_DELETE,
+        clay_message_dialog_new (_("Delete Template"), CLAY_ICON_EDIT_DELETE,
                                  GTK_WIDGET (editor), 0,
-                                 gimp_standard_help_func, NULL,
+                                 clay_standard_help_func, NULL,
 
                                  _("_Cancel"), GTK_RESPONSE_CANCEL,
                                  _("_Delete"), GTK_RESPONSE_OK,
 
                                  NULL);
 
-      gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+      clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                                GTK_RESPONSE_OK,
                                                GTK_RESPONSE_CANCEL,
                                                -1);
@@ -266,11 +266,11 @@ templates_delete_cmd_callback (GimpAction *action,
                         G_CALLBACK (templates_delete_response),
                         delete_data);
 
-      gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+      clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                          _("Are you sure you want to delete "
                                            "template '%s' from the list and "
                                            "from disk?"),
-                                         gimp_object_get_name (template));
+                                         clay_object_get_name (template));
       gtk_widget_set_visible (dialog, TRUE);
     }
 }
@@ -280,13 +280,13 @@ templates_delete_cmd_callback (GimpAction *action,
 
 static void
 templates_new_callback (GtkWidget    *dialog,
-                        GimpTemplate *template,
-                        GimpTemplate *edit_template,
-                        GimpContext  *context,
+                        ClayTemplate *template,
+                        ClayTemplate *edit_template,
+                        ClayContext  *context,
                         gpointer      user_data)
 {
-  gimp_container_add (context->gimp->templates, GIMP_OBJECT (edit_template));
-  gimp_context_set_template (gimp_get_user_context (context->gimp),
+  clay_container_add (context->clay->templates, CLAY_OBJECT (edit_template));
+  clay_context_set_template (clay_get_user_context (context->clay),
                              edit_template);
 
   gtk_widget_destroy (dialog);
@@ -294,12 +294,12 @@ templates_new_callback (GtkWidget    *dialog,
 
 static void
 templates_edit_callback (GtkWidget    *dialog,
-                         GimpTemplate *template,
-                         GimpTemplate *edit_template,
-                         GimpContext  *context,
+                         ClayTemplate *template,
+                         ClayTemplate *edit_template,
+                         ClayContext  *context,
                          gpointer      user_data)
 {
-  gimp_config_sync (G_OBJECT (edit_template),
+  clay_config_sync (G_OBJECT (edit_template),
                     G_OBJECT (template), 0);
 
   gtk_widget_destroy (dialog);
@@ -312,25 +312,25 @@ templates_delete_response (GtkWidget          *dialog,
 {
   if (response_id == GTK_RESPONSE_OK)
     {
-      GimpObject *new_active = NULL;
+      ClayObject *new_active = NULL;
 
       if (delete_data->template ==
-          gimp_context_get_template (delete_data->context))
+          clay_context_get_template (delete_data->context))
         {
-          new_active = gimp_container_get_neighbor_of (delete_data->container,
-                                                       GIMP_OBJECT (delete_data->template));
+          new_active = clay_container_get_neighbor_of (delete_data->container,
+                                                       CLAY_OBJECT (delete_data->template));
         }
 
-      if (gimp_container_have (delete_data->container,
-                               GIMP_OBJECT (delete_data->template)))
+      if (clay_container_have (delete_data->container,
+                               CLAY_OBJECT (delete_data->template)))
         {
           if (new_active)
-            gimp_context_set_by_type (delete_data->context,
-                                      gimp_container_get_child_type (delete_data->container),
+            clay_context_set_by_type (delete_data->context,
+                                      clay_container_get_child_type (delete_data->container),
                                       new_active);
 
-          gimp_container_remove (delete_data->container,
-                                 GIMP_OBJECT (delete_data->template));
+          clay_container_remove (delete_data->container,
+                                 CLAY_OBJECT (delete_data->template));
         }
     }
 

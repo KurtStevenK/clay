@@ -56,18 +56,18 @@
 #include <glib/gstdio.h>
 
 #ifdef G_OS_WIN32
-#include <libgimpbase/gimpwin32-io.h>
+#include <libclaybase/claywin32-io.h>
 #endif
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "fractal-explorer.h"
 #include "fractal-explorer-dialogs.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 typedef struct _Explorer      Explorer;
@@ -75,12 +75,12 @@ typedef struct _ExplorerClass ExplorerClass;
 
 struct _Explorer
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _ExplorerClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -89,19 +89,19 @@ struct _ExplorerClass
 
 GType                   explorer_get_type         (void);
 
-static GList          * explorer_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * explorer_create_procedure (GimpPlugIn           *plug_in,
+static GList          * explorer_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * explorer_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * explorer_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * explorer_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
-static void       explorer                         (GimpDrawable        *drawable,
-                                                    GimpProcedureConfig *config);
+static void       explorer                         (ClayDrawable        *drawable,
+                                                    ClayProcedureConfig *config);
 
 static void       delete_dialog_callback           (GtkWidget          *widget,
                                                     gboolean            value,
@@ -131,9 +131,9 @@ static void       fractalexplorer_rescan_list      (GtkWidget *widget,
                                                     gpointer   data);
 
 
-G_DEFINE_TYPE (Explorer, explorer, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Explorer, explorer, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (EXPLORER_TYPE)
+CLAY_MAIN (EXPLORER_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -204,7 +204,7 @@ static GtkWidget   *delete_dialog = NULL;
 static void
 explorer_class_init (ExplorerClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = explorer_query_procedures;
   plug_in_class->create_procedure = explorer_create_procedure;
@@ -217,45 +217,45 @@ explorer_init (Explorer *explorer)
 }
 
 static GList *
-explorer_query_procedures (GimpPlugIn *plug_in)
+explorer_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-explorer_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+explorer_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             explorer_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Fractal Explorer..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Render/Fractals");
+      clay_procedure_set_menu_label (procedure, _("_Fractal Explorer..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Render/Fractals");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Render fractal art"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Cotting (cotting@multimania.com, "
                                       "www.multimania.com/cotting)",
                                       "Daniel Cotting (cotting@multimania.com, "
                                       "www.multimania.com/cotting)",
                                       "December, 1998");
 
-      gimp_procedure_add_choice_argument (procedure, "fractal-type",
+      clay_procedure_add_choice_argument (procedure, "fractal-type",
                                           _("Fr_actal type"),
                                           _("Type of fractal pattern"),
-                                          gimp_choice_new_with_values ("mandelbrot", 0, _("Mandelbrot"), NULL,
+                                          clay_choice_new_with_values ("mandelbrot", 0, _("Mandelbrot"), NULL,
                                                                        "julia",      1, _("Julia"),      NULL,
                                                                        "barnsley-1", 2, _("Barnsley 1"), NULL,
                                                                        "barnsley-2", 3, _("Barnsley 2"), NULL,
@@ -268,129 +268,129 @@ explorer_create_procedure (GimpPlugIn  *plug_in,
                                           "mandelbrot",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "xmin",
+      clay_procedure_add_double_argument (procedure, "xmin",
                                           _("Lef_t"),
                                           _("X min fractal image delimiter"),
                                           -3.000, 3.000, -2.000,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "xmax",
+      clay_procedure_add_double_argument (procedure, "xmax",
                                           _("Ri_ght"),
                                           _("X max fractal image delimiter"),
                                           -3.000, 3.000, 2.000,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "ymin",
+      clay_procedure_add_double_argument (procedure, "ymin",
                                           _("To_p"),
                                           _("Y min fractal image delimiter"),
                                           -3.000, 3.000, -1.500,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "ymax",
+      clay_procedure_add_double_argument (procedure, "ymax",
                                           _("_Bottom"),
                                           _("Y max fractal image delimiter"),
                                           -3.000, 3.000, 1.500,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "iter",
+      clay_procedure_add_double_argument (procedure, "iter",
                                           _("Iteratio_ns"),
                                           _("Iteration value"),
                                           1, 1000, 50,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "cx",
+      clay_procedure_add_double_argument (procedure, "cx",
                                           _("C_X"),
                                           _("CX value"),
                                           -2.5000, 2.5000, -0.75,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "cy",
+      clay_procedure_add_double_argument (procedure, "cy",
                                           _("C_Y"),
                                           _("CY value"),
                                           -2.5000, 2.5000, -0.2,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "color-mode",
+      clay_procedure_add_choice_argument (procedure, "color-mode",
                                           _("Color Mode"),
                                           _("Apply specified color map or active gradient to final image"),
-                                          gimp_choice_new_with_values ("colormap", 0, _("As specified above"),                   NULL,
+                                          clay_choice_new_with_values ("colormap", 0, _("As specified above"),                   NULL,
                                                                        "gradient", 1, _("Apply active gradient to final image"), NULL,
                                                                        NULL),
                                           "colormap",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "red-stretch",
+      clay_procedure_add_double_argument (procedure, "red-stretch",
                                           _("Red stretch"),
                                           _("Red stretching factor"),
                                           0, 1, 1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "green-stretch",
+      clay_procedure_add_double_argument (procedure, "green-stretch",
                                           _("Green stretch"),
                                           _("Green stretching factor"),
                                           0, 1, 1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "blue-stretch",
+      clay_procedure_add_double_argument (procedure, "blue-stretch",
                                           _("Blue stretch"),
                                           _("Blue stretching factor"),
                                           0, 1, 1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "red-mode",
+      clay_procedure_add_choice_argument (procedure, "red-mode",
                                           _("_Red"),
                                           _("Red application mode"),
-                                          gimp_choice_new_with_values ("red-sin",  0, _("Sine"),   NULL,
+                                          clay_choice_new_with_values ("red-sin",  0, _("Sine"),   NULL,
                                                                        "red-cos",  1, _("Cosine"), NULL,
                                                                        "red-none", 2, _("None"),   NULL,
                                                                        NULL),
                                           "red-cos",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "green-mode",
+      clay_procedure_add_choice_argument (procedure, "green-mode",
                                           _("_Green"),
                                           _("Green application mode"),
-                                          gimp_choice_new_with_values ("green-sin",  0, _("Sine"),   NULL,
+                                          clay_choice_new_with_values ("green-sin",  0, _("Sine"),   NULL,
                                                                        "green-cos",  1, _("Cosine"), NULL,
                                                                        "green-none", 2, _("None"),   NULL,
                                                                        NULL),
                                           "green-cos",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "blue-mode",
+      clay_procedure_add_choice_argument (procedure, "blue-mode",
                                           _("_Blue"),
                                           _("Blue application mode"),
-                                          gimp_choice_new_with_values ("blue-sin",  0, _("Sine"),   NULL,
+                                          clay_choice_new_with_values ("blue-sin",  0, _("Sine"),   NULL,
                                                                        "blue-cos",  1, _("Cosine"), NULL,
                                                                        "blue-none", 2, _("None"),   NULL,
                                                                        NULL),
                                           "blue-sin",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "red-invert",
+      clay_procedure_add_boolean_argument (procedure, "red-invert",
                                            _("In_version"),
                                            _("Red inversion mode"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "green-invert",
+      clay_procedure_add_boolean_argument (procedure, "green-invert",
                                            _("I_nversion"),
                                            _("Green inversion mode"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "blue-invert",
+      clay_procedure_add_boolean_argument (procedure, "blue-invert",
                                            _("_Inversion"),
                                            _("Blue inversion mode"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "n-colors",
+      clay_procedure_add_int_argument (procedure, "n-colors",
                                        _("_Number of colors"),
                                        _("Number of Colors for mapping"),
                                        2, 8192, 512,
                                        G_PARAM_READWRITE);
-      gimp_procedure_add_boolean_argument (procedure, "use-loglog-smoothing",
+      clay_procedure_add_boolean_argument (procedure, "use-loglog-smoothing",
                                            _("_Use log log smoothing"),
                                            _("Use log log smoothing to eliminate "
                                            "\"banding\" in the result"),
@@ -402,33 +402,33 @@ explorer_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-explorer_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+explorer_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpDrawable      *drawable;
+  ClayDrawable      *drawable;
   gint               pwidth;
   gint               pheight;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
   gint               sel_width;
   gint               sel_height;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -436,11 +436,11 @@ explorer_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &sel_x, &sel_y,
                                       &sel_width, &sel_height))
     {
-      return gimp_procedure_new_return_values (procedure, status, NULL);
+      return clay_procedure_new_return_values (procedure, status, NULL);
     }
 
   /* Calculate preview size */
@@ -463,15 +463,15 @@ explorer_run (GimpProcedure        *procedure,
   /* See how we will run */
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       /* Get information from the dialog */
       if (! explorer_dialog (procedure, config))
-        return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL,
                                                  NULL);
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_NONINTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
       make_color_map (config);
       break;
 
@@ -488,17 +488,17 @@ explorer_run (GimpProcedure        *procedure,
                 "cy",   &cy,
                 NULL);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      gimp_progress_init (_("Rendering fractal"));
+      clay_progress_init (_("Rendering fractal"));
 
       explorer (drawable, config);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
 
-  return gimp_procedure_new_return_values (procedure, status, NULL);
+  return clay_procedure_new_return_values (procedure, status, NULL);
 }
 
 /**********************************************************************
@@ -506,8 +506,8 @@ explorer_run (GimpProcedure        *procedure,
  *********************************************************************/
 
 static void
-explorer (GimpDrawable        *drawable,
-          GimpProcedureConfig *config)
+explorer (ClayDrawable        *drawable,
+          ClayProcedureConfig *config)
 {
   GeglBuffer *src_buffer;
   GeglBuffer *dest_buffer;
@@ -529,16 +529,16 @@ explorer (GimpDrawable        *drawable,
    *  need to be done for correct operation. (It simply makes it go
    *  faster, since fewer pixels need to be operated on).
    */
-  if (! gimp_drawable_mask_intersect (drawable, &x, &y, &w, &h))
+  if (! clay_drawable_mask_intersect (drawable, &x, &y, &w, &h))
     return;
 
   /* Get the size of the input image. (This will/must be the same
    *  as the size of the output image.
    */
-  width  = gimp_drawable_get_width  (drawable);
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width  (drawable);
+  height = clay_drawable_get_height (drawable);
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     format = babl_format ("R'G'B'A u8");
   else
     format = babl_format ("R'G'B' u8");
@@ -549,8 +549,8 @@ explorer (GimpDrawable        *drawable,
   src_row  = g_new (guchar, bpp * w);
   dest_row = g_new (guchar, bpp * w);
 
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
   xbild = width;
   ybild = height;
@@ -575,7 +575,7 @@ explorer (GimpDrawable        *drawable,
                        GEGL_AUTO_ROWSTRIDE);
 
       if ((row % 10) == 0)
-        gimp_progress_update ((double) row / (double) h);
+        clay_progress_update ((double) row / (double) h);
     }
 
   g_object_unref (src_buffer);
@@ -584,11 +584,11 @@ explorer (GimpDrawable        *drawable,
   g_free (src_row);
   g_free (dest_row);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   /*  update the processed region  */
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, x, y, w, h);
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, x, y, w, h);
 }
 
 /**********************************************************************
@@ -601,7 +601,7 @@ explorer_render_row (const guchar        *src_row,
                      gint                 row,
                      gint                 row_width,
                      gint                 bpp,
-                     GimpProcedureConfig *config)
+                     ClayProcedureConfig *config)
 {
   gint    col;
   gdouble a;
@@ -639,7 +639,7 @@ explorer_render_row (const guchar        *src_row,
                 "n-colors",             &n_colors,
                 NULL);
   fractal_type =
-    gimp_procedure_config_get_choice_id (wvals.config, "fractal-type");
+    clay_procedure_config_get_choice_id (wvals.config, "fractal-type");
 
   iteration = (gint) iter;
   log2      = log (2.0);
@@ -879,10 +879,10 @@ delete_fractal_callback (GtkWidget *widget,
                                "\"%s\" from the list and from disk?"),
                              sel_obj->draw_name);
 
-      delete_dialog = gimp_query_boolean_box (_("Delete Fractal"),
+      delete_dialog = clay_query_boolean_box (_("Delete Fractal"),
                                               gtk_widget_get_toplevel (view),
-                                              gimp_standard_help_func, NULL,
-                                              GIMP_ICON_DIALOG_QUESTION,
+                                              clay_standard_help_func, NULL,
+                                              CLAY_ICON_DIALOG_QUESTION,
                                               str,
                                               _("_Delete"), _("_Cancel"),
                                               G_OBJECT (widget), "destroy",
@@ -1169,7 +1169,7 @@ fractalexplorer_load (const gchar *filename,
   if (!fp)
     {
       g_message (_("Could not open '%s' for reading: %s"),
-                 gimp_filename_to_utf8 (filename), g_strerror (errno));
+                 clay_filename_to_utf8 (filename), g_strerror (errno));
       return NULL;
     }
 
@@ -1190,7 +1190,7 @@ fractalexplorer_load (const gchar *filename,
   if (strncmp (fractalexplorer_HEADER, load_buf, strlen (load_buf)))
     {
       g_message (_("File '%s' is not a FractalExplorer file"),
-                 gimp_filename_to_utf8 (filename));
+                 clay_filename_to_utf8 (filename));
       fclose (fp);
       fractalexplorer_free (fractalexplorer);
 
@@ -1200,7 +1200,7 @@ fractalexplorer_load (const gchar *filename,
   if (load_options (fractalexplorer, fp))
     {
       g_message (_("File '%s' is corrupt.\nLine %d Option section incorrect"),
-                 gimp_filename_to_utf8 (filename), line_no);
+                 clay_filename_to_utf8 (filename), line_no);
       fclose (fp);
       fractalexplorer_free (fractalexplorer);
 
@@ -1224,7 +1224,7 @@ fractalexplorer_list_load_all (const gchar *explorer_path)
   current_obj = NULL;
   fractalexplorer_list_free_all ();
 
-  path = gimp_config_path_expand_to_files (explorer_path, NULL);
+  path = clay_config_path_expand_to_files (explorer_path, NULL);
 
   for (list = path; list; list = g_list_next (list))
     {
@@ -1348,7 +1348,7 @@ add_objects_list (void)
   gtk_grid_attach (GTK_GRID (grid), button, 0, 1, 1, 1);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Select folder and rescan collection"), NULL);
 
   g_signal_connect (button, "clicked",
@@ -1359,7 +1359,7 @@ add_objects_list (void)
   gtk_grid_attach (GTK_GRID (grid), button, 1, 1, 1, 1);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Apply currently selected fractal"), NULL);
 
   g_signal_connect (button, "clicked",
@@ -1370,7 +1370,7 @@ add_objects_list (void)
   gtk_grid_attach (GTK_GRID (grid), button, 2, 1, 1, 1);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Delete currently selected fractal"), NULL);
 
   g_signal_connect (button, "clicked",
@@ -1394,17 +1394,17 @@ fractalexplorer_rescan_list (GtkWidget *widget,
       return;
     }
 
-  dlg = gimp_dialog_new (_("Rescan for Fractals"), PLUG_IN_ROLE,
+  dlg = clay_dialog_new (_("Rescan for Fractals"), PLUG_IN_ROLE,
                          gtk_widget_get_toplevel (view),
                          GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                         gimp_standard_help_func, PLUG_IN_PROC,
+                         clay_standard_help_func, PLUG_IN_PROC,
 
                          _("_Cancel"), GTK_RESPONSE_CANCEL,
                          _("_OK"),     GTK_RESPONSE_OK,
 
                          NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dlg),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dlg),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -1413,18 +1413,18 @@ fractalexplorer_rescan_list (GtkWidget *widget,
                     G_CALLBACK (gtk_widget_destroyed),
                     &dlg);
 
-  patheditor = gimp_path_editor_new (_("Add FractalExplorer Path"),
+  patheditor = clay_path_editor_new (_("Add FractalExplorer Path"),
                                      fractalexplorer_path);
   gtk_container_set_border_width (GTK_CONTAINER (patheditor), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dlg))),
                       patheditor, TRUE, TRUE, 0);
   gtk_widget_set_visible (patheditor, TRUE);
 
-  if (gimp_dialog_run (GIMP_DIALOG (dlg)) == GTK_RESPONSE_OK)
+  if (clay_dialog_run (CLAY_DIALOG (dlg)) == GTK_RESPONSE_OK)
     {
       g_free (fractalexplorer_path);
       fractalexplorer_path =
-        gimp_path_editor_get_path (GIMP_PATH_EDITOR (patheditor));
+        clay_path_editor_get_path (CLAY_PATH_EDITOR (patheditor));
 
       if (fractalexplorer_path)
         {

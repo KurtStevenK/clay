@@ -17,7 +17,7 @@
 # "Perlized" from C source by Manish Singh <yosh@gimp.org>
 
 sub brushes_popup {
-    $blurb = 'Invokes the GIMP brush selection dialog.';
+    $blurb = 'Invokes the Clay brush selection dialog.';
     $help  = 'Opens a dialog letting a user choose a brush.';
 
     &andy_pdb_misc('1998');
@@ -36,14 +36,14 @@ sub brushes_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->brush_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->brush_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, brush_callback) ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
-                             gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, brush_callback) ||
+      ! clay_pdb_dialog_new (clay, context, progress,
+                             clay_container_get_child_type (container),
                              parent_window, popup_title, brush_callback,
-                             GIMP_OBJECT (initial_brush), NULL))
+                             CLAY_OBJECT (initial_brush), NULL))
     success = FALSE;
 }
 CODE
@@ -64,12 +64,12 @@ sub brushes_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->brush_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->brush_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, brush_callback) ||
-      ! gimp_pdb_dialog_close (gimp,
-                               gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, brush_callback) ||
+      ! clay_pdb_dialog_close (clay,
+                               clay_container_get_child_type (container),
                                brush_callback))
     success = FALSE;
 }
@@ -93,13 +93,13 @@ sub brushes_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->brush_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->brush_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, brush_callback) ||
-      ! gimp_pdb_dialog_set (gimp,
-                             gimp_container_get_child_type (container),
-                             brush_callback, GIMP_OBJECT (brush), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, brush_callback) ||
+      ! clay_pdb_dialog_set (clay,
+                             clay_container_get_child_type (container),
+                             brush_callback, CLAY_OBJECT (brush), NULL))
     success = FALSE;
 }
 CODE
@@ -107,9 +107,9 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdatafactory.h");
+@headers = qw("core/clay.h"
+              "core/claycontainer.h"
+              "core/claydatafactory.h");
 
 @procs = qw(brushes_popup
             brushes_close_popup
@@ -118,8 +118,8 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Brush UI';
-$doc_title = 'gimpbrushselect';
+$doc_title = 'claybrushselect';
 $doc_short_desc = 'Methods of a font chooser dialog';
-$doc_long_desc = 'A dialog letting a user choose a brush.  Read more at gimpfontselect.';
+$doc_long_desc = 'A dialog letting a user choose a brush.  Read more at clayfontselect.';
 
 1;

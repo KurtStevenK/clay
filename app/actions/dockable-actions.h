@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   dockable_actions_setup  (GimpActionGroup *group);
-void   dockable_actions_update (GimpActionGroup *group,
+void   dockable_actions_setup  (ClayActionGroup *group);
+void   dockable_actions_update (ClayActionGroup *group,
                                 gpointer         data);

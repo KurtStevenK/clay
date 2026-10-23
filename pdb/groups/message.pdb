@@ -36,9 +36,9 @@ HELP
 {
   const gchar *domain = NULL;
 
-  if (gimp->plug_in_manager->current_plug_in)
-    domain = gimp_plug_in_get_undo_desc (gimp->plug_in_manager->current_plug_in);
-  gimp_show_message (gimp, G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+  if (clay->plug_in_manager->current_plug_in)
+    domain = clay_plug_in_get_undo_desc (clay->plug_in_manager->current_plug_in);
+  clay_show_message (clay, G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                      domain, message);
 }
 CODE
@@ -52,20 +52,20 @@ BLURB
 
     $help = <<'HELP';
 This procedure returns the way g_message warnings are displayed. They can be
-shown in a dialog box or printed on the console where gimp was started.
+shown in a dialog box or printed on the console where clay was started.
 HELP
 
     &yosh_pdb_misc('1998');
 
     @outargs = (
-	{ name => 'handler', type => 'enum GimpMessageHandlerType',
+	{ name => 'handler', type => 'enum ClayMessageHandlerType',
 	  desc => 'The current handler type' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  handler = gimp->message_handler;
+  handler = clay->message_handler;
 }
 CODE
     );
@@ -76,20 +76,20 @@ sub message_set_handler {
 
     $help = <<'HELP';
 This procedure controls how g_message warnings are displayed. They can be shown
-in a dialog box or printed on the console where gimp was started.
+in a dialog box or printed on the console where clay was started.
 HELP
 
     &yosh_pdb_misc('1998');
 
     @inargs = (
-	{ name => 'handler', type => 'enum GimpMessageHandlerType',
+	{ name => 'handler', type => 'enum ClayMessageHandlerType',
 	  desc => 'The new handler type' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  gimp->message_handler = handler;
+  clay->message_handler = handler;
 }
 CODE
     );
@@ -97,10 +97,10 @@ CODE
 
 
 @headers = qw(<string.h>
-              "core/gimp.h"
-              "plug-in/gimpplugin.h"
-              "plug-in/gimppluginmanager.h"
-              "gimp-intl.h");
+              "core/clay.h"
+              "plug-in/clayplugin.h"
+              "plug-in/claypluginmanager.h"
+              "clay-intl.h");
 
 @procs = qw(message
             message_get_handler
@@ -109,7 +109,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Message procedures';
-$doc_title = 'gimpmessage';
+$doc_title = 'claymessage';
 $doc_short_desc = 'Display a dialog box with a message.';
 $doc_long_desc = 'Display a dialog box with a message.';
 

@@ -24,7 +24,7 @@
  *    the pdf file, and it can show a gui. This procedure works on a single
  *    image.
  * 2. file-pdf-export-defaults
- *    This procedures is the one that will be invoked by gimp's file-save,
+ *    This procedures is the one that will be invoked by clay's file-save,
  *    when the pdf extension is chosen. If it's in RUN_INTERACTIVE, it will
  *    pop a user interface with more options, like file-pdf-export. If it's in
  *    RUN_NONINTERACTIVE, it will simply use the default values. Note that on
@@ -36,22 +36,22 @@
  *    paged pdf files. It will be located in File/Create/Multiple page PDF...
  *
  * It was suggested that file-pdf-export-multi will be removed from the UI as it
- * does not match the product vision (GIMP isn't a program for editing multiple
+ * does not match the product vision (Clay isn't a program for editing multiple
  * paged documents).
  */
 
 /* Known Issues (except for the coding style issues):
  * 1. Grayscale layers are inverted (although layer masks which are not grayscale,
  * are not inverted)
- * 2. Exporting some fonts doesn't work since gimp_text_layer_get_font Returns a
+ * 2. Exporting some fonts doesn't work since clay_text_layer_get_font Returns a
  * font which is sometimes incompatible with pango_font_description_from_string
- * (gimp_text_layer_get_font sometimes returns suffixes such as "semi-expanded" to
- * the font's name although the GIMP's font selection dialog shows the don'ts name
- * normally - This should be checked again in GIMP 2.7)
- * 3. Indexed layers can't be optimized yet (Since gimp_histogram won't work on
+ * (clay_text_layer_get_font sometimes returns suffixes such as "semi-expanded" to
+ * the font's name although the Clay's font selection dialog shows the don'ts name
+ * normally - This should be checked again in Clay 2.7)
+ * 3. Indexed layers can't be optimized yet (Since clay_histogram won't work on
  * indexed layers)
  * 4. Rendering the pango layout requires multiplying the size in PANGO_SCALE. This
- * means I'll need to do some hacking on the markup returned from GIMP.
+ * means I'll need to do some hacking on the markup returned from Clay.
  * 5. When accessing the contents of layer groups is supported, we should do use it
  * (since this plugin should preserve layers).
  *
@@ -86,15 +86,15 @@
  *
  * August 21, 2009 | Barak Itkin <lightningismyname@gmail.com>
  *   Fixed a typo that prevented the plugin from compiling...
- *   A migration to the new GIMP 2.8 api, which includes:
- *   - Now using gimp_export_dialog_new
- *   - Using gimp_text_layer_get_hint_style (2.8) instead of the deprecated
- *     gimp_text_layer_get_hinting (2.6).
+ *   A migration to the new Clay 2.8 api, which includes:
+ *   - Now using clay_export_dialog_new
+ *   - Using clay_text_layer_get_hint_style (2.8) instead of the deprecated
+ *     clay_text_layer_get_hinting (2.6).
  *
  * August 24, 2010 | Barak Itkin <lightningismyname@gmail.com>
- *   More migrations to the new GIMP 2.8 api:
- *   - Now using the GimpItem api
- *   - Using gimp_text_layer_get_markup where possible
+ *   More migrations to the new Clay 2.8 api:
+ *   - Now using the ClayItem api
+ *   - Using clay_text_layer_get_markup where possible
  *   - Fixed some compiler warnings
  *   Also merged the header and c file into one file, Updated some of the comments
  *   and documentation, and moved this into the main source repository.
@@ -108,38 +108,38 @@
 #include <cairo-pdf.h>
 #include <pango/pangocairo.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC             "file-pdf-export"
 #define EXPORT_MULTI_PROC       "file-pdf-export-multi"
 #define PLUG_IN_BINARY          "file-pdf-export"
-#define PLUG_IN_ROLE            "gimp-file-pdf-export"
+#define PLUG_IN_ROLE            "clay-file-pdf-export"
 
 #define DATA_IMAGE_LIST         "file-pdf-data-multi-page"
 
-/* Gimp will crash before you reach this limitation :D */
+/* Clay will crash before you reach this limitation :D */
 #define MAX_PAGE_COUNT           350
 #define MAX_FILE_NAME_LENGTH     350
 
 #define THUMB_WIDTH              90
 #define THUMB_HEIGHT             120
 
-#define GIMP_PLUGIN_PDF_EXPORT_ERROR gimp_plugin_pdf_export_error_quark ()
+#define CLAY_PLUGIN_PDF_EXPORT_ERROR clay_plugin_pdf_export_error_quark ()
 
 typedef enum
 {
-  GIMP_PLUGIN_PDF_EXPORT_ERROR_FAILED
-} GimpPluginPDFError;
+  CLAY_PLUGIN_PDF_EXPORT_ERROR_FAILED
+} ClayPluginPDFError;
 
-GQuark gimp_plugin_pdf_export_error_quark (void);
+GQuark clay_plugin_pdf_export_error_quark (void);
 
 typedef struct
 {
-  GimpImage *images[MAX_PAGE_COUNT];
+  ClayImage *images[MAX_PAGE_COUNT];
   guint32    image_count;
   gchar      file_name[MAX_FILE_NAME_LENGTH];
 } PdfMultiPage;
@@ -165,12 +165,12 @@ typedef struct _PdfClass PdfClass;
 
 struct _Pdf
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PdfClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -179,43 +179,43 @@ struct _PdfClass
 
 GType                           pdf_get_type             (void);
 
-static GList                  * pdf_query_procedures     (GimpPlugIn           *plug_in);
-static GimpProcedure          * pdf_create_procedure     (GimpPlugIn           *plug_in,
+static GList                  * pdf_query_procedures     (ClayPlugIn           *plug_in);
+static ClayProcedure          * pdf_create_procedure     (ClayPlugIn           *plug_in,
                                                           const gchar          *name);
 
-static GimpValueArray         * pdf_export               (GimpProcedure        *procedure,
-                                                          GimpRunMode           run_mode,
-                                                          GimpImage            *image,
+static ClayValueArray         * pdf_export               (ClayProcedure        *procedure,
+                                                          ClayRunMode           run_mode,
+                                                          ClayImage            *image,
                                                           GFile                *file,
-                                                          GimpExportOptions    *options,
-                                                          GimpMetadata         *metadata,
-                                                          GimpProcedureConfig  *config,
+                                                          ClayExportOptions    *options,
+                                                          ClayMetadata         *metadata,
+                                                          ClayProcedureConfig  *config,
                                                           gpointer              run_data);
-static GimpValueArray         * pdf_export_multi         (GimpProcedure        *procedure,
-                                                          GimpProcedureConfig  *config,
+static ClayValueArray         * pdf_export_multi         (ClayProcedure        *procedure,
+                                                          ClayProcedureConfig  *config,
                                                           gpointer              run_data);
 
-static GimpPDBStatusType        pdf_export_image         (GimpProcedure        *procedure,
-                                                          GimpProcedureConfig  *config,
-                                                          GimpExportOptions    *options,
+static ClayPDBStatusType        pdf_export_image         (ClayProcedure        *procedure,
+                                                          ClayProcedureConfig  *config,
+                                                          ClayExportOptions    *options,
                                                           gboolean              single_image,
                                                           gboolean              show_progress,
                                                           GError              **error);
 
-static GimpExportCapabilities   export_edit_options      (GimpProcedure        *procedure,
-                                                          GimpProcedureConfig  *config,
-                                                          GimpExportOptions    *options,
+static ClayExportCapabilities   export_edit_options      (ClayProcedure        *procedure,
+                                                          ClayProcedureConfig  *config,
+                                                          ClayExportOptions    *options,
                                                           gpointer              create_data);
 
-static void                     init_image_list_defaults (GimpImage            *image);
+static void                     init_image_list_defaults (ClayImage            *image);
 
 static void                     validate_image_list      (void);
 
-static gboolean                 gui_single               (GimpProcedure        *procedure,
-                                                          GimpProcedureConfig  *config,
-                                                          GimpImage            *image);
-static gboolean                 gui_multi                (GimpProcedure        *procedure,
-                                                          GimpProcedureConfig  *config);
+static gboolean                 gui_single               (ClayProcedure        *procedure,
+                                                          ClayProcedureConfig  *config,
+                                                          ClayImage            *image);
+static gboolean                 gui_multi                (ClayProcedure        *procedure,
+                                                          ClayProcedureConfig  *config);
 
 static void                     choose_file_call         (GtkWidget            *browse_button,
                                                           gpointer              file_entry);
@@ -233,30 +233,30 @@ static void                     remove_call              (GtkTreeModel         *
                                                           gpointer              user_data);
 static void                     recount_pages            (void);
 
-static cairo_surface_t *get_cairo_surface        (GimpDrawable         *drawable,
+static cairo_surface_t *get_cairo_surface        (ClayDrawable         *drawable,
                                                   gboolean              as_mask,
                                                   GError              **error);
 
-static GeglColor *      get_layer_color          (GimpLayer            *layer,
+static GeglColor *      get_layer_color          (ClayLayer            *layer,
                                                   gboolean             *single);
 
-static void             drawText                 (GimpLayer            *layer,
+static void             drawText                 (ClayLayer            *layer,
                                                   gdouble               opacity,
                                                   cairo_t              *cr,
                                                   gdouble               x_res,
                                                   gdouble               y_res);
-static void             drawPath                 (GimpLayer            *layer,
+static void             drawPath                 (ClayLayer            *layer,
                                                   gdouble               opacity,
                                                   cairo_t              *cr,
                                                   gdouble               x_res,
                                                   gdouble               y_res);
 static void             draw_path_pattern        (cairo_t              *cr,
-                                                  GimpPattern          *pattern);
+                                                  ClayPattern          *pattern);
 
-static gboolean         draw_layer               (GimpImage            *image,
-                                                  GimpLayer           **layers,
+static gboolean         draw_layer               (ClayImage            *image,
+                                                  ClayLayer           **layers,
                                                   gint                  n_layers,
-                                                  GimpProcedureConfig  *config,
+                                                  ClayProcedureConfig  *config,
                                                   gboolean              single_image,
                                                   gint                  j,
                                                   cairo_t              *cr,
@@ -270,9 +270,9 @@ static gboolean         draw_layer               (GimpImage            *image,
                                                   GError              **error);
 
 
-G_DEFINE_TYPE (Pdf, pdf, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pdf, pdf, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PDF_TYPE)
+CLAY_MAIN (PDF_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -284,12 +284,12 @@ static GtkFileChooserNative *file_choose;
 static gchar                *file_name;
 
 
-G_DEFINE_QUARK (gimp-plugin-pdf-export-error-quark, gimp_plugin_pdf_export_error)
+G_DEFINE_QUARK (clay-plugin-pdf-export-error-quark, clay_plugin_pdf_export_error)
 
 static void
 pdf_class_init (PdfClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pdf_query_procedures;
   plug_in_class->create_procedure = pdf_create_procedure;
@@ -302,7 +302,7 @@ pdf_init (Pdf *pdf)
 }
 
 static GList *
-pdf_query_procedures (GimpPlugIn *plug_in)
+pdf_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -312,23 +312,23 @@ pdf_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-pdf_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pdf_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              TRUE, pdf_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Portable Document Format"));
+      clay_procedure_set_menu_label (procedure, _("Portable Document Format"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in PDF format"),
                                         _("Exports files in Adobe's Portable "
                                           "Document Format. PDF is designed to "
@@ -336,65 +336,65 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
                                           "different platforms, and is a "
                                           "distant cousin of PostScript."),
                                           name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Barak Itkin, Lionel N., Jehan",
                                       "Copyright Barak Itkin, Lionel N., Jehan",
                                       "August 2009, 2017");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PDF"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "application/pdf");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pdf");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
                                               0, export_edit_options, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "vectorize",
+      clay_procedure_add_boolean_argument (procedure, "vectorize",
                                            _("Convert _bitmaps to vector graphics where possible"),
                                            _("Convert bitmaps to vector graphics where possible"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "ignore-hidden",
+      clay_procedure_add_boolean_argument (procedure, "ignore-hidden",
                                            _("O_mit hidden layers and layers with zero opacity"),
                                            _("Non-visible layers will not be exported"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "apply-masks",
+      clay_procedure_add_boolean_argument (procedure, "apply-masks",
                                            _("_Apply layer masks"),
                                            _("Apply layer masks before saving (Keeping the mask "
                                              "will not change the output, only the PDF structure)"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "layers-as-pages",
+      clay_procedure_add_boolean_argument (procedure, "layers-as-pages",
                                            _("La_yers as pages"),
                                            _("Layers as pages (bottom layers first)."),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "reverse-order",
+      clay_procedure_add_boolean_argument (procedure, "reverse-order",
                                            _("Re_verse order"),
                                            _("Reverse the pages order (top layers first)."),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "root-layers-only",
+      clay_procedure_add_boolean_argument (procedure, "root-layers-only",
                                            _("Roo_t layers only"),
                                            _("Only the root layers are considered pages"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "convert-text-layers",
+      clay_procedure_add_boolean_argument (procedure, "convert-text-layers",
                                            _("Convert te_xt layers to image"),
                                            _("Convert text layers to raster graphics"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "fill-background-color",
+      clay_procedure_add_boolean_argument (procedure, "fill-background-color",
                                            _("_Fill transparent areas with background color"),
                                            _("Fill transparent areas with background color if "
                                              "layer has an alpha channel"),
@@ -403,18 +403,18 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_MULTI_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       pdf_export_multi, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("_Create multipage PDF..."));
+      clay_procedure_set_menu_label (procedure, _("_Create multipage PDF..."));
 #if 0
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/Create/PDF");
+      clay_procedure_add_menu_path (procedure, "<Image>/File/Create/PDF");
 #endif
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in PDF format"),
                                         _("Exports files in Adobe's Portable "
                                           "Document Format. PDF is designed to "
@@ -422,73 +422,73 @@ pdf_create_procedure (GimpPlugIn  *plug_in,
                                           "different platforms, and is a "
                                           "distant cousin of PostScript."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Barak Itkin",
                                       "Copyright Barak Itkin",
                                       "August 2009");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_INTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_INTERACTIVE,
                                         G_PARAM_READWRITE);
 
-      gimp_procedure_add_core_object_array_argument (procedure, "images",
+      clay_procedure_add_core_object_array_argument (procedure, "images",
                                                      "Images",
                                                      "Input image for each page (An image can "
                                                      "appear more than once)",
-                                                     GIMP_TYPE_IMAGE,
+                                                     CLAY_TYPE_IMAGE,
                                                      G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "vectorize",
+      clay_procedure_add_boolean_argument (procedure, "vectorize",
                                            _("Convert _bitmaps to vector graphics where possible"),
                                            _("Convert bitmaps to vector graphics where possible"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "ignore-hidden",
+      clay_procedure_add_boolean_argument (procedure, "ignore-hidden",
                                            _("O_mit hidden layers and layers with zero opacity"),
                                            _("Non-visible layers will not be exported"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "apply-masks",
+      clay_procedure_add_boolean_argument (procedure, "apply-masks",
                                            _("_Apply layer masks"),
                                            _("Apply layer masks before saving (Keeping the mask "
                                              "will not change the output, only the PDF structure)"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "fill-background-color",
+      clay_procedure_add_boolean_argument (procedure, "fill-background-color",
                                            _("_Fill transparent areas with background color"),
                                            _("Fill transparent areas with background color if "
                                              "layer has an alpha channel"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "uri",
+      clay_procedure_add_string_argument (procedure, "uri",
                                           _("Export to"),
                                           _("The URI of the file to export to"),
                                           NULL,
-                                          GIMP_PARAM_READWRITE);
+                                          CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-pdf_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+pdf_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
   GError            *error  = NULL;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
 
   gegl_init (NULL, NULL);
 
@@ -501,32 +501,32 @@ pdf_export (GimpProcedure        *procedure,
 
   validate_image_list ();
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! gui_single (procedure, config, image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     status = pdf_export_image (procedure, config, options, TRUE,
-                               (run_mode != GIMP_RUN_NONINTERACTIVE),
+                               (run_mode != CLAY_RUN_NONINTERACTIVE),
                                &error);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpValueArray *
-pdf_export_multi (GimpProcedure        *procedure,
-                  GimpProcedureConfig  *config,
+static ClayValueArray *
+pdf_export_multi (ClayProcedure        *procedure,
+                  ClayProcedureConfig  *config,
                   gpointer              run_data)
 {
   GError            *error     = NULL;
-  GimpPDBStatusType  status    = GIMP_PDB_SUCCESS;
-  GimpRunMode        run_mode;
-  GimpExportOptions *options   = NULL;
+  ClayPDBStatusType  status    = CLAY_PDB_SUCCESS;
+  ClayRunMode        run_mode;
+  ClayExportOptions *options   = NULL;
   gchar             *uri;
-  GimpImage        **images    = NULL;
-  GimpImage         *image     = NULL;
+  ClayImage        **images    = NULL;
+  ClayImage         *image     = NULL;
   GFile             *file      = NULL;
 
   gegl_init (NULL, NULL);
@@ -537,13 +537,13 @@ pdf_export_multi (GimpProcedure        *procedure,
                 "images",   &images,
                 NULL);
 
-  options = g_object_new (GIMP_TYPE_EXPORT_OPTIONS,
+  options = g_object_new (CLAY_TYPE_EXPORT_OPTIONS,
                           "capabilities",
-                          GIMP_EXPORT_CAN_HANDLE_RGB    |
-                          GIMP_EXPORT_CAN_HANDLE_ALPHA  |
-                          GIMP_EXPORT_CAN_HANDLE_GRAY   |
-                          GIMP_EXPORT_CAN_HANDLE_LAYERS |
-                          GIMP_EXPORT_CAN_HANDLE_INDEXED,
+                          CLAY_EXPORT_CAN_HANDLE_RGB    |
+                          CLAY_EXPORT_CAN_HANDLE_ALPHA  |
+                          CLAY_EXPORT_CAN_HANDLE_GRAY   |
+                          CLAY_EXPORT_CAN_HANDLE_LAYERS |
+                          CLAY_EXPORT_CAN_HANDLE_INDEXED,
                           NULL);
 
   if (uri != NULL)
@@ -557,7 +557,7 @@ pdf_export_multi (GimpProcedure        *procedure,
 
   if (images)
     {
-      multi_page.image_count = gimp_core_object_array_get_length ((GObject **) images);
+      multi_page.image_count = clay_core_object_array_get_length ((GObject **) images);
       for (gint i = 0; i < multi_page.image_count; i++)
         multi_page.images[i] = images[i];
     }
@@ -569,18 +569,18 @@ pdf_export_multi (GimpProcedure        *procedure,
   validate_image_list ();
 
   /* Starting the executions */
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! gui_multi (procedure, config))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     status = pdf_export_image (procedure, config, options, FALSE,
-                               (run_mode != GIMP_RUN_NONINTERACTIVE),
+                               (run_mode != CLAY_RUN_NONINTERACTIVE),
                                &error);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static cairo_status_t
@@ -600,14 +600,14 @@ get_missing_fonts (GList *layers)
 
   for (iter = layers; iter; iter = iter->next)
     {
-      GimpLayer *layer = iter->data;
+      ClayLayer *layer = iter->data;
 
-      if (gimp_item_is_group (GIMP_ITEM (layer)))
+      if (clay_item_is_group (CLAY_ITEM (layer)))
         {
           GList *child_missing_fonts;
           GList *iter2;
 
-          child_missing_fonts = get_missing_fonts (gimp_item_list_children (GIMP_ITEM (layer)));
+          child_missing_fonts = get_missing_fonts (clay_item_list_children (CLAY_ITEM (layer)));
           for (iter2 = child_missing_fonts; iter2; iter2 = iter2->next)
             {
               gchar *missing = iter2->data;
@@ -619,9 +619,9 @@ get_missing_fonts (GList *layers)
             }
           g_list_free (child_missing_fonts);
         }
-      else if (gimp_item_is_text_layer (GIMP_ITEM (layer)))
+      else if (clay_item_is_text_layer (CLAY_ITEM (layer)))
         {
-          GimpFont             *gimp_font;
+          ClayFont             *clay_font;
           PangoFontDescription *font_description;
           PangoFontDescription *font_description2;
           PangoFontMap         *fontmap;
@@ -631,8 +631,8 @@ get_missing_fonts (GList *layers)
           fontmap = pango_cairo_font_map_new_for_font_type (CAIRO_FONT_TYPE_FT);
           context = pango_font_map_create_context (fontmap);
 
-          gimp_font        = gimp_text_layer_get_font (GIMP_TEXT_LAYER (layer));
-          font_description = gimp_font_get_pango_font_description (gimp_font);
+          clay_font        = clay_text_layer_get_font (CLAY_TEXT_LAYER (layer));
+          font_description = clay_font_get_pango_font_description (clay_font);
 
           font = pango_font_map_load_font (fontmap, context, font_description);
           font_description2 = pango_font_describe (font);
@@ -659,10 +659,10 @@ get_missing_fonts (GList *layers)
   return missing_fonts;
 }
 
-static GimpPDBStatusType
-pdf_export_image (GimpProcedure        *procedure,
-                  GimpProcedureConfig  *config,
-                  GimpExportOptions    *options,
+static ClayPDBStatusType
+pdf_export_image (ClayProcedure        *procedure,
+                  ClayProcedureConfig  *config,
+                  ClayExportOptions    *options,
                   gboolean              single_image,
                   gboolean              show_progress,
                   GError              **error)
@@ -681,9 +681,9 @@ pdf_export_image (GimpProcedure        *procedure,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_filename_to_utf8 (file_name), g_strerror (errno));
+                   clay_filename_to_utf8 (file_name), g_strerror (errno));
 
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   pdf_file = cairo_pdf_surface_create_for_stream (write_func, fp, 1, 1);
@@ -697,22 +697,22 @@ pdf_export_image (GimpProcedure        *procedure,
                      "selected location isn't read only!"),
                    cairo_status_to_string (cairo_surface_status (pdf_file)));
 
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   cr = cairo_create (pdf_file);
 
   for (i = 0; i < multi_page.image_count; i++)
     {
-      GimpImage     *image = multi_page.images[i];
-      GimpLayer    **layers;
+      ClayImage     *image = multi_page.images[i];
+      ClayLayer    **layers;
       gint32         n_layers;
       gdouble        x_res, y_res;
       gdouble        x_scale, y_scale;
-      GimpDrawable **drawables;
+      ClayDrawable **drawables;
       gint           j;
 
-      drawables = gimp_image_get_selected_drawables (image);
+      drawables = clay_image_get_selected_drawables (image);
       if (drawables[0] == NULL)
         {
           g_free (drawables);
@@ -725,27 +725,27 @@ pdf_export_image (GimpProcedure        *procedure,
        */
       cairo_save (cr);
 
-      if (! (gimp_export_options_get_image (options,
-                                            &image) == GIMP_EXPORT_EXPORT))
+      if (! (clay_export_options_get_image (options,
+                                            &image) == CLAY_EXPORT_EXPORT))
         {
-          /* gimp_drawable_histogram() only works within the bounds of
+          /* clay_drawable_histogram() only works within the bounds of
            * the selection, which is a problem (see issue #2431).
            * Instead of saving the selection, unselecting to later
            * reselect, let's just always work on a duplicate of the
            * image.
            */
-          image = gimp_image_duplicate (image);
+          image = clay_image_duplicate (image);
         }
 
-      gimp_selection_none (image);
+      clay_selection_none (image);
 
-      gimp_image_get_resolution (image, &x_res, &y_res);
+      clay_image_get_resolution (image, &x_res, &y_res);
       x_scale = 72.0 / x_res;
       y_scale = 72.0 / y_res;
 
       cairo_pdf_surface_set_size (pdf_file,
-                                  gimp_image_get_width  (image) * x_scale,
-                                  gimp_image_get_height (image) * y_scale);
+                                  clay_image_get_width  (image) * x_scale,
+                                  clay_image_get_height (image) * y_scale);
 
       /* This way we set how many pixels are there in every inch.
        * It's very important for PangoCairo
@@ -761,15 +761,15 @@ pdf_export_image (GimpProcedure        *procedure,
        */
       cairo_scale (cr, x_scale, y_scale);
 
-      layers   = gimp_image_get_layers (image);
-      n_layers = gimp_core_object_array_get_length ((GObject **) layers);
+      layers   = clay_image_get_layers (image);
+      n_layers = clay_core_object_array_get_length ((GObject **) layers);
 
       /* Now, we should loop over the layers of each image */
       for (j = 0; j < n_layers; j++)
         {
           if (! draw_layer (image, layers, n_layers, config,
                             single_image, j, cr, x_res, y_res,
-                            gimp_procedure_get_name (procedure),
+                            clay_procedure_get_name (procedure),
                             show_progress,
                             /* Progression is showed per image, and would restart at 0
                              * if you open several images.
@@ -784,11 +784,11 @@ pdf_export_image (GimpProcedure        *procedure,
               cairo_destroy (cr);
               fclose (fp);
 
-              return GIMP_PDB_EXECUTION_ERROR;
+              return CLAY_PDB_EXECUTION_ERROR;
             }
         }
       if (show_progress)
-        gimp_progress_update (1.0);
+        clay_progress_update (1.0);
 
       g_free (layers);
 
@@ -801,7 +801,7 @@ pdf_export_image (GimpProcedure        *procedure,
 
       cairo_restore (cr);
 
-      gimp_image_delete (image);
+      clay_image_delete (image);
     }
 
   /* We are done with all the images - time to free the resources */
@@ -810,30 +810,30 @@ pdf_export_image (GimpProcedure        *procedure,
 
   fclose (fp);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
-static GimpExportCapabilities
-export_edit_options (GimpProcedure        *procedure,
-                     GimpProcedureConfig  *config,
-                     GimpExportOptions    *options,
+static ClayExportCapabilities
+export_edit_options (ClayProcedure        *procedure,
+                     ClayProcedureConfig  *config,
+                     ClayExportOptions    *options,
                      gpointer              create_data)
 {
-  GimpExportCapabilities capabilities;
+  ClayExportCapabilities capabilities;
   gboolean               apply_masks;
 
   g_object_get (G_OBJECT (config),
                 "apply-masks", &apply_masks,
                 NULL);
 
-  capabilities = (GIMP_EXPORT_CAN_HANDLE_RGB    |
-                  GIMP_EXPORT_CAN_HANDLE_ALPHA  |
-                  GIMP_EXPORT_CAN_HANDLE_GRAY   |
-                  GIMP_EXPORT_CAN_HANDLE_LAYERS |
-                  GIMP_EXPORT_CAN_HANDLE_INDEXED);
+  capabilities = (CLAY_EXPORT_CAN_HANDLE_RGB    |
+                  CLAY_EXPORT_CAN_HANDLE_ALPHA  |
+                  CLAY_EXPORT_CAN_HANDLE_GRAY   |
+                  CLAY_EXPORT_CAN_HANDLE_LAYERS |
+                  CLAY_EXPORT_CAN_HANDLE_INDEXED);
 
   if (! apply_masks)
-    capabilities |= GIMP_EXPORT_CAN_HANDLE_LAYER_MASKS;
+    capabilities |= CLAY_EXPORT_CAN_HANDLE_LAYER_MASKS;
 
   return capabilities;
 }
@@ -844,7 +844,7 @@ export_edit_options (GimpProcedure        *procedure,
 
 /* A function that initializes the image list to default values */
 static void
-init_image_list_defaults (GimpImage *image)
+init_image_list_defaults (ClayImage *image)
 {
   if (image)
     {
@@ -868,7 +868,7 @@ validate_image_list (void)
 
   for (i = 0 ; i < MAX_PAGE_COUNT && i < multi_page.image_count ; i++)
     {
-      if (gimp_image_is_valid (multi_page.images[i]))
+      if (clay_image_is_valid (multi_page.images[i]))
         {
           multi_page.images[valid] = multi_page.images[i];
           valid++;
@@ -886,25 +886,25 @@ validate_image_list (void)
 /* The main GUI function for saving single-paged PDFs */
 
 static gboolean
-gui_single (GimpProcedure       *procedure,
-            GimpProcedureConfig *config,
-            GimpImage           *image)
+gui_single (ClayProcedure       *procedure,
+            ClayProcedureConfig *config,
+            ClayImage           *image)
 {
   GtkWidget  *window;
   GtkWidget  *widget;
-  GimpLayer **layers;
+  ClayLayer **layers;
   GList      *missing_fonts;
   GList      *dialog_props = NULL;
   gboolean    run;
   gint32      n_layers;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  window = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  window = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (window),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (window),
                                   "pages-box",
                                   "reverse-order", "root-layers-only", NULL);
   /* XXX the "layers-as-pages" checkbox label used to be changing,
@@ -912,20 +912,20 @@ gui_single (GimpProcedure       *procedure,
    * the value of "reverse-order". Should we want this? Or do it
    * differently, i.e. maybe with an additional label showing the order?
    */
-  widget = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (window),
+  widget = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (window),
                                             "pages-frame", "layers-as-pages", FALSE,
                                             "pages-box");
   /* Enable "layers-as-pages" if more than one layer, or there's a single
    * layer group has more than one layer */
-  layers   = gimp_image_get_layers (multi_page.images[0]);
-  n_layers = gimp_core_object_array_get_length ((GObject **) layers);
+  layers   = clay_image_get_layers (multi_page.images[0]);
+  n_layers = clay_core_object_array_get_length ((GObject **) layers);
 
-  if (n_layers == 1 && gimp_item_is_group (GIMP_ITEM (layers[0])))
+  if (n_layers == 1 && clay_item_is_group (CLAY_ITEM (layers[0])))
     {
-      GimpItem **children;
+      ClayItem **children;
 
-      children = gimp_item_get_children (GIMP_ITEM (layers[0]));
-      n_layers = gimp_core_object_array_get_length ((GObject **) children);
+      children = clay_item_get_children (CLAY_ITEM (layers[0]));
+      n_layers = clay_core_object_array_get_length ((GObject **) children);
       g_free (children);
     }
   g_free (layers);
@@ -935,7 +935,7 @@ gui_single (GimpProcedure       *procedure,
   /* Warning for missing fonts (non-embeddable with rasterization
    * possible).
    */
-  missing_fonts = get_missing_fonts (gimp_image_list_layers (multi_page.images[0]));
+  missing_fonts = get_missing_fonts (clay_image_list_layers (multi_page.images[0]));
   if (missing_fonts != NULL)
     {
       GList *iter;
@@ -964,16 +964,16 @@ gui_single (GimpProcedure       *procedure,
                                 "or to install the missing fonts before exporting, "
                                 "otherwise your design may not look right."),
                               font_list);
-      /* TODO: we used to have a GtkImage showing a GIMP_ICON_WILBER_EEK
+      /* TODO: we used to have a GtkImage showing a CLAY_ICON_WILBER_EEK
        * icon in GTK_ICON_SIZE_BUTTON size, next to the label, to make
        * the warning more obvious.
        */
-      widget = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (window),
+      widget = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (window),
                                                 "missing-fonts-label",
                                                 text, FALSE, FALSE);
       gtk_label_set_line_wrap (GTK_LABEL (widget), TRUE);
       gtk_label_set_max_width_chars (GTK_LABEL (widget), 80);
-      gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (window),
+      clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (window),
                                         "convert-text-layers-frame",
                                         "convert-text-layers", TRUE,
                                         "missing-fonts-label");
@@ -994,10 +994,10 @@ gui_single (GimpProcedure       *procedure,
   dialog_props = g_list_prepend (dialog_props, "vectorize");
   dialog_props = g_list_prepend (dialog_props, "apply-masks");
   dialog_props = g_list_prepend (dialog_props, "pages-frame");
-  gimp_procedure_dialog_fill_list (GIMP_PROCEDURE_DIALOG (window),
+  clay_procedure_dialog_fill_list (CLAY_PROCEDURE_DIALOG (window),
                                    dialog_props);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (window));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (window));
 
   gtk_widget_destroy (window);
 
@@ -1007,8 +1007,8 @@ gui_single (GimpProcedure       *procedure,
 /* The main GUI function for saving multi-paged PDFs */
 
 static gboolean
-gui_multi (GimpProcedure       *procedure,
-           GimpProcedureConfig *config)
+gui_multi (ClayProcedure       *procedure,
+           ClayProcedureConfig *config)
 {
   GtkWidget   *window;
   GtkWidget   *vbox;
@@ -1026,14 +1026,14 @@ gui_multi (GimpProcedure       *procedure,
   gboolean     run;
   const gchar *temp;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  window = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  window = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Export Image as Multi-Page PDF"));
-  gimp_procedure_dialog_set_ok_label (GIMP_PROCEDURE_DIALOG (window), _("_Export"));
+  clay_procedure_dialog_set_ok_label (CLAY_PROCEDURE_DIALOG (window), _("_Export"));
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (window),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (window),
                                          "multi-pdf-options-vbox",
                                          "apply-masks", "vectorize",
                                          "fill-background-color",
@@ -1097,7 +1097,7 @@ gui_multi (GimpProcedure       *procedure,
 
   h_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 
-  img_combo = gimp_image_combo_box_new (NULL, NULL, NULL);
+  img_combo = clay_image_combo_box_new (NULL, NULL, NULL);
   gtk_box_pack_start (GTK_BOX (h_box), img_combo, FALSE, FALSE, 0);
   gtk_widget_set_visible (img_combo, TRUE);
 
@@ -1125,10 +1125,10 @@ gui_multi (GimpProcedure       *procedure,
                     G_CALLBACK (remove_call),
                     NULL);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (window),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (window),
                               "multi-pdf-options-vbox",
                               NULL);
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (window));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (window));
 
   if (run)
     {
@@ -1185,22 +1185,22 @@ create_model (void)
                               GDK_TYPE_PIXBUF,  /* THUMB */
                               G_TYPE_STRING,    /* PAGE_NUMBER */
                               G_TYPE_STRING,    /* IMAGE_NAME */
-                              GIMP_TYPE_IMAGE); /* IMAGE */
+                              CLAY_TYPE_IMAGE); /* IMAGE */
 
   for (i = 0 ; i < multi_page.image_count && i < MAX_PAGE_COUNT ; i++)
     {
       GtkTreeIter  iter;
-      GimpImage   *image = multi_page.images[i];
+      ClayImage   *image = multi_page.images[i];
       GdkPixbuf   *pixbuf;
 
-      pixbuf = gimp_image_get_thumbnail (image, THUMB_WIDTH, THUMB_HEIGHT,
-                                         GIMP_PIXBUF_SMALL_CHECKS);
+      pixbuf = clay_image_get_thumbnail (image, THUMB_WIDTH, THUMB_HEIGHT,
+                                         CLAY_PIXBUF_SMALL_CHECKS);
 
       gtk_list_store_append (model, &iter);
       gtk_list_store_set (model, &iter,
                           THUMB,       pixbuf,
                           PAGE_NUMBER, g_strdup_printf (_("Page %d"), i + 1),
-                          IMAGE_NAME,  gimp_image_get_name (image),
+                          IMAGE_NAME,  clay_image_get_name (image),
                           IMAGE,       image,
                           -1);
 
@@ -1225,7 +1225,7 @@ get_image_list (void)
        valid;
        valid = gtk_tree_model_iter_next (model, &iter))
     {
-      GimpImage *image;
+      ClayImage *image;
 
       gtk_tree_model_get (model, &iter,
                           IMAGE, &image,
@@ -1257,25 +1257,25 @@ add_image_call (GtkWidget *widget,
   GtkListStore *store;
   GtkTreeIter   iter;
   gint32        image_id;
-  GimpImage    *image;
+  ClayImage    *image;
   GdkPixbuf    *pixbuf;
 
   dnd_remove = FALSE;
 
-  gimp_int_combo_box_get_active (img_combo, &image_id);
-  image = gimp_image_get_by_id (image_id);
+  clay_int_combo_box_get_active (img_combo, &image_id);
+  image = clay_image_get_by_id (image_id);
 
   store = GTK_LIST_STORE (model);
 
-  pixbuf = gimp_image_get_thumbnail (image, THUMB_WIDTH, THUMB_HEIGHT,
-                                     GIMP_PIXBUF_SMALL_CHECKS);
+  pixbuf = clay_image_get_thumbnail (image, THUMB_WIDTH, THUMB_HEIGHT,
+                                     CLAY_PIXBUF_SMALL_CHECKS);
 
   gtk_list_store_append (store, &iter);
   gtk_list_store_set (store, &iter,
                       PAGE_NUMBER, g_strdup_printf (_("Page %d"),
                                                     multi_page.image_count+1),
                       THUMB,       pixbuf,
-                      IMAGE_NAME,  gimp_image_get_name (image),
+                      IMAGE_NAME,  clay_image_get_name (image),
                       IMAGE,       image,
                       -1);
 
@@ -1382,7 +1382,7 @@ recount_pages (void)
 /******************************************************/
 
 static cairo_surface_t *
-get_cairo_surface (GimpDrawable  *drawable,
+get_cairo_surface (ClayDrawable  *drawable,
                    gboolean       as_mask,
                    GError       **error)
 {
@@ -1394,14 +1394,14 @@ get_cairo_surface (GimpDrawable  *drawable,
   gint             width;
   gint             height;
 
-  src_buffer = gimp_drawable_get_buffer (drawable);
+  src_buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (src_buffer);
   height = gegl_buffer_get_height (src_buffer);
 
   if (as_mask)
     format = CAIRO_FORMAT_A8;
-  else if (gimp_drawable_has_alpha (drawable))
+  else if (clay_drawable_has_alpha (drawable))
     format = CAIRO_FORMAT_ARGB32;
   else
     format = CAIRO_FORMAT_RGB24;
@@ -1415,14 +1415,14 @@ get_cairo_surface (GimpDrawable  *drawable,
         {
         case CAIRO_STATUS_INVALID_SIZE:
           g_set_error_literal (error,
-                               GIMP_PLUGIN_PDF_EXPORT_ERROR,
-                               GIMP_PLUGIN_PDF_EXPORT_ERROR_FAILED,
+                               CLAY_PLUGIN_PDF_EXPORT_ERROR,
+                               CLAY_PLUGIN_PDF_EXPORT_ERROR_FAILED,
                                _("Cannot handle the size (either width or height) of the image."));
           break;
         default:
           g_set_error (error,
-                       GIMP_PLUGIN_PDF_EXPORT_ERROR,
-                       GIMP_PLUGIN_PDF_EXPORT_ERROR_FAILED,
+                       CLAY_PLUGIN_PDF_EXPORT_ERROR,
+                       CLAY_PLUGIN_PDF_EXPORT_ERROR_FAILED,
                        "Cairo error: %s",
                        cairo_status_to_string (status));
           break;
@@ -1431,7 +1431,7 @@ get_cairo_surface (GimpDrawable  *drawable,
       return NULL;
     }
 
-  dest_buffer = gimp_cairo_surface_get_buffer (surface, NULL, TRUE);
+  dest_buffer = clay_cairo_surface_get_buffer (surface, NULL, TRUE);
   if (as_mask)
     {
       /* src_buffer represents a mask in "Y u8", "Y u16", etc. formats.
@@ -1459,7 +1459,7 @@ get_cairo_surface (GimpDrawable  *drawable,
  * convert bitmaps to vector where possible
  */
 static GeglColor *
-get_layer_color (GimpLayer *layer,
+get_layer_color (ClayLayer *layer,
                  gboolean  *single)
 {
   GeglColor *col     = gegl_color_new (NULL);
@@ -1470,9 +1470,9 @@ get_layer_color (GimpLayer *layer,
 
   devSum = 0;
   dev    = 0;
-  bpp    = gimp_drawable_get_bpp (GIMP_DRAWABLE (layer));
+  bpp    = clay_drawable_get_bpp (CLAY_DRAWABLE (layer));
 
-  if (gimp_drawable_is_indexed (GIMP_DRAWABLE (layer)))
+  if (clay_drawable_is_indexed (CLAY_DRAWABLE (layer)))
     {
       /* FIXME: We can't do a proper histogram on indexed layers! */
       *single = FALSE;
@@ -1480,24 +1480,24 @@ get_layer_color (GimpLayer *layer,
       return col;
     }
 
-  if (gimp_drawable_is_rgb (GIMP_DRAWABLE (layer)))
+  if (clay_drawable_is_rgb (CLAY_DRAWABLE (layer)))
     {
       /* Are we in RGB mode? */
 
-      gimp_drawable_histogram (GIMP_DRAWABLE (layer),
-                               GIMP_HISTOGRAM_RED, 0.0, 1.0,
+      clay_drawable_histogram (CLAY_DRAWABLE (layer),
+                               CLAY_HISTOGRAM_RED, 0.0, 1.0,
                                &rgba[0], &dev, &median, &pixels, &count,
                                &percentile);
       devSum += dev;
 
-      gimp_drawable_histogram (GIMP_DRAWABLE (layer),
-                               GIMP_HISTOGRAM_GREEN, 0.0, 1.0,
+      clay_drawable_histogram (CLAY_DRAWABLE (layer),
+                               CLAY_HISTOGRAM_GREEN, 0.0, 1.0,
                                &rgba[1], &dev, &median, &pixels, &count,
                                &percentile);
       devSum += dev;
 
-      gimp_drawable_histogram (GIMP_DRAWABLE (layer),
-                               GIMP_HISTOGRAM_BLUE, 0.0, 1.0,
+      clay_drawable_histogram (CLAY_DRAWABLE (layer),
+                               CLAY_HISTOGRAM_BLUE, 0.0, 1.0,
                                &rgba[2], &dev, &median, &pixels, &count,
                                &percentile);
       devSum += dev;
@@ -1506,8 +1506,8 @@ get_layer_color (GimpLayer *layer,
     {
       /* We are in Grayscale mode (or Indexed) */
 
-      gimp_drawable_histogram (GIMP_DRAWABLE (layer),
-                               GIMP_HISTOGRAM_VALUE, 0.0, 1.0,
+      clay_drawable_histogram (CLAY_DRAWABLE (layer),
+                               CLAY_HISTOGRAM_VALUE, 0.0, 1.0,
                                &rgba[0], &dev, &median, &pixels, &count,
                                &percentile);
       devSum += dev;
@@ -1515,9 +1515,9 @@ get_layer_color (GimpLayer *layer,
       rgba[2] = rgba[0];
     }
 
-  if (gimp_drawable_has_alpha (GIMP_DRAWABLE (layer)))
-    gimp_drawable_histogram (GIMP_DRAWABLE (layer),
-                             GIMP_HISTOGRAM_ALPHA, 0.0, 1.0,
+  if (clay_drawable_has_alpha (CLAY_DRAWABLE (layer)))
+    clay_drawable_histogram (CLAY_DRAWABLE (layer),
+                             CLAY_HISTOGRAM_ALPHA, 0.0, 1.0,
                              &rgba[3], &dev, &median, &pixels, &count,
                              &percentile);
   else
@@ -1528,22 +1528,22 @@ get_layer_color (GimpLayer *layer,
 
   /* If the image is 8-bit, we need to normalize the RGB values that are
    * returned in the 0...255 range */
-  bpp -= gimp_drawable_has_alpha (GIMP_DRAWABLE (layer)) ? 1 : 0;
-  if ((gimp_drawable_is_rgb (GIMP_DRAWABLE (layer)) && bpp == 3) ||
+  bpp -= clay_drawable_has_alpha (CLAY_DRAWABLE (layer)) ? 1 : 0;
+  if ((clay_drawable_is_rgb (CLAY_DRAWABLE (layer)) && bpp == 3) ||
        bpp == 1)
     {
       for (gint i = 0; i < 4; i++)
         rgba[i] /= 255.0f;
     }
 
-  switch (gimp_image_get_precision (gimp_item_get_image (GIMP_ITEM (layer))))
+  switch (clay_image_get_precision (clay_item_get_image (CLAY_ITEM (layer))))
     {
-      case GIMP_PRECISION_U8_LINEAR:
-      case GIMP_PRECISION_U16_LINEAR:
-      case GIMP_PRECISION_U32_LINEAR:
-      case GIMP_PRECISION_HALF_LINEAR:
-      case GIMP_PRECISION_FLOAT_LINEAR:
-      case GIMP_PRECISION_DOUBLE_LINEAR:
+      case CLAY_PRECISION_U8_LINEAR:
+      case CLAY_PRECISION_U16_LINEAR:
+      case CLAY_PRECISION_U32_LINEAR:
+      case CLAY_PRECISION_HALF_LINEAR:
+      case CLAY_PRECISION_FLOAT_LINEAR:
+      case CLAY_PRECISION_DOUBLE_LINEAR:
         gegl_color_set_rgba (col, rgba[0], rgba[1], rgba[2], rgba[3]);
         break;
 
@@ -1556,36 +1556,36 @@ get_layer_color (GimpLayer *layer,
 }
 
 /* A function that uses Pango to render the text to our cairo surface,
- * in the same way it was the user saw it inside gimp.
+ * in the same way it was the user saw it inside clay.
  * Needs some work on choosing the font name better, and on hinting
  * (freetype and pango differences)
  */
 static void
-drawText (GimpLayer *layer,
+drawText (ClayLayer *layer,
           gdouble    opacity,
           cairo_t   *cr,
           gdouble    x_res,
           gdouble    y_res)
 {
-  GimpImageType         type   = gimp_drawable_type (GIMP_DRAWABLE (layer));
-  gchar                *text   = gimp_text_layer_get_text (GIMP_TEXT_LAYER (layer));
-  gchar                *markup = gimp_text_layer_get_markup (GIMP_TEXT_LAYER (layer));
+  ClayImageType         type   = clay_drawable_type (CLAY_DRAWABLE (layer));
+  gchar                *text   = clay_text_layer_get_text (CLAY_TEXT_LAYER (layer));
+  gchar                *markup = clay_text_layer_get_markup (CLAY_TEXT_LAYER (layer));
   gchar                *language;
   cairo_font_options_t *options;
   gint                  x;
   gint                  y;
   GeglColor            *color;
   gdouble               rgb[3];
-  GimpUnit             *unit;
+  ClayUnit             *unit;
   gdouble               size;
-  GimpTextHintStyle     hinting;
-  GimpTextJustification j;
+  ClayTextHintStyle     hinting;
+  ClayTextJustification j;
   gboolean              justify;
   PangoAlignment        align;
-  GimpTextDirection     dir;
+  ClayTextDirection     dir;
   PangoLayout          *layout;
   PangoContext         *context;
-  GimpFont             *font;
+  ClayFont             *font;
   PangoFontDescription *font_description;
   gdouble               indent;
   gdouble               line_spacing;
@@ -1600,21 +1600,21 @@ drawText (GimpLayer *layer,
   cairo_get_font_options (cr, options);
 
   /* Position */
-  gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &x, &y);
+  clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &x, &y);
   cairo_translate (cr, x, y);
 
   /* Offset */
-  gimp_text_layer_get_layout_offsets (GIMP_TEXT_LAYER (layer), &x, &y);
+  clay_text_layer_get_layout_offsets (CLAY_TEXT_LAYER (layer), &x, &y);
   cairo_translate (cr, x, y);
 
   /* Color */
   /* When dealing with a gray/indexed image, the viewed color of the text layer
    * can be different than the one kept in the memory */
-  if (type == GIMP_RGBA_IMAGE)
-    color = gimp_text_layer_get_color (GIMP_TEXT_LAYER (layer));
+  if (type == CLAY_RGBA_IMAGE)
+    color = clay_text_layer_get_color (CLAY_TEXT_LAYER (layer));
   else
-    gimp_image_pick_color (gimp_item_get_image (GIMP_ITEM (layer)),
-                           (const GimpDrawable*[2]) { GIMP_DRAWABLE (layer), NULL },
+    clay_image_pick_color (clay_item_get_image (CLAY_ITEM (layer)),
+                           (const ClayDrawable*[2]) { CLAY_DRAWABLE (layer), NULL },
                            x, y, FALSE, FALSE, 0, &color);
 
   /* TODO: this export plug-in is not space-aware yet, so we draw everything as
@@ -1625,28 +1625,28 @@ drawText (GimpLayer *layer,
   g_object_unref (color);
 
   /* Hinting */
-  hinting = gimp_text_layer_get_hint_style (GIMP_TEXT_LAYER (layer));
+  hinting = clay_text_layer_get_hint_style (CLAY_TEXT_LAYER (layer));
   switch (hinting)
     {
-    case GIMP_TEXT_HINT_STYLE_NONE:
+    case CLAY_TEXT_HINT_STYLE_NONE:
       cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_NONE);
       break;
 
-    case GIMP_TEXT_HINT_STYLE_SLIGHT:
+    case CLAY_TEXT_HINT_STYLE_SLIGHT:
       cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_SLIGHT);
       break;
 
-    case GIMP_TEXT_HINT_STYLE_MEDIUM:
+    case CLAY_TEXT_HINT_STYLE_MEDIUM:
       cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_MEDIUM);
       break;
 
-    case GIMP_TEXT_HINT_STYLE_FULL:
+    case CLAY_TEXT_HINT_STYLE_FULL:
       cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_FULL);
       break;
     }
 
   /* Antialiasing */
-  if (gimp_text_layer_get_antialias (GIMP_TEXT_LAYER (layer)))
+  if (clay_text_layer_get_antialias (CLAY_TEXT_LAYER (layer)))
     cairo_font_options_set_antialias (options, CAIRO_ANTIALIAS_DEFAULT);
   else
     cairo_font_options_set_antialias (options, CAIRO_ANTIALIAS_NONE);
@@ -1657,11 +1657,11 @@ drawText (GimpLayer *layer,
   fontmap = pango_cairo_font_map_new_for_font_type (CAIRO_FONT_TYPE_FT);
 
   /* Font */
-  font = gimp_text_layer_get_font (GIMP_TEXT_LAYER (layer));
-  font_description = gimp_font_get_pango_font_description (font);
+  font = clay_text_layer_get_font (CLAY_TEXT_LAYER (layer));
+  font_description = clay_font_get_pango_font_description (font);
 
   /* This function breaks rendering with some fonts if it's called before
-   * gimp_font_get_pango_font_description(). I'm still unsure why yet it
+   * clay_font_get_pango_font_description(). I'm still unsure why yet it
    * probably means there is a bug somewhere we must fix. Until then, let's make
    * sure we keep this order. XXX
    */
@@ -1673,47 +1673,47 @@ drawText (GimpLayer *layer,
   pango_cairo_context_set_font_options (context, options);
 
   /* Language */
-  language = gimp_text_layer_get_language (GIMP_TEXT_LAYER (layer));
+  language = clay_text_layer_get_language (CLAY_TEXT_LAYER (layer));
   if (language)
     pango_context_set_language (context,
                                 pango_language_from_string (language));
 
   /* Text Direction */
-  dir = gimp_text_layer_get_base_direction (GIMP_TEXT_LAYER (layer));
+  dir = clay_text_layer_get_base_direction (CLAY_TEXT_LAYER (layer));
 
   switch (dir)
     {
-    case GIMP_TEXT_DIRECTION_LTR:
+    case CLAY_TEXT_DIRECTION_LTR:
       pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
       pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_NATURAL);
       pango_context_set_base_gravity (context, PANGO_GRAVITY_SOUTH);
       break;
 
-    case GIMP_TEXT_DIRECTION_RTL:
+    case CLAY_TEXT_DIRECTION_RTL:
       pango_context_set_base_dir (context, PANGO_DIRECTION_RTL);
       pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_NATURAL);
       pango_context_set_base_gravity (context, PANGO_GRAVITY_SOUTH);
       break;
 
-    case GIMP_TEXT_DIRECTION_TTB_RTL:
+    case CLAY_TEXT_DIRECTION_TTB_RTL:
       pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
       pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_LINE);
       pango_context_set_base_gravity (context, PANGO_GRAVITY_EAST);
       break;
 
-    case GIMP_TEXT_DIRECTION_TTB_RTL_UPRIGHT:
+    case CLAY_TEXT_DIRECTION_TTB_RTL_UPRIGHT:
       pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
       pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_STRONG);
       pango_context_set_base_gravity (context, PANGO_GRAVITY_EAST);
       break;
 
-    case GIMP_TEXT_DIRECTION_TTB_LTR:
+    case CLAY_TEXT_DIRECTION_TTB_LTR:
       pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
       pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_LINE);
       pango_context_set_base_gravity (context, PANGO_GRAVITY_WEST);
       break;
 
-    case GIMP_TEXT_DIRECTION_TTB_LTR_UPRIGHT:
+    case CLAY_TEXT_DIRECTION_TTB_LTR_UPRIGHT:
       pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
       pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_STRONG);
       pango_context_set_base_gravity (context, PANGO_GRAVITY_WEST);
@@ -1727,40 +1727,40 @@ drawText (GimpLayer *layer,
   pango_layout_set_wrap (layout, PANGO_WRAP_WORD_CHAR);
 
   /* Font Size */
-  size = gimp_text_layer_get_font_size (GIMP_TEXT_LAYER (layer), &unit);
-  size = gimp_units_to_pixels (size, unit, y_res);
+  size = clay_text_layer_get_font_size (CLAY_TEXT_LAYER (layer), &unit);
+  size = clay_units_to_pixels (size, unit, y_res);
   pango_font_description_set_absolute_size (font_description, size * PANGO_SCALE);
 
   pango_layout_set_font_description (layout, font_description);
 
-  if (! gimp_text_layer_is_dynamic (GIMP_TEXT_LAYER (layer)))
+  if (! clay_text_layer_is_dynamic (CLAY_TEXT_LAYER (layer)))
     {
        /* Width */
        if (! PANGO_GRAVITY_IS_VERTICAL (pango_context_get_base_gravity (context)))
          pango_layout_set_width (layout,
-                                 gimp_drawable_get_width (GIMP_DRAWABLE (layer)) *
+                                 clay_drawable_get_width (CLAY_DRAWABLE (layer)) *
                                  PANGO_SCALE);
        else
          pango_layout_set_width (layout,
-                                 gimp_drawable_get_height (GIMP_DRAWABLE (layer)) *
+                                 clay_drawable_get_height (CLAY_DRAWABLE (layer)) *
                                  PANGO_SCALE);
     }
   /* Justification, and Alignment */
   justify = FALSE;
-  j = gimp_text_layer_get_justification (GIMP_TEXT_LAYER (layer));
+  j = clay_text_layer_get_justification (CLAY_TEXT_LAYER (layer));
   align = PANGO_ALIGN_LEFT;
   switch (j)
     {
-    case GIMP_TEXT_JUSTIFY_LEFT:
+    case CLAY_TEXT_JUSTIFY_LEFT:
       align = PANGO_ALIGN_LEFT;
       break;
-    case GIMP_TEXT_JUSTIFY_RIGHT:
+    case CLAY_TEXT_JUSTIFY_RIGHT:
       align = PANGO_ALIGN_RIGHT;
       break;
-    case GIMP_TEXT_JUSTIFY_CENTER:
+    case CLAY_TEXT_JUSTIFY_CENTER:
       align = PANGO_ALIGN_CENTER;
       break;
-    case GIMP_TEXT_JUSTIFY_FILL:
+    case CLAY_TEXT_JUSTIFY_FILL:
       align = PANGO_ALIGN_LEFT;
       justify = TRUE;
       break;
@@ -1769,15 +1769,15 @@ drawText (GimpLayer *layer,
   pango_layout_set_justify (layout, justify);
 
   /* Indentation */
-  indent = gimp_text_layer_get_indent (GIMP_TEXT_LAYER (layer));
-  pango_layout_set_indent (layout, pango_units_from_double (gimp_units_to_pixels (indent, unit, y_res)));
+  indent = clay_text_layer_get_indent (CLAY_TEXT_LAYER (layer));
+  pango_layout_set_indent (layout, pango_units_from_double (clay_units_to_pixels (indent, unit, y_res)));
 
   /* Line Spacing */
-  line_spacing = gimp_text_layer_get_line_spacing (GIMP_TEXT_LAYER (layer));
-  pango_layout_set_spacing (layout, pango_units_from_double (gimp_units_to_pixels (line_spacing, unit, y_res)));
+  line_spacing = clay_text_layer_get_line_spacing (CLAY_TEXT_LAYER (layer));
+  pango_layout_set_spacing (layout, pango_units_from_double (clay_units_to_pixels (line_spacing, unit, y_res)));
 
   /* Letter Spacing */
-  letter_spacing = gimp_text_layer_get_letter_spacing (GIMP_TEXT_LAYER (layer));
+  letter_spacing = clay_text_layer_get_letter_spacing (CLAY_TEXT_LAYER (layer));
   /*
    * for some reason if the letter spacing is not specified in the pango markup
    * (and is instead set for the pango layout) it is ignored.
@@ -1804,17 +1804,17 @@ drawText (GimpLayer *layer,
   else /* If we can't find a markup, then it has just text */
     pango_layout_set_text (layout, text, -1);
 
-  if (dir == GIMP_TEXT_DIRECTION_TTB_RTL ||
-      dir == GIMP_TEXT_DIRECTION_TTB_RTL_UPRIGHT)
+  if (dir == CLAY_TEXT_DIRECTION_TTB_RTL ||
+      dir == CLAY_TEXT_DIRECTION_TTB_RTL_UPRIGHT)
     {
-      cairo_translate (cr, gimp_drawable_get_width (GIMP_DRAWABLE (layer)), 0);
+      cairo_translate (cr, clay_drawable_get_width (CLAY_DRAWABLE (layer)), 0);
       cairo_rotate (cr, G_PI_2);
     }
 
-  if (dir == GIMP_TEXT_DIRECTION_TTB_LTR ||
-      dir == GIMP_TEXT_DIRECTION_TTB_LTR_UPRIGHT)
+  if (dir == CLAY_TEXT_DIRECTION_TTB_LTR ||
+      dir == CLAY_TEXT_DIRECTION_TTB_LTR_UPRIGHT)
     {
-      cairo_translate (cr, 0, gimp_drawable_get_height (GIMP_DRAWABLE (layer)));
+      cairo_translate (cr, 0, clay_drawable_get_height (CLAY_DRAWABLE (layer)));
       cairo_rotate (cr, -G_PI_2);
     }
 
@@ -1837,15 +1837,15 @@ drawText (GimpLayer *layer,
 }
 
 static void
-drawPath (GimpLayer *layer,
+drawPath (ClayLayer *layer,
           gdouble    opacity,
           cairo_t   *cr,
           gdouble    x_res,
           gdouble    y_res)
 {
-  GimpVectorLayer *vector_layer;
-  GimpPath        *path    = NULL;
-  GimpPattern     *pattern = NULL;
+  ClayVectorLayer *vector_layer;
+  ClayPath        *path    = NULL;
+  ClayPattern     *pattern = NULL;
   GeglColor       *color;
   gdouble          rgb[3];
   gboolean         set_fill;
@@ -1854,26 +1854,26 @@ drawPath (GimpLayer *layer,
   gint            *strokes;
   gboolean         closed = FALSE;
 
-  vector_layer = GIMP_VECTOR_LAYER (layer);
-  path         = gimp_vector_layer_get_path (vector_layer);
-  set_fill     = gimp_vector_layer_get_enable_fill (vector_layer);
-  set_stroke   = gimp_vector_layer_get_enable_stroke (vector_layer);
+  vector_layer = CLAY_VECTOR_LAYER (layer);
+  path         = clay_vector_layer_get_path (vector_layer);
+  set_fill     = clay_vector_layer_get_enable_fill (vector_layer);
+  set_stroke   = clay_vector_layer_get_enable_stroke (vector_layer);
 
   cairo_save (cr);
 
   /* Create path in Cairo */
-  strokes = gimp_path_get_strokes (path, &num_strokes);
+  strokes = clay_path_get_strokes (path, &num_strokes);
   for (gint s = 0; s < num_strokes; s++)
     {
-      GimpPathStrokeType  type;
+      ClayPathStrokeType  type;
       gdouble            *control_points;
       gsize               num_points;
       gsize               num_indexes;
 
-      type = gimp_path_stroke_get_points (path, strokes[s], &num_points,
+      type = clay_path_stroke_get_points (path, strokes[s], &num_points,
                                           &control_points, &closed);
 
-      if (type == GIMP_PATH_STROKE_TYPE_BEZIER)
+      if (type == CLAY_PATH_STROKE_TYPE_BEZIER)
         {
           num_indexes = num_points / 2;
 
@@ -1904,7 +1904,7 @@ drawPath (GimpLayer *layer,
   /* Add fill/stroke to Cairo path */
   if (set_fill)
     {
-      color = gimp_vector_layer_get_fill_color (vector_layer);
+      color = clay_vector_layer_get_fill_color (vector_layer);
       if (color)
         {
           gegl_color_get_pixel (color,
@@ -1915,7 +1915,7 @@ drawPath (GimpLayer *layer,
         }
       else
         {
-          pattern = gimp_vector_layer_get_fill_pattern (vector_layer);
+          pattern = clay_vector_layer_get_fill_pattern (vector_layer);
 
           draw_path_pattern (cr, pattern);
         }
@@ -1936,7 +1936,7 @@ drawPath (GimpLayer *layer,
       gsize              num_dashes;
       gdouble           *dash_pattern;
 
-      color = gimp_vector_layer_get_stroke_color (vector_layer);
+      color = clay_vector_layer_get_stroke_color (vector_layer);
       if (color)
         {
           gegl_color_get_pixel (color,
@@ -1947,23 +1947,23 @@ drawPath (GimpLayer *layer,
         }
       else
         {
-          pattern = gimp_vector_layer_get_stroke_pattern (vector_layer);
+          pattern = clay_vector_layer_get_stroke_pattern (vector_layer);
 
           draw_path_pattern (cr, pattern);
         }
 
-      stroke_width = gimp_vector_layer_get_stroke_width (vector_layer);
+      stroke_width = clay_vector_layer_get_stroke_width (vector_layer);
       cairo_set_line_width (cr, stroke_width);
 
-      miter_limit = gimp_vector_layer_get_stroke_miter_limit (vector_layer);
+      miter_limit = clay_vector_layer_get_stroke_miter_limit (vector_layer);
       cairo_set_miter_limit (cr, miter_limit);
 
-      switch (gimp_vector_layer_get_stroke_cap_style (vector_layer))
+      switch (clay_vector_layer_get_stroke_cap_style (vector_layer))
         {
-        case GIMP_CAP_ROUND:
+        case CLAY_CAP_ROUND:
           cap_style = CAIRO_LINE_CAP_ROUND;
           break;
-        case GIMP_CAP_SQUARE:
+        case CLAY_CAP_SQUARE:
           cap_style = CAIRO_LINE_CAP_SQUARE;
           break;
         default:
@@ -1972,12 +1972,12 @@ drawPath (GimpLayer *layer,
         }
       cairo_set_line_cap (cr, cap_style);
 
-      switch (gimp_vector_layer_get_stroke_join_style (vector_layer))
+      switch (clay_vector_layer_get_stroke_join_style (vector_layer))
         {
-        case GIMP_JOIN_ROUND:
+        case CLAY_JOIN_ROUND:
           join_style = CAIRO_LINE_JOIN_ROUND;
           break;
-        case GIMP_JOIN_BEVEL:
+        case CLAY_JOIN_BEVEL:
           join_style = CAIRO_LINE_JOIN_BEVEL;
           break;
         default:
@@ -1986,8 +1986,8 @@ drawPath (GimpLayer *layer,
         }
       cairo_set_line_join (cr, join_style);
 
-      dash_offset = gimp_vector_layer_get_stroke_dash_offset (vector_layer);
-      gimp_vector_layer_get_stroke_dash_pattern (vector_layer, &num_dashes,
+      dash_offset = clay_vector_layer_get_stroke_dash_offset (vector_layer);
+      clay_vector_layer_get_stroke_dash_pattern (vector_layer, &num_dashes,
                                                  &dash_pattern);
       if (num_dashes > 0)
         {
@@ -2005,34 +2005,34 @@ drawPath (GimpLayer *layer,
 
 static void
 draw_path_pattern (cairo_t     *cr,
-                   GimpPattern *pattern)
+                   ClayPattern *pattern)
 {
   cairo_surface_t *pattern_image = NULL;
-  GimpImage       *temp_image;
-  GimpLayer       *temp_layer;
+  ClayImage       *temp_image;
+  ClayLayer       *temp_layer;
   gint             width;
   gint             height;
   GeglBuffer      *src_buffer;
   GeglBuffer      *dst_buffer;
 
-  src_buffer = gimp_pattern_get_buffer (pattern, 0, 0,
+  src_buffer = clay_pattern_get_buffer (pattern, 0, 0,
                                         babl_format ("R'G'B' u8"));
   width      = gegl_buffer_get_width (src_buffer);
   height     = gegl_buffer_get_height (src_buffer);
-  temp_image = gimp_image_new (width, height, GIMP_RGB);
-  temp_layer = gimp_layer_new (temp_image, NULL, width, height,
-                               GIMP_RGBA_IMAGE, 100.0,
-                               GIMP_LAYER_MODE_NORMAL);
-  gimp_image_insert_layer (temp_image, temp_layer, NULL, 0);
-  dst_buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (temp_layer));
+  temp_image = clay_image_new (width, height, CLAY_RGB);
+  temp_layer = clay_layer_new (temp_image, NULL, width, height,
+                               CLAY_RGBA_IMAGE, 100.0,
+                               CLAY_LAYER_MODE_NORMAL);
+  clay_image_insert_layer (temp_image, temp_layer, NULL, 0);
+  dst_buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (temp_layer));
   gegl_buffer_copy (src_buffer, NULL, GEGL_ABYSS_NONE, dst_buffer, NULL);
 
   g_object_unref (src_buffer);
   g_object_unref (dst_buffer);
 
-  pattern_image = get_cairo_surface (GIMP_DRAWABLE (temp_layer), FALSE,
+  pattern_image = get_cairo_surface (CLAY_DRAWABLE (temp_layer), FALSE,
                                      NULL);
-  gimp_image_delete (temp_image);
+  clay_image_delete (temp_image);
 
   cairo_set_source_surface (cr, pattern_image, 0, 0);
   cairo_surface_destroy (pattern_image);
@@ -2040,10 +2040,10 @@ draw_path_pattern (cairo_t     *cr,
 }
 
 static gboolean
-draw_layer (GimpImage            *image,
-            GimpLayer           **layers,
+draw_layer (ClayImage            *image,
+            ClayLayer           **layers,
             gint                  n_layers,
-            GimpProcedureConfig  *config,
+            ClayProcedureConfig  *config,
             gboolean              single_image,
             gint                  j,
             cairo_t              *cr,
@@ -2056,7 +2056,7 @@ draw_layer (GimpImage            *image,
             gint                  layer_level,
             GError              **error)
 {
-  GimpLayer *layer;
+  ClayLayer *layer;
   gdouble    opacity;
   gboolean   vectorize;
   gboolean   ignore_hidden;
@@ -2085,23 +2085,23 @@ draw_layer (GimpImage            *image,
   else
     layer = layers [n_layers - j - 1];
 
-  opacity = gimp_layer_get_opacity (layer) / 100.0;
-  if ((! gimp_item_get_visible (GIMP_ITEM (layer)) || opacity == 0.0) &&
+  opacity = clay_layer_get_opacity (layer) / 100.0;
+  if ((! clay_item_get_visible (CLAY_ITEM (layer)) || opacity == 0.0) &&
       ignore_hidden)
     return TRUE;
 
-  if (gimp_item_is_group (GIMP_ITEM (layer)))
+  if (clay_item_is_group (CLAY_ITEM (layer)))
     {
-      GimpItem **children;
+      ClayItem **children;
       gint       children_num = 0;
       gint       i;
 
-      children     = gimp_item_get_children (GIMP_ITEM (layer));
-      children_num = gimp_core_object_array_get_length ((GObject **) children);
+      children     = clay_item_get_children (CLAY_ITEM (layer));
+      children_num = clay_core_object_array_get_length ((GObject **) children);
 
       for (i = 0; children[i] != NULL; i++)
         {
-          if (! draw_layer (image, (GimpLayer **) children, children_num,
+          if (! draw_layer (image, (ClayLayer **) children, children_num,
                             config, single_image, i,
                             cr, x_res, y_res, name,
                             show_progress,
@@ -2122,12 +2122,12 @@ draw_layer (GimpImage            *image,
   else
     {
       cairo_surface_t *mask_image = NULL;
-      GimpLayerMask   *mask       = NULL;
+      ClayLayerMask   *mask       = NULL;
       gint             x, y;
       gboolean         fill_page  = FALSE;
 
       if (show_progress)
-        gimp_progress_update (progress_start);
+        clay_progress_update (progress_start);
 
       /* First fill layer with opaque background color when either
        * multi-layered or this is the first layer at the top level
@@ -2152,9 +2152,9 @@ draw_layer (GimpImage            *image,
           gdouble    rgb[3];
 
           cairo_rectangle (cr, 0.0, 0.0,
-                           gimp_image_get_width  (image),
-                           gimp_image_get_height (image));
-          color = gimp_context_get_background ();
+                           clay_image_get_width  (image),
+                           clay_image_get_height (image));
+          color = clay_context_get_background ();
           gegl_color_get_pixel (color, babl_format ("R'G'B' double"), rgb);
           cairo_set_source_rgb (cr, rgb[0], rgb[1], rgb[2]);
           cairo_fill (cr);
@@ -2162,23 +2162,23 @@ draw_layer (GimpImage            *image,
         }
 
       /* Only render layer mask if it's not disabled */
-      if (gimp_layer_get_mask (layer) && gimp_layer_get_apply_mask (layer))
-        mask = gimp_layer_get_mask (layer);
+      if (clay_layer_get_mask (layer) && clay_layer_get_apply_mask (layer))
+        mask = clay_layer_get_mask (layer);
 
       if (mask)
         {
-          mask_image = get_cairo_surface (GIMP_DRAWABLE (mask), TRUE,
+          mask_image = get_cairo_surface (CLAY_DRAWABLE (mask), TRUE,
                                           error);
 
           if (*error)
             return FALSE;
         }
 
-      gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &x, &y);
+      clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &x, &y);
 
-      if (((! gimp_item_is_text_layer (GIMP_ITEM (layer))               ||
-           gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (layer))) &&
-           ! gimp_item_is_vector_layer (GIMP_ITEM (layer)))             ||
+      if (((! clay_item_is_text_layer (CLAY_ITEM (layer))               ||
+           clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (layer))) &&
+           ! clay_item_is_vector_layer (CLAY_ITEM (layer)))             ||
           convert_text)
         {
           /* For raster layers */
@@ -2189,12 +2189,12 @@ draw_layer (GimpImage            *image,
           layer_color = get_layer_color (layer, &single_color);
 
           cairo_rectangle (cr, x, y,
-                           gimp_drawable_get_width  (GIMP_DRAWABLE (layer)),
-                           gimp_drawable_get_height (GIMP_DRAWABLE (layer)));
+                           clay_drawable_get_width  (CLAY_DRAWABLE (layer)),
+                           clay_drawable_get_height (CLAY_DRAWABLE (layer)));
 
           if (vectorize && single_color)
             {
-              gimp_cairo_set_source_color (cr, layer_color, NULL, FALSE, NULL);
+              clay_cairo_set_source_color (cr, layer_color, NULL, FALSE, NULL);
               if (mask)
                 cairo_mask_surface (cr, mask_image, x, y);
               else
@@ -2204,7 +2204,7 @@ draw_layer (GimpImage            *image,
             {
               cairo_surface_t *layer_image;
 
-              layer_image = get_cairo_surface (GIMP_DRAWABLE (layer), FALSE,
+              layer_image = get_cairo_surface (CLAY_DRAWABLE (layer), FALSE,
                                                error);
 
               if (*error)
@@ -2229,12 +2229,12 @@ draw_layer (GimpImage            *image,
 
           g_object_unref (layer_color);
         }
-      else if (gimp_item_is_text_layer (GIMP_ITEM (layer)))
+      else if (clay_item_is_text_layer (CLAY_ITEM (layer)))
         {
           /* For text layers */
           drawText (layer, opacity, cr, x_res, y_res);
         }
-      else if (gimp_item_is_vector_layer (GIMP_ITEM (layer)))
+      else if (clay_item_is_vector_layer (CLAY_ITEM (layer)))
         {
           drawPath (layer, opacity, cr, x_res, y_res);
         }

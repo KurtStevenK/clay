@@ -12,10 +12,10 @@ It is important that you fill all the fields of the template. -->
 - If the feature is UI-related, please DO NOT REPORT HERE. First,
   you should discuss with the community and developers in the forums or
   talk with the developers on IRC: https://www.gimp.org/discuss.html. Then,
-  if it really seems to align with GIMP, report it on gimp-ux:
-  https://gitlab.gnome.org/Teams/GIMP/Design/gimp-ux/-/issues;
+  if it really seems to align with Clay, report it on clay-ux:
+  https://gitlab.gnome.org/Teams/Clay/Design/clay-ux/-/issues;
 
-- If the feature is about some image file format on GIMP, first check if it
+- If the feature is about some image file format on Clay, first check if it
   is not already listed on https://developer.gimp.org/core/coding/standards/images,
   then you can make the request, ideally linking relevant resources (e.g. specs);
 

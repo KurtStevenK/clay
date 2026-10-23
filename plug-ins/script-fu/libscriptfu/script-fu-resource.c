@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "script-fu-types.h"
 #include "script-fu-resource.h"
@@ -35,7 +35,7 @@ static gint32 sf_resource_arg_get_ID_from_context (SFArg *arg);
 /* Called at registration time.
  * The name may be empty i.e. NULL, the special value "from context",
  * a name that matches a resource, or an invalid name of a resource.
- * We can't check for validity now because Gimp is not done initializing resources.
+ * We can't check for validity now because Clay is not done initializing resources.
  */
 void
 sf_resource_arg_set_name_default (SFArg *arg, GType resource_type, gchar *name_of_default)
@@ -65,12 +65,12 @@ sf_resource_arg_get_name_default (SFArg *arg)
  * ScriptFu does not keep a reference,
  * only passes the reference when declaring args to PDB procedure.
  */
-GimpResource*
+ClayResource*
 sf_resource_arg_get_default (SFArg *arg)
 {
-  GimpResource *result;
+  ClayResource *result;
 
-  result = gimp_resource_get_by_name (
+  result = clay_resource_get_by_name (
     arg->default_value.sfa_resource.resource_type,
     sf_resource_arg_get_name_default (arg));
 
@@ -79,9 +79,9 @@ sf_resource_arg_get_default (SFArg *arg)
 }
 
 /* Return the current value. */
-GimpResource *sf_resource_arg_get_value          (SFArg *arg)
+ClayResource *sf_resource_arg_get_value          (SFArg *arg)
 {
-  return gimp_resource_get_by_id (arg->value.sfa_resource.history);
+  return clay_resource_get_by_id (arg->value.sfa_resource.history);
 }
 
 /* Sets the arg's internal value.
@@ -147,9 +147,9 @@ sf_resource_arg_init_current_value (SFArg *arg)
   if (arg->value.sfa_resource.history < 1)
     {
       /* The ID has not flowed from a widget in a prior run of plugin. */
-      GimpResource *default_resource = sf_resource_arg_get_default (arg);
+      ClayResource *default_resource = sf_resource_arg_get_default (arg);
       if (default_resource != NULL)
-        sf_resource_arg_set (arg, gimp_resource_get_id (default_resource));
+        sf_resource_arg_set (arg, clay_resource_get_id (default_resource));
       else
         /* The author declared default is not valid. */
         sf_resource_arg_set (arg, sf_resource_arg_get_ID_from_context (arg));
@@ -164,20 +164,20 @@ sf_resource_arg_init_current_value (SFArg *arg)
 static gint32
 sf_resource_arg_get_ID_from_context (SFArg *arg)
 {
-  GimpResource *resource = NULL;
+  ClayResource *resource = NULL;
   gint32        result_ID;
   GType         resource_type = arg->default_value.sfa_resource.resource_type;
 
-  if (resource_type == GIMP_TYPE_BRUSH)
-    resource = GIMP_RESOURCE (gimp_context_get_brush ());
-  else if (resource_type == GIMP_TYPE_FONT)
-    resource = GIMP_RESOURCE (gimp_context_get_font ());
-  else if (resource_type == GIMP_TYPE_GRADIENT)
-    resource = GIMP_RESOURCE (gimp_context_get_gradient ());
-  else if (resource_type == GIMP_TYPE_PALETTE)
-    resource = GIMP_RESOURCE (gimp_context_get_palette ());
-  else if (resource_type == GIMP_TYPE_PATTERN)
-    resource = GIMP_RESOURCE (gimp_context_get_pattern ());
+  if (resource_type == CLAY_TYPE_BRUSH)
+    resource = CLAY_RESOURCE (clay_context_get_brush ());
+  else if (resource_type == CLAY_TYPE_FONT)
+    resource = CLAY_RESOURCE (clay_context_get_font ());
+  else if (resource_type == CLAY_TYPE_GRADIENT)
+    resource = CLAY_RESOURCE (clay_context_get_gradient ());
+  else if (resource_type == CLAY_TYPE_PALETTE)
+    resource = CLAY_RESOURCE (clay_context_get_palette ());
+  else if (resource_type == CLAY_TYPE_PATTERN)
+    resource = CLAY_RESOURCE (clay_context_get_pattern ());
 
   if (resource == NULL)
     {
@@ -186,7 +186,7 @@ sf_resource_arg_get_ID_from_context (SFArg *arg)
     }
   else
     {
-      result_ID = gimp_resource_get_id (resource);
+      result_ID = clay_resource_get_id (resource);
     }
   return result_ID;
 }

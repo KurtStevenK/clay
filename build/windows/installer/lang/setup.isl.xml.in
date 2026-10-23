@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<gimp-ms-installer-config>
+<clay-ms-installer-config>
 
   <section name="Messages">
     <!-- InfoBefore page is used instead of license page because the GPL only concerns distribution, not use, and as such doesn't have to be accepted -->
@@ -80,11 +80,11 @@
       <value>Description</value>
     </config>
     <!-- Components -->
-    <config name="ComponentsGimp">
+    <config name="ComponentsClay">
       <value>Clay</value>
     </config>
     <!-- Components -->
-    <config name="ComponentsGimpDescription">
+    <config name="ComponentsClayDescription">
       <value>Clay and all default plug-ins</value>
     </config>
     <!-- Components -->
@@ -199,7 +199,7 @@
       <value>for free updates.</value>
     </config>
 
-    <config name="SettingUpPyGimp">
+    <config name="SettingUpPyClay">
       <value>Setting up environment for Clay Python extension...</value>
     </config>
     <config name="SettingUpEnvironment">
@@ -207,7 +207,7 @@
     </config>
 
     <!-- Displayed on last page -->
-    <config name="LaunchGimp">
+    <config name="LaunchClay">
       <value>Launch Clay</value>
     </config>
 
@@ -225,4 +225,4 @@
       <value>Internal error (%1).</value>
     </config>
   </section>
-</gimp-ms-installer-config>
+</clay-ms-installer-config>

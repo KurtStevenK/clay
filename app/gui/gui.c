@@ -22,54 +22,54 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
-#include "libgimpwidgets/gimpwidgets-private.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
+#include "libclaywidgets/claywidgets-private.h"
 
 #include "gui-types.h"
-#include "gimpapp.h"
+#include "clayapp.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/claytoolinfo.h"
 
-#include "plug-in/gimpenvirontable.h"
-#include "plug-in/gimppluginmanager.h"
+#include "plug-in/clayenvirontable.h"
+#include "plug-in/claypluginmanager.h"
 
-#include "display/gimpcanvas-style.h"
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplay-foreach.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpstatusbar.h"
+#include "display/claycanvas-style.h"
+#include "display/claydisplay.h"
+#include "display/claydisplay-foreach.h"
+#include "display/claydisplayshell.h"
+#include "display/claystatusbar.h"
 
-#include "tools/gimp-tools.h"
-#include "tools/gimptool.h"
+#include "tools/clay-tools.h"
+#include "tools/claytool.h"
 #include "tools/tool_manager.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpaction-history.h"
-#include "widgets/gimpclipboard.h"
-#include "widgets/gimpcolorselectorpalette.h"
-#include "widgets/gimpcontrollermanager.h"
-#include "widgets/gimpcontrollers.h"
-#include "widgets/gimpdevices.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdnd.h"
-#include "widgets/gimprender.h"
-#include "widgets/gimphelp.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpmenufactory.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpradioaction.h"
-#include "widgets/gimpsessioninfo.h"
-#include "widgets/gimptranslationstore.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayaction-history.h"
+#include "widgets/clayclipboard.h"
+#include "widgets/claycolorselectorpalette.h"
+#include "widgets/claycontrollermanager.h"
+#include "widgets/claycontrollers.h"
+#include "widgets/claydevices.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydnd.h"
+#include "widgets/clayrender.h"
+#include "widgets/clayhelp.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claymenufactory.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/clayradioaction.h"
+#include "widgets/claysessioninfo.h"
+#include "widgets/claytranslationstore.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "actions/actions.h"
 #include "actions/windows-commands.h"
@@ -78,7 +78,7 @@
 
 #include "dialogs/dialogs.h"
 
-#include "gimpuiconfigurer.h"
+#include "clayuiconfigurer.h"
 #include "gui.h"
 #include "gui-unique.h"
 #include "gui-vtable.h"
@@ -110,7 +110,7 @@
 
 #endif /* GDK_WINDOWING_QUARTZ */
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
@@ -121,42 +121,42 @@ static void        gui_help_func                 (const gchar        *help_id,
 static GeglColor * gui_get_background_func       (void);
 static GeglColor * gui_get_foreground_func       (void);
 
-static void        gui_initialize_after_callback (Gimp               *gimp,
-                                                  GimpInitStatusFunc  callback);
+static void        gui_initialize_after_callback (Clay               *clay,
+                                                  ClayInitStatusFunc  callback);
 
-static void        gui_restore_callback          (Gimp               *gimp,
-                                                  GimpInitStatusFunc  callback);
-static void        gui_restore_after_callback    (Gimp               *gimp,
-                                                  GimpInitStatusFunc  callback);
+static void        gui_restore_callback          (Clay               *clay,
+                                                  ClayInitStatusFunc  callback);
+static void        gui_restore_after_callback    (Clay               *clay,
+                                                  ClayInitStatusFunc  callback);
 
-static gboolean    gui_exit_callback             (Gimp               *gimp,
+static gboolean    gui_exit_callback             (Clay               *clay,
                                                   gboolean            force);
-static gboolean    gui_exit_after_callback       (Gimp               *gimp,
+static gboolean    gui_exit_after_callback       (Clay               *clay,
                                                   gboolean            force);
 
-static void        gui_show_help_button_notify   (GimpGuiConfig      *gui_config,
+static void        gui_show_help_button_notify   (ClayGuiConfig      *gui_config,
                                                   GParamSpec         *pspec,
-                                                  Gimp               *gimp);
-static void        gui_user_manual_notify        (GimpGuiConfig      *gui_config,
+                                                  Clay               *clay);
+static void        gui_user_manual_notify        (ClayGuiConfig      *gui_config,
                                                   GParamSpec         *pspec,
-                                                  Gimp               *gimp);
-static void        gui_single_window_mode_notify (GimpGuiConfig      *gui_config,
+                                                  Clay               *clay);
+static void        gui_single_window_mode_notify (ClayGuiConfig      *gui_config,
                                                   GParamSpec         *pspec,
-                                                  GimpUIConfigurer   *ui_configurer);
+                                                  ClayUIConfigurer   *ui_configurer);
 
-static void        gui_clipboard_changed         (Gimp               *gimp);
+static void        gui_clipboard_changed         (Clay               *clay);
 
-static void        gui_menu_show_tooltip         (GimpUIManager      *manager,
+static void        gui_menu_show_tooltip         (ClayUIManager      *manager,
                                                   const gchar        *tooltip,
-                                                  Gimp               *gimp);
-static void        gui_menu_hide_tooltip         (GimpUIManager      *manager,
-                                                  Gimp               *gimp);
+                                                  Clay               *clay);
+static void        gui_menu_hide_tooltip         (ClayUIManager      *manager,
+                                                  Clay               *clay);
 
-static void        gui_display_changed           (GimpContext        *context,
-                                                  GimpDisplay        *display,
-                                                  Gimp               *gimp);
+static void        gui_display_changed           (ClayContext        *context,
+                                                  ClayDisplay        *display,
+                                                  Clay               *clay);
 
-static void        gui_check_unique_accelerators (Gimp               *gimp);
+static void        gui_check_unique_accelerators (Clay               *clay);
 
 #ifdef GDK_WINDOWING_QUARTZ
 static gboolean    gui_macos_shortcut            (const GdkEventKey  *kevent);
@@ -167,8 +167,8 @@ static void        gui_macos_event_handler       (GdkEvent           *event,
 
 /*  private variables  */
 
-static Gimp             *the_gui_gimp     = NULL;
-static GimpUIConfigurer *ui_configurer    = NULL;
+static Clay             *the_gui_clay     = NULL;
+static ClayUIConfigurer *ui_configurer    = NULL;
 static GdkMonitor       *initial_monitor  = NULL;
 
 typedef struct
@@ -178,7 +178,7 @@ typedef struct
 } ClayPlaceData;
 
 static GdkMonitor *
-clay_startup_monitor (Gimp *gimp)
+clay_startup_monitor (Clay *clay)
 {
   GdkDisplay *display;
   gint        n_monitors;
@@ -190,7 +190,7 @@ clay_startup_monitor (Gimp *gimp)
   if (n_monitors < 1)
     return NULL;
 
-  index = GIMP_GUI_CONFIG (gimp->config)->startup_monitor;
+  index = CLAY_GUI_CONFIG (clay->config)->startup_monitor;
 
   if (index < 0 || index >= n_monitors)
     {
@@ -254,8 +254,8 @@ gui_libs_init (GOptionContext *context)
 
   g_option_context_add_group (context, gtk_get_option_group (TRUE));
 
-  /*  make the GimpDisplay type known by name early, needed for the PDB */
-  g_type_class_ref (GIMP_TYPE_DISPLAY);
+  /*  make the ClayDisplay type known by name early, needed for the PDB */
+  g_type_class_ref (CLAY_TYPE_DISPLAY);
 }
 
 void
@@ -266,7 +266,7 @@ gui_abort (const gchar *abort_message)
 
   g_return_if_fail (abort_message != NULL);
 
-  dialog = gimp_dialog_new (_("Clay Message"), "gimp-abort",
+  dialog = clay_dialog_new (_("Clay Message"), "clay-abort",
                             NULL, GTK_DIALOG_MODAL, NULL, NULL,
 
                             _("_OK"), GTK_RESPONSE_OK,
@@ -275,50 +275,50 @@ gui_abort (const gchar *abort_message)
 
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 
-  box = g_object_new (GIMP_TYPE_MESSAGE_BOX,
-                      "icon-name",    GIMP_ICON_WILBER_EEK,
+  box = g_object_new (CLAY_TYPE_MESSAGE_BOX,
+                      "icon-name",    CLAY_ICON_WILBER_EEK,
                       "border-width", 12,
                       NULL);
 
-  gimp_message_box_set_text (GIMP_MESSAGE_BOX (box), "%s", abort_message);
+  clay_message_box_set_text (CLAY_MESSAGE_BOX (box), "%s", abort_message);
 
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       box, TRUE, TRUE, 0);
   gtk_widget_set_visible (box, TRUE);
 
-  gimp_dialog_run (GIMP_DIALOG (dialog));
+  clay_dialog_run (CLAY_DIALOG (dialog));
 
   exit (EXIT_FAILURE);
 }
 
 /**
  * gui_init:
- * @gimp:
+ * @clay:
  * @no_splash:
  * @test_base_dir: a base prefix directory.
  *
  * @test_base_dir should be set to %NULL in all our codebase except for
  * unit testing calls.
  */
-GimpInitStatusFunc
-gui_init (Gimp         *gimp,
+ClayInitStatusFunc
+gui_init (Clay         *clay,
           gboolean      no_splash,
-          GimpApp      *app,
+          ClayApp      *app,
           const gchar  *test_base_dir,
           const gchar  *system_lang_l10n)
 {
-  GimpInitStatusFunc  status_callback = NULL;
+  ClayInitStatusFunc  status_callback = NULL;
   gchar              *abort_message;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
-  g_return_val_if_fail (the_gui_gimp == NULL, NULL);
-  g_return_val_if_fail (GIMP_IS_APP (app) || app == NULL, NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
+  g_return_val_if_fail (the_gui_clay == NULL, NULL);
+  g_return_val_if_fail (CLAY_IS_APP (app) || app == NULL, NULL);
 
   abort_message = gui_sanity_check ();
   if (abort_message)
     gui_abort (abort_message);
 
-  the_gui_gimp = gimp;
+  the_gui_clay = clay;
 
   /* Normally this should have been taken care of during command line
    * parsing as a post-parse hook of gtk_get_option_group(), using the
@@ -328,20 +328,20 @@ gui_init (Gimp         *gimp,
    */
   gtk_widget_set_default_direction (gtk_get_locale_direction ());
 
-  gui_unique_init (gimp);
-  gimp_translation_store_initialize (system_lang_l10n);
+  gui_unique_init (clay);
+  clay_translation_store_initialize (system_lang_l10n);
 
-  /*  initialize icon themes before gimp_widgets_init() so we avoid
+  /*  initialize icon themes before clay_widgets_init() so we avoid
    *  setting the configured theme twice
    */
-  icon_themes_init (gimp);
+  icon_themes_init (clay);
 
-  gimp_widgets_init (gui_help_func,
+  clay_widgets_init (gui_help_func,
                      gui_get_foreground_func,
                      gui_get_background_func,
                      NULL, test_base_dir);
 
-  g_type_class_ref (GIMP_TYPE_COLOR_SELECT);
+  g_type_class_ref (CLAY_TYPE_COLOR_SELECT);
 
   /*  disable automatic startup notification  */
   gtk_window_set_auto_startup_notification (FALSE);
@@ -366,34 +366,34 @@ gui_init (Gimp         *gimp,
   gdk_event_handler_set (gui_macos_event_handler, NULL, NULL);
 #endif /* GDK_WINDOWING_QUARTZ */
 
-  gimp_dnd_init (gimp);
+  clay_dnd_init (clay);
 
-  themes_init (gimp);
-  gimp_canvas_styles_init ();
+  themes_init (clay);
+  clay_canvas_styles_init ();
 
-  initial_monitor = clay_startup_monitor (gimp);
+  initial_monitor = clay_startup_monitor (clay);
 
   if (! no_splash)
     {
-      splash_create (gimp, gimp->be_verbose, initial_monitor, app);
+      splash_create (clay, clay->be_verbose, initial_monitor, app);
       status_callback = splash_update;
     }
 
-  g_signal_connect_after (gimp, "initialize",
+  g_signal_connect_after (clay, "initialize",
                           G_CALLBACK (gui_initialize_after_callback),
                           NULL);
 
-  g_signal_connect (gimp, "restore",
+  g_signal_connect (clay, "restore",
                     G_CALLBACK (gui_restore_callback),
                     NULL);
-  g_signal_connect_after (gimp, "restore",
+  g_signal_connect_after (clay, "restore",
                           G_CALLBACK (gui_restore_after_callback),
                           NULL);
 
-  g_signal_connect (gimp, "exit",
+  g_signal_connect (clay, "exit",
                     G_CALLBACK (gui_exit_callback),
                     NULL);
-  g_signal_connect_after (gimp, "exit",
+  g_signal_connect_after (clay, "exit",
                           G_CALLBACK (gui_exit_after_callback),
                           NULL);
 
@@ -416,7 +416,7 @@ gui_recover (gint n_recoveries)
   GtkWidget *box;
   gboolean   recover;
 
-  dialog = gimp_dialog_new (_("Image Recovery"), "gimp-recovery",
+  dialog = clay_dialog_new (_("Image Recovery"), "clay-recovery",
                             NULL, GTK_DIALOG_MODAL, NULL, NULL,
                             _("_Discard"), GTK_RESPONSE_CANCEL,
                             _("_Recover"), GTK_RESPONSE_OK,
@@ -424,15 +424,15 @@ gui_recover (gint n_recoveries)
   gtk_dialog_set_default_response (GTK_DIALOG (dialog),
                                    GTK_RESPONSE_OK);
 
-  box = gimp_message_box_new (GIMP_ICON_WILBER_EEK);
+  box = clay_message_box_new (CLAY_ICON_WILBER_EEK);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       box, TRUE, TRUE, 0);
   gtk_widget_set_visible (box, TRUE);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_BOX (box),
+  clay_message_box_set_primary_text (CLAY_MESSAGE_BOX (box),
                                      _("Eeek! It looks like Clay recovered from a crash!"));
 
-  gimp_message_box_set_text (GIMP_MESSAGE_BOX (box),
+  clay_message_box_set_text (CLAY_MESSAGE_BOX (box),
                              /* TRANSLATORS: even if English singular form does
                               * not use %d, you can use %d for translation in
                               * any singular/plural form of your language if
@@ -445,16 +445,16 @@ gui_recover (gint n_recoveries)
                                        "Do you want to try and recover them?",
                                        n_recoveries), n_recoveries);
 
-  recover = (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_OK);
+  recover = (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_OK);
   gtk_widget_destroy (dialog);
 
   return recover;
 }
 
 GdkMonitor *
-gui_get_initial_monitor (Gimp *gimp)
+gui_get_initial_monitor (Clay *clay)
 {
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), 0);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), 0);
 
   return initial_monitor;
 }
@@ -501,7 +501,7 @@ gui_sanity_check (void)
 static gboolean
 gui_macos_shortcut (const GdkEventKey *kevent)
 {
-  GdkModifierType primary  = gimp_get_primary_accelerator_mask ();
+  GdkModifierType primary  = clay_get_primary_accelerator_mask ();
   gboolean        redirect = FALSE;
 
   /* on macOS, Ctrl+F2 is used instead of Alt. See: #13502 */
@@ -554,9 +554,9 @@ static void
 gui_help_func (const gchar *help_id,
                gpointer     help_data)
 {
-  g_return_if_fail (GIMP_IS_GIMP (the_gui_gimp));
+  g_return_if_fail (CLAY_IS_CLAY (the_gui_clay));
 
-  gimp_help (the_gui_gimp, NULL, NULL, help_id);
+  clay_help (the_gui_clay, NULL, NULL, help_id);
 }
 
 static GeglColor *
@@ -564,9 +564,9 @@ gui_get_foreground_func (void)
 {
   GeglColor *color;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (the_gui_gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (the_gui_clay), FALSE);
 
-  color = gimp_context_get_foreground (gimp_get_user_context (the_gui_gimp));
+  color = clay_context_get_foreground (clay_get_user_context (the_gui_clay));
 
   return gegl_color_duplicate (color);
 }
@@ -576,22 +576,22 @@ gui_get_background_func (void)
 {
   GeglColor *color;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (the_gui_gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (the_gui_clay), FALSE);
 
-  color = gimp_context_get_background (gimp_get_user_context (the_gui_gimp));
+  color = clay_context_get_background (clay_get_user_context (the_gui_clay));
 
   return gegl_color_duplicate (color);
 }
 
 static void
-gui_initialize_after_callback (Gimp               *gimp,
-                               GimpInitStatusFunc  status_callback)
+gui_initialize_after_callback (Clay               *clay,
+                               ClayInitStatusFunc  status_callback)
 {
   const gchar *name = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("INIT: %s\n", G_STRFUNC);
 
 #if defined (GDK_WINDOWING_X11)
@@ -606,164 +606,164 @@ gui_initialize_after_callback (Gimp               *gimp,
     {
       const gchar *display = gdk_display_get_name (gdk_display_get_default ());
 
-      gimp_environ_table_add (gimp->plug_in_manager->environ_table,
+      clay_environ_table_add (clay->plug_in_manager->environ_table,
                               name, display, NULL);
     }
 
-  gimp_tools_init (gimp);
+  clay_tools_init (clay);
 
-  gimp_context_set_tool (gimp_get_user_context (gimp),
-                         gimp_tool_info_get_standard (gimp));
+  clay_context_set_tool (clay_get_user_context (clay),
+                         clay_tool_info_get_standard (clay));
 }
 
 static void
-gui_restore_callback (Gimp               *gimp,
-                      GimpInitStatusFunc  status_callback)
+gui_restore_callback (Clay               *clay,
+                      ClayInitStatusFunc  status_callback)
 {
-  GimpDisplayConfig *display_config = GIMP_DISPLAY_CONFIG (gimp->config);
-  GimpGuiConfig     *gui_config     = GIMP_GUI_CONFIG (gimp->config);
+  ClayDisplayConfig *display_config = CLAY_DISPLAY_CONFIG (clay->config);
+  ClayGuiConfig     *gui_config     = CLAY_GUI_CONFIG (clay->config);
 
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("INIT: %s\n", G_STRFUNC);
 
-  gui_vtable_init (gimp);
+  gui_vtable_init (clay);
 
-  gimp_dialogs_show_help_button (gui_config->use_help &&
+  clay_dialogs_show_help_button (gui_config->use_help &&
                                  gui_config->show_help_button);
 
   g_signal_connect (gui_config, "notify::use-help",
                     G_CALLBACK (gui_show_help_button_notify),
-                    gimp);
+                    clay);
   g_signal_connect (gui_config, "notify::user-manual-online",
                     G_CALLBACK (gui_user_manual_notify),
-                    gimp);
+                    clay);
   g_signal_connect (gui_config, "notify::show-help-button",
                     G_CALLBACK (gui_show_help_button_notify),
-                    gimp);
+                    clay);
 
-  g_signal_connect (gimp_get_user_context (gimp), "display-changed",
+  g_signal_connect (clay_get_user_context (clay), "display-changed",
                     G_CALLBACK (gui_display_changed),
-                    gimp);
+                    clay);
 
   /* make sure the monitor resolution is valid */
   if (display_config->monitor_res_from_gdk               ||
-      display_config->monitor_xres < GIMP_MIN_RESOLUTION ||
-      display_config->monitor_yres < GIMP_MIN_RESOLUTION)
+      display_config->monitor_xres < CLAY_MIN_RESOLUTION ||
+      display_config->monitor_yres < CLAY_MIN_RESOLUTION)
     {
       gdouble xres, yres;
 
-      gimp_get_monitor_resolution (initial_monitor, &xres, &yres);
+      clay_get_monitor_resolution (initial_monitor, &xres, &yres);
 
-      g_object_set (gimp->config,
+      g_object_set (clay->config,
                     "monitor-xresolution",                      xres,
                     "monitor-yresolution",                      yres,
                     "monitor-resolution-from-windowing-system", TRUE,
                     NULL);
     }
 
-  actions_init (gimp);
-  menus_init (gimp);
-  gimp_render_init (gimp);
+  actions_init (clay);
+  menus_init (clay);
+  clay_render_init (clay);
 
-  dialogs_init (gimp);
+  dialogs_init (clay);
 
-  gimp_clipboard_init (gimp);
-  if (gimp_get_clipboard_image (gimp))
-    gimp_clipboard_set_image (gimp, gimp_get_clipboard_image (gimp));
+  clay_clipboard_init (clay);
+  if (clay_get_clipboard_image (clay))
+    clay_clipboard_set_image (clay, clay_get_clipboard_image (clay));
   else
-    gimp_clipboard_set_buffer (gimp, gimp_get_clipboard_buffer (gimp));
+    clay_clipboard_set_buffer (clay, clay_get_clipboard_buffer (clay));
 
-  g_signal_connect (gimp, "clipboard-changed",
+  g_signal_connect (clay, "clipboard-changed",
                     G_CALLBACK (gui_clipboard_changed),
                     NULL);
 
-  gimp_devices_init (gimp);
-  gimp_controllers_init (gimp);
-  modifiers_init (gimp);
-  session_init (gimp);
+  clay_devices_init (clay);
+  clay_controllers_init (clay);
+  modifiers_init (clay);
+  session_init (clay);
 
-  g_type_class_unref (g_type_class_ref (GIMP_TYPE_COLOR_SELECTOR_PALETTE));
+  g_type_class_unref (g_type_class_ref (CLAY_TYPE_COLOR_SELECTOR_PALETTE));
 
   status_callback (NULL, _("Tool Options"), 1.0);
-  gimp_tools_restore (gimp);
+  clay_tools_restore (clay);
 }
 
 static void
-gui_restore_after_callback (Gimp               *gimp,
-                            GimpInitStatusFunc  status_callback)
+gui_restore_after_callback (Clay               *clay,
+                            ClayInitStatusFunc  status_callback)
 {
-  GimpGuiConfig         *gui_config = GIMP_GUI_CONFIG (gimp->config);
-  GimpControllerManager *controller_manager;
-  GimpUIManager         *image_ui_manager;
-  GimpDisplay           *display;
+  ClayGuiConfig         *gui_config = CLAY_GUI_CONFIG (clay->config);
+  ClayControllerManager *controller_manager;
+  ClayUIManager         *image_ui_manager;
+  ClayDisplay           *display;
 #ifdef G_OS_WIN32
   STARTUPINFO            StartupInfo;
 
   GetStartupInfo (&StartupInfo);
 #endif
 
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("INIT: %s\n", G_STRFUNC);
 
-  gimp->message_handler = GIMP_MESSAGE_BOX;
+  clay->message_handler = CLAY_MESSAGE_BOX;
 
-  /*  load the recent documents after gimp_real_restore() because we
+  /*  load the recent documents after clay_real_restore() because we
    *  need the mime-types implemented by plug-ins
    */
   status_callback (NULL, _("Documents"), 0.9);
-  gimp_recent_list_load (gimp);
+  clay_recent_list_load (clay);
 
-  ui_configurer = g_object_new (GIMP_TYPE_UI_CONFIGURER,
-                                "gimp", gimp,
+  ui_configurer = g_object_new (CLAY_TYPE_UI_CONFIGURER,
+                                "clay", clay,
                                 NULL);
 
-  image_ui_manager = menus_get_image_manager_singleton (gimp);
-  gimp_ui_manager_update (image_ui_manager, gimp);
+  image_ui_manager = menus_get_image_manager_singleton (clay);
+  clay_ui_manager_update (image_ui_manager, clay);
 
   if (gui_config->restore_accels)
-    menus_restore (gimp);
+    menus_restore (clay);
 
   /* Check that every accelerator is unique. */
-  gui_check_unique_accelerators (gimp);
+  gui_check_unique_accelerators (clay);
 
-  gimp_action_history_init (gimp);
+  clay_action_history_init (clay);
 
   g_signal_connect_object (gui_config, "notify::single-window-mode",
                            G_CALLBACK (gui_single_window_mode_notify),
                            ui_configurer, 0);
   g_signal_connect (image_ui_manager, "show-tooltip",
                     G_CALLBACK (gui_menu_show_tooltip),
-                    gimp);
+                    clay);
   g_signal_connect (image_ui_manager, "hide-tooltip",
                     G_CALLBACK (gui_menu_hide_tooltip),
-                    gimp);
+                    clay);
 
-  gimp_devices_restore (gimp);
-  controller_manager = gimp_get_controller_manager (gimp);
-  gimp_controller_manager_restore (controller_manager, image_ui_manager);
-  modifiers_restore (gimp);
+  clay_devices_restore (clay);
+  controller_manager = clay_get_controller_manager (clay);
+  clay_controller_manager_restore (controller_manager, image_ui_manager);
+  modifiers_restore (clay);
 
   if (status_callback == splash_update)
     splash_destroy ();
 
-  if (gimp_get_show_gui (gimp))
+  if (clay_get_show_gui (clay))
     {
-      GimpDisplayShell *shell;
+      ClayDisplayShell *shell;
       GtkWidget        *toplevel;
 
       /*  create the empty display  */
-      display = GIMP_DISPLAY (gimp_create_display (gimp, NULL,
-                                                   gimp_unit_pixel (), 1.0,
+      display = CLAY_DISPLAY (clay_create_display (clay, NULL,
+                                                   clay_unit_pixel (), 1.0,
                                                    G_OBJECT (initial_monitor)));
 
-      shell = gimp_display_get_shell (display);
+      shell = clay_display_get_shell (display);
 
 #if defined(G_OS_WIN32) || (defined(PLATFORM_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)
-      themes_set_title_bar (gimp);
+      themes_set_title_bar (clay);
 #endif
 
       if (gui_config->restore_session)
-        session_restore (gimp, initial_monitor);
+        session_restore (clay, initial_monitor);
 
       toplevel = gtk_widget_get_toplevel (GTK_WIDGET (shell));
 
@@ -802,36 +802,36 @@ gui_restore_after_callback (Gimp               *gimp,
 }
 
 static gboolean
-gui_exit_callback (Gimp     *gimp,
+gui_exit_callback (Clay     *clay,
                    gboolean  force)
 {
-  GimpGuiConfig *gui_config = GIMP_GUI_CONFIG (gimp->config);
-  GimpTool      *active_tool;
+  ClayGuiConfig *gui_config = CLAY_GUI_CONFIG (clay->config);
+  ClayTool      *active_tool;
 
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("EXIT: %s\n", G_STRFUNC);
 
-  if (! force && gimp_displays_dirty (gimp))
+  if (! force && clay_displays_dirty (clay))
     {
-      GimpContext *context = gimp_get_user_context (gimp);
-      GimpDisplay *display = gimp_context_get_display (context);
-      GdkMonitor  *monitor = gimp_get_monitor_at_pointer ();
+      ClayContext *context = clay_get_user_context (clay);
+      ClayDisplay *display = clay_context_get_display (context);
+      GdkMonitor  *monitor = clay_get_monitor_at_pointer ();
       GtkWidget   *parent  = NULL;
 
       if (display)
         {
-          GimpDisplayShell *shell = gimp_display_get_shell (display);
+          ClayDisplayShell *shell = clay_display_get_shell (display);
 
-          parent = GTK_WIDGET (gimp_display_shell_get_window (shell));
+          parent = GTK_WIDGET (clay_display_shell_get_window (shell));
         }
 
-      gimp_dialog_factory_dialog_raise (gimp_dialog_factory_get_singleton (),
-                                        monitor, parent, "gimp-quit-dialog", -1);
+      clay_dialog_factory_dialog_raise (clay_dialog_factory_get_singleton (),
+                                        monitor, parent, "clay-quit-dialog", -1);
 
       return TRUE; /* stop exit for now */
     }
 
-  gimp->message_handler = GIMP_CONSOLE;
+  clay->message_handler = CLAY_CONSOLE;
 
   gui_unique_exit ();
 
@@ -840,56 +840,56 @@ gui_exit_callback (Gimp     *gimp,
    * save any alternate value instead of the main one. Make sure that
    * any modifier is reset before saving options.
    */
-  active_tool = tool_manager_get_active (gimp);
+  active_tool = tool_manager_get_active (clay);
   if  (active_tool && active_tool->focus_display)
-    gimp_tool_set_modifier_state  (active_tool, 0, active_tool->focus_display);
+    clay_tool_set_modifier_state  (active_tool, 0, active_tool->focus_display);
 
   if (gui_config->save_session_info)
-    session_save (gimp, FALSE);
+    session_save (clay, FALSE);
 
   if (gui_config->save_device_status)
-    gimp_devices_save (gimp, FALSE);
+    clay_devices_save (clay, FALSE);
 
   if (TRUE /* gui_config->save_controllers */)
     {
-      GimpControllerManager *controller_manager;
+      ClayControllerManager *controller_manager;
 
-      controller_manager = gimp_get_controller_manager (gimp);
-      gimp_controller_manager_save (controller_manager);
+      controller_manager = clay_get_controller_manager (clay);
+      clay_controller_manager_save (controller_manager);
     }
 
-  modifiers_save (gimp, FALSE);
+  modifiers_save (clay, FALSE);
 
-  g_signal_handlers_disconnect_by_func (gimp_get_user_context (gimp),
+  g_signal_handlers_disconnect_by_func (clay_get_user_context (clay),
                                         gui_display_changed,
-                                        gimp);
+                                        clay);
 
-  gimp_displays_delete (gimp);
+  clay_displays_delete (clay);
 
   if (gui_config->save_accels)
-    menus_save (gimp, FALSE);
+    menus_save (clay, FALSE);
 
-  gimp_tools_save (gimp, gui_config->save_tool_options, FALSE);
-  gimp_tools_exit (gimp);
+  clay_tools_save (clay, gui_config->save_tool_options, FALSE);
+  clay_tools_exit (clay);
 
   return FALSE; /* continue exiting */
 }
 
 static gboolean
-gui_exit_after_callback (Gimp     *gimp,
+gui_exit_after_callback (Clay     *clay,
                          gboolean  force)
 {
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("EXIT: %s\n", G_STRFUNC);
 
-  g_signal_handlers_disconnect_by_func (gimp->config,
+  g_signal_handlers_disconnect_by_func (clay->config,
                                         gui_show_help_button_notify,
-                                        gimp);
-  g_signal_handlers_disconnect_by_func (gimp->config,
+                                        clay);
+  g_signal_handlers_disconnect_by_func (clay->config,
                                         gui_user_manual_notify,
-                                        gimp);
+                                        clay);
 
-  gimp_action_history_exit (gimp);
+  clay_action_history_exit (clay);
 
   g_object_unref (ui_configurer);
   ui_configurer = NULL;
@@ -897,119 +897,119 @@ gui_exit_after_callback (Gimp     *gimp,
   /*  exit the clipboard before shutting down the GUI because it runs
    *  a whole lot of code paths. See bug #731389.
    */
-  g_signal_handlers_disconnect_by_func (gimp,
+  g_signal_handlers_disconnect_by_func (clay,
                                         G_CALLBACK (gui_clipboard_changed),
                                         NULL);
-  gimp_clipboard_exit (gimp);
+  clay_clipboard_exit (clay);
 
-  session_exit (gimp);
-  menus_exit (gimp);
-  actions_exit (gimp);
-  gimp_render_exit (gimp);
+  session_exit (clay);
+  menus_exit (clay);
+  actions_exit (clay);
+  clay_render_exit (clay);
 
-  gimp_controllers_exit (gimp);
-  modifiers_exit (gimp);
-  gimp_devices_exit (gimp);
-  dialogs_exit (gimp);
-  themes_exit (gimp);
-  gimp_canvas_styles_exit ();
+  clay_controllers_exit (clay);
+  modifiers_exit (clay);
+  clay_devices_exit (clay);
+  dialogs_exit (clay);
+  themes_exit (clay);
+  clay_canvas_styles_exit ();
 
-  g_type_class_unref (g_type_class_peek (GIMP_TYPE_COLOR_SELECT));
+  g_type_class_unref (g_type_class_peek (CLAY_TYPE_COLOR_SELECT));
 
   return FALSE; /* continue exiting */
 }
 
 static void
-gui_show_help_button_notify (GimpGuiConfig *gui_config,
+gui_show_help_button_notify (ClayGuiConfig *gui_config,
                              GParamSpec    *param_spec,
-                             Gimp          *gimp)
+                             Clay          *clay)
 {
-  gimp_dialogs_show_help_button (gui_config->use_help &&
+  clay_dialogs_show_help_button (gui_config->use_help &&
                                  gui_config->show_help_button);
 }
 
 static void
-gui_user_manual_notify (GimpGuiConfig *gui_config,
+gui_user_manual_notify (ClayGuiConfig *gui_config,
                         GParamSpec    *param_spec,
-                        Gimp          *gimp)
+                        Clay          *clay)
 {
-  gimp_help_user_manual_changed (gimp);
+  clay_help_user_manual_changed (clay);
 }
 
 static void
-gui_single_window_mode_notify (GimpGuiConfig      *gui_config,
+gui_single_window_mode_notify (ClayGuiConfig      *gui_config,
                                GParamSpec         *pspec,
-                               GimpUIConfigurer   *ui_configurer)
+                               ClayUIConfigurer   *ui_configurer)
 {
-  gimp_ui_configurer_configure (ui_configurer,
+  clay_ui_configurer_configure (ui_configurer,
                                 gui_config->single_window_mode);
 }
 
 static void
-gui_clipboard_changed (Gimp *gimp)
+gui_clipboard_changed (Clay *clay)
 {
-  if (gimp_get_clipboard_image (gimp))
-    gimp_clipboard_set_image (gimp, gimp_get_clipboard_image (gimp));
+  if (clay_get_clipboard_image (clay))
+    clay_clipboard_set_image (clay, clay_get_clipboard_image (clay));
   else
-    gimp_clipboard_set_buffer (gimp, gimp_get_clipboard_buffer (gimp));
+    clay_clipboard_set_buffer (clay, clay_get_clipboard_buffer (clay));
 }
 
 static void
-gui_menu_show_tooltip (GimpUIManager *manager,
+gui_menu_show_tooltip (ClayUIManager *manager,
                        const gchar   *tooltip,
-                       Gimp          *gimp)
+                       Clay          *clay)
 {
-  GimpContext *context = gimp_get_user_context (gimp);
-  GimpDisplay *display = gimp_context_get_display (context);
+  ClayContext *context = clay_get_user_context (clay);
+  ClayDisplay *display = clay_context_get_display (context);
 
   if (display)
     {
-      GimpDisplayShell *shell     = gimp_display_get_shell (display);
-      GimpStatusbar    *statusbar = gimp_display_shell_get_statusbar (shell);
+      ClayDisplayShell *shell     = clay_display_get_shell (display);
+      ClayStatusbar    *statusbar = clay_display_shell_get_statusbar (shell);
 
-      gimp_statusbar_push (statusbar, "menu-tooltip",
+      clay_statusbar_push (statusbar, "menu-tooltip",
                            NULL, "%s", tooltip);
     }
 }
 
 static void
-gui_menu_hide_tooltip (GimpUIManager *manager,
-                       Gimp          *gimp)
+gui_menu_hide_tooltip (ClayUIManager *manager,
+                       Clay          *clay)
 {
-  GimpContext *context = gimp_get_user_context (gimp);
-  GimpDisplay *display = gimp_context_get_display (context);
+  ClayContext *context = clay_get_user_context (clay);
+  ClayDisplay *display = clay_context_get_display (context);
 
   if (display)
     {
-      GimpDisplayShell *shell     = gimp_display_get_shell (display);
-      GimpStatusbar    *statusbar = gimp_display_shell_get_statusbar (shell);
+      ClayDisplayShell *shell     = clay_display_get_shell (display);
+      ClayStatusbar    *statusbar = clay_display_shell_get_statusbar (shell);
 
-      gimp_statusbar_pop (statusbar, "menu-tooltip");
+      clay_statusbar_pop (statusbar, "menu-tooltip");
     }
 }
 
 static void
-gui_display_changed (GimpContext *context,
-                     GimpDisplay *display,
-                     Gimp        *gimp)
+gui_display_changed (ClayContext *context,
+                     ClayDisplay *display,
+                     Clay        *clay)
 {
   if (! display)
     {
-      GimpImage *image = gimp_context_get_image (context);
+      ClayImage *image = clay_context_get_image (context);
 
       if (image)
         {
           GList *list;
 
-          for (list = gimp_get_display_iter (gimp);
+          for (list = clay_get_display_iter (clay);
                list;
                list = g_list_next (list))
             {
-              GimpDisplay *display2 = list->data;
+              ClayDisplay *display2 = list->data;
 
-              if (gimp_display_get_image (display2) == image)
+              if (clay_display_get_image (display2) == image)
                 {
-                  gimp_context_set_display (context, display2);
+                  clay_context_set_display (context, display2);
 
                   /* stop the emission of the original signal
                    * (the emission of the recursive signal is finished)
@@ -1019,11 +1019,11 @@ gui_display_changed (GimpContext *context,
                 }
             }
 
-          gimp_context_set_image (context, NULL);
+          clay_context_set_image (context, NULL);
         }
     }
 
-  gimp_ui_manager_update (menus_get_image_manager_singleton (gimp),
+  clay_ui_manager_update (menus_get_image_manager_singleton (clay),
                           display);
 }
 
@@ -1036,22 +1036,22 @@ typedef struct
 accelData;
 
 static void
-gui_check_unique_accelerators (Gimp *gimp)
+gui_check_unique_accelerators (Clay *clay)
 {
   gchar **actions;
 
-  actions = g_action_group_list_actions (G_ACTION_GROUP (gimp->app));
+  actions = g_action_group_list_actions (G_ACTION_GROUP (clay->app));
 
   for (gint i = 0; actions[i] != NULL; i++)
     {
       gchar      **accels;
       gchar       *detailed_name;
-      GimpAction  *action;
+      ClayAction  *action;
       gint         value;
 
-      action = (GimpAction *) g_action_map_lookup_action (G_ACTION_MAP (gimp->app), actions[i]);
+      action = (ClayAction *) g_action_map_lookup_action (G_ACTION_MAP (clay->app), actions[i]);
 
-      if (GIMP_IS_RADIO_ACTION (action))
+      if (CLAY_IS_RADIO_ACTION (action))
         {
           g_object_get ((GObject *) action,
                         "value", &value,
@@ -1064,7 +1064,7 @@ gui_check_unique_accelerators (Gimp *gimp)
           detailed_name = g_strdup_printf ("app.%s", actions[i]);
         }
 
-      accels = gtk_application_get_accels_for_action (GTK_APPLICATION (gimp->app),
+      accels = gtk_application_get_accels_for_action (GTK_APPLICATION (clay->app),
                                                       detailed_name);
       g_free (detailed_name);
 
@@ -1074,11 +1074,11 @@ gui_check_unique_accelerators (Gimp *gimp)
             {
               gchar      **accels2;
               gchar       *detailed_name2;
-              GimpAction  *action2;
+              ClayAction  *action2;
 
-              action2 = (GimpAction *) g_action_map_lookup_action (G_ACTION_MAP (gimp->app), actions[k]);
+              action2 = (ClayAction *) g_action_map_lookup_action (G_ACTION_MAP (clay->app), actions[k]);
 
-              if (GIMP_IS_RADIO_ACTION (action2))
+              if (CLAY_IS_RADIO_ACTION (action2))
                 {
                   g_object_get ((GObject *) action2,
                                 "value", &value,
@@ -1091,7 +1091,7 @@ gui_check_unique_accelerators (Gimp *gimp)
                   detailed_name2 = g_strdup_printf ("app.%s", actions[k]);
                 }
 
-              accels2 = gtk_application_get_accels_for_action (GTK_APPLICATION (gimp->app),
+              accels2 = gtk_application_get_accels_for_action (GTK_APPLICATION (clay->app),
                                                                detailed_name2);
               g_free (detailed_name2);
 
@@ -1106,7 +1106,7 @@ gui_check_unique_accelerators (Gimp *gimp)
                       gint      remove;
                       gboolean  print_warning = TRUE;
 
-                      action = g_action_map_lookup_action (G_ACTION_MAP (gimp->app),
+                      action = g_action_map_lookup_action (G_ACTION_MAP (clay->app),
                                                            actions[i]);
                       /* Just keep the first one (no reason other than we have
                        * to choose), unless it's a secondary shortcut, and the
@@ -1120,10 +1120,10 @@ gui_check_unique_accelerators (Gimp *gimp)
                            * clashes with other shortcuts. In this case, we
                            * drop the duplicate shortcut on the zoom action. See
                            * special code in
-                           * gimp_action_group_add_action_with_accel()
+                           * clay_action_group_add_action_with_accel()
                            */
                           (g_str_has_prefix (actions[i], "view-zoom-1-") &&
-                           gimp_action_is_default_accel (GIMP_ACTION (action), accels[j])))
+                           clay_action_is_default_accel (CLAY_ACTION (action), accels[j])))
                         {
                           disabled_action = actions[i];
                           disabled_accels = accels;
@@ -1136,11 +1136,11 @@ gui_check_unique_accelerators (Gimp *gimp)
                           remove = l;
                         }
 
-                      action = g_action_map_lookup_action (G_ACTION_MAP (gimp->app),
+                      action = g_action_map_lookup_action (G_ACTION_MAP (clay->app),
                                                            disabled_action);
 
                       if (g_str_has_prefix (disabled_action, "view-zoom-1-") &&
-                          gimp_action_is_default_accel (GIMP_ACTION (action), disabled_accels[remove]))
+                          clay_action_is_default_accel (CLAY_ACTION (action), disabled_accels[remove]))
                         /* We drop the shortcut **silently** because it will be
                          * a case where we have 2 default accelerators clashing
                          * (because of the conversion code) while not being a
@@ -1161,7 +1161,7 @@ gui_check_unique_accelerators (Gimp *gimp)
                                     "  Disabling the accelerator on \"%s\".\n",
                                     actions[i], actions[k], disabled_action);
 
-                      gimp_action_set_accels (GIMP_ACTION (action),
+                      clay_action_set_accels (CLAY_ACTION (action),
                                               (const gchar **) disabled_accels);
                     }
                 }

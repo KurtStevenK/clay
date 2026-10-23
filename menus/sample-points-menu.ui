@@ -4,7 +4,7 @@
   <menu id="/sample-points-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="sample-points-action">Sample Point Menu</attribute>
-      <attribute name="icon">gimp-sample-point</attribute>
+      <attribute name="icon">clay-sample-point</attribute>
 
       <item><attribute name="action">sample-points.sample-points-sample-merged</attribute></item>
     </submenu>

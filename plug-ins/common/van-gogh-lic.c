@@ -1,8 +1,8 @@
-/* LIC 0.14 -- image filter plug-in for GIMP
+/* LIC 0.14 -- image filter plug-in for Clay
  * Copyright (C) 1996 Tom Bech
  *
  * E-mail: tomb@gimp.org
- * You can contact the original GIMP authors at gimp@xcf.berkeley.edu
+ * You can contact the original Clay authors at clay@xcf.berkeley.edu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
  * -> 0.11: Fixed a bug in the convolution kernels (Tom).
  * -> 0.12: Added Quartic's bilinear interpolation stuff (Tom).
  * -> 0.13 Changed some UI stuff causing trouble with the 0.60 release, added
- *         the (GIMP) tags and changed random() calls to rand() (Tom)
+ *         the (Clay) tags and changed random() calls to rand() (Tom)
  * -> 0.14 Ported to 0.99.11 (Tom)
  *
  * This plug-in implements the Line Integral Convolution (LIC) as described in
@@ -37,10 +37,10 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /************/
@@ -52,7 +52,7 @@
 
 #define PLUG_IN_PROC   "plug-in-lic"
 #define PLUG_IN_BINARY "van-gogh-lic"
-#define PLUG_IN_ROLE   "gimp-van-gogh-lic"
+#define PLUG_IN_ROLE   "clay-van-gogh-lic"
 
 typedef enum
 {
@@ -67,12 +67,12 @@ typedef struct _LicClass LicClass;
 
 struct _Lic
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _LicClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -81,33 +81,33 @@ struct _LicClass
 
 GType                   lic_get_type         (void);
 
-static GList          * lic_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * lic_create_procedure (GimpPlugIn           *plug_in,
+static GList          * lic_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * lic_create_procedure (ClayPlugIn           *plug_in,
                                               const gchar          *name);
 
-static GimpValueArray * lic_run              (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
-                                              GimpDrawable        **drawables,
-                                              GimpProcedureConfig  *config,
+static ClayValueArray * lic_run              (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
+                                              ClayDrawable        **drawables,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
-static gboolean         create_main_dialog   (GimpProcedure        *procedure,
-                                              GimpProcedureConfig  *config,
-                                              GimpDrawable         *drawable);
-static void             compute_image        (GimpProcedureConfig  *config,
-                                              GimpDrawable         *drawable);
+static gboolean         create_main_dialog   (ClayProcedure        *procedure,
+                                              ClayProcedureConfig  *config,
+                                              ClayDrawable         *drawable);
+static void             compute_image        (ClayProcedureConfig  *config,
+                                              ClayDrawable         *drawable);
 
-G_DEFINE_TYPE (Lic, lic, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Lic, lic, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (LIC_TYPE)
+CLAY_MAIN (LIC_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 lic_class_init (LicClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = lic_query_procedures;
   plug_in_class->create_procedure = lic_create_procedure;
@@ -120,97 +120,97 @@ lic_init (Lic *lic)
 }
 
 static GList *
-lic_query_procedures (GimpPlugIn *plug_in)
+lic_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-lic_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+lic_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             lic_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Van Gogh (LIC)..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Artistic");
+      clay_procedure_set_menu_label (procedure, _("_Van Gogh (LIC)..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Artistic");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Line Integral Convolution (LIC) effects"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tom Bech & Federico Mena Quintero",
                                       "Tom Bech & Federico Mena Quintero",
                                       "Version 0.14, September 24 1997");
 
-      gimp_procedure_add_choice_argument (procedure, "effect-channel",
+      clay_procedure_add_choice_argument (procedure, "effect-channel",
                                           _("E_ffect Channel"),
                                           _("Effect Channel"),
-                                          gimp_choice_new_with_values ("hue",        LIC_HUE,        _("Hue"),        NULL,
+                                          clay_choice_new_with_values ("hue",        LIC_HUE,        _("Hue"),        NULL,
                                                                        "saturation", LIC_SATURATION, _("Saturation"), NULL,
                                                                        "brightness", LIC_BRIGHTNESS, _("Brightness"), NULL,
                                                                        NULL),
                                           "brightness",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "effect-operator",
+      clay_procedure_add_choice_argument (procedure, "effect-operator",
                                           _("Effect O_perator"),
                                           _("Effect Operator"),
-                                          gimp_choice_new_with_values ("derivative", 0, _("Derivative"), NULL,
+                                          clay_choice_new_with_values ("derivative", 0, _("Derivative"), NULL,
                                                                        "gradient",   1, _("Gradient"),   NULL,
                                                                        NULL),
                                           "gradient",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "effect-convolve",
+      clay_procedure_add_choice_argument (procedure, "effect-convolve",
                                           _("Con_volve"),
                                           _("Convolve"),
-                                          gimp_choice_new_with_values ("with-white-noise",  0, _("With white noise"),  NULL,
+                                          clay_choice_new_with_values ("with-white-noise",  0, _("With white noise"),  NULL,
                                                                        "with-source-image", 1, _("With source image"), NULL,
                                                                        NULL),
                                           "with-source-image",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "effect-image",
+      clay_procedure_add_drawable_argument (procedure, "effect-image",
                                             _("Effect i_mage"),
                                             _("Effect image"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "filter-length",
+      clay_procedure_add_double_argument (procedure, "filter-length",
                                           _("Fil_ter length"),
                                           _("Filter length"),
                                           0.1, 64.0, 5.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "noise-magnitude",
+      clay_procedure_add_double_argument (procedure, "noise-magnitude",
                                           _("_Noise magnitude"),
                                           _("Noise magnitude"),
                                           1.0, 5.0, 2.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "integration-steps",
+      clay_procedure_add_double_argument (procedure, "integration-steps",
                                           _("Inte_gration steps"),
                                           _("Integration steps"),
                                           1.0, 40.0, 25.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "min-value",
+      clay_procedure_add_double_argument (procedure, "min-value",
                                           _("Minimum v_alue"),
                                           _("Minimum value"),
                                           -100.0, 0, -25.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "max-value",
+      clay_procedure_add_double_argument (procedure, "max-value",
                                           _("Ma_ximum value"),
                                           _("Maximum value"),
                                           0.0, 100, 25.0,
@@ -220,28 +220,28 @@ lic_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-lic_run (GimpProcedure        *procedure,
-         GimpRunMode           run_mode,
-         GimpImage            *image,
-         GimpDrawable        **drawables,
-         GimpProcedureConfig  *config,
+static ClayValueArray *
+lic_run (ClayProcedure        *procedure,
+         ClayRunMode           run_mode,
+         ClayImage            *image,
+         ClayDrawable        **drawables,
+         ClayProcedureConfig  *config,
          gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -252,20 +252,20 @@ lic_run (GimpProcedure        *procedure,
   /* Make sure that the drawable is RGBA or RGB color */
   /* ================================================ */
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
       switch (run_mode)
         {
-        case GIMP_RUN_INTERACTIVE:
+        case CLAY_RUN_INTERACTIVE:
           if (! create_main_dialog (procedure, config, drawable))
             {
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_CANCEL,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_CANCEL,
                                                        NULL);
             }
           /*  fallthrough  */
 
-        case GIMP_RUN_WITH_LAST_VALS:
+        case CLAY_RUN_WITH_LAST_VALS:
           compute_image (config, drawable);
           break;
 
@@ -275,12 +275,12 @@ lic_run (GimpProcedure        *procedure,
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 /*****************************/
@@ -571,7 +571,7 @@ getpixel (GeglBuffer *buffer,
   for (gint i = 0; i < 4; i++)
     pixels[i + 12] = pp[i];
 
-  gimp_bilinear_rgb (u, v, pixels, source_drw_has_alpha, p);
+  clay_bilinear_rgb (u, v, pixels, source_drw_has_alpha, p);
 }
 
 static void
@@ -665,7 +665,7 @@ lic_image (GeglBuffer *buffer,
 }
 
 static guchar *
-rgb_to_hsl (GimpDrawable     *drawable,
+rgb_to_hsl (ClayDrawable     *drawable,
             LICEffectChannel  effect_channel)
 {
   GeglBuffer *buffer;
@@ -680,12 +680,12 @@ rgb_to_hsl (GimpDrawable     *drawable,
 
   gr = g_rand_new ();
 
-  width_max  = gimp_drawable_get_width (drawable);
-  height_max = gimp_drawable_get_height (drawable);
+  width_max  = clay_drawable_get_width (drawable);
+  height_max = clay_drawable_get_height (drawable);
 
   maxc = width_max * height_max;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   themap = g_new (guchar, maxc);
 
@@ -726,8 +726,8 @@ rgb_to_hsl (GimpDrawable     *drawable,
 
 
 static void
-compute_lic (GimpProcedureConfig *config,
-             GimpDrawable        *drawable,
+compute_lic (ClayProcedureConfig *config,
+             ClayDrawable        *drawable,
              const guchar        *scalarfield,
              gboolean             rotate)
 {
@@ -738,11 +738,11 @@ compute_lic (GimpProcedureConfig *config,
   gdouble     vx, vy, tmp;
   gint        effect_convolve;
 
-  effect_convolve = gimp_procedure_config_get_choice_id (config,
+  effect_convolve = clay_procedure_config_get_choice_id (config,
                                                          "effect-convolve");
 
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
   for (ycount = 0; ycount < border_h; ycount++)
     {
@@ -798,20 +798,20 @@ compute_lic (GimpProcedureConfig *config,
           poke (dest_buffer, xcount, ycount, color);
         }
 
-      gimp_progress_update ((gfloat) ycount / (gfloat) border_h);
+      clay_progress_update ((gfloat) ycount / (gfloat) border_h);
     }
 
   g_object_unref (src_buffer);
   g_object_unref (dest_buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static void
-compute_image (GimpProcedureConfig *config,
-               GimpDrawable        *drawable)
+compute_image (ClayProcedureConfig *config,
+               ClayDrawable        *drawable)
 {
-  GimpDrawable *effect_image;
+  ClayDrawable *effect_image;
   guchar       *scalarfield = NULL;
   gdouble       filtlen;
   gdouble       noisemag;
@@ -830,11 +830,11 @@ compute_image (GimpProcedureConfig *config,
                 "min-value",         &minv,
                 "max-value",         &maxv,
                 NULL);
-  effect_channel  = gimp_procedure_config_get_choice_id (config,
+  effect_channel  = clay_procedure_config_get_choice_id (config,
                                                          "effect-channel");
-  effect_operator = gimp_procedure_config_get_choice_id (config,
+  effect_operator = clay_procedure_config_get_choice_id (config,
                                                          "effect-operator");
-  effect_convolve = gimp_procedure_config_get_choice_id (config,
+  effect_convolve = clay_procedure_config_get_choice_id (config,
                                                          "effect-convolve");
 
   if (! effect_image)
@@ -842,12 +842,12 @@ compute_image (GimpProcedureConfig *config,
 
   /* Get some useful info on the input drawable */
   /* ========================================== */
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &border_x, &border_y,
                                       &border_w, &border_h))
     return;
 
-  gimp_progress_init (_("Van Gogh (LIC)"));
+  clay_progress_init (_("Van Gogh (LIC)"));
 
   if (effect_convolve == 0)
     generatevectors ();
@@ -861,10 +861,10 @@ compute_image (GimpProcedureConfig *config,
   maxv = maxv / 10.0;
   isteps = intsteps;
 
-  source_drw_has_alpha = gimp_drawable_has_alpha (drawable);
+  source_drw_has_alpha = clay_drawable_has_alpha (drawable);
 
-  effect_width =  gimp_drawable_get_width  (effect_image);
-  effect_height = gimp_drawable_get_height (effect_image);
+  effect_width =  clay_drawable_get_width  (effect_image);
+  effect_height = clay_drawable_get_height (effect_image);
 
   switch (effect_channel)
     {
@@ -887,10 +887,10 @@ compute_image (GimpProcedureConfig *config,
   /* Update image */
   /* ============ */
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, border_x, border_y, border_w, border_h);
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, border_x, border_y, border_w, border_h);
 
-  gimp_displays_flush ();
+  clay_displays_flush ();
 }
 
 /**************************/
@@ -898,43 +898,43 @@ compute_image (GimpProcedureConfig *config,
 /**************************/
 
 static gboolean
-create_main_dialog (GimpProcedure       *procedure,
-                    GimpProcedureConfig *config,
-                    GimpDrawable        *drawable)
+create_main_dialog (ClayProcedure       *procedure,
+                    ClayProcedureConfig *config,
+                    ClayDrawable        *drawable)
 {
   GtkWidget *dialog;
   GtkWidget *chooser;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Van Gogh (LIC)"));
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "filter-length", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "noise-magnitude", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "integration-steps", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "min-value", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "max-value", 1.0);
 
-  chooser = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                              "effect-image", GIMP_TYPE_ITEM_CHOOSER);
+  chooser = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                              "effect-image", CLAY_TYPE_ITEM_CHOOSER);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  /* TODO: Currently we can't serialize GimpDrawable parameters, so this sets
+  /* TODO: Currently we can't serialize ClayDrawable parameters, so this sets
    * the parameter to the current image as a default value */
-  gimp_item_chooser_set_item (GIMP_ITEM_CHOOSER (chooser), GIMP_ITEM (drawable));
+  clay_item_chooser_set_item (CLAY_ITEM_CHOOSER (chooser), CLAY_ITEM (drawable));
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

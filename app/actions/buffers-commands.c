@@ -20,52 +20,52 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimp-edit.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
+#include "core/clay.h"
+#include "core/clay-edit.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimpcontainereditor.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpcontainerview-utils.h"
+#include "widgets/claycontainereditor.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claycontainerview-utils.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpdisplayshell-transform.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/claydisplayshell-transform.h"
 
 #include "buffers-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  public functions */
 
 void
-buffers_paste_cmd_callback (GimpAction *action,
+buffers_paste_cmd_callback (ClayAction *action,
                             GVariant   *value,
                             gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpBuffer          *buffer;
-  GimpPasteType        paste_type = (GimpPasteType) g_variant_get_int32 (value);
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayBuffer          *buffer;
+  ClayPasteType        paste_type = (ClayPasteType) g_variant_get_int32 (value);
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  buffer = gimp_context_get_buffer (context);
+  buffer = clay_context_get_buffer (context);
 
-  if (buffer && gimp_container_have (container, GIMP_OBJECT (buffer)))
+  if (buffer && clay_container_have (container, CLAY_OBJECT (buffer)))
     {
-      GimpDisplay *display = gimp_context_get_display (context);
-      GimpImage   *image   = NULL;
+      ClayDisplay *display = clay_context_get_display (context);
+      ClayImage   *image   = NULL;
       gint         x       = -1;
       gint         y       = -1;
       gint         width   = -1;
@@ -73,71 +73,71 @@ buffers_paste_cmd_callback (GimpAction *action,
 
       if (display)
         {
-          GimpDisplayShell *shell = gimp_display_get_shell (display);
+          ClayDisplayShell *shell = clay_display_get_shell (display);
 
-          gimp_display_shell_untransform_viewport (
+          clay_display_shell_untransform_viewport (
             shell,
-            ! gimp_display_shell_get_infinite_canvas (shell),
+            ! clay_display_shell_get_infinite_canvas (shell),
             &x, &y, &width, &height);
 
-          image = gimp_display_get_image (display);
+          image = clay_display_get_image (display);
         }
       else
         {
-          image = gimp_context_get_image (context);
+          image = clay_context_get_image (context);
         }
 
       if (image)
         {
-          GList *drawables = gimp_image_get_selected_drawables (image);
+          GList *drawables = clay_image_get_selected_drawables (image);
 
-          g_list_free (gimp_edit_paste (image, drawables,
-                                        GIMP_OBJECT (buffer), paste_type,
+          g_list_free (clay_edit_paste (image, drawables,
+                                        CLAY_OBJECT (buffer), paste_type,
                                         context, FALSE,
                                         x, y, width, height));
 
-          gimp_image_flush (image);
+          clay_image_flush (image);
           g_list_free (drawables);
         }
     }
 }
 
 void
-buffers_paste_as_new_image_cmd_callback (GimpAction *action,
+buffers_paste_as_new_image_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpBuffer          *buffer;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayBuffer          *buffer;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  buffer = gimp_context_get_buffer (context);
+  buffer = clay_context_get_buffer (context);
 
-  if (buffer && gimp_container_have (container, GIMP_OBJECT (buffer)))
+  if (buffer && clay_container_have (container, CLAY_OBJECT (buffer)))
     {
       GtkWidget *widget = GTK_WIDGET (editor);
-      GimpImage *new_image;
+      ClayImage *new_image;
 
-      new_image = gimp_edit_paste_as_new_image (context->gimp,
-                                                GIMP_OBJECT (buffer),
+      new_image = clay_edit_paste_as_new_image (context->clay,
+                                                CLAY_OBJECT (buffer),
                                                 context);
-      gimp_create_display (context->gimp, new_image,
-                           gimp_unit_pixel (), 1.0,
-                           G_OBJECT (gimp_widget_get_monitor (widget)));
+      clay_create_display (context->clay, new_image,
+                           clay_unit_pixel (), 1.0,
+                           G_OBJECT (clay_widget_get_monitor (widget)));
       g_object_unref (new_image);
     }
 }
 
 void
-buffers_delete_cmd_callback (GimpAction *action,
+buffers_delete_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
 
-  gimp_container_view_remove_active (editor->view);
+  clay_container_view_remove_active (editor->view);
 }

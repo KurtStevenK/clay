@@ -30,56 +30,56 @@
 
 #include "gui/gui-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpimagewindow.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/clayimagewindow.h"
 
 #include "file/file-open.h"
 
 #include "menus/menus.h"
 
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayuimanager.h"
 
-#include "gimpdbusservice.h"
+#include "claydbusservice.h"
 #include "gui-unique.h"
 #include "themes.h"
 
 
 #ifdef G_OS_WIN32
 
-static void  gui_unique_win32_init (Gimp *gimp);
+static void  gui_unique_win32_init (Clay *clay);
 static void  gui_unique_win32_exit (void);
 
-static Gimp *unique_gimp  = NULL;
+static Clay *unique_clay  = NULL;
 static HWND  proxy_window = NULL;
 
 #elif defined (GDK_WINDOWING_QUARTZ)
 
-static void     gui_unique_quartz_init         (Gimp *gimp);
+static void     gui_unique_quartz_init         (Clay *clay);
 static void     gui_unique_quartz_exit         (void);
 static gboolean gui_unique_quartz_trigger_quit (gpointer data);
 
-@interface GimpAppleEventHandler : NSObject {}
+@interface ClayAppleEventHandler : NSObject {}
 - (void) handleEvent:(NSAppleEventDescriptor *) inEvent
         andReplyWith:(NSAppleEventDescriptor *) replyEvent;
 @end
 
-@interface GimpAppDelegate : NSObject <NSApplicationDelegate>
+@interface ClayAppDelegate : NSObject <NSApplicationDelegate>
 @end
 
 
-static Gimp                   *unique_gimp                            = NULL;
-static GimpAppleEventHandler  *event_handler                          = NULL;
+static Clay                   *unique_clay                            = NULL;
+static ClayAppleEventHandler  *event_handler                          = NULL;
 static void                  (^themeChangeHandler) (NSNotification *) = NULL;
 
 #else
 
-static void  gui_dbus_service_init (Gimp *gimp);
+static void  gui_dbus_service_init (Clay *clay);
 static void  gui_dbus_service_exit (void);
 
 static GDBusObjectManagerServer *dbus_manager = NULL;
@@ -89,14 +89,14 @@ static guint                     dbus_name_id = 0;
 
 
 void
-gui_unique_init (Gimp *gimp)
+gui_unique_init (Clay *clay)
 {
 #ifdef G_OS_WIN32
-  gui_unique_win32_init (gimp);
+  gui_unique_win32_init (clay);
 #elif defined (GDK_WINDOWING_QUARTZ)
-  gui_unique_quartz_init (gimp);
+  gui_unique_quartz_init (clay);
 #else
-  gui_dbus_service_init (gimp);
+  gui_dbus_service_init (clay);
 #endif
 }
 
@@ -143,25 +143,25 @@ idle_open_data_free (IdleOpenData *data)
 static gboolean
 gui_unique_win32_idle_open (IdleOpenData *data)
 {
-  /*  We want to be called again later in case that GIMP is not fully
+  /*  We want to be called again later in case that Clay is not fully
    *  started yet.
    */
-  if (! gimp_is_restored (unique_gimp))
+  if (! clay_is_restored (unique_clay))
     return TRUE;
 
   if (data->file)
     {
-      file_open_from_command_line (unique_gimp, data->file,
+      file_open_from_command_line (unique_clay, data->file,
                                    data->as_new, NULL);
     }
   else
     {
       /*  raise the first display  */
-      GimpObject *display;
+      ClayObject *display;
 
-      display = gimp_container_get_first_child (unique_gimp->displays);
+      display = clay_container_get_first_child (unique_clay->displays);
 
-      gimp_display_shell_present (gimp_display_get_shell (GIMP_DISPLAY (display)));
+      clay_display_shell_present (clay_display_get_shell (CLAY_DISPLAY (display)));
     }
 
   return FALSE;
@@ -176,10 +176,10 @@ gui_unique_win32_message_handler (HWND   hWnd,
   switch (uMsg)
     {
     case WM_COPYDATA:
-      if (unique_gimp)
+      if (unique_clay)
         {
           COPYDATASTRUCT *copydata = (COPYDATASTRUCT *) lParam;
-          GimpObject     *display;
+          ClayObject     *display;
 
           if (copydata->cbData > 0)
             {
@@ -199,7 +199,7 @@ gui_unique_win32_message_handler (HWND   hWnd,
                                         data,
                                         (GClosureNotify) idle_open_data_free);
 
-              g_object_watch_closure (G_OBJECT (unique_gimp), closure);
+              g_object_watch_closure (G_OBJECT (unique_clay), closure);
 
               /* be patient on opening to avoid stuckness */
               source = g_timeout_source_new (50);
@@ -210,9 +210,9 @@ gui_unique_win32_message_handler (HWND   hWnd,
             }
 
           /* Deiconify the window if minimized. */
-          display = gimp_container_get_first_child (unique_gimp->displays);
+          display = clay_container_get_first_child (unique_clay->displays);
           if (display)
-            gimp_display_shell_present (gimp_display_get_shell (GIMP_DISPLAY (display)));
+            clay_display_shell_present (clay_display_get_shell (CLAY_DISPLAY (display)));
         }
       return TRUE;
 
@@ -224,7 +224,7 @@ gui_unique_win32_message_handler (HWND   hWnd,
        */
       if (lParam != 0 && lstrcmpW((LPCWSTR)lParam, L"ImmersiveColorSet") == 0)
         {
-          themes_theme_change_notify (GIMP_GUI_CONFIG (unique_gimp->config), NULL, unique_gimp);
+          themes_theme_change_notify (CLAY_GUI_CONFIG (unique_clay->config), NULL, unique_clay);
           return 0;
         }
       break;
@@ -234,36 +234,36 @@ gui_unique_win32_message_handler (HWND   hWnd,
 }
 
 static void
-gui_unique_win32_init (Gimp *gimp)
+gui_unique_win32_init (Clay *clay)
 {
   WNDCLASSW wc;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
-  g_return_if_fail (unique_gimp == NULL);
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+  g_return_if_fail (unique_clay == NULL);
 
-  unique_gimp = gimp;
+  unique_clay = clay;
 
   /* register window class for proxy window */
   memset (&wc, 0, sizeof (wc));
 
   wc.hInstance     = GetModuleHandleW (NULL);
   wc.lpfnWndProc   = gui_unique_win32_message_handler;
-  wc.lpszClassName = GIMP_UNIQUE_WIN32_WINDOW_CLASS;
+  wc.lpszClassName = CLAY_UNIQUE_WIN32_WINDOW_CLASS;
 
   RegisterClassW (&wc);
 
   proxy_window = CreateWindowExW (0,
-                                  GIMP_UNIQUE_WIN32_WINDOW_CLASS,
-                                  GIMP_UNIQUE_WIN32_WINDOW_NAME,
+                                  CLAY_UNIQUE_WIN32_WINDOW_CLASS,
+                                  CLAY_UNIQUE_WIN32_WINDOW_NAME,
                                   WS_POPUP, 0, 0, 1, 1, NULL, NULL, wc.hInstance, NULL);
 }
 
 static void
 gui_unique_win32_exit (void)
 {
-  g_return_if_fail (GIMP_IS_GIMP (unique_gimp));
+  g_return_if_fail (CLAY_IS_CLAY (unique_clay));
 
-  unique_gimp = NULL;
+  unique_clay = NULL;
 
   DestroyWindow (proxy_window);
 }
@@ -273,21 +273,21 @@ gui_unique_win32_exit (void)
 static gboolean
 gui_unique_quartz_idle_open (GFile *file)
 {
-  /*  We want to be called again later in case that GIMP is not fully
+  /*  We want to be called again later in case that Clay is not fully
    *  started yet.
    */
-  if (! gimp_is_restored (unique_gimp))
+  if (! clay_is_restored (unique_clay))
     return TRUE;
 
   if (file)
     {
-      file_open_from_command_line (unique_gimp, file, FALSE, NULL);
+      file_open_from_command_line (unique_clay, file, FALSE, NULL);
     }
 
   return FALSE;
 }
 
-@implementation GimpAppleEventHandler
+@implementation ClayAppleEventHandler
 - (void) handleEvent: (NSAppleEventDescriptor *) inEvent
         andReplyWith: (NSAppleEventDescriptor *) replyEvent
 {
@@ -336,7 +336,7 @@ gui_unique_quartz_idle_open (GFile *file)
       closure = g_cclosure_new (G_CALLBACK (gui_unique_quartz_idle_open),
                                 g_file_new_for_path (path), (GClosureNotify) g_object_unref);
 
-      g_object_watch_closure (G_OBJECT (unique_gimp), closure);
+      g_object_watch_closure (G_OBJECT (unique_clay), closure);
 
       /* be patient on opening to avoid stuckness */
       source = g_timeout_source_new (50);
@@ -350,32 +350,32 @@ gui_unique_quartz_idle_open (GFile *file)
 }
 @end
 
-@implementation GimpAppDelegate
+@implementation ClayAppDelegate
 - (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) sender
 {
-    g_idle_add ((GSourceFunc) gui_unique_quartz_trigger_quit, unique_gimp);
+    g_idle_add ((GSourceFunc) gui_unique_quartz_trigger_quit, unique_clay);
 
     return NSTerminateCancel;
 }
 @end
 
 static void
-gui_unique_quartz_init (Gimp *gimp)
+gui_unique_quartz_init (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
-  g_return_if_fail (unique_gimp == NULL);
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+  g_return_if_fail (unique_clay == NULL);
 
-  unique_gimp = gimp;
+  unique_clay = clay;
 
   themeChangeHandler = ^(NSNotification *notification)
   {
-    themes_theme_change_notify (GIMP_GUI_CONFIG (unique_gimp->config), NULL, unique_gimp);
+    themes_theme_change_notify (CLAY_GUI_CONFIG (unique_clay->config), NULL, unique_clay);
   };
 
   /* Observe macOS theme changes (Light, Dark) via distributed notifications.
    * When the "AppleInterfaceThemeChangedNotification" fires, the block runs
    * on the main thread (via mainQueue), calling themes_theme_change_notify()
-   * to update GIMP's UI theme accordingly.
+   * to update Clay's UI theme accordingly.
    */
   [[NSDistributedNotificationCenter defaultCenter]
     addObserverForName: @"AppleInterfaceThemeChangedNotification"
@@ -395,7 +395,7 @@ gui_unique_quartz_init (Gimp *gimp)
    * event processing is done before gtkosx_application_ready is
    * called, which we unfortuantly can't avoid doing right now.
    */
-  event_handler = [[GimpAppleEventHandler alloc] init];
+  event_handler = [[ClayAppleEventHandler alloc] init];
 
   [[NSAppleEventManager sharedAppleEventManager]
       setEventHandler: event_handler
@@ -404,19 +404,19 @@ gui_unique_quartz_init (Gimp *gimp)
            andEventID: kAEOpenDocuments];
 
   /* When quitting the application using "Quit" from the dock's right-click menu,
-   * GIMP does not follow our standard quit procedure. Instead, macOS forces the
+   * Clay does not follow our standard quit procedure. Instead, macOS forces the
    * application to close, which may result in losing unsaved changes.
    * This delegate intercepts the applicationShouldTerminate call and uses our
    * existing quit code, preventing macOS from handling the shutdown directly. */
-  [NSApp setDelegate:[[GimpAppDelegate alloc] init]];
+  [NSApp setDelegate:[[ClayAppDelegate alloc] init]];
 }
 
 static void
 gui_unique_quartz_exit (void)
 {
-  g_return_if_fail (GIMP_IS_GIMP (unique_gimp));
+  g_return_if_fail (CLAY_IS_CLAY (unique_clay));
 
-  unique_gimp = NULL;
+  unique_clay = NULL;
 
   [[NSAppleEventManager sharedAppleEventManager]
       removeEventHandlerForEventClass: kCoreEventClass
@@ -441,10 +441,10 @@ gui_unique_quartz_exit (void)
 static gboolean
 gui_unique_quartz_trigger_quit (gpointer data)
 {
-  Gimp          *gimp       = (Gimp *)data;
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (gimp);
+  Clay          *clay       = (Clay *)data;
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "file", "file-quit");
+  clay_ui_manager_activate_action (ui_manager, "file", "file-quit");
 
   return FALSE;
 }
@@ -454,17 +454,17 @@ gui_unique_quartz_trigger_quit (gpointer data)
 static void
 gui_dbus_bus_acquired (GDBusConnection *connection,
                        const gchar     *name,
-                       Gimp            *gimp)
+                       Clay            *clay)
 {
   GDBusObjectSkeleton *object;
   GObject             *service;
 
-  /* this should use GIMP_DBUS_SERVICE_PATH, but that's historically wrong */
-  dbus_manager = g_dbus_object_manager_server_new ("/org/gimp/Clay");
+  /* this should use CLAY_DBUS_SERVICE_PATH, but that's historically wrong */
+  dbus_manager = g_dbus_object_manager_server_new ("/org/clay/Clay");
 
-  object = g_dbus_object_skeleton_new (GIMP_DBUS_INTERFACE_PATH);
+  object = g_dbus_object_skeleton_new (CLAY_DBUS_INTERFACE_PATH);
 
-  service = gimp_dbus_service_new (gimp);
+  service = clay_dbus_service_new (clay);
   g_dbus_object_skeleton_add_interface (object,
                                         G_DBUS_INTERFACE_SKELETON (service));
   g_object_unref (service);
@@ -478,14 +478,14 @@ gui_dbus_bus_acquired (GDBusConnection *connection,
 static void
 gui_dbus_name_acquired (GDBusConnection *connection,
                         const gchar     *name,
-                        Gimp            *gimp)
+                        Clay            *clay)
 {
 }
 
 static void
 gui_dbus_name_lost (GDBusConnection *connection,
                     const gchar     *name,
-                    Gimp            *gimp)
+                    Clay            *clay)
 {
   if (connection == NULL)
     g_printerr ("%s: connection to the bus cannot be established.\n",
@@ -496,18 +496,18 @@ gui_dbus_name_lost (GDBusConnection *connection,
 }
 
 static void
-gui_dbus_service_init (Gimp *gimp)
+gui_dbus_service_init (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
   g_return_if_fail (dbus_name_id == 0);
 
   dbus_name_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                 GIMP_DBUS_SERVICE_NAME,
+                                 CLAY_DBUS_SERVICE_NAME,
                                  G_BUS_NAME_OWNER_FLAGS_NONE,
                                  (GBusAcquiredCallback) gui_dbus_bus_acquired,
                                  (GBusNameAcquiredCallback) gui_dbus_name_acquired,
                                  (GBusNameLostCallback) gui_dbus_name_lost,
-                                 gimp, NULL);
+                                 clay, NULL);
 }
 
 static void

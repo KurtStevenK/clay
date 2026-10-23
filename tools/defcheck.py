@@ -55,7 +55,7 @@ have_errors = 0
 
 
 # PROJECT-SPECIFIC CONFIGURATION
-# This script is synced between BABL, GEGL and GIMP. Everything that differs
+# This script is synced between BABL, GEGL and Clay. Everything that differs
 # lives in this block, the rest should stay identical for easier maintenance
 
 # Symbols to ignore only when checking the .def files.
@@ -67,29 +67,29 @@ ignore_sorting_errors = [ ]
 
 # Symbols to ignore only when checking the .gir files.
 # It looks like extern variables are not introspectable. We have
-# GIMP_MAJOR_VERSION, etc. macros anyways. The variables are only
-# used to do a core sanity check and ensure the libgimp and core
+# CLAY_MAJOR_VERSION, etc. macros anyways. The variables are only
+# used to do a core sanity check and ensure the libclay and core
 # binaries are matching versions. These 3 version symbols will
-# therefore be made private in GIMP 4, but we can't remove them now
+# therefore be made private in Clay 4, but we can't remove them now
 # for API stability.
-gir_exclude_symbols = [ 'gimp_major_version', 'gimp_minor_version', 'gimp_micro_version' ]
+gir_exclude_symbols = [ 'clay_major_version', 'clay_minor_version', 'clay_micro_version' ]
 
 # Regex matching the project prefix to find the functions in private headers
-symbol_prefix = "(gimp|gp)"
+symbol_prefix = "(clay|gp)"
 
 # Headers not named *-private.h which are nonetheless not stable public API
 special_cased = {
-   'libgimpwidgets': [ 'gimpcontroller.h' ]
+   'libclaywidgets': [ 'claycontroller.h' ]
 }
 
 # Directories of the libraries with no associated .gir file as an exception
-not_introspected = [ 'libgimpthumb' ]
+not_introspected = [ 'libclaythumb' ]
 
 
 #READ LIBRARY SYMBOLS
 libextension   = ".so"
 #command        = getenv("NM", default="nm") + " --defined-only --extern-only "
-command        = getenv("NM", default="nm") + " -D " #see https://gitlab.gnome.org/GNOME/gimp/-/work_items/16255
+command        = getenv("NM", default="nm") + " -D " #see https://github.com/KurtStevenK/clay/-/work_items/16255
 libprefix      = "lib"
 platform_linux = True
 platform_win32 = False
@@ -120,7 +120,7 @@ for df in def_files:
    # Installed library filenames use the Clay prefix. The .def files
    # still carry the upstream basename.
    lib_basename = basename
-   if lib_basename.startswith("gimp"):
+   if lib_basename.startswith("clay"):
       lib_basename = "clay" + lib_basename[4:]
    libname = path.join(os.getcwd(), directory, libprefix + lib_basename + "-*" + libextension)
    matches = glob.glob(libname)

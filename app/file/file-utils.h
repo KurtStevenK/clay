@@ -20,10 +20,10 @@
 #pragma once
 
 
-GFile     * file_utils_filename_to_file  (Gimp         *gimp,
+GFile     * file_utils_filename_to_file  (Clay         *clay,
                                           const gchar  *filename,
                                           GError      **error);
 
 GdkPixbuf * file_utils_load_thumbnail    (GFile        *file);
-gboolean    file_utils_save_thumbnail    (GimpImage    *image,
+gboolean    file_utils_save_thumbnail    (ClayImage    *image,
                                           GFile        *file);

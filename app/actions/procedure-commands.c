@@ -20,195 +20,195 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "actions-types.h"
 
-#include "operations/gimpoperationsettings.h"
+#include "operations/clayoperationsettings.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/claydrawable.h"
+#include "core/clayparamspecs.h"
+#include "core/clayprogress.h"
 
-#include "pdb/gimpprocedure.h"
+#include "pdb/clayprocedure.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
 #include "procedure-commands.h"
 
 
 static inline gboolean
-GIMP_IS_PARAM_SPEC_RUN_MODE (GParamSpec *pspec)
+CLAY_IS_PARAM_SPEC_RUN_MODE (GParamSpec *pspec)
 {
   return (G_IS_PARAM_SPEC_ENUM (pspec) &&
-          pspec->value_type == GIMP_TYPE_RUN_MODE);
+          pspec->value_type == CLAY_TYPE_RUN_MODE);
 }
 
-GimpValueArray *
-procedure_commands_get_run_mode_arg (GimpProcedure *procedure)
+ClayValueArray *
+procedure_commands_get_run_mode_arg (ClayProcedure *procedure)
 {
-  GimpValueArray *args;
+  ClayValueArray *args;
   gint            n_args = 0;
 
-  args = gimp_procedure_get_arguments (procedure);
+  args = clay_procedure_get_arguments (procedure);
 
   /* initialize the first argument  */
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
     {
-      g_value_set_enum (gimp_value_array_index (args, n_args),
-                        GIMP_RUN_INTERACTIVE);
+      g_value_set_enum (clay_value_array_index (args, n_args),
+                        CLAY_RUN_INTERACTIVE);
       n_args++;
     }
 
   if (n_args > 0)
-    gimp_value_array_truncate (args, n_args);
+    clay_value_array_truncate (args, n_args);
 
   return args;
 }
 
-GimpValueArray *
-procedure_commands_get_data_args (GimpProcedure *procedure,
-                                  GimpObject    *object)
+ClayValueArray *
+procedure_commands_get_data_args (ClayProcedure *procedure,
+                                  ClayObject    *object)
 {
-  GimpValueArray *args;
+  ClayValueArray *args;
   gint            n_args = 0;
 
-  args = gimp_procedure_get_arguments (procedure);
+  args = clay_procedure_get_arguments (procedure);
 
   /* initialize the first argument  */
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
     {
-      g_value_set_enum (gimp_value_array_index (args, n_args),
-                        GIMP_RUN_INTERACTIVE);
+      g_value_set_enum (clay_value_array_index (args, n_args),
+                        CLAY_RUN_INTERACTIVE);
       n_args++;
     }
 
-  if (gimp_value_array_length (args) > n_args &&
+  if (clay_value_array_length (args) > n_args &&
       G_IS_PARAM_SPEC_STRING (procedure->args[n_args]))
     {
       if (object)
         {
-          g_value_set_string (gimp_value_array_index (args, n_args),
-                              gimp_object_get_name (object));
+          g_value_set_string (clay_value_array_index (args, n_args),
+                              clay_object_get_name (object));
           n_args++;
         }
       else
         {
           g_warning ("Uh-oh, no active data object for the plug-in!");
-          gimp_value_array_unref (args);
+          clay_value_array_unref (args);
           return NULL;
         }
     }
 
   if (n_args > 0)
-    gimp_value_array_truncate (args, n_args);
+    clay_value_array_truncate (args, n_args);
 
   return args;
 }
 
-GimpValueArray *
-procedure_commands_get_image_args (GimpProcedure   *procedure,
-                                   GimpImage       *image)
+ClayValueArray *
+procedure_commands_get_image_args (ClayProcedure   *procedure,
+                                   ClayImage       *image)
 {
-  GimpValueArray *args;
+  ClayValueArray *args;
   gint            n_args = 0;
 
-  args = gimp_procedure_get_arguments (procedure);
+  args = clay_procedure_get_arguments (procedure);
 
   /* initialize the first argument  */
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
     {
-      g_value_set_enum (gimp_value_array_index (args, n_args),
-                        GIMP_RUN_INTERACTIVE);
+      g_value_set_enum (clay_value_array_index (args, n_args),
+                        CLAY_RUN_INTERACTIVE);
       n_args++;
     }
 
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_IMAGE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_IMAGE (procedure->args[n_args]))
     {
       if (image)
         {
-          g_value_set_object (gimp_value_array_index (args, n_args), image);
+          g_value_set_object (clay_value_array_index (args, n_args), image);
           n_args++;
         }
       else
         {
           g_warning ("Uh-oh, no active image for the plug-in!");
-          gimp_value_array_unref (args);
+          clay_value_array_unref (args);
           return NULL;
         }
     }
 
   if (n_args)
-    gimp_value_array_truncate (args, n_args);
+    clay_value_array_truncate (args, n_args);
 
   return args;
 }
 
-GimpValueArray *
-procedure_commands_get_items_args (GimpProcedure *procedure,
-                                   GimpImage     *image,
+ClayValueArray *
+procedure_commands_get_items_args (ClayProcedure *procedure,
+                                   ClayImage     *image,
                                    GList         *items_list)
 {
-  GimpValueArray *args;
+  ClayValueArray *args;
   gint            n_args = 0;
 
-  args = gimp_procedure_get_arguments (procedure);
+  args = clay_procedure_get_arguments (procedure);
 
   /* initialize the first argument  */
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
     {
-      g_value_set_enum (gimp_value_array_index (args, n_args),
-                        GIMP_RUN_INTERACTIVE);
+      g_value_set_enum (clay_value_array_index (args, n_args),
+                        CLAY_RUN_INTERACTIVE);
       n_args++;
     }
 
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_IMAGE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_IMAGE (procedure->args[n_args]))
     {
       if (image)
         {
-          g_value_set_object (gimp_value_array_index (args, n_args), image);
+          g_value_set_object (clay_value_array_index (args, n_args), image);
           n_args++;
 
-          if (gimp_value_array_length (args) > n_args &&
-              GIMP_IS_PARAM_SPEC_ITEM (procedure->args[n_args]))
+          if (clay_value_array_length (args) > n_args &&
+              CLAY_IS_PARAM_SPEC_ITEM (procedure->args[n_args]))
             {
               if (items_list)
                 {
                   g_printerr ("%s: plug-in procedures expecting a single item are deprecated!\n",
                               G_STRFUNC);
-                  g_value_set_object (gimp_value_array_index (args, n_args),
+                  g_value_set_object (clay_value_array_index (args, n_args),
                                       items_list->data);
                   n_args++;
                 }
               else
                 {
                   g_warning ("Uh-oh, no selected items for the plug-in!");
-                  gimp_value_array_unref (args);
+                  clay_value_array_unref (args);
                   return NULL;
                 }
             }
-          else if (GIMP_IS_PARAM_SPEC_CORE_OBJECT_ARRAY (procedure->args[n_args]))
+          else if (CLAY_IS_PARAM_SPEC_CORE_OBJECT_ARRAY (procedure->args[n_args]))
             {
-              GimpItem **items   = NULL;
+              ClayItem **items   = NULL;
               gint       n_items;
               GList     *iter;
               gint       i;
 
 
               n_items = g_list_length (items_list);
-              items   = g_new0 (GimpItem *, n_items + 1);
+              items   = g_new0 (ClayItem *, n_items + 1);
               for (iter = items_list, i = 0; iter; iter = iter->next, i++)
                 items[i] = iter->data;
 
-              g_value_set_boxed (gimp_value_array_index (args, n_args++), (GObject **) items);
+              g_value_set_boxed (clay_value_array_index (args, n_args++), (GObject **) items);
 
               g_free (items);
             }
@@ -216,66 +216,66 @@ procedure_commands_get_items_args (GimpProcedure *procedure,
     }
 
   if (n_args)
-    gimp_value_array_truncate (args, n_args);
+    clay_value_array_truncate (args, n_args);
 
   return args;
 }
 
-GimpValueArray *
-procedure_commands_get_display_args (GimpProcedure *procedure,
-                                     GimpDisplay   *display,
-                                     GimpObject    *settings)
+ClayValueArray *
+procedure_commands_get_display_args (ClayProcedure *procedure,
+                                     ClayDisplay   *display,
+                                     ClayObject    *settings)
 {
-  GimpValueArray *args;
+  ClayValueArray *args;
   gint            n_args = 0;
 
-  args = gimp_procedure_get_arguments (procedure);
+  args = clay_procedure_get_arguments (procedure);
 
   /* initialize the first argument  */
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[n_args]))
     {
-      g_value_set_enum (gimp_value_array_index (args, n_args),
-                        GIMP_RUN_INTERACTIVE);
+      g_value_set_enum (clay_value_array_index (args, n_args),
+                        CLAY_RUN_INTERACTIVE);
       n_args++;
     }
 
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_DISPLAY (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_DISPLAY (procedure->args[n_args]))
     {
       if (display)
         {
-          g_value_set_object (gimp_value_array_index (args, n_args), display);
+          g_value_set_object (clay_value_array_index (args, n_args), display);
           n_args++;
         }
       else
         {
           g_warning ("Uh-oh, no active display for the plug-in!");
-          gimp_value_array_unref (args);
+          clay_value_array_unref (args);
           return NULL;
         }
     }
 
-  if (gimp_value_array_length (args) > n_args &&
-      GIMP_IS_PARAM_SPEC_IMAGE (procedure->args[n_args]))
+  if (clay_value_array_length (args) > n_args &&
+      CLAY_IS_PARAM_SPEC_IMAGE (procedure->args[n_args]))
     {
-      GimpImage *image = display ? gimp_display_get_image (display) : NULL;
+      ClayImage *image = display ? clay_display_get_image (display) : NULL;
 
       if (image)
         {
-          GList *drawables_list = gimp_image_get_selected_drawables (image);
+          GList *drawables_list = clay_image_get_selected_drawables (image);
 
-          g_value_set_object (gimp_value_array_index (args, n_args), image);
+          g_value_set_object (clay_value_array_index (args, n_args), image);
           n_args++;
 
-          if (gimp_value_array_length (args) > n_args &&
-              GIMP_IS_PARAM_SPEC_DRAWABLE (procedure->args[n_args]))
+          if (clay_value_array_length (args) > n_args &&
+              CLAY_IS_PARAM_SPEC_DRAWABLE (procedure->args[n_args]))
             {
               if (drawables_list)
                 {
                   g_printerr ("%s: plug-in procedures expecting a single drawable are deprecated!\n",
                               G_STRFUNC);
-                  g_value_set_object (gimp_value_array_index (args, n_args),
+                  g_value_set_object (clay_value_array_index (args, n_args),
                                       drawables_list->data);
                   n_args++;
                 }
@@ -283,27 +283,27 @@ procedure_commands_get_display_args (GimpProcedure *procedure,
                 {
                   g_warning ("Uh-oh, no selected drawables for the plug-in!");
 
-                  gimp_value_array_unref (args);
+                  clay_value_array_unref (args);
                   g_list_free (drawables_list);
 
                   return NULL;
                 }
             }
-          else if (gimp_value_array_length (args) > n_args &&
-                   GIMP_IS_PARAM_SPEC_CORE_OBJECT_ARRAY (procedure->args[n_args]))
+          else if (clay_value_array_length (args) > n_args &&
+                   CLAY_IS_PARAM_SPEC_CORE_OBJECT_ARRAY (procedure->args[n_args]))
             {
-              GimpDrawable **drawables   = NULL;
+              ClayDrawable **drawables   = NULL;
               gint           n_drawables;
               GList         *iter;
               gint           i;
 
               n_drawables = g_list_length (drawables_list);
 
-              drawables = g_new0 (GimpDrawable *, n_drawables + 1);
+              drawables = g_new0 (ClayDrawable *, n_drawables + 1);
               for (iter = drawables_list, i = 0; iter; iter = iter->next, i++)
                 drawables[i] = iter->data;
 
-              g_value_set_boxed (gimp_value_array_index (args, n_args++), (GObject **) drawables);
+              g_value_set_boxed (clay_value_array_index (args, n_args++), (GObject **) drawables);
 
               g_free (drawables);
             }
@@ -315,49 +315,49 @@ procedure_commands_get_display_args (GimpProcedure *procedure,
    * list), which we want to pass around, but we don't want to pass
    * other types of object data.
    */
-  if (gimp_value_array_length (args) > n_args &&
+  if (clay_value_array_length (args) > n_args &&
       g_type_is_a (G_PARAM_SPEC_VALUE_TYPE (procedure->args[n_args]),
-                   GIMP_TYPE_OPERATION_SETTINGS))
+                   CLAY_TYPE_OPERATION_SETTINGS))
     {
-      g_value_set_object (gimp_value_array_index (args, n_args), settings);
+      g_value_set_object (clay_value_array_index (args, n_args), settings);
       n_args++;
     }
 
   if (n_args)
-    gimp_value_array_truncate (args, n_args);
+    clay_value_array_truncate (args, n_args);
 
   return args;
 }
 
 gboolean
-procedure_commands_run_procedure (GimpProcedure  *procedure,
-                                  Gimp           *gimp,
-                                  GimpProgress   *progress,
-                                  GimpValueArray *args)
+procedure_commands_run_procedure (ClayProcedure  *procedure,
+                                  Clay           *clay,
+                                  ClayProgress   *progress,
+                                  ClayValueArray *args)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   GError         *error = NULL;
 
-  g_return_val_if_fail (GIMP_IS_PROCEDURE (procedure), FALSE);
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), FALSE);
+  g_return_val_if_fail (CLAY_IS_PROCEDURE (procedure), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), FALSE);
   g_return_val_if_fail (args != NULL, FALSE);
 
-  if (gimp_value_array_length (args) > 0 &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[0]))
-    g_value_set_enum (gimp_value_array_index (args, 0),
-                      GIMP_RUN_NONINTERACTIVE);
+  if (clay_value_array_length (args) > 0 &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[0]))
+    g_value_set_enum (clay_value_array_index (args, 0),
+                      CLAY_RUN_NONINTERACTIVE);
 
-  return_vals = gimp_procedure_execute (procedure, gimp,
-                                        gimp_get_user_context (gimp),
+  return_vals = clay_procedure_execute (procedure, clay,
+                                        clay_get_user_context (clay),
                                         progress, args,
                                         &error);
-  gimp_value_array_unref (return_vals);
+  clay_value_array_unref (return_vals);
 
   if (error)
     {
-      gimp_message_literal (gimp,
-                            G_OBJECT (progress), GIMP_MESSAGE_ERROR,
+      clay_message_literal (clay,
+                            G_OBJECT (progress), CLAY_MESSAGE_ERROR,
                             error->message);
       g_clear_error (&error);
 
@@ -368,35 +368,35 @@ procedure_commands_run_procedure (GimpProcedure  *procedure,
 }
 
 gboolean
-procedure_commands_run_procedure_async (GimpProcedure  *procedure,
-                                        Gimp           *gimp,
-                                        GimpProgress   *progress,
-                                        GimpRunMode     run_mode,
-                                        GimpValueArray *args,
-                                        GimpDisplay    *display)
+procedure_commands_run_procedure_async (ClayProcedure  *procedure,
+                                        Clay           *clay,
+                                        ClayProgress   *progress,
+                                        ClayRunMode     run_mode,
+                                        ClayValueArray *args,
+                                        ClayDisplay    *display)
 {
   GError *error = NULL;
 
-  g_return_val_if_fail (GIMP_IS_PROCEDURE (procedure), FALSE);
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), FALSE);
-  g_return_val_if_fail (display == NULL || GIMP_IS_DISPLAY (display), FALSE);
+  g_return_val_if_fail (CLAY_IS_PROCEDURE (procedure), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), FALSE);
+  g_return_val_if_fail (display == NULL || CLAY_IS_DISPLAY (display), FALSE);
   g_return_val_if_fail (args != NULL, FALSE);
 
-  if (gimp_value_array_length (args) > 0 &&
-      GIMP_IS_PARAM_SPEC_RUN_MODE (procedure->args[0]))
-    g_value_set_enum (gimp_value_array_index (args, 0),
+  if (clay_value_array_length (args) > 0 &&
+      CLAY_IS_PARAM_SPEC_RUN_MODE (procedure->args[0]))
+    g_value_set_enum (clay_value_array_index (args, 0),
                       run_mode);
 
-  gimp_procedure_execute_async (procedure, gimp,
-                                gimp_get_user_context (gimp),
+  clay_procedure_execute_async (procedure, clay,
+                                clay_get_user_context (clay),
                                 progress, args,
                                 display, &error);
 
   if (error)
     {
-      gimp_message_literal (gimp,
-                            G_OBJECT (progress), GIMP_MESSAGE_ERROR,
+      clay_message_literal (clay,
+                            G_OBJECT (progress), CLAY_MESSAGE_ERROR,
                             error->message);
       g_clear_error (&error);
 

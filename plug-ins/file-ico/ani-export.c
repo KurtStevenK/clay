@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,21 +25,21 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "ico.h"
 #include "ani.h"
 #include "ani-export.h"
 #include "ico-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /* Ported from James Huang's ani.c code, under the GPL v3 license */
-GimpPDBStatusType
+ClayPDBStatusType
 ani_export_image (GFile                *file,
-                  GimpImage            *image,
-                  GimpProcedure        *procedure,
-                  GimpProcedureConfig  *config,
+                  ClayImage            *image,
+                  ClayProcedure        *procedure,
+                  ClayProcedureConfig  *config,
                   gint32                run_mode,
                   gsize                *n_hot_spot_x,
                   const gint32         *hot_spot_x,
@@ -54,7 +54,7 @@ ani_export_image (GFile                *file,
   FILE         *fp;
   gint32        i;
   gchar        *str;
-  GimpParasite *parasite = NULL;
+  ClayParasite *parasite = NULL;
   gchar         id[5];
   guint32       size;
   guint8        padding       = 0;
@@ -68,7 +68,7 @@ ani_export_image (GFile                *file,
                        *n_hot_spot_y, hot_spot_y,
                        error))
     {
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Save individual frames as .cur so we can retain
@@ -95,14 +95,14 @@ ani_export_image (GFile                *file,
   header->flags = 1;
 
   /* Load metadata from parasite */
-  parasite = gimp_image_get_parasite (image, "ani-header");
+  parasite = clay_image_get_parasite (image, "ani-header");
   if (parasite)
     {
       gchar   *parasite_data;
       guint32  parasite_size;
       gint     jif_rate;
 
-      parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+      parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
       parasite_data = g_strndup (parasite_data, parasite_size);
 
 #ifndef _UCRT
@@ -114,39 +114,39 @@ ani_export_image (GFile                *file,
           header->jif_rate = jif_rate;
         }
 
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
       g_free (parasite_data);
     }
 
-  parasite = gimp_image_get_parasite (image, "ani-info-inam");
+  parasite = clay_image_get_parasite (image, "ani-info-inam");
   if (parasite)
     {
       guint32  parasite_size;
       gchar   *inam = NULL;
 
-      inam = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+      inam = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
       ani_info->inam = g_strndup (inam, parasite_size);
 
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
     }
 
-  parasite = gimp_image_get_parasite (image, "ani-info-iart");
+  parasite = clay_image_get_parasite (image, "ani-info-iart");
   if (parasite)
     {
       guint32  parasite_size;
       gchar   *iart = NULL;
 
-      iart = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+      iart = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
       ani_info->iart = g_strndup (iart, parasite_size);
 
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! ico_save_dialog (image, procedure, config, &info,
                              header, ani_info))
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
 
       for (i = 1; i < info.num_icons; i++)
         {
@@ -156,8 +156,8 @@ ani_export_image (GFile                *file,
         }
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "wb");
 
@@ -165,8 +165,8 @@ ani_export_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return GIMP_PDB_EXECUTION_ERROR;
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Writing the .ani header data */
@@ -247,7 +247,7 @@ ani_export_image (GFile                *file,
   memcpy (id, "icon", 4);
   for (i = 0; i < info.num_icons; i++)
     {
-      GimpPDBStatusType status;
+      ClayPDBStatusType status;
 
       fwrite (id, 4, 1, fp);
       ofs_size_icon = ftell (fp);
@@ -259,13 +259,13 @@ ani_export_image (GFile                *file,
                                   n_hot_spot_y, hot_spot_y, new_hot_spot_y,
                                   offset, i, error, &info);
 
-      if (status != GIMP_PDB_SUCCESS)
+      if (status != CLAY_PDB_SUCCESS)
         {
           ico_save_info_free (&info);
           g_clear_pointer (&ani_info->inam, g_free);
           g_clear_pointer (&ani_info->iart, g_free);
           fclose (fp);
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
       fseek (fp, 0L, SEEK_END);
       size = ftell (fp) - offset;
@@ -273,7 +273,7 @@ ani_export_image (GFile                *file,
       fwrite (&size, sizeof (size), 1, fp);
       fseek (fp, 0L, SEEK_END);
 
-      gimp_progress_update ((gdouble) i / (gdouble) info.num_icons);
+      clay_progress_update ((gdouble) i / (gdouble) info.num_icons);
     }
   ico_save_info_free (&info);
 
@@ -291,35 +291,35 @@ ani_export_image (GFile                *file,
 
   /* Update metadata if needed */
   str = g_strdup_printf ("%d", header->jif_rate);
-  parasite = gimp_parasite_new ("ani-header",
-                                GIMP_PARASITE_PERSISTENT,
+  parasite = clay_parasite_new ("ani-header",
+                                CLAY_PARASITE_PERSISTENT,
                                 strlen (str) + 1, (gpointer) str);
   g_free (str);
-  gimp_image_attach_parasite (image, parasite);
-  gimp_parasite_free (parasite);
+  clay_image_attach_parasite (image, parasite);
+  clay_parasite_free (parasite);
 
   if (ani_info->inam && strlen (ani_info->inam) > 0)
     {
       str = g_strdup_printf ("%s", ani_info->inam);
-      parasite = gimp_parasite_new ("ani-info-inam",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("ani-info-inam",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (ani_info->inam) + 1, (gpointer) str);
       g_free (str);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
   if (ani_info->iart && strlen (ani_info->iart) > 0)
     {
       str = g_strdup_printf ("%s", ani_info->iart);
-      parasite = gimp_parasite_new ("ani-info-iart",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("ani-info-iart",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (ani_info->iart) + 1, (gpointer) str);
       g_free (str);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }

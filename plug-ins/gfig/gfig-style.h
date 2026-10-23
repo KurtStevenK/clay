@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -25,15 +25,15 @@
 #ifndef __GFIG_STYLE_H__
 #define __GFIG_STYLE_H__
 
-#include <libgimp/gimpui.h>
+#include <libclay/clayui.h>
 
 struct _Style
 {
   gchar     *name;
 
-  GimpBrush    *brush;
-  GimpPattern  *pattern;
-  GimpGradient *gradient;
+  ClayBrush    *brush;
+  ClayPattern  *pattern;
+  ClayGradient *gradient;
 
   gint       brush_width;
   gint       brush_height;
@@ -69,23 +69,23 @@ void     gfig_style_save_as_attributes     (Style                *style,
 
 void     gfig_save_styles                  (GString              *string);
 
-void     set_foreground_callback           (GimpColorButton      *button,
+void     set_foreground_callback           (ClayColorButton      *button,
                                             gpointer              data);
 
-void     set_background_callback           (GimpColorButton      *button,
+void     set_background_callback           (ClayColorButton      *button,
                                             gpointer              data);
 
 void     set_paint_type_callback           (GtkToggleButton      *toggle,
                                             gpointer              data);
 
 void     gfig_brush_changed_callback       (gpointer              user_data,
-                                            GimpBrush            *brush,
+                                            ClayBrush            *brush,
                                             gboolean              dialog_closing);
 void     gfig_pattern_changed_callback     (gpointer              user_data,
-                                            GimpPattern          *pattern,
+                                            ClayPattern          *pattern,
                                             gboolean              dialog_closing);
 void     gfig_gradient_changed_callback    (gpointer              user_data,
-                                            GimpGradient         *gradient,
+                                            ClayGradient         *gradient,
                                             gboolean              dialog_closing);
 
 void     gfig_style_copy                   (Style                *style1,
@@ -94,14 +94,14 @@ void     gfig_style_copy                   (Style                *style1,
 
 void     gfig_style_apply                  (Style                *style);
 
-void     gfig_read_gimp_style              (Style                *style,
+void     gfig_read_clay_style              (Style                *style,
                                             const gchar          *name);
 
 void     gfig_style_set_context_from_style (Style                *style);
 
 void     gfig_style_set_style_from_context (Style                *style);
 
-void     set_context_bdesc                 (GimpBrush            *brush);
+void     set_context_bdesc                 (ClayBrush            *brush);
 
 Style   *gfig_context_get_current_style    (void);
 

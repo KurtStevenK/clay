@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -22,11 +22,11 @@
 #define __DDSREAD_H__
 
 
-extern GimpPDBStatusType read_dds (GFile               *file,
-                                   GimpImage          **image,
+extern ClayPDBStatusType read_dds (GFile               *file,
+                                   ClayImage          **image,
                                    gboolean             interactive,
-                                   GimpProcedure       *procedure,
-                                   GimpProcedureConfig *config,
+                                   ClayProcedure       *procedure,
+                                   ClayProcedureConfig *config,
                                    GError             **error);
 
 

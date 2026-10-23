@@ -27,134 +27,134 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpchannel-combine.h"
-#include "core/gimpchannel.h"
-#include "core/gimpimage.h"
-#include "core/gimpparamspecs.h"
+#include "core/claychannel-combine.h"
+#include "core/claychannel.h"
+#include "core/clayimage.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-channel_new_invoker (GimpProcedure         *procedure,
-                     Gimp                  *gimp,
-                     GimpContext           *context,
-                     GimpProgress          *progress,
-                     const GimpValueArray  *args,
+static ClayValueArray *
+channel_new_invoker (ClayProcedure         *procedure,
+                     Clay                  *clay,
+                     ClayContext           *context,
+                     ClayProgress          *progress,
+                     const ClayValueArray  *args,
                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   const gchar *name;
   gint width;
   gint height;
   gdouble opacity;
   GeglColor *color;
-  GimpChannel *channel = NULL;
+  ClayChannel *channel = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  name = g_value_get_string (gimp_value_array_index (args, 1));
-  width = g_value_get_int (gimp_value_array_index (args, 2));
-  height = g_value_get_int (gimp_value_array_index (args, 3));
-  opacity = g_value_get_double (gimp_value_array_index (args, 4));
-  color = g_value_get_object (gimp_value_array_index (args, 5));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 1));
+  width = g_value_get_int (clay_value_array_index (args, 2));
+  height = g_value_get_int (clay_value_array_index (args, 3));
+  opacity = g_value_get_double (clay_value_array_index (args, 4));
+  color = g_value_get_object (clay_value_array_index (args, 5));
 
   if (success)
     {
-      gimp_color_set_alpha (color, opacity / 100.0);
-      channel = gimp_channel_new (image, width, height, name, color);
+      clay_color_set_alpha (color, opacity / 100.0);
+      channel = clay_channel_new (image, width, height, name, color);
 
       if (! channel)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), channel);
+    g_value_set_object (clay_value_array_index (return_vals, 1), channel);
 
   return return_vals;
 }
 
-static GimpValueArray *
-channel_new_from_component_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+channel_new_from_component_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint component;
   const gchar *name;
-  GimpChannel *channel = NULL;
+  ClayChannel *channel = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  component = g_value_get_enum (gimp_value_array_index (args, 1));
-  name = g_value_get_string (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  component = g_value_get_enum (clay_value_array_index (args, 1));
+  name = g_value_get_string (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_image_get_component_format (image, component) != NULL)
-        channel = gimp_channel_new_from_component (image,
+      if (clay_image_get_component_format (image, component) != NULL)
+        channel = clay_channel_new_from_component (image,
                                                    component, name, NULL);
 
       if (channel)
-        gimp_item_set_visible (GIMP_ITEM (channel), FALSE, FALSE);
+        clay_item_set_visible (CLAY_ITEM (channel), FALSE, FALSE);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), channel);
+    g_value_set_object (clay_value_array_index (return_vals, 1), channel);
 
   return return_vals;
 }
 
-static GimpValueArray *
-channel_copy_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+channel_copy_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpChannel *channel;
-  GimpChannel *channel_copy = NULL;
+  ClayValueArray *return_vals;
+  ClayChannel *channel;
+  ClayChannel *channel_copy = NULL;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpImage *image  = gimp_item_get_image (GIMP_ITEM (channel));
-      gint       width  = gimp_image_get_width  (image);
-      gint       height = gimp_image_get_height (image);
+      ClayImage *image  = clay_item_get_image (CLAY_ITEM (channel));
+      gint       width  = clay_image_get_width  (image);
+      gint       height = clay_image_get_height (image);
 
-      if (gimp_item_get_width  (GIMP_ITEM (channel)) == width &&
-          gimp_item_get_height (GIMP_ITEM (channel)) == height)
+      if (clay_item_get_width  (CLAY_ITEM (channel)) == width &&
+          clay_item_get_height (CLAY_ITEM (channel)) == height)
         {
-          channel_copy = GIMP_CHANNEL (gimp_item_duplicate (GIMP_ITEM (channel),
-                                                            GIMP_TYPE_CHANNEL));
+          channel_copy = CLAY_CHANNEL (clay_item_duplicate (CLAY_ITEM (channel),
+                                                            CLAY_TYPE_CHANNEL));
 
           if (! channel_copy)
             success = FALSE;
@@ -163,583 +163,583 @@ channel_copy_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), channel_copy);
+    g_value_set_object (clay_value_array_index (return_vals, 1), channel_copy);
 
   return return_vals;
 }
 
-static GimpValueArray *
-channel_combine_masks_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+channel_combine_masks_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpChannel *channel1;
-  GimpChannel *channel2;
+  ClayChannel *channel1;
+  ClayChannel *channel2;
   gint operation;
   gint offx;
   gint offy;
 
-  channel1 = g_value_get_object (gimp_value_array_index (args, 0));
-  channel2 = g_value_get_object (gimp_value_array_index (args, 1));
-  operation = g_value_get_enum (gimp_value_array_index (args, 2));
-  offx = g_value_get_int (gimp_value_array_index (args, 3));
-  offy = g_value_get_int (gimp_value_array_index (args, 4));
+  channel1 = g_value_get_object (clay_value_array_index (args, 0));
+  channel2 = g_value_get_object (clay_value_array_index (args, 1));
+  operation = g_value_get_enum (clay_value_array_index (args, 2));
+  offx = g_value_get_int (clay_value_array_index (args, 3));
+  offy = g_value_get_int (clay_value_array_index (args, 4));
 
   if (success)
     {
-      if (gimp_item_is_attached (GIMP_ITEM (channel1)))
-        gimp_channel_push_undo (channel1, _("Combine Masks"));
+      if (clay_item_is_attached (CLAY_ITEM (channel1)))
+        clay_channel_push_undo (channel1, _("Combine Masks"));
 
-      gimp_channel_combine_mask (channel1, channel2, operation, offx, offy);
+      clay_channel_combine_mask (channel1, channel2, operation, offx, offy);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-channel_get_show_masked_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+channel_get_show_masked_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpChannel *channel;
+  ClayValueArray *return_vals;
+  ClayChannel *channel;
   gboolean show_masked = FALSE;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      show_masked = gimp_channel_get_show_masked (channel);
+      show_masked = clay_channel_get_show_masked (channel);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), show_masked);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), show_masked);
 
   return return_vals;
 }
 
-static GimpValueArray *
-channel_set_show_masked_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+channel_set_show_masked_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpChannel *channel;
+  ClayChannel *channel;
   gboolean show_masked;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
-  show_masked = g_value_get_boolean (gimp_value_array_index (args, 1));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
+  show_masked = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_channel_set_show_masked (channel, show_masked);
+      clay_channel_set_show_masked (channel, show_masked);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-channel_get_opacity_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+channel_get_opacity_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpChannel *channel;
+  ClayValueArray *return_vals;
+  ClayChannel *channel;
   gdouble opacity = 0.0;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      opacity = gimp_channel_get_opacity (channel) * 100;
+      opacity = clay_channel_get_opacity (channel) * 100;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), opacity);
+    g_value_set_double (clay_value_array_index (return_vals, 1), opacity);
 
   return return_vals;
 }
 
-static GimpValueArray *
-channel_set_opacity_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+channel_set_opacity_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpChannel *channel;
+  ClayChannel *channel;
   gdouble opacity;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
-  opacity = g_value_get_double (gimp_value_array_index (args, 1));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
+  opacity = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_channel_set_opacity (channel, opacity / 100.0, TRUE);
+      clay_channel_set_opacity (channel, opacity / 100.0, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-channel_get_color_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+channel_get_color_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpChannel *channel;
+  ClayValueArray *return_vals;
+  ClayChannel *channel;
   GeglColor *color = NULL;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      color = gegl_color_duplicate (gimp_channel_get_color (channel));
-      gimp_color_set_alpha (color, 1.0);
+      color = gegl_color_duplicate (clay_channel_get_color (channel));
+      clay_color_set_alpha (color, 1.0);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), color);
+    g_value_take_object (clay_value_array_index (return_vals, 1), color);
 
   return return_vals;
 }
 
-static GimpValueArray *
-channel_set_color_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+channel_set_color_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpChannel *channel;
+  ClayChannel *channel;
   GeglColor *color;
 
-  channel = g_value_get_object (gimp_value_array_index (args, 0));
-  color = g_value_get_object (gimp_value_array_index (args, 1));
+  channel = g_value_get_object (clay_value_array_index (args, 0));
+  color = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
       gdouble alpha;
 
       gegl_color_get_rgba (channel->color, NULL, NULL, NULL, &alpha);
-      gimp_color_set_alpha (color, alpha);
-      gimp_channel_set_color (channel, color, TRUE);
+      clay_color_set_alpha (color, alpha);
+      clay_channel_set_color (channel, color, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_channel_procs (GimpPDB *pdb)
+register_channel_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-channel-new
+   * clay-channel-new
    */
-  procedure = gimp_procedure_new (channel_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new channel.",
                                   "This procedure creates a new channel with the specified @width, @height, @name, @opacity and @color.\n"
                                   "\n"
                                   "Other attributes, such as channel visibility, should be set with explicit procedure calls.\n"
                                   "\n"
-                                  "The new channel still needs to be added to the image, as this is not automatic. Add the new channel with [method@Gimp.Image.insert_channel].\n"
+                                  "The new channel still needs to be added to the image, as this is not automatic. Add the new channel with [method@Clay.Image.insert_channel].\n"
                                   "\n"
                                   "The channel's contents are undefined initially.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image to which to add the channel",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The channel name",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("width",
                                                  "width",
                                                  "The channel width",
-                                                 1, GIMP_MAX_IMAGE_SIZE, 1,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 1, CLAY_MAX_IMAGE_SIZE, 1,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("height",
                                                  "height",
                                                  "The channel height",
-                                                 1, GIMP_MAX_IMAGE_SIZE, 1,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 1, CLAY_MAX_IMAGE_SIZE, 1,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("opacity",
                                                     "opacity",
                                                     "The channel opacity",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The channel compositing color",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_channel ("channel",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_channel ("channel",
                                                             "channel",
                                                             "The newly created channel",
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-new-from-component
+   * clay-channel-new-from-component
    */
-  procedure = gimp_procedure_new (channel_new_from_component_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-new-from-component");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_new_from_component_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-new-from-component");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new channel from a color component",
                                   "This procedure creates a new channel from a color component.\n"
                                   "\n"
-                                  "The new channel still needs to be added to the image, as this is not automatic. Add the new channel with [method@Gimp.Image.insert_channel].\n"
+                                  "The new channel still needs to be added to the image, as this is not automatic. Add the new channel with [method@Clay.Image.insert_channel].\n"
                                   "\n"
                                   "Other attributes, such as channel visibility, should be set with explicit procedure calls.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image to which to add the channel",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("component",
                                                   "component",
                                                   "The image component",
-                                                  GIMP_TYPE_CHANNEL_TYPE,
-                                                  GIMP_CHANNEL_RED,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+                                                  CLAY_TYPE_CHANNEL_TYPE,
+                                                  CLAY_CHANNEL_RED,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The channel name",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_channel ("channel",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_channel ("channel",
                                                             "channel",
                                                             "The newly created channel",
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-copy
+   * clay-channel-copy
    */
-  procedure = gimp_procedure_new (channel_copy_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-copy");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_copy_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-copy");
+  clay_procedure_set_static_help (procedure,
                                   "Copy a channel.",
                                   "This procedure copies the specified channel and returns the copy.\n"
                                   "\n"
-                                  "The new channel still needs to be added to the image, as this is not automatic. Add the new channel with [method@Gimp.Image.insert_channel].",
+                                  "The new channel still needs to be added to the image, as this is not automatic. Add the new channel with [method@Clay.Image.insert_channel].",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel to copy",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_channel ("channel-copy",
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_channel ("channel-copy",
                                                             "channel copy",
                                                             "The newly copied channel",
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-combine-masks
+   * clay-channel-combine-masks
    */
-  procedure = gimp_procedure_new (channel_combine_masks_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-combine-masks");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_combine_masks_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-combine-masks");
+  clay_procedure_set_static_help (procedure,
                                   "Combine two channel masks.",
                                   "This procedure combines two channel masks. The result is stored in the first channel.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel1",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel1",
                                                         "channel1",
                                                         "The channel1",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel2",
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel2",
                                                         "channel2",
                                                         "The channel2",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("offx",
                                                  "offx",
                                                  "x offset between upper left corner of channels: (second - first)",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("offy",
                                                  "offy",
                                                  "y offset between upper left corner of channels: (second - first)",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-get-show-masked
+   * clay-channel-get-show-masked
    */
-  procedure = gimp_procedure_new (channel_get_show_masked_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-get-show-masked");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_get_show_masked_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-get-show-masked");
+  clay_procedure_set_static_help (procedure,
                                   "Get the composite method of the specified channel.",
                                   "This procedure returns the specified channel's composite method. If it is TRUE, then the channel is composited with the image so that masked regions are shown. Otherwise, selected regions are shown.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("show-masked",
                                                          "show masked",
                                                          "The channel composite method",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-set-show-masked
+   * clay-channel-set-show-masked
    */
-  procedure = gimp_procedure_new (channel_set_show_masked_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-set-show-masked");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_set_show_masked_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-set-show-masked");
+  clay_procedure_set_static_help (procedure,
                                   "Set the composite method of the specified channel.",
                                   "This procedure sets the specified channel's composite method. If it is TRUE, then the channel is composited with the image so that masked regions are shown. Otherwise, selected regions are shown.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("show-masked",
                                                      "show masked",
                                                      "The new channel composite method",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-get-opacity
+   * clay-channel-get-opacity
    */
-  procedure = gimp_procedure_new (channel_get_opacity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-get-opacity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_get_opacity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-get-opacity");
+  clay_procedure_set_static_help (procedure,
                                   "Get the opacity of the specified channel.",
                                   "This procedure returns the specified channel's opacity.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("opacity",
                                                         "opacity",
                                                         "The channel opacity",
                                                         0, 100, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-set-opacity
+   * clay-channel-set-opacity
    */
-  procedure = gimp_procedure_new (channel_set_opacity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-set-opacity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_set_opacity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-set-opacity");
+  clay_procedure_set_static_help (procedure,
                                   "Set the opacity of the specified channel.",
                                   "This procedure sets the specified channel's opacity.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("opacity",
                                                     "opacity",
                                                     "The new channel opacity",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-get-color
+   * clay-channel-get-color
    */
-  procedure = gimp_procedure_new (channel_get_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-get-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_get_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-get-color");
+  clay_procedure_set_static_help (procedure,
                                   "Get the compositing color of the specified channel.",
                                   "This procedure returns the specified channel's compositing color.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("color",
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("color",
                                                           "color",
                                                           "The channel compositing color",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-channel-set-color
+   * clay-channel-set-color
    */
-  procedure = gimp_procedure_new (channel_set_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-channel-set-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (channel_set_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-channel-set-color");
+  clay_procedure_set_static_help (procedure,
                                   "Set the compositing color of the specified channel.",
                                   "This procedure sets the specified channel's compositing color.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_channel ("channel",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_channel ("channel",
                                                         "channel",
                                                         "The channel",
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The new channel compositing color",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

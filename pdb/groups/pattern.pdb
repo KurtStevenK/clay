@@ -48,7 +48,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  pattern = GIMP_PATTERN (gimp_pdb_get_resource (gimp, GIMP_TYPE_PATTERN, name, GIMP_PDB_DATA_ACCESS_READ, error));
+  pattern = CLAY_PATTERN (clay_pdb_get_resource (clay, CLAY_TYPE_PATTERN, name, CLAY_PDB_DATA_ACCESS_READ, error));
 
   /* Ignore "not found" error, just return NULL. */
   g_clear_error (error);
@@ -85,11 +85,11 @@ HELP
 {
   const Babl *format;
 
-  format = gimp_babl_compat_u8_format (
-    gimp_temp_buf_get_format (pattern->mask));
+  format = clay_babl_compat_u8_format (
+    clay_temp_buf_get_format (pattern->mask));
 
-  width  = gimp_temp_buf_get_width  (pattern->mask);
-  height = gimp_temp_buf_get_height (pattern->mask);
+  width  = clay_temp_buf_get_width  (pattern->mask);
+  height = clay_temp_buf_get_height (pattern->mask);
   bpp    = babl_format_get_bytes_per_pixel (format);
 }
 CODE
@@ -131,16 +131,16 @@ HELP
   const Babl *format;
   gpointer    data;
 
-  format = gimp_babl_compat_u8_format (
-    gimp_temp_buf_get_format (pattern->mask));
-  data   = gimp_temp_buf_lock (pattern->mask, format, GEGL_ACCESS_READ);
+  format = clay_babl_compat_u8_format (
+    clay_temp_buf_get_format (pattern->mask));
+  data   = clay_temp_buf_lock (pattern->mask, format, GEGL_ACCESS_READ);
 
-  width           = gimp_temp_buf_get_width  (pattern->mask);
-  height          = gimp_temp_buf_get_height (pattern->mask);
+  width           = clay_temp_buf_get_width  (pattern->mask);
+  height          = clay_temp_buf_get_height (pattern->mask);
   bpp             = babl_format_get_bytes_per_pixel (format);
-  color_bytes     = g_bytes_new (data, gimp_temp_buf_get_data_size (pattern->mask));
+  color_bytes     = g_bytes_new (data, clay_temp_buf_get_data_size (pattern->mask));
 
-  gimp_temp_buf_unlock (pattern->mask, data);
+  clay_temp_buf_unlock (pattern->mask, data);
 }
 CODE
     );
@@ -148,12 +148,12 @@ CODE
 
 
 @headers = qw(<string.h>
-              "gegl/gimp-babl-compat.h"
-              "core/gimpcontext.h"
-              "core/gimpdatafactory.h"
-              "core/gimppattern.h"
-              "core/gimptempbuf.h"
-              "gimppdb-utils.h");
+              "gegl/clay-babl-compat.h"
+              "core/claycontext.h"
+              "core/claydatafactory.h"
+              "core/claypattern.h"
+              "core/claytempbuf.h"
+              "claypdb-utils.h");
 
 @procs = qw(pattern_get_by_name
             pattern_get_info
@@ -162,7 +162,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Pattern';
-$doc_title = 'gimppattern';
+$doc_title = 'claypattern';
 $doc_short_desc = 'Installable object used by fill and clone tools.';
 $doc_long_desc =  'Installable object used by fill and clone tools.';
 

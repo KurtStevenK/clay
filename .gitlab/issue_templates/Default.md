@@ -8,7 +8,7 @@ https://gimp.org/bugs/#checking-existing-reports -->
 
 ### Environment/Versions
 
-- GIMP version number: <!-- Please see: https://gimp.org/bugs/report.html#ensure-to-use-the-latest-gimp -->
+- Clay version number: <!-- Please see: https://gimp.org/bugs/report.html#ensure-to-use-the-latest-clay -->
 - Package: <!--[Flatpak? Snap? Installer from gimp.org? MS Store package? If another installer, tell us where from] (write it after the > symbol)-->
 - Operating System: <!--[Windows? macOS? Linux? All? Add OS versions too] (write it after the > symbol) -->
 - (if Linux) Display system: <!--[X11? Wayland? Which compositor and version?] (write it after the > symbol) -->
@@ -21,7 +21,7 @@ https://gimp.org/bugs/report.html#fill-all-the-issue-template -->
 ### Reproduction
 
 <!-- Again, it is important that you fill all the fields of the template. Please see:
-https://gimp.org/bugs/report.html#reproduce-the-bug-on-latest-gimp -->
+https://gimp.org/bugs/report.html#reproduce-the-bug-on-latest-clay -->
 
 Is the bug reproducible? <!--[Always / Randomly / Happened only once ] (write it after the > symbol)-->
 

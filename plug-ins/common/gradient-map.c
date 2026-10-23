@@ -21,16 +21,16 @@
 #include "config.h"
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /* Some useful macros */
 #define GRADMAP_PROC    "plug-in-gradmap"
 #define PALETTEMAP_PROC "plug-in-palettemap"
 #define PLUG_IN_BINARY  "gradient-map"
-#define PLUG_IN_ROLE    "gimp-gradient-map"
+#define PLUG_IN_ROLE    "clay-gradient-map"
 #define NSAMPLES         2048
 
 typedef enum
@@ -45,12 +45,12 @@ typedef struct _MapClass MapClass;
 
 struct _Map
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _MapClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -59,35 +59,35 @@ struct _MapClass
 
 GType                   map_get_type         (void);
 
-static GList          * map_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * map_create_procedure (GimpPlugIn           *plug_in,
+static GList          * map_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * map_create_procedure (ClayPlugIn           *plug_in,
                                               const gchar          *name);
 
-static GimpValueArray * map_run              (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
-                                              GimpDrawable        **drawables,
-                                              GimpProcedureConfig  *config,
+static ClayValueArray * map_run              (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
+                                              ClayDrawable        **drawables,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
 static void             map                  (GeglBuffer           *buffer,
                                               GeglBuffer           *shadow_buffer,
-                                              GimpDrawable         *drawable,
+                                              ClayDrawable         *drawable,
                                               MapMode               mode);
-static gdouble        * get_samples_gradient (GimpDrawable         *drawable);
-static gdouble        * get_samples_palette  (GimpDrawable         *drawable);
+static gdouble        * get_samples_gradient (ClayDrawable         *drawable);
+static gdouble        * get_samples_palette  (ClayDrawable         *drawable);
 
 
-G_DEFINE_TYPE (Map, map, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Map, map, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (MAP_TYPE)
+CLAY_MAIN (MAP_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 map_class_init (MapClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = map_query_procedures;
   plug_in_class->create_procedure = map_create_procedure;
@@ -100,7 +100,7 @@ map_init (Map *map)
 }
 
 static GList *
-map_query_procedures (GimpPlugIn *plug_in)
+map_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -110,28 +110,28 @@ map_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-map_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+map_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, GRADMAP_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             map_run,
                                             GINT_TO_POINTER (GRADIENT_MODE),
                                             NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Gradient Map"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Map");
+      clay_procedure_set_menu_label (procedure, _("_Gradient Map"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Map");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Recolor the image using colors "
                                           "from the active gradient"),
                                         "This plug-in maps the contents of "
@@ -147,27 +147,27 @@ map_create_procedure (GimpPlugIn  *plug_in,
                                         "Grayscale and RGB image "
                                         "with/without alpha channel.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Eiichi Takamori",
                                       "Eiichi Takamori",
                                       "1997");
     }
   else if (! strcmp (name, PALETTEMAP_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             map_run,
                                             GINT_TO_POINTER (PALETTE_MODE),
                                             NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Palette Map"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Map");
+      clay_procedure_set_menu_label (procedure, _("_Palette Map"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Map");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Recolor the image using colors "
                                           "from the active palette"),
                                         "This plug-in maps the contents of "
@@ -182,7 +182,7 @@ map_create_procedure (GimpPlugIn  *plug_in,
                                         "both Grayscale and RGB image "
                                         "with/without alpha channel.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Bill Skaggs",
                                       "Bill Skaggs",
                                       "2004");
@@ -191,31 +191,31 @@ map_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-map_run (GimpProcedure        *procedure,
-         GimpRunMode           run_mode,
-         GimpImage            *image,
-         GimpDrawable        **drawables,
-         GimpProcedureConfig  *config,
+static ClayValueArray *
+map_run (ClayProcedure        *procedure,
+         ClayRunMode           run_mode,
+         ClayImage            *image,
+         ClayDrawable        **drawables,
+         ClayProcedureConfig  *config,
          gpointer              run_data)
 {
   MapMode       mode = GPOINTER_TO_INT (run_data);
   GeglBuffer   *shadow_buffer;
   GeglBuffer   *buffer;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -223,50 +223,50 @@ map_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  shadow_buffer = gimp_drawable_get_shadow_buffer (drawable);
-  buffer        = gimp_drawable_get_buffer (drawable);
+  shadow_buffer = clay_drawable_get_shadow_buffer (drawable);
+  buffer        = clay_drawable_get_buffer (drawable);
 
   /*  Make sure that the drawable is gray or RGB color  */
-  if (gimp_drawable_is_rgb  (drawable) ||
-      gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_rgb  (drawable) ||
+      clay_drawable_is_gray (drawable))
     {
       if (mode == GRADIENT_MODE)
         {
-          gimp_progress_init (_("Gradient Map"));
+          clay_progress_init (_("Gradient Map"));
         }
       else
         {
-          gimp_progress_init (_("Palette Map"));
+          clay_progress_init (_("Palette Map"));
         }
 
       map (buffer, shadow_buffer, drawable, mode);
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
   g_object_unref (buffer);
   g_object_unref (shadow_buffer);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_merge_shadow (drawable, TRUE);
 
-  gimp_drawable_update (drawable, 0, 0,
-                        gimp_drawable_get_width  (drawable),
-                        gimp_drawable_get_height (drawable));
+  clay_drawable_update (drawable, 0, 0,
+                        clay_drawable_get_width  (drawable),
+                        clay_drawable_get_height (drawable));
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static void
 map (GeglBuffer   *buffer,
      GeglBuffer   *shadow_buffer,
-     GimpDrawable *drawable,
+     ClayDrawable *drawable,
      MapMode       mode)
 {
   GeglBufferIterator *gi;
@@ -282,8 +282,8 @@ map (GeglBuffer   *buffer,
   const Babl         *format_shadow;
   const Babl         *format_buffer;
 
-  is_rgb    = gimp_drawable_is_rgb (drawable);
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  is_rgb    = clay_drawable_is_rgb (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   switch (mode)
     {
@@ -412,20 +412,20 @@ map (GeglBuffer   *buffer,
   Each sample is (R'G'B'A float) or (Y'A float), depending on the drawable
  */
 static gdouble *
-get_samples_gradient (GimpDrawable *drawable)
+get_samples_gradient (ClayDrawable *drawable)
 {
-  GimpGradient  *gradient;
+  ClayGradient  *gradient;
   GeglColor    **colors;
   const Babl    *format_dst;
   gdouble       *d_samples;
   gint           bpp;
 
-  gradient = gimp_context_get_gradient ();
+  gradient = clay_context_get_gradient ();
 
   /* FIXME: "reverse" hardcoded to FALSE. */
-  colors = gimp_gradient_get_uniform_samples (gradient, NSAMPLES, FALSE);
+  colors = clay_gradient_get_uniform_samples (gradient, NSAMPLES, FALSE);
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
       format_dst = babl_format ("R'G'B'A double");
       bpp        = 4;
@@ -441,7 +441,7 @@ get_samples_gradient (GimpDrawable *drawable)
   for (gint i = 0; colors[i] != NULL; i++)
     gegl_color_get_pixel (colors[i], format_dst, &d_samples[i * bpp]);
 
-  gimp_color_array_free (colors);
+  clay_color_array_free (colors);
 
   return d_samples;
 }
@@ -451,9 +451,9 @@ get_samples_gradient (GimpDrawable *drawable)
   Each sample is (R'G'B'A float) or (Y'A float), depending on the drawable
  */
 static gdouble *
-get_samples_palette (GimpDrawable *drawable)
+get_samples_palette (ClayDrawable *drawable)
 {
-  GimpPalette *palette;
+  ClayPalette *palette;
 
   gdouble    *d_samples, *d_samp;
   gboolean    is_rgb;
@@ -462,10 +462,10 @@ get_samples_palette (GimpDrawable *drawable)
   gint        nb_color_chan, nb_chan, i;
   const Babl *format;
 
-  palette = gimp_context_get_palette ();
-  num_colors = gimp_palette_get_color_count (palette);
+  palette = clay_context_get_palette ();
+  num_colors = clay_palette_get_color_count (palette);
 
-  is_rgb = gimp_drawable_is_rgb (drawable);
+  is_rgb = clay_drawable_is_rgb (drawable);
 
   factor = ((double) num_colors) / NSAMPLES;
   format = is_rgb ? babl_format ("R'G'B'A double") : babl_format ("Y'A double");
@@ -481,7 +481,7 @@ get_samples_palette (GimpDrawable *drawable)
       d_samp = &d_samples[i * nb_chan];
       pal_entry = CLAMP ((int)(i * factor), 0, num_colors - 1);
 
-      color_sample = gimp_palette_get_entry_color (palette, pal_entry);
+      color_sample = clay_palette_get_entry_color (palette, pal_entry);
       gegl_color_get_pixel (color_sample, format, d_samp);
     }
 

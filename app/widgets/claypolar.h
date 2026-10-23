@@ -1,0 +1,43 @@
+/* xyz.kainzmayer.ClayDesign
+ * Copyright (C) 1995 Spencer Kimball and Peter Mattis
+ *
+ * claypolar.h
+ * Copyright (C) 2014 Michael Natterer <mitch@gimp.org>
+ *
+ * Based on code from the color-rotate plug-in
+ * Copyright (C) 1997-1999 Sven Anders (anderss@fmi.uni-passau.de)
+ *                         Based on code from Pavel Grinfeld (pavel@ml.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include "claycircle.h"
+
+
+#define CLAY_TYPE_POLAR (clay_polar_get_type ())
+G_DECLARE_DERIVABLE_TYPE (ClayPolar,
+                          clay_polar,
+                          CLAY, POLAR,
+                          ClayCircle)
+
+
+struct _ClayPolarClass
+{
+  ClayCircleClass  parent_class;
+};
+
+
+GtkWidget * clay_polar_new (void);

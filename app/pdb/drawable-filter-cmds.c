@@ -28,92 +28,92 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpbase/gimpprotocol-private.h"
-#include "libgimpbase/gimpwire-private.h"
+#include "libclaybase/claybase.h"
+#include "libclaybase/clayprotocol-private.h"
+#include "libclaybase/claywire-private.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "libgimp/gimpgpparams.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdrawable-filters.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpdrawablefilter.h"
-#include "core/gimpimage-undo-push.h"
-#include "core/gimpitem.h"
-#include "core/gimpparamspecs.h"
-#include "gegl/gimp-gegl-utils.h"
-#include "operations/gimp-operation-config.h"
-#include "operations/gimpoperationsettings.h"
+#include "libclay/claygpparams.h"
+#include "core/claycontainer.h"
+#include "core/claydrawable-filters.h"
+#include "core/claydrawable.h"
+#include "core/claydrawablefilter.h"
+#include "core/clayimage-undo-push.h"
+#include "core/clayitem.h"
+#include "core/clayparamspecs.h"
+#include "gegl/clay-gegl-utils.h"
+#include "operations/clay-operation-config.h"
+#include "operations/clayoperationsettings.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-drawable_filter_id_is_valid_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_id_is_valid_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint filter_id;
   gboolean valid = FALSE;
 
-  filter_id = g_value_get_int (gimp_value_array_index (args, 0));
+  filter_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      valid = (gimp_drawable_filter_get_by_id (gimp, filter_id) != NULL);
+      valid = (clay_drawable_filter_get_by_id (clay, filter_id) != NULL);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), valid);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), valid);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_new_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_new_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable *drawable;
+  ClayValueArray *return_vals;
+  ClayDrawable *drawable;
   const gchar *operation_name;
   const gchar *name;
-  GimpDrawableFilter *filter = NULL;
+  ClayDrawableFilter *filter = NULL;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  operation_name = g_value_get_string (gimp_value_array_index (args, 1));
-  name = g_value_get_string (gimp_value_array_index (args, 2));
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  operation_name = g_value_get_string (clay_value_array_index (args, 1));
+  name = g_value_get_string (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_gegl_op_nde_allowed (operation_name, error))
+      if (clay_gegl_op_nde_allowed (operation_name, error))
         {
           GeglNode *operation = gegl_node_new ();
 
           gegl_node_set (operation,
                          "operation", operation_name,
                          NULL);
-          if (gimp_operation_config_is_custom (gimp, operation_name))
+          if (clay_operation_config_is_custom (clay, operation_name))
             {
               GParamSpec *pspec  = gegl_node_find_property (operation, "config");
               GType       otype  = pspec->value_type;
@@ -124,14 +124,14 @@ drawable_filter_new_invoker (GimpProcedure         *procedure,
               g_object_unref (config);
             }
 
-          filter = gimp_drawable_filter_new (drawable, name, operation, NULL);
-          /* We don't have a libgimp function for setting the clipping
+          filter = clay_drawable_filter_new (drawable, name, operation, NULL);
+          /* We don't have a libclay function for setting the clipping
            * behavior. I want to look further into the whole logic first.
            * In the meantime if all API-made filters must have a single
            * clipping behavior, I believe that not-clipping (adjusting) is
            * the nicer default.
            */
-          gimp_drawable_filter_set_clip (filter, FALSE);
+          clay_drawable_filter_set_clip (filter, FALSE);
           g_clear_object (&operation);
         }
       else
@@ -140,227 +140,227 @@ drawable_filter_new_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), filter);
+    g_value_set_object (clay_value_array_index (return_vals, 1), filter);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_get_name_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_name_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gchar *name = NULL;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      name = g_strdup (gimp_object_get_name (GIMP_OBJECT (filter)));
+      name = g_strdup (clay_object_get_name (CLAY_OBJECT (filter)));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_get_operation_name_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_operation_name_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gchar *name = NULL;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       GeglNode *node;
 
-      node = gimp_drawable_filter_get_operation (filter);
+      node = clay_drawable_filter_get_operation (filter);
       name = g_strdup (gegl_node_get_operation (node));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_get_visible_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_visible_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gboolean visible = FALSE;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      visible = gimp_filter_get_active (GIMP_FILTER (filter));
+      visible = clay_filter_get_active (CLAY_FILTER (filter));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), visible);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), visible);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_set_visible_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_set_visible_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawableFilter *filter;
+  ClayDrawableFilter *filter;
   gboolean visible;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
-  visible = g_value_get_boolean (gimp_value_array_index (args, 1));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
+  visible = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (visible != gimp_filter_get_active (GIMP_FILTER (filter)))
+      if (visible != clay_filter_get_active (CLAY_FILTER (filter)))
         {
-          if (gimp_item_is_attached (GIMP_ITEM (gimp_drawable_filter_get_drawable (filter))))
-            gimp_image_undo_push_filter_visibility_compressible (filter, context);
+          if (clay_item_is_attached (CLAY_ITEM (clay_drawable_filter_get_drawable (filter))))
+            clay_image_undo_push_filter_visibility_compressible (filter, context);
 
-          gimp_filter_set_active (GIMP_FILTER (filter), visible);
+          clay_filter_set_active (CLAY_FILTER (filter), visible);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-drawable_filter_get_opacity_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_opacity_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gdouble opacity = 0.0;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      opacity = gimp_drawable_filter_get_opacity (filter);
+      opacity = clay_drawable_filter_get_opacity (filter);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), opacity);
+    g_value_set_double (clay_value_array_index (return_vals, 1), opacity);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_get_blend_mode_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_blend_mode_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gint mode = 0;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      mode = gimp_drawable_filter_get_paint_mode (filter);
+      mode = clay_drawable_filter_get_paint_mode (filter);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), mode);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), mode);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_update_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_update_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawableFilter *filter;
+  ClayDrawableFilter *filter;
   const gchar **propnames;
-  const GimpValueArray *propvalues;
+  const ClayValueArray *propvalues;
   gdouble opacity;
   gint blend_mode;
   gint blend_space;
   gint composite_mode;
   gint composite_space;
   const gchar **auxinputnames;
-  GimpDrawable **auxinputs;
+  ClayDrawable **auxinputs;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
-  propnames = g_value_get_boxed (gimp_value_array_index (args, 1));
-  propvalues = g_value_get_boxed (gimp_value_array_index (args, 2));
-  opacity = g_value_get_double (gimp_value_array_index (args, 3));
-  blend_mode = g_value_get_enum (gimp_value_array_index (args, 4));
-  blend_space = g_value_get_enum (gimp_value_array_index (args, 5));
-  composite_mode = g_value_get_enum (gimp_value_array_index (args, 6));
-  composite_space = g_value_get_enum (gimp_value_array_index (args, 7));
-  auxinputnames = g_value_get_boxed (gimp_value_array_index (args, 8));
-  auxinputs = g_value_get_boxed (gimp_value_array_index (args, 9));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
+  propnames = g_value_get_boxed (clay_value_array_index (args, 1));
+  propvalues = g_value_get_boxed (clay_value_array_index (args, 2));
+  opacity = g_value_get_double (clay_value_array_index (args, 3));
+  blend_mode = g_value_get_enum (clay_value_array_index (args, 4));
+  blend_space = g_value_get_enum (clay_value_array_index (args, 5));
+  composite_mode = g_value_get_enum (clay_value_array_index (args, 6));
+  composite_space = g_value_get_enum (clay_value_array_index (args, 7));
+  auxinputnames = g_value_get_boxed (clay_value_array_index (args, 8));
+  auxinputs = g_value_get_boxed (clay_value_array_index (args, 9));
 
   if (success)
     {
-      success = gimp_drawable_filter_update (filter, propnames, propvalues,
+      success = clay_drawable_filter_update (filter, propnames, propvalues,
                                              opacity,
                                              blend_mode, blend_space,
                                              composite_mode, composite_space,
@@ -368,40 +368,40 @@ drawable_filter_update_invoker (GimpProcedure         *procedure,
                                              error);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-drawable_filter_get_number_arguments_invoker (GimpProcedure         *procedure,
-                                              Gimp                  *gimp,
-                                              GimpContext           *context,
-                                              GimpProgress          *progress,
-                                              const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_number_arguments_invoker (ClayProcedure         *procedure,
+                                              Clay                  *clay,
+                                              ClayContext           *context,
+                                              ClayProgress          *progress,
+                                              const ClayValueArray  *args,
                                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gint num_args = 0;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       GeglNode    *node;
       const gchar *opname;
 
-      node   = gimp_drawable_filter_get_operation (filter);
+      node   = clay_drawable_filter_get_operation (filter);
       opname = gegl_node_get_operation (node);
 
       if (gegl_has_operation (opname))
         {
           guint n_properties;
 
-          if (gimp_operation_config_is_custom (gimp, opname))
+          if (clay_operation_config_is_custom (clay, opname))
             {
-              GimpObject   *settings = NULL;
+              ClayObject   *settings = NULL;
               GObjectClass *klass;
               GObjectClass *parent_klass;
               guint         n_parent_properties;
@@ -430,39 +430,39 @@ drawable_filter_get_number_arguments_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), num_args);
+    g_value_set_int (clay_value_array_index (return_vals, 1), num_args);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_get_pspec_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_pspec_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gint arg_num;
   GParamSpec *param_spec = NULL;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
-  arg_num = g_value_get_int (gimp_value_array_index (args, 1));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
+  arg_num = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpObject  *settings = NULL;
+      ClayObject  *settings = NULL;
       GeglNode    *node;
       const gchar *opname;
 
-      node   = gimp_drawable_filter_get_operation (filter);
+      node   = clay_drawable_filter_get_operation (filter);
       opname = gegl_node_get_operation (node);
 
       if (gegl_has_operation (opname))
@@ -471,7 +471,7 @@ drawable_filter_get_pspec_invoker (GimpProcedure         *procedure,
           guint         n_properties;
           guint         n_parent_properties = 0;
 
-          if (gimp_operation_config_is_custom (gimp, opname))
+          if (clay_operation_config_is_custom (clay, opname))
             {
               GObjectClass *klass;
               GObjectClass *parent_klass;
@@ -508,30 +508,30 @@ drawable_filter_get_pspec_invoker (GimpProcedure         *procedure,
       g_clear_object (&settings);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_param (gimp_value_array_index (return_vals, 1), param_spec);
+    g_value_take_param (clay_value_array_index (return_vals, 1), param_spec);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_get_arguments_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_get_arguments_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawableFilter *filter;
+  ClayValueArray *return_vals;
+  ClayDrawableFilter *filter;
   gchar **argnames = NULL;
-  GimpValueArray *values = NULL;
+  ClayValueArray *values = NULL;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -541,13 +541,13 @@ drawable_filter_get_arguments_invoker (GimpProcedure         *procedure,
       guint         n_specs;
       guint         n_parent_properties = 0;
       GStrvBuilder *names_builder;
-      GimpObject   *settings = NULL;
+      ClayObject   *settings = NULL;
 
-      node   = gimp_drawable_filter_get_operation (filter);
+      node   = clay_drawable_filter_get_operation (filter);
       opname = gegl_node_get_operation (node);
 
       if (gegl_has_operation (opname) &&
-          gimp_operation_config_is_custom (gimp, opname))
+          clay_operation_config_is_custom (clay, opname))
         {
           GObjectClass *klass;
           GObjectClass *parent_klass;
@@ -571,7 +571,7 @@ drawable_filter_get_arguments_invoker (GimpProcedure         *procedure,
        }
 
       names_builder = g_strv_builder_new ();
-      values        = gimp_value_array_new (n_specs);
+      values        = clay_value_array_new (n_specs);
 
       for (gint i = 0; i < n_specs; i++)
         {
@@ -587,7 +587,7 @@ drawable_filter_get_arguments_invoker (GimpProcedure         *procedure,
           if (GEGL_IS_PARAM_SPEC_ENUM (pspec))
             {
               /* Special-casing GeglParamEnum which are passed as string to
-               * libgimp.
+               * libclay.
                */
               GParamSpecEnum *espec       = G_PARAM_SPEC_ENUM (pspec);
               GEnumClass     *enum_class  = espec->enum_class;
@@ -614,12 +614,12 @@ drawable_filter_get_arguments_invoker (GimpProcedure         *procedure,
                     g_value_set_string (&string_value, enum_value.value_nick);
                 }
 
-              gimp_value_array_append (values, &string_value);
+              clay_value_array_append (values, &string_value);
               g_value_unset (&string_value);
             }
           else
             {
-              gimp_value_array_append (values, &value);
+              clay_value_array_append (values, &value);
             }
           g_strv_builder_add (names_builder, pspec->name);
           g_value_unset (&value);
@@ -632,41 +632,41 @@ drawable_filter_get_arguments_invoker (GimpProcedure         *procedure,
       g_clear_object (&settings);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_boxed (gimp_value_array_index (return_vals, 1), argnames);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 2), values);
+      g_value_take_boxed (clay_value_array_index (return_vals, 1), argnames);
+      g_value_take_boxed (clay_value_array_index (return_vals, 2), values);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_delete_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_delete_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawableFilter *filter;
+  ClayDrawableFilter *filter;
 
-  filter = g_value_get_object (gimp_value_array_index (args, 0));
+  filter = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpDrawable *drawable = gimp_drawable_filter_get_drawable (filter);
+      ClayDrawable *drawable = clay_drawable_filter_get_drawable (filter);
 
-      if (drawable && gimp_drawable_has_filter (drawable, GIMP_FILTER (filter)))
+      if (drawable && clay_drawable_has_filter (drawable, CLAY_FILTER (filter)))
         {
-          gimp_image_undo_push_filter_remove (gimp_item_get_image (GIMP_ITEM (drawable)),
+          clay_image_undo_push_filter_remove (clay_item_get_image (CLAY_ITEM (drawable)),
                                               _("Remove filter"), drawable, filter);
 
-          gimp_drawable_filter_abort (filter);
+          clay_drawable_filter_abort (filter);
         }
       else
         {
@@ -674,25 +674,25 @@ drawable_filter_delete_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-drawable_filter_operation_get_available_invoker (GimpProcedure         *procedure,
-                                                 Gimp                  *gimp,
-                                                 GimpContext           *context,
-                                                 GimpProgress          *progress,
-                                                 const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_operation_get_available_invoker (ClayProcedure         *procedure,
+                                                 Clay                  *clay,
+                                                 ClayContext           *context,
+                                                 ClayProgress          *progress,
+                                                 const ClayValueArray  *args,
                                                  GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar **names = NULL;
 
   GList        *ops     = NULL;
   GStrvBuilder *builder = NULL;
 
-  ops     = gimp_gegl_get_op_classes (FALSE);
+  ops     = clay_gegl_get_op_classes (FALSE);
   builder = g_strv_builder_new ();
 
   for (GList *op = ops; op != NULL; op = op->next)
@@ -707,31 +707,31 @@ drawable_filter_operation_get_available_invoker (GimpProcedure         *procedur
   g_list_free (ops);
   g_strv_builder_unref (builder);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_take_boxed (gimp_value_array_index (return_vals, 1), names);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_take_boxed (clay_value_array_index (return_vals, 1), names);
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_operation_get_details_invoker (GimpProcedure         *procedure,
-                                               Gimp                  *gimp,
-                                               GimpContext           *context,
-                                               GimpProgress          *progress,
-                                               const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_operation_get_details_invoker (ClayProcedure         *procedure,
+                                               Clay                  *clay,
+                                               ClayContext           *context,
+                                               ClayProgress          *progress,
+                                               const ClayValueArray  *args,
                                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *operation_name;
   gchar **propnames = NULL;
-  GimpValueArray *propvalues = NULL;
+  ClayValueArray *propvalues = NULL;
 
-  operation_name = g_value_get_string (gimp_value_array_index (args, 0));
+  operation_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_gegl_op_nde_allowed (operation_name, error))
+      if (clay_gegl_op_nde_allowed (operation_name, error))
         {
           GStrvBuilder       *names_builder = NULL;
           GeglOperationClass *klass         = NULL;
@@ -743,7 +743,7 @@ drawable_filter_operation_get_details_invoker (GimpProcedure         *procedure,
           GType gegl_operation_gtype_from_name (const gchar *name);
 
           names_builder = g_strv_builder_new ();
-          propvalues    = gimp_value_array_new (0);
+          propvalues    = clay_value_array_new (0);
 
           op_type = gegl_operation_gtype_from_name (operation_name);
           klass   = g_type_class_ref (op_type);
@@ -752,15 +752,15 @@ drawable_filter_operation_get_details_invoker (GimpProcedure         *procedure,
 
           g_strv_builder_add (names_builder, "title");
           g_value_take_string (&value, g_strdup (gegl_operation_class_get_key (klass, "title")));
-          gimp_value_array_append (propvalues, &value);
+          clay_value_array_append (propvalues, &value);
 
           g_strv_builder_add (names_builder, "description");
           g_value_take_string (&value, g_strdup (gegl_operation_class_get_key (klass, "description")));
-          gimp_value_array_append (propvalues, &value);
+          clay_value_array_append (propvalues, &value);
 
           g_strv_builder_add (names_builder, "categories");
           g_value_take_string (&value, g_strdup (gegl_operation_class_get_key (klass, "categories")));
-          gimp_value_array_append (propvalues, &value);
+          clay_value_array_append (propvalues, &value);
 
           license = g_strdup (gegl_operation_class_get_key (klass, "license"));
           if (license == NULL)
@@ -768,7 +768,7 @@ drawable_filter_operation_get_details_invoker (GimpProcedure         *procedure,
 
           g_strv_builder_add (names_builder, "license");
           g_value_take_string (&value, license);
-          gimp_value_array_append (propvalues, &value);
+          clay_value_array_append (propvalues, &value);
 
           propnames = g_strv_builder_end (names_builder);
 
@@ -780,49 +780,49 @@ drawable_filter_operation_get_details_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_boxed (gimp_value_array_index (return_vals, 1), propnames);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 2), propvalues);
+      g_value_take_boxed (clay_value_array_index (return_vals, 1), propnames);
+      g_value_take_boxed (clay_value_array_index (return_vals, 2), propvalues);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-drawable_filter_operation_get_pspecs_invoker (GimpProcedure         *procedure,
-                                              Gimp                  *gimp,
-                                              GimpContext           *context,
-                                              GimpProgress          *progress,
-                                              const GimpValueArray  *args,
+static ClayValueArray *
+drawable_filter_operation_get_pspecs_invoker (ClayProcedure         *procedure,
+                                              Clay                  *clay,
+                                              ClayContext           *context,
+                                              ClayProgress          *progress,
+                                              const ClayValueArray  *args,
                                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *operation_name;
-  GimpValueArray *pspecs = NULL;
+  ClayValueArray *pspecs = NULL;
 
-  operation_name = g_value_get_string (gimp_value_array_index (args, 0));
+  operation_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_gegl_op_nde_allowed (operation_name, error))
+      if (clay_gegl_op_nde_allowed (operation_name, error))
         {
           GParamSpec **specs          = NULL;
           guint        n_specs        = 0;
           guint        n_parent_specs = 0;
 
-          if (gimp_operation_config_is_custom (gimp, operation_name))
+          if (clay_operation_config_is_custom (clay, operation_name))
             {
               GObjectClass *op_config_klass = NULL;
               GObjectClass *op_parent_klass = NULL;
               GType         op_config_type;
               GType         op_parent_type;
 
-              op_config_type  = gimp_operation_config_get_type (gimp, operation_name, NULL, GIMP_TYPE_OPERATION_SETTINGS);
+              op_config_type  = clay_operation_config_get_type (clay, operation_name, NULL, CLAY_TYPE_OPERATION_SETTINGS);
               op_config_klass = g_type_class_ref (op_config_type);
               specs           = g_object_class_list_properties (op_config_klass, &n_specs);
               g_type_class_unref (op_config_klass);
@@ -839,7 +839,7 @@ drawable_filter_operation_get_pspecs_invoker (GimpProcedure         *procedure,
               specs = gegl_operation_list_properties (operation_name, &n_specs);
             }
 
-          pspecs = gimp_value_array_new (n_specs);
+          pspecs = clay_value_array_new (n_specs);
 
           for (gint i = 0; i < n_specs; i++)
             {
@@ -852,7 +852,7 @@ drawable_filter_operation_get_pspecs_invoker (GimpProcedure         *procedure,
               /* Make sure we do not try to send param specs over the wire
                * if we don't support sending their type.
                */
-              if (! _gimp_param_spec_to_gp_param_def (pspec, &param_def, TRUE))
+              if (! _clay_param_spec_to_gp_param_def (pspec, &param_def, TRUE))
                 {
                   /* This is not technically a bug if an operation has
                    * unsupported argument types, because we cannot possibly
@@ -881,7 +881,7 @@ drawable_filter_operation_get_pspecs_invoker (GimpProcedure         *procedure,
                   g_value_set_param (&value, g_param_spec_ref (pspec));
                 }
 
-              gimp_value_array_append (pspecs, &value);
+              clay_value_array_append (pspecs, &value);
 
               g_value_unset (&value);
             }
@@ -894,570 +894,570 @@ drawable_filter_operation_get_pspecs_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), pspecs);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), pspecs);
 
   return return_vals;
 }
 
 void
-register_drawable_filter_procs (GimpPDB *pdb)
+register_drawable_filter_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-drawable-filter-id-is-valid
+   * clay-drawable-filter-id-is-valid
    */
-  procedure = gimp_procedure_new (drawable_filter_id_is_valid_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-id-is-valid");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_id_is_valid_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-id-is-valid");
+  clay_procedure_set_static_help (procedure,
                                   "Returns %TRUE if the drawable filter ID is valid.",
                                   "This procedure checks if the given drawable filter ID is valid and refers to an existing filter.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("filter-id",
                                                  "filter id",
                                                  "The filter ID to check",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("valid",
                                                          "valid",
                                                          "Whether the filter ID is valid",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-new
+   * clay-drawable-filter-new
    */
-  procedure = gimp_procedure_new (drawable_filter_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new drawable filter.",
                                   "This procedure creates a new filter for the specified operation on @drawable.\n"
-                                  "The new effect still needs to be either added or merged to @drawable later. Add the effect non-destructively with [method@Gimp.Drawable.append_filter].\n"
+                                  "The new effect still needs to be either added or merged to @drawable later. Add the effect non-destructively with [method@Clay.Drawable.append_filter].\n"
                                   "Currently only layers can have non-destructive effects. The effects must be merged for all other types of drawable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("operation-name",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("operation-name",
                                                        "operation name",
                                                        "The GEGL operation's name",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The effect name",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_drawable_filter ("filter",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_drawable_filter ("filter",
                                                                     "filter",
                                                                     "The newly created filter",
                                                                     FALSE,
-                                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-name
+   * clay-drawable-filter-get-name
    */
-  procedure = gimp_procedure_new (drawable_filter_get_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-name");
+  clay_procedure_set_static_help (procedure,
                                   "Get a drawable filter's name.",
                                   "This procedure returns the specified filter's name.\n"
                                   "Since it is not possible to set a drawable filter's name yet, this will be the operation's name. Eventually this filter's name will be a free form field so do not rely on this information for any processing.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter whose name you want",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The filter's name",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-operation-name
+   * clay-drawable-filter-get-operation-name
    */
-  procedure = gimp_procedure_new (drawable_filter_get_operation_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-operation-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_operation_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-operation-name");
+  clay_procedure_set_static_help (procedure,
                                   "Get a drawable filter's operation name.",
                                   "This procedure returns the specified filter's operation name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter whose operation name you want",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The filter's operation name",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-visible
+   * clay-drawable-filter-get-visible
    */
-  procedure = gimp_procedure_new (drawable_filter_get_visible_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-visible");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_visible_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-visible");
+  clay_procedure_set_static_help (procedure,
                                   "Get the visibility of the specified filter.",
                                   "This procedure returns the specified filter's visibility.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("visible",
                                                          "visible",
                                                          "The filter visibility",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-set-visible
+   * clay-drawable-filter-set-visible
    */
-  procedure = gimp_procedure_new (drawable_filter_set_visible_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-set-visible");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_set_visible_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-set-visible");
+  clay_procedure_set_static_help (procedure,
                                   "Set the visibility of the specified filter.",
                                   "This procedure sets the specified filter's visibility.\n"
-                                  "The drawable won't be immediately rendered. Use [method@Gimp.Drawable.update] to trigger an update.",
+                                  "The drawable won't be immediately rendered. Use [method@Clay.Drawable.update] to trigger an update.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("visible",
                                                      "visible",
                                                      "The new filter visibility",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-opacity
+   * clay-drawable-filter-get-opacity
    */
-  procedure = gimp_procedure_new (drawable_filter_get_opacity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-opacity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_opacity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-opacity");
+  clay_procedure_set_static_help (procedure,
                                   "Get the opacity of the specified filter.",
                                   "This procedure returns the specified filter's opacity.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("opacity",
                                                         "opacity",
                                                         "The filter's opacity",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-blend-mode
+   * clay-drawable-filter-get-blend-mode
    */
-  procedure = gimp_procedure_new (drawable_filter_get_blend_mode_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-blend-mode");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_blend_mode_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-blend-mode");
+  clay_procedure_set_static_help (procedure,
                                   "Get the blending mode of the specified filter.",
                                   "This procedure returns the specified filter's mode.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("mode",
                                                       "mode",
                                                       "The effect blending mode",
-                                                      GIMP_TYPE_LAYER_MODE,
-                                                      GIMP_LAYER_MODE_NORMAL_LEGACY,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_LAYER_MODE,
+                                                      CLAY_LAYER_MODE_NORMAL_LEGACY,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-update
+   * clay-drawable-filter-update
    */
-  procedure = gimp_procedure_new (drawable_filter_update_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-update");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_update_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-update");
+  clay_procedure_set_static_help (procedure,
                                   "Update the settings of the specified filter.",
                                   "This procedure updates the settings of the specified filter all at once.\n"
                                   "In particular, update will be frozen and will happen only once for all changed settings.\n"
                                   "This PDB function is internal, meant to be private and its arguments will likely change as filters evolve. It should not be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("propnames",
                                                    "propnames",
                                                    "Array of property names",
                                                    G_TYPE_STRV,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_value_array ("propvalues",
+                                                   CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_value_array ("propvalues",
                                                             "propvalues",
                                                             "Array of values, one per property in propnames",
                                                             NULL,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                            CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("opacity",
                                                     "opacity",
                                                     "The filter's opacity",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("blend-mode",
                                                   "blend mode",
                                                   "The effect blending mode",
-                                                  GIMP_TYPE_LAYER_MODE,
-                                                  GIMP_LAYER_MODE_NORMAL,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_LAYER_MODE,
+                                                  CLAY_LAYER_MODE_NORMAL,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("blend-space",
                                                   "blend space",
                                                   "The effect blending space",
-                                                  GIMP_TYPE_LAYER_COLOR_SPACE,
-                                                  GIMP_LAYER_COLOR_SPACE_AUTO,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_LAYER_COLOR_SPACE,
+                                                  CLAY_LAYER_COLOR_SPACE_AUTO,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("composite-mode",
                                                   "composite mode",
                                                   "The layer composite mode",
-                                                  GIMP_TYPE_LAYER_COMPOSITE_MODE,
-                                                  GIMP_LAYER_COMPOSITE_AUTO,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_LAYER_COMPOSITE_MODE,
+                                                  CLAY_LAYER_COMPOSITE_AUTO,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("composite-space",
                                                   "composite space",
                                                   "The effect composite space",
-                                                  GIMP_TYPE_LAYER_COLOR_SPACE,
-                                                  GIMP_LAYER_COLOR_SPACE_AUTO,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_LAYER_COLOR_SPACE,
+                                                  CLAY_LAYER_COLOR_SPACE_AUTO,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("auxinputnames",
                                                    "auxinputnames",
                                                    "Array of aux input pads",
                                                    G_TYPE_STRV,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_core_object_array ("auxinputs",
+                                                   CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_core_object_array ("auxinputs",
                                                                   "auxinputs",
                                                                   "Array of drawables, one per auxinputnames",
-                                                                  GIMP_TYPE_DRAWABLE,
-                                                                  GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                  CLAY_TYPE_DRAWABLE,
+                                                                  CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-number-arguments
+   * clay-drawable-filter-get-number-arguments
    */
-  procedure = gimp_procedure_new (drawable_filter_get_number_arguments_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-number-arguments");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_number_arguments_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-number-arguments");
+  clay_procedure_set_static_help (procedure,
                                   "Queries for the number of arguments on the specified filter.",
                                   "This procedure returns the number of arguments on the specified filter.\n"
-                                  "For specific information on each input argument, use 'gimp-drawable-filter-get-argument'.",
+                                  "For specific information on each input argument, use 'clay-drawable-filter-get-argument'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-args",
                                                      "num args",
                                                      "The number of input arguments",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-pspec
+   * clay-drawable-filter-get-pspec
    */
-  procedure = gimp_procedure_new (drawable_filter_get_pspec_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-pspec");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_pspec_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-pspec");
+  clay_procedure_set_static_help (procedure,
                                   "Queries for information on the specified filter's argument.",
                                   "This procedure returns the #GParamSpec of filter's argument.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("arg-num",
                                                  "arg num",
                                                  "The argument number",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_param ("param-spec",
                                                        "param spec",
                                                        "The GParamSpec of the argument",
                                                        G_TYPE_PARAM,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-get-arguments
+   * clay-drawable-filter-get-arguments
    */
-  procedure = gimp_procedure_new (drawable_filter_get_arguments_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-get-arguments");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_get_arguments_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-get-arguments");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the currently set filter arguments.",
                                   "This procedure returns the filter's arguments.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("argnames",
                                                        "argnames",
                                                        "The names of the arguments",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_value_array ("values",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_value_array ("values",
                                                                 "values",
                                                                 "The values of the arguments in same order",
                                                                 NULL,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-delete
+   * clay-drawable-filter-delete
    */
-  procedure = gimp_procedure_new (drawable_filter_delete_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-delete");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_delete_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-delete");
+  clay_procedure_set_static_help (procedure,
                                   "Delete a drawable filter.",
                                   "This procedure deletes the specified filter. This must not be done if the drawable whose this filter was applied to was already deleted or if the drawable was already removed from the image.\n"
                                   "Do not use anymore the @filter object after having deleted it.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable_filter ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable_filter ("filter",
                                                                 "filter",
                                                                 "The filter to delete",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-operation-get-available
+   * clay-drawable-filter-operation-get-available
    */
-  procedure = gimp_procedure_new (drawable_filter_operation_get_available_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-operation-get-available");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_operation_get_available_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-operation-get-available");
+  clay_procedure_set_static_help (procedure,
                                   "Get a list of all available GEGL operation names for drawable filters.",
                                   "This procedure returns a list of all GEGL operation names available for use with drawable filters.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ondřej Míchal <harrymichal@seznam.cz>",
                                          "Ondřej Míchal",
                                          "2025");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("names",
                                                        "names",
                                                        "The list of GEGL operation names",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-operation-get-details
+   * clay-drawable-filter-operation-get-details
    */
-  procedure = gimp_procedure_new (drawable_filter_operation_get_details_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-operation-get-details");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_operation_get_details_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-operation-get-details");
+  clay_procedure_set_static_help (procedure,
                                   "Get information about a GEGL operation.",
                                   "This procedure returns information about a GEGL operation. The content of the list of information can vary across versions and currently can contain:\n"
                                   "- a human-readable title of the operation, - a description of the operation's behaviour, - the categories the operation belongs to, and - the license of the operation.\n"
                                   "An operation can belong to no categories or to multiple categories. Multiple categories are separated by the ':' character.\n"
                                   "Some operation's license is not specifically set. In such cases, the returned license is 'unknown'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ondřej Míchal <harrymichal@seznam.cz>",
                                          "Ondřej Míchal",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("operation-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("operation-name",
                                                        "operation name",
                                                        "The GEGL operation's name",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("propnames",
                                                        "propnames",
                                                        "The names of properties",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_value_array ("propvalues",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_value_array ("propvalues",
                                                                 "propvalues",
                                                                 "The values of properties in the same order",
                                                                 NULL,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawable-filter-operation-get-pspecs
+   * clay-drawable-filter-operation-get-pspecs
    */
-  procedure = gimp_procedure_new (drawable_filter_operation_get_pspecs_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawable-filter-operation-get-pspecs");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawable_filter_operation_get_pspecs_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawable-filter-operation-get-pspecs");
+  clay_procedure_set_static_help (procedure,
                                   "Get information for all parameters of a GEGL operation.",
                                   "This procedure returns a list of all parameters used to configure a GEGL operation.\n"
                                   "Each parameter is represented by GParamSpec.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ondřej Míchal <harrymichal@seznam.cz>",
                                          "Ondřej Míchal",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("operation-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("operation-name",
                                                        "operation name",
                                                        "The GEGL operation's name",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_value_array ("pspecs",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_value_array ("pspecs",
                                                                 "pspecs",
                                                                 "List of all parameters of the GEGL operation",
                                                                 NULL,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

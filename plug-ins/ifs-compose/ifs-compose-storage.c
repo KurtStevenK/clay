@@ -24,7 +24,7 @@
 
 #include <gdk/gdk.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "ifs-compose.h"
 

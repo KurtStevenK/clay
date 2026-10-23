@@ -18,20 +18,20 @@
 #pragma once
 
 
-typedef void (* GimpTemplateOptionsCallback) (GtkWidget    *dialog,
-                                              GimpTemplate *template,
-                                              GimpTemplate *edit_template,
-                                              GimpContext  *context,
+typedef void (* ClayTemplateOptionsCallback) (GtkWidget    *dialog,
+                                              ClayTemplate *template,
+                                              ClayTemplate *edit_template,
+                                              ClayContext  *context,
                                               gpointer      user_data);
 
 
-GtkWidget * template_options_dialog_new (GimpTemplate                *template,
-                                         GimpContext                 *context,
+GtkWidget * template_options_dialog_new (ClayTemplate                *template,
+                                         ClayContext                 *context,
                                          GtkWidget                   *parent,
                                          const gchar                 *title,
                                          const gchar                 *role,
                                          const gchar                 *icon_name,
                                          const gchar                 *desc,
                                          const gchar                 *help_id,
-                                         GimpTemplateOptionsCallback  callback,
+                                         ClayTemplateOptionsCallback  callback,
                                          gpointer                     user_data);

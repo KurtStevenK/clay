@@ -25,7 +25,7 @@
 
 #include "pdb-types.h"
 
-#include "gimppdb.h"
+#include "claypdb.h"
 
 #include "internal-procs.h"
 
@@ -33,9 +33,9 @@
 /* 803 procedures registered total */
 
 void
-internal_procs_init (GimpPDB *pdb)
+internal_procs_init (ClayPDB *pdb)
 {
-  g_return_if_fail (GIMP_IS_PDB (pdb));
+  g_return_if_fail (CLAY_IS_PDB (pdb));
 
   register_brush_select_procs (pdb);
   register_brush_procs (pdb);
@@ -57,8 +57,8 @@ internal_procs_init (GimpPDB *pdb)
   register_font_procs (pdb);
   register_font_select_procs (pdb);
   register_fonts_procs (pdb);
-  register_gimp_procs (pdb);
-  register_gimprc_procs (pdb);
+  register_clay_procs (pdb);
+  register_clayrc_procs (pdb);
   register_gradient_select_procs (pdb);
   register_gradient_procs (pdb);
   register_gradients_procs (pdb);

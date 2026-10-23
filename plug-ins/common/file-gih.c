@@ -1,4 +1,4 @@
-/* Plug-in to load and export .gih (GIMP Brush Pipe) files.
+/* Plug-in to load and export .gih (Clay Brush Pipe) files.
  *
  * Copyright (C) 1999 Tor Lillqvist
  * Copyright (C) 2000 Jens Lautenbacher, Sven Neumann
@@ -40,22 +40,22 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
-#include <libgimpbase/gimpparasiteio.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
+#include <libclaybase/clayparasiteio.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-gih-export"
 #define PLUG_IN_BINARY "file-gih"
-#define PLUG_IN_ROLE   "gimp-file-gih"
+#define PLUG_IN_ROLE   "clay-file-gih"
 
 
 typedef struct
 {
-  GtkWidget *rank_entry[GIMP_PIXPIPE_MAXDIM];
-  GtkWidget *mode_entry[GIMP_PIXPIPE_MAXDIM];
+  GtkWidget *rank_entry[CLAY_PIXPIPE_MAXDIM];
+  GtkWidget *mode_entry[CLAY_PIXPIPE_MAXDIM];
 } SizeAdjustmentData;
 
 
@@ -64,12 +64,12 @@ typedef struct _GihClass GihClass;
 
 struct _Gih
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GihClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -78,33 +78,33 @@ struct _GihClass
 
 GType                   gih_get_type          (void);
 
-static GList          * gih_query_procedures  (GimpPlugIn           *plug_in);
-static GimpProcedure  * gih_create_procedure  (GimpPlugIn           *plug_in,
+static GList          * gih_query_procedures  (ClayPlugIn           *plug_in);
+static ClayProcedure  * gih_create_procedure  (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * gih_export            (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
+static ClayValueArray * gih_export            (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
                                                GFile                *file,
-                                               GimpExportOptions    *options,
-                                               GimpMetadata         *metadata,
-                                               GimpProcedureConfig  *config,
+                                               ClayExportOptions    *options,
+                                               ClayMetadata         *metadata,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
-static void             gih_remove_guides     (GimpProcedureConfig  *config,
-                                               GimpImage            *image);
-static void             gih_cell_width_notify (GimpProcedureConfig  *config,
+static void             gih_remove_guides     (ClayProcedureConfig  *config,
+                                               ClayImage            *image);
+static void             gih_cell_width_notify (ClayProcedureConfig  *config,
                                                const GParamSpec     *pspec,
-                                               GimpProcedureDialog  *dialog);
+                                               ClayProcedureDialog  *dialog);
 
-static gboolean         gih_save_dialog       (GimpImage            *image,
-                                               GimpProcedure        *procedure,
-                                               GimpProcedureConfig  *config);
+static gboolean         gih_save_dialog       (ClayImage            *image,
+                                               ClayProcedure        *procedure,
+                                               ClayProcedureConfig  *config);
 
 
-G_DEFINE_TYPE (Gih, gih, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Gih, gih, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIH_TYPE)
+CLAY_MAIN (GIH_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -127,7 +127,7 @@ static const gchar * const mode_labels[] = { N_("Incremental"),
 static void
 gih_class_init (GihClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = gih_query_procedures;
   plug_in_class->create_procedure = gih_create_procedure;
@@ -140,29 +140,29 @@ gih_init (Gih *gih)
 }
 
 static GList *
-gih_query_procedures (GimpPlugIn *plug_in)
+gih_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-gih_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+gih_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, gih_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
 
-      gimp_procedure_set_menu_label (procedure, _("Clay brush (animated)"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Clay brush (animated)"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports images in Clay Brush Pipe "
                                           "format"),
                                         _("This plug-in exports an image in "
@@ -174,107 +174,107 @@ gih_create_procedure (GimpPlugIn  *plug_in,
                                           "layers can be divided into a "
                                           "rectangular array of brushes."),
                                         EXPORT_PROC);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tor Lillqvist",
                                       "Tor Lillqvist",
                                       "1999");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
-                                          "image/x-gimp-gih");
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
+                                          "image/x-clay-gih");
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("Brush Pipe"));
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "gih");
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB   |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY  |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB   |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY  |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_int_argument (procedure, "spacing",
+      clay_procedure_add_int_argument (procedure, "spacing",
                                        _("Spacing (_percent)"),
                                        _("Spacing of the brush"),
                                        1, 1000, 20,
-                                       GIMP_PARAM_READWRITE);
+                                       CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "description",
+      clay_procedure_add_string_argument (procedure, "description",
                                           _("_Description"),
                                           _("Short description of the GIH brush pipe"),
                                           "Clay Brush Pipe",
-                                          GIMP_PARAM_READWRITE);
+                                          CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "cell-width",
+      clay_procedure_add_int_argument (procedure, "cell-width",
                                        _("Cell _width"),
                                        _("Width of the brush cells in pixels"),
-                                       1, GIMP_MAX_IMAGE_SIZE, 1,
-                                       GIMP_PARAM_READWRITE);
+                                       1, CLAY_MAX_IMAGE_SIZE, 1,
+                                       CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "cell-height",
+      clay_procedure_add_int_argument (procedure, "cell-height",
                                        _("Cell _height"),
                                        _("Height of the brush cells in pixels"),
-                                       1, GIMP_MAX_IMAGE_SIZE, 1,
-                                       GIMP_PARAM_READWRITE);
+                                       1, CLAY_MAX_IMAGE_SIZE, 1,
+                                       CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "num-cells",
+      clay_procedure_add_int_argument (procedure, "num-cells",
                                        _("_Number of cells"),
                                        _("Number of cells to cut up"),
                                        1, 1000, 1,
-                                       GIMP_PARAM_READWRITE);
+                                       CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_bytes_argument (procedure, "ranks",
+      clay_procedure_add_bytes_argument (procedure, "ranks",
                                          _("_Rank"),
                                          _("Ranks of the dimensions"),
-                                         GIMP_PARAM_READWRITE);
+                                         CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_array_argument (procedure, "selection-modes",
+      clay_procedure_add_string_array_argument (procedure, "selection-modes",
                                                _("Selection modes"),
                                                _("Selection modes"),
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
       /* Auxiliary arguments. Only useful for the GUI, to pass info around. */
 
-      gimp_procedure_add_string_aux_argument (procedure, "info-text",
+      clay_procedure_add_string_aux_argument (procedure, "info-text",
                                               _("Display as"),
                                               _("Describe how the layers will be split"),
-                                              "", GIMP_PARAM_READWRITE);
+                                              "", CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_aux_argument (procedure, "dimension",
+      clay_procedure_add_int_aux_argument (procedure, "dimension",
                                            _("D_imension"),
                                            _("How many dimensions the animated brush has"),
-                                           1, GIMP_PIXPIPE_MAXDIM, 1,
-                                           GIMP_PARAM_READWRITE);
+                                           1, CLAY_PIXPIPE_MAXDIM, 1,
+                                           CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int32_array_aux_argument (procedure, "guides",
+      clay_procedure_add_int32_array_aux_argument (procedure, "guides",
                                                    "Guides",
                                                    "Guides to show how the layers will be split in cells",
-                                                   GIMP_PARAM_READWRITE);
+                                                   CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-gih_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+gih_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status    = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export    = GIMP_EXPORT_IGNORE;
-  GimpLayer        **layers    = NULL;
-  GimpParasite      *parasite;
-  GimpImage         *orig_image;
+  ClayPDBStatusType  status    = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export    = CLAY_EXPORT_IGNORE;
+  ClayLayer        **layers    = NULL;
+  ClayParasite      *parasite;
+  ClayImage         *orig_image;
   GError            *error     = NULL;
 
-  GimpPixPipeParams  gihparams   = { 0, };
+  ClayPixPipeParams  gihparams   = { 0, };
   gchar             *description = NULL;
   gint               spacing;
   GBytes            *rank_bytes;
@@ -283,7 +283,7 @@ gih_export (GimpProcedure        *procedure,
 
   orig_image = image;
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       GParamSpec *spec;
       gint        image_width;
@@ -292,26 +292,26 @@ gih_export (GimpProcedure        *procedure,
       gint        cell_height;
 
       G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-      gimp_pixpipe_params_init (&gihparams);
+      clay_pixpipe_params_init (&gihparams);
       G_GNUC_END_IGNORE_DEPRECATIONS
 
       /*  Possibly retrieve data  */
-      parasite = gimp_image_get_parasite (orig_image,
-                                          "gimp-brush-pipe-name");
+      parasite = clay_image_get_parasite (orig_image,
+                                          "clay-brush-pipe-name");
       if (parasite)
         {
           gchar   *parasite_data;
           guint32  parasite_size;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
 
           g_object_set (config, "description", parasite_data, NULL);
 
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
       else
         {
-          gchar *name = g_path_get_basename (gimp_file_get_utf8_name (file));
+          gchar *name = g_path_get_basename (clay_file_get_utf8_name (file));
 
           if (g_str_has_suffix (name, ".gih"))
             name[strlen (name) - 4] = '\0';
@@ -322,19 +322,19 @@ gih_export (GimpProcedure        *procedure,
           g_free (name);
         }
 
-      parasite = gimp_image_get_parasite (orig_image,
-                                          "gimp-brush-pipe-parameters");
+      parasite = clay_image_get_parasite (orig_image,
+                                          "clay-brush-pipe-parameters");
       if (parasite)
        {
           gchar   *parasite_data;
           guint32  parasite_size;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite,
+          parasite_data = (gchar *) clay_parasite_get_data (parasite,
                                                             &parasite_size);
           parasite_data = g_strndup (parasite_data, parasite_size);
 
           G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-          gimp_pixpipe_params_parse (parasite_data, &gihparams);
+          clay_pixpipe_params_parse (parasite_data, &gihparams);
           G_GNUC_END_IGNORE_DEPRECATIONS
 
           g_object_set (config,
@@ -367,7 +367,7 @@ gih_export (GimpProcedure        *procedure,
               g_free (selection_modes);
             }
 
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
           g_free (parasite_data);
        }
 
@@ -376,8 +376,8 @@ gih_export (GimpProcedure        *procedure,
                     "cell-height", &cell_height,
                     NULL);
 
-      image_width  = gimp_image_get_width (image);
-      image_height = gimp_image_get_height (image);
+      image_width  = clay_image_get_width (image);
+      image_height = clay_image_get_height (image);
 
       spec = g_object_class_find_property (G_OBJECT_GET_CLASS (config), "cell-width");
       G_PARAM_SPEC_INT (spec)->default_value = image_width;
@@ -398,17 +398,17 @@ gih_export (GimpProcedure        *procedure,
           G_PARAM_SPEC_INT (spec)->maximum = 1;
         }
 
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! gih_save_dialog (image, procedure, config))
         {
-          status = GIMP_PDB_CANCEL;
+          status = CLAY_PDB_CANCEL;
           goto out;
         }
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  layers = gimp_image_get_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  layers = clay_image_get_layers (image);
 
   g_object_get (config,
                 "spacing",         &spacing,
@@ -420,8 +420,8 @@ gih_export (GimpProcedure        *procedure,
                 "selection-modes", &selection,
                 NULL);
 
-  gihparams.cols = gimp_image_get_width (image) / gihparams.cellwidth;
-  gihparams.rows = gimp_image_get_height (image) / gihparams.cellheight;
+  gihparams.cols = clay_image_get_width (image) / gihparams.cellwidth;
+  gihparams.rows = clay_image_get_height (image) / gihparams.cellheight;
 
   rank           = g_bytes_get_data (rank_bytes, NULL);
   gihparams.dim  = g_bytes_get_size (rank_bytes);
@@ -435,72 +435,72 @@ gih_export (GimpProcedure        *procedure,
   g_strfreev (selection);
   g_bytes_unref (rank_bytes);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpProcedure  *procedure;
-      GimpValueArray *save_retvals;
+      ClayProcedure  *procedure;
+      ClayValueArray *save_retvals;
       gchar          *paramstring;
 
       G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-      paramstring = gimp_pixpipe_params_build (&gihparams);
+      paramstring = clay_pixpipe_params_build (&gihparams);
       G_GNUC_END_IGNORE_DEPRECATIONS
 
-      procedure = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      procedure = clay_pdb_lookup_procedure (clay_get_pdb (),
                                              "file-gih-export-internal");
-      save_retvals = gimp_procedure_run (procedure,
+      save_retvals = clay_procedure_run (procedure,
                                          "image",     image,
-                                         "drawables", (GimpDrawable **) layers,
+                                         "drawables", (ClayDrawable **) layers,
                                          "file",      file,
                                          "spacing",   spacing,
                                          "name",      description,
                                          "params",    paramstring,
                                          NULL);
 
-      if (GIMP_VALUES_GET_ENUM (save_retvals, 0) == GIMP_PDB_SUCCESS)
+      if (CLAY_VALUES_GET_ENUM (save_retvals, 0) == CLAY_PDB_SUCCESS)
         {
-          parasite = gimp_parasite_new ("gimp-brush-pipe-name",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("clay-brush-pipe-name",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (description) + 1,
                                         description);
-          gimp_image_attach_parasite (orig_image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (orig_image, parasite);
+          clay_parasite_free (parasite);
 
-          gimp_image_detach_parasite (image, "gimp-brush-pipe-parameters");
+          clay_image_detach_parasite (image, "clay-brush-pipe-parameters");
         }
       else
         {
           g_set_error (&error, 0, 0,
                        "Running procedure 'file-gih-export-internal' "
                        "failed: %s",
-                       gimp_pdb_get_last_error (gimp_get_pdb ()));
+                       clay_pdb_get_last_error (clay_get_pdb ()));
 
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
       g_free (paramstring);
     }
 
   G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-  gimp_pixpipe_params_free (&gihparams);
+  clay_pixpipe_params_free (&gihparams);
   G_GNUC_END_IGNORE_DEPRECATIONS
   g_free (description);
 
  out:
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_free (layers);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 
 /*  export routines */
 
 static void
-gih_remove_guides (GimpProcedureConfig *config,
-                   GimpImage           *image)
+gih_remove_guides (ClayProcedureConfig *config,
+                   ClayImage           *image)
 {
-  GimpArray *array;
+  ClayArray *array;
 
   g_object_get (config, "guides", &array, NULL);
 
@@ -510,19 +510,19 @@ gih_remove_guides (GimpProcedureConfig *config,
       gint    n_guides = array->length / 4;
 
       for (gint i = 0; i < n_guides; i++)
-        gimp_image_delete_guide (image, guides[i]);
+        clay_image_delete_guide (image, guides[i]);
     }
-  g_clear_pointer (&array, gimp_array_free);
+  g_clear_pointer (&array, clay_array_free);
 
   g_object_set (config, "guides", NULL, NULL);
 }
 
 static void
-gih_cell_width_notify (GimpProcedureConfig *config,
+gih_cell_width_notify (ClayProcedureConfig *config,
                        const GParamSpec    *pspec,
-                       GimpProcedureDialog *dialog)
+                       ClayProcedureDialog *dialog)
 {
-  GimpImage      *image;
+  ClayImage      *image;
   GParamSpec     *spec;
   gchar          *info_text;
   gchar          *grid_text      = NULL;
@@ -593,13 +593,13 @@ gih_cell_width_notify (GimpProcedureConfig *config,
     num_cells = MIN (max_cells, num_cells);
 
   G_PARAM_SPEC_INT (spec)->maximum = max_cells;
-  widget = gimp_procedure_dialog_get_widget (dialog, "num-cells", G_TYPE_NONE);
+  widget = clay_procedure_dialog_get_widget (dialog, "num-cells", G_TYPE_NONE);
   g_object_set (widget, "upper", (gdouble) max_cells, NULL);
-  gimp_label_spin_set_increments (GIMP_LABEL_SPIN (widget), 1.0, 1.0);
+  clay_label_spin_set_increments (CLAY_LABEL_SPIN (widget), 1.0, 1.0);
 
   gih_remove_guides (config, image);
 
-  widget = gimp_procedure_dialog_get_widget (dialog, "info-text", G_TYPE_NONE);
+  widget = clay_procedure_dialog_get_widget (dialog, "info-text", G_TYPE_NONE);
   gtk_widget_set_visible (widget, (strlen (info_text) > 0));
   if (n_horiz_guides + n_vert_guides > 0)
     {
@@ -609,13 +609,13 @@ gih_cell_width_notify (GimpProcedureConfig *config,
       guides = g_new0 (gint32, n_horiz_guides + n_vert_guides);
 
       for (gint i = 0; i < n_vert_guides; i++)
-        guides[i] = gimp_image_add_vguide (image, cell_width * (i + 1));
+        guides[i] = clay_image_add_vguide (image, cell_width * (i + 1));
 
       for (gint i = 0; i < n_horiz_guides; i++)
-        guides[n_vert_guides + i] = gimp_image_add_hguide (image, cell_height * (i + 1));
+        guides[n_vert_guides + i] = clay_image_add_hguide (image, cell_height * (i + 1));
 
-      g_value_init (&value, GIMP_TYPE_INT32_ARRAY);
-      gimp_value_set_int32_array (&value, guides, n_horiz_guides + n_vert_guides);
+      g_value_init (&value, CLAY_TYPE_INT32_ARRAY);
+      clay_value_set_int32_array (&value, guides, n_horiz_guides + n_vert_guides);
       g_object_set_property (G_OBJECT (config), "guides", &value);
       g_free (guides);
     }
@@ -644,7 +644,7 @@ gih_selection_mode_changed (GtkWidget *widget,
 }
 
 static void
-gih_dimension_notify (GimpProcedureConfig *config,
+gih_dimension_notify (ClayProcedureConfig *config,
                       const GParamSpec    *pspec,
                       SizeAdjustmentData  *data)
 {
@@ -653,7 +653,7 @@ gih_dimension_notify (GimpProcedureConfig *config,
 
   g_object_get (config, "dimension", &dimension, NULL);
 
-  for (i = 0; i < GIMP_PIXPIPE_MAXDIM; i++)
+  for (i = 0; i < CLAY_PIXPIPE_MAXDIM; i++)
     {
       gtk_widget_set_sensitive (data->rank_entry[i], i < dimension);
       gtk_widget_set_sensitive (data->mode_entry[i], i < dimension);
@@ -661,9 +661,9 @@ gih_dimension_notify (GimpProcedureConfig *config,
 }
 
 static gboolean
-gih_save_dialog (GimpImage           *image,
-                 GimpProcedure       *procedure,
-                 GimpProcedureConfig *config)
+gih_save_dialog (ClayImage           *image,
+                 ClayProcedure       *procedure,
+                 ClayProcedureConfig *config)
 {
   GtkWidget           *dialog;
   GtkWidget           *dimgrid;
@@ -676,19 +676,19 @@ gih_save_dialog (GimpImage           *image,
   SizeAdjustmentData   cellh_adjust;
   gchar              **selection;
   GBytes              *rank_bytes = NULL;
-  guint8               rank[GIMP_PIXPIPE_MAXDIM];
+  guint8               rank[CLAY_PIXPIPE_MAXDIM];
   gint                 num_cells;
   gint                 dimension;
   gboolean             run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gtk_widget_set_halign (gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  gtk_widget_set_halign (clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                           "info-text", NULL, TRUE, FALSE),
                          GTK_ALIGN_START);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "description", "spacing",
                               "cell-width", "cell-height", "num-cells",
                               "info-text", "dimension", NULL);
@@ -700,7 +700,7 @@ gih_save_dialog (GimpImage           *image,
   g_signal_connect (config, "notify::cell-height",
                     G_CALLBACK (gih_cell_width_notify),
                     dialog);
-  gih_cell_width_notify (config, NULL, GIMP_PROCEDURE_DIALOG (dialog));
+  gih_cell_width_notify (config, NULL, CLAY_PROCEDURE_DIALOG (dialog));
 
   g_signal_connect (config, "notify::dimension",
                     G_CALLBACK (gih_dimension_notify),
@@ -715,17 +715,17 @@ gih_save_dialog (GimpImage           *image,
                 "ranks",           &rank_bytes,
                 "num-cells",       &num_cells,
                 NULL);
-  if (selection == NULL || g_strv_length (selection) != GIMP_PIXPIPE_MAXDIM)
+  if (selection == NULL || g_strv_length (selection) != CLAY_PIXPIPE_MAXDIM)
     {
       GStrvBuilder *builder = g_strv_builder_new ();
       gint          old_len;
 
       old_len = (selection == NULL ? 0 : g_strv_length (selection));
 
-      for (i = 0; i < MIN (old_len, GIMP_PIXPIPE_MAXDIM); i++)
+      for (i = 0; i < MIN (old_len, CLAY_PIXPIPE_MAXDIM); i++)
         g_strv_builder_add (builder, selection[i]);
 
-      for (i = old_len; i < GIMP_PIXPIPE_MAXDIM; i++)
+      for (i = old_len; i < CLAY_PIXPIPE_MAXDIM; i++)
         g_strv_builder_add (builder, "random");
 
       g_strfreev (selection);
@@ -738,7 +738,7 @@ gih_save_dialog (GimpImage           *image,
       dimension = 1;
 
       rank[0] = 1;
-      for (i = 1; i < GIMP_PIXPIPE_MAXDIM; i++)
+      for (i = 1; i < CLAY_PIXPIPE_MAXDIM; i++)
         rank[i] = 0;
     }
   else
@@ -751,7 +751,7 @@ gih_save_dialog (GimpImage           *image,
       for (i = 0; i < dimension; i++)
         rank[i] = stored[i];
 
-      for (i = dimension; i < GIMP_PIXPIPE_MAXDIM; i++)
+      for (i = dimension; i < CLAY_PIXPIPE_MAXDIM; i++)
         rank[i] = 1;
     }
   g_bytes_unref (rank_bytes);
@@ -764,7 +764,7 @@ gih_save_dialog (GimpImage           *image,
   gtk_grid_attach (GTK_GRID (dimgrid), label, 0, 0, 1, 1);
   gtk_widget_set_visible (label, TRUE);
 
-  for (i = 0; i < GIMP_PIXPIPE_MAXDIM; i++)
+  for (i = 0; i < CLAY_PIXPIPE_MAXDIM; i++)
     {
       gsize j;
 
@@ -772,7 +772,7 @@ gih_save_dialog (GimpImage           *image,
       if (i == 0)
         g_object_set_data (G_OBJECT (dialog), "rank0", adjustment);
 
-      spinbutton = gimp_spin_button_new (adjustment, 1.0, 0);
+      spinbutton = clay_spin_button_new (adjustment, 1.0, 0);
       gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
       gtk_grid_attach (GTK_GRID (dimgrid), spinbutton, 1, i, 1, 1);
 
@@ -782,7 +782,7 @@ gih_save_dialog (GimpImage           *image,
         gtk_widget_set_sensitive (spinbutton, FALSE);
 
       g_signal_connect (adjustment, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &rank[i]);
 
       cellw_adjust.rank_entry[i] = cellh_adjust.rank_entry[i] = spinbutton;
@@ -819,7 +819,7 @@ gih_save_dialog (GimpImage           *image,
                       dimgrid, TRUE, TRUE, 0);
   gtk_widget_set_visible (dimgrid, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   g_object_get (config, "dimension", &dimension, NULL);
   rank_bytes = g_bytes_new (rank, sizeof (guint8) * dimension);

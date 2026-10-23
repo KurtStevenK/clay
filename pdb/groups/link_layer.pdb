@@ -32,7 +32,7 @@ method.
 
 The arguments are kept as simple as necessary for the basic case. All
 link attributes, however, can be modified with the appropriate
-`gimp_link_layer_set_*()` procedures.
+`clay_link_layer_set_*()` procedures.
 HELP
 
     &jehan_pdb_misc('2025', '3.2');
@@ -46,7 +46,7 @@ HELP
 
     @outargs = (
         { name => 'layer', type => 'link_layer',
-          desc => 'The new link layer. The object belongs to libgimp and you should not free it.' }
+          desc => 'The new link layer. The object belongs to libclay and you should not free it.' }
     );
 
     %invoke = (
@@ -54,7 +54,7 @@ HELP
 {
   if (file == NULL)
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    _("Failed to create link layer"));
 
       success = FALSE;
@@ -62,9 +62,9 @@ HELP
 
   if (success)
     {
-      GimpLink *link;
+      ClayLink *link;
 
-      link = gimp_link_new (gimp, file, 0, 0, TRUE, NULL, error);
+      link = clay_link_new (clay, file, 0, 0, TRUE, NULL, error);
 
       if (link == NULL)
         {
@@ -72,11 +72,11 @@ HELP
         }
       else
         {
-          layer = GIMP_LINK_LAYER (gimp_link_layer_new (image, link));
+          layer = CLAY_LINK_LAYER (clay_link_layer_new (image, link));
 
           if (! layer)
             {
-              g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                            _("Failed to create link layer"));
 
               success = FALSE;
@@ -112,7 +112,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  file = g_object_ref (gimp_link_get_file (gimp_link_layer_get_link (layer), NULL, NULL));
+  file = g_object_ref (clay_link_get_file (clay_link_layer_get_link (layer), NULL, NULL));
 }
 CODE
     );
@@ -138,11 +138,11 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpLink *link = gimp_link_new (gimp, file, 0, 0, TRUE, NULL, error);
+  ClayLink *link = clay_link_new (clay, file, 0, 0, TRUE, NULL, error);
 
   if (link)
     {
-      gimp_link_layer_set_link (layer, link, TRUE);
+      clay_link_layer_set_link (layer, link, TRUE);
     }
   else
     {
@@ -163,7 +163,7 @@ This procedure returns the mime type of the file which is being monitored by @la
 
 
 Note that this will be the real mime type, corresponding to our format support,
-as returned by the [class@Gimp.LoadProcedure] which actually performs the external
+as returned by the [class@Clay.LoadProcedure] which actually performs the external
 image file import.
 
 
@@ -186,17 +186,17 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  mimetype = g_strdup (gimp_link_get_mime_type (gimp_link_layer_get_link (layer)));
+  mimetype = g_strdup (clay_link_get_mime_type (clay_link_layer_get_link (layer)));
 }
 CODE
     );
 }
 
-@headers = qw("core/gimplink.h"
-              "core/gimplinklayer.h"
-              "core/gimprasterizable.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+@headers = qw("core/claylink.h"
+              "core/claylinklayer.h"
+              "core/clayrasterizable.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(link_layer_new
             link_layer_get_file
@@ -206,7 +206,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Link layer procedures';
-$doc_title = 'gimplinklayer';
+$doc_title = 'claylinklayer';
 $doc_short_desc = 'Functions for querying and manipulating link layers.';
 $doc_long_desc = 'Functions for querying and manipulating link layers.';
 

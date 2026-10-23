@@ -30,9 +30,9 @@
 ; ----------------------------------------------------------------------
 ; Resources: Brush, Font, Gradient, Palette, Pattern
 ;
-; Resources are Gimp objects for installed data such as fonts.
+; Resources are Clay objects for installed data such as fonts.
 
-; Resources have a unique integer ID for the lifetime of a Gimp session.
+; Resources have a unique integer ID for the lifetime of a Clay session.
 ; In ScriptFu, a resource argument is bound to an integer ID.
 ;
 ; Resources have names, often unique, but not always.
@@ -48,7 +48,7 @@
 ;
 ; In the code below, a default name is shown,
 ; but is ignored since v3.
-; Some even name resources that are not installed with Gimp any longer.
+; Some even name resources that are not installed with Clay any longer.
 ;
 ; In non-interactive mode, a resource argument in ScriptFu
 ; is an integer ID passed by the caller.
@@ -88,7 +88,7 @@
 ;
 ; Usage:
 ; SF-FILENAME "Environment Map"
-;             (string-append "" gimp-data-directory "/scripts/beavis.jpg")
+;             (string-append "" clay-data-directory "/scripts/beavis.jpg")
 ;
 ; The value returned when the script is invoked is a string containing the
 ; filename.
@@ -121,7 +121,7 @@
 ; Only useful in interactive mode. It will create a widget in the control
 ; dialog. The widget is a combo-box showing all enum values for the given
 ; enum type. This has to be the name of a registered enum, without the
-; "Gimp" prefix. The second parameter specifies the default value, using
+; "Clay" prefix. The second parameter specifies the default value, using
 ; the enum value's nick.
 ;
 ; Usage:
@@ -158,8 +158,8 @@
   (let* (
         (width (* radius 3.75))
         (height (* radius 2.5))
-        (img (car (gimp-image-new width height RGB)))
-        (drawable (car (gimp-layer-new img "Sphere Layer"
+        (img (car (clay-image-new width height RGB)))
+        (drawable (car (clay-layer-new img "Sphere Layer"
                                        width height RGB-IMAGE
                                        100 LAYER-MODE-NORMAL)))
         (radians (/ (* light *pi*) 180))
@@ -170,7 +170,7 @@
         (light-end-x (+ cx (* radius (cos (+ *pi* radians)))))
         (light-end-y (- cy (* radius (sin (+ *pi* radians)))))
         (offset (* radius 0.1))
-        (text-extents (gimp-text-get-extents-font multi-text
+        (text-extents (clay-text-get-extents-font multi-text
                                                   size
                                                   font))
         (x-position (- cx (/ (car text-extents) 2)))
@@ -179,15 +179,15 @@
         (shadow-x 0)
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
-    (gimp-context-set-foreground sphere-color)
-    (gimp-context-set-background bg-color)
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
-    (gimp-context-set-background '(20 20 20))
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
+    (clay-context-set-foreground sphere-color)
+    (clay-context-set-background bg-color)
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(20 20 20))
 
     (if (and
          (or (and (>= light 45) (<= light 75))
@@ -201,51 +201,51 @@
               (begin (set! shadow-x (+ cx shadow-w))
                      (set! shadow-w (- shadow-w))))
 
-          (gimp-context-set-feather TRUE)
-          (gimp-context-set-feather-radius 7.5 7.5)
-          (gimp-image-select-ellipse img CHANNEL-OP-REPLACE shadow-x shadow-y shadow-w shadow-h)
-          (gimp-context-set-pattern pattern)
-          (gimp-drawable-edit-fill drawable FILL-PATTERN)))
+          (clay-context-set-feather TRUE)
+          (clay-context-set-feather-radius 7.5 7.5)
+          (clay-image-select-ellipse img CHANNEL-OP-REPLACE shadow-x shadow-y shadow-w shadow-h)
+          (clay-context-set-pattern pattern)
+          (clay-drawable-edit-fill drawable FILL-PATTERN)))
 
-    (gimp-context-set-feather FALSE)
-    (gimp-image-select-ellipse img CHANNEL-OP-REPLACE (- cx radius) (- cy radius)
+    (clay-context-set-feather FALSE)
+    (clay-image-select-ellipse img CHANNEL-OP-REPLACE (- cx radius) (- cy radius)
                                (* 2 radius) (* 2 radius))
 
-    (gimp-context-set-gradient-fg-bg-rgb)
-    (gimp-drawable-edit-gradient-fill drawable
+    (clay-context-set-gradient-fg-bg-rgb)
+    (clay-drawable-edit-gradient-fill drawable
 				      GRADIENT-RADIAL offset
 				      FALSE 1 0
 				      TRUE
 				      light-x light-y
 				      light-end-x light-end-y)
 
-    (gimp-selection-none img)
+    (clay-selection-none img)
 
-    (gimp-image-select-ellipse img CHANNEL-OP-REPLACE 10 10 50 50)
+    (clay-image-select-ellipse img CHANNEL-OP-REPLACE 10 10 50 50)
 
-    (gimp-context-set-gradient gradient)
-    (gimp-context-set-gradient-reverse gradient-reverse)
-    (gimp-drawable-edit-gradient-fill drawable
+    (clay-context-set-gradient gradient)
+    (clay-context-set-gradient-reverse gradient-reverse)
+    (clay-drawable-edit-gradient-fill drawable
 				      GRADIENT-LINEAR offset
 				      FALSE 1 0
 				      TRUE
 				      10 10
 				      30 60)
 
-    (gimp-selection-none img)
+    (clay-selection-none img)
 
-    (gimp-context-set-foreground '(0 0 0))
-    (gimp-floating-sel-anchor (car (gimp-text-font     img drawable
+    (clay-context-set-foreground '(0 0 0))
+    (clay-floating-sel-anchor (car (clay-text-font     img drawable
                                                        x-position y-position
                                                        multi-text
                                                        0 TRUE
                                                        size
                                                        font)))
 
-    (gimp-image-undo-enable img)
-    (gimp-display-new img)
+    (clay-image-undo-enable img)
+    (clay-display-new img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 
@@ -273,7 +273,7 @@
   SF-ADJUSTMENT "Font size (pixels)" '(50 1 1000 1 10 0 1)
   SF-PALETTE    "Palette"            "Default"
   SF-FILENAME   "Environment map"
-                (string-append gimp-data-directory
+                (string-append clay-data-directory
                                "/scripts/images/beavis.jpg")
   SF-OPTION     "Orientation"        '("Horizontal"
                                        "Vertical")

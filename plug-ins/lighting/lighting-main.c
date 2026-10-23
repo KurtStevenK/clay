@@ -1,4 +1,4 @@
-/* Lighting Effects 0.2.2 -- image filter plug-in for GIMP
+/* Lighting Effects 0.2.2 -- image filter plug-in for Clay
  *
  * Copyright (C) 1996-98 Tom Bech
  * Copyright (C) 1996-98 Federico Mena Quintero
@@ -23,7 +23,7 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "lighting-apply.h"
 #include "lighting-image.h"
@@ -32,7 +32,7 @@
 #include "lighting-shade.h"
 #include "lighting-ui.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 LightingValues mapvals;
@@ -43,12 +43,12 @@ typedef struct _LightingClass LightingClass;
 
 struct _Lighting
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _LightingClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -57,31 +57,31 @@ struct _LightingClass
 
 GType                   lighting_get_type         (void);
 
-static GList          * lighting_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * lighting_create_procedure (GimpPlugIn           *plug_in,
+static GList          * lighting_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * lighting_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * lighting_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * lighting_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
 static void             set_default_settings      (void);
 static void             check_drawables           (void);
 
 
-G_DEFINE_TYPE (Lighting, lighting, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Lighting, lighting, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (LIGHTING_TYPE)
+CLAY_MAIN (LIGHTING_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 lighting_class_init (LightingClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = lighting_query_procedures;
   plug_in_class->create_procedure = lighting_create_procedure;
@@ -94,16 +94,16 @@ lighting_init (Lighting *lighting)
 }
 
 static GList *
-lighting_query_procedures (GimpPlugIn *plug_in)
+lighting_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-lighting_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+lighting_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
@@ -123,57 +123,57 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
       default_color_5 = gegl_color_new ("white");
       default_color_6 = gegl_color_new ("white");
 
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             lighting_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Lighting Effects..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("_Lighting Effects..."));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Light and Shadow/[Light]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Apply various lighting effects "
                                           "to an image"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tom Bech & Federico Mena Quintero",
                                       "Tom Bech & Federico Mena Quintero",
                                       "Version 0.2.0, March 15 1998");
 
-      gimp_procedure_add_drawable_argument (procedure, "bump-drawable",
+      clay_procedure_add_drawable_argument (procedure, "bump-drawable",
                                             _("B_ump map image"),
                                             _("Bumpmap drawable (set to NULL if disabled)"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "env-drawable",
+      clay_procedure_add_drawable_argument (procedure, "env-drawable",
                                             _("Enviro_nment map image"),
                                             _("Environmentmap drawable "
                                               "(set to NULL if disabled)"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "do-bumpmap",
+      clay_procedure_add_boolean_argument (procedure, "do-bumpmap",
                                            _("Enable bump mappi_ng"),
                                            _("Enable bumpmapping"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "do-envmap",
+      clay_procedure_add_boolean_argument (procedure, "do-envmap",
                                            _("Enable en_vironment mapping"),
                                            _("Enable envmapping"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "bumpmap-type",
+      clay_procedure_add_choice_argument (procedure, "bumpmap-type",
                                           _("Cur_ve"),
                                           _("Type of mapping"),
-                                          gimp_choice_new_with_values ("bumpmap-linear",     LINEAR_MAP,      _("Linear"),      NULL,
+                                          clay_choice_new_with_values ("bumpmap-linear",     LINEAR_MAP,      _("Linear"),      NULL,
                                                                        "bumpmap-log",        LOGARITHMIC_MAP, _("Logarithmic"), NULL,
                                                                        "bumpmap-sinusoidal", SINUSOIDAL_MAP,  _("Sinusoidal"),  NULL,
                                                                        "bumpmap-spherical",  SPHERICAL_MAP,   _("Spherical"),   NULL,
@@ -181,16 +181,16 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                           "bumpmap-linear",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "bumpmap-max-height",
+      clay_procedure_add_double_argument (procedure, "bumpmap-max-height",
                                           _("Ma_ximum height"),
                                           _("The maximum height of the bumpmap"),
                                           0.0, G_MAXFLOAT, 0.1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_aux_argument (procedure, "which-light",
+      clay_procedure_add_choice_aux_argument (procedure, "which-light",
                                               _("Active"),
                                               _("Which light is active in the GUI"),
-                                              gimp_choice_new_with_values ("light-1", 0, _("Light 1"), NULL,
+                                              clay_choice_new_with_values ("light-1", 0, _("Light 1"), NULL,
                                                                            "light-2", 1, _("Light 2"), NULL,
                                                                            "light-3", 2, _("Light 3"), NULL,
                                                                            "light-4", 3, _("Light 4"), NULL,
@@ -200,17 +200,17 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                               "light-1",
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "isolate",
+      clay_procedure_add_boolean_aux_argument (procedure, "isolate",
                                                _("Isolate"),
                                                _("Only show the active lighting in "
                                                  "the preview"),
                                                FALSE,
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "light-type-1",
+      clay_procedure_add_choice_argument (procedure, "light-type-1",
                                           _("Type"),
                                           _("Type of light source"),
-                                          gimp_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
+                                          clay_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
                                                                        "light-directional", DIRECTIONAL_LIGHT, _("Directional"), NULL,
                                                                        "light-point",       POINT_LIGHT,       _("Point"),       NULL,
                                                                        "light-spot",        SPOT_LIGHT,        _("Spot"),        NULL,
@@ -218,122 +218,122 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                           "light-point",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_argument (procedure, "light-color-1",
+      clay_procedure_add_color_argument (procedure, "light-color-1",
                                          _("Color"),
                                          _("Light source color"),
                                          TRUE, default_color_1,
                                          G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-intensity-1",
+      clay_procedure_add_double_argument (procedure, "light-intensity-1",
                                           _("Intensity"),
                                           _("Light source intensity"),
                                           0, 100.0, 1.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-position-x-1",
+      clay_procedure_add_double_argument (procedure, "light-position-x-1",
                                           _("Light position X"),
                                           _("Light source position (x,y,z)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, -1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-position-y-1",
+      clay_procedure_add_double_argument (procedure, "light-position-y-1",
                                           _("Light position Y"),
                                           _("Light source position (x,y,z)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, -1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-position-z-1",
+      clay_procedure_add_double_argument (procedure, "light-position-z-1",
                                           _("Light position Z"),
                                           _("Light source position (x,y,z)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-direction-x-1",
+      clay_procedure_add_double_argument (procedure, "light-direction-x-1",
                                           _("Light direction X"),
                                           _("Light source direction (x,y,z)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, -1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-direction-y-1",
+      clay_procedure_add_double_argument (procedure, "light-direction-y-1",
                                           _("Light direction Y"),
                                           _("Light source direction (x,y,z)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, -1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "light-direction-z-1",
+      clay_procedure_add_double_argument (procedure, "light-direction-z-1",
                                           _("Light direction Z"),
                                           _("Light source direction (x,y,z)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "ambient-intensity",
+      clay_procedure_add_double_argument (procedure, "ambient-intensity",
                                           _("Ambient intensity"),
                                           _("Material ambient intensity "
                                             "(Glowing)"),
                                           0, 1, 0.2,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "diffuse-intensity",
+      clay_procedure_add_double_argument (procedure, "diffuse-intensity",
                                           _("Diffuse intensity"),
                                           _("Material diffuse intensity "
                                             "(Bright)"),
                                           0, 1, 0.5,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "diffuse-reflectivity",
+      clay_procedure_add_double_argument (procedure, "diffuse-reflectivity",
                                           _("Diffuse reflectivity"),
                                           _("Material diffuse reflectivity"),
                                           0, 1, 0.4,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "specular-reflectivity",
+      clay_procedure_add_double_argument (procedure, "specular-reflectivity",
                                           _("Specular reflectivity"),
                                           _("Material specular reflectivity"),
                                           0, 1, 0.5,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "highlight",
+      clay_procedure_add_double_argument (procedure, "highlight",
                                           _("Highlight"),
                                           _("Material highlight (note, it's exponential) "
                                             "(Polished)"),
                                           0, G_MAXDOUBLE, 27.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "metallic",
+      clay_procedure_add_boolean_argument (procedure, "metallic",
                                            _("Metallic"),
                                            _("Make surfaces look metallic"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "antialiasing",
+      clay_procedure_add_boolean_argument (procedure, "antialiasing",
                                            _("_Antialiasing"),
                                            _("Apply antialiasing"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "new-image",
+      clay_procedure_add_boolean_argument (procedure, "new-image",
                                            _("Create new ima_ge"),
                                            _("Create a new image"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "transparent-background",
+      clay_procedure_add_boolean_argument (procedure, "transparent-background",
                                            _("Trans_parent background"),
                                            _("Make background transparent"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "distance",
+      clay_procedure_add_double_argument (procedure, "distance",
                                           _("_Distance"),
                                           _("Distance of observer from surface"),
                                           0, 2.0, 0.25,
                                           G_PARAM_READWRITE);
 
       /* GUI-only arguments for additional light sources */
-      gimp_procedure_add_choice_aux_argument (procedure, "light-type-2",
+      clay_procedure_add_choice_aux_argument (procedure, "light-type-2",
                                               _("Type"),
                                               _("Type of light source"),
-                                              gimp_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
+                                              clay_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
                                                                            "light-directional", DIRECTIONAL_LIGHT, _("Directional"), NULL,
                                                                            "light-point",       POINT_LIGHT,       _("Point"),       NULL,
                                                                            "light-spot",        SPOT_LIGHT,        _("Spot"),        NULL,
@@ -341,58 +341,58 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                               "light-none",
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_aux_argument (procedure, "light-color-2",
+      clay_procedure_add_color_aux_argument (procedure, "light-color-2",
                                              _("Color"),
                                              _("Light source color"),
                                              TRUE, default_color_2,
                                              G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-intensity-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-intensity-2",
                                               _("Intensity"),
                                               _("Light source intensity"),
                                               0, 100.0, 1.0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-x-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-x-2",
                                               _("Light position X"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, -2,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-y-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-y-2",
                                               _("Light position Y"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, -1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-z-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-z-2",
                                               _("Light position Z"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-x-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-x-2",
                                               _("Light direction X"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-y-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-y-2",
                                               _("Light direction Y"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, -1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-z-2",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-z-2",
                                               _("Light direction Z"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_aux_argument (procedure, "light-type-3",
+      clay_procedure_add_choice_aux_argument (procedure, "light-type-3",
                                               _("Type"),
                                               _("Type of light source"),
-                                              gimp_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
+                                              clay_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
                                                                            "light-directional", DIRECTIONAL_LIGHT, _("Directional"), NULL,
                                                                            "light-point",       POINT_LIGHT,       _("Point"),       NULL,
                                                                            "light-spot",        SPOT_LIGHT,        _("Spot"),        NULL,
@@ -400,58 +400,58 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                               "light-none",
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_aux_argument (procedure, "light-color-3",
+      clay_procedure_add_color_aux_argument (procedure, "light-color-3",
                                              _("Color"),
                                              _("Light source color"),
                                              TRUE, default_color_3,
                                              G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-intensity-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-intensity-3",
                                               _("Intensity"),
                                               _("Light source intensity"),
                                               0, 100.0, 1.0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-x-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-x-3",
                                               _("Light position X"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-y-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-y-3",
                                               _("Light position Y"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 2,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-z-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-z-3",
                                               _("Light position Z"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-x-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-x-3",
                                               _("Light direction X"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-y-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-y-3",
                                               _("Light direction Y"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-z-3",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-z-3",
                                               _("Light direction Z"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_aux_argument (procedure, "light-type-4",
+      clay_procedure_add_choice_aux_argument (procedure, "light-type-4",
                                               _("Type"),
                                               _("Type of light source"),
-                                              gimp_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
+                                              clay_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
                                                                            "light-directional", DIRECTIONAL_LIGHT, _("Directional"), NULL,
                                                                            "light-point",       POINT_LIGHT,       _("Point"),       NULL,
                                                                            "light-spot",        SPOT_LIGHT,        _("Spot"),        NULL,
@@ -459,58 +459,58 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                               "light-none",
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_aux_argument (procedure, "light-color-4",
+      clay_procedure_add_color_aux_argument (procedure, "light-color-4",
                                              _("Color"),
                                              _("Light source color"),
                                              TRUE, default_color_4,
                                              G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-intensity-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-intensity-4",
                                               _("Intensity"),
                                               _("Light source intensity"),
                                               0, 100.0, 1.0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-x-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-x-4",
                                               _("Light position X"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-y-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-y-4",
                                               _("Light position Y"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-z-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-z-4",
                                               _("Light position Z"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-x-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-x-4",
                                               _("Light direction X"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-y-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-y-4",
                                               _("Light direction Y"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-z-4",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-z-4",
                                               _("Light direction Z"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_aux_argument (procedure, "light-type-5",
+      clay_procedure_add_choice_aux_argument (procedure, "light-type-5",
                                               _("Type"),
                                               _("Type of light source"),
-                                              gimp_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
+                                              clay_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
                                                                            "light-directional", DIRECTIONAL_LIGHT, _("Directional"), NULL,
                                                                            "light-point",       POINT_LIGHT,       _("Point"),       NULL,
                                                                            "light-spot",        SPOT_LIGHT,        _("Spot"),        NULL,
@@ -518,58 +518,58 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                               "light-none",
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_aux_argument (procedure, "light-color-5",
+      clay_procedure_add_color_aux_argument (procedure, "light-color-5",
                                              _("Color"),
                                              _("Light source color"),
                                              TRUE, default_color_5,
                                              G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-intensity-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-intensity-5",
                                               _("Intensity"),
                                               _("Light source intensity"),
                                               0, 100.0, 1.0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-x-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-x-5",
                                               _("Light position X"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-y-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-y-5",
                                               _("Light position Y"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-z-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-z-5",
                                               _("Light position Z"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-x-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-x-5",
                                               _("Light direction X"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-y-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-y-5",
                                               _("Light direction Y"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-z-5",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-z-5",
                                               _("Light direction Z"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_aux_argument (procedure, "light-type-6",
+      clay_procedure_add_choice_aux_argument (procedure, "light-type-6",
                                               _("Type"),
                                               _("Type of light source"),
-                                              gimp_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
+                                              clay_choice_new_with_values ("light-none",        NO_LIGHT,          _("None"),        NULL,
                                                                            "light-directional", DIRECTIONAL_LIGHT, _("Directional"), NULL,
                                                                            "light-point",       POINT_LIGHT,       _("Point"),       NULL,
                                                                            "light-spot",        SPOT_LIGHT,        _("Spot"),        NULL,
@@ -577,49 +577,49 @@ lighting_create_procedure (GimpPlugIn  *plug_in,
                                               "light-none",
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_aux_argument (procedure, "light-color-6",
+      clay_procedure_add_color_aux_argument (procedure, "light-color-6",
                                              _("Color"),
                                              _("Light source color"),
                                              TRUE, default_color_6,
                                              G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-intensity-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-intensity-6",
                                               _("Intensity"),
                                               _("Light source intensity"),
                                               0, 100.0, 1.0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-x-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-x-6",
                                               _("Light position X"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-y-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-y-6",
                                               _("Light position Y"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-position-z-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-position-z-6",
                                               _("Light position Z"),
                                               _("Light source position (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-x-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-x-6",
                                               _("Light direction X"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-y-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-y-6",
                                               _("Light direction Y"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 0,
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_aux_argument (procedure, "light-direction-z-6",
+      clay_procedure_add_double_aux_argument (procedure, "light-direction-z-6",
                                               _("Light direction Z"),
                                               _("Light source direction (x,y,z)"),
                                               -G_MAXDOUBLE, G_MAXDOUBLE, 1,
@@ -645,11 +645,11 @@ set_default_settings (void)
   mapvals.light_selected = 0;
   mapvals.light_isolated = FALSE;
 
-  gimp_vector3_set (&mapvals.viewpoint,   0.5, 0.5, 0.25);
-  gimp_vector3_set (&mapvals.planenormal, 0.0, 0.0, 1.0);
+  clay_vector3_set (&mapvals.viewpoint,   0.5, 0.5, 0.25);
+  clay_vector3_set (&mapvals.planenormal, 0.0, 0.0, 1.0);
 
-  gimp_vector3_set (&mapvals.lightsource[0].position,  -1.0, -1.0, 1.0);
-  gimp_vector3_set (&mapvals.lightsource[0].direction, -1.0, -1.0, 1.0);
+  clay_vector3_set (&mapvals.lightsource[0].position,  -1.0, -1.0, 1.0);
+  clay_vector3_set (&mapvals.lightsource[0].direction, -1.0, -1.0, 1.0);
 
   for (gint i = 0; i < 4; i++)
     mapvals.lightsource[0].color[i] = 1.0;
@@ -658,17 +658,17 @@ set_default_settings (void)
   mapvals.lightsource[0].active    = TRUE;
 
   /* init lights 2 and 3 pos to upper left and below */
-  gimp_vector3_set (&mapvals.lightsource[1].position,   2.0, -1.0, 1.0);
-  gimp_vector3_set (&mapvals.lightsource[1].direction,  1.0, -1.0, 1.0);
+  clay_vector3_set (&mapvals.lightsource[1].position,   2.0, -1.0, 1.0);
+  clay_vector3_set (&mapvals.lightsource[1].direction,  1.0, -1.0, 1.0);
 
-  gimp_vector3_set (&mapvals.lightsource[2].position,   1.0,  2.0, 1.0);
-  gimp_vector3_set (&mapvals.lightsource[2].direction,  0.0,  1.0, 1.0);
+  clay_vector3_set (&mapvals.lightsource[2].position,   1.0,  2.0, 1.0);
+  clay_vector3_set (&mapvals.lightsource[2].direction,  0.0,  1.0, 1.0);
 
   /* init any remaining lights to directly overhead */
   for (k = 3; k < NUM_LIGHTS; k++)
     {
-      gimp_vector3_set (&mapvals.lightsource[k].position,   0.0,  0.0, 1.0);
-      gimp_vector3_set (&mapvals.lightsource[k].direction,  0.0,  0.0, 1.0);
+      clay_vector3_set (&mapvals.lightsource[k].position,   0.0,  0.0, 1.0);
+      clay_vector3_set (&mapvals.lightsource[k].direction,  0.0,  0.0, 1.0);
     }
 
   for (k = 1; k < NUM_LIGHTS; k++)
@@ -711,24 +711,24 @@ set_default_settings (void)
 static void
 check_drawables (void)
 {
-  GimpDrawable *drawable;
-  GimpDrawable *map;
+  ClayDrawable *drawable;
+  ClayDrawable *map;
 
   if (mapvals.bump_mapped)
     {
-      if (! gimp_item_id_is_drawable (mapvals.bumpmap_id))
+      if (! clay_item_id_is_drawable (mapvals.bumpmap_id))
         {
           mapvals.bump_mapped = FALSE;
           mapvals.bumpmap_id  = -1;
         }
       else
         {
-          drawable = gimp_drawable_get_by_id (mapvals.drawable_id);
-          map      = gimp_drawable_get_by_id (mapvals.bumpmap_id);
+          drawable = clay_drawable_get_by_id (mapvals.drawable_id);
+          map      = clay_drawable_get_by_id (mapvals.bumpmap_id);
 
-          if (gimp_drawable_is_indexed (map) ||
-              (gimp_drawable_get_width  (drawable) != gimp_drawable_get_width  (map)) ||
-              (gimp_drawable_get_height (drawable) != gimp_drawable_get_height (map)))
+          if (clay_drawable_is_indexed (map) ||
+              (clay_drawable_get_width  (drawable) != clay_drawable_get_width  (map)) ||
+              (clay_drawable_get_height (drawable) != clay_drawable_get_height (map)))
             {
               mapvals.bump_mapped = FALSE;
               mapvals.bumpmap_id  = -1;
@@ -738,17 +738,17 @@ check_drawables (void)
 
   if (mapvals.env_mapped)
     {
-      if (! gimp_item_id_is_drawable (mapvals.envmap_id))
+      if (! clay_item_id_is_drawable (mapvals.envmap_id))
         {
           mapvals.env_mapped = FALSE;
           mapvals.envmap_id  = -1;
         }
       else
         {
-          map = gimp_drawable_get_by_id (mapvals.envmap_id);
+          map = clay_drawable_get_by_id (mapvals.envmap_id);
 
-          if (gimp_drawable_is_gray   (map) ||
-              gimp_drawable_has_alpha (map))
+          if (clay_drawable_is_gray   (map) ||
+              clay_drawable_has_alpha (map))
             {
               mapvals.env_mapped = FALSE;
               mapvals.envmap_id  = -1;
@@ -757,28 +757,28 @@ check_drawables (void)
     }
 }
 
-static GimpValueArray *
-lighting_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+lighting_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -788,37 +788,37 @@ lighting_run (GimpProcedure        *procedure,
 
   set_default_settings ();
 
-  mapvals.drawable_id = gimp_item_get_id (GIMP_ITEM (drawable));
+  mapvals.drawable_id = clay_item_get_id (CLAY_ITEM (drawable));
 
   check_drawables ();
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
       mapvals.config = config;
       copy_from_config (config);
 
       switch (run_mode)
         {
-        case GIMP_RUN_INTERACTIVE:
+        case CLAY_RUN_INTERACTIVE:
           if (! main_dialog (procedure, config, drawable))
             {
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_CANCEL,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_CANCEL,
                                                        NULL);
             }
 
           compute_image ();
 
-          gimp_displays_flush ();
+          clay_displays_flush ();
           break;
 
-        case GIMP_RUN_WITH_LAST_VALS:
+        case CLAY_RUN_WITH_LAST_VALS:
           if (image_setup (drawable, FALSE))
             compute_image ();
-          gimp_displays_flush ();
+          clay_displays_flush ();
           break;
 
-        case GIMP_RUN_NONINTERACTIVE:
+        case CLAY_RUN_NONINTERACTIVE:
           check_drawables ();
           if (image_setup (drawable, FALSE))
             compute_image ();
@@ -828,13 +828,13 @@ lighting_run (GimpProcedure        *procedure,
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
   g_free (xpostab);
   g_free (ypostab);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }

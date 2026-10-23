@@ -20,12 +20,12 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "metadata-tag-object.h"
 
-struct _GimpMetadataTagObject
+struct _ClayMetadataTagObject
 {
   GObject parent_instance;
 
@@ -33,44 +33,44 @@ struct _GimpMetadataTagObject
   gchar *value;
 };
 
-G_DEFINE_TYPE (GimpMetadataTagObject, gimp_metadata_tag_object, G_TYPE_OBJECT);
+G_DEFINE_TYPE (ClayMetadataTagObject, clay_metadata_tag_object, G_TYPE_OBJECT);
 
-static void          gimp_metadata_tag_object_finalize          (GObject          *object);
+static void          clay_metadata_tag_object_finalize          (GObject          *object);
 
 static void
-gimp_metadata_tag_object_finalize (GObject *object)
+clay_metadata_tag_object_finalize (GObject *object)
 {
-  GimpMetadataTagObject *self = GIMP_METADATA_TAG_OBJECT (object);
+  ClayMetadataTagObject *self = CLAY_METADATA_TAG_OBJECT (object);
 
   g_free (self->tag);
   g_free (self->value);
 
-  G_OBJECT_CLASS (gimp_metadata_tag_object_parent_class)->finalize (object);
+  G_OBJECT_CLASS (clay_metadata_tag_object_parent_class)->finalize (object);
 }
 
 static void
-gimp_metadata_tag_object_init (GimpMetadataTagObject *self)
+clay_metadata_tag_object_init (ClayMetadataTagObject *self)
 {
 }
 
 static void
-gimp_metadata_tag_object_class_init (GimpMetadataTagObjectClass *klass)
+clay_metadata_tag_object_class_init (ClayMetadataTagObjectClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = gimp_metadata_tag_object_finalize;
+  object_class->finalize = clay_metadata_tag_object_finalize;
 }
 
-GimpMetadataTagObject *
-gimp_metadata_tag_object_new (const gchar *tag,
+ClayMetadataTagObject *
+clay_metadata_tag_object_new (const gchar *tag,
                               const gchar *value)
 {
-    GimpMetadataTagObject *self;
+    ClayMetadataTagObject *self;
 
     g_return_val_if_fail (tag != NULL, NULL);
     g_return_val_if_fail (value != NULL, NULL);
 
-    self = g_object_new (GIMP_TYPE_METADATA_TAG_OBJECT, NULL);
+    self = g_object_new (CLAY_TYPE_METADATA_TAG_OBJECT, NULL);
     self->tag = g_strdup (tag);
     self->value = g_strdup (value);
 
@@ -78,17 +78,17 @@ gimp_metadata_tag_object_new (const gchar *tag,
 }
 
 const gchar *
-gimp_metadata_tag_object_get_tag (GimpMetadataTagObject *self)
+clay_metadata_tag_object_get_tag (ClayMetadataTagObject *self)
 {
-    g_return_val_if_fail (GIMP_IS_METADATA_TAG_OBJECT (self), NULL);
+    g_return_val_if_fail (CLAY_IS_METADATA_TAG_OBJECT (self), NULL);
 
     return self->tag;
 }
 
 const gchar *
-gimp_metadata_tag_object_get_value (GimpMetadataTagObject *self)
+clay_metadata_tag_object_get_value (ClayMetadataTagObject *self)
 {
-    g_return_val_if_fail (GIMP_IS_METADATA_TAG_OBJECT (self), NULL);
+    g_return_val_if_fail (CLAY_IS_METADATA_TAG_OBJECT (self), NULL);
 
     return self->value;
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Gimp-Python - allows the writing of Gimp plugins in Python.
+#   Clay-Python - allows the writing of Clay plugins in Python.
 #   Copyright (C) 1997  James Henstridge <james@daa.com.au>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import gi
-gi.require_version('Gimp', '3.0')
-gi.require_version('GimpUi', '3.0')
-from gi.repository import Gimp
-from gi.repository import GimpUi
+gi.require_version('Clay', '3.0')
+gi.require_version('ClayUi', '3.0')
+from gi.repository import Clay
+from gi.repository import ClayUi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import GObject
@@ -30,10 +30,10 @@ from gi.repository import GLib
 import sys
 import warnings
 import pyconsole
-#import gimpshelf, gimpui, pyconsole
+#import clayshelf, clayui, pyconsole
 
 import gettext
-textdomain = "gimp30-python"
+textdomain = "clay30-python"
 gettext.textdomain(textdomain)
 _ = gettext.gettext
 
@@ -42,7 +42,7 @@ PROC_NAME = 'python-fu-console'
 RESPONSE_BROWSE, RESPONSE_CLEAR, RESPONSE_SAVE = range(3)
 
 def run(procedure, config, data):
-    GimpUi.init ("python-console.py")
+    ClayUi.init ("python-console.py")
 
     namespace = {'__builtins__': __builtins__,
                  '__name__': '__main__', '__doc__': None,
@@ -50,8 +50,8 @@ def run(procedure, config, data):
                  'cairo': gi.repository.cairo,
                  'Gdk': gi.repository.Gdk,
                  'Gegl': gi.repository.Gegl,
-                 'Gimp': gi.repository.Gimp,
-                 'GimpUi': gi.repository.GimpUi,
+                 'Clay': gi.repository.Clay,
+                 'ClayUi': gi.repository.ClayUi,
                  'Gio': gi.repository.Gio,
                  'Gtk': gi.repository.Gtk,
                  'GdkPixbuf': gi.repository.GdkPixbuf,
@@ -59,40 +59,40 @@ def run(procedure, config, data):
                  'GObject': gi.repository.GObject,
                  'Pango': gi.repository.Pango }
 
-    class GimpConsole(pyconsole.Console):
+    class ClayConsole(pyconsole.Console):
         def __init__(self, quit_func=None, initial_history=None):
-            banner = ('GIMP %s Python Console\nPython %s\n' %
-                      (Gimp.version(), sys.version))
+            banner = ('Clay %s Python Console\nPython %s\n' %
+                      (Clay.version(), sys.version))
             pyconsole.Console.__init__(self,
                                        locals=namespace, banner=banner,
                                        quit_func=quit_func,
                                        initial_history=initial_history)
         def _commit(self):
             pyconsole.Console._commit(self)
-            Gimp.displays_flush()
+            Clay.displays_flush()
 
-    class ConsoleDialog(GimpUi.Dialog):
+    class ConsoleDialog(ClayUi.Dialog):
         def __init__(self):
             use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
-            GimpUi.Dialog.__init__(self, use_header_bar=use_header_bar)
+            ClayUi.Dialog.__init__(self, use_header_bar=use_header_bar)
             self.set_property("help-id", PROC_NAME)
             Gtk.Window.set_title(self, _("Python Console"))
             Gtk.Window.set_role(self, PROC_NAME)
-            GimpUi.window_set_transient(self)
+            ClayUi.window_set_transient(self)
             Gtk.Dialog.add_button(self, _("_Save"), Gtk.ResponseType.OK)
             Gtk.Dialog.add_button(self, _("Cl_ear"), RESPONSE_CLEAR)
             Gtk.Dialog.add_button(self, _("_Browse..."), RESPONSE_BROWSE)
             Gtk.Dialog.add_button(self, _("_Close"), Gtk.ResponseType.CLOSE)
 
             Gtk.Widget.set_name (self, PROC_NAME)
-            GimpUi.Dialog.set_alternative_button_order_from_array(self,
+            ClayUi.Dialog.set_alternative_button_order_from_array(self,
                                                                 [ Gtk.ResponseType.CLOSE,
                                                                   RESPONSE_BROWSE,
                                                                   RESPONSE_CLEAR,
                                                                   Gtk.ResponseType.OK ])
 
             history = config.get_property('history')
-            self.cons = GimpConsole(quit_func=lambda: Gtk.main_quit(), initial_history=history)
+            self.cons = ClayConsole(quit_func=lambda: Gtk.main_quit(), initial_history=history)
 
             self.style_set (None, None)
 
@@ -156,28 +156,28 @@ def run(procedure, config, data):
             that the user can figure out how to edit the template.
 
             The code will run in the environment of the console/browser,
-            which is not the GIMP v2 GimpFu environment
-            but the GIMP v3 PyGObject introspected environment.
+            which is not the Clay v2 ClayFu environment
+            but the Clay v3 PyGObject introspected environment.
 
-            If ever GimpFu module is resurrected, and Python console imports it,
+            If ever ClayFu module is resurrected, and Python console imports it,
             then revert this code to its v2 form.
             '''
-            proc = Gimp.get_pdb().lookup_procedure(proc_name)
+            proc = Clay.get_pdb().lookup_procedure(proc_name)
             if proc is None:
                 return None
 
             return_values = proc.get_return_values()
             param_specs   = proc.get_arguments()
 
-            cmd  = f"procedure = Gimp.get_pdb().lookup_procedure('{proc_name}'); "
+            cmd  = f"procedure = Clay.get_pdb().lookup_procedure('{proc_name}'); "
             cmd += f"config = procedure.create_config(); "
 
             for arg in param_specs:
               if arg.name == 'run-mode':
                 # Special handling for run mode.
-                cmd += "config.set_property('" + arg.name + "', Gimp.RunMode.INTERACTIVE); "
-              elif type(arg) == Gimp.ParamCoreObjectArray:
-                # Special handling for GimpCoreObjectArray parameters
+                cmd += "config.set_property('" + arg.name + "', Clay.RunMode.INTERACTIVE); "
+              elif type(arg) == Clay.ParamCoreObjectArray:
+                # Special handling for ClayCoreObjectArray parameters
                 cmd += "config.set_core_object_array('" + arg.name + "', " + arg.name.replace('-', '_') + "); "
               else:
                 cmd += "config.set_property('" + arg.name + "', " + arg.name.replace('-', '_') + "); "
@@ -221,7 +221,7 @@ def run(procedure, config, data):
         def browse(self):
             if not self.browse_dlg:
                 use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
-                dlg = GimpUi.ProcBrowserDialog(use_header_bar=use_header_bar)
+                dlg = ClayUi.ProcBrowserDialog(use_header_bar=use_header_bar)
                 Gtk.Window.set_title(dlg, _("Python Procedure Browser"))
                 Gtk.Window.set_role(dlg, PROC_NAME)
                 Gtk.Window.set_transient_for(dlg, self)
@@ -229,7 +229,7 @@ def run(procedure, config, data):
                 Gtk.Dialog.add_button(dlg, _("_Close"), Gtk.ResponseType.CLOSE)
 
                 Gtk.Dialog.set_default_response(self, Gtk.ResponseType.OK)
-                GimpUi.Dialog.set_alternative_button_order_from_array(dlg,
+                ClayUi.Dialog.set_alternative_button_order_from_array(dlg,
                                                                     [ Gtk.ResponseType.CLOSE,
                                                                       Gtk.ResponseType.APPLY ])
 
@@ -251,7 +251,7 @@ def run(procedure, config, data):
                 try:
                     logfile = open(filename, 'w')
                 except IOError as e:
-                    Gimp.message(_("Could not open '%s' for writing: %s") %
+                    Clay.message(_("Could not open '%s' for writing: %s") %
                                  (filename, e.strerror))
                     return
 
@@ -266,7 +266,7 @@ def run(procedure, config, data):
                     logfile.write(log)
                     logfile.close()
                 except IOError as e:
-                    Gimp.message(_("Could not write to '%s': %s") %
+                    Clay.message(_("Could not write to '%s': %s") %
                                  (filename, e.strerror))
                     return
 
@@ -299,32 +299,32 @@ def run(procedure, config, data):
 
     ConsoleDialog().run()
 
-    return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+    return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
 
-class PythonConsole (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class PythonConsole (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, name):
-        gettext.bindtextdomain(textdomain, Gimp.locale_directory())
-        return True, 'gimp30-python', None
+        gettext.bindtextdomain(textdomain, Clay.locale_directory())
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ PROC_NAME ]
 
     def do_create_procedure(self, name):
         if name == PROC_NAME:
-            procedure = Gimp.Procedure.new(self, name,
-                                           Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.Procedure.new(self, name,
+                                           Clay.PDBProcType.PLUGIN,
                                            run, None)
             procedure.set_menu_label(_("Python _Console"))
-            procedure.set_documentation(_("Interactive GIMP Python interpreter"),
+            procedure.set_documentation(_("Interactive Clay Python interpreter"),
                                         _("Type in commands and see results"),
                                         "")
             procedure.set_attribution("James Henstridge",
                                       "James Henstridge",
                                       "1997-1999")
             procedure.add_enum_argument ("run-mode", _("Run mode"),
-                                         _("The run mode"), Gimp.RunMode,
-                                         Gimp.RunMode.INTERACTIVE,
+                                         _("The run mode"), Clay.RunMode,
+                                         Clay.RunMode.INTERACTIVE,
                                          GObject.ParamFlags.READWRITE)
             procedure.add_string_array_aux_argument ("history",
                                                      "Command history", "Command history",
@@ -334,4 +334,4 @@ class PythonConsole (Gimp.PlugIn):
             return procedure
         return None
 
-Gimp.main(PythonConsole.__gtype__, sys.argv)
+Clay.main(PythonConsole.__gtype__, sys.argv)

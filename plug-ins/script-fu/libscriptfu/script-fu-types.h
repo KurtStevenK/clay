@@ -94,14 +94,14 @@ typedef struct
   gint          n_args;
   SFArg        *args;
   SFDrawableArity drawable_arity;
-  GType           proc_class; /* GimpProcedure or GimpImageProcedure. */
+  GType           proc_class; /* ClayProcedure or ClayImageProcedure. */
   /* is declared using script-fu-register and dialog is old-style. */
   gboolean       is_old_style;
 } SFScript;
 
 /* ScriptFu keeps array of SFArg, it's private arg specs.
  * Scripts declare args except run_mode (SF hides it.)
- * A GimpConfig has two extra leading properties, for procedure and run_mode.
+ * A ClayConfig has two extra leading properties, for procedure and run_mode.
  * A set of GParamSpecs is derived from a config and also has two extra.
  * This defines the difference in length between SF's arg spec array and a config.
  */
@@ -125,8 +125,8 @@ void          sf_resource_arg_set_name_default   (SFArg *arg,
                                                   GType  resource_type,
                                                   gchar *name_of_default);
 gchar        *sf_resource_arg_get_name_default   (SFArg *arg);
-GimpResource *sf_resource_arg_get_default        (SFArg *arg);
-GimpResource *sf_resource_arg_get_value          (SFArg *arg);
+ClayResource *sf_resource_arg_get_default        (SFArg *arg);
+ClayResource *sf_resource_arg_get_value          (SFArg *arg);
 
 void          sf_resource_arg_set                (SFArg *arg,
                                                   gint32 ID);

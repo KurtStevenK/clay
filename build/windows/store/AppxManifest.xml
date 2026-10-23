@@ -11,20 +11,20 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10">
-  <Identity Name="@IDENTITY_NAME@" Publisher="CN=8705A20E-F3A1-463E-86D3-B71D4DE2E37D" Version="@CUSTOM_GIMP_VERSION@" ProcessorArchitecture="neutral" />
+  <Identity Name="@IDENTITY_NAME@" Publisher="CN=8705A20E-F3A1-463E-86D3-B71D4DE2E37D" Version="@CUSTOM_CLAY_VERSION@" ProcessorArchitecture="neutral" />
   <Properties>
     <DisplayName>@DISPLAY_NAME@</DisplayName>
-    <PublisherDisplayName>GIMP</PublisherDisplayName>
+    <PublisherDisplayName>Clay</PublisherDisplayName>
     <Description>ms-resource:Description</Description>
     <Logo>Assets\StoreLogo.png</Logo>
     <virtualization:FileSystemWriteVirtualization>
       <virtualization:ExcludedDirectories>
-        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\GIMP</virtualization:ExcludedDirectory>
+        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\Clay</virtualization:ExcludedDirectory>
       </virtualization:ExcludedDirectories>
     </virtualization:FileSystemWriteVirtualization>
   </Properties>
   <Dependencies>
-    <!--keep MinVersion consistent with build\windows\installer\*gimp3264.iss and devel-docs\os-support.txt-->
+    <!--keep MinVersion consistent with build\windows\installer\*clay3264.iss and devel-docs\os-support.txt-->
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.20348.0" MaxVersionTested="10.0.26100.0" />
   </Dependencies>
   <Resources>
@@ -37,7 +37,7 @@
     <Resource uap:Scale="400" />
   </Resources>
   <Applications>
-    <Application Id="GIMP" Executable="VFS\ProgramFilesX64\GIMP\bin\gimp@MUTEX_SUFFIX@.exe" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="Clay" Executable="VFS\ProgramFilesX64\Clay\bin\clay@MUTEX_SUFFIX@.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements DisplayName="@DISPLAY_NAME@" Description="ms-resource:Description" BackgroundColor="transparent" Square150x150Logo="Assets\MedTile.png" Square44x44Logo="Assets\AppList.png">
         <uap:DefaultTile Wide310x150Logo="Assets\WideTile.png" Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
           <uap:ShowNameOnTiles>
@@ -75,7 +75,7 @@
         </uap:Extension>
         <uap5:Extension Category="windows.appExecutionAlias" EntryPoint="Windows.FullTrustApplication">
             <uap5:AppExecutionAlias>
-              <uap5:ExecutionAlias Alias="gimp@MUTEX_SUFFIX@.exe"/>
+              <uap5:ExecutionAlias Alias="clay@MUTEX_SUFFIX@.exe"/>
             </uap5:AppExecutionAlias>
         </uap5:Extension>
       </Extensions>
@@ -87,7 +87,7 @@
   <Extensions>
     <uap6:Extension Category="windows.loaderSearchPathOverride">
       <uap6:LoaderSearchPathOverride>
-        <uap6:LoaderSearchPathEntry FolderPath="VFS\ProgramFilesX64\GIMP\bin"/>
+        <uap6:LoaderSearchPathEntry FolderPath="VFS\ProgramFilesX64\Clay\bin"/>
       </uap6:LoaderSearchPathOverride>
     </uap6:Extension>
   </Extensions>

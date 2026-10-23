@@ -1,4 +1,4 @@
-/* This is a plugin for GIMP.
+/* This is a plugin for Clay.
  *
  * Copyright (C) 1997 Jochen Friedrich
  * Parts Copyright (C) 1995 Gert Doering
@@ -44,11 +44,11 @@
 #define _O_BINARY 0
 #endif
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "g3.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC "file-faxg3-load"
@@ -60,12 +60,12 @@ typedef struct _Faxg3Class Faxg3Class;
 
 struct _Faxg3
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _Faxg3Class
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -74,22 +74,22 @@ struct _Faxg3Class
 
 GType                   faxg3_get_type         (void);
 
-static GList          * faxg3_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * faxg3_create_procedure (GimpPlugIn            *plug_in,
+static GList          * faxg3_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * faxg3_create_procedure (ClayPlugIn            *plug_in,
                                                 const gchar           *name);
 
-static GimpValueArray * faxg3_load             (GimpProcedure         *procedure,
-                                                GimpRunMode            run_mode,
+static ClayValueArray * faxg3_load             (ClayProcedure         *procedure,
+                                                ClayRunMode            run_mode,
                                                 GFile                 *file,
-                                                GimpMetadata          *metadata,
-                                                GimpMetadataLoadFlags *flags,
-                                                GimpProcedureConfig   *config,
+                                                ClayMetadata          *metadata,
+                                                ClayMetadataLoadFlags *flags,
+                                                ClayProcedureConfig   *config,
                                                 gpointer               run_data);
 
-static GimpImage      * load_image             (GFile                 *file,
+static ClayImage      * load_image             (GFile                 *file,
                                                 GError               **error);
 
-static GimpImage      *  emitgimp              (gint                   hcol,
+static ClayImage      *  emitclay              (gint                   hcol,
                                                 gint                   row,
                                                 const gchar           *bitmap,
                                                 gint                   bperrow,
@@ -97,16 +97,16 @@ static GimpImage      *  emitgimp              (gint                   hcol,
                                                 GError               **error);
 
 
-G_DEFINE_TYPE (Faxg3, faxg3, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Faxg3, faxg3, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (FAXG3_TYPE)
+CLAY_MAIN (FAXG3_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 faxg3_class_init (Faxg3Class *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = faxg3_query_procedures;
   plug_in_class->create_procedure = faxg3_create_procedure;
@@ -119,57 +119,57 @@ faxg3_init (Faxg3 *faxg3)
 }
 
 static GList *
-faxg3_query_procedures (GimpPlugIn *plug_in)
+faxg3_query_procedures (ClayPlugIn *plug_in)
 {
   return  g_list_append (NULL, g_strdup (LOAD_PROC));
 }
 
-static GimpProcedure *
-faxg3_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+faxg3_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            faxg3_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("G3 fax image"));
+      clay_procedure_set_menu_label (procedure, _("G3 fax image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads g3 fax files",
                                         "This plug-in loads Fax G3 Image files.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Jochen Friedrich",
                                       "Jochen Friedrich, Gert Doering, "
                                       "Spencer Kimball & Peter Mattis",
                                       NULL);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/g3-fax");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "g3");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "4,string,Research");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-faxg3_load (GimpProcedure         *procedure,
-            GimpRunMode            run_mode,
+static ClayValueArray *
+faxg3_load (ClayProcedure         *procedure,
+            ClayRunMode            run_mode,
             GFile                 *file,
-            GimpMetadata          *metadata,
-            GimpMetadataLoadFlags *flags,
-            GimpProcedureConfig   *config,
+            ClayMetadata          *metadata,
+            ClayMetadataLoadFlags *flags,
+            ClayProcedureConfig   *config,
             gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -177,15 +177,15 @@ faxg3_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
@@ -222,7 +222,7 @@ static  int  rs;                /* read buffer size */
 #define MAX_COLS 1728           /* !! FIXME - command line parameter */
 
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
@@ -236,7 +236,7 @@ load_image (GFile   *file,
   int             cons_eol;
   int             last_eol_row;
 
-  GimpImage      *image   = NULL;
+  ClayImage      *image   = NULL;
   gint            bperrow = MAX_COLS/8;  /* bytes per bit row */
   gchar          *bitmap;                /* MAX_ROWS by (bperrow) bytes */
   gchar          *bp;                    /* bitmap pointer */
@@ -244,8 +244,8 @@ load_image (GFile   *file,
   gint            max_rows;              /* max. rows allocated */
   gint            col, hcol;             /* column, highest column ever used */
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /* initialize lookup trees */
   build_tree (&white, t_white);
@@ -261,7 +261,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -283,12 +283,12 @@ load_image (GFile   *file,
       close (fd);
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Error while reading '%s': %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
   rr += rs;
-  gimp_progress_update ((float) rr / rsize / 2.0);
+  clay_progress_update ((float) rr / rsize / 2.0);
 
                         /* skip GhostScript header */
   rp = (rs >= 64 && strcmp (rbuf + 1, "PC Research, Inc") == 0) ? 64 : 0;
@@ -327,7 +327,7 @@ load_image (GFile   *file,
                   break;
                 }
               rr += rs;
-              gimp_progress_update ((float) rr / rsize / 2.0);
+              clay_progress_update ((float) rr / rsize / 2.0);
               rp = 0;
               if (rs == 0)
                 goto do_write;
@@ -375,7 +375,7 @@ load_image (GFile   *file,
                         }
 
                       rr += rs;
-                      gimp_progress_update ((float) rr / rsize / 2.0);
+                      clay_progress_update ((float) rr / rsize / 2.0);
                       rp = 0;
                       if (rs == 0)
                         goto do_write;
@@ -431,7 +431,7 @@ load_image (GFile   *file,
                           break;
                         }
                       rr += rs;
-                      gimp_progress_update ((float) rr / rsize / 2.0);
+                      clay_progress_update ((float) rr / rsize / 2.0);
                       rp = 0;
                       if (rs == 0)
                         goto do_write;
@@ -524,7 +524,7 @@ load_image (GFile   *file,
   g_printerr ("consecutive EOLs: %d, max columns: %d\n", cons_eol, hcol);
 #endif
 
-  image = emitgimp (hcol, row, bitmap, bperrow, file, error);
+  image = emitclay (hcol, row, bitmap, bperrow, file, error);
 
   g_free (bitmap);
 
@@ -537,8 +537,8 @@ load_image (GFile   *file,
  * than 1728 pixels wide]
  */
 
-static GimpImage *
-emitgimp (gint         hcol,
+static ClayImage *
+emitclay (gint         hcol,
           gint         row,
           const gchar *bitmap,
           gint         bperrow,
@@ -546,8 +546,8 @@ emitgimp (gint         hcol,
           GError     **error)
 {
   GeglBuffer *buffer;
-  GimpImage  *image;
-  GimpLayer  *layer;
+  ClayImage  *image;
+  ClayLayer  *layer;
   guchar     *buf;
   guchar      tmp;
   gint        x, y;
@@ -559,11 +559,11 @@ emitgimp (gint         hcol,
   tmp = 0;
 
 #ifdef DEBUG
-  g_printerr ("emit gimp: %d x %d\n", hcol, row);
+  g_printerr ("emit clay: %d x %d\n", hcol, row);
 #endif
 
-  if (hcol > GIMP_MAX_IMAGE_SIZE || hcol <= 0 ||
-      row > GIMP_MAX_IMAGE_SIZE || row <= 0)
+  if (hcol > CLAY_MAX_IMAGE_SIZE || hcol <= 0 ||
+      row > CLAY_MAX_IMAGE_SIZE || row <= 0)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Invalid image dimensions (%d x %d). "
@@ -572,7 +572,7 @@ emitgimp (gint         hcol,
       return NULL;
     }
 
-  image = gimp_image_new (hcol, row, GIMP_GRAY);
+  image = clay_image_new (hcol, row, CLAY_GRAY);
   if (! image)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
@@ -580,17 +580,17 @@ emitgimp (gint         hcol,
       return NULL;
     }
 
-  layer = gimp_layer_new (image, _("Background"),
+  layer = clay_layer_new (image, _("Background"),
                           hcol,
                           row,
-                          GIMP_GRAY_IMAGE,
+                          CLAY_GRAY_IMAGE,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
 #ifdef DEBUG
   g_printerr ("tile height: %d\n", tile_height);
 #endif
@@ -601,7 +601,7 @@ emitgimp (gint         hcol,
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not create buffer to process image data."));
       g_object_unref (buffer);
-      gimp_image_delete(image);
+      clay_image_delete(image);
       return NULL;
     }
 
@@ -627,7 +627,7 @@ emitgimp (gint         hcol,
           gegl_buffer_set (buffer, GEGL_RECTANGLE (0, yy, hcol, tile_height), 0,
                            NULL, buf, GEGL_AUTO_ROWSTRIDE);
 
-          gimp_progress_update (0.5 + (float) y / row / 2.0);
+          clay_progress_update (0.5 + (float) y / row / 2.0);
 
           xx = 0;
           yy += tile_height;
@@ -644,7 +644,7 @@ emitgimp (gint         hcol,
                        NULL, buf, GEGL_AUTO_ROWSTRIDE);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_free (buf);
 

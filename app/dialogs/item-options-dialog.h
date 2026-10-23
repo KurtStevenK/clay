@@ -18,22 +18,22 @@
 #pragma once
 
 
-typedef void (* GimpItemOptionsCallback) (GtkWidget    *dialog,
-                                          GimpImage    *image,
-                                          GimpItem     *item,
-                                          GimpContext  *context,
+typedef void (* ClayItemOptionsCallback) (GtkWidget    *dialog,
+                                          ClayImage    *image,
+                                          ClayItem     *item,
+                                          ClayContext  *context,
                                           const gchar  *item_name,
                                           gboolean      item_visible,
-                                          GimpColorTag  item_color_tag,
+                                          ClayColorTag  item_color_tag,
                                           gboolean      item_lock_content,
                                           gboolean      item_lock_position,
                                           gboolean      item_lock_visibility,
                                           gpointer      user_data);
 
 
-GtkWidget * item_options_dialog_new (GimpImage               *image,
-                                     GimpItem                *item,
-                                     GimpContext             *context,
+GtkWidget * item_options_dialog_new (ClayImage               *image,
+                                     ClayItem                *item,
+                                     ClayContext             *context,
                                      GtkWidget               *parent,
                                      const gchar             *title,
                                      const gchar             *role,
@@ -47,11 +47,11 @@ GtkWidget * item_options_dialog_new (GimpImage               *image,
                                      const gchar             *lock_visibility_label,
                                      const gchar             *item_name,
                                      gboolean                 item_visible,
-                                     GimpColorTag             item_color_tag,
+                                     ClayColorTag             item_color_tag,
                                      gboolean                 item_lock_content,
                                      gboolean                 item_lock_position,
                                      gboolean                 item_lock_visibility,
-                                     GimpItemOptionsCallback  callback,
+                                     ClayItemOptionsCallback  callback,
                                      gpointer                 user_data);
 
 GtkWidget * item_options_dialog_get_vbox             (GtkWidget   *dialog);

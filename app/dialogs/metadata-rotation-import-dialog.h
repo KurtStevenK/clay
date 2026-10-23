@@ -21,8 +21,8 @@
 #pragma once
 
 
-GimpMetadataRotationPolicy
-metadata_rotation_import_dialog_run (GimpImage   *image,
-                                     GimpContext *context,
+ClayMetadataRotationPolicy
+metadata_rotation_import_dialog_run (ClayImage   *image,
+                                     ClayContext *context,
                                      GtkWidget   *parent,
                                      gboolean    *dont_ask);

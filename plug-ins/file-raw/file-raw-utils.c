@@ -30,7 +30,7 @@
 #include <windows.h>
 #endif
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "file-raw-utils.h"
 

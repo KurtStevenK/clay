@@ -56,34 +56,34 @@ typedef enum
 /* This enum is local to ScriptFu
  * but the notion is general to other plugins.
  *
- * A GimpImageProcedure has drawable  arity > 1.
- * A GimpProcedure often does not take any drawables, i.e. arity zero.
- * Some GimpProcedure may take drawables i.e. arity > 0,
+ * A ClayImageProcedure has drawable  arity > 1.
+ * A ClayProcedure often does not take any drawables, i.e. arity zero.
+ * Some ClayProcedure may take drawables i.e. arity > 0,
  * but the procedure's menu item is always sensitive,
  * and the drawable can be chosen in the plugin's dialog.
  *
  * Script author does not use SF-NO-DRAWABLE, for now.
  *
- * Scripts of class GimpProcedure are declared by script-fu-register.
+ * Scripts of class ClayProcedure are declared by script-fu-register.
  * Their GUI is handled by ScriptFu, script-fu-interface.c
  * An author does not declare drawable_arity.
  *
- * Scripts of class GimpImageProcedure are declared by script-fu-register-filter.
- * Their GUI is handled by libgimpui, GimpProcedureDialog.
+ * Scripts of class ClayImageProcedure are declared by script-fu-register-filter.
+ * Their GUI is handled by libclayui, ClayProcedureDialog.
  * Their drawable_arity is declared by the author of the script.
  *
- * For backward compatibility, GIMP deprecates but allows PDB procedures
+ * For backward compatibility, Clay deprecates but allows PDB procedures
  * to take a single drawable, and sets their sensitivity automatically.
  * Their drawable_arity is inferred by ScriptFu.
  * FUTURE insist that an author use script-fu-register-filter (not script-fu-register)
- * for GimpImageProcedure taking image and one or more drawables.
+ * for ClayImageProcedure taking image and one or more drawables.
  */
 typedef enum
 {
-  SF_NO_DRAWABLE = 0,       /* GimpProcedure. */
-  SF_ONE_DRAWABLE,          /* GimpImageProcedure, but only process one layer */
-  SF_ONE_OR_MORE_DRAWABLE,  /* GimpImageProcedure, multilayer capable */
-  SF_TWO_OR_MORE_DRAWABLE,  /* GimpImageProcedure, requires at least two drawables. */
+  SF_NO_DRAWABLE = 0,       /* ClayProcedure. */
+  SF_ONE_DRAWABLE,          /* ClayImageProcedure, but only process one layer */
+  SF_ONE_OR_MORE_DRAWABLE,  /* ClayImageProcedure, multilayer capable */
+  SF_TWO_OR_MORE_DRAWABLE,  /* ClayImageProcedure, requires at least two drawables. */
 } SFDrawableArity;
 
 #endif /*  __SCRIPT_FU_ENUMS__  */

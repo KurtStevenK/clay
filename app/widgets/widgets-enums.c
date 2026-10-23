@@ -1,28 +1,28 @@
 
-/* Generated data (by gimp-mkenums) */
+/* Generated data (by clay-mkenums) */
 
 #include "stamp-widgets-enums.h"
 #include "config.h"
 #include <gtk/gtk.h>
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 #include "widgets-enums.h"
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 /* enumerations from "widgets-enums.h" */
 GType
-gimp_active_color_get_type (void)
+clay_active_color_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_ACTIVE_COLOR_FOREGROUND, "GIMP_ACTIVE_COLOR_FOREGROUND", "foreground" },
-    { GIMP_ACTIVE_COLOR_BACKGROUND, "GIMP_ACTIVE_COLOR_BACKGROUND", "background" },
+    { CLAY_ACTIVE_COLOR_FOREGROUND, "CLAY_ACTIVE_COLOR_FOREGROUND", "foreground" },
+    { CLAY_ACTIVE_COLOR_BACKGROUND, "CLAY_ACTIVE_COLOR_BACKGROUND", "background" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_ACTIVE_COLOR_FOREGROUND, NC_("active-color", "Foreground"), NULL },
-    { GIMP_ACTIVE_COLOR_BACKGROUND, NC_("active-color", "Background"), NULL },
+    { CLAY_ACTIVE_COLOR_FOREGROUND, NC_("active-color", "Foreground"), NULL },
+    { CLAY_ACTIVE_COLOR_BACKGROUND, NC_("active-color", "Background"), NULL },
     { 0, NULL, NULL }
   };
 
@@ -30,28 +30,28 @@ gimp_active_color_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpActiveColor", values);
-      gimp_type_set_translation_context (type, "active-color");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayActiveColor", values);
+      clay_type_set_translation_context (type, "active-color");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_circle_background_get_type (void)
+clay_circle_background_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_CIRCLE_BACKGROUND_PLAIN, "GIMP_CIRCLE_BACKGROUND_PLAIN", "plain" },
-    { GIMP_CIRCLE_BACKGROUND_HSV, "GIMP_CIRCLE_BACKGROUND_HSV", "hsv" },
+    { CLAY_CIRCLE_BACKGROUND_PLAIN, "CLAY_CIRCLE_BACKGROUND_PLAIN", "plain" },
+    { CLAY_CIRCLE_BACKGROUND_HSV, "CLAY_CIRCLE_BACKGROUND_HSV", "hsv" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_CIRCLE_BACKGROUND_PLAIN, NC_("circle-background", "Plain"), NULL },
-    { GIMP_CIRCLE_BACKGROUND_HSV, NC_("circle-background", "HSV"), NULL },
+    { CLAY_CIRCLE_BACKGROUND_PLAIN, NC_("circle-background", "Plain"), NULL },
+    { CLAY_CIRCLE_BACKGROUND_HSV, NC_("circle-background", "HSV"), NULL },
     { 0, NULL, NULL }
   };
 
@@ -59,30 +59,30 @@ gimp_circle_background_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpCircleBackground", values);
-      gimp_type_set_translation_context (type, "circle-background");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayCircleBackground", values);
+      clay_type_set_translation_context (type, "circle-background");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_color_dialog_state_get_type (void)
+clay_color_dialog_state_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_COLOR_DIALOG_OK, "GIMP_COLOR_DIALOG_OK", "ok" },
-    { GIMP_COLOR_DIALOG_CANCEL, "GIMP_COLOR_DIALOG_CANCEL", "cancel" },
-    { GIMP_COLOR_DIALOG_UPDATE, "GIMP_COLOR_DIALOG_UPDATE", "update" },
+    { CLAY_COLOR_DIALOG_OK, "CLAY_COLOR_DIALOG_OK", "ok" },
+    { CLAY_COLOR_DIALOG_CANCEL, "CLAY_COLOR_DIALOG_CANCEL", "cancel" },
+    { CLAY_COLOR_DIALOG_UPDATE, "CLAY_COLOR_DIALOG_UPDATE", "update" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_COLOR_DIALOG_OK, "GIMP_COLOR_DIALOG_OK", NULL },
-    { GIMP_COLOR_DIALOG_CANCEL, "GIMP_COLOR_DIALOG_CANCEL", NULL },
-    { GIMP_COLOR_DIALOG_UPDATE, "GIMP_COLOR_DIALOG_UPDATE", NULL },
+    { CLAY_COLOR_DIALOG_OK, "CLAY_COLOR_DIALOG_OK", NULL },
+    { CLAY_COLOR_DIALOG_CANCEL, "CLAY_COLOR_DIALOG_CANCEL", NULL },
+    { CLAY_COLOR_DIALOG_UPDATE, "CLAY_COLOR_DIALOG_UPDATE", NULL },
     { 0, NULL, NULL }
   };
 
@@ -90,32 +90,32 @@ gimp_color_dialog_state_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpColorDialogState", values);
-      gimp_type_set_translation_context (type, "color-dialog-state");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayColorDialogState", values);
+      clay_type_set_translation_context (type, "color-dialog-state");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_color_pick_target_get_type (void)
+clay_color_pick_target_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_COLOR_PICK_TARGET_NONE, "GIMP_COLOR_PICK_TARGET_NONE", "none" },
-    { GIMP_COLOR_PICK_TARGET_FOREGROUND, "GIMP_COLOR_PICK_TARGET_FOREGROUND", "foreground" },
-    { GIMP_COLOR_PICK_TARGET_BACKGROUND, "GIMP_COLOR_PICK_TARGET_BACKGROUND", "background" },
-    { GIMP_COLOR_PICK_TARGET_PALETTE, "GIMP_COLOR_PICK_TARGET_PALETTE", "palette" },
+    { CLAY_COLOR_PICK_TARGET_NONE, "CLAY_COLOR_PICK_TARGET_NONE", "none" },
+    { CLAY_COLOR_PICK_TARGET_FOREGROUND, "CLAY_COLOR_PICK_TARGET_FOREGROUND", "foreground" },
+    { CLAY_COLOR_PICK_TARGET_BACKGROUND, "CLAY_COLOR_PICK_TARGET_BACKGROUND", "background" },
+    { CLAY_COLOR_PICK_TARGET_PALETTE, "CLAY_COLOR_PICK_TARGET_PALETTE", "palette" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_COLOR_PICK_TARGET_NONE, NC_("color-pick-target", "Pick only"), NULL },
-    { GIMP_COLOR_PICK_TARGET_FOREGROUND, NC_("color-pick-target", "Set foreground color"), NULL },
-    { GIMP_COLOR_PICK_TARGET_BACKGROUND, NC_("color-pick-target", "Set background color"), NULL },
-    { GIMP_COLOR_PICK_TARGET_PALETTE, NC_("color-pick-target", "Add to palette"), NULL },
+    { CLAY_COLOR_PICK_TARGET_NONE, NC_("color-pick-target", "Pick only"), NULL },
+    { CLAY_COLOR_PICK_TARGET_FOREGROUND, NC_("color-pick-target", "Set foreground color"), NULL },
+    { CLAY_COLOR_PICK_TARGET_BACKGROUND, NC_("color-pick-target", "Set background color"), NULL },
+    { CLAY_COLOR_PICK_TARGET_PALETTE, NC_("color-pick-target", "Add to palette"), NULL },
     { 0, NULL, NULL }
   };
 
@@ -123,30 +123,30 @@ gimp_color_pick_target_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpColorPickTarget", values);
-      gimp_type_set_translation_context (type, "color-pick-target");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayColorPickTarget", values);
+      clay_type_set_translation_context (type, "color-pick-target");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_color_pick_state_get_type (void)
+clay_color_pick_state_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_COLOR_PICK_STATE_START, "GIMP_COLOR_PICK_STATE_START", "start" },
-    { GIMP_COLOR_PICK_STATE_UPDATE, "GIMP_COLOR_PICK_STATE_UPDATE", "update" },
-    { GIMP_COLOR_PICK_STATE_END, "GIMP_COLOR_PICK_STATE_END", "end" },
+    { CLAY_COLOR_PICK_STATE_START, "CLAY_COLOR_PICK_STATE_START", "start" },
+    { CLAY_COLOR_PICK_STATE_UPDATE, "CLAY_COLOR_PICK_STATE_UPDATE", "update" },
+    { CLAY_COLOR_PICK_STATE_END, "CLAY_COLOR_PICK_STATE_END", "end" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_COLOR_PICK_STATE_START, "GIMP_COLOR_PICK_STATE_START", NULL },
-    { GIMP_COLOR_PICK_STATE_UPDATE, "GIMP_COLOR_PICK_STATE_UPDATE", NULL },
-    { GIMP_COLOR_PICK_STATE_END, "GIMP_COLOR_PICK_STATE_END", NULL },
+    { CLAY_COLOR_PICK_STATE_START, "CLAY_COLOR_PICK_STATE_START", NULL },
+    { CLAY_COLOR_PICK_STATE_UPDATE, "CLAY_COLOR_PICK_STATE_UPDATE", NULL },
+    { CLAY_COLOR_PICK_STATE_END, "CLAY_COLOR_PICK_STATE_END", NULL },
     { 0, NULL, NULL }
   };
 
@@ -154,28 +154,28 @@ gimp_color_pick_state_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpColorPickState", values);
-      gimp_type_set_translation_context (type, "color-pick-state");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayColorPickState", values);
+      clay_type_set_translation_context (type, "color-pick-state");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_histogram_scale_get_type (void)
+clay_histogram_scale_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_HISTOGRAM_SCALE_LINEAR, "GIMP_HISTOGRAM_SCALE_LINEAR", "linear" },
-    { GIMP_HISTOGRAM_SCALE_LOGARITHMIC, "GIMP_HISTOGRAM_SCALE_LOGARITHMIC", "logarithmic" },
+    { CLAY_HISTOGRAM_SCALE_LINEAR, "CLAY_HISTOGRAM_SCALE_LINEAR", "linear" },
+    { CLAY_HISTOGRAM_SCALE_LOGARITHMIC, "CLAY_HISTOGRAM_SCALE_LOGARITHMIC", "logarithmic" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_HISTOGRAM_SCALE_LINEAR, NC_("histogram-scale", "Linear histogram"), NULL },
-    { GIMP_HISTOGRAM_SCALE_LOGARITHMIC, NC_("histogram-scale", "Logarithmic histogram"), NULL },
+    { CLAY_HISTOGRAM_SCALE_LINEAR, NC_("histogram-scale", "Linear histogram"), NULL },
+    { CLAY_HISTOGRAM_SCALE_LOGARITHMIC, NC_("histogram-scale", "Logarithmic histogram"), NULL },
     { 0, NULL, NULL }
   };
 
@@ -183,40 +183,40 @@ gimp_histogram_scale_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpHistogramScale", values);
-      gimp_type_set_translation_context (type, "histogram-scale");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayHistogramScale", values);
+      clay_type_set_translation_context (type, "histogram-scale");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_tab_style_get_type (void)
+clay_tab_style_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_TAB_STYLE_ICON, "GIMP_TAB_STYLE_ICON", "icon" },
-    { GIMP_TAB_STYLE_PREVIEW, "GIMP_TAB_STYLE_PREVIEW", "preview" },
-    { GIMP_TAB_STYLE_NAME, "GIMP_TAB_STYLE_NAME", "name" },
-    { GIMP_TAB_STYLE_BLURB, "GIMP_TAB_STYLE_BLURB", "blurb" },
-    { GIMP_TAB_STYLE_ICON_NAME, "GIMP_TAB_STYLE_ICON_NAME", "icon-name" },
-    { GIMP_TAB_STYLE_ICON_BLURB, "GIMP_TAB_STYLE_ICON_BLURB", "icon-blurb" },
-    { GIMP_TAB_STYLE_PREVIEW_NAME, "GIMP_TAB_STYLE_PREVIEW_NAME", "preview-name" },
-    { GIMP_TAB_STYLE_PREVIEW_BLURB, "GIMP_TAB_STYLE_PREVIEW_BLURB", "preview-blurb" },
+    { CLAY_TAB_STYLE_ICON, "CLAY_TAB_STYLE_ICON", "icon" },
+    { CLAY_TAB_STYLE_PREVIEW, "CLAY_TAB_STYLE_PREVIEW", "preview" },
+    { CLAY_TAB_STYLE_NAME, "CLAY_TAB_STYLE_NAME", "name" },
+    { CLAY_TAB_STYLE_BLURB, "CLAY_TAB_STYLE_BLURB", "blurb" },
+    { CLAY_TAB_STYLE_ICON_NAME, "CLAY_TAB_STYLE_ICON_NAME", "icon-name" },
+    { CLAY_TAB_STYLE_ICON_BLURB, "CLAY_TAB_STYLE_ICON_BLURB", "icon-blurb" },
+    { CLAY_TAB_STYLE_PREVIEW_NAME, "CLAY_TAB_STYLE_PREVIEW_NAME", "preview-name" },
+    { CLAY_TAB_STYLE_PREVIEW_BLURB, "CLAY_TAB_STYLE_PREVIEW_BLURB", "preview-blurb" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_TAB_STYLE_ICON, NC_("tab-style", "Icon"), NULL },
-    { GIMP_TAB_STYLE_PREVIEW, NC_("tab-style", "Current status"), NULL },
-    { GIMP_TAB_STYLE_NAME, NC_("tab-style", "Text"), NULL },
-    { GIMP_TAB_STYLE_BLURB, NC_("tab-style", "Description"), NULL },
-    { GIMP_TAB_STYLE_ICON_NAME, NC_("tab-style", "Icon & text"), NULL },
-    { GIMP_TAB_STYLE_ICON_BLURB, NC_("tab-style", "Icon & desc"), NULL },
-    { GIMP_TAB_STYLE_PREVIEW_NAME, NC_("tab-style", "Status & text"), NULL },
-    { GIMP_TAB_STYLE_PREVIEW_BLURB, NC_("tab-style", "Status & desc"), NULL },
+    { CLAY_TAB_STYLE_ICON, NC_("tab-style", "Icon"), NULL },
+    { CLAY_TAB_STYLE_PREVIEW, NC_("tab-style", "Current status"), NULL },
+    { CLAY_TAB_STYLE_NAME, NC_("tab-style", "Text"), NULL },
+    { CLAY_TAB_STYLE_BLURB, NC_("tab-style", "Description"), NULL },
+    { CLAY_TAB_STYLE_ICON_NAME, NC_("tab-style", "Icon & text"), NULL },
+    { CLAY_TAB_STYLE_ICON_BLURB, NC_("tab-style", "Icon & desc"), NULL },
+    { CLAY_TAB_STYLE_PREVIEW_NAME, NC_("tab-style", "Status & text"), NULL },
+    { CLAY_TAB_STYLE_PREVIEW_BLURB, NC_("tab-style", "Status & desc"), NULL },
     { 0, NULL, NULL }
   };
 
@@ -224,28 +224,28 @@ gimp_tab_style_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpTabStyle", values);
-      gimp_type_set_translation_context (type, "tab-style");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayTabStyle", values);
+      clay_type_set_translation_context (type, "tab-style");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;
 }
 
 GType
-gimp_tag_entry_mode_get_type (void)
+clay_tag_entry_mode_get_type (void)
 {
   static const GEnumValue values[] =
   {
-    { GIMP_TAG_ENTRY_MODE_QUERY, "GIMP_TAG_ENTRY_MODE_QUERY", "query" },
-    { GIMP_TAG_ENTRY_MODE_ASSIGN, "GIMP_TAG_ENTRY_MODE_ASSIGN", "assign" },
+    { CLAY_TAG_ENTRY_MODE_QUERY, "CLAY_TAG_ENTRY_MODE_QUERY", "query" },
+    { CLAY_TAG_ENTRY_MODE_ASSIGN, "CLAY_TAG_ENTRY_MODE_ASSIGN", "assign" },
     { 0, NULL, NULL }
   };
 
-  static const GimpEnumDesc descs[] =
+  static const ClayEnumDesc descs[] =
   {
-    { GIMP_TAG_ENTRY_MODE_QUERY, "GIMP_TAG_ENTRY_MODE_QUERY", NULL },
-    { GIMP_TAG_ENTRY_MODE_ASSIGN, "GIMP_TAG_ENTRY_MODE_ASSIGN", NULL },
+    { CLAY_TAG_ENTRY_MODE_QUERY, "CLAY_TAG_ENTRY_MODE_QUERY", NULL },
+    { CLAY_TAG_ENTRY_MODE_ASSIGN, "CLAY_TAG_ENTRY_MODE_ASSIGN", NULL },
     { 0, NULL, NULL }
   };
 
@@ -253,9 +253,9 @@ gimp_tag_entry_mode_get_type (void)
 
   if (G_UNLIKELY (! type))
     {
-      type = g_enum_register_static ("GimpTagEntryMode", values);
-      gimp_type_set_translation_context (type, "tag-entry-mode");
-      gimp_enum_set_value_descriptions (type, descs);
+      type = g_enum_register_static ("ClayTagEntryMode", values);
+      clay_type_set_translation_context (type, "tag-entry-mode");
+      clay_enum_set_value_descriptions (type, descs);
     }
 
   return type;

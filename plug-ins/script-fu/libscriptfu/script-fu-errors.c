@@ -82,7 +82,7 @@ script_error (scheme        *sc,
   /* Logs to domain "scriptfu" since G_LOG_DOMAIN is set to that. */
   g_debug ("%s", error_message);
 
-  /* Return message that will cross the GimpProtocol in a GError in return values
+  /* Return message that will cross the ClayProtocol in a GError in return values
    * to be displayed to GUI user.
    */
    /* FUTURE prefix with "ScriptFu: in script," */
@@ -287,7 +287,7 @@ debug_in_arg (scheme           *sc,
 }
 
 /* Log GValue: its value and its GType
- * FUTURE: for Gimp types, gimp_item_get_id (GIMP_ITEM (<value>)));
+ * FUTURE: for Clay types, clay_item_get_id (CLAY_ITEM (<value>)));
  */
 void
 debug_gvalue (const GValue     *value)

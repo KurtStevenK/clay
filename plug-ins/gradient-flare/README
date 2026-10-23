@@ -6,7 +6,7 @@
 
 ==========================================================================
 
-  GFlare is a plug-in for GIMP.  The name "GFlare" is short for
+  GFlare is a plug-in for Clay.  The name "GFlare" is short for
 "Gradient Flare".  It renders lense flare effect using custom
 gradients.  The basic idea is suggested by Marcelo Malheiros,
 originally based on a 3DStudio MAX plug-in called LenZFX:
@@ -19,12 +19,12 @@ INSTALL:
 2) Type "make install".
 
 3) Type "make install-data" if needed. (It copies sample gradients and
-   gflares under ~/.gimp)
+   gflares under ~/.clay)
 
-3) Add new entry to ~/.gimp/gimprc as
-     (gflare-path "${gimp_dir}/gflares:${gimp_data_dir}/gflares")
+3) Add new entry to ~/.clay/clayrc as
+     (gflare-path "${clay_dir}/gflares:${clay_data_dir}/gflares")
 
-3) Run GIMP. The menu path is <Image>/Filters/Effects/GFlare.
+3) Run Clay. The menu path is <Image>/Filters/Effects/GFlare.
 
 
 HOW TO USE IT:

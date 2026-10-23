@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -20,9 +20,9 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include <libgimp/stdplugins-intl.h>
+#include <libclay/stdplugins-intl.h>
 
 #include "endian_rw.h"
 #include "imath.h"
@@ -42,7 +42,7 @@ saturate (gfloat a)
 }
 
 void
-decode_ycocg (GimpDrawable *drawable)
+decode_ycocg (ClayDrawable *drawable)
 {
   GeglBuffer   *buffer;
   const Babl   *format;
@@ -53,7 +53,7 @@ decode_ycocg (GimpDrawable *drawable)
   gfloat        Y, Co, Cg;
   gfloat        R, G, B;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   format = babl_format ("R'G'B'A u8");
 
@@ -67,7 +67,7 @@ decode_ycocg (GimpDrawable *drawable)
                    GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
   /* Translators: Do not translate YCoCg, it's the name of a colorspace */
-  gimp_progress_init (_("Decoding YCoCg pixels..."));
+  clay_progress_init (_("Decoding YCoCg pixels..."));
 
   for (i = 0; i < num_pixels; ++i)
     {
@@ -91,17 +91,17 @@ decode_ycocg (GimpDrawable *drawable)
       data[4 * i + 2] = (guchar) (B * 255.0f);
 
       if ((i & 0x7fff) == 0)
-        gimp_progress_update ((gdouble) i / (gdouble) num_pixels);
+        clay_progress_update ((gdouble) i / (gdouble) num_pixels);
     }
 
   gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, w, h), 0, format, data,
                    GEGL_AUTO_ROWSTRIDE);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   gegl_buffer_flush (buffer);
 
-  gimp_drawable_update (drawable, 0, 0, w, h);
+  clay_drawable_update (drawable, 0, 0, w, h);
 
   g_free (data);
 
@@ -109,7 +109,7 @@ decode_ycocg (GimpDrawable *drawable)
 }
 
 void
-decode_ycocg_scaled (GimpDrawable *drawable)
+decode_ycocg_scaled (ClayDrawable *drawable)
 {
   GeglBuffer   *buffer;
   const Babl   *format;
@@ -120,7 +120,7 @@ decode_ycocg_scaled (GimpDrawable *drawable)
   gfloat        Y, Co, Cg;
   gfloat        R, G, B, s;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   format = babl_format ("R'G'B'A u8");
 
@@ -134,7 +134,7 @@ decode_ycocg_scaled (GimpDrawable *drawable)
                    GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
                    
   /* Translators: Do not translate YCoCg, it's the name of a colorspace */
-  gimp_progress_init (_("Decoding YCoCg (scaled) pixels..."));
+  clay_progress_init (_("Decoding YCoCg (scaled) pixels..."));
 
   for (i = 0; i < num_pixels; ++i)
     {
@@ -161,17 +161,17 @@ decode_ycocg_scaled (GimpDrawable *drawable)
       data[4 * i + 3] = 255;
 
       if ((i & 0x7fff) == 0)
-        gimp_progress_update ((gdouble) i / (gdouble) num_pixels);
+        clay_progress_update ((gdouble) i / (gdouble) num_pixels);
     }
 
   gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, w, h), 0, format, data,
                    GEGL_AUTO_ROWSTRIDE);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   gegl_buffer_flush (buffer);
 
-  gimp_drawable_update (drawable, 0, 0, w, h);
+  clay_drawable_update (drawable, 0, 0, w, h);
 
   g_free (data);
 
@@ -179,7 +179,7 @@ decode_ycocg_scaled (GimpDrawable *drawable)
 }
 
 void
-decode_alpha_exponent (GimpDrawable *drawable)
+decode_alpha_exponent (ClayDrawable *drawable)
 {
   GeglBuffer *buffer;
   const Babl *format;
@@ -188,7 +188,7 @@ decode_alpha_exponent (GimpDrawable *drawable)
   guint       i, w, h;
   gint        R, G, B, A;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   format = babl_format ("R'G'B'A u8");
 
@@ -201,7 +201,7 @@ decode_alpha_exponent (GimpDrawable *drawable)
   gegl_buffer_get (buffer, GEGL_RECTANGLE (0, 0, w, h), 1.0, format, data,
                    GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
-  gimp_progress_init (_("Decoding Alpha-exponent pixels..."));
+  clay_progress_init (_("Decoding Alpha-exponent pixels..."));
 
   for (i = 0; i < num_pixels; ++i)
     {
@@ -221,17 +221,17 @@ decode_alpha_exponent (GimpDrawable *drawable)
       data[4 * i + 3] = A;
 
       if ((i & 0x7fff) == 0)
-        gimp_progress_update ((gdouble) i / (gdouble) num_pixels);
+        clay_progress_update ((gdouble) i / (gdouble) num_pixels);
     }
 
   gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, w, h), 0, format, data,
                    GEGL_AUTO_ROWSTRIDE);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   gegl_buffer_flush (buffer);
 
-  gimp_drawable_update (drawable, 0, 0, w, h);
+  clay_drawable_update (drawable, 0, 0, w, h);
 
   g_free (data);
 

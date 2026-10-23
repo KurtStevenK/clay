@@ -19,16 +19,16 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "print.h"
 #include "print-draw-page.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
-static cairo_surface_t * print_surface_from_drawable (GimpDrawable    *drawable,
+static cairo_surface_t * print_surface_from_drawable (ClayDrawable    *drawable,
                                                       GError         **error);
 
 static void              print_draw_crop_marks       (GtkPrintContext *context,
@@ -88,27 +88,27 @@ print_draw_page (GtkPrintContext *context,
 }
 
 static cairo_surface_t *
-print_surface_from_drawable (GimpDrawable  *drawable,
+print_surface_from_drawable (ClayDrawable  *drawable,
                              GError       **error)
 {
-  GeglBuffer         *buffer   = gimp_drawable_get_buffer (drawable);
+  GeglBuffer         *buffer   = clay_drawable_get_buffer (drawable);
   const Babl         *format;
   cairo_surface_t    *surface;
   cairo_status_t      status;
-  const gint          width    = gimp_drawable_get_width  (drawable);
-  const gint          height   = gimp_drawable_get_height (drawable);
+  const gint          width    = clay_drawable_get_width  (drawable);
+  const gint          height   = clay_drawable_get_height (drawable);
   GeglBufferIterator *iter;
   guchar             *pixels;
   gint                stride;
   guint               count    = 0;
   guint64             done     = 0;
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     format = babl_format ("cairo-ARGB32");
   else
     format = babl_format ("cairo-RGB24");
 
-  surface = cairo_image_surface_create (gimp_drawable_has_alpha (drawable) ?
+  surface = cairo_image_surface_create (clay_drawable_has_alpha (drawable) ?
                                         CAIRO_FORMAT_ARGB32 :
                                         CAIRO_FORMAT_RGB24,
                                         width, height);
@@ -120,14 +120,14 @@ print_surface_from_drawable (GimpDrawable  *drawable,
         {
         case CAIRO_STATUS_INVALID_SIZE:
           g_set_error_literal (error,
-                               GIMP_PLUGIN_PRINT_ERROR,
-                               GIMP_PLUGIN_PRINT_ERROR_FAILED,
+                               CLAY_PLUGIN_PRINT_ERROR,
+                               CLAY_PLUGIN_PRINT_ERROR_FAILED,
                                _("Cannot handle the size (either width or height) of the image."));
           break;
         default:
           g_set_error (error,
-                       GIMP_PLUGIN_PRINT_ERROR,
-                       GIMP_PLUGIN_PRINT_ERROR_FAILED,
+                       CLAY_PLUGIN_PRINT_ERROR,
+                       CLAY_PLUGIN_PRINT_ERROR_FAILED,
                        "Cairo error: %s",
                        cairo_status_to_string (status));
           break;
@@ -161,14 +161,14 @@ print_surface_from_drawable (GimpDrawable  *drawable,
       done += (guint64) iter->items[0].roi.height * iter->items[0].roi.width;
 
       if (count++ % 16 == 0)
-        gimp_progress_update ((gdouble) done / ((gdouble) width * height));
+        clay_progress_update ((gdouble) done / ((gdouble) width * height));
     }
 
   g_object_unref (buffer);
 
   cairo_surface_mark_dirty (surface);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return surface;
 }

@@ -1,7 +1,7 @@
-<!-- simple DTD for GIMP authors -->
+<!-- simple DTD for Clay authors -->
 
-<!ELEMENT gimp-authors (creator+, maintainer+, contributor+)>
-<!ATTLIST gimp-authors xmlns CDATA #FIXED "http://purl.org/dc/elements/1.1/">
+<!ELEMENT clay-authors (creator+, maintainer+, contributor+)>
+<!ATTLIST clay-authors xmlns CDATA #FIXED "http://purl.org/dc/elements/1.1/">
 
 <!ELEMENT creator (#PCDATA)>
 <!ATTLIST creator role CDATA #REQUIRED>

@@ -40,5 +40,5 @@ install_data([
     # file format specific config files for export testing
     'bmp-export-tests.ini',
   ],
-  install_dir: gimpplugindir / 'plug-ins' / 'test-file-plug-ins' / 'tests',
+  install_dir: clayplugindir / 'plug-ins' / 'test-file-plug-ins' / 'tests',
 )

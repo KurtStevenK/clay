@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -33,8 +33,8 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "gfig.h"
 #include "gfig-style.h"
@@ -52,24 +52,24 @@
 #include "gfig-spiral.h"
 #include "gfig-star.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define GFIG_HEADER      "GFIG Version 0.2\n"
 
 GType                   gfig_get_type         (void);
 
-static void             gimp_gfig_finalize    (GObject              *object);
+static void             clay_gfig_finalize    (GObject              *object);
 
-static GList          * gfig_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * gfig_create_procedure (GimpPlugIn           *plug_in,
+static GList          * gfig_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * gfig_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * gfig_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * gfig_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
 static void             on_app_activate       (GApplication         *gapp,
@@ -80,9 +80,9 @@ static gint             load_options          (GFigObj              *gfig,
 
 
 
-G_DEFINE_TYPE (GimpGfig, gimp_gfig, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayGfig, clay_gfig, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_TYPE_GFIG)
+CLAY_MAIN (CLAY_TYPE_GFIG)
 DEFINE_STD_SET_I18N
 
 
@@ -116,12 +116,12 @@ GdkPixbuf   *back_pixbuf = NULL;
 
 
 static void
-gimp_gfig_class_init (GimpGfigClass *klass)
+clay_gfig_class_init (ClayGfigClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
   GObjectClass    *object_class  = G_OBJECT_CLASS (klass);
 
-  object_class->finalize          = gimp_gfig_finalize;
+  object_class->finalize          = clay_gfig_finalize;
 
   plug_in_class->query_procedures = gfig_query_procedures;
   plug_in_class->create_procedure = gfig_create_procedure;
@@ -129,47 +129,47 @@ gimp_gfig_class_init (GimpGfigClass *klass)
 }
 
 static void
-gimp_gfig_init (GimpGfig *gfig)
+clay_gfig_init (ClayGfig *gfig)
 {
 }
 
 static void
-gimp_gfig_finalize (GObject *object)
+clay_gfig_finalize (GObject *object)
 {
-  GimpGfig *gfig = GIMP_GFIG (object);
+  ClayGfig *gfig = CLAY_GFIG (object);
 
-  G_OBJECT_CLASS (gimp_gfig_parent_class)->finalize (object);
+  G_OBJECT_CLASS (clay_gfig_parent_class)->finalize (object);
 
   g_clear_object (&gfig->builder);
 }
 
 
 static GList *
-gfig_query_procedures (GimpPlugIn *plug_in)
+gfig_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-gfig_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+gfig_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             gfig_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Gfig..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Render");
+      clay_procedure_set_menu_label (procedure, _("_Gfig..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Render");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create geometric shapes"),
                                         "Draw Vector Graphics and paint them "
                                         "onto your images. Gfig allows you "
@@ -183,7 +183,7 @@ gfig_create_procedure (GimpPlugIn  *plug_in,
                                         "Gfig objects can also be used to "
                                         "create selections.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Andy Thomas",
                                       "Andy Thomas",
                                       "1997");
@@ -192,29 +192,29 @@ gfig_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-gfig_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+gfig_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpDrawable      *drawable;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayDrawable      *drawable;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
   gint               pwidth, pheight;
-  GimpGfig          *gfig;
+  ClayGfig          *gfig;
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -222,7 +222,7 @@ gfig_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  gfig          = GIMP_GFIG (gimp_procedure_get_plug_in (procedure));
+  gfig          = CLAY_GFIG (clay_procedure_get_plug_in (procedure));
 #if GLIB_CHECK_VERSION(2,74,0)
   gfig->app     = gtk_application_new (NULL, G_APPLICATION_DEFAULT_FLAGS);
 #else
@@ -230,7 +230,7 @@ gfig_run (GimpProcedure        *procedure,
 #endif
   gfig->success = FALSE;
 
-  gfig->builder = gtk_builder_new_from_resource ("/org/gimp/gfig/gfig-menu.ui");
+  gfig->builder = gtk_builder_new_from_resource ("/org/clay/gfig/gfig-menu.ui");
 
   gfig_context = g_new0 (GFigContext, 1);
 
@@ -240,22 +240,22 @@ gfig_run (GimpProcedure        *procedure,
   gfig_context->image    = image;
   gfig_context->drawable = drawable;
 
-  gimp_image_undo_group_start (gfig_context->image);
+  clay_image_undo_group_start (gfig_context->image);
 
-  gimp_context_push ();
+  clay_context_push ();
 
   /* TMP Hack - clear any selections */
-  if (! gimp_selection_is_empty (gfig_context->image))
-    gimp_selection_none (gfig_context->image);
+  if (! clay_selection_is_empty (gfig_context->image))
+    clay_selection_none (gfig_context->image);
 
-  if (! gimp_drawable_mask_intersect (drawable, &sel_x, &sel_y,
+  if (! clay_drawable_mask_intersect (drawable, &sel_x, &sel_y,
                                       &sel_width, &sel_height))
     {
-      gimp_context_pop ();
+      clay_context_pop ();
 
-      gimp_image_undo_group_end (gfig_context->image);
+      clay_image_undo_group_end (gfig_context->image);
 
-      return gimp_procedure_new_return_values (procedure, status, NULL);
+      return clay_procedure_new_return_values (procedure, status, NULL);
     }
 
   /* Calculate preview size */
@@ -284,44 +284,44 @@ gfig_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_INTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
       g_signal_connect (gfig->app, "activate", G_CALLBACK (on_app_activate), gfig);
       g_application_run (G_APPLICATION (gfig->app), 0, NULL);
       g_clear_object (&gfig->app);
 
       if (! gfig->success)
         {
-          gimp_image_undo_group_end (gfig_context->image);
+          clay_image_undo_group_end (gfig_context->image);
 
-          return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL,
+          return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL,
                                                    NULL);
         }
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-      status = GIMP_PDB_CALLING_ERROR;
+    case CLAY_RUN_NONINTERACTIVE:
+      status = CLAY_PDB_CALLING_ERROR;
       break;
 
     default:
       break;
     }
 
-  gimp_context_pop ();
+  clay_context_pop ();
 
-  gimp_image_undo_group_end (gfig_context->image);
+  clay_image_undo_group_end (gfig_context->image);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, status, NULL);
+  return clay_procedure_new_return_values (procedure, status, NULL);
 }
 
 static void
 on_app_activate (GApplication *gapp,
                  gpointer      user_data)
 {
-  GimpGfig *gfig = GIMP_GFIG (user_data);
+  ClayGfig *gfig = CLAY_GFIG (user_data);
 
   gfig_dialog (gfig);
 
@@ -465,7 +465,7 @@ gfig_new (void)
 }
 
 static void
-gfig_load_objs (GimpGfig *gfig,
+gfig_load_objs (ClayGfig *gfig,
                 GFigObj  *gfig_obj,
                 gint      load_count,
                 FILE     *fp)
@@ -503,7 +503,7 @@ gfig_load_objs (GimpGfig *gfig,
 }
 
 GFigObj *
-gfig_load (GimpGfig    *gfig,
+gfig_load (ClayGfig    *gfig,
            const gchar *filename,
            const gchar *name)
 {
@@ -527,7 +527,7 @@ gfig_load (GimpGfig    *gfig,
   if (!fp)
     {
       g_message (_("Could not open '%s' for reading: %s"),
-                 gimp_filename_to_utf8 (filename), g_strerror (errno));
+                 clay_filename_to_utf8 (filename), g_strerror (errno));
       return NULL;
     }
 
@@ -554,7 +554,7 @@ gfig_load (GimpGfig    *gfig,
   if (strcmp (magic1, "GFIG") || strcmp (magic2, "Version"))
     {
       g_message ("File '%s' is not a gfig file",
-                  gimp_filename_to_utf8 (gfig_obj->filename));
+                  clay_filename_to_utf8 (gfig_obj->filename));
       gfig_free (gfig_obj);
       fclose (fp);
       return NULL;
@@ -583,7 +583,7 @@ gfig_load (GimpGfig    *gfig,
   if (load_options (gfig_obj, fp))
     {
       g_message ("File '%s' corrupt file - Line %d Option section incorrect",
-                 gimp_filename_to_utf8 (filename), line_no);
+                 clay_filename_to_utf8 (filename), line_no);
       gfig_free (gfig_obj);
       fclose (fp);
       return NULL;
@@ -592,7 +592,7 @@ gfig_load (GimpGfig    *gfig,
   if (gfig_load_styles (gfig_obj, fp))
     {
       g_message ("File '%s' corrupt file - Line %d Option section incorrect",
-                 gimp_filename_to_utf8 (filename), line_no);
+                 clay_filename_to_utf8 (filename), line_no);
       gfig_free (gfig_obj);
       fclose (fp);
       return NULL;
@@ -609,7 +609,7 @@ gfig_load (GimpGfig    *gfig,
   if (chk_count != load_count)
     {
       g_message ("File '%s' corrupt file - Line %d Object count to small",
-                 gimp_filename_to_utf8 (filename), line_no);
+                 clay_filename_to_utf8 (filename), line_no);
       gfig_free (gfig_obj);
       fclose (fp);
       return NULL;
@@ -833,62 +833,62 @@ gfig_save_as_string (void)
 gboolean
 gfig_save_as_parasite (void)
 {
-  GimpParasite *parasite;
+  ClayParasite *parasite;
   GString       *string;
 
   string = gfig_save_as_string ();
 
-  parasite = gimp_parasite_new ("gfig",
-                                GIMP_PARASITE_PERSISTENT |
-                                GIMP_PARASITE_UNDOABLE,
+  parasite = clay_parasite_new ("gfig",
+                                CLAY_PARASITE_PERSISTENT |
+                                CLAY_PARASITE_UNDOABLE,
                                 string->len, string->str);
 
   g_string_free (string, TRUE);
 
-  if (!gimp_item_attach_parasite (GIMP_ITEM (gfig_context->drawable),
+  if (!clay_item_attach_parasite (CLAY_ITEM (gfig_context->drawable),
                                   parasite))
     {
       g_message (_("Error trying to save figure as a parasite: "
                    "can't attach parasite to drawable."));
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
       return FALSE;
     }
 
-  gimp_parasite_free (parasite);
+  clay_parasite_free (parasite);
   return TRUE;
 }
 
 GFigObj *
-gfig_load_from_parasite (GimpGfig *gfig)
+gfig_load_from_parasite (ClayGfig *gfig)
 {
   GFile        *file;
   FILE         *fp;
-  GimpParasite *parasite;
+  ClayParasite *parasite;
   const gchar  *parasite_data;
   guint32       parasite_size;
   GFigObj      *gfig_obj;
 
-  parasite = gimp_item_get_parasite (GIMP_ITEM (gfig_context->drawable),
+  parasite = clay_item_get_parasite (CLAY_ITEM (gfig_context->drawable),
                                      "gfig");
   if (! parasite)
     return NULL;
 
-  file  = gimp_temp_file ("gfigtmp");
+  file  = clay_temp_file ("gfigtmp");
 
   fp = g_fopen (g_file_peek_path (file), "wb");
   if (! fp)
     {
       g_message (_("Error trying to open temporary file '%s' "
                    "for parasite loading: %s"),
-                 gimp_file_get_utf8_name (file), g_strerror (errno));
+                 clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
-  parasite_data = gimp_parasite_get_data (parasite, &parasite_size);
+  parasite_data = clay_parasite_get_data (parasite, &parasite_size);
   fwrite (parasite_data, sizeof (guchar), parasite_size, fp);
   fclose (fp);
 
-  gimp_parasite_free (parasite);
+  clay_parasite_free (parasite);
 
   gfig_obj = gfig_load (gfig, g_file_peek_path (file), "(none)");
 
@@ -913,7 +913,7 @@ gfig_save_callbk (void)
   if (!fp)
     {
       g_message (_("Could not open '%s' for writing: %s"),
-                 gimp_filename_to_utf8 (savename), g_strerror (errno));
+                 clay_filename_to_utf8 (savename), g_strerror (errno));
       return;
     }
 

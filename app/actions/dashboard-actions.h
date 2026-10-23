@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   dashboard_actions_setup  (GimpActionGroup *group);
-void   dashboard_actions_update (GimpActionGroup *group,
+void   dashboard_actions_setup  (ClayActionGroup *group);
+void   dashboard_actions_update (ClayActionGroup *group,
                                  gpointer         data);

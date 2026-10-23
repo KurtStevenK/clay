@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 
 #define PLUG_IN_PROC "file-glob"
@@ -33,12 +33,12 @@ typedef struct _GlobClass GlobClass;
 
 struct _Glob
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _GlobClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -47,12 +47,12 @@ struct _GlobClass
 
 GType                   glob_get_type         (void);
 
-static GList          * glob_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * glob_create_procedure (GimpPlugIn           *plug_in,
+static GList          * glob_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * glob_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * glob_run              (GimpProcedure        *procedure,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * glob_run              (ClayProcedure        *procedure,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
 static gboolean         glob_match            (const gchar          *pattern,
@@ -62,15 +62,15 @@ static gboolean         glob_fnmatch          (const gchar          *pattern,
                                                const gchar          *string);
 
 
-G_DEFINE_TYPE (Glob, glob, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Glob, glob, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GLOB_TYPE)
+CLAY_MAIN (GLOB_TYPE)
 
 
 static void
 glob_class_init (GlobClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = glob_query_procedures;
   plug_in_class->create_procedure = glob_create_procedure;
@@ -83,24 +83,24 @@ glob_init (Glob *glob)
 }
 
 static GList *
-glob_query_procedures (GimpPlugIn *plug_in)
+glob_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-glob_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+glob_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       glob_run, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Returns a list of matching filenames",
                                         "This can be useful in scripts and "
                                         "other plug-ins (e.g., "
@@ -111,40 +111,40 @@ glob_create_procedure (GimpPlugIn  *plug_in,
                                         "simple patterns like "
                                         "\"/home/foo/bar/*.jpg\".",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Sven Neumann",
                                       "Sven Neumann",
                                       "2004");
 
-      gimp_procedure_add_string_argument (procedure, "pattern",
+      clay_procedure_add_string_argument (procedure, "pattern",
                                           "Pattern",
                                           "The glob pattern (in UTF-8 encoding)",
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "filename-encoding",
+      clay_procedure_add_boolean_argument (procedure, "filename-encoding",
                                            "Filename encoding",
                                            "FALSE to return UTF-8 strings, TRUE to return "
                                            "strings in filename encoding",
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_array_return_value (procedure, "files",
+      clay_procedure_add_string_array_return_value (procedure, "files",
                                                     "Files",
                                                     "The list of matching filenames",
                                                     G_PARAM_READWRITE |
-                                                    GIMP_PARAM_NO_VALIDATE);
+                                                    CLAY_PARAM_NO_VALIDATE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-glob_run (GimpProcedure        *procedure,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+glob_run (ClayProcedure        *procedure,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar          *pattern;
   gboolean        filename_encoding;
   gchar         **matches;
@@ -156,16 +156,16 @@ glob_run (GimpProcedure        *procedure,
 
   if (! glob_match (pattern, filename_encoding, &matches))
     {
-      return_vals = gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return_vals = clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
   else
     {
-      return_vals = gimp_procedure_new_return_values (procedure,
-                                                      GIMP_PDB_SUCCESS,
+      return_vals = clay_procedure_new_return_values (procedure,
+                                                      CLAY_PDB_SUCCESS,
                                                       NULL);
-      GIMP_VALUES_TAKE_STRV (return_vals, 1, matches);
+      CLAY_VALUES_TAKE_STRV (return_vals, 1, matches);
     }
   g_free (pattern);
 

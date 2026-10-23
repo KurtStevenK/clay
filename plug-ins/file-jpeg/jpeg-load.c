@@ -30,36 +30,36 @@
 
 #include <lcms2.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "jpeg.h"
 #include "jpeg-icc.h"
 #include "jpeg-settings.h"
 #include "jpeg-load.h"
 
-static gboolean  jpeg_load_resolution       (GimpImage *image,
+static gboolean  jpeg_load_resolution       (ClayImage *image,
                                              struct jpeg_decompress_struct
                                                        *cinfo);
 
 static void      jpeg_load_sanitize_comment (gchar    *comment);
 
 
-GimpImage * volatile  preview_image;
-GimpLayer *           preview_layer;
+ClayImage * volatile  preview_image;
+ClayLayer *           preview_layer;
 
-GimpImage *
+ClayImage *
 load_image (GFile        *file,
-            GimpRunMode   runmode,
+            ClayRunMode   runmode,
             gboolean      preview,
             gboolean     *resolution_loaded,
             gboolean     *ps_metadata_loaded,
             GError      **error)
 {
-  GimpImage * volatile image;
-  GimpLayer           *layer;
+  ClayImage * volatile image;
+  ClayLayer           *layer;
   struct jpeg_decompress_struct cinfo;
   struct my_error_mgr           jerr;
   jpeg_saved_marker_ptr         marker;
@@ -68,14 +68,14 @@ load_image (GFile        *file,
   guint16           *buf_16;
   guchar           **rowbuf;
   guint16          **rowbuf_16;
-  GimpImageBaseType  image_type;
-  GimpImageType      layer_type;
+  ClayImageBaseType  image_type;
+  ClayImageType      layer_type;
   GeglBuffer        *buffer         = NULL;
   const Babl        *format;
   const Babl        *space;
   const gchar       *encoding;
   const gchar       *layer_name     = NULL;
-  GimpColorProfile  *cmyk_profile   = NULL;
+  ClayColorProfile  *cmyk_profile   = NULL;
   gint               tile_height;
   gint               i;
   gchar             *photoshop_data = NULL;
@@ -98,8 +98,8 @@ load_image (GFile        *file,
     {
       jerr.pub.output_message = my_output_message;
 
-      gimp_progress_init_printf (_("Opening '%s'"),
-                                 gimp_file_get_utf8_name (file));
+      clay_progress_init_printf (_("Opening '%s'"),
+                                 clay_file_get_utf8_name (file));
     }
 
   infile = g_fopen (g_file_peek_path (file), "rb");
@@ -108,7 +108,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -125,7 +125,7 @@ load_image (GFile        *file,
         fclose (infile);
 
       if (image && !preview)
-        gimp_image_delete (image);
+        clay_image_delete (image);
 
       if (preview)
         destroy_preview ();
@@ -193,7 +193,7 @@ load_image (GFile        *file,
    */
 
   /* temporary buffer */
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   if (cinfo.data_precision <= 8 || ! support_12_bit)
     {
       buf = g_new (guchar,
@@ -218,20 +218,20 @@ load_image (GFile        *file,
   switch (cinfo.output_components)
     {
     case 1:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAY_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAY_IMAGE;
       break;
 
     case 3:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGB_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGB_IMAGE;
       break;
 
     case 4:
       if (cinfo.out_color_space == JCS_CMYK)
         {
-          image_type = GIMP_RGB;
-          layer_type = GIMP_RGB_IMAGE;
+          image_type = CLAY_RGB;
+          layer_type = CLAY_RGB_IMAGE;
           break;
         }
       /*fallthrough*/
@@ -256,19 +256,19 @@ load_image (GFile        *file,
       GString       *comment_buffer = NULL;
       guint8        *icc_data       = NULL;
       guint          icc_length     = 0;
-      GimpPrecision  precision      = GIMP_PRECISION_U8_NON_LINEAR;
+      ClayPrecision  precision      = CLAY_PRECISION_U8_NON_LINEAR;
 
       layer_name = _("Background");
 
       if (cinfo.data_precision > 8 && support_12_bit)
-        precision = GIMP_PRECISION_U16_NON_LINEAR;
+        precision = CLAY_PRECISION_U16_NON_LINEAR;
 
-      image = gimp_image_new_with_precision (cinfo.output_width,
+      image = clay_image_new_with_precision (cinfo.output_width,
                                              cinfo.output_height,
                                              image_type,
                                              precision);
 
-      gimp_image_undo_disable (image);
+      clay_image_undo_disable (image);
 
       /* Step 5.0: save the original JPEG settings in a parasite */
       jpeg_detect_original_settings (&cinfo, image);
@@ -281,7 +281,7 @@ load_image (GFile        *file,
 
           if (marker->marker == JPEG_COM)
             {
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
               g_print ("jpeg-load: found image comment (%d bytes)\n",
                        marker->data_length);
 #endif
@@ -301,7 +301,7 @@ load_image (GFile        *file,
                    && (len > sizeof (JPEG_APP_HEADER_EXIF) + 8)
                    && ! strcmp (JPEG_APP_HEADER_EXIF, data))
             {
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
               g_print ("jpeg-load: found Exif block (%d bytes)\n",
                        (gint) (len - sizeof (JPEG_APP_HEADER_EXIF)));
 #endif
@@ -321,7 +321,7 @@ load_image (GFile        *file,
               if (ps_metadata_loaded)
                 *ps_metadata_loaded = TRUE;
 
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
               g_print ("jpeg-load: found Photoshop block (%d bytes) %s\n",
                        (gint) (len - sizeof (JPEG_APP_HEADER_PS)), data);
 #endif
@@ -337,15 +337,15 @@ load_image (GFile        *file,
       /* if we found any comments, then make a parasite for them */
       if (comment_buffer && comment_buffer->len)
         {
-          GimpParasite *parasite;
+          ClayParasite *parasite;
 
           jpeg_load_sanitize_comment (comment_buffer->str);
-          parasite = gimp_parasite_new ("gimp-comment",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("clay-comment",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (comment_buffer->str) + 1,
                                         comment_buffer->str);
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
 
           g_string_free (comment_buffer, TRUE);
         }
@@ -355,9 +355,9 @@ load_image (GFile        *file,
 
       if (icc_data)
         {
-          GimpColorProfile *profile;
+          ClayColorProfile *profile;
 
-          profile = gimp_color_profile_new_from_icc_profile (icc_data,
+          profile = clay_color_profile_new_from_icc_profile (icc_data,
                                                              icc_length,
                                                              NULL);
           if (cinfo.out_color_space == JCS_CMYK)
@@ -369,7 +369,7 @@ load_image (GFile        *file,
 
           if (profile)
             {
-              gimp_image_set_color_profile (image, profile);
+              clay_image_set_color_profile (image, profile);
               g_object_unref (profile);
             }
         }
@@ -381,12 +381,12 @@ load_image (GFile        *file,
        */
     }
 
-  layer = gimp_layer_new (image, layer_name,
+  layer = clay_layer_new (image, layer_name,
                           cinfo.output_width,
                           cinfo.output_height,
                           layer_type,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
+                          clay_image_get_default_new_layer_mode (image));
 
   if (preview)
     preview_layer = layer;
@@ -398,17 +398,17 @@ load_image (GFile        *file,
    * loop counter, so that we don't have to keep track ourselves.
    */
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   if (cinfo.out_color_space == JCS_CMYK)
     {
       encoding = "cmyk u8";
       if (cmyk_profile)
         {
-          space = gimp_color_profile_get_space (cmyk_profile,
-                                                GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+          space = clay_color_profile_get_space (cmyk_profile,
+                                                CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                                 error);
-          gimp_image_set_simulation_profile (image, cmyk_profile);
+          clay_image_set_simulation_profile (image, cmyk_profile);
         }
       else
         {
@@ -417,7 +417,7 @@ load_image (GFile        *file,
     }
   else
     {
-      if (image_type == GIMP_RGB)
+      if (image_type == CLAY_RGB)
         {
           if (cinfo.data_precision <= 8 || ! support_12_bit)
             encoding = "R'G'B' u8";
@@ -431,7 +431,7 @@ load_image (GFile        *file,
           else
             encoding = "Y' u16";
         }
-      space = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+      space = clay_drawable_get_format (CLAY_DRAWABLE (layer));
     }
   format = babl_format_with_space (encoding, space);
 
@@ -517,7 +517,7 @@ load_image (GFile        *file,
         goto finish;
 
       if (! preview && (cinfo.output_scanline % 32) == 0)
-        gimp_progress_update ((gdouble) cinfo.output_scanline /
+        clay_progress_update ((gdouble) cinfo.output_scanline /
                               (gdouble) cinfo.output_height);
     }
 
@@ -565,20 +565,20 @@ load_image (GFile        *file,
    */
   if (! preview)
     {
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
     }
 
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
   /* Step 9: Load PSD-format metadata if applicable */
   if (photoshop_len > 0)
     {
       FILE           *fp;
       GFile          *temp_file   = NULL;
-      GimpProcedure  *procedure;
-      GimpValueArray *return_vals = NULL;
+      ClayProcedure  *procedure;
+      ClayValueArray *return_vals = NULL;
 
-      temp_file = gimp_temp_file ("tmp");
+      temp_file = clay_temp_file ("tmp");
       fp = g_fopen (g_file_peek_path (temp_file), "wb");
 
       if (! fp)
@@ -586,7 +586,7 @@ load_image (GFile        *file,
           g_message (_("Error trying to open temporary %s file '%s' "
                      "for jpeg metadata loading: %s"),
                      "tmp",
-                     gimp_file_get_utf8_name (temp_file),
+                     clay_file_get_utf8_name (temp_file),
                      g_strerror (errno));
         }
 
@@ -595,10 +595,10 @@ load_image (GFile        *file,
 
       g_free (photoshop_data);
 
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                "file-psd-load-metadata");
-      return_vals = gimp_procedure_run (procedure,
-                                        "run-mode",      GIMP_RUN_NONINTERACTIVE,
+      return_vals = clay_procedure_run (procedure,
+                                        "run-mode",      CLAY_RUN_NONINTERACTIVE,
                                         "file",          temp_file,
                                         "size",          photoshop_len,
                                         "image",         image,
@@ -607,14 +607,14 @@ load_image (GFile        *file,
 
       g_file_delete (temp_file, NULL, NULL);
       g_object_unref (temp_file);
-      gimp_value_array_unref (return_vals);
+      clay_value_array_unref (return_vals);
     }
 
   return image;
 }
 
 static gboolean
-jpeg_load_resolution (GimpImage                     *image,
+jpeg_load_resolution (ClayImage                     *image,
                       struct jpeg_decompress_struct *cinfo)
 {
   if (cinfo->saw_JFIF_marker && cinfo->X_density != 0 && cinfo->Y_density != 0)
@@ -630,7 +630,7 @@ jpeg_load_resolution (GimpImage                     *image,
                  */
           asymmetry = xresolution / yresolution;
 
-          gimp_image_get_resolution (image, &xresolution, &yresolution);
+          clay_image_get_resolution (image, &xresolution, &yresolution);
 
           xresolution *= asymmetry;
           break;
@@ -641,7 +641,7 @@ jpeg_load_resolution (GimpImage                     *image,
         case 2: /* dots per cm */
           xresolution *= 2.54;
           yresolution *= 2.54;
-          gimp_image_set_unit (image, gimp_unit_mm ());
+          clay_image_set_unit (image, clay_unit_mm ());
           break;
 
         default:
@@ -650,7 +650,7 @@ jpeg_load_resolution (GimpImage                     *image,
           break;
         }
 
-      gimp_image_set_resolution (image, xresolution, yresolution);
+      clay_image_set_resolution (image, xresolution, yresolution);
 
       return TRUE;
     }
@@ -661,7 +661,7 @@ jpeg_load_resolution (GimpImage                     *image,
 /*
  * A number of JPEG files have comments written in a local character set
  * instead of UTF-8.  Some of these files may have been saved by older
- * versions of GIMP.  It is not possible to reliably detect the character
+ * versions of Clay.  It is not possible to reliably detect the character
  * set used, but it is better to keep all characters in the ASCII range
  * and replace the non-ASCII characters instead of discarding the whole
  * comment.  This is especially useful if the comment contains only a few
@@ -684,22 +684,22 @@ jpeg_load_sanitize_comment (gchar *comment)
     }
 }
 
-GimpImage *
+ClayImage *
 load_thumbnail_image (GFile         *file,
                       gint          *width,
                       gint          *height,
-                      GimpImageType *type,
+                      ClayImageType *type,
                       GError       **error)
 {
-  GimpImage * volatile          image = NULL;
+  ClayImage * volatile          image = NULL;
   struct jpeg_decompress_struct cinfo;
   struct my_error_mgr           jerr;
   FILE                         *infile   = NULL;
 
-  gimp_progress_init_printf (_("Opening thumbnail for '%s'"),
+  clay_progress_init_printf (_("Opening thumbnail for '%s'"),
                              g_file_get_parse_name (file));
 
-  image = gimp_image_metadata_load_thumbnail (file, error);
+  image = clay_image_metadata_load_thumbnail (file, error);
   if (! image)
     return NULL;
 
@@ -714,7 +714,7 @@ load_thumbnail_image (GFile         *file,
                    g_file_get_parse_name (file), g_strerror (errno));
 
       if (image)
-        gimp_image_delete (image);
+        clay_image_delete (image);
 
       return NULL;
     }
@@ -729,7 +729,7 @@ load_thumbnail_image (GFile         *file,
       jpeg_destroy_decompress (&cinfo);
 
       if (image)
-        gimp_image_delete (image);
+        clay_image_delete (image);
 
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error reading data. Image may be corrupt."));
@@ -755,17 +755,17 @@ load_thumbnail_image (GFile         *file,
   switch (cinfo.output_components)
     {
     case 1:
-      *type = GIMP_GRAY_IMAGE;
+      *type = CLAY_GRAY_IMAGE;
       break;
 
     case 3:
-      *type = GIMP_RGB_IMAGE;
+      *type = CLAY_RGB_IMAGE;
       break;
 
     case 4:
       if (cinfo.out_color_space == JCS_CMYK)
         {
-          *type = GIMP_RGB_IMAGE;
+          *type = CLAY_RGB_IMAGE;
           break;
         }
       /*fallthrough*/
@@ -776,7 +776,7 @@ load_thumbnail_image (GFile         *file,
                  cinfo.output_components, cinfo.out_color_space,
                  cinfo.jpeg_color_space);
 
-      gimp_image_delete (image);
+      clay_image_delete (image);
       image = NULL;
       break;
     }
@@ -795,7 +795,7 @@ load_thumbnail_image (GFile         *file,
 
 gboolean
 load_mpo_image (GFile      *file,
-                GimpImage  *first_image,
+                ClayImage  *first_image,
                 GError    **error)
 {
   FILE     *fp;
@@ -841,11 +841,11 @@ load_mpo_image (GFile      *file,
                   if (read_first_image)
                     {
                       GFile     *temp_file = NULL;
-                      GimpImage *temp_image = NULL;
+                      ClayImage *temp_image = NULL;
                       gboolean   dummy1;
                       gboolean   dummy2;
 
-                      temp_file = gimp_temp_file ("tmp");
+                      temp_file = clay_temp_file ("tmp");
                       fp        = g_fopen (g_file_peek_path (temp_file), "wb");
 
                       if (! fp)
@@ -860,7 +860,7 @@ load_mpo_image (GFile      *file,
                       fclose (fp);
 
                       temp_image = load_image (temp_file,
-                                               GIMP_RUN_NONINTERACTIVE, FALSE,
+                                               CLAY_RUN_NONINTERACTIVE, FALSE,
                                                &dummy1, &dummy2, error);
                       g_file_delete (temp_file, NULL, NULL);
                       g_object_unref (temp_file);
@@ -872,18 +872,18 @@ load_mpo_image (GFile      *file,
                         }
                       else
                         {
-                          GimpLayer **layers;
-                          GimpLayer  *new_layer;
+                          ClayLayer **layers;
+                          ClayLayer  *new_layer;
 
-                          layers    = gimp_image_get_layers (temp_image);
+                          layers    = clay_image_get_layers (temp_image);
                           new_layer =
-                            gimp_layer_new_from_drawable (GIMP_DRAWABLE (layers[0]),
+                            clay_layer_new_from_drawable (CLAY_DRAWABLE (layers[0]),
                                                           first_image);
-                          gimp_image_insert_layer (first_image, new_layer,
+                          clay_image_insert_layer (first_image, new_layer,
                                                    NULL, 0);
 
                           g_free (layers);
-                          gimp_image_delete (temp_image);
+                          clay_image_delete (temp_image);
                         }
                     }
                   read_first_image = TRUE;

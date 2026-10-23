@@ -20,30 +20,30 @@
 #include "core/core-types.h"
 
 
-typedef struct _GimpPDB                GimpPDB;
-typedef struct _GimpProcedure          GimpProcedure;
-typedef struct _GimpPlugInProcedure    GimpPlugInProcedure;
-typedef struct _GimpTemporaryProcedure GimpTemporaryProcedure;
+typedef struct _ClayPDB                ClayPDB;
+typedef struct _ClayProcedure          ClayProcedure;
+typedef struct _ClayPlugInProcedure    ClayPlugInProcedure;
+typedef struct _ClayTemporaryProcedure ClayTemporaryProcedure;
 
 
 typedef enum
 {
-  GIMP_PDB_COMPAT_OFF,
-  GIMP_PDB_COMPAT_ON,
-  GIMP_PDB_COMPAT_WARN
-} GimpPDBCompatMode;
+  CLAY_PDB_COMPAT_OFF,
+  CLAY_PDB_COMPAT_ON,
+  CLAY_PDB_COMPAT_WARN
+} ClayPDBCompatMode;
 
 
 typedef enum
 {
-  GIMP_PDB_ITEM_CONTENT  = 1 << 0,
-  GIMP_PDB_ITEM_POSITION = 1 << 1
-} GimpPDBItemModify;
+  CLAY_PDB_ITEM_CONTENT  = 1 << 0,
+  CLAY_PDB_ITEM_POSITION = 1 << 1
+} ClayPDBItemModify;
 
 
 typedef enum
 {
-  GIMP_PDB_DATA_ACCESS_READ   = 0,
-  GIMP_PDB_DATA_ACCESS_WRITE  = 1 << 0,
-  GIMP_PDB_DATA_ACCESS_RENAME = 1 << 1
-} GimpPDBDataAccess;
+  CLAY_PDB_DATA_ACCESS_READ   = 0,
+  CLAY_PDB_DATA_ACCESS_WRITE  = 1 << 0,
+  CLAY_PDB_DATA_ACCESS_RENAME = 1 << 1
+} ClayPDBDataAccess;

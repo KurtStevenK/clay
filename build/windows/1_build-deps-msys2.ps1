@@ -22,7 +22,7 @@ if (-not $GITLAB_CI)
   }
 
 
-# Install the required (pre-built) packages for babl, GEGL and GIMP
+# Install the required (pre-built) packages for babl, GEGL and Clay
 if (-not $env:VCPKG_ROOT -or (Test-Path "$env:VCPKG_ROOT\vcpkg.exe" -Type Leaf))
   {
     $env:VCPKG_ROOT = $(@($(Resolve-Path "${PWD}${PARENT_DIR}\vcpkg" -ErrorAction SilentlyContinue),$env:VCPKG_ROOT) | ?{$_} | select -First 1)
@@ -66,21 +66,21 @@ else
     powershell -Command { $ProgressPreference = 'SilentlyContinue'; $env:PATH="$env:MSYS_ROOT\usr\bin;$env:PATH"; pacman --noconfirm -Suy }; if ("$LASTEXITCODE" -gt '0') { exit 1 }
     powershell -Command { $ProgressPreference = 'SilentlyContinue'; $env:PATH="$env:MSYS_ROOT\usr\bin;$env:PATH"; pacman --noconfirm -S --needed (Get-Content build/windows/all-deps-uni.txt | Where-Object { $_ -match 'MINGW_' -and -not $_.Trim().StartsWith('#') } | ForEach-Object { (($_.Split('#')[0].Trim() -split '\|vcpkg:')[0] -replace '\$\{MINGW_PACKAGE_PREFIX\}', $(if ($env:MINGW_PACKAGE_PREFIX) { $env:MINGW_PACKAGE_PREFIX } elseif ($env:MSYSTEM_PREFIX -eq 'clangarm64') { 'mingw-w64-clang-aarch64' } else { 'mingw-w64-clang-x86_64' })) }) }; if ("$LASTEXITCODE" -gt '0') { exit 1 }
   }
-#See: https://gitlab.gnome.org/GNOME/gimp/-/work_items/14145
+#See: https://github.com/KurtStevenK/clay/-/work_items/14145
 if (-not (Get-Command win_flex -ErrorAction SilentlyContinue)) { $winflexbison_tag = (Invoke-RestMethod 'https://api.github.com/repos/lexxmark/winflexbison/releases/latest').tag_name -replace 'v',''; Invoke-WebRequest "https://github.com/lexxmark/winflexbison/releases/download/v${winflexbison_tag}/win_flex_bison-${winflexbison_tag}.zip" -UseBasicParsing -OutFile ${PWD}${PARENT_DIR}\winflexbison.zip; Expand-Archive ${PWD}${PARENT_DIR}\winflexbison.zip ${PWD}${PARENT_DIR}\winflexbison; $env:PATH = "$(Resolve-Path ${PWD}${PARENT_DIR}\winflexbison);$env:PATH" }
 Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):deps_install$([char]13)$([char]27)[0K"
 foreach ($dir in "$env:VCPKG_ROOT/installed/$env:VCPKG_DEFAULT_HOST_TRIPLET/bin", "$env:MSYS_ROOT/$env:MSYSTEM_PREFIX/bin") { if (Test-Path $dir) { if (Get-ChildItem -Path "$dir\*" -Include "X11*.dll","libX11*.dll","msys-*.dll" -ErrorAction SilentlyContinue) { Write-Host -ForegroundColor Yellow "(WARNING): X11 or CYGWIN is installed on Windows. Please remove the culprit from all-deps-uni.txt or report to $(if ("$env:VCPKG_ROOT") {'vcpkg'} else {'MSYS2'})" } } }
 
 
 # Prepare env
-$GIMP_DIR = $PWD
-Set-Location ${GIMP_DIR}${PARENT_DIR}
+$CLAY_DIR = $PWD
+Set-Location ${CLAY_DIR}${PARENT_DIR}
 
-if (-not $GIMP_PREFIX)
+if (-not $CLAY_PREFIX)
   {
-    $GIMP_PREFIX = "$PWD\_install"
+    $CLAY_PREFIX = "$PWD\_install"
   }
-Invoke-Expression ((Get-Content $GIMP_DIR\.gitlab-ci.yml | Select-String 'win_environ\[' -Context 0,9) -replace '> ','' -replace '- ','')
+Invoke-Expression ((Get-Content $CLAY_DIR\.gitlab-ci.yml | Select-String 'win_environ\[' -Context 0,9) -replace '> ','' -replace '- ','')
 
 
 # Build babl and GEGL
@@ -89,10 +89,10 @@ function self_build ([string]$repo, [array]$branch, [array]$patches, [array]$opt
     $dep = ($repo -split "/")[-1] -replace '.git',''
     Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):${dep}_build[collapsed=true]$([char]13)$([char]27)[0KBuilding $dep"
     ## Make sure that the deps repos are fine
-    if (($GIMP_CI_WIN_INSTALLER -match '[1-9]' -or $GIMP_CI_MS_STORE -match '[1-9]') -and -not $CI_COMMIT_TAG -and $CI_PIPELINE_SOURCE -ne 'schedule')
+    if (($CLAY_CI_WIN_INSTALLER -match '[1-9]' -or $CLAY_CI_MS_STORE -match '[1-9]') -and -not $CI_COMMIT_TAG -and $CI_PIPELINE_SOURCE -ne 'schedule')
       {
-        #needed to avoid broken GIMP revisions with untagged babl/gegl
-        Write-Host "(ERROR): revision is set but no GIMP tag found. Please, tag the revision." -ForegroundColor red
+        #needed to avoid broken Clay revisions with untagged babl/gegl
+        Write-Host "(ERROR): revision is set but no Clay tag found. Please, tag the revision." -ForegroundColor red
         exit 1
       }
     if (-not (Test-Path $dep))
@@ -122,7 +122,7 @@ function self_build ([string]$repo, [array]$branch, [array]$patches, [array]$opt
           {
             if ("$patch" -notlike "http*")
               {
-                git apply -v $GIMP_DIR\$patch
+                git apply -v $CLAY_DIR\$patch
               }
             else
               {
@@ -148,11 +148,11 @@ function self_build ([string]$repo, [array]$branch, [array]$patches, [array]$opt
               {
                 if ("$dep" -ne 'babl' -and "$dep" -ne 'gegl')
                   {
-                    Add-Content meson.build "meson.add_install_script(find_program('$("$GIMP_DIR".Replace('\','/'))/tools/meson_install_win_debug.py'))"
+                    Add-Content meson.build "meson.add_install_script(find_program('$("$CLAY_DIR".Replace('\','/'))/tools/meson_install_win_debug.py'))"
                   }
                 $clang_opts_meson=@('-Dc_args=-"fansi-escape-codes -gcodeview"', '-Dcpp_args=-"fansi-escape-codes -gcodeview"', '-Dc_link_args="-Wl,--pdb="', '-Dcpp_link_args="-Wl,--pdb="')
               }
-            meson setup _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREFIX) | ?{$_} | select -First 1) -Dprefix="$GIMP_PREFIX" $PKGCONF_RELOCATABLE_OPTION $WARN_AS_ERROR_ON_CI `
+            meson setup _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREFIX) | ?{$_} | select -First 1) -Dprefix="$CLAY_PREFIX" $PKGCONF_RELOCATABLE_OPTION $WARN_AS_ERROR_ON_CI `
                         -Dbuildtype=debugoptimized $clang_opts_meson `
                         $(if ($branch -like '-*') { $branch } elseif ($patches -like '-*') { $patches } else { $options });
           }
@@ -160,10 +160,10 @@ function self_build ([string]$repo, [array]$branch, [array]$patches, [array]$opt
           {
             if (-not "$env:VCPKG_ROOT")
               {
-                Add-Content CMakeLists.txt "install(CODE `"execute_process(COMMAND `${Python3_EXECUTABLE`} $("$GIMP_DIR".Replace('\','/'))/tools/meson_install_win_debug.py`)`")"
+                Add-Content CMakeLists.txt "install(CODE `"execute_process(COMMAND `${Python3_EXECUTABLE`} $("$CLAY_DIR".Replace('\','/'))/tools/meson_install_win_debug.py`)`")"
                 $clang_opts_cmake=@('-DCMAKE_C_FLAGS="-gcodeview"', '-DCMAKE_CXX_FLAGS="-gcodeview"', '-DCMAKE_EXE_LINKER_FLAGS="-Wl,--pdb="', '-DCMAKE_SHARED_LINKER_FLAGS="-Wl,--pdb="', '-DCMAKE_MODULE_LINKER_FLAGS="-Wl,--pdb="')
               }
-            cmake -G Ninja -B _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREFIX) | ?{$_} | select -First 1) -DCMAKE_INSTALL_PREFIX="$GIMP_PREFIX" `
+            cmake -G Ninja -B _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREFIX) | ?{$_} | select -First 1) -DCMAKE_INSTALL_PREFIX="$CLAY_PREFIX" `
                   -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_COLOR_DIAGNOSTICS=ON $clang_opts_cmake `
                   $(if ($branch -like '-*') { $branch } elseif ($patches -like '-*') { $patches } else { $options });
           }
@@ -186,4 +186,4 @@ self_build https://gitlab.gnome.org/GNOME/babl
 self_build https://gitlab.gnome.org/GNOME/gegl @('-Ddocs=false')
 self_build https://github.com/Exiv2/exiv2 "v0.28.9" @('https://github.com/Exiv2/exiv2/pull/3361.patch', 'build\windows\patches\0001-exiv2-Include-previously-implicit-header.patch') @('-DCMAKE_DLL_NAME_WITH_SOVERSION=ON', '-DEXIV2_BUILD_EXIV2_COMMAND=OFF', '-DEXIV2_ENABLE_VIDEO=OFF')
 
-Set-Location $GIMP_DIR
+Set-Location $CLAY_DIR

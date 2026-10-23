@@ -24,22 +24,22 @@
 #pragma once
 
 
-gboolean   file_remote_mount_file           (Gimp          *gimp,
+gboolean   file_remote_mount_file           (Clay          *clay,
                                              GFile         *file,
-                                             GimpProgress  *progress,
+                                             ClayProgress  *progress,
                                              GError       **error);
 
-GFile    * file_remote_download_image       (Gimp          *gimp,
+GFile    * file_remote_download_image       (Clay          *clay,
                                              GFile         *file,
-                                             GimpProgress  *progress,
+                                             ClayProgress  *progress,
                                              GError       **error);
 
-GFile    * file_remote_upload_image_prepare (Gimp          *gimp,
+GFile    * file_remote_upload_image_prepare (Clay          *clay,
                                              GFile         *file,
-                                             GimpProgress  *progress,
+                                             ClayProgress  *progress,
                                              GError       **error);
-gboolean   file_remote_upload_image_finish  (Gimp          *gimp,
+gboolean   file_remote_upload_image_finish  (Clay          *clay,
                                              GFile         *file,
                                              GFile         *local_file,
-                                             GimpProgress  *progress,
+                                             ClayProgress  *progress,
                                              GError       **error);

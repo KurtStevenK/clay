@@ -18,5 +18,5 @@
 #pragma once
 
 
-void   filters_menu_setup (GimpUIManager *manager,
+void   filters_menu_setup (ClayUIManager *manager,
                            const gchar   *ui_path);

@@ -1,5 +1,5 @@
 /*
- * SGI image file plug-in for GIMP.
+ * SGI image file plug-in for Clay.
  *
  * Copyright 1997-1998 Michael Sweet (mike@easysw.com)
  *
@@ -18,7 +18,7 @@
  *
  * Contents:
  *
- *   main()                      - Main entry - just call gimp_main()...
+ *   main()                      - Main entry - just call clay_main()...
  *   query()                     - Respond to a plug-in query...
  *   run()                       - Run the plug-in...
  *   load_image()                - Load a PNG image into a new image window.
@@ -32,12 +32,12 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "sgi-lib.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC        "file-sgi-load"
@@ -51,12 +51,12 @@ typedef struct _SgiClass SgiClass;
 
 struct _Sgi
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _SgiClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -65,49 +65,49 @@ struct _SgiClass
 
 GType                   sgi_get_type         (void);
 
-static GList          * sgi_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * sgi_create_procedure (GimpPlugIn            *plug_in,
+static GList          * sgi_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * sgi_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * sgi_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * sgi_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * sgi_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * sgi_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GError               **error);
 static gint             export_image         (GFile                 *file,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable,
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable,
                                               GObject               *config,
                                               GError               **error);
 
-static gboolean         save_dialog          (GimpProcedure         *procedure,
+static gboolean         save_dialog          (ClayProcedure         *procedure,
                                               GObject               *config,
-                                              GimpImage             *image);
+                                              ClayImage             *image);
 
 
-G_DEFINE_TYPE (Sgi, sgi, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Sgi, sgi, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SGI_TYPE)
+CLAY_MAIN (SGI_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 sgi_class_init (SgiClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = sgi_query_procedures;
   plug_in_class->create_procedure = sgi_create_procedure;
@@ -120,7 +120,7 @@ sgi_init (Sgi *sgi)
 }
 
 static GList *
-sgi_query_procedures (GimpPlugIn *plug_in)
+sgi_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -130,76 +130,76 @@ sgi_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-sgi_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+sgi_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            sgi_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Silicon Graphics IRIS image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in SGI image file format"),
                                         _("This plug-in loads SGI image files."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Michael Sweet <mike@easysw.com>",
                                       "Copyright 1997-1998 by Michael Sweet",
                                       PLUG_IN_VERSION);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-sgi");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "sgi,rgb,rgba,bw,icon");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,short,474");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, sgi_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Silicon Graphics IRIS image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "SGI");
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in SGI image file format"),
                                         _("This plug-in exports SGI image files."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Michael Sweet <mike@easysw.com>",
                                       "Copyright 1997-1998 by Michael Sweet",
                                       PLUG_IN_VERSION);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-sgi");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "sgi,rgb,rgba,bw,icon");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "compression",
+      clay_procedure_add_choice_argument (procedure, "compression",
                                           _("Compression _type"),
                                           _("Compression level"),
-                                          gimp_choice_new_with_values ("none", SGI_COMP_NONE, _("No compression"),                        NULL,
+                                          clay_choice_new_with_values ("none", SGI_COMP_NONE, _("No compression"),                        NULL,
                                                                        "rle",  SGI_COMP_RLE,  _("RLE compression"),                       NULL,
                                                                        "arle", SGI_COMP_ARLE, _("Aggressive RLE (not supported by SGI)"), NULL,
                                                                        NULL),
@@ -210,17 +210,17 @@ sgi_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-sgi_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+sgi_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -228,64 +228,64 @@ sgi_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-sgi_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+sgi_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data,
                           G_OBJECT (config), &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
@@ -294,26 +294,26 @@ load_image (GFile   *file,
                  y,           /* Current Y coordinate */
                  image_type,  /* Type of image */
                  layer_type,  /* Type of drawable/layer */
-                 tile_height, /* Height of tile in GIMP */
+                 tile_height, /* Height of tile in Clay */
                  count,       /* Count of rows to put in image */
                  bytes;       /* Number of channels to use */
   gboolean       errprinted;  /* flag to avoid spamming logfile */
   sgi_t         *sgip;        /* File pointer */
-  GimpImage     *image;       /* Image */
-  GimpLayer     *layer;       /* Layer */
+  ClayImage     *image;       /* Image */
+  ClayLayer     *layer;       /* Layer */
   GeglBuffer    *buffer;      /* Buffer for layer */
   guchar       **pixels,      /* Pixel rows */
                 *pptr;        /* Current pixel */
   gushort      **rows;        /* SGI image data */
-  GimpPrecision  precision;
+  ClayPrecision  precision;
   const Babl    *bablfmt = NULL;
 
  /*
   * Open the file for reading...
   */
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   sgip = sgiOpen (g_file_peek_path (file), SGI_READ, 0, 0, 0, 0, 0);
 
@@ -321,7 +321,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not open '%s' for reading."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       free (sgip);
       return NULL;
     };
@@ -331,9 +331,9 @@ load_image (GFile   *file,
    */
 
   /* Sanitize dimensions (note that they are unsigned short and can
-   * thus never be larger than GIMP_MAX_IMAGE_SIZE
+   * thus never be larger than CLAY_MAX_IMAGE_SIZE
    */
-  if (sgip->xsize == 0 /*|| sgip->xsize > GIMP_MAX_IMAGE_SIZE*/)
+  if (sgip->xsize == 0 /*|| sgip->xsize > CLAY_MAX_IMAGE_SIZE*/)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
               _("Invalid width: %hu"), sgip->xsize);
@@ -341,7 +341,7 @@ load_image (GFile   *file,
       return NULL;
     }
 
-  if (sgip->ysize == 0 /*|| sgip->ysize > GIMP_MAX_IMAGE_SIZE*/)
+  if (sgip->ysize == 0 /*|| sgip->ysize > CLAY_MAX_IMAGE_SIZE*/)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
               _("Invalid height: %hu"), sgip->ysize);
@@ -349,7 +349,7 @@ load_image (GFile   *file,
       return NULL;
     }
 
-  if (sgip->zsize == 0 /*|| sgip->zsize > GIMP_MAX_IMAGE_SIZE*/)
+  if (sgip->zsize == 0 /*|| sgip->zsize > CLAY_MAX_IMAGE_SIZE*/)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
               _("Invalid number of channels: %hu"), sgip->zsize);
@@ -362,89 +362,89 @@ load_image (GFile   *file,
   switch (sgip->zsize)
     {
     case 1 :    /* Grayscale */
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAY_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAY_IMAGE;
       if (sgip->bpp == 1)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           bablfmt = babl_format ("Y' u8");
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           bablfmt = babl_format ("Y' u16");
         }
       break;
 
     case 2 :    /* Grayscale + alpha */
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAYA_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAYA_IMAGE;
       if (sgip->bpp == 1)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           bablfmt = babl_format ("Y'A u8");
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           bablfmt = babl_format ("Y'A u16");
         }
       break;
 
     case 3 :    /* RGB */
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGB_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGB_IMAGE;
       if (sgip->bpp == 1)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           bablfmt = babl_format ("R'G'B' u8");
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           bablfmt = babl_format ("R'G'B' u16");
         }
       break;
 
     case 4 :    /* RGBA */
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGBA_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGBA_IMAGE;
       if (sgip->bpp == 1)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           bablfmt = babl_format ("R'G'B'A u8");
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           bablfmt = babl_format ("R'G'B'A u16");
         }
       break;
 
     default:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGBA_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGBA_IMAGE;
       bytes = 4;
       if (sgip->bpp == 1)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           bablfmt = babl_format ("R'G'B'A u8");
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           bablfmt = babl_format ("R'G'B'A u16");
         }
       break;
     }
 
-  image = gimp_image_new_with_precision (sgip->xsize, sgip->ysize,
+  image = clay_image_new_with_precision (sgip->xsize, sgip->ysize,
                                          image_type, precision);
   if (! image)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    "Could not allocate new image: %s",
-                   gimp_pdb_get_last_error (gimp_get_pdb ()));
+                   clay_pdb_get_last_error (clay_get_pdb ()));
       free (sgip);
       return NULL;
     }
@@ -453,23 +453,23 @@ load_image (GFile   *file,
    * Create the "background" layer to hold the image...
    */
 
-  layer = gimp_layer_new (image, _("Background"), sgip->xsize, sgip->ysize,
+  layer = clay_layer_new (image, _("Background"), sgip->xsize, sgip->ysize,
                           layer_type,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
   /*
    * Get the drawable and set the pixel region for our load...
    */
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   /*
    * Temporary buffers...
    */
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   pixels      = g_new (guchar *, tile_height);
   pixels[0]   = g_new (guchar, ((gsize) tile_height) * sgip->xsize * sgip->bpp * bytes);
 
@@ -499,7 +499,7 @@ load_image (GFile   *file,
 
           count = 0;
 
-          gimp_progress_update ((double) y / (double) sgip->ysize);
+          clay_progress_update ((double) y / (double) sgip->ysize);
         }
 
       for (i = 0; i < sgip->zsize; i ++)
@@ -555,15 +555,15 @@ load_image (GFile   *file,
 
   g_object_unref (buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
 
 static gint
 export_image (GFile        *file,
-              GimpImage    *image,
-              GimpDrawable *drawable,
+              ClayImage    *image,
+              ClayDrawable *drawable,
               GObject      *config,
               GError      **error)
 {
@@ -573,7 +573,7 @@ export_image (GFile        *file,
   gint         y;           /* Current Y coordinate */
   gint         width;       /* Drawable width */
   gint         height;      /* Drawable height */
-  gint         tile_height; /* Height of tile in GIMP */
+  gint         tile_height; /* Height of tile in Clay */
   gint         count;       /* Count of rows to put in image */
   gint         zsize;       /* Number of channels in file */
   sgi_t       *sgip;        /* File pointer */
@@ -584,38 +584,38 @@ export_image (GFile        *file,
   gushort    **rows;        /* SGI image data */
 
   compression =
-    gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                          "compression");
 
   /*
    * Get the drawable for the current image...
    */
 
-  width  = gimp_drawable_get_width  (drawable);
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width  (drawable);
+  height = clay_drawable_get_height (drawable);
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
-  switch (gimp_drawable_type (drawable))
+  switch (clay_drawable_type (drawable))
     {
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       zsize = 1;
       format = babl_format ("Y' u8");
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       zsize = 2;
       format = babl_format ("Y'A u8");
       break;
 
-    case GIMP_RGB_IMAGE:
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_RGB_IMAGE:
+    case CLAY_INDEXED_IMAGE:
       zsize = 3;
       format = babl_format ("R'G'B' u8");
       break;
 
-    case GIMP_RGBA_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_RGBA_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       format = babl_format ("R'G'B'A u8");
       zsize = 4;
       break;
@@ -628,8 +628,8 @@ export_image (GFile        *file,
    * Open the file for writing...
    */
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   sgip = sgiOpen (g_file_peek_path (file), SGI_WRITE, compression, 1,
                   width, height, zsize);
@@ -638,7 +638,7 @@ export_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not open '%s' for writing."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return FALSE;
     };
 
@@ -646,7 +646,7 @@ export_image (GFile        *file,
    * Allocate memory for "tile_height" rows...
    */
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   pixels      = g_new (guchar *, tile_height);
   pixels[0]   = g_new (guchar, ((gsize) tile_height) * width * zsize);
 
@@ -692,7 +692,7 @@ export_image (GFile        *file,
             sgiPutRow (sgip, rows[j], height - 1 - y - i, j);
         };
 
-      gimp_progress_update ((double) y / (double) height);
+      clay_progress_update ((double) y / (double) height);
     }
 
   /*
@@ -708,34 +708,34 @@ export_image (GFile        *file,
 
   g_object_unref (buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return TRUE;
 }
 
 static gboolean
-save_dialog (GimpProcedure *procedure,
+save_dialog (ClayProcedure *procedure,
              GObject       *config,
-             GimpImage     *image)
+             ClayImage     *image)
 {
   GtkWidget *dialog;
   GtkWidget *vbox;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "sgi-vbox", "compression", NULL);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "sgi-vbox", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

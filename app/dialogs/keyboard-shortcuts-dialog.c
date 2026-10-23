@@ -20,33 +20,33 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimpactioneditor.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactioneditor.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "menus/menus.h"
 
 #include "keyboard-shortcuts-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void   keyboard_shortcuts_dialog_response (GtkWidget *dialog,
                                                   gint       response,
-                                                  Gimp      *gimp);
+                                                  Clay      *clay);
 
 
 /*  public functions  */
 
 GtkWidget *
-keyboard_shortcuts_dialog_new (Gimp *gimp)
+keyboard_shortcuts_dialog_new (Clay *clay)
 {
   GtkWidget *dialog;
   GtkWidget *vbox;
@@ -55,13 +55,13 @@ keyboard_shortcuts_dialog_new (Gimp *gimp)
   GtkWidget *button;
   gchar     *hint;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  dialog = gimp_dialog_new (_("Configure Keyboard Shortcuts"),
-                            "gimp-keyboard-shortcuts-dialog",
+  dialog = clay_dialog_new (_("Configure Keyboard Shortcuts"),
+                            "clay-keyboard-shortcuts-dialog",
                             NULL, 0,
-                            gimp_standard_help_func,
-                            GIMP_HELP_KEYBOARD_SHORTCUTS,
+                            clay_standard_help_func,
+                            CLAY_HELP_KEYBOARD_SHORTCUTS,
 
                             _("_OK"), GTK_RESPONSE_OK,
 
@@ -69,7 +69,7 @@ keyboard_shortcuts_dialog_new (Gimp *gimp)
 
   g_signal_connect (dialog, "response",
                     G_CALLBACK (keyboard_shortcuts_dialog_response),
-                    gimp);
+                    clay);
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
@@ -77,7 +77,7 @@ keyboard_shortcuts_dialog_new (Gimp *gimp)
                       vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  editor = gimp_action_editor_new (gimp, NULL, TRUE);
+  editor = clay_action_editor_new (clay, NULL, TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), editor, TRUE, TRUE, 0);
   gtk_widget_set_visible (editor, TRUE);
 
@@ -85,13 +85,13 @@ keyboard_shortcuts_dialog_new (Gimp *gimp)
                             "corresponding row, click on its \"%s\" "
                             "column and type a new accelerator, "
                             "or press backspace to clear."), _("Shortcut"));
-  box = gimp_hint_box_new (hint);
+  box = clay_hint_box_new (hint);
   g_free (hint);
 
   gtk_box_pack_start (GTK_BOX (vbox), box, FALSE, FALSE, 0);
   gtk_widget_set_visible (box, TRUE);
 
-  button = gimp_prop_check_button_new (G_OBJECT (gimp->config), "save-accels",
+  button = clay_prop_check_button_new (G_OBJECT (clay->config), "save-accels",
                                        _("S_ave keyboard shortcuts on exit"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
 
@@ -104,7 +104,7 @@ keyboard_shortcuts_dialog_new (Gimp *gimp)
 static void
 keyboard_shortcuts_dialog_response (GtkWidget *dialog,
                                     gint       response,
-                                    Gimp      *gimp)
+                                    Clay      *clay)
 {
   switch (response)
     {

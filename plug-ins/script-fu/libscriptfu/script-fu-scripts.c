@@ -25,7 +25,7 @@
 #include <windows.h>
 #endif
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "tinyscheme/scheme-private.h"
 
@@ -85,7 +85,7 @@ static GList *script_menu_list = NULL;
  * In other words, uninstall is a try that may have no effect.
  */
 static void
-script_fu_scripts_clear_tree ( GimpPlugIn *plug_in)
+script_fu_scripts_clear_tree ( ClayPlugIn *plug_in)
 {
   if (script_tree != NULL)
     {
@@ -128,7 +128,7 @@ script_fu_scripts_clear_tree ( GimpPlugIn *plug_in)
  * Each .scm file may register (and define run func for) many PDB procedures.
  */
 GTree *
-script_fu_scripts_load_into_tree ( GimpPlugIn *plug_in,
+script_fu_scripts_load_into_tree ( ClayPlugIn *plug_in,
                                    GList      *paths)
 {
   script_fu_scripts_clear_tree (plug_in);
@@ -168,12 +168,12 @@ script_fu_get_menu_list (void)
  * owned by self PDB procedure (e.g. extension-script-fu.)
  */
 void
-script_fu_find_scripts (GimpPlugIn *plug_in,
+script_fu_find_scripts (ClayPlugIn *plug_in,
                         GList      *path)
 {
   script_fu_scripts_load_into_tree (plug_in, path);
 
-  /*  Now that all scripts are read in and sorted, tell gimp about them  */
+  /*  Now that all scripts are read in and sorted, tell clay about them  */
   g_tree_foreach (script_tree,
                   (GTraverseFunc) script_fu_install_script,
                   plug_in);
@@ -210,7 +210,7 @@ script_fu_add_script (scheme  *sc,
   script = script_fu_script_new_from_metadata_args (sc, &a);
 
   /* Require drawable_arity defaults to SF_PROC_ORDINARY.
-   * script-fu-register specifies an ordinary GimpProcedure.
+   * script-fu-register specifies an ordinary ClayProcedure.
    * We may go on to infer a different arity.
    */
   g_assert (script->drawable_arity == SF_NO_DRAWABLE);
@@ -229,7 +229,7 @@ script_fu_add_script (scheme  *sc,
    */
   script_fu_script_infer_drawable_arity (script);
 
-  script->proc_class = GIMP_TYPE_PROCEDURE;
+  script->proc_class = CLAY_TYPE_PROCEDURE;
 
   script_fu_script_set_is_old_style (script);
 
@@ -278,7 +278,7 @@ script_fu_add_script_filter (scheme  *sc,
   if (args_error != sc->NIL)
       return args_error;
 
-  script->proc_class = GIMP_TYPE_IMAGE_PROCEDURE;
+  script->proc_class = CLAY_TYPE_IMAGE_PROCEDURE;
 
   script_fu_try_map_menu (script);
   script_fu_append_script_to_tree (script);
@@ -317,7 +317,7 @@ script_fu_add_script_regular (scheme  *sc,
   if (args_error != sc->NIL)
       return args_error;
 
-  script->proc_class = GIMP_TYPE_PROCEDURE;
+  script->proc_class = CLAY_TYPE_PROCEDURE;
 
   script_fu_try_map_menu (script);
   script_fu_append_script_to_tree (script);
@@ -526,7 +526,7 @@ script_fu_load_directory (GFile *directory)
 static void
 script_fu_load_script (GFile *file)
 {
-  if (gimp_file_has_extension (file, ".scm"))
+  if (clay_file_has_extension (file, ".scm"))
     {
       gchar  *path    = g_file_get_path (file);
       gchar  *escaped = script_fu_strescape (path);
@@ -539,7 +539,7 @@ script_fu_load_script (GFile *file)
       if (! script_fu_run_command (command, &error))
         {
           gchar *message = g_strdup_printf (_("Error while loading %s:"),
-                                            gimp_file_get_utf8_name (file));
+                                            clay_file_get_utf8_name (file));
 
           g_message ("%s\n\n%s", message, error->message);
 
@@ -569,7 +569,7 @@ script_fu_install_script (gpointer  foo G_GNUC_UNUSED,
                           GList    *scripts,
                           gpointer  data)
 {
-  GimpPlugIn *plug_in = data;
+  ClayPlugIn *plug_in = data;
   GList      *list;
 
   for (list = scripts; list; list = g_list_next (list))
@@ -589,14 +589,14 @@ script_fu_install_script (gpointer  foo G_GNUC_UNUSED,
 static void
 script_fu_install_menu (SFMenu *menu)
 {
-  GimpPlugIn    *plug_in   = gimp_get_plug_in ();
-  GimpProcedure *procedure = NULL;
+  ClayPlugIn    *plug_in   = clay_get_plug_in ();
+  ClayProcedure *procedure = NULL;
 
-  procedure = gimp_plug_in_get_temp_procedure (plug_in,
+  procedure = clay_plug_in_get_temp_procedure (plug_in,
                                                menu->script->name);
 
   if (procedure)
-    gimp_procedure_add_menu_path (procedure, menu->menu_path);
+    clay_procedure_add_menu_path (procedure, menu->menu_path);
 
   g_free (menu->menu_path);
   g_slice_free (SFMenu, menu);
@@ -613,7 +613,7 @@ script_fu_remove_script (gpointer  foo G_GNUC_UNUSED,
                          GList    *scripts,
                          gpointer  data)
 {
-  GimpPlugIn *plug_in = data;
+  ClayPlugIn *plug_in = data;
   GList      *list;
 
   g_debug ("%s", G_STRFUNC);

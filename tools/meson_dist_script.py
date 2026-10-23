@@ -15,7 +15,7 @@ MESON_BUILD_ROOT = os.environ.get('MESON_BUILD_ROOT', sys.argv[3])
 # actually acceptable as it warns us). But the case where we would copy
 # outdated git-version.h is silent and worse.
 # See: https://github.com/mesonbuild/meson/issues/10650
-# And: https://gitlab.gnome.org/GNOME/gimp/-/issues/7907
+# And: https://github.com/KurtStevenK/clay/-/issues/7907
 # This is why we manually trigger, not only a reconfigure, but also a
 # rebuild of the main project before copying data around.
 

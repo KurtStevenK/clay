@@ -40,9 +40,9 @@ if [ -z "$GITLAB_CI" ]; then
 fi
 
 
-# Prepare env (only GIMP_PREFIX is needed for flatpak)
-if [ -z "$GIMP_PREFIX" ]; then
-  export GIMP_PREFIX="$PWD/../_install"
+# Prepare env (only CLAY_PREFIX is needed for flatpak)
+if [ -z "$CLAY_PREFIX" ]; then
+  export CLAY_PREFIX="$PWD/../_install"
 fi
 
 
@@ -53,7 +53,7 @@ if [ "$CI_PIPELINE_SOURCE" = 'schedule' ]; then
   export FLATPAK_SYSTEM_HELPER_ON_SESSION=foo
   flatpak install --user https://dl.flathub.org/repo/appstream/org.flathub.flatpak-external-data-checker.flatpakref -y
   if ! flatpak run --user --filesystem=$CI_PROJECT_DIR org.flathub.flatpak-external-data-checker \
-                   --check-outdated build/linux/flatpak/org.gimp.GIMP-nightly.json; then
+                   --check-outdated build/linux/flatpak/org.clay.Clay-nightly.json; then
     printf "\033[31m(ERROR)\033[0m: Some dependencies sources are outdated. Please, update them on the manifest.\n"
     exit 1
   else
@@ -61,12 +61,12 @@ if [ "$CI_PIPELINE_SOURCE" = 'schedule' ]; then
   fi
 fi
 if [ "$GITLAB_CI" ]; then
-  built_deps_image="quay.io/gnome_infrastructure/gnome-nightly-cache:$(uname -m)-$(echo "org.gimp.GIMP.Nightly" | tr 'A-Z' 'a-z')-master"
+  built_deps_image="quay.io/gnome_infrastructure/gnome-nightly-cache:$(uname -m)-$(echo "org.clay.Clay.Nightly" | tr 'A-Z' 'a-z')-master"
   oras pull $built_deps_image && oras logout quay.io || true
   tar --zstd --xattrs -xf _build-cached-$RUNNER.tar.zst || true
 fi
 eval $FLATPAK_BUILDER --force-clean --disable-rofiles-fuse --build-only --stop-at=babl \
-                      "$GIMP_PREFIX" build/linux/flatpak/org.gimp.GIMP-nightly.json > flatpak-builder.log 2>&1
+                      "$CLAY_PREFIX" build/linux/flatpak/org.clay.Clay-nightly.json > flatpak-builder.log 2>&1
 if [ "$GITLAB_CI" ] && [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
   tar --zstd --xattrs --exclude=.flatpak-builder/build/ -cf _build-cached-$RUNNER.tar.zst .flatpak-builder/
   cat $NIGHTLY_CACHE_ORAS_TOKEN_FILE | oras login -u "${NIGHTLY_CACHE_ORAS_USER}" --password-stdin quay.io || true
@@ -76,20 +76,20 @@ printf "\e[0Ksection_end:`date +%s`:deps_build\r\e[0K\n"
 
 printf "\e[0Ksection_start:`date +%s`:babl_build[collapsed=true]\r\e[0KBuilding babl\n"
 eval $FLATPAK_BUILDER --force-clean --disable-rofiles-fuse --keep-build-dirs --build-only --stop-at=gegl \
-                      "$GIMP_PREFIX" build/linux/flatpak/org.gimp.GIMP-nightly.json
+                      "$CLAY_PREFIX" build/linux/flatpak/org.clay.Clay-nightly.json
 if [ "$GITLAB_CI" ]; then
   cp .flatpak-builder/build/babl-1/_flatpak_build/meson-logs/meson-log.txt babl-meson-log.txt
 fi
 printf "\e[0Ksection_end:`date +%s`:babl_build\r\e[0K\n"
 
 printf "\e[0Ksection_start:`date +%s`:gegl_build[collapsed=true]\r\e[0KBuilding gegl\n"
-eval $FLATPAK_BUILDER --force-clean --disable-rofiles-fuse --keep-build-dirs --build-only --stop-at=gimp \
-                      "$GIMP_PREFIX" build/linux/flatpak/org.gimp.GIMP-nightly.json
+eval $FLATPAK_BUILDER --force-clean --disable-rofiles-fuse --keep-build-dirs --build-only --stop-at=clay \
+                      "$CLAY_PREFIX" build/linux/flatpak/org.clay.Clay-nightly.json
 if [ "$GITLAB_CI" ]; then
   cp .flatpak-builder/build/gegl-1/_flatpak_build/meson-logs/meson-log.txt gegl-meson-log.txt
   printf "\e[0Ksection_end:`date +%s`:gegl_build\r\e[0K\n"
 
-  ## Save built deps for 'gimp-flatpak' job ##
+  ## Save built deps for 'clay-flatpak' job ##
   #
   # Just passing .flatpak-builder/ as artifacts work, but the files all
   # end up root, which flatpak-builder chokes on with "permission

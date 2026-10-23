@@ -30,8 +30,8 @@
 #include <glib.h>
 #include <glib/gstdio.h> /* g_unlink() */
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "screenshot.h"
 #include "screenshot-osx.h"
@@ -45,7 +45,7 @@
  *
  * Since Mac OS X 10.2 a system utility for screencapturing is
  * included. We can safely use this, since it's available on every OS
- * X version GIMP is running on.
+ * X version Clay is running on.
  *
  * The main drawbacks are that it's not possible to shoot windows or
  * regions in scripts in noninteractive mode, and that windows always
@@ -73,13 +73,13 @@ screenshot_osx_get_capabilities (void)
           SCREENSHOT_CAN_DELAY_WINDOW_SHOT);
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 screenshot_osx_shoot (ShootType   shoot_type,
                       guint       select_delay,
                       guint       screenshot_delay,
                       gboolean    decorate,
                       gboolean    show_cursor,
-                      GimpImage **image,
+                      ClayImage **image,
                       GError    **error)
 {
   const gchar *mode    = " ";
@@ -117,13 +117,13 @@ screenshot_osx_shoot (ShootType   shoot_type,
       break;
 
     default:
-      g_return_val_if_reached (GIMP_PDB_CALLING_ERROR);
+      g_return_val_if_reached (CLAY_PDB_CALLING_ERROR);
       break;
     }
 
   delay = g_strdup_printf ("-T %i", screenshot_delay);
 
-  tmpfile = gimp_temp_file ("png");
+  tmpfile = clay_temp_file ("png");
   quoted  = g_shell_quote (g_file_peek_path (tmpfile));
 
   command = g_strjoin (" ",
@@ -142,18 +142,18 @@ screenshot_osx_shoot (ShootType   shoot_type,
       /* don't attach a profile, screencapture attached one
        */
 
-      *image = gimp_file_load (GIMP_RUN_NONINTERACTIVE,
+      *image = clay_file_load (CLAY_RUN_NONINTERACTIVE,
                                tmpfile);
 
       g_file_delete (tmpfile, NULL, NULL);
       g_free (command);
 
-      return GIMP_PDB_SUCCESS;
+      return CLAY_PDB_SUCCESS;
    }
 
   g_free (command);
 
-  return GIMP_PDB_EXECUTION_ERROR;
+  return CLAY_PDB_EXECUTION_ERROR;
 }
 
 #endif /* PLATFORM_OSX */

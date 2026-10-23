@@ -20,38 +20,38 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimperrorconsole.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimptextbuffer.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayerrorconsole.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claytextbuffer.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "error-console-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void   error_console_save_response (GtkNativeDialog  *dialog,
                                            gint              response_id,
-                                           GimpErrorConsole *console);
+                                           ClayErrorConsole *console);
 
 
 /*  public functions  */
 
 void
-error_console_clear_cmd_callback (GimpAction *action,
+error_console_clear_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpErrorConsole *console = GIMP_ERROR_CONSOLE (data);
+  ClayErrorConsole *console = CLAY_ERROR_CONSOLE (data);
   GtkTextIter       start_iter;
   GtkTextIter       end_iter;
 
@@ -60,11 +60,11 @@ error_console_clear_cmd_callback (GimpAction *action,
 }
 
 void
-error_console_select_all_cmd_callback (GimpAction *action,
+error_console_select_all_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data)
 {
-  GimpErrorConsole *console = GIMP_ERROR_CONSOLE (data);
+  ClayErrorConsole *console = CLAY_ERROR_CONSOLE (data);
   GtkTextIter       start_iter;
   GtkTextIter       end_iter;
 
@@ -73,11 +73,11 @@ error_console_select_all_cmd_callback (GimpAction *action,
 }
 
 void
-error_console_save_cmd_callback (GimpAction *action,
+error_console_save_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpErrorConsole *console   = GIMP_ERROR_CONSOLE (data);
+  ClayErrorConsole *console   = CLAY_ERROR_CONSOLE (data);
   gboolean          selection = (gboolean) g_variant_get_int32 (value);
   GtkFileFilter    *filter;
 
@@ -85,8 +85,8 @@ error_console_save_cmd_callback (GimpAction *action,
       ! gtk_text_buffer_get_selection_bounds (console->text_buffer,
                                               NULL, NULL))
     {
-      gimp_message_literal (console->gimp,
-                            G_OBJECT (console), GIMP_MESSAGE_WARNING,
+      clay_message_literal (console->clay,
+                            G_OBJECT (console), CLAY_MESSAGE_WARNING,
                             _("Cannot save. Nothing is selected."));
       return;
     }
@@ -115,36 +115,36 @@ error_console_save_cmd_callback (GimpAction *action,
 }
 
 void
-error_console_highlight_error_cmd_callback (GimpAction *action,
+error_console_highlight_error_cmd_callback (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data)
 {
-  GimpErrorConsole *console = GIMP_ERROR_CONSOLE (data);
+  ClayErrorConsole *console = CLAY_ERROR_CONSOLE (data);
   gboolean          active  = g_variant_get_boolean (value);
 
-  console->highlight[GIMP_MESSAGE_ERROR] = active;
+  console->highlight[CLAY_MESSAGE_ERROR] = active;
 }
 
 void
-error_console_highlight_warning_cmd_callback (GimpAction *action,
+error_console_highlight_warning_cmd_callback (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data)
 {
-  GimpErrorConsole *console = GIMP_ERROR_CONSOLE (data);
+  ClayErrorConsole *console = CLAY_ERROR_CONSOLE (data);
   gboolean          active  = g_variant_get_boolean (value);
 
-  console->highlight[GIMP_MESSAGE_WARNING] = active;
+  console->highlight[CLAY_MESSAGE_WARNING] = active;
 }
 
 void
-error_console_highlight_info_cmd_callback (GimpAction *action,
+error_console_highlight_info_cmd_callback (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data)
 {
-  GimpErrorConsole *console = GIMP_ERROR_CONSOLE (data);
+  ClayErrorConsole *console = CLAY_ERROR_CONSOLE (data);
   gboolean          active  = g_variant_get_boolean (value);
 
-  console->highlight[GIMP_MESSAGE_INFO] = active;
+  console->highlight[CLAY_MESSAGE_INFO] = active;
 }
 
 
@@ -153,20 +153,20 @@ error_console_highlight_info_cmd_callback (GimpAction *action,
 static void
 error_console_save_response (GtkNativeDialog  *dialog,
                              gint              response_id,
-                             GimpErrorConsole *console)
+                             ClayErrorConsole *console)
 {
   if (response_id == GTK_RESPONSE_ACCEPT)
     {
       GFile  *file  = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
       GError *error = NULL;
 
-      if (! gimp_text_buffer_save (GIMP_TEXT_BUFFER (console->text_buffer),
+      if (! clay_text_buffer_save (CLAY_TEXT_BUFFER (console->text_buffer),
                                    file,
                                    console->save_selection, &error))
         {
-          gimp_message (console->gimp, G_OBJECT (dialog), GIMP_MESSAGE_ERROR,
+          clay_message (console->clay, G_OBJECT (dialog), CLAY_MESSAGE_ERROR,
                         _("Error writing file '%s':\n%s"),
-                        gimp_file_get_utf8_name (file),
+                        clay_file_get_utf8_name (file),
                         error->message);
           g_clear_error (&error);
           g_object_unref (file);

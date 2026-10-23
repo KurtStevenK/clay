@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -27,10 +27,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "gfig.h"
 #include "gfig-dobject.h"
@@ -40,7 +40,7 @@
 static void gfig_read_resource           (gchar       **text,
                                           gint          nitems,
                                           const gchar  *tag,
-                                          GimpResource **style_entry,
+                                          ClayResource **style_entry,
                                           GType         resource_type);
 
 static void gfig_read_parameter_int      (gchar       **text,
@@ -53,7 +53,7 @@ static void gfig_read_parameter_double   (gchar        **text,
                                           const gchar   *name,
                                           gdouble       *style_entry);
 
-static void gfig_read_parameter_gimp_rgb (gchar        **text,
+static void gfig_read_parameter_clay_rgb (gchar        **text,
                                           gint           nitems,
                                           const gchar   *name,
                                           GeglColor    **style_entry);
@@ -66,7 +66,7 @@ static void
 gfig_read_resource (gchar        **text,
                     gint           nitems,
                     const gchar   *tag,
-                    GimpResource **style_entry,
+                    ClayResource **style_entry,
                     GType          resource_type)
 {
   gint  n = 0;
@@ -84,7 +84,7 @@ gfig_read_resource (gchar        **text,
             {
               const gchar *resource_name = g_strchug (ptr);
 
-              *style_entry = gimp_resource_get_by_name (resource_type,
+              *style_entry = clay_resource_get_by_name (resource_type,
                                                         resource_name);
               g_free (tmpstr);
               return;
@@ -165,7 +165,7 @@ gfig_read_parameter_double (gchar        **text,
 }
 
 static void
-gfig_read_parameter_gimp_rgb (gchar        **text,
+gfig_read_parameter_clay_rgb (gchar        **text,
                               gint           nitems,
                               const gchar   *name,
                               GeglColor    **style_entry)
@@ -282,19 +282,19 @@ gfig_load_style (Style *style,
     }
 
   gfig_read_resource (style_text, nitems, "BrushName",
-                      (GimpResource**) &style->brush, GIMP_TYPE_BRUSH);
+                      (ClayResource**) &style->brush, CLAY_TYPE_BRUSH);
 
   if (style->brush == NULL)
     g_message ("Error loading style: missing brush.");
 
   gfig_read_resource (style_text, nitems, "Pattern",
-                      (GimpResource**) &style->pattern, GIMP_TYPE_PATTERN);
+                      (ClayResource**) &style->pattern, CLAY_TYPE_PATTERN);
   gfig_read_resource (style_text, nitems, "Gradient",
-                      (GimpResource**) &style->gradient, GIMP_TYPE_GRADIENT);
+                      (ClayResource**) &style->gradient, CLAY_TYPE_GRADIENT);
 
-  gfig_read_parameter_gimp_rgb (style_text, nitems, "Foreground",
+  gfig_read_parameter_clay_rgb (style_text, nitems, "Foreground",
                                 &style->foreground);
-  gfig_read_parameter_gimp_rgb (style_text, nitems, "Background",
+  gfig_read_parameter_clay_rgb (style_text, nitems, "Background",
                                 &style->background);
 
   gfig_read_parameter_int (style_text, nitems, "FillType", &value);
@@ -384,11 +384,11 @@ gfig_save_style (Style   *style,
 
   if (gfig_context->debug_styles)
     g_printerr ("Saving style %s, brush name '%s'\n", style->name,
-                gimp_resource_get_name (GIMP_RESOURCE (style->brush)));
+                clay_resource_get_name (CLAY_RESOURCE (style->brush)));
 
   g_string_append_printf (string, "<Style %s>\n", style->name);
   g_string_append_printf (string, "BrushName:      %s\n",
-                          gimp_resource_get_name (GIMP_RESOURCE (style->brush)));
+                          clay_resource_get_name (CLAY_RESOURCE (style->brush)));
   if (!style->brush)
     g_message ("Error saving style %s: saving NULL for brush name", style->name);
 
@@ -400,9 +400,9 @@ gfig_save_style (Style   *style,
                           g_ascii_dtostr (buffer, blen, style->fill_opacity));
 
   g_string_append_printf (string, "Pattern:        %s\n",
-                          gimp_resource_get_name (GIMP_RESOURCE (style->pattern)));
+                          clay_resource_get_name (CLAY_RESOURCE (style->pattern)));
   g_string_append_printf (string, "Gradient:       %s\n",
-                          gimp_resource_get_name (GIMP_RESOURCE (style->gradient)));
+                          clay_resource_get_name (CLAY_RESOURCE (style->gradient)));
 
   gegl_color_get_pixel (style->foreground, babl_format ("R'G'B'A double"), rgba);
   g_string_append_printf (string, "Foreground: %s %s %s %s\n",
@@ -438,7 +438,7 @@ gfig_style_save_as_attributes (Style   *style,
 
   /* Tags must match the ones written, see below in the code. */
   g_string_append_printf (string, "BrushName=\"%s\" ",
-                          gimp_resource_get_name (GIMP_RESOURCE (style->brush)));
+                          clay_resource_get_name (CLAY_RESOURCE (style->brush)));
   /* Why only brush and not pattern and gradient? */
 
   gegl_color_get_pixel (style->foreground, babl_format ("R'G'B'A double"), rgba);
@@ -479,7 +479,7 @@ gfig_save_styles (GString *string)
  * gfig_context->enable_repaint is FALSE).
  */
 void
-set_foreground_callback (GimpColorButton *button,
+set_foreground_callback (ClayColorButton *button,
                          gpointer         data)
 {
   Style *current_style;
@@ -490,13 +490,13 @@ set_foreground_callback (GimpColorButton *button,
   current_style = gfig_context_get_current_style ();
 
   g_clear_object (&current_style->foreground);
-  current_style->foreground = gimp_color_button_get_color (button);
+  current_style->foreground = clay_color_button_get_color (button);
 
   gfig_paint_callback ();
 }
 
 void
-set_background_callback (GimpColorButton *button,
+set_background_callback (ClayColorButton *button,
                          gpointer         data)
 {
   Style *current_style;
@@ -507,7 +507,7 @@ set_background_callback (GimpColorButton *button,
   current_style = gfig_context_get_current_style ();
 
   g_clear_object (&current_style->background);
-  current_style->background = gimp_color_button_get_color (button);
+  current_style->background = clay_color_button_get_color (button);
 
   gfig_paint_callback ();
 }
@@ -536,7 +536,7 @@ set_paint_type_callback (GtkToggleButton *toggle,
  */
 void
 gfig_brush_changed_callback (gpointer               user_data,
-                             GimpBrush             *brush,
+                             ClayBrush             *brush,
                              gboolean               dialog_closing)
 {
   Style *current_style;
@@ -548,15 +548,15 @@ gfig_brush_changed_callback (gpointer               user_data,
   if (brush)
     set_context_bdesc (brush);
 
-  gimp_context_set_brush (brush);
-  gimp_context_set_brush_default_size ();
+  clay_context_set_brush (brush);
+  clay_context_set_brush_default_size ();
 
   gfig_paint_callback ();
 }
 
 void
 gfig_pattern_changed_callback (gpointer                 user_data,
-                               GimpPattern             *pattern,
+                               ClayPattern             *pattern,
                                gboolean                 dialog_closing)
 {
   Style *current_style;
@@ -569,7 +569,7 @@ gfig_pattern_changed_callback (gpointer                 user_data,
 
 void
 gfig_gradient_changed_callback (gpointer                  user_data,
-                                GimpGradient             *gradient,
+                                ClayGradient             *gradient,
                                 gboolean                  dialog_closing)
 {
   Style *current_style;
@@ -617,7 +617,7 @@ gfig_style_copy (Style       *style1,
 
 /*
  * gfig_style_apply() applies the settings from the specified style to
- * the GIMP core.  It does not change any widgets, and does not cause
+ * the Clay core.  It does not change any widgets, and does not cause
  * a repaint.
  */
 void
@@ -626,63 +626,63 @@ gfig_style_apply (Style *style)
   if (gfig_context->debug_styles)
     g_printerr ("Applying style '%s' -- ", style->name);
 
-  gimp_context_set_foreground (style->foreground);
-  gimp_context_set_background (style->background);
+  clay_context_set_foreground (style->foreground);
+  clay_context_set_background (style->background);
 
-  if (! gimp_context_set_brush (style->brush))
+  if (! clay_context_set_brush (style->brush))
     g_message ("Style apply: Failed to set brush to '%s' in style '%s'",
-               gimp_resource_get_name (GIMP_RESOURCE (style->brush)),
+               clay_resource_get_name (CLAY_RESOURCE (style->brush)),
                style->name);
 
-  gimp_context_set_brush_default_size ();
+  clay_context_set_brush_default_size ();
 
   g_assert (style->pattern != NULL);
-  gimp_context_set_pattern (style->pattern);
+  clay_context_set_pattern (style->pattern);
 
-  gimp_context_set_gradient (style->gradient);
+  clay_context_set_gradient (style->gradient);
 
   if (gfig_context->debug_styles)
     g_printerr ("done.\n");
 }
 
 /*
- * gfig_read_gimp_style() reads the style settings from the Gimp core,
+ * gfig_read_clay_style() reads the style settings from the Clay core,
  * and applies them to the specified style, giving that style the
  * specified name.  This is mainly useful as a way of initializing
  * a style.  The function does not cause a repaint.
  */
 void
-gfig_read_gimp_style (Style       *style,
+gfig_read_clay_style (Style       *style,
                       const gchar *name)
 {
   gint dummy;
 
   if (!name)
-    g_message ("Error: name is NULL in gfig_read_gimp_style.");
+    g_message ("Error: name is NULL in gfig_read_clay_style.");
 
   if (gfig_context->debug_styles)
-    g_printerr ("Reading Gimp settings as style %s\n", name);
+    g_printerr ("Reading Clay settings as style %s\n", name);
   style->name = g_strdup (name);
 
   g_clear_object (&style->foreground);
-  style->foreground = gimp_context_get_foreground ();
+  style->foreground = clay_context_get_foreground ();
 
   g_clear_object (&style->background);
-  style->background = gimp_context_get_background ();
+  style->background = clay_context_get_background ();
 
-  style->brush    = gimp_context_get_brush ();
-  style->gradient = gimp_context_get_gradient ();
-  style->pattern  = gimp_context_get_pattern ();
+  style->brush    = clay_context_get_brush ();
+  style->gradient = clay_context_get_gradient ();
+  style->pattern  = clay_context_get_pattern ();
 
   style->fill_opacity = 100.;
 
   /* Cache attributes of brush. */
   if (style->brush)
     {
-      gimp_brush_get_info (style->brush,
+      clay_brush_get_info (style->brush,
                            &style->brush_width, &style->brush_height,
                            &dummy, &dummy);
-      style->brush_spacing = gimp_brush_get_spacing (style->brush);
+      style->brush_spacing = clay_brush_get_spacing (style->brush);
 
       set_context_bdesc (style->brush);
     }
@@ -699,7 +699,7 @@ gfig_read_gimp_style (Style       *style,
 
 /*
  * gfig_style_set_content_from_style() sets all of the style control widgets
- * to values from the specified style.  This in turn sets the Gimp core's
+ * to values from the specified style.  This in turn sets the Clay core's
  * values to the same things.  Repainting is suppressed while this happens,
  * so calling this function will not produce a repaint.
  *
@@ -715,26 +715,26 @@ gfig_style_set_context_from_style (Style *style)
   enable_repaint = gfig_context->enable_repaint;
   gfig_context->enable_repaint = FALSE;
 
-  gimp_color_button_set_color (GIMP_COLOR_BUTTON (gfig_context->fg_color_button),
+  clay_color_button_set_color (CLAY_COLOR_BUTTON (gfig_context->fg_color_button),
                                style->foreground);
-  gimp_color_button_set_color (GIMP_COLOR_BUTTON (gfig_context->bg_color_button),
+  clay_color_button_set_color (CLAY_COLOR_BUTTON (gfig_context->bg_color_button),
                                style->background);
-  if (! gimp_context_set_brush (style->brush))
+  if (! clay_context_set_brush (style->brush))
     g_message ("Style from context: Failed to set brush");
 
-  gimp_context_set_brush_default_size ();
+  clay_context_set_brush_default_size ();
 
   if (style->brush)
-    gimp_resource_chooser_set_resource (GIMP_RESOURCE_CHOOSER (gfig_context->brush_select),
-                                        GIMP_RESOURCE (style->brush));
+    clay_resource_chooser_set_resource (CLAY_RESOURCE_CHOOSER (gfig_context->brush_select),
+                                        CLAY_RESOURCE (style->brush));
 
   if (style->pattern)
-    gimp_resource_chooser_set_resource (GIMP_RESOURCE_CHOOSER (gfig_context->pattern_select),
-                                        GIMP_RESOURCE (style->pattern));
+    clay_resource_chooser_set_resource (CLAY_RESOURCE_CHOOSER (gfig_context->pattern_select),
+                                        CLAY_RESOURCE (style->pattern));
 
   if (style->gradient)
-    gimp_resource_chooser_set_resource (GIMP_RESOURCE_CHOOSER (gfig_context->gradient_select),
-                                        GIMP_RESOURCE (style->gradient));
+    clay_resource_chooser_set_resource (CLAY_RESOURCE_CHOOSER (gfig_context->gradient_select),
+                                        CLAY_RESOURCE (style->gradient));
 
   if (style->brush)
     set_context_bdesc (style->brush);
@@ -742,7 +742,7 @@ gfig_style_set_context_from_style (Style *style)
   if (gfig_context->debug_styles)
     g_printerr ("done.\n");
 
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (gfig_context->fillstyle_combo),
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (gfig_context->fillstyle_combo),
                                  (gint) style->fill_type);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gfig_context->paint_type_toggle),
@@ -764,7 +764,7 @@ gfig_style_set_style_from_context (Style *style)
   current_style = gfig_context_get_current_style ();
 
   g_clear_object (&style->foreground);
-  style->foreground = gimp_color_button_get_color (GIMP_COLOR_BUTTON (gfig_context->fg_color_button));
+  style->foreground = clay_color_button_get_color (CLAY_COLOR_BUTTON (gfig_context->fg_color_button));
   if (gfig_context->debug_styles)
     {
       gdouble rgb[3];
@@ -775,11 +775,11 @@ gfig_style_set_style_from_context (Style *style)
     }
 
   g_clear_object (&style->background);
-  style->background = gimp_color_button_get_color (GIMP_COLOR_BUTTON (gfig_context->bg_color_button));
+  style->background = clay_color_button_get_color (CLAY_COLOR_BUTTON (gfig_context->bg_color_button));
 
   /* FIXME: issues of ownership.
    * A resource is a pointer to an object.
-   * We own each resource object returned by gimp_context_get_<resource> and should unref it.
+   * We own each resource object returned by clay_context_get_<resource> and should unref it.
    * Here this is possibly overwriting a reference that should be unreffed.
    * Also, this is copying a reference, so we should ref the object.
    *
@@ -789,7 +789,7 @@ gfig_style_set_style_from_context (Style *style)
   style->pattern = current_style->pattern;
   style->gradient = current_style->gradient;
 
-  if (gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (gfig_context->fillstyle_combo), &value))
+  if (clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (gfig_context->fillstyle_combo), &value))
     style->fill_type = value;
 
   /* FIXME when there is an opacity control widget to read */
@@ -800,16 +800,16 @@ gfig_style_set_style_from_context (Style *style)
 
 /* Set bdesc from brush.  Side effects on gfig_context->bdesc */
 void
-set_context_bdesc (GimpBrush *brush)
+set_context_bdesc (ClayBrush *brush)
 {
   gint width;
   gint height;
   gint dummy;
 
   g_return_if_fail (brush != NULL);
-  g_return_if_fail (GIMP_IS_BRUSH (brush));
+  g_return_if_fail (CLAY_IS_BRUSH (brush));
 
-  if (brush && gimp_brush_get_info (brush, &width, &height, &dummy, &dummy))
+  if (brush && clay_brush_get_info (brush, &width, &height, &dummy, &dummy))
     {
       gfig_context->bdesc.brush  = brush;
       gfig_context->bdesc.width  = MAX (width, 32);

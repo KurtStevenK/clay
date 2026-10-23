@@ -22,10 +22,10 @@ sub edit_cut {
     $help = <<'HELP';
 If there is a selection in the image, then the area specified by the
 selection is cut from the specified drawables and placed in an internal
-GIMP edit buffer. It can subsequently be retrieved using the
-gimp_edit_paste() command. If there is no selection and only one
+Clay edit buffer. It can subsequently be retrieved using the
+clay_edit_paste() command. If there is no selection and only one
 specified drawable, then the specified drawable will be removed and its
-contents stored in the internal GIMP edit buffer.
+contents stored in the internal Clay edit buffer.
 
 This procedure will return %FALSE if the selected area lies completely
 outside the bounds of the current drawables and there is nothing to cut
@@ -48,15 +48,15 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpImage *image         = NULL;
+  ClayImage *image         = NULL;
   GList     *drawable_list = NULL;
   gint       i;
 
   for (i = 0; drawables[i] != NULL; i++)
     {
-      if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
-                                       GIMP_PDB_ITEM_CONTENT, error) ||
-          ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawables[i]), error))
+      if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
+                                       CLAY_PDB_ITEM_CONTENT, error) ||
+          ! clay_pdb_item_is_not_group (CLAY_ITEM (drawables[i]), error))
         {
           success = FALSE;
           break;
@@ -64,13 +64,13 @@ HELP
 
       if (! image)
         {
-          image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+          image = clay_item_get_image (CLAY_ITEM (drawables[i]));
         }
-      else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+      else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
         {
           success = FALSE;
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 _("All specified drawables must belong to the same image."));
           break;
         }
@@ -82,12 +82,12 @@ HELP
     {
       GError *my_error = NULL;
 
-      non_empty = gimp_edit_cut (image, drawable_list, context, &my_error) != NULL;
+      non_empty = clay_edit_cut (image, drawable_list, context, &my_error) != NULL;
 
       if (! non_empty)
         {
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 my_error->message);
           g_clear_error (&my_error);
         }
@@ -108,9 +108,9 @@ sub edit_copy {
     $help = <<'HELP';
 If there is a selection in the image, then the area specified by the
 selection is copied from the specified drawables and placed in an
-internal GIMP edit buffer. It can subsequently be retrieved using the
-gimp_edit_paste() command.  If there is no selection, then the
-specified drawables' contents will be stored in the internal GIMP edit
+internal Clay edit buffer. It can subsequently be retrieved using the
+clay_edit_paste() command.  If there is no selection, then the
+specified drawables' contents will be stored in the internal Clay edit
 buffer.
 
 This procedure will return %FALSE if the selected area lies
@@ -136,22 +136,22 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpImage *image          = NULL;
+  ClayImage *image          = NULL;
   GList     *drawables_list = NULL;
   gint       i;
 
   for (i = 0; drawables[i] != NULL; i++)
     {
-      if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL, 0, error))
+      if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL, 0, error))
         {
           success = FALSE;
           break;
         }
       if (image == NULL)
         {
-          image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+          image = clay_item_get_image (CLAY_ITEM (drawables[i]));
         }
-      else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+      else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
         {
           success = FALSE;
           break;
@@ -163,12 +163,12 @@ HELP
     {
       GError *my_error = NULL;
 
-      non_empty = gimp_edit_copy (image, drawables_list, context, FALSE, &my_error) != NULL;
+      non_empty = clay_edit_copy (image, drawables_list, context, FALSE, &my_error) != NULL;
 
       if (! non_empty)
         {
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 my_error->message);
           g_clear_error (&my_error);
         }
@@ -187,10 +187,10 @@ sub edit_copy_visible {
 
     $help = <<'HELP';
 If there is a selection in the image, then the area specified by the
-selection is copied from the projection and placed in an internal GIMP
+selection is copied from the projection and placed in an internal Clay
 edit buffer. It can subsequently be retrieved using the
-gimp_edit_paste() command. If there is no selection, then the
-projection's contents will be stored in the internal GIMP edit buffer.
+clay_edit_paste() command. If there is no selection, then the
+projection's contents will be stored in the internal Clay edit buffer.
 HELP
 
     &mitch_pdb_misc('2004', '2.2');
@@ -210,12 +210,12 @@ HELP
 {
   GError *my_error = NULL;
 
-  non_empty = gimp_edit_copy_visible (image, context, &my_error) != NULL;
+  non_empty = clay_edit_copy_visible (image, context, &my_error) != NULL;
 
   if (! non_empty)
     {
-      gimp_message_literal (gimp,
-                            G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+      clay_message_literal (clay,
+                            G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                             my_error->message);
       g_clear_error (&my_error);
     }
@@ -228,9 +228,9 @@ sub edit_paste {
     $blurb = 'Paste buffer to the specified drawable.';
 
     $help = <<'HELP';
-This procedure pastes a copy of the internal GIMP edit buffer to the
-specified drawable. The GIMP edit buffer will be empty unless a call
-was previously made to either [func@Gimp.edit_cut] or [func@Gimp.edit_copy].
+This procedure pastes a copy of the internal Clay edit buffer to the
+specified drawable. The Clay edit buffer will be empty unless a call
+was previously made to either [func@Clay.edit_cut] or [func@Clay.edit_copy].
 The "paste_into" option specifies whether to clear the current image
 selection, or to paste the buffer "behind" the selection. This allows
 the selection to act as a mask for the pasted buffer. Anywhere that
@@ -243,7 +243,7 @@ floating selection is added.
 
 This procedure returns the new drawables (floating or not). If the result
 is a floating selection, it will already be attached to the specified
-drawable, and a subsequent call to [func@Gimp.floating_sel_attach] is not needed.
+drawable, and a subsequent call to [func@Clay.floating_sel_attach] is not needed.
 HELP
 
     &std_pdb_misc;
@@ -263,12 +263,12 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpObject *paste = gimp_get_clipboard_object (gimp);
+  ClayObject *paste = clay_get_clipboard_object (clay);
 
   if (paste &&
-      gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+      clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
       GList *drawables = NULL;
       GList *list;
@@ -278,11 +278,11 @@ HELP
       if (drawable != NULL)
         drawables = g_list_prepend (drawables, drawable);
 
-      list = gimp_edit_paste (gimp_item_get_image (GIMP_ITEM (drawable)),
+      list = clay_edit_paste (clay_item_get_image (CLAY_ITEM (drawable)),
                               drawables, paste,
                               paste_into ?
-                              GIMP_PASTE_TYPE_FLOATING_INTO :
-                              GIMP_PASTE_TYPE_FLOATING,
+                              CLAY_PASTE_TYPE_FLOATING_INTO :
+                              CLAY_PASTE_TYPE_FLOATING,
                               context, FALSE,
                               -1, -1, -1, -1);
       g_list_free (drawables);
@@ -291,7 +291,7 @@ HELP
         success = FALSE;
 
       num_drawables = g_list_length (list);
-      new_drawables = g_new0 (GimpDrawable *, num_drawables + 1);
+      new_drawables = g_new0 (ClayDrawable *, num_drawables + 1);
 
       for (i = 0; i < num_drawables; i++, list = g_list_next (list))
         new_drawables[i] = g_object_ref (list->data);
@@ -309,9 +309,9 @@ sub edit_paste_as_new_image {
     $blurb = 'Paste buffer to a new image.';
 
     $help = <<'HELP';
-This procedure pastes a copy of the internal GIMP edit buffer to a new
-image.  The GIMP edit buffer will be empty unless a call was
-previously made to either gimp_edit_cut() or gimp_edit_copy(). This
+This procedure pastes a copy of the internal Clay edit buffer to a new
+image.  The Clay edit buffer will be empty unless a call was
+previously made to either clay_edit_cut() or clay_edit_copy(). This
 procedure returns the new image or -1 if the edit buffer was empty.
 HELP
 
@@ -324,11 +324,11 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpObject *paste = gimp_get_clipboard_object (gimp);
+  ClayObject *paste = clay_get_clipboard_object (clay);
 
   if (paste)
     {
-      image = gimp_edit_paste_as_new_image (gimp, paste, context);
+      image = clay_edit_paste_as_new_image (clay, paste, context);
 
       if (! image)
         success = FALSE;
@@ -342,7 +342,7 @@ sub edit_named_cut {
     $blurb = 'Cut into a named buffer.';
 
     $help = <<'HELP';
-This procedure works like gimp_edit_cut(), but additionally stores the
+This procedure works like clay_edit_cut(), but additionally stores the
 cut buffer into a named buffer that will stay available for later
 pasting, regardless of any intermediate copy or cut operations.
 HELP
@@ -365,15 +365,15 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpImage *image         = NULL;
+  ClayImage *image         = NULL;
   GList     *drawable_list = NULL;
   gint       i;
 
   for (i = 0; drawables[i] != NULL; i++)
     {
-      if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
-                                       GIMP_PDB_ITEM_CONTENT, error) ||
-          ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawables[i]), error))
+      if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
+                                       CLAY_PDB_ITEM_CONTENT, error) ||
+          ! clay_pdb_item_is_not_group (CLAY_ITEM (drawables[i]), error))
         {
           success = FALSE;
           break;
@@ -381,13 +381,13 @@ HELP
 
       if (! image)
         {
-          image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+          image = clay_item_get_image (CLAY_ITEM (drawables[i]));
         }
-      else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+      else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
         {
           success = FALSE;
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 _("All specified drawables must belong to the same image."));
           break;
         }
@@ -399,7 +399,7 @@ HELP
     {
       GError *my_error = NULL;
 
-      real_name = (gchar *) gimp_edit_named_cut (image, buffer_name,
+      real_name = (gchar *) clay_edit_named_cut (image, buffer_name,
                                                  drawable_list, context, &my_error);
 
       if (real_name)
@@ -408,8 +408,8 @@ HELP
         }
       else
         {
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 my_error->message);
           g_clear_error (&my_error);
         }
@@ -428,7 +428,7 @@ sub edit_named_copy {
     $blurb = 'Copy into a named buffer.';
 
     $help = <<'HELP';
-This procedure works like gimp_edit_copy(), but additionally stores the
+This procedure works like clay_edit_copy(), but additionally stores the
 copied buffer into a named buffer that will stay available for later
 pasting, regardless of any intermediate copy or cut operations.
 HELP
@@ -451,13 +451,13 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpImage *image         = NULL;
+  ClayImage *image         = NULL;
   GList     *drawable_list = NULL;
   gint       i;
 
   for (i = 0; drawables[i] != NULL; i++)
     {
-      if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
+      if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
                                        0, error))
         {
           success = FALSE;
@@ -466,13 +466,13 @@ HELP
 
       if (! image)
         {
-          image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+          image = clay_item_get_image (CLAY_ITEM (drawables[i]));
         }
-      else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+      else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
         {
           success = FALSE;
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 _("All specified drawables must belong to the same image."));
           break;
         }
@@ -484,7 +484,7 @@ HELP
     {
       GError *my_error = NULL;
 
-      real_name = (gchar *) gimp_edit_named_copy (image, buffer_name,
+      real_name = (gchar *) clay_edit_named_copy (image, buffer_name,
                                                   drawable_list, context, &my_error);
 
       if (real_name)
@@ -493,8 +493,8 @@ HELP
         }
       else
         {
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 my_error->message);
           g_clear_error (&my_error);
         }
@@ -513,7 +513,7 @@ sub edit_named_copy_visible {
     $blurb = 'Copy from the projection into a named buffer.';
 
     $help = <<'HELP';
-This procedure works like gimp_edit_copy_visible(), but additionally
+This procedure works like clay_edit_copy_visible(), but additionally
 stores the copied buffer into a named buffer that will stay available
 for later pasting, regardless of any intermediate copy or cut
 operations.
@@ -539,7 +539,7 @@ HELP
 {
   GError *my_error = NULL;
 
-  real_name = (gchar *) gimp_edit_named_copy_visible (image, buffer_name,
+  real_name = (gchar *) clay_edit_named_copy_visible (image, buffer_name,
                                                       context, &my_error);
 
   if (real_name)
@@ -548,8 +548,8 @@ HELP
     }
   else
     {
-      gimp_message_literal (gimp,
-                            G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+      clay_message_literal (clay,
+                            G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                             my_error->message);
       g_clear_error (&my_error);
     }
@@ -562,7 +562,7 @@ sub edit_named_paste {
     $blurb = 'Paste named buffer to the specified drawable.';
 
     $help = <<'HELP';
-This procedure works like gimp_edit_paste() but pastes a named buffer
+This procedure works like clay_edit_paste() but pastes a named buffer
 instead of the global buffer.
 HELP
 
@@ -585,12 +585,12 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+  ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
   if (buffer &&
-      gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+      clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
       GList *drawables = NULL;
       GList *layers;
@@ -598,11 +598,11 @@ HELP
       if (drawable != NULL)
         drawables = g_list_prepend (drawables, drawable);
 
-      layers = gimp_edit_paste (gimp_item_get_image (GIMP_ITEM (drawable)),
-                                drawables, GIMP_OBJECT (buffer),
+      layers = clay_edit_paste (clay_item_get_image (CLAY_ITEM (drawable)),
+                                drawables, CLAY_OBJECT (buffer),
                                 paste_into ?
-                                GIMP_PASTE_TYPE_FLOATING_INTO :
-                                GIMP_PASTE_TYPE_FLOATING,
+                                CLAY_PASTE_TYPE_FLOATING_INTO :
+                                CLAY_PASTE_TYPE_FLOATING,
                                 context, FALSE,
                                 -1, -1, -1, -1);
       g_list_free (drawables);
@@ -625,7 +625,7 @@ sub edit_named_paste_as_new_image {
     $blurb = 'Paste named buffer to a new image.';
 
     $help = <<'HELP';
-This procedure works like gimp_edit_paste_as_new_image() but pastes a
+This procedure works like clay_edit_paste_as_new_image() but pastes a
 named buffer instead of the global buffer.
 HELP
 
@@ -644,11 +644,11 @@ HELP
     %invoke = (
 	code => <<CODE
 {
-  GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+  ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
   if (buffer)
     {
-      image = gimp_edit_paste_as_new_image (gimp, GIMP_OBJECT (buffer), context);
+      image = clay_edit_paste_as_new_image (clay, CLAY_OBJECT (buffer), context);
 
       if (! image)
         success = FALSE;
@@ -661,16 +661,16 @@ CODE
 }
 
 
-@headers = qw("libgimpconfig/gimpconfig.h"
-              "core/gimp.h"
-              "core/gimp-edit.h"
-              "core/gimpdrawable-edit.h"
-              "core/gimpbuffer.h"
-              "core/gimpimage.h"
-              "core/gimpprogress.h"
-              "gimppdb-utils.h"
-              "gimppdbcontext.h"
-              "gimp-intl.h");
+@headers = qw("libclayconfig/clayconfig.h"
+              "core/clay.h"
+              "core/clay-edit.h"
+              "core/claydrawable-edit.h"
+              "core/claybuffer.h"
+              "core/clayimage.h"
+              "core/clayprogress.h"
+              "claypdb-utils.h"
+              "claypdbcontext.h"
+              "clay-intl.h");
 
 @procs = qw(edit_cut
             edit_copy
@@ -686,7 +686,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Edit procedures';
-$doc_title = 'gimpedit';
+$doc_title = 'clayedit';
 $doc_short_desc = 'Edit menu functions (cut, copy, paste, clear, etc.)';
 $doc_long_desc = 'Edit menu functions (cut, copy, paste, clear, etc.)';
 

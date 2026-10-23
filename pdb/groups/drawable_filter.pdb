@@ -38,7 +38,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  valid = (gimp_drawable_filter_get_by_id (gimp, filter_id) != NULL);
+  valid = (clay_drawable_filter_get_by_id (clay, filter_id) != NULL);
 }
 CODE
     );
@@ -51,7 +51,7 @@ sub drawable_filter_new {
 This procedure creates a new filter for the specified operation on @drawable.
 
 The new effect still needs to be either added or merged to @drawable later.
-Add the effect non-destructively with [method@Gimp.Drawable.append_filter].
+Add the effect non-destructively with [method@Clay.Drawable.append_filter].
 
 Currently only layers can have non-destructive effects. The effects must be merged for all other types of drawable.
 HELP
@@ -75,14 +75,14 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_gegl_op_nde_allowed (operation_name, error))
+  if (clay_gegl_op_nde_allowed (operation_name, error))
     {
       GeglNode *operation = gegl_node_new ();
 
       gegl_node_set (operation,
                      "operation", operation_name,
                      NULL);
-      if (gimp_operation_config_is_custom (gimp, operation_name))
+      if (clay_operation_config_is_custom (clay, operation_name))
         {
           GParamSpec *pspec  = gegl_node_find_property (operation, "config");
           GType       otype  = pspec->value_type;
@@ -93,14 +93,14 @@ HELP
           g_object_unref (config);
         }
 
-      filter = gimp_drawable_filter_new (drawable, name, operation, NULL);
-      /* We don't have a libgimp function for setting the clipping
+      filter = clay_drawable_filter_new (drawable, name, operation, NULL);
+      /* We don't have a libclay function for setting the clipping
        * behavior. I want to look further into the whole logic first.
        * In the meantime if all API-made filters must have a single
        * clipping behavior, I believe that not-clipping (adjusting) is
        * the nicer default.
        */
-      gimp_drawable_filter_set_clip (filter, FALSE);
+      clay_drawable_filter_set_clip (filter, FALSE);
       g_clear_object (&operation);
     }
   else
@@ -138,7 +138,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  name = g_strdup (gimp_object_get_name (GIMP_OBJECT (filter)));
+  name = g_strdup (clay_object_get_name (CLAY_OBJECT (filter)));
 }
 CODE
     );
@@ -168,7 +168,7 @@ HELP
 {
   GeglNode *node;
 
-  node = gimp_drawable_filter_get_operation (filter);
+  node = clay_drawable_filter_get_operation (filter);
   name = g_strdup (gegl_node_get_operation (node));
 }
 CODE
@@ -195,7 +195,7 @@ sub drawable_filter_get_visible {
     %invoke = (
 	code => <<'CODE'
 {
-  visible = gimp_filter_get_active (GIMP_FILTER (filter));
+  visible = clay_filter_get_active (CLAY_FILTER (filter));
 }
 CODE
     );
@@ -207,7 +207,7 @@ sub drawable_filter_set_visible {
     $help = <<'HELP';
 This procedure sets the specified filter's visibility.
 
-The drawable won't be immediately rendered. Use [method@Gimp.Drawable.update] to trigger an update.
+The drawable won't be immediately rendered. Use [method@Clay.Drawable.update] to trigger an update.
 HELP
 
     &jehan_pdb_misc('2024', '3.0');
@@ -222,12 +222,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (visible != gimp_filter_get_active (GIMP_FILTER (filter)))
+  if (visible != clay_filter_get_active (CLAY_FILTER (filter)))
     {
-      if (gimp_item_is_attached (GIMP_ITEM (gimp_drawable_filter_get_drawable (filter))))
-        gimp_image_undo_push_filter_visibility_compressible (filter, context);
+      if (clay_item_is_attached (CLAY_ITEM (clay_drawable_filter_get_drawable (filter))))
+        clay_image_undo_push_filter_visibility_compressible (filter, context);
 
-      gimp_filter_set_active (GIMP_FILTER (filter), visible);
+      clay_filter_set_active (CLAY_FILTER (filter), visible);
     }
 }
 CODE
@@ -254,7 +254,7 @@ sub drawable_filter_get_opacity {
     %invoke = (
 	code => <<'CODE'
 {
-  opacity = gimp_drawable_filter_get_opacity (filter);
+  opacity = clay_drawable_filter_get_opacity (filter);
 }
 CODE
     );
@@ -273,14 +273,14 @@ sub drawable_filter_get_blend_mode {
     );
 
     @outargs = (
-	{ name => 'mode', type => 'enum GimpLayerMode',
+	{ name => 'mode', type => 'enum ClayLayerMode',
 	  desc => 'The effect blending mode' },
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  mode = gimp_drawable_filter_get_paint_mode (filter);
+  mode = clay_drawable_filter_get_paint_mode (filter);
 }
 CODE
     );
@@ -311,17 +311,17 @@ HELP
 	  desc => 'Array of values, one per property in propnames' },
 	{ name => 'opacity', type => '0 <= double <= 100',
 	  desc => "The filter's opacity" },
-	{ name => 'blend_mode', type => 'enum GimpLayerMode',
-          default => 'GIMP_LAYER_MODE_NORMAL',
+	{ name => 'blend_mode', type => 'enum ClayLayerMode',
+          default => 'CLAY_LAYER_MODE_NORMAL',
 	  desc => 'The effect blending mode' },
-	{ name => 'blend_space', type => 'enum GimpLayerColorSpace',
-          default => 'GIMP_LAYER_COLOR_SPACE_AUTO',
+	{ name => 'blend_space', type => 'enum ClayLayerColorSpace',
+          default => 'CLAY_LAYER_COLOR_SPACE_AUTO',
 	  desc => 'The effect blending space' },
-	{ name => 'composite_mode', type => 'enum GimpLayerCompositeMode',
-          default => 'GIMP_LAYER_COMPOSITE_AUTO',
+	{ name => 'composite_mode', type => 'enum ClayLayerCompositeMode',
+          default => 'CLAY_LAYER_COMPOSITE_AUTO',
 	  desc => 'The layer composite mode' },
-	{ name => 'composite_space', type => 'enum GimpLayerColorSpace',
-          default => 'GIMP_LAYER_COLOR_SPACE_AUTO',
+	{ name => 'composite_space', type => 'enum ClayLayerColorSpace',
+          default => 'CLAY_LAYER_COLOR_SPACE_AUTO',
 	  desc => 'The effect composite space' },
 	{ name => 'auxinputnames', type => 'strv',
 	  desc => 'Array of aux input pads' },
@@ -332,7 +332,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  success = gimp_drawable_filter_update (filter, propnames, propvalues,
+  success = clay_drawable_filter_update (filter, propnames, propvalues,
                                          opacity,
                                          blend_mode, blend_space,
                                          composite_mode, composite_space,
@@ -351,7 +351,7 @@ BLURB
     $help = <<'HELP';
 This procedure returns the number of arguments on the specified filter.
 
-For specific information on each input argument, use gimp_drawable_filter_get_argument().
+For specific information on each input argument, use clay_drawable_filter_get_argument().
 HELP
 
     &jehan_pdb_misc('2024', '3.0');
@@ -374,16 +374,16 @@ HELP
   GeglNode    *node;
   const gchar *opname;
 
-  node   = gimp_drawable_filter_get_operation (filter);
+  node   = clay_drawable_filter_get_operation (filter);
   opname = gegl_node_get_operation (node);
 
   if (gegl_has_operation (opname))
     {
       guint n_properties;
 
-      if (gimp_operation_config_is_custom (gimp, opname))
+      if (clay_operation_config_is_custom (clay, opname))
         {
-          GimpObject   *settings = NULL;
+          ClayObject   *settings = NULL;
           GObjectClass *klass;
           GObjectClass *parent_klass;
           guint         n_parent_properties;
@@ -443,11 +443,11 @@ HELP
    %invoke = (
 	code => <<'CODE'
 {
-  GimpObject  *settings = NULL;
+  ClayObject  *settings = NULL;
   GeglNode    *node;
   const gchar *opname;
 
-  node   = gimp_drawable_filter_get_operation (filter);
+  node   = clay_drawable_filter_get_operation (filter);
   opname = gegl_node_get_operation (node);
 
   if (gegl_has_operation (opname))
@@ -456,7 +456,7 @@ HELP
       guint         n_properties;
       guint         n_parent_properties = 0;
 
-      if (gimp_operation_config_is_custom (gimp, opname))
+      if (clay_operation_config_is_custom (clay, opname))
         {
           GObjectClass *klass;
           GObjectClass *parent_klass;
@@ -529,13 +529,13 @@ HELP
   guint         n_specs;
   guint         n_parent_properties = 0;
   GStrvBuilder *names_builder;
-  GimpObject   *settings = NULL;
+  ClayObject   *settings = NULL;
 
-  node   = gimp_drawable_filter_get_operation (filter);
+  node   = clay_drawable_filter_get_operation (filter);
   opname = gegl_node_get_operation (node);
 
   if (gegl_has_operation (opname) &&
-      gimp_operation_config_is_custom (gimp, opname))
+      clay_operation_config_is_custom (clay, opname))
     {
       GObjectClass *klass;
       GObjectClass *parent_klass;
@@ -559,7 +559,7 @@ HELP
    }
 
   names_builder = g_strv_builder_new ();
-  values        = gimp_value_array_new (n_specs);
+  values        = clay_value_array_new (n_specs);
 
   for (gint i = 0; i < n_specs; i++)
     {
@@ -575,7 +575,7 @@ HELP
       if (GEGL_IS_PARAM_SPEC_ENUM (pspec))
         {
           /* Special-casing GeglParamEnum which are passed as string to
-           * libgimp.
+           * libclay.
            */
           GParamSpecEnum *espec       = G_PARAM_SPEC_ENUM (pspec);
           GEnumClass     *enum_class  = espec->enum_class;
@@ -602,12 +602,12 @@ HELP
                 g_value_set_string (&string_value, enum_value.value_nick);
             }
 
-          gimp_value_array_append (values, &string_value);
+          clay_value_array_append (values, &string_value);
           g_value_unset (&string_value);
         }
       else
         {
-          gimp_value_array_append (values, &value);
+          clay_value_array_append (values, &value);
         }
       g_strv_builder_add (names_builder, pspec->name);
       g_value_unset (&value);
@@ -644,14 +644,14 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpDrawable *drawable = gimp_drawable_filter_get_drawable (filter);
+  ClayDrawable *drawable = clay_drawable_filter_get_drawable (filter);
 
-  if (drawable && gimp_drawable_has_filter (drawable, GIMP_FILTER (filter)))
+  if (drawable && clay_drawable_has_filter (drawable, CLAY_FILTER (filter)))
     {
-      gimp_image_undo_push_filter_remove (gimp_item_get_image (GIMP_ITEM (drawable)),
+      clay_image_undo_push_filter_remove (clay_item_get_image (CLAY_ITEM (drawable)),
                                           _("Remove filter"), drawable, filter);
 
-      gimp_drawable_filter_abort (filter);
+      clay_drawable_filter_abort (filter);
     }
   else
     {
@@ -685,7 +685,7 @@ HELP
   GList        *ops     = NULL;
   GStrvBuilder *builder = NULL;
 
-  ops     = gimp_gegl_get_op_classes (FALSE);
+  ops     = clay_gegl_get_op_classes (FALSE);
   builder = g_strv_builder_new ();
 
   for (GList *op = ops; op != NULL; op = op->next)
@@ -746,7 +746,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_gegl_op_nde_allowed (operation_name, error))
+  if (clay_gegl_op_nde_allowed (operation_name, error))
     {
       GStrvBuilder       *names_builder = NULL;
       GeglOperationClass *klass         = NULL;
@@ -758,7 +758,7 @@ HELP
       GType gegl_operation_gtype_from_name (const gchar *name);
 
       names_builder = g_strv_builder_new ();
-      propvalues    = gimp_value_array_new (0);
+      propvalues    = clay_value_array_new (0);
 
       op_type = gegl_operation_gtype_from_name (operation_name);
       klass   = g_type_class_ref (op_type);
@@ -767,15 +767,15 @@ HELP
 
       g_strv_builder_add (names_builder, "title");
       g_value_take_string (&value, g_strdup (gegl_operation_class_get_key (klass, "title")));
-      gimp_value_array_append (propvalues, &value);
+      clay_value_array_append (propvalues, &value);
 
       g_strv_builder_add (names_builder, "description");
       g_value_take_string (&value, g_strdup (gegl_operation_class_get_key (klass, "description")));
-      gimp_value_array_append (propvalues, &value);
+      clay_value_array_append (propvalues, &value);
 
       g_strv_builder_add (names_builder, "categories");
       g_value_take_string (&value, g_strdup (gegl_operation_class_get_key (klass, "categories")));
-      gimp_value_array_append (propvalues, &value);
+      clay_value_array_append (propvalues, &value);
 
       license = g_strdup (gegl_operation_class_get_key (klass, "license"));
       if (license == NULL)
@@ -783,7 +783,7 @@ HELP
 
       g_strv_builder_add (names_builder, "license");
       g_value_take_string (&value, license);
-      gimp_value_array_append (propvalues, &value);
+      clay_value_array_append (propvalues, &value);
 
       propnames = g_strv_builder_end (names_builder);
 
@@ -827,20 +827,20 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_gegl_op_nde_allowed (operation_name, error))
+  if (clay_gegl_op_nde_allowed (operation_name, error))
     {
       GParamSpec **specs          = NULL;
       guint        n_specs        = 0;
       guint        n_parent_specs = 0;
 
-      if (gimp_operation_config_is_custom (gimp, operation_name))
+      if (clay_operation_config_is_custom (clay, operation_name))
         {
           GObjectClass *op_config_klass = NULL;
           GObjectClass *op_parent_klass = NULL;
           GType         op_config_type;
           GType         op_parent_type;
 
-          op_config_type  = gimp_operation_config_get_type (gimp, operation_name, NULL, GIMP_TYPE_OPERATION_SETTINGS);
+          op_config_type  = clay_operation_config_get_type (clay, operation_name, NULL, CLAY_TYPE_OPERATION_SETTINGS);
           op_config_klass = g_type_class_ref (op_config_type);
           specs           = g_object_class_list_properties (op_config_klass, &n_specs);
           g_type_class_unref (op_config_klass);
@@ -857,7 +857,7 @@ HELP
           specs = gegl_operation_list_properties (operation_name, &n_specs);
         }
 
-      pspecs = gimp_value_array_new (n_specs);
+      pspecs = clay_value_array_new (n_specs);
 
       for (gint i = 0; i < n_specs; i++)
         {
@@ -870,7 +870,7 @@ HELP
           /* Make sure we do not try to send param specs over the wire
            * if we don't support sending their type.
            */
-          if (! _gimp_param_spec_to_gp_param_def (pspec, &param_def, TRUE))
+          if (! _clay_param_spec_to_gp_param_def (pspec, &param_def, TRUE))
             {
               /* This is not technically a bug if an operation has
                * unsupported argument types, because we cannot possibly
@@ -899,7 +899,7 @@ HELP
               g_value_set_param (&value, g_param_spec_ref (pspec));
             }
 
-          gimp_value_array_append (pspecs, &value);
+          clay_value_array_append (pspecs, &value);
 
           g_value_unset (&value);
         }
@@ -918,22 +918,22 @@ CODE
 @headers = qw(<gegl.h>
               <gegl-plugin.h>
 
-              "libgimpbase/gimpbase.h"
-              "libgimpbase/gimpprotocol-private.h"
-              "libgimpbase/gimpwire-private.h"
+              "libclaybase/claybase.h"
+              "libclaybase/clayprotocol-private.h"
+              "libclaybase/claywire-private.h"
 
-              "libgimp/gimpgpparams.h"
+              "libclay/claygpparams.h"
 
-              "core/gimpcontainer.h"
-              "core/gimpdrawablefilter.h"
-              "core/gimpdrawable-filters.h"
-              "core/gimpimage-undo-push.h"
-              "core/gimpitem.h"
-              "gegl/gimp-gegl-utils.h"
-              "operations/gimp-operation-config.h"
-              "operations/gimpoperationsettings.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+              "core/claycontainer.h"
+              "core/claydrawablefilter.h"
+              "core/claydrawable-filters.h"
+              "core/clayimage-undo-push.h"
+              "core/clayitem.h"
+              "gegl/clay-gegl-utils.h"
+              "operations/clay-operation-config.h"
+              "operations/clayoperationsettings.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(drawable_filter_id_is_valid
             drawable_filter_new
@@ -955,7 +955,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Drawable Filter';
-$doc_title = 'gimpdrawablefilter';
+$doc_title = 'claydrawablefilter';
 $doc_short_desc = 'Operations on drawable filters.';
 $doc_long_desc = 'Operations on drawable filters: creation, editing.';
 

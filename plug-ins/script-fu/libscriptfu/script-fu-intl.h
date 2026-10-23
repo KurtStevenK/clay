@@ -30,7 +30,7 @@
 
 #define DEFINE_STD_SET_I18N                                          \
 static gboolean                                                      \
-set_i18n (GimpPlugIn   *plug_in,                                     \
+set_i18n (ClayPlugIn   *plug_in,                                     \
           const gchar  *procedure_name,                              \
           gchar       **gettext_domain,                              \
           gchar       **catalog_dir)                                 \

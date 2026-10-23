@@ -23,8 +23,8 @@
 # functions and HSV colors
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -57,14 +57,14 @@ def format_text(text):
 def gradient_css_save(procedure, config, data):
     runmode = config.get_property("run-mode")
 
-    if runmode == Gimp.RunMode.INTERACTIVE:
-        gi.require_version('GimpUi', '3.0')
-        from gi.repository import GimpUi
+    if runmode == Clay.RunMode.INTERACTIVE:
+        gi.require_version('ClayUi', '3.0')
+        from gi.repository import ClayUi
         gi.require_version('Gtk', '3.0')
         from gi.repository import Gtk
 
-        GimpUi.init('python-fu-gradient-save-as-css')
-        dialog = GimpUi.ProcedureDialog(procedure=procedure, config=config)
+        ClayUi.init('python-fu-gradient-save-as-css')
+        dialog = ClayUi.ProcedureDialog(procedure=procedure, config=config)
 
         # Fill the dialog.
         config.set_property("gradient", None)
@@ -72,14 +72,14 @@ def gradient_css_save(procedure, config, data):
 
         if not dialog.run():
             dialog.destroy()
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
+            return procedure.new_return_values(Clay.PDBStatusType.CANCEL, GLib.Error())
 
     gradient = config.get_property("gradient")
     file     = config.get_property("file")
 
     if file is None:
         error = 'No file given'
-        return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR,
                                            GLib.Error(error))
 
     stops = []
@@ -111,22 +111,22 @@ def gradient_css_save(procedure, config, data):
                                           flags=Gio.FileCreateFlags.REPLACE_DESTINATION,
                                           cancellable=None)
     if success:
-        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+        return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
     else:
-        return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.EXECUTION_ERROR,
                                            GLib.Error('File saving failed: {}'.format(file.get_path())))
 
-class GradientsSaveAsCSS (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class GradientsSaveAsCSS (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ 'python-fu-gradient-save-as-css' ]
 
     def do_create_procedure(self, name):
-        procedure = Gimp.Procedure.new(self, name,
-                                       Gimp.PDBProcType.PLUGIN,
+        procedure = Clay.Procedure.new(self, name,
+                                       Clay.PDBProcType.PLUGIN,
                                        gradient_css_save, None)
         if name == 'python-fu-gradient-save-as-css':
             procedure.set_documentation (_("Creates a new palette from a given gradient"),
@@ -139,16 +139,16 @@ class GradientsSaveAsCSS (Gimp.PlugIn):
             procedure.add_menu_path('<Gradients>/Gradients Menu')
 
             procedure.add_enum_argument ("run-mode", _("Run mode"),
-                                         _("The run mode"), Gimp.RunMode,
-                                         Gimp.RunMode.NONINTERACTIVE,
+                                         _("The run mode"), Clay.RunMode,
+                                         Clay.RunMode.NONINTERACTIVE,
                                          GObject.ParamFlags.READWRITE)
             procedure.add_gradient_argument ("gradient", _("_Gradient to use"),
                                              "", True,
                                              None, True, # Default to context.
                                              GObject.ParamFlags.READWRITE)
             procedure.add_file_argument ("file", _("_File"), "",
-                                         Gimp.FileChooserAction.SAVE,
+                                         Clay.FileChooserAction.SAVE,
                                          False, None, GObject.ParamFlags.READWRITE)
         return procedure
 
-Gimp.main(GradientsSaveAsCSS.__gtype__, sys.argv)
+Clay.main(GradientsSaveAsCSS.__gtype__, sys.argv)

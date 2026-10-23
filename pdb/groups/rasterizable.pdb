@@ -28,7 +28,7 @@ This procedure makes the item behave like a typical raster layer.
 Note that the source information (text contents and properties for a
 text layer, source file for a link layer, path and render properties for
 a vector layer, etc.) are not actually discarded, and it is possible to
-retrieve the original behavior with [method@Gimp.Rasterizable.restore].
+retrieve the original behavior with [method@Clay.Rasterizable.restore].
 HELP
 
     &jehan_pdb_misc('2025', '3.2');
@@ -41,13 +41,13 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (! gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (item)))
+  if (! clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (item)))
     {
-      gimp_rasterizable_rasterize (GIMP_RASTERIZABLE (item), TRUE);
+      clay_rasterizable_rasterize (CLAY_RASTERIZABLE (item), TRUE);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    _("This item has already been rasterized."));
       success = FALSE;
     }
@@ -79,13 +79,13 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (item)))
+  if (clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (item)))
     {
-      gimp_rasterizable_restore (GIMP_RASTERIZABLE (item));
+      clay_rasterizable_restore (CLAY_RASTERIZABLE (item));
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    _("This item has not been rasterized."));
       success = FALSE;
     }
@@ -103,15 +103,15 @@ rasterized. In this case, you should treat this @item as the generic
 raster variant.
 
 
-For instance, a [class@Gimp.TextLayer] object implements the
-%GimpRasterizable interface. If a text layer instance were to return
+For instance, a [class@Clay.TextLayer] object implements the
+%ClayRasterizable interface. If a text layer instance were to return
 %TRUE, you should only consider its rendering as returned by
-[method@Gimp.Drawable.get_buffer].
+[method@Clay.Drawable.get_buffer].
 
 
 On the other hand, if this returned %FALSE, depending on your intents,
 you may prefer to use the text contents and its properties with the
-various procedures provided by the [class@Gimp.TextLayer] class interface.
+various procedures provided by the [class@Clay.TextLayer] class interface.
 HELP
 
     &jehan_pdb_misc('2025', '3.2');
@@ -129,15 +129,15 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  is_rasterized = gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (item));
+  is_rasterized = clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (item));
 }
 CODE
     );
 }
 
-@headers = qw("core/gimprasterizable.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+@headers = qw("core/clayrasterizable.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(rasterizable_rasterize
             rasterizable_restore
@@ -146,7 +146,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Rasterizable procedures';
-$doc_title = 'gimprasterizable';
+$doc_title = 'clayrasterizable';
 $doc_short_desc = 'Functions for querying and manipulating rasterizable items.';
 $doc_long_desc = 'Functions for querying and manipulating rasterizable items.';
 

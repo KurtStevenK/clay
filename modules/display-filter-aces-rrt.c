@@ -20,13 +20,13 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymath/claymath.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 #define DEFAULT_EXPOSURE 0.0
 
@@ -42,14 +42,14 @@ typedef struct _CdisplayAcesRRTClass CdisplayAcesRRTClass;
 
 struct _CdisplayAcesRRT
 {
-  GimpColorDisplay  parent_instance;
+  ClayColorDisplay  parent_instance;
 
   gdouble           exposure;
 };
 
 struct _CdisplayAcesRRTClass
 {
-  GimpColorDisplayClass  parent_instance;
+  ClayColorDisplayClass  parent_instance;
 };
 
 
@@ -71,16 +71,16 @@ static void        cdisplay_aces_rrt_get_property    (GObject            *object
                                                       GValue             *value,
                                                       GParamSpec         *pspec);
 
-static void        cdisplay_aces_rrt_convert_buffer  (GimpColorDisplay   *display,
+static void        cdisplay_aces_rrt_convert_buffer  (ClayColorDisplay   *display,
                                                       GeglBuffer         *buffer,
                                                       GeglRectangle      *area);
 static void        cdisplay_aces_rrt_set_exposure    (CdisplayAcesRRT      *aces_rrt,
                                                       gdouble             value);
 
 
-static const GimpModuleInfo cdisplay_aces_rrt_info =
+static const ClayModuleInfo cdisplay_aces_rrt_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   N_("ACES RRT (RRT = Reference Rendering Transform). An HDR to SDR proof color display filter, using a luminance-only approximation of the ACES RRT, a pre-defined filmic look to be used before ODT (display or output space ICC profile)"),
   "Øyvind Kolås <pippin@gimp.org>",
   "v0.1",
@@ -90,17 +90,17 @@ static const GimpModuleInfo cdisplay_aces_rrt_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (CdisplayAcesRRT, cdisplay_aces_rrt,
-                       GIMP_TYPE_COLOR_DISPLAY)
+                       CLAY_TYPE_COLOR_DISPLAY)
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &cdisplay_aces_rrt_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
   cdisplay_aces_rrt_register_type (module);
 
@@ -111,12 +111,12 @@ static void
 cdisplay_aces_rrt_class_init (CdisplayAcesRRTClass *klass)
 {
   GObjectClass          *object_class  = G_OBJECT_CLASS (klass);
-  GimpColorDisplayClass *display_class = GIMP_COLOR_DISPLAY_CLASS (klass);
+  ClayColorDisplayClass *display_class = CLAY_COLOR_DISPLAY_CLASS (klass);
 
   object_class->get_property     = cdisplay_aces_rrt_get_property;
   object_class->set_property     = cdisplay_aces_rrt_set_property;
 
-  GIMP_CONFIG_PROP_DOUBLE (object_class, PROP_EXPOSURE,
+  CLAY_CONFIG_PROP_DOUBLE (object_class, PROP_EXPOSURE,
                            "exposure",
                            _("Pre-transform change in stops"),
                            NULL,
@@ -124,8 +124,8 @@ cdisplay_aces_rrt_class_init (CdisplayAcesRRTClass *klass)
                            1);
 
   display_class->name            = _("Aces RRT");
-  display_class->help_id         = "gimp-colordisplay-aces-rrt";
-  display_class->icon_name       = GIMP_ICON_DISPLAY_FILTER_GAMMA;
+  display_class->help_id         = "clay-colordisplay-aces-rrt";
+  display_class->icon_name       = CLAY_ICON_DISPLAY_FILTER_GAMMA;
 
   display_class->convert_buffer  = cdisplay_aces_rrt_convert_buffer;
 }
@@ -190,7 +190,7 @@ static inline float aces_aces_rrt (float x)
 }
 
 static void
-cdisplay_aces_rrt_convert_buffer (GimpColorDisplay *display,
+cdisplay_aces_rrt_convert_buffer (ClayColorDisplay *display,
                                   GeglBuffer       *buffer,
                                   GeglRectangle    *area)
 {
@@ -226,6 +226,6 @@ cdisplay_aces_rrt_set_exposure (CdisplayAcesRRT *aces_rrt,
       aces_rrt->exposure = value;
 
       g_object_notify (G_OBJECT (aces_rrt), "exposure");
-      gimp_color_display_changed (GIMP_COLOR_DISPLAY (aces_rrt));
+      clay_color_display_changed (CLAY_COLOR_DISPLAY (aces_rrt));
     }
 }

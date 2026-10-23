@@ -4,4 +4,4 @@ files = [
 ]
 
 install_data(files,
-             install_dir: gimpdatadir / 'themes' / 'Clay' / 'ui')
+             install_dir: claydatadir / 'themes' / 'Clay' / 'ui')

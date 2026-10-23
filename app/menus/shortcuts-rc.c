@@ -23,17 +23,17 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "menus-types.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpradioaction.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayradioaction.h"
 
 #include "shortcuts-rc.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define SHORTCUTS_RC_FILE_VERSION 1
@@ -69,7 +69,7 @@ shortcuts_rc_parse (GtkApplication  *application,
   g_return_val_if_fail (G_IS_FILE (file), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  scanner = gimp_scanner_new_file (file, error);
+  scanner = clay_scanner_new_file (file, error);
 
   if (! scanner)
     return FALSE;
@@ -99,7 +99,7 @@ shortcuts_rc_parse (GtkApplication  *application,
             {
             case FILE_VERSION:
               token = G_TOKEN_INT;
-              if (gimp_scanner_parse_int (scanner, &file_version))
+              if (clay_scanner_parse_int (scanner, &file_version))
                 token = G_TOKEN_RIGHT_PAREN;
               break;
 
@@ -136,7 +136,7 @@ shortcuts_rc_parse (GtkApplication  *application,
     {
       g_printerr (_("Wrong shortcutsrc (%s) file format version: %d (expected: %d). "
                     "We tried to load shortcuts as well as possible.\n"),
-                   gimp_file_get_utf8_name (file),
+                   clay_file_get_utf8_name (file),
                    file_version, SHORTCUTS_RC_FILE_VERSION);
     }
   if (token != G_TOKEN_LEFT_PAREN)
@@ -151,7 +151,7 @@ shortcuts_rc_parse (GtkApplication  *application,
       return FALSE;
     }
 
-  gimp_scanner_unref (scanner);
+  clay_scanner_unref (scanner);
 
   return TRUE;
 }
@@ -161,14 +161,14 @@ shortcuts_rc_write (GtkApplication  *application,
                    GFile            *file,
                    GError          **error)
 {
-  GimpConfigWriter  *writer;
+  ClayConfigWriter  *writer;
   gchar            **actions;
 
   g_return_val_if_fail (GTK_IS_APPLICATION (application), FALSE);
   g_return_val_if_fail (G_IS_FILE (file), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  writer = gimp_config_writer_new_from_file (file,
+  writer = clay_config_writer_new_from_file (file,
                                              FALSE,
                                              "Clay shortcutsrc\n\n"
                                              "If you delete this file, all shortcuts "
@@ -179,22 +179,22 @@ shortcuts_rc_write (GtkApplication  *application,
 
   actions = g_action_group_list_actions (G_ACTION_GROUP (application));
 
-  gimp_config_writer_open (writer, "file-version");
-  gimp_config_writer_printf (writer, "%d", SHORTCUTS_RC_FILE_VERSION);
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "file-version");
+  clay_config_writer_printf (writer, "%d", SHORTCUTS_RC_FILE_VERSION);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_linefeed (writer);
+  clay_config_writer_linefeed (writer);
 
   for (gint i = 0; actions[i] != NULL; i++)
     {
-      GimpAction  *action;
+      ClayAction  *action;
       gchar      **accels;
       gchar       *detailed_name;
       gboolean     commented = FALSE;
 
-      action = (GimpAction *) g_action_map_lookup_action (G_ACTION_MAP (application), actions[i]);
+      action = (ClayAction *) g_action_map_lookup_action (G_ACTION_MAP (application), actions[i]);
 
-      if (GIMP_IS_RADIO_ACTION (action))
+      if (CLAY_IS_RADIO_ACTION (action))
         {
           gint value;
 
@@ -213,19 +213,19 @@ shortcuts_rc_write (GtkApplication  *application,
 
       accels = gtk_application_get_accels_for_action (application, detailed_name);
 
-      if (gimp_action_use_default_accels (action))
+      if (clay_action_use_default_accels (action))
         commented = TRUE;
 
-      gimp_config_writer_comment_mode (writer, commented);
+      clay_config_writer_comment_mode (writer, commented);
 
-      gimp_config_writer_open (writer, "action");
-      gimp_config_writer_string (writer, actions[i]);
+      clay_config_writer_open (writer, "action");
+      clay_config_writer_string (writer, actions[i]);
 
       for (gint j = 0; accels[j]; j++)
-        gimp_config_writer_string (writer, accels[j]);
+        clay_config_writer_string (writer, accels[j]);
 
-      gimp_config_writer_close (writer);
-      gimp_config_writer_comment_mode (writer, FALSE);
+      clay_config_writer_close (writer);
+      clay_config_writer_comment_mode (writer, FALSE);
 
       g_strfreev (accels);
       g_free (detailed_name);
@@ -233,7 +233,7 @@ shortcuts_rc_write (GtkApplication  *application,
 
   g_strfreev (actions);
 
-  return gimp_config_writer_finish (writer, "end of shortcutsrc", error);
+  return clay_config_writer_finish (writer, "end of shortcutsrc", error);
 }
 
 
@@ -248,11 +248,11 @@ shortcuts_action_deserialize (GScanner       *scanner,
   gchar         *accel;
   gchar        **accels;
 
-  if (! gimp_scanner_parse_string (scanner, &action_name))
+  if (! clay_scanner_parse_string (scanner, &action_name))
     return G_TOKEN_STRING;
 
   builder = g_strv_builder_new ();
-  while (gimp_scanner_parse_string (scanner, &accel))
+  while (clay_scanner_parse_string (scanner, &accel))
     {
       gchar           **dup_actions;
       gboolean          add_accel = TRUE;
@@ -272,7 +272,7 @@ shortcuts_action_deserialize (GScanner       *scanner,
 
       for (gint i = 0; dup_actions[i] != NULL; i++)
         {
-          GimpAction *conflict_action;
+          ClayAction *conflict_action;
           gchar      *left_paren_ptr = strchr (dup_actions[i], '(');
 
           if (left_paren_ptr)
@@ -282,15 +282,15 @@ shortcuts_action_deserialize (GScanner       *scanner,
           if (g_strcmp0 (dup_actions[i] + 4, action_name) == 0)
             continue;
 
-          conflict_action = (GimpAction *) g_action_map_lookup_action (G_ACTION_MAP (application),
+          conflict_action = (ClayAction *) g_action_map_lookup_action (G_ACTION_MAP (application),
                                                                        dup_actions[i] + 4);
-          if (gimp_action_use_default_accels (conflict_action))
+          if (clay_action_use_default_accels (conflict_action))
             {
               /* We might simply not have scanned this action's accelerators yet
                * in the shortcutsrc file. Just delete its current accelerators
                * without any message.
                */
-              gimp_action_set_accels (conflict_action, NULL);
+              clay_action_set_accels (conflict_action, NULL);
             }
           else
             {
@@ -312,14 +312,14 @@ shortcuts_action_deserialize (GScanner       *scanner,
 
   if (g_action_group_has_action (G_ACTION_GROUP (application), action_name))
     {
-      GimpAction *action;
+      ClayAction *action;
       gchar      *detailed_name;
 
-      action = (GimpAction *) g_action_map_lookup_action (G_ACTION_MAP (application),
+      action = (ClayAction *) g_action_map_lookup_action (G_ACTION_MAP (application),
                                                           action_name);
 
       detailed_name = g_strdup_printf ("app.%s", action_name);
-      gimp_action_set_accels (action, (const gchar **) accels);
+      clay_action_set_accels (action, (const gchar **) accels);
       g_free (detailed_name);
     }
   else
@@ -335,7 +335,7 @@ shortcuts_action_deserialize (GScanner       *scanner,
   g_free (action_name);
   g_strfreev (accels);
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   return G_TOKEN_LEFT_PAREN;

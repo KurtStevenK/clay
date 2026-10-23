@@ -16,8 +16,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -40,10 +40,10 @@ import time
 
 
 def result_success():
-    return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+    return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
 
 
-PROC_NAME = "plug-in-spyrogimp"
+PROC_NAME = "plug-in-spyroclay"
 
 two_pi, half_pi = 2 * pi, pi / 2
 layer_name = _("Spyro Layer")
@@ -370,13 +370,13 @@ class SelectionToPath:
 
     def convert_selection_to_path(self):
 
-        if Gimp.Selection.is_empty(self.image):
+        if Clay.Selection.is_empty(self.image):
             selection_was_empty = True
-            Gimp.Selection.all(self.image)
+            Clay.Selection.all(self.image)
         else:
             selection_was_empty = False
 
-        proc   = Gimp.get_pdb().lookup_procedure('plug-in-sel2path')
+        proc   = Clay.get_pdb().lookup_procedure('plug-in-sel2path')
         config = proc.create_config()
         config.set_property('image', self.image)
         result = proc.run(config)
@@ -402,11 +402,11 @@ class SelectionToPath:
 
         if selection_was_empty:
             # Restore empty selection if it was empty.
-            Gimp.Selection.none(self.image)
+            Clay.Selection.none(self.image)
 
     def compute_selection_hash(self):
         return naive_hash(self.image)
-        # In gimp 2 we used this:
+        # In clay 2 we used this:
         #px = self.image.get_selection().  get_pixel_rgn(0, 0, self.image.get_width(), self.image.get_height())
         #return px[0:self.image.get_width(), 0:self.image.get_height()].__hash__()
 
@@ -470,9 +470,9 @@ class SelectionShape(Shape):
         perpendicular_p, perpendicular_m = slope_angle + half_pi, slope_angle - half_pi
         step_size = 2   # The distance we are going to go in the direction of each angle.
         xp, yp = x + step_size * cos(perpendicular_p), y + step_size * sin(perpendicular_p)
-        value_plus = Gimp.Selection.value(self.image, xp, yp)
+        value_plus = Clay.Selection.value(self.image, xp, yp)
         xp, yp = x + step_size * cos(perpendicular_m), y + step_size * sin(perpendicular_m)
-        value_minus = Gimp.Selection.value(self.image, xp, yp)
+        value_minus = Clay.Selection.value(self.image, xp, yp)
 
         perpendicular = perpendicular_p if value_plus > value_minus else perpendicular_m
         return x + dist * cos(perpendicular), y + dist * sin(perpendicular)
@@ -493,12 +493,12 @@ shapes = {
 
 
 def get_gradient_samples(num_samples):
-    gradient = Gimp.context_get_gradient()
-    reverse_mode = Gimp.context_get_gradient_reverse()
-    repeat_mode = Gimp.context_get_gradient_repeat_mode()
+    gradient = Clay.context_get_gradient()
+    reverse_mode = Clay.context_get_gradient_reverse()
+    repeat_mode = Clay.context_get_gradient_repeat_mode()
     color_samples = []
 
-    if repeat_mode == Gimp.RepeatMode.TRIANGULAR:
+    if repeat_mode == Clay.RepeatMode.TRIANGULAR:
         color_samples2 = []
         # Get two uniform samples, which are reversed from each other, and connect them.
 
@@ -541,14 +541,14 @@ class PencilTool():
 
     def draw(self, layer, strokes, color=None):
         if color:
-            Gimp.context_push()
-            Gimp.context_enable_dynamics(False)
-            Gimp.context_set_foreground(color)
+            Clay.context_push()
+            Clay.context_enable_dynamics(False)
+            Clay.context_set_foreground(color)
 
-        Gimp.pencil(layer, strokes)
+        Clay.pencil(layer, strokes)
 
         if color:
-            Gimp.context_pop()
+            Clay.context_pop()
 
 
 class AirBrushTool():
@@ -557,14 +557,14 @@ class AirBrushTool():
 
     def draw(self, layer, strokes, color=None):
         if color:
-            Gimp.context_push()
-            Gimp.context_enable_dynamics(False)
-            Gimp.context_set_foreground(color)
+            Clay.context_push()
+            Clay.context_enable_dynamics(False)
+            Clay.context_set_foreground(color)
 
-        Gimp.airbrush_default(layer, strokes)
+        Clay.airbrush_default(layer, strokes)
 
         if color:
-            Gimp.context_pop()
+            Clay.context_pop()
 
 
 class AbstractStrokeTool():
@@ -577,20 +577,20 @@ class AbstractStrokeTool():
             control_points += [i, k] * 3
 
         # Create path
-        path = Gimp.Path.new(layer.get_image(), 'temp_path')
+        path = Clay.Path.new(layer.get_image(), 'temp_path')
         layer.get_image().insert_path(path, None, 0)
-        sid = path.stroke_new_from_points(Gimp.PathStrokeType.BEZIER,
+        sid = path.stroke_new_from_points(Clay.PathStrokeType.BEZIER,
                                           control_points, False)
 
         # Draw it.
 
-        Gimp.context_push()
+        Clay.context_push()
 
         # Call template method to set the kind of stroke to draw.
         self.prepare_stroke_context(color)
 
         layer.edit_stroke_item(path)
-        Gimp.context_pop()
+        Clay.context_pop()
 
         # Get rid of the path.
         layer.get_image().remove_path(path)
@@ -601,23 +601,23 @@ class PreviewTool:
 
     # Implementation using pencil.  (A previous implementation using stroke was slower, and thus removed).
     def draw(self, layer, strokes, color=None):
-        foreground = Gimp.context_get_foreground()
-        Gimp.context_push()
-        Gimp.context_set_defaults()
-        Gimp.context_set_foreground(foreground)
-        Gimp.context_enable_dynamics(False)
+        foreground = Clay.context_get_foreground()
+        Clay.context_push()
+        Clay.context_set_defaults()
+        Clay.context_set_foreground(foreground)
+        Clay.context_enable_dynamics(False)
 
         # TODO: in the future, there could be several brushes with this name. We
         # should have methods to loop through all of them and to know whether
         # they are default/system brushes or not.
-        brush = Gimp.Brush.get_by_name('1. Pixel')
+        brush = Clay.Brush.get_by_name('1. Pixel')
         assert brush is not None
 
-        Gimp.context_set_brush(brush)
-        Gimp.context_set_brush_size(1.0)
-        Gimp.context_set_brush_spacing(3.0)
-        Gimp.pencil(layer, strokes)
-        Gimp.context_pop()
+        Clay.context_set_brush(brush)
+        Clay.context_set_brush_size(1.0)
+        Clay.context_set_brush_spacing(3.0)
+        Clay.pencil(layer, strokes)
+        Clay.context_pop()
 
     name = _("Preview")
     can_color = False
@@ -629,10 +629,10 @@ class StrokeTool(AbstractStrokeTool):
 
     def prepare_stroke_context(self, color):
         if color:
-            Gimp.context_enable_dynamics(False)
-            Gimp.context_set_foreground(color)
+            Clay.context_enable_dynamics(False)
+            Clay.context_set_foreground(color)
 
-        Gimp.context_set_stroke_method(Gimp.StrokeMethod.LINE)
+        Clay.context_set_stroke_method(Clay.StrokeMethod.LINE)
 
 
 class StrokePaintTool(AbstractStrokeTool):
@@ -643,11 +643,11 @@ class StrokePaintTool(AbstractStrokeTool):
 
     def prepare_stroke_context(self, color):
         if self.can_color and color is not None:
-            Gimp.context_enable_dynamics(False)
-            Gimp.context_set_foreground(color)
+            Clay.context_enable_dynamics(False)
+            Clay.context_set_foreground(color)
 
-        Gimp.context_set_stroke_method(Gimp.StrokeMethod.PAINT_METHOD)
-        Gimp.context_set_paint_method(self.paint_method)
+        Clay.context_set_stroke_method(Clay.StrokeMethod.PAINT_METHOD)
+        Clay.context_set_paint_method(self.paint_method)
 
 
 class SaveToPathTool():
@@ -655,7 +655,7 @@ class SaveToPathTool():
         We dont add this to the list of tools. """
 
     def __init__(self, img):
-        self.path = Gimp.Path.new(img, path_name)
+        self.path = Clay.Path.new(img, path_name)
         img.insert_path(self.path, None, 0)
 
     def draw(self, layer, strokes, color=None):
@@ -665,21 +665,21 @@ class SaveToPathTool():
         for i, k in zip(strokes[0::2], strokes[1::2]):
             control_points += [i, k] * 3
 
-        self.path.stroke_new_from_points(Gimp.PathStrokeType.BEZIER,
+        self.path.stroke_new_from_points(Clay.PathStrokeType.BEZIER,
                                          control_points, False)
 
 
 tools = {
     "preview":       PreviewTool(),
-    "paintbrush":    StrokePaintTool(_("PaintBrush"), "gimp-paintbrush"),
+    "paintbrush":    StrokePaintTool(_("PaintBrush"), "clay-paintbrush"),
     "penciltool":    PencilTool(),
     "airbrush":      AirBrushTool(),
     "stroke":        StrokeTool(),
-    "ink":           StrokePaintTool(_("Ink"), 'gimp-ink'),
-    "mypaintbrush":  StrokePaintTool(_("MyPaintBrush"), 'gimp-mybrush')
+    "ink":           StrokePaintTool(_("Ink"), 'clay-ink'),
+    "mypaintbrush":  StrokePaintTool(_("MyPaintBrush"), 'clay-mybrush')
     # Clone does not work properly when an image is not set.  When that happens, drawing fails, and
     # I am unable to catch the error. This causes the plugin to crash, and subsequent problems with undo.
-    # StrokePaintTool("Clone", 'gimp-clone', False)
+    # StrokePaintTool("Clone", 'clay-clone', False)
 }
 
 
@@ -759,7 +759,7 @@ class PatternParameters:
 # Handle shelving of plugin parameters
 
 def unshelf_parameters():
-    # TODO: we'd usually use Gimp.PDB.set_data() but this won't work on
+    # TODO: we'd usually use Clay.PDB.set_data() but this won't work on
     # introspection bindings. We will need to work on this.
     #if shelf.has_key("p"):
         #parameters = shelf["p"]
@@ -770,7 +770,7 @@ def unshelf_parameters():
 
 def shelf_parameters(pp):
     # TODO: see unshelf_parameters() which explains why we can't use
-    # Gimp.PDB.get_data().
+    # Clay.PDB.get_data().
     pass
     #shelf["p"] = pp
 
@@ -864,14 +864,14 @@ class ComputedParameters:
             curve_types[self.pp.curve_type].supports_shapes()
         ):
             shapes[self.pp.shape_index].process_selection(img)
-            Gimp.displays_flush()
+            Clay.displays_flush()
             self.num_drawings = shapes[self.pp.shape_index].get_num_drawings()
         else:
             self.num_drawings = 1
         self.current_drawing = 0
 
         # Get bounds. We don't care weather a selection exists or not.
-        success, exists, x1, y1, x2, y2 = Gimp.Selection.bounds(img)
+        success, exists, x1, y1, x2, y2 = Clay.Selection.bounds(img)
 
         # Combine different ways to specify patterns, into a unified set of computed parameters.
         self.num_notation_drawings = 1
@@ -1101,7 +1101,7 @@ class DrawingEngine:
 
         self.img.undo_group_end()
 
-        Gimp.displays_flush()
+        Clay.displays_flush()
 
     # Methods for incremental drawing.
 
@@ -1774,9 +1774,9 @@ class SpyroWindow():
         def create_ui():
 
             use_header_bar = Gtk.Settings.get_default().get_property("gtk-dialogs-use-header")
-            self.dialog = GimpUi.Dialog(use_header_bar=use_header_bar,
-                                      title=_("Spyrogimp"))
-            GimpUi.window_set_transient(self.dialog)
+            self.dialog = ClayUi.Dialog(use_header_bar=use_header_bar,
+                                      title=_("Spyroclay"))
+            ClayUi.window_set_transient(self.dialog)
             #self.set_default_size(350, -1)
             #self.set_border_width(10)
 
@@ -1785,7 +1785,7 @@ class SpyroWindow():
             self.dialog.get_content_area().add(vbox)
             vbox.set_visible(True)
 
-            box = GimpUi.HintBox.new(_("Draw spyrographs using current tool settings and selection."))
+            box = ClayUi.HintBox.new(_("Draw spyrographs using current tool settings and selection."))
             vbox.pack_start(box, False, False, 0)
             box.set_visible(True)
 
@@ -1814,7 +1814,7 @@ class SpyroWindow():
 
             add_to_box(vbox, dialog_button_box())
 
-            self.progress_bar = Gtk.ProgressBar()   # gimpui.ProgressBar() - causes gimppdbprogress error message.
+            self.progress_bar = Gtk.ProgressBar()   # clayui.ProgressBar() - causes claypdbprogress error message.
             self.progress_bar.set_show_text(True)
             vbox.add(self.progress_bar)
             self.progress_bar.set_visible(True)
@@ -1831,14 +1831,14 @@ class SpyroWindow():
 
         self.engine = DrawingEngine(img, self.p)
 
-        # Make a new GIMP layer to draw on
-        self.spyro_layer = Gimp.Layer.new(img, layer_name, img.get_width(), img.get_height(),
-                                          layer.type_with_alpha(), 100, Gimp.LayerMode.NORMAL)
+        # Make a new Clay layer to draw on
+        self.spyro_layer = Clay.Layer.new(img, layer_name, img.get_width(), img.get_height(),
+                                          layer.type_with_alpha(), 100, Clay.LayerMode.NORMAL)
         img.insert_layer(self.spyro_layer, None, 0)
         self.drawing_layer = self.spyro_layer
 
         # Create the UI.
-        GimpUi.init(sys.argv[0])
+        ClayUi.init(sys.argv[0])
         create_ui()
         self.update_view()   # Update UI to reflect the parameter values.
 
@@ -1926,7 +1926,7 @@ class SpyroWindow():
 
                 self.img.undo_group_end()
 
-                Gimp.displays_flush()
+                Clay.displays_flush()
 
                 Gtk.main_quit()
                 yield False
@@ -1942,7 +1942,7 @@ class SpyroWindow():
         # maybe it was already deleted by the user.
         if self.spyro_layer in self.img.get_layers():
             self.img.remove_layer(self.spyro_layer)
-            Gimp.displays_flush()
+            Clay.displays_flush()
 
         Gtk.main_quit()
 
@@ -2162,7 +2162,7 @@ class SpyroWindow():
     def progress_start(self):
         self.progress_bar.set_text(_("Rendering Pattern"))
         self.progress_bar.set_fraction(0.0)
-        Gimp.displays_flush()
+        Clay.displays_flush()
 
     def progress_end(self):
         self.progress_bar.set_text("")
@@ -2174,7 +2174,7 @@ class SpyroWindow():
     def progress_unknown(self):
         self.progress_bar.set_text(_("Please wait : Rendering Pattern"))
         self.progress_bar.pulse()
-        Gimp.displays_flush()
+        Clay.displays_flush()
 
     # Incremental drawing.
 
@@ -2194,7 +2194,7 @@ class SpyroWindow():
         else:
             self.progress_end()
 
-        Gimp.displays_flush()
+        Clay.displays_flush()
 
     def start_new_incremental_drawing(self):
         """
@@ -2224,8 +2224,8 @@ class SpyroWindow():
 
     def clear(self):
         """ Clear current drawing. """
-        # pdb.gimp_edit_clear(self.spyro_layer)
-        self.spyro_layer.fill(Gimp.FillType.TRANSPARENT)
+        # pdb.clay_edit_clear(self.spyro_layer)
+        self.spyro_layer.fill(Clay.FillType.TRANSPARENT)
 
     def redraw(self, data=None):
         if self.enable_incremental_drawing:
@@ -2233,39 +2233,39 @@ class SpyroWindow():
             self.start_new_incremental_drawing()
 
 
-class SpyrogimpPlusPlugin(Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class SpyroclayPlusPlugin(Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [PROC_NAME]
 
     def do_create_procedure(self, name):
         if name == PROC_NAME:
-            procedure = Gimp.ImageProcedure.new(self, name,
-                                                Gimp.PDBProcType.PLUGIN,
-                                                self.plug_in_spyrogimp, None)
+            procedure = Clay.ImageProcedure.new(self, name,
+                                                Clay.PDBProcType.PLUGIN,
+                                                self.plug_in_spyroclay, None)
             procedure.set_image_types("*")
-            procedure.set_sensitivity_mask (Gimp.ProcedureSensitivityMask.DRAWABLE)
+            procedure.set_sensitivity_mask (Clay.ProcedureSensitivityMask.DRAWABLE)
             procedure.set_documentation (_("Draw spyrographs using current tool settings and selection."),
                                          _("Uses current tool settings to draw Spyrograph patterns. "
                                          "The size and location of the pattern is based on the current selection."),
                                          name)
-            procedure.set_menu_label(_("Spyrogimp..."))
+            procedure.set_menu_label(_("Spyroclay..."))
             procedure.set_attribution("Elad Shahar",
                                       "Elad Shahar",
                                       "2018")
             procedure.add_menu_path ("<Image>/Filters/Render/")
 
-            curve_choice = Gimp.Choice.new()
+            curve_choice = Clay.Choice.new()
             curve_choice.add("spyrograph", 0, _("Spyrograph"), "")
             curve_choice.add("epitrochoid", 1, _("Epitrochoid"), "")
             curve_choice.add("sine", 2, _("Sine"), "")
             curve_choice.add("lissajous", 3, _("Lissajous"), "")
             procedure.add_choice_argument ("curve-type", _("Curve Type"), _("Curve Type"),
                                            curve_choice, "spyrograph", GObject.ParamFlags.READWRITE)
-            shape_choice = Gimp.Choice.new()
+            shape_choice = Clay.Choice.new()
             shape_choice.add("circle", 0, _("Circle"), "")
             shape_choice.add("rack", 1, _("rack"), "")
             shape_choice.add("frame", 2, _("frame"), "")
@@ -2303,7 +2303,7 @@ class SpyrogimpPlusPlugin(Gimp.PlugIn):
             procedure.add_double_argument ("shape-rotation", _("_Rotation"),
                                            _("Shape rotation of fixed gear, in degrees"),
                                            -360.0, 360.0, 0.0, GObject.ParamFlags.READWRITE)
-            tool_choice = Gimp.Choice.new()
+            tool_choice = Clay.Choice.new()
             tool_choice.add("preview", 0, _("Preview"), "")
             tool_choice.add("paintbrush", 1, _("PaintBrush"), "")
             tool_choice.add("pencil", 2, _("Pencil"), "")
@@ -2323,7 +2323,7 @@ class SpyrogimpPlusPlugin(Gimp.PlugIn):
         return procedure
 
     # Implementation of plugin.
-    def plug_in_spyrogimp(self, procedure, run_mode, image, layers, config, data):
+    def plug_in_spyroclay(self, procedure, run_mode, image, layers, config, data):
         curve_type=config.get_property('curve-type')
         shape=config.get_property('shape')
         sides=config.get_property('sides')
@@ -2338,7 +2338,7 @@ class SpyrogimpPlusPlugin(Gimp.PlugIn):
         tool=config.get_property('tool')
         long_gradient=config.get_property('long-gradient')
 
-        if run_mode == Gimp.RunMode.NONINTERACTIVE:
+        if run_mode == Clay.RunMode.NONINTERACTIVE:
             pp = PatternParameters()
             pp.curve_type = curve_type
             pp.shape_index = shape
@@ -2357,22 +2357,22 @@ class SpyrogimpPlusPlugin(Gimp.PlugIn):
             engine = DrawingEngine(image, pp)
             engine.draw_full(layers[0])
 
-        elif run_mode == Gimp.RunMode.INTERACTIVE:
-            gi.require_version('GimpUi', '3.0')
-            global GimpUi
-            from gi.repository import GimpUi
+        elif run_mode == Clay.RunMode.INTERACTIVE:
+            gi.require_version('ClayUi', '3.0')
+            global ClayUi
+            from gi.repository import ClayUi
 
             Gegl.init (None)
 
             window = SpyroWindow(image, layers[0])
             Gtk.main()
 
-        elif run_mode == Gimp.RunMode.WITH_LAST_VALS:
+        elif run_mode == Clay.RunMode.WITH_LAST_VALS:
             pp = unshelf_parameters()
             engine = DrawingEngine(image, pp)
             engine.draw_full(layers[0])
 
-        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+        return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
 
 
-Gimp.main(SpyrogimpPlusPlugin.__gtype__, sys.argv)
+Clay.main(SpyroclayPlusPlugin.__gtype__, sys.argv)

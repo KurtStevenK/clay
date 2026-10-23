@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -22,8 +22,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "imap_commands.h"
 #include "imap_grid.h"
@@ -31,7 +31,7 @@
 #include "imap_menu.h"
 #include "imap_preview.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define PREVIEW_MASK  (GDK_EXPOSURE_MASK       | \
                        GDK_POINTER_MOTION_MASK | \
@@ -82,28 +82,28 @@ render_background(Preview_t *preview_base)
 {
    GtkWidget *preview = preview_base->preview;
 
-   gimp_preview_area_fill (GIMP_PREVIEW_AREA (preview),
+   clay_preview_area_fill (CLAY_PREVIEW_AREA (preview),
                            0, 0, G_MAXINT, G_MAXINT,
                            255, 255, 255);
 }
 
 static void
 render_rgb_image (Preview_t *preview_base,
-                  GimpDrawable *drawable)
+                  ClayDrawable *drawable)
 {
   GeglBuffer *buffer;
   guchar     *dest_buffer;
   gint        dwidth, dheight, pwidth, pheight;
   GtkWidget  *preview = preview_base->preview;
 
-  dwidth  = gimp_drawable_get_width (drawable);
-  dheight = gimp_drawable_get_height (drawable);
+  dwidth  = clay_drawable_get_width (drawable);
+  dheight = clay_drawable_get_height (drawable);
   pwidth  = preview_base->widget_width;
   pheight = preview_base->widget_height;
 
   dest_buffer = g_new (guchar, pwidth * pheight * 4);
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   gegl_buffer_get (buffer, GEGL_RECTANGLE (0, 0, pwidth, pheight),
                    MIN ((gdouble) pwidth / (gdouble) dwidth,
@@ -113,9 +113,9 @@ render_rgb_image (Preview_t *preview_base,
 
   g_object_unref (buffer);
 
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (preview),
                           0, 0, pwidth, pheight,
-                          GIMP_RGBA_IMAGE,
+                          CLAY_RGBA_IMAGE,
                           dest_buffer,
                           pwidth * 4);
 
@@ -124,7 +124,7 @@ render_rgb_image (Preview_t *preview_base,
 
 static void
 render_preview (Preview_t *preview_base,
-                GimpDrawable *drawable)
+                ClayDrawable *drawable)
 {
   render_background (preview_base);
   render_rgb_image (preview_base, drawable);
@@ -251,9 +251,9 @@ preview_size_allocate (GtkWidget *widget,
 
 static void
 scroll_adj_changed (GtkAdjustment *adj,
-                    GimpRuler     *ruler)
+                    ClayRuler     *ruler)
 {
-  gimp_ruler_set_range (ruler,
+  clay_ruler_set_range (ruler,
                         gtk_adjustment_get_value (adj),
                         gtk_adjustment_get_value (adj) +
                         gtk_adjustment_get_page_size (adj),
@@ -261,7 +261,7 @@ scroll_adj_changed (GtkAdjustment *adj,
 }
 
 Preview_t *
-make_preview (GimpDrawable *drawable,
+make_preview (ClayDrawable *drawable,
               gpointer      imap)
 {
    Preview_t *data = g_new (Preview_t, 1);
@@ -277,7 +277,7 @@ make_preview (GimpDrawable *drawable,
    gint width, height;
 
    data->drawable = drawable;
-   data->preview = preview = gimp_preview_area_new ();
+   data->preview = preview = clay_preview_area_new ();
 
    g_object_set_data (G_OBJECT (preview), "preview", data);
    gtk_widget_set_events (GTK_WIDGET (preview), PREVIEW_MASK);
@@ -297,8 +297,8 @@ make_preview (GimpDrawable *drawable,
                      G_CALLBACK (handle_drop),
                      NULL);
 
-   data->widget_width  = data->width  = gimp_drawable_get_width (drawable);
-   data->widget_height = data->height = gimp_drawable_get_height (drawable);
+   data->widget_width  = data->width  = clay_drawable_get_width (drawable);
+   data->widget_height = data->height = clay_drawable_get_height (drawable);
    gtk_widget_set_size_request (preview, data->widget_width,
                                 data->widget_height);
 
@@ -321,13 +321,13 @@ make_preview (GimpDrawable *drawable,
                      G_CALLBACK (arrow_cb),
                      imap);
 
-   arrow = gtk_image_new_from_icon_name (GIMP_ICON_GO_NEXT,
+   arrow = gtk_image_new_from_icon_name (CLAY_ICON_GO_NEXT,
                                          GTK_ICON_SIZE_BUTTON);
    gtk_container_add (GTK_CONTAINER (button), arrow);
    gtk_widget_set_visible (arrow, TRUE);
 
    /* Create horizontal ruler */
-   data->hruler = ruler = gimp_ruler_new (GTK_ORIENTATION_HORIZONTAL);
+   data->hruler = ruler = clay_ruler_new (GTK_ORIENTATION_HORIZONTAL);
    g_signal_connect_swapped (preview, "motion-notify-event",
                              G_CALLBACK (GTK_WIDGET_GET_CLASS (ruler)->motion_notify_event),
                              ruler);
@@ -337,7 +337,7 @@ make_preview (GimpDrawable *drawable,
    gtk_widget_set_visible (ruler, TRUE);
 
    /* Create vertical ruler */
-   data->vruler = ruler = gimp_ruler_new (GTK_ORIENTATION_VERTICAL);
+   data->vruler = ruler = clay_ruler_new (GTK_ORIENTATION_VERTICAL);
    g_signal_connect_swapped (preview, "motion-notify-event",
                              G_CALLBACK (GTK_WIDGET_GET_CLASS (ruler)->motion_notify_event),
                             ruler);

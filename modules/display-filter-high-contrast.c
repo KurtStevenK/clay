@@ -20,13 +20,13 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymath/claymath.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 
 #define DEFAULT_CONTRAST 1.0
@@ -44,14 +44,14 @@ typedef struct _CdisplayContrastClass CdisplayContrastClass;
 
 struct _CdisplayContrast
 {
-  GimpColorDisplay  parent_instance;
+  ClayColorDisplay  parent_instance;
 
   gdouble           contrast;
 };
 
 struct _CdisplayContrastClass
 {
-  GimpColorDisplayClass  parent_instance;
+  ClayColorDisplayClass  parent_instance;
 };
 
 
@@ -73,16 +73,16 @@ static void        cdisplay_contrast_get_property    (GObject          *object,
                                                       GValue           *value,
                                                       GParamSpec       *pspec);
 
-static void        cdisplay_contrast_convert_buffer  (GimpColorDisplay *display,
+static void        cdisplay_contrast_convert_buffer  (ClayColorDisplay *display,
                                                       GeglBuffer       *buffer,
                                                       GeglRectangle    *area);
 static void        cdisplay_contrast_set_contrast    (CdisplayContrast *contrast,
                                                       gdouble           value);
 
 
-static const GimpModuleInfo cdisplay_contrast_info =
+static const ClayModuleInfo cdisplay_contrast_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   N_("High Contrast color display filter"),
   "Jay Cox <jaycox@gimp.org>",
   "v0.2",
@@ -92,17 +92,17 @@ static const GimpModuleInfo cdisplay_contrast_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (CdisplayContrast, cdisplay_contrast,
-                       GIMP_TYPE_COLOR_DISPLAY)
+                       CLAY_TYPE_COLOR_DISPLAY)
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &cdisplay_contrast_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
   cdisplay_contrast_register_type (module);
 
@@ -113,12 +113,12 @@ static void
 cdisplay_contrast_class_init (CdisplayContrastClass *klass)
 {
   GObjectClass          *object_class  = G_OBJECT_CLASS (klass);
-  GimpColorDisplayClass *display_class = GIMP_COLOR_DISPLAY_CLASS (klass);
+  ClayColorDisplayClass *display_class = CLAY_COLOR_DISPLAY_CLASS (klass);
 
   object_class->get_property     = cdisplay_contrast_get_property;
   object_class->set_property     = cdisplay_contrast_set_property;
 
-  GIMP_CONFIG_PROP_DOUBLE (object_class, PROP_CONTRAST,
+  CLAY_CONFIG_PROP_DOUBLE (object_class, PROP_CONTRAST,
                            "contrast",
                            _("Contrast cycles"),
                            NULL,
@@ -126,8 +126,8 @@ cdisplay_contrast_class_init (CdisplayContrastClass *klass)
                            0);
 
   display_class->name            = _("Contrast");
-  display_class->help_id         = "gimp-colordisplay-contrast";
-  display_class->icon_name       = GIMP_ICON_DISPLAY_FILTER_CONTRAST;
+  display_class->help_id         = "clay-colordisplay-contrast";
+  display_class->icon_name       = CLAY_ICON_DISPLAY_FILTER_CONTRAST;
 
   display_class->convert_buffer  = cdisplay_contrast_convert_buffer;
 }
@@ -181,7 +181,7 @@ cdisplay_contrast_set_property (GObject      *object,
 }
 
 static void
-cdisplay_contrast_convert_buffer (GimpColorDisplay *display,
+cdisplay_contrast_convert_buffer (ClayColorDisplay *display,
                                   GeglBuffer       *buffer,
                                   GeglRectangle    *area)
 {
@@ -223,6 +223,6 @@ cdisplay_contrast_set_contrast (CdisplayContrast *contrast,
       contrast->contrast = value;
 
       g_object_notify (G_OBJECT (contrast), "contrast");
-      gimp_color_display_changed (GIMP_COLOR_DISPLAY (contrast));
+      clay_color_display_changed (CLAY_COLOR_DISPLAY (contrast));
     }
 }

@@ -1,4 +1,4 @@
-menus_dir = prefix / gimpdatadir / 'menus'
+menus_dir = prefix / claydatadir / 'menus'
 
 ui_menus_files = files(
   'app-menu.ui',

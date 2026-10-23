@@ -20,13 +20,13 @@
 ;
 (define (script-fu-util-image-resize-from-layer image layer)
   (let* (
-        (width (car (gimp-drawable-get-width layer)))
-        (height (car (gimp-drawable-get-height layer)))
-        (posx (- (car (gimp-drawable-get-offsets layer))))
-        (posy (- (cadr (gimp-drawable-get-offsets layer))))
+        (width (car (clay-drawable-get-width layer)))
+        (height (car (clay-drawable-get-height layer)))
+        (posx (- (car (clay-drawable-get-offsets layer))))
+        (posy (- (cadr (clay-drawable-get-offsets layer))))
         )
 
-    (gimp-image-resize image width height posx posy)
+    (clay-image-resize image width height posx posy)
   )
 )
 
@@ -38,17 +38,17 @@
   (while (not (null? layers))
     (let ((layer (car layers)))
       (set! layers (cdr layers))
-      (gimp-image-insert-layer image layer 0 -1)
-      (gimp-image-lower-item image layer)
+      (clay-image-insert-layer image layer 0 -1)
+      (clay-image-lower-item image layer)
     )
   )
 )
 
 
 
-; Allow command line usage of GIMP such as:
+; Allow command line usage of Clay such as:
 ;
-;     gimp -i -b '(with-files "*.png" <body>)'
+;     clay -i -b '(with-files "*.png" <body>)'
 ;
 ; where <body> is the code that handles whatever processing you want to
 ; perform on the files. There are four variables that are available
@@ -62,13 +62,13 @@
 ; For example, to invert the colors of all of the PNG files in the
 ; start directory:
 ;
-;    gimp -i -b '(with-files "*.png" (gimp-drawable-invert layer FALSE) \
-;                 (gimp-file-save 1 image layer filename))'
+;    clay -i -b '(with-files "*.png" (clay-drawable-invert layer FALSE) \
+;                 (clay-file-save 1 image layer filename))'
 ;
 ; To do the same thing, but saving them as jpeg instead:
 ;
-;    gimp -i -b '(with-files "*.png" (gimp-drawable-invert layer FALSE) \
-;                 (gimp-file-save 1 image layer \
+;    clay -i -b '(with-files "*.png" (clay-drawable-invert layer FALSE) \
+;                 (clay-file-save 1 image layer \
 ;                  (string-append basename ".jpg") ))'
 
 ; butlast is needed below.
@@ -90,13 +90,13 @@
        (let ,loop ((,filenames (cadr (file-glob ,pattern 1))))
          (unless (null? ,filenames)
            (let* ((filename (car ,filenames))
-                  (image (catch #f (car (gimp-file-load RUN-NONINTERACTIVE
+                  (image (catch #f (car (clay-file-load RUN-NONINTERACTIVE
                                                         filename))))
-                  (layer (if image (vector-ref (gimp-image-get-selected-layers image) 0) #f))
+                  (layer (if image (vector-ref (clay-image-get-selected-layers image) 0) #f))
                   (basename (unbreakupstr (butlast (strbreakup filename ".")) ".")))
              (when image
                ,@body
-               (gimp-image-delete image)))
+               (clay-image-delete image)))
            (,loop (cdr ,filenames))
          )
        )

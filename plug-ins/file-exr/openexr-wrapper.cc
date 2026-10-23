@@ -19,20 +19,20 @@
 
 #include <string>
 
-/*  These libgimp includes are not needed here at all, but this is a
- *  convenient place to make sure the public libgimp headers are
+/*  These libclay includes are not needed here at all, but this is a
+ *  convenient place to make sure the public libclay headers are
  *  C++-clean. The C++ compiler will choke on stuff like naming
  *  a struct member or parameter "private".
  */
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpthumb/gimpthumb.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaythumb/claythumb.h"
+#include "libclaywidgets/claywidgets.h"
 
 #if defined(__MINGW32__)
 #ifndef FLT_EPSILON
@@ -375,17 +375,17 @@ struct _EXRLoader
     return can_load_ ? 1 : 0;
   }
 
-  GimpColorProfile *getProfile () const {
+  ClayColorProfile *getProfile () const {
     Chromaticities chromaticities;
     float whiteLuminance = 1.0;
 
-    GimpColorProfile *linear_srgb_profile;
+    ClayColorProfile *linear_srgb_profile;
     cmsHPROFILE linear_srgb_lcms;
 
-    GimpColorProfile *profile;
+    ClayColorProfile *profile;
     cmsHPROFILE lcms_profile;
 
-    cmsCIEXYZ *gimp_r_XYZ, *gimp_g_XYZ, *gimp_b_XYZ, *gimp_w_XYZ;
+    cmsCIEXYZ *clay_r_XYZ, *clay_g_XYZ, *clay_b_XYZ, *clay_w_XYZ;
     cmsCIEXYZ exr_r_XYZ, exr_g_XYZ, exr_b_XYZ, exr_w_XYZ;
 
     /* get the color information from the EXR */
@@ -427,34 +427,34 @@ struct _EXRLoader
                                           chromaticities.blue.y,
                                           whiteLuminance } };
 
-    /* get the primaries + wp from GIMP's internal linear sRGB profile */
-    linear_srgb_profile = gimp_color_profile_new_rgb_srgb_linear ();
-    linear_srgb_lcms = gimp_color_profile_get_lcms_profile (linear_srgb_profile);
+    /* get the primaries + wp from Clay's internal linear sRGB profile */
+    linear_srgb_profile = clay_color_profile_new_rgb_srgb_linear ();
+    linear_srgb_lcms = clay_color_profile_get_lcms_profile (linear_srgb_profile);
 
-    gimp_r_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigRedColorantTag);
-    gimp_g_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigGreenColorantTag);
-    gimp_b_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigBlueColorantTag);
-    gimp_w_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigMediaWhitePointTag);
+    clay_r_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigRedColorantTag);
+    clay_g_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigGreenColorantTag);
+    clay_b_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigBlueColorantTag);
+    clay_w_XYZ = (cmsCIEXYZ *) cmsReadTag (linear_srgb_lcms, cmsSigMediaWhitePointTag);
 
     cmsxyY2XYZ (&exr_r_XYZ, &CameraPrimaries.Red);
     cmsxyY2XYZ (&exr_g_XYZ, &CameraPrimaries.Green);
     cmsxyY2XYZ (&exr_b_XYZ, &CameraPrimaries.Blue);
     cmsxyY2XYZ (&exr_w_XYZ, &whitePoint);
 
-    /* ... and check if the data stored in the EXR matches GIMP's internal profile */
-    bool exr_is_linear_srgb = XYZ_equal (&exr_r_XYZ, gimp_r_XYZ) &&
-                              XYZ_equal (&exr_g_XYZ, gimp_g_XYZ) &&
-                              XYZ_equal (&exr_b_XYZ, gimp_b_XYZ) &&
-                              XYZ_equal (&exr_w_XYZ, gimp_w_XYZ);
+    /* ... and check if the data stored in the EXR matches Clay's internal profile */
+    bool exr_is_linear_srgb = XYZ_equal (&exr_r_XYZ, clay_r_XYZ) &&
+                              XYZ_equal (&exr_g_XYZ, clay_g_XYZ) &&
+                              XYZ_equal (&exr_b_XYZ, clay_b_XYZ) &&
+                              XYZ_equal (&exr_w_XYZ, clay_w_XYZ);
 
-    /* using GIMP's linear sRGB profile allows to skip the conversion popup */
+    /* using Clay's linear sRGB profile allows to skip the conversion popup */
     if (exr_is_linear_srgb)
       return linear_srgb_profile;
 
     /* nope, it's something else. Clean up and build a new profile */
     g_object_unref (linear_srgb_profile);
 
-    /* TODO: maybe factor this out into libgimpcolor/gimpcolorprofile.h ? */
+    /* TODO: maybe factor this out into libclaycolor/claycolorprofile.h ? */
     double Parameters[2] = { 1.0, 0.0 };
     cmsToneCurve *Gamma[3];
     Gamma[0] = Gamma[1] = Gamma[2] = cmsBuildParametricToneCurve(0,
@@ -466,7 +466,7 @@ struct _EXRLoader
 
     /* cmsSetProfileVersion (lcms_profile, 2.1); */
     cmsMLU *mlu0 = cmsMLUalloc (NULL, 1);
-    cmsMLUsetASCII (mlu0, "en", "US", "(GIMP internal)");
+    cmsMLUsetASCII (mlu0, "en", "US", "(Clay internal)");
     cmsMLU *mlu1 = cmsMLUalloc(NULL, 1);
     cmsMLUsetASCII (mlu1, "en", "US", "color profile from EXR chromaticities");
     cmsMLU *mlu2 = cmsMLUalloc(NULL, 1);
@@ -478,7 +478,7 @@ struct _EXRLoader
     cmsMLUfree (mlu1);
     cmsMLUfree (mlu2);
 
-    profile = gimp_color_profile_new_from_lcms_profile (lcms_profile,
+    profile = clay_color_profile_new_from_lcms_profile (lcms_profile,
                                                         NULL);
     cmsCloseProfile (lcms_profile);
 
@@ -665,7 +665,7 @@ exr_loader_has_alpha (EXRLoader *loader)
   return loader->hasAlpha ();
 }
 
-GimpColorProfile *
+ClayColorProfile *
 exr_loader_get_profile (EXRLoader *loader)
 {
   return loader->getProfile ();

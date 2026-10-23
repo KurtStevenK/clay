@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * Test suite for GimpConfig.
+ * Test suite for ClayConfig.
  * Copyright (C) 2001-2002  Sven Neumann <sven@gimp.org>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,14 +26,14 @@
 #include <gegl.h>
 #include <gio/gio.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpbase/gimpbase-private.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclaybase/claybase-private.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "core/core-types.h"
-#include "core/gimpgrid.h"
+#include "core/claygrid.h"
 
-#include "gimprc-unknown.h"
+#include "clayrc-unknown.h"
 
 
 static void  notify_callback      (GObject     *object,
@@ -49,8 +49,8 @@ int
 main (int   argc,
       char *argv[])
 {
-  GimpConfig  *grid;
-  GimpConfig  *grid2;
+  ClayConfig  *grid;
+  ClayConfig  *grid2;
   GFile       *file = g_file_new_for_path ("foorc");
   gchar       *header;
   gchar       *result;
@@ -73,21 +73,21 @@ main (int   argc,
   units_init ();
   gegl_init (&argc, &argv);
 
-  g_print ("\nTesting GimpConfig ...\n");
+  g_print ("\nTesting ClayConfig ...\n");
 
   g_print (" Creating a new Grid object ...");
-  grid = g_object_new (GIMP_TYPE_GRID, NULL);
+  grid = g_object_new (CLAY_TYPE_GRID, NULL);
   g_print (" done.\n");
 
   g_print (" Adding the unknown token (foobar \"hadjaha\") ...");
-  gimp_rc_add_unknown_token (grid, "foobar", "hadjaha");
+  clay_rc_add_unknown_token (grid, "foobar", "hadjaha");
   g_print (" done.\n");
 
   g_print (" Serializing %s to '%s' ...",
            g_type_name (G_TYPE_FROM_INSTANCE (grid)),
-           gimp_file_get_utf8_name (file));
+           clay_file_get_utf8_name (file));
 
-  if (! gimp_config_serialize_to_file (grid,
+  if (! clay_config_serialize_to_file (grid,
                                        file,
                                        "foorc", "end of foorc",
                                        NULL, &error))
@@ -102,22 +102,22 @@ main (int   argc,
                     NULL);
 
   g_print (" Deserializing from '%s' ...\n",
-           gimp_file_get_utf8_name (file));
+           clay_file_get_utf8_name (file));
 
-  if (! gimp_config_deserialize_file (grid, file, NULL, &error))
+  if (! clay_config_deserialize_file (grid, file, NULL, &error))
     {
       g_print ("%s\n", error->message);
       return EXIT_FAILURE;
     }
   header = " Unknown string tokens:\n";
-  gimp_rc_foreach_unknown_token (grid, output_unknown_token, &header);
+  clay_rc_foreach_unknown_token (grid, output_unknown_token, &header);
   g_print (" done.\n\n");
 
   g_print (" Changing a property ...");
-  g_object_set (grid, "style", GIMP_GRID_DOTS, NULL);
+  g_object_set (grid, "style", CLAY_GRID_DOTS, NULL);
 
-  g_print (" Testing gimp_config_duplicate() ...");
-  grid2 = gimp_config_duplicate (grid);
+  g_print (" Testing clay_config_duplicate() ...");
+  grid2 = clay_config_duplicate (grid);
   g_print (" done.\n");
 
   g_signal_connect (grid2, "notify",
@@ -128,7 +128,7 @@ main (int   argc,
   g_object_set (grid2, "xspacing", 20.0, NULL);
 
   g_print (" Creating a diff between the two ...");
-  for (list = gimp_config_diff (G_OBJECT (grid), G_OBJECT (grid2), 0);
+  for (list = clay_config_diff (G_OBJECT (grid), G_OBJECT (grid2), 0);
        list;
        list = list->next)
     {
@@ -140,10 +140,10 @@ main (int   argc,
 
   g_object_unref (grid2);
 
-  g_print (" Deserializing from gimpconfig.c (should fail) ...");
+  g_print (" Deserializing from clayconfig.c (should fail) ...");
 
-  if (! gimp_config_deserialize_file (grid,
-                                      g_file_new_for_path ("gimpconfig.c"),
+  if (! clay_config_deserialize_file (grid,
+                                      g_file_new_for_path ("clayconfig.c"),
                                       NULL, &error))
     {
       g_print (" OK, failed. The error was:\n %s\n", error->message);
@@ -158,11 +158,11 @@ main (int   argc,
 
   g_print (" Serializing to a string and back ... ");
 
-  result = gimp_config_serialize_to_string (grid, NULL);
+  result = clay_config_serialize_to_string (grid, NULL);
 
-  grid2 = g_object_new (GIMP_TYPE_GRID, NULL);
+  grid2 = g_object_new (CLAY_TYPE_GRID, NULL);
 
-  if (! gimp_config_deserialize_string (grid2, result, -1, NULL, &error))
+  if (! clay_config_deserialize_string (grid2, result, -1, NULL, &error))
     {
       g_print ("failed!\nThe error was:\n %s\n", error->message);
       g_error_free (error);
@@ -170,7 +170,7 @@ main (int   argc,
     }
   else
     {
-      GList *diff = gimp_config_diff (G_OBJECT (grid), G_OBJECT (grid2), 0);
+      GList *diff = clay_config_diff (G_OBJECT (grid), G_OBJECT (grid2), 0);
 
       if (diff)
         {
@@ -192,7 +192,7 @@ main (int   argc,
   g_object_unref (grid2);
   g_object_unref (grid);
 
-  g_print ("\nFinished test of GimpConfig.\n\n");
+  g_print ("\nFinished test of ClayConfig.\n\n");
 
   return EXIT_SUCCESS;
 }
@@ -212,7 +212,7 @@ notify_callback (GObject    *object,
 
   str = g_string_new (NULL);
 
-  if (gimp_config_serialize_value (&value, str, TRUE))
+  if (clay_config_serialize_value (&value, str, TRUE))
     {
       g_print ("  %s -> %s\n", pspec->name, str->str);
     }
@@ -250,7 +250,7 @@ static void
 units_init (void)
 {
   /* Empty dummy units implementation  */
-  GimpUnitVtable vtable = { 0 };
+  ClayUnitVtable vtable = { 0 };
 
-  gimp_base_init (&vtable);
+  clay_base_init (&vtable);
 }

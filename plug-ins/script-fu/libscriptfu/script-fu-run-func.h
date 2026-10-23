@@ -18,19 +18,19 @@
 #ifndef __SCRIPT_FU_RUN_FUNC_H__
 #define __SCRIPT_FU_RUN_FUNC_H__
 
-GimpValueArray *script_fu_run_procedure       (GimpProcedure        *procedure,
-                                               GimpProcedureConfig  *config,
+ClayValueArray *script_fu_run_procedure       (ClayProcedure        *procedure,
+                                               ClayProcedureConfig  *config,
                                                gpointer              data);
 
-GimpValueArray *script_fu_run_image_procedure (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+ClayValueArray *script_fu_run_image_procedure (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              data);
-GimpValueArray *script_fu_run_regular_procedure (
-                                               GimpProcedure        *procedure,
-                                               GimpProcedureConfig  *config,
+ClayValueArray *script_fu_run_regular_procedure (
+                                               ClayProcedure        *procedure,
+                                               ClayProcedureConfig  *config,
                                                gpointer              data);
 
 

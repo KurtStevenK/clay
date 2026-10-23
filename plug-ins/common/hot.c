@@ -66,15 +66,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-hot"
 #define PLUG_IN_BINARY "hot"
-#define PLUG_IN_ROLE   "gimp-hot"
+#define PLUG_IN_ROLE   "clay-hot"
 
 
 typedef enum
@@ -135,12 +135,12 @@ typedef struct _HotClass HotClass;
 
 struct _Hot
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _HotClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -149,21 +149,21 @@ struct _HotClass
 
 GType                   hot_get_type         (void);
 
-static GList          * hot_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * hot_create_procedure (GimpPlugIn           *plug_in,
+static GList          * hot_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * hot_create_procedure (ClayPlugIn           *plug_in,
                                               const gchar          *name);
 
-static GimpValueArray * hot_run              (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
-                                              GimpDrawable        **drawables,
-                                              GimpProcedureConfig  *config,
+static ClayValueArray * hot_run              (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
+                                              ClayDrawable        **drawables,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
-static gboolean         pluginCore           (GimpImage            *image,
-                                              GimpDrawable         *drawable,
+static gboolean         pluginCore           (ClayImage            *image,
+                                              ClayDrawable         *drawable,
                                               GObject              *config);
-static gboolean         plugin_dialog        (GimpProcedure        *procedure,
+static gboolean         plugin_dialog        (ClayProcedure        *procedure,
                                               GObject              *config);
 static gboolean         hotp                 (guint8                r,
                                               guint8                g,
@@ -195,9 +195,9 @@ static void             build_tab            (gint                  m);
 #define pix_encode(v)  ((int)(v * (double)MAXPIX + 0.5))
 
 
-G_DEFINE_TYPE (Hot, hot, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Hot, hot, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (HOT_TYPE)
+CLAY_MAIN (HOT_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -211,7 +211,7 @@ static gint     icompos_lim;         /* composite amplitude limit (scaled intege
 static void
 hot_class_init (HotClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = hot_query_procedures;
   plug_in_class->create_procedure = hot_create_procedure;
@@ -224,31 +224,31 @@ hot_init (Hot *hot)
 }
 
 static GList *
-hot_query_procedures (GimpPlugIn *plug_in)
+hot_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-hot_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+hot_create_procedure (ClayPlugIn  *plug_in,
                                const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             hot_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Hot..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/[Modify]");
+      clay_procedure_set_menu_label (procedure, _("_Hot..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/[Modify]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Find and fix pixels that may "
                                           "be unsafely bright"),
                                         "This procedure scans an image for pixels that "
@@ -258,31 +258,31 @@ hot_create_procedure (GimpPlugIn  *plug_in,
                                         "or PAL signal. Several actions can be "
                                         "performed on these 'hot' pixels.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Eric L. Hernes, Alan Wm Paeth",
                                       "Eric L. Hernes",
                                       "1997");
 
-      gimp_procedure_add_choice_argument (procedure, "mode",
+      clay_procedure_add_choice_argument (procedure, "mode",
                                           _("_Mode"),
                                           _("Signal mode"),
-                                          gimp_choice_new_with_values ("ntsc", MODE_NTSC, _("NTSC"), NULL,
+                                          clay_choice_new_with_values ("ntsc", MODE_NTSC, _("NTSC"), NULL,
                                                                        "pal",  MODE_PAL,  _("PAL"),   NULL,
                                                                        NULL),
                                           "ntsc",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "action",
+      clay_procedure_add_choice_argument (procedure, "action",
                                           _("_Action"),
                                           _("Action"),
-                                          gimp_choice_new_with_values ("reduce-luminance",   ACT_LREDUX, _("Reduce luminance"),  NULL,
+                                          clay_choice_new_with_values ("reduce-luminance",   ACT_LREDUX, _("Reduce luminance"),  NULL,
                                                                        "reduce-saturation",  ACT_SREDUX, _("Reduce saturation"), NULL,
                                                                        "blacken",            ACT_FLAG,   _("Blacken"),           NULL,
                                                                        NULL),
                                           "reduce-luminance",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "new-layer",
+      clay_procedure_add_boolean_argument (procedure, "new-layer",
                                            _("Create _new layer"),
                                            _("Create a new layer"),
                                            TRUE,
@@ -292,28 +292,28 @@ hot_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-hot_run (GimpProcedure        *procedure,
-         GimpRunMode           run_mode,
-         GimpImage            *image,
-         GimpDrawable        **drawables,
-         GimpProcedureConfig  *config,
+static ClayValueArray *
+hot_run (ClayProcedure        *procedure,
+         ClayRunMode           run_mode,
+         ClayImage            *image,
+         ClayDrawable        **drawables,
+         ClayProcedureConfig  *config,
          gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -321,25 +321,25 @@ hot_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! plugin_dialog (procedure, G_OBJECT (config)))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! plugin_dialog (procedure, G_OBJECT (config)))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
   if (! pluginCore (image, drawable, G_OBJECT (config)))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              NULL);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gboolean
-pluginCore (GimpImage    *image,
-            GimpDrawable *drawable,
+pluginCore (ClayImage    *image,
+            ClayDrawable *drawable,
             GObject      *config)
 {
   gint        mode;
@@ -352,7 +352,7 @@ pluginCore (GimpImage    *image,
   gint        src_bpp;
   gint        dest_bpp;
   gboolean    success = TRUE;
-  GimpLayer  *nl      = NULL;
+  ClayLayer  *nl      = NULL;
   gint        y, i;
   gint        Y, I, Q;
   gint        width, height;
@@ -374,15 +374,15 @@ pluginCore (GimpImage    *image,
   g_object_get (config,
                 "new-layer", &new_layer,
                 NULL);
-  mode = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  mode = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                               "mode");
-  action = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  action = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "action");
 
-  width  = gimp_drawable_get_width  (drawable);
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width  (drawable);
+  height = clay_drawable_get_height (drawable);
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     src_format = babl_format ("R'G'B'A u8");
   else
     src_format = babl_format ("R'G'B' u8");
@@ -408,18 +408,18 @@ pluginCore (GimpImage    *image,
                   mode_names[mode],
                   action_names[action]);
 
-      nl = gimp_layer_new (image, name, width, height,
-                           GIMP_RGBA_IMAGE,
+      nl = clay_layer_new (image, name, width, height,
+                           CLAY_RGBA_IMAGE,
                            100,
-                           gimp_image_get_default_new_layer_mode (image));
+                           clay_image_get_default_new_layer_mode (image));
 
-      gimp_drawable_fill (GIMP_DRAWABLE (nl), GIMP_FILL_TRANSPARENT);
-      gimp_image_insert_layer (image, nl, NULL, 0);
+      clay_drawable_fill (CLAY_DRAWABLE (nl), CLAY_FILL_TRANSPARENT);
+      clay_image_insert_layer (image, nl, NULL, 0);
 
       dest_format = babl_format ("R'G'B'A u8");
     }
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &sel_x1, &sel_y1, &width, &height))
     return success;
 
@@ -441,15 +441,15 @@ pluginCore (GimpImage    *image,
       return success;
     }
 
-  src_buffer = gimp_drawable_get_buffer (drawable);
+  src_buffer = clay_drawable_get_buffer (drawable);
 
   if (new_layer)
     {
-      dest_buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (nl));
+      dest_buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (nl));
     }
   else
     {
-      dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+      dest_buffer = clay_drawable_get_shadow_buffer (drawable);
     }
 
   gegl_buffer_get (src_buffer,
@@ -462,7 +462,7 @@ pluginCore (GimpImage    *image,
 
   build_tab (mode);
 
-  gimp_progress_init (_("Hot"));
+  clay_progress_init (_("Hot"));
   prog_interval = height / 10;
 
   for (y = sel_y1; y < sel_y2; y++)
@@ -470,7 +470,7 @@ pluginCore (GimpImage    *image,
       gint x;
 
       if (y % prog_interval == 0)
-        gimp_progress_update ((double) y / (double) (sel_y2 - sel_y1));
+        clay_progress_update ((double) y / (double) (sel_y2 - sel_y1));
 
       for (x = sel_x1; x < sel_x2; x++)
         {
@@ -632,7 +632,7 @@ pluginCore (GimpImage    *image,
                    dest_format, dst,
                    GEGL_AUTO_ROWSTRIDE);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_free (src);
   g_free (dst);
@@ -642,21 +642,21 @@ pluginCore (GimpImage    *image,
 
   if (new_layer)
     {
-      gimp_drawable_update (GIMP_DRAWABLE (nl), sel_x1, sel_y1, width, height);
+      clay_drawable_update (CLAY_DRAWABLE (nl), sel_x1, sel_y1, width, height);
     }
   else
     {
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, sel_x1, sel_y1, width, height);
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, sel_x1, sel_y1, width, height);
     }
 
-  gimp_displays_flush ();
+  clay_displays_flush ();
 
   return success;
 }
 
 static gboolean
-plugin_dialog (GimpProcedure *procedure,
+plugin_dialog (ClayProcedure *procedure,
                GObject       *config)
 {
   GtkWidget  *dlg;
@@ -664,25 +664,25 @@ plugin_dialog (GimpProcedure *procedure,
   GtkWidget  *hbox;
   gboolean    run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dlg = gimp_procedure_dialog_new (procedure,
-                                   GIMP_PROCEDURE_CONFIG (config),
+  dlg = clay_procedure_dialog_new (procedure,
+                                   CLAY_PROCEDURE_CONFIG (config),
                                    _("Hot"));
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
-                                    "mode", GIMP_TYPE_INT_RADIO_FRAME);
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
-                                    "action", GIMP_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
+                                    "mode", CLAY_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
+                                    "action", CLAY_TYPE_INT_RADIO_FRAME);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dlg),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dlg),
                                          "hot-left-side",
                                          "mode",
                                          "new-layer",
                                          NULL);
   gtk_box_set_spacing (GTK_BOX (vbox), 12);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dlg),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dlg),
                                          "hot-hbox",
                                          "hot-left-side",
                                          "action",
@@ -693,13 +693,13 @@ plugin_dialog (GimpProcedure *procedure,
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
                                   GTK_ORIENTATION_HORIZONTAL);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg),
                               "hot-hbox",
                               NULL);
 
   gtk_widget_set_visible (dlg, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dlg));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dlg));
 
   gtk_widget_destroy (dlg);
 

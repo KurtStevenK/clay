@@ -1,0 +1,6 @@
+clay-script-fu-interpreter=@SCRIPTFU_PATH@clay-script-fu-interpreter-3.0.exe
+clay-script-fu-interpreter-3.0=@SCRIPTFU_PATH@clay-script-fu-interpreter-3.0.exe
+clay-script-fu-interpreter=@SCRIPTFU_PATH@clay-script-fu-interpreter-3.0.exe
+clay-script-fu-interpreter-3.0=@SCRIPTFU_PATH@clay-script-fu-interpreter-3.0.exe
+/usr/bin/clay-script-fu-interpreter=@SCRIPTFU_PATH@clay-script-fu-interpreter-3.0.exe
+,ScriptFu,E,,scm,,@SCRIPTFU_PATH@clay-script-fu-interpreter-3.0.exe,

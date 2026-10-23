@@ -18,13 +18,13 @@
 #pragma once
 
 
-#define GIMP_ACRONYM \
+#define CLAY_ACRONYM \
   "Clay"
 
-#define GIMP_NAME \
+#define CLAY_NAME \
   "Clay Image Beautification Program"
 
-#define GIMP_COPYRIGHT \
+#define CLAY_COPYRIGHT \
   _("© 2026 ClayDesign Contributors.")
 
 /* TRANSLATORS: do not end the license URL with a dot, because it would
@@ -32,7 +32,7 @@
  * ends with a space, a newline or is end of text.
  * Cf. bug 762282.
  */
-#define GIMP_LICENSE \
+#define CLAY_LICENSE \
   _("Clay is free software: you can redistribute it and/or modify it "   \
     "under the terms of the GNU General Public License as published by " \
     "the Free Software Foundation; either version 3 of the License, or " \

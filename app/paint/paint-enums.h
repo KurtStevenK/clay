@@ -19,8 +19,8 @@
 
 #if 0
    This file is parsed by two scripts, enumgen.pl in pdb,
-   and gimp-mkenums. All enums that are not marked with
-   /*< pdb-skip >*/ are exported to libgimp and the PDB. Enums that are
+   and clay-mkenums. All enums that are not marked with
+   /*< pdb-skip >*/ are exported to libclay and the PDB. Enums that are
    not marked with /*< skip >*/ are registered with the GType system.
    If you want the enum to be skipped by both scripts, you have to use
    /*< pdb-skip, skip >*/.
@@ -33,40 +33,40 @@
  * enums that are registered with the type system
  */
 
-#define GIMP_TYPE_BRUSH_APPLICATION_MODE (gimp_brush_application_mode_get_type ())
+#define CLAY_TYPE_BRUSH_APPLICATION_MODE (clay_brush_application_mode_get_type ())
 
-GType gimp_brush_application_mode_get_type (void);
+GType clay_brush_application_mode_get_type (void);
 
 typedef enum
 {
-  GIMP_BRUSH_HARD,
-  GIMP_BRUSH_SOFT,
-  GIMP_BRUSH_PRESSURE  /*< pdb-skip, skip >*/
-} GimpBrushApplicationMode;
+  CLAY_BRUSH_HARD,
+  CLAY_BRUSH_SOFT,
+  CLAY_BRUSH_PRESSURE  /*< pdb-skip, skip >*/
+} ClayBrushApplicationMode;
 
 
-#define GIMP_TYPE_PERSPECTIVE_CLONE_MODE (gimp_perspective_clone_mode_get_type ())
+#define CLAY_TYPE_PERSPECTIVE_CLONE_MODE (clay_perspective_clone_mode_get_type ())
 
-GType gimp_perspective_clone_mode_get_type (void);
+GType clay_perspective_clone_mode_get_type (void);
 
 typedef enum  /*< pdb-skip >*/
 {
-  GIMP_PERSPECTIVE_CLONE_MODE_ADJUST,  /*< desc="Modify Perspective" >*/
-  GIMP_PERSPECTIVE_CLONE_MODE_PAINT    /*< desc="Perspective Clone"  >*/
-} GimpPerspectiveCloneMode;
+  CLAY_PERSPECTIVE_CLONE_MODE_ADJUST,  /*< desc="Modify Perspective" >*/
+  CLAY_PERSPECTIVE_CLONE_MODE_PAINT    /*< desc="Perspective Clone"  >*/
+} ClayPerspectiveCloneMode;
 
 
-#define GIMP_TYPE_SOURCE_ALIGN_MODE (gimp_source_align_mode_get_type ())
+#define CLAY_TYPE_SOURCE_ALIGN_MODE (clay_source_align_mode_get_type ())
 
-GType gimp_source_align_mode_get_type (void);
+GType clay_source_align_mode_get_type (void);
 
 typedef enum /*< pdb-skip >*/
 {
-  GIMP_SOURCE_ALIGN_NO,          /*< desc="None"        >*/
-  GIMP_SOURCE_ALIGN_YES,         /*< desc="Aligned"     >*/
-  GIMP_SOURCE_ALIGN_REGISTERED,  /*< desc="Registered"  >*/
-  GIMP_SOURCE_ALIGN_FIXED        /*< desc="Fixed"       >*/
-} GimpSourceAlignMode;
+  CLAY_SOURCE_ALIGN_NO,          /*< desc="None"        >*/
+  CLAY_SOURCE_ALIGN_YES,         /*< desc="Aligned"     >*/
+  CLAY_SOURCE_ALIGN_REGISTERED,  /*< desc="Registered"  >*/
+  CLAY_SOURCE_ALIGN_FIXED        /*< desc="Fixed"       >*/
+} ClaySourceAlignMode;
 
 
 /*
@@ -75,15 +75,15 @@ typedef enum /*< pdb-skip >*/
 
 typedef enum  /*< skip, pdb-skip >*/
 {
-  GIMP_PAINT_STATE_INIT,    /*  Setup PaintFunc internals                    */
-  GIMP_PAINT_STATE_MOTION,  /*  PaintFunc performs motion-related rendering  */
-  GIMP_PAINT_STATE_FINISH   /*  Cleanup and/or reset PaintFunc operation     */
-} GimpPaintState;
+  CLAY_PAINT_STATE_INIT,    /*  Setup PaintFunc internals                    */
+  CLAY_PAINT_STATE_MOTION,  /*  PaintFunc performs motion-related rendering  */
+  CLAY_PAINT_STATE_FINISH   /*  Cleanup and/or reset PaintFunc operation     */
+} ClayPaintState;
 
 /*  State of lock blinking  */
 typedef enum /*< skip, pdb-skip >*/
 {
-  GIMP_PAINT_LOCK_NOT_BLINKED,
-  GIMP_PAINT_LOCK_BLINK_PENDING,
-  GIMP_PAINT_LOCK_BLINKED,
-} GimpPaintLockBlinkState;
+  CLAY_PAINT_LOCK_NOT_BLINKED,
+  CLAY_PAINT_LOCK_BLINK_PENDING,
+  CLAY_PAINT_LOCK_BLINKED,
+} ClayPaintLockBlinkState;

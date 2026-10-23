@@ -1,11 +1,11 @@
-;;; line-nova.scm for gimp-1.1 -*-scheme-*-
+;;; line-nova.scm for clay-1.1 -*-scheme-*-
 ;;; Time-stamp: <1998/11/25 13:26:44 narazaki@gimp.org>
 ;;; Author Shuji Narazaki <narazaki@gimp.org>
 ;;; Version 0.7
 
 (define (script-fu-line-nova img drw num-of-lines corn-deg offset variation)
 
-  ; fmod and nth were globally defined before GIMP 3
+  ; fmod and nth were globally defined before Clay 3
 
   ; floating point remainder
   (define (fmod a b)
@@ -26,19 +26,19 @@
         (2pi (* 2 *pi*))
         (rad/deg (/ 2pi 360))
         (variation/2 (/ variation 2))
-        (drw (vector-ref (car (gimp-image-get-selected-drawables img)) 0))
-        (drw-width (car (gimp-drawable-get-width drw)))
-        (drw-height (car (gimp-drawable-get-height drw)))
-        (drw-offsets (gimp-drawable-get-offsets drw))
+        (drw (vector-ref (car (clay-image-get-selected-drawables img)) 0))
+        (drw-width (car (clay-drawable-get-width drw)))
+        (drw-height (car (clay-drawable-get-height drw)))
+        (drw-offsets (clay-drawable-get-offsets drw))
         (old-selection FALSE)
         (radius (max drw-height drw-width))
         (index 0)
         (dir-deg/line (/ 360 num-of-lines))
-        (fg-color (car (gimp-context-get-foreground)))
+        (fg-color (car (clay-context-get-foreground)))
         )
-    (gimp-context-push)
-    (gimp-context-set-defaults)
-    (gimp-context-set-foreground fg-color)
+    (clay-context-push)
+    (clay-context-set-defaults)
+    (clay-context-set-foreground fg-color)
 
     (define (draw-vector beg-x beg-y direction)
 
@@ -76,20 +76,20 @@
                     (+ beg-y (* off (sin dir0)))
         )
         (set-marginal-point beg-x beg-y direction)
-        (gimp-image-select-polygon img CHANNEL-OP-ADD *points*)
+        (clay-image-select-polygon img CHANNEL-OP-ADD *points*)
       )
     )
 
-    (gimp-image-undo-group-start img)
+    (clay-image-undo-group-start img)
 
     (set! old-selection
-      (if (eq? (car (gimp-selection-is-empty img)) TRUE)
+      (if (eq? (car (clay-selection-is-empty img)) TRUE)
          #f
-         (car (gimp-selection-save img))
+         (car (clay-selection-save img))
       )
     )
 
-    (gimp-selection-none img)
+    (clay-selection-none img)
     (srand (realtime))
     (while (< index num-of-lines)
       (draw-vector (+ (nth 0 drw-offsets) (/ drw-width 2))
@@ -98,18 +98,18 @@
       )
       (set! index (+ index 1))
     )
-    (gimp-drawable-edit-fill drw FILL-FOREGROUND)
+    (clay-drawable-edit-fill drw FILL-FOREGROUND)
 
     (if old-selection
       (begin
-        (gimp-image-select-item img CHANNEL-OP-REPLACE old-selection)
-        (gimp-image-remove-channel img old-selection)
+        (clay-image-select-item img CHANNEL-OP-REPLACE old-selection)
+        (clay-image-remove-channel img old-selection)
       )
     )
 
-    (gimp-image-undo-group-end img)
-    (gimp-displays-flush)
-    (gimp-context-pop)
+    (clay-image-undo-group-end img)
+    (clay-displays-flush)
+    (clay-context-pop)
   )
 )
 

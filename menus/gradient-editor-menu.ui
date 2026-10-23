@@ -4,7 +4,7 @@
   <menu id="/gradient-editor-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="gradient-editor-action">Gradient Editor Menu</attribute>
-      <attribute name="icon">gimp-tool-gradient</attribute>
+      <attribute name="icon">clay-tool-gradient</attribute>
       <submenu>
         <attribute name="label" translatable="yes" context="gradient-editor-action">Left Color Type</attribute>
         <item><attribute name="action">gradient-editor.gradient-editor-left-color-fixed</attribute></item>

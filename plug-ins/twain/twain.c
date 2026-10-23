@@ -30,7 +30,7 @@
  * Any suggestions, bug-reports or patches are welcome.
  *
  * This plug-in interfaces to the TWAIN support library in order
- * to capture images from TWAIN devices directly into GIMP images.
+ * to capture images from TWAIN devices directly into Clay images.
  * The plug-in is capable of acquiring the following type of
  * images:
  * - B/W (1 bit images translated to grayscale B/W)
@@ -69,8 +69,8 @@
 #include "tw_platform.h"
 #include "tw_local.h"
 
-#include "libgimp/gimp.h"
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/clay.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "tw_func.h"
 #include "tw_util.h"
@@ -132,12 +132,12 @@ typedef struct _TwainClass TwainClass;
 
 struct _Twain
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _TwainClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -146,27 +146,27 @@ struct _TwainClass
 
 GType                   twain_get_type         (void);
 
-static GList          * twain_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * twain_create_procedure (GimpPlugIn           *plug_in,
+static GList          * twain_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * twain_create_procedure (ClayPlugIn           *plug_in,
                                                 const gchar          *name);
 
-static GimpValueArray * twain_run              (GimpProcedure        *procedure,
-                                                GimpRunMode           run_mode,
-                                                GimpImage            *image,
-                                                GimpDrawable        **drawables,
-                                                GimpProcedureConfig  *config,
+static ClayValueArray * twain_run              (ClayProcedure        *procedure,
+                                                ClayRunMode           run_mode,
+                                                ClayImage            *image,
+                                                ClayDrawable        **drawables,
+                                                ClayProcedureConfig  *config,
                                                 gpointer              run_data);
 
-G_DEFINE_TYPE (Twain, twain, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Twain, twain, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (TWAIN_TYPE)
+CLAY_MAIN (TWAIN_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 twain_class_init (TwainClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = twain_query_procedures;
   plug_in_class->create_procedure = twain_create_procedure;
@@ -179,46 +179,46 @@ twain_init (Twain *twain)
 }
 
 static GList *
-twain_query_procedures (GimpPlugIn *plug_in)
+twain_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_NAME));
 }
 
-static GimpProcedure *
-twain_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+twain_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_NAME))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             twain_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE     |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES    |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_IMAGE);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE     |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES    |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_IMAGE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Scanner/Camera..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/Create");
+      clay_procedure_set_menu_label (procedure, _("_Scanner/Camera..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/File/Create");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         PLUG_IN_DESCRIPTION,
                                         PLUG_IN_HELP,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       PLUG_IN_AUTHOR,
                                       PLUG_IN_COPYRIGHT,
                                       PLUG_IN_VERSION);
 
-      gimp_procedure_add_core_object_array_return_value (procedure, "images",
+      clay_procedure_add_core_object_array_return_value (procedure, "images",
                                                          "Array of acquired images",
                                                          "Array of acquired images",
-                                                         GIMP_TYPE_IMAGE,
+                                                         CLAY_TYPE_IMAGE,
                                                          G_PARAM_READWRITE);
      }
 
@@ -367,7 +367,7 @@ initializeTwain (void)
 }
 
 /******************************************************************
- * GIMP Plug-in entry points
+ * Clay Plug-in entry points
  ******************************************************************/
 
 /* Return values storage */
@@ -380,20 +380,20 @@ static gint   image_count = 0;
  * The plug-in is being requested to run.
  * Capture an image from a TWAIN datasource
  */
-static GimpValueArray *
-twain_run (GimpProcedure        *procedure,
-           GimpRunMode           run_mode,
-           GimpImage            *image,
-           GimpDrawable        **drawables,
-           GimpProcedureConfig  *config,
+static ClayValueArray *
+twain_run (ClayProcedure        *procedure,
+           ClayRunMode           run_mode,
+           ClayImage            *image,
+           ClayDrawable        **drawables,
+           ClayProcedureConfig  *config,
            gpointer              run_data)
 {
   /* Initialize the return values
    * Always return at least the status to the caller.
    */
-  GimpPDBStatusType   status      = GIMP_PDB_SUCCESS;
-  GimpValueArray     *return_vals = NULL;
-  GimpImage         **images;
+  ClayPDBStatusType   status      = CLAY_PDB_SUCCESS;
+  ClayValueArray     *return_vals = NULL;
+  ClayImage         **images;
   GList              *list;
   gint                num_images;
   gint                i;
@@ -408,20 +408,20 @@ twain_run (GimpProcedure        *procedure,
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("TWAIN driver not found, scanning not available"));
-      return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
-  if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  if (run_mode == CLAY_RUN_NONINTERACTIVE)
     /* Currently, we don't do non-interactive calls.
      * Bail if someone tries to call us non-interactively
      */
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR, NULL);
 
   /* Have we succeeded so far? */
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     twainMain ();
 
   /* Check to make sure we got at least one valid
@@ -435,7 +435,7 @@ twain_run (GimpProcedure        *procedure,
        */
 
       num_images = g_list_length (image_list);
-      images     = g_new0 (GimpImage *, num_images + 1);
+      images     = g_new0 (ClayImage *, num_images + 1);
 
       for (list = image_list, i = 0;
            list;
@@ -447,14 +447,14 @@ twain_run (GimpProcedure        *procedure,
       g_list_free (image_list);
 
       /* Set return values */
-      return_vals = gimp_procedure_new_return_values (procedure, status, NULL);
-      GIMP_VALUES_TAKE_CORE_OBJECT_ARRAY (return_vals, 1, images);
+      return_vals = clay_procedure_new_return_values (procedure, status, NULL);
+      CLAY_VALUES_TAKE_CORE_OBJECT_ARRAY (return_vals, 1, images);
 
       return return_vals;
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 }
@@ -468,8 +468,8 @@ twain_run (GimpProcedure        *procedure,
  */
 typedef struct
 {
-  GimpImage    *image;
-  GimpLayer    *layer;
+  ClayImage    *image;
+  ClayLayer    *layer;
   GeglBuffer   *buffer;
   const Babl   *format;
   pTW_PALETTE8  paletteData;
@@ -487,7 +487,7 @@ void
 preTransferCallback (void *clientData)
 {
   /* Initialize our progress dialog */
-  gimp_progress_init (_("Transferring data from scanner/camera"));
+  clay_progress_init (_("Transferring data from scanner/camera"));
 }
 
 /*
@@ -503,9 +503,9 @@ beginTransferCallback (pTW_IMAGEINFO  imageInfo,
   pClientDataStruct theClientData = g_new (ClientDataStruct, 1);
 
   const Babl        *format;
-  GimpImageBaseType  imageType;
-  GimpImageType      layerType;
-  GimpPrecision      precision;
+  ClayImageBaseType  imageType;
+  ClayImageType      layerType;
+  ClayPrecision      precision;
 
   gint               bpc = imageInfo->BitsPerPixel /
                            imageInfo->SamplesPerPixel;
@@ -520,26 +520,26 @@ beginTransferCallback (pTW_IMAGEINFO  imageInfo,
     {
     case TWPT_BW:
       /* Set up the image and layer types */
-      imageType = GIMP_GRAY;
-      layerType = GIMP_GRAY_IMAGE;
-      precision = GIMP_PRECISION_U8_NON_LINEAR;
+      imageType = CLAY_GRAY;
+      layerType = CLAY_GRAY_IMAGE;
+      precision = CLAY_PRECISION_U8_NON_LINEAR;
       format    = babl_format ("Y' u8");
       break;
 
     case TWPT_GRAY:
       /* Set up the image and layer types */
-      imageType = GIMP_GRAY;
-      layerType = GIMP_GRAY_IMAGE;
+      imageType = CLAY_GRAY;
+      layerType = CLAY_GRAY_IMAGE;
 
       switch (bpc)
         {
         case 8:
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           format    = babl_format ("Y' u8");
           break;
 
         case 16:
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           format    = babl_format ("Y' u16");
           break;
 
@@ -550,18 +550,18 @@ beginTransferCallback (pTW_IMAGEINFO  imageInfo,
 
     case TWPT_RGB:
       /* Set up the image and layer types */
-      imageType = GIMP_RGB;
-      layerType = GIMP_RGB_IMAGE;
+      imageType = CLAY_RGB;
+      layerType = CLAY_RGB_IMAGE;
 
       switch (bpc)
         {
         case 8:
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           format    = babl_format ("R'G'B' u8");
           break;
 
         case 16:
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           format    = babl_format ("R'G'B' u16");
           break;
 
@@ -584,18 +584,18 @@ beginTransferCallback (pTW_IMAGEINFO  imageInfo,
         {
         case TWPA_RGB:
           /* Set up the image and layer types */
-          imageType = GIMP_RGB;
-          layerType = GIMP_RGB_IMAGE;
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          imageType = CLAY_RGB;
+          layerType = CLAY_RGB_IMAGE;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
 
           format = babl_format ("R'G'B' u8");
           break;
 
         case TWPA_GRAY:
           /* Set up the image and layer types */
-          imageType = GIMP_GRAY;
-          layerType = GIMP_GRAY_IMAGE;
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          imageType = CLAY_GRAY;
+          layerType = CLAY_GRAY_IMAGE;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
 
           format = babl_format ("Y' u8");
           break;
@@ -613,37 +613,37 @@ beginTransferCallback (pTW_IMAGEINFO  imageInfo,
       return FALSE;
     }
 
-  /* Create the GIMP image */
-  theClientData->image = gimp_image_new_with_precision (imageInfo->ImageWidth,
+  /* Create the Clay image */
+  theClientData->image = clay_image_new_with_precision (imageInfo->ImageWidth,
                                                         imageInfo->ImageLength,
                                                         imageType,
                                                         precision);
 
   /* Set the actual resolution */
-  gimp_image_set_resolution (theClientData->image,
+  clay_image_set_resolution (theClientData->image,
                              FIX32ToFloat (imageInfo->XResolution),
                              FIX32ToFloat (imageInfo->YResolution));
-  gimp_image_set_unit (theClientData->image, gimp_unit_inch ());
+  clay_image_set_unit (theClientData->image, clay_unit_inch ());
 
   /* Create a layer */
-  theClientData->layer = gimp_layer_new (theClientData->image,
+  theClientData->layer = clay_layer_new (theClientData->image,
                                          _("Background"),
                                          imageInfo->ImageWidth,
                                          imageInfo->ImageLength,
                                          layerType, 100,
-                                         GIMP_LAYER_MODE_NORMAL);
+                                         CLAY_LAYER_MODE_NORMAL);
 
   /* Add the layer to the image */
-  gimp_image_insert_layer (theClientData->image,
+  clay_image_insert_layer (theClientData->image,
                            theClientData->layer, NULL, 0);
 
   /* Update the progress dialog */
   theClientData->totalPixels     = imageInfo->ImageWidth * imageInfo->ImageLength;
   theClientData->completedPixels = 0;
 
-  gimp_progress_update (0.0);
+  clay_progress_update (0.0);
 
-  theClientData->buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (theClientData->layer));
+  theClientData->buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (theClientData->layer));
   theClientData->format = format;
 
   /* Store our client data for the data transfer callbacks */
@@ -666,7 +666,7 @@ beginTransferCallback (pTW_IMAGEINFO  imageInfo,
  * the image type is Black/White.
  *
  * Black and white data is unpacked from bit data
- * into byte data and written into a gray scale GIMP
+ * into byte data and written into a gray scale Clay
  * image.
  */
 static char bitMasks[] = { 128, 64, 32, 16, 8, 4, 2, 1 };
@@ -709,7 +709,7 @@ bitTransferCallback (pTW_IMAGEINFO     imageInfo,
 
   /* Update the user on our progress */
   theClientData->completedPixels += (cols * rows);
-  gimp_progress_update ((double) theClientData->completedPixels /
+  clay_progress_update ((double) theClientData->completedPixels /
                         (double) theClientData->totalPixels);
 
   return TRUE;
@@ -740,7 +740,7 @@ directTransferCallback (pTW_IMAGEINFO     imageInfo,
 
   /* Update the user on our progress */
   theClientData->completedPixels += (cols * rows);
-  gimp_progress_update ((double) theClientData->completedPixels /
+  clay_progress_update ((double) theClientData->completedPixels /
                         (double) theClientData->totalPixels);
 
   return TRUE;
@@ -752,7 +752,7 @@ directTransferCallback (pTW_IMAGEINFO     imageInfo,
  * The following function is called for each memory
  * block that is transferred from the data source if
  * the image type is paletted.  This does not create
- * an indexed image type in GIMP because for some
+ * an indexed image type in Clay because for some
  * reason it does not allow creation of a specific
  * palette.  This function will create an RGB or Gray
  * image and use the palette to set the details of
@@ -826,7 +826,7 @@ palettedTransferCallback (pTW_IMAGEINFO     imageInfo,
 
   /* Update the user on our progress */
   theClientData->completedPixels += (cols * rows);
-  gimp_progress_update ((double) theClientData->completedPixels /
+  clay_progress_update ((double) theClientData->completedPixels /
                         (double) theClientData->totalPixels);
 
   return TRUE;
@@ -903,14 +903,14 @@ endTransferCallback (int   completionState,
 
       /* Display the image */
       LogMessage ("Displaying image %d\n",
-                  gimp_image_get_id (theClientData->image));
-      gimp_display_new (theClientData->image);
+                  clay_image_get_id (theClientData->image));
+      clay_display_new (theClientData->image);
     }
   else
     {
       /* The transfer did not complete successfully */
       LogMessage ("Deleting image\n");
-      gimp_image_delete (theClientData->image);
+      clay_image_delete (theClientData->image);
     }
 
   /* Shut down if we have received all of the possible images */

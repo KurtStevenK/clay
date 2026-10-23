@@ -27,17 +27,17 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-tim-load"
 #define EXPORT_PROC    "file-tim-export"
 #define PLUG_IN_BINARY "file-tim"
-#define PLUG_IN_ROLE   "gimp-file-tim"
+#define PLUG_IN_ROLE   "clay-file-tim"
 
 
 typedef struct _TimSharedHeader
@@ -63,12 +63,12 @@ typedef struct _TimClass TimClass;
 
 struct _Tim
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _TimClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -78,39 +78,39 @@ struct _TimClass
 GType                   tim_get_type                  (void);
 
 
-static GList          *         tim_query_procedures  (GimpPlugIn            *plug_in);
-static GimpProcedure  *         tim_create_procedure  (GimpPlugIn            *plug_in,
+static GList          *         tim_query_procedures  (ClayPlugIn            *plug_in);
+static ClayProcedure  *         tim_create_procedure  (ClayPlugIn            *plug_in,
                                                        const gchar           *name);
 
-static GimpValueArray *         tim_load              (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
+static ClayValueArray *         tim_load              (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
                                                        GFile                 *file,
-                                                       GimpMetadata          *metadata,
-                                                       GimpMetadataLoadFlags *flags,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayMetadata          *metadata,
+                                                       ClayMetadataLoadFlags *flags,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
-static GimpValueArray *        tim_export             (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
-                                                       GimpImage             *image,
+static ClayValueArray *        tim_export             (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
+                                                       ClayImage             *image,
                                                        GFile                 *file,
-                                                       GimpExportOptions     *options,
-                                                       GimpMetadata          *metadata,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayExportOptions     *options,
+                                                       ClayMetadata          *metadata,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
 
-static GimpImage      *         load_image            (GFile                 *file,
+static ClayImage      *         load_image            (GFile                 *file,
                                                        GObject               *config,
-                                                       GimpRunMode            run_mode,
+                                                       ClayRunMode            run_mode,
                                                        FILE                  *fp,
                                                        GError               **error);
 static gboolean                 export_image          (GFile                 *file,
-                                                       GimpProcedureConfig   *config,
-                                                       GimpImage             *image,
-                                                       GimpDrawable          *drawable,
+                                                       ClayProcedureConfig   *config,
+                                                       ClayImage             *image,
+                                                       ClayDrawable          *drawable,
                                                        GError               **error);
 
-static gboolean                 export_dialog         (GimpImage            *image,
-                                                       GimpProcedure        *procedure,
+static gboolean                 export_dialog         (ClayImage            *image,
+                                                       ClayProcedure        *procedure,
                                                        GObject              *config);
 
 static void                     convert_from_a1r5g5b5 (gushort               data,
@@ -120,16 +120,16 @@ static void                     convert_to_a1r5g5b5   (guchar               *pix
                                                        guint                 index,
                                                        guchar               *data);
 
-G_DEFINE_TYPE (Tim, tim, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Tim, tim, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (TIM_TYPE)
+CLAY_MAIN (TIM_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 tim_class_init (TimClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = tim_query_procedures;
   plug_in_class->create_procedure = tim_create_procedure;
@@ -142,7 +142,7 @@ tim_init (Tim *tim)
 }
 
 static GList *
-tim_query_procedures (GimpPlugIn *plug_in)
+tim_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -152,71 +152,71 @@ tim_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-tim_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+tim_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            tim_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("PlayStation TIM image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads file in the TIM file format"),
                                         _("Loads file in the Sony PlayStation "
                                           "TIM file format"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Andrew Kieschnick",
                                       "Andrew Kieschnick <andrewk@mail.utexas.edu>",
                                       "1998");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "tim");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, tim_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*, INDEXED*");
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*, INDEXED*");
 
-      gimp_procedure_set_menu_label (procedure, _("PlayStation TIM image"));
+      clay_procedure_set_menu_label (procedure, _("PlayStation TIM image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the TIM file format"),
                                         _("Exports files in the PlayStation TIM "
                                           "file format"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Andrew Kieschnick",
                                       "Andrew Kieschnick <andrewk@mail.utexas.edu>",
                                       "1998");
 
-      gimp_procedure_set_menu_label (procedure, _("PlayStation TIM image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("PlayStation TIM image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "PlayStation TIM image");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "tim");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB   |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY  |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB   |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY  |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "type",
+      clay_procedure_add_choice_argument (procedure, "type",
                                           _("_Type"),
                                           _("Type of TIM texture to export"),
-                                          gimp_choice_new_with_values ("pal-4bpp",  PSX_4BPP,  _("4BPP (Indexed)"),  NULL,
+                                          clay_choice_new_with_values ("pal-4bpp",  PSX_4BPP,  _("4BPP (Indexed)"),  NULL,
                                                                        "pal-8bpp",  PSX_8BPP,  _("8BPP (Indexed)"),  NULL,
                                                                        "rgb-16bpp", PSX_16BPP, _("16BPP (RGB)"),     NULL,
                                                                        "rgb-24bpp", PSX_24BPP, _("24BPP (RGB)"),     NULL,
@@ -224,26 +224,26 @@ tim_create_procedure (GimpPlugIn  *plug_in,
                                           "pal-8bpp",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "origin-x",
+      clay_procedure_add_int_argument (procedure, "origin-x",
                                        _("Image _X"),
                                        _("Origin X coordinate"),
                                        0, G_MAXUSHORT, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "origin-y",
+      clay_procedure_add_int_argument (procedure, "origin-y",
                                        _("Image _Y"),
                                        _("Origin Y coordinate"),
                                        0, G_MAXUSHORT, 0,
                                        G_PARAM_READWRITE);
 
       /* Only used with indexed image exports */
-      gimp_procedure_add_int_argument (procedure, "palette-x",
+      clay_procedure_add_int_argument (procedure, "palette-x",
                                        _("_Palette X"),
                                        _("Palette X coordinate"),
                                        0, G_MAXUSHORT, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "palette-y",
+      clay_procedure_add_int_argument (procedure, "palette-y",
                                        _("P_alette Y"),
                                        _("Palette Y coordinate"),
                                        0, 511, 0,
@@ -253,17 +253,17 @@ tim_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-tim_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+tim_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   FILE           *fp;
   GError         *error = NULL;
 
@@ -275,9 +275,9 @@ tim_load (GimpProcedure         *procedure,
     {
       g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
@@ -286,72 +286,72 @@ tim_load (GimpProcedure         *procedure,
   fclose (fp);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-tim_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+tim_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! export_dialog (image, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      export    = gimp_export_options_get_image (options, &image);
-      drawables = gimp_image_list_layers (image);
+      export    = clay_export_options_get_image (options, &image);
+      drawables = clay_image_list_layers (image);
 
       if (! export_image (file, config, image, drawables->data, &error))
-        status = GIMP_PDB_EXECUTION_ERROR;
+        status = CLAY_PDB_EXECUTION_ERROR;
 
       g_list_free (drawables);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             FILE         *fp,
             GError      **error)
 {
-  GimpImage         *image = NULL;
-  GimpLayer         *layer = NULL;
-  GimpImageBaseType  image_type;
-  GimpImageType      layer_type;
+  ClayImage         *image = NULL;
+  ClayLayer         *layer = NULL;
+  ClayImageBaseType  image_type;
+  ClayImageType      layer_type;
   GeglBuffer        *buffer;
   TimSharedHeader    tim_header;
   gushort            width;
@@ -361,7 +361,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read header from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -376,8 +376,8 @@ load_image (GFile        *file,
       return NULL;
     }
 
-  image_type = GIMP_RGB;
-  layer_type = GIMP_RGBA_IMAGE;
+  image_type = CLAY_RGB;
+  layer_type = CLAY_RGBA_IMAGE;
 
   if (tim_header.type[0] == PSX_16BPP ||
       tim_header.type[0] == PSX_24BPP)
@@ -389,23 +389,23 @@ load_image (GFile        *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not read header from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           return NULL;
         }
 
       if (tim_header.type[0] == PSX_24BPP)
         {
           width      = (gushort) ((gfloat) width / 1.5);
-          layer_type = GIMP_RGB_IMAGE;
+          layer_type = CLAY_RGB_IMAGE;
         }
 
-      image = gimp_image_new (width, height, image_type);
-      layer = gimp_layer_new (image, _("Background"),
+      image = clay_image_new (width, height, image_type);
+      layer = clay_layer_new (image, _("Background"),
                               width, height, layer_type, 100,
-                              gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, 0);
+                              clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, 0);
 
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
       /* Pixels are in A1B5G5R5 format */
       if (tim_header.type[0] == PSX_16BPP)
@@ -476,7 +476,7 @@ load_image (GFile        *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not read header from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           return NULL;
         }
 
@@ -501,7 +501,7 @@ load_image (GFile        *file,
             return NULL;
           }
 
-        /* TODO: GIMP currently only supports 256 colors in an indexed image.
+        /* TODO: Clay currently only supports 256 colors in an indexed image.
          * TIM textures can have multiple tables and exceeds that, so we'll
          * convert those to RGB instead*/
         if (clut_size > 256)
@@ -509,15 +509,15 @@ load_image (GFile        *file,
 
         if (! promote_to_rgb)
           {
-            image_type = GIMP_INDEXED;
-            layer_type = GIMP_INDEXED_IMAGE;
+            image_type = CLAY_INDEXED;
+            layer_type = CLAY_INDEXED_IMAGE;
           }
 
         if (fread (clut_data, (clut_size * 2), 1, fp) == 0)
           {
             g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                          _("Could not read palette from '%s'"),
-                         gimp_file_get_utf8_name (file));
+                         clay_file_get_utf8_name (file));
             g_free (clut_data);
             g_free (color_map);
             return NULL;
@@ -536,7 +536,7 @@ load_image (GFile        *file,
           {
             g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                          _("Could not read header from '%s'"),
-                         gimp_file_get_utf8_name (file));
+                         clay_file_get_utf8_name (file));
             g_free (clut_data);
             g_free (color_map);
             return NULL;
@@ -547,18 +547,18 @@ load_image (GFile        *file,
         else if (tim_header.type[0] == PSX_8BPP)
           width *= 2;
 
-        image = gimp_image_new (width, height, image_type);
-        layer = gimp_layer_new (image, _("Background"),
+        image = clay_image_new (width, height, image_type);
+        layer = clay_layer_new (image, _("Background"),
                                 width, height, layer_type, 100,
-                                gimp_image_get_default_new_layer_mode (image));
-        gimp_image_insert_layer (image, layer, NULL, 0);
+                                clay_image_get_default_new_layer_mode (image));
+        clay_image_insert_layer (image, layer, NULL, 0);
 
         if (! promote_to_rgb)
-          gimp_palette_set_colormap (gimp_image_get_palette (image),
+          clay_palette_set_colormap (clay_image_get_palette (image),
                                      babl_format ("R'G'B'A u8"),
                                      (guint8 *) color_map, clut_size * 4);
 
-        buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+        buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
         /* Two pixels per byte */
         if (tim_header.type[0] == PSX_4BPP)
@@ -692,9 +692,9 @@ load_image (GFile        *file,
 
 static gboolean
 export_image (GFile                *file,
-              GimpProcedureConfig  *config,
-              GimpImage            *image,
-              GimpDrawable         *drawable,
+              ClayProcedureConfig  *config,
+              ClayImage            *image,
+              ClayDrawable         *drawable,
               GError              **error)
 {
   FILE       *fp;
@@ -716,19 +716,19 @@ export_image (GFile                *file,
                 "palette-x", &palette_x,
                 "palette-y", &palette_y,
                 NULL);
-  type = (guchar) gimp_procedure_config_get_choice_id (config, "type");
+  type = (guchar) clay_procedure_config_get_choice_id (config, "type");
 
   if ((type == PSX_4BPP || type == PSX_8BPP) &&
-      gimp_image_get_base_type (image) != GIMP_INDEXED)
+      clay_image_get_base_type (image) != CLAY_INDEXED)
     {
-      gimp_image_convert_indexed (image,
-                                  GIMP_CONVERT_DITHER_FS,
-                                  GIMP_CONVERT_PALETTE_GENERATE,
+      clay_image_convert_indexed (image,
+                                  CLAY_CONVERT_DITHER_FS,
+                                  CLAY_CONVERT_PALETTE_GENERATE,
                                   (type == PSX_8BPP) ? 256 : 16,
                                   TRUE, FALSE, "dummy");
     }
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
   width  = (guint16) gegl_buffer_get_width (buffer);
   height = (guint16) gegl_buffer_get_height (buffer);
 
@@ -752,13 +752,13 @@ export_image (GFile                *file,
                    _("Unable to export '%s'.  "
                      "The TIM file format does not support images that are "
                      "more than %d pixels wide or tall."),
-                   gimp_file_get_utf8_name (file), G_MAXUSHORT);
+                   clay_file_get_utf8_name (file), G_MAXUSHORT);
 
       return FALSE;
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "wb");
 
@@ -766,7 +766,7 @@ export_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -823,7 +823,7 @@ export_image (GFile                *file,
             }
 
           g_free (pixels);
-          gimp_progress_update (i / (gdouble) height);
+          clay_progress_update (i / (gdouble) height);
         }
 
       /* Update file size */
@@ -845,7 +845,7 @@ export_image (GFile                *file,
       guchar   converted[2];
       guchar  *indexes;
 
-      colormap = gimp_palette_get_colormap (gimp_image_get_palette (image),
+      colormap = clay_palette_get_colormap (clay_image_get_palette (image),
                                             babl_format ("R'G'B' u8"),
                                             &n_colors, NULL);
 
@@ -943,7 +943,7 @@ export_image (GFile                *file,
         }
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   fclose (fp);
 
@@ -954,52 +954,52 @@ export_image (GFile                *file,
 }
 
 static gboolean
-export_dialog (GimpImage     *image,
-               GimpProcedure *procedure,
+export_dialog (ClayImage     *image,
+               ClayProcedure *procedure,
                GObject       *config)
 {
   GtkWidget *dialog;
   GtkWidget *box;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "image-origin-label", _("Image Origin"),
                                    FALSE, FALSE);
 
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "image-box", "origin-x", "origin-y",
                                         NULL);
   gtk_box_set_spacing (GTK_BOX (box), 12);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (box),
                                   GTK_ORIENTATION_HORIZONTAL);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "image-frame", "image-origin-label",
                                     FALSE, "image-box");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "palette-origin-label", _("Palette Origin"),
                                    FALSE, FALSE);
 
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "palette-box", "palette-x",
                                         "palette-y", NULL);
   gtk_box_set_spacing (GTK_BOX (box), 12);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (box),
                                   GTK_ORIENTATION_HORIZONTAL);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "palette-frame", "palette-origin-label",
                                     FALSE, "palette-box");
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "type",
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "type",
                               "image-frame", "palette-frame", NULL);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

@@ -41,9 +41,9 @@ gboolean     console_history_is_cursor_at_tail (CommandHistory *self);
 const gchar *console_history_get_at_cursor     (CommandHistory *self);
 
 GStrv        console_history_from_settings     (CommandHistory       *self,
-                                                GimpProcedureConfig  *config);
+                                                ClayProcedureConfig  *config);
 void         console_history_to_settings       (CommandHistory       *self,
-                                                GimpProcedureConfig  *config);
+                                                ClayProcedureConfig  *config);
 
 
 #endif /*  __SCRIPT_FU_CONSOLE_HISTORY_H__  */

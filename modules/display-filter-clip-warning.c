@@ -23,14 +23,14 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymath/claymath.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 
 #define DEFAULT_SHADOWS_COLOR    ((gdouble[]) {0.25, 0.25, 1.00, 1.00})
@@ -58,7 +58,7 @@ typedef struct _CdisplayClipWarningClass CdisplayClipWarningClass;
 
 struct _CdisplayClipWarning
 {
-  GimpColorDisplay  parent_instance;
+  ClayColorDisplay  parent_instance;
 
   gboolean          show_shadows;
   GeglColor        *shadows_color;
@@ -74,7 +74,7 @@ struct _CdisplayClipWarning
 
 struct _CdisplayClipWarningClass
 {
-  GimpColorDisplayClass  parent_instance;
+  ClayColorDisplayClass  parent_instance;
 };
 
 
@@ -104,7 +104,7 @@ static void    cdisplay_clip_warning_get_property   (GObject             *object
                                                      GValue              *value,
                                                      GParamSpec          *pspec);
 
-static void    cdisplay_clip_warning_convert_buffer (GimpColorDisplay    *display,
+static void    cdisplay_clip_warning_convert_buffer (ClayColorDisplay    *display,
                                                      GeglBuffer          *buffer,
                                                      GeglRectangle       *area);
 
@@ -116,9 +116,9 @@ static void    cdisplay_clip_warning_set_member     (CdisplayClipWarning *clip_w
 static void    cdisplay_clip_warning_update_colors  (CdisplayClipWarning *clip_warning);
 
 
-static const GimpModuleInfo cdisplay_clip_warning_info =
+static const ClayModuleInfo cdisplay_clip_warning_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   /* Translators: "Clip Warning" is the name of a (color) display filter
    * that highlights pixels outside of the color space range.
    * Shown as a label description. */
@@ -131,17 +131,17 @@ static const GimpModuleInfo cdisplay_clip_warning_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (CdisplayClipWarning, cdisplay_clip_warning,
-                       GIMP_TYPE_COLOR_DISPLAY)
+                       CLAY_TYPE_COLOR_DISPLAY)
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &cdisplay_clip_warning_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
   cdisplay_clip_warning_register_type (module);
 
@@ -152,7 +152,7 @@ static void
 cdisplay_clip_warning_class_init (CdisplayClipWarningClass *klass)
 {
   GObjectClass          *object_class  = G_OBJECT_CLASS (klass);
-  GimpColorDisplayClass *display_class = GIMP_COLOR_DISPLAY_CLASS (klass);
+  ClayColorDisplayClass *display_class = CLAY_COLOR_DISPLAY_CLASS (klass);
   GeglColor             *color         = gegl_color_new (NULL);
 
   object_class->finalize     = cdisplay_clip_warning_finalize;
@@ -161,84 +161,84 @@ cdisplay_clip_warning_class_init (CdisplayClipWarningClass *klass)
 
   gegl_color_set_pixel (color, babl_format ("R'G'B'A double"),
                         DEFAULT_SHADOWS_COLOR);
-  GIMP_CONFIG_PROP_BOOLEAN (object_class, PROP_SHOW_SHADOWS,
+  CLAY_CONFIG_PROP_BOOLEAN (object_class, PROP_SHOW_SHADOWS,
                             "show-shadows",
                             _("Show shadows"),
                             _("Show warning for pixels with a negative component"),
                             TRUE,
-                            GIMP_PARAM_STATIC_STRINGS);
+                            CLAY_PARAM_STATIC_STRINGS);
 
-   GIMP_CONFIG_PROP_COLOR (object_class, PROP_SHADOWS_COLOR,
+   CLAY_CONFIG_PROP_COLOR (object_class, PROP_SHADOWS_COLOR,
                            "shadows-color",
                            _("Shadows color"),
                            _("Shadows warning color"),
                            FALSE, color,
-                           GIMP_PARAM_STATIC_STRINGS |
-                           GIMP_CONFIG_PARAM_DEFAULTS);
+                           CLAY_PARAM_STATIC_STRINGS |
+                           CLAY_CONFIG_PARAM_DEFAULTS);
 
   gegl_param_spec_set_property_key (
     g_object_class_find_property (G_OBJECT_CLASS (klass), "shadows-color"),
     "sensitive", "show-shadows");
 
-  GIMP_CONFIG_PROP_BOOLEAN (object_class, PROP_SHOW_HIGHLIGHTS,
+  CLAY_CONFIG_PROP_BOOLEAN (object_class, PROP_SHOW_HIGHLIGHTS,
                             "show-highlights",
                             _("Show highlights"),
                             _("Show warning for pixels with a component greater than one"),
                             TRUE,
-                            GIMP_PARAM_STATIC_STRINGS);
+                            CLAY_PARAM_STATIC_STRINGS);
 
   gegl_color_set_pixel (color, babl_format ("R'G'B'A double"),
                         DEFAULT_HIGHLIGHTS_COLOR);
-  GIMP_CONFIG_PROP_COLOR (object_class, PROP_HIGHLIGHTS_COLOR,
+  CLAY_CONFIG_PROP_COLOR (object_class, PROP_HIGHLIGHTS_COLOR,
                           "highlights-color",
                           _("Highlights color"),
                           _("Highlights warning color"),
                           FALSE, color,
-                          GIMP_PARAM_STATIC_STRINGS |
-                          GIMP_CONFIG_PARAM_DEFAULTS);
+                          CLAY_PARAM_STATIC_STRINGS |
+                          CLAY_CONFIG_PARAM_DEFAULTS);
 
   gegl_param_spec_set_property_key (
     g_object_class_find_property (G_OBJECT_CLASS (klass), "highlights-color"),
     "sensitive", "show-highlights");
 
-  GIMP_CONFIG_PROP_BOOLEAN (object_class, PROP_SHOW_BOGUS,
+  CLAY_CONFIG_PROP_BOOLEAN (object_class, PROP_SHOW_BOGUS,
                             "show-bogus",
                             _("Show bogus"),
                             _("Show warning for pixels with an infinite or NaN component"),
                             TRUE,
-                            GIMP_PARAM_STATIC_STRINGS);
+                            CLAY_PARAM_STATIC_STRINGS);
 
   gegl_color_set_pixel (color, babl_format ("R'G'B'A double"),
                         DEFAULT_BOGUS_COLOR);
-  GIMP_CONFIG_PROP_COLOR (object_class, PROP_BOGUS_COLOR,
+  CLAY_CONFIG_PROP_COLOR (object_class, PROP_BOGUS_COLOR,
                           "bogus-color",
                           _("Bogus color"),
                           _("Bogus warning color"),
                           FALSE, color,
-                          GIMP_PARAM_STATIC_STRINGS |
-                          GIMP_CONFIG_PARAM_DEFAULTS);
+                          CLAY_PARAM_STATIC_STRINGS |
+                          CLAY_CONFIG_PARAM_DEFAULTS);
 
   gegl_param_spec_set_property_key (
     g_object_class_find_property (G_OBJECT_CLASS (klass), "bogus-color"),
     "sensitive", "show-bogus");
 
-  GIMP_CONFIG_PROP_BOOLEAN (object_class, PROP_INCLUDE_ALPHA,
+  CLAY_CONFIG_PROP_BOOLEAN (object_class, PROP_INCLUDE_ALPHA,
                             "include-alpha",
                             _("Include alpha component"),
                             _("Include alpha component in the warning"),
                             TRUE,
-                            GIMP_PARAM_STATIC_STRINGS);
+                            CLAY_PARAM_STATIC_STRINGS);
 
-  GIMP_CONFIG_PROP_BOOLEAN (object_class, PROP_INCLUDE_TRANSPARENT,
+  CLAY_CONFIG_PROP_BOOLEAN (object_class, PROP_INCLUDE_TRANSPARENT,
                             "include-transparent",
                             _("Include transparent pixels"),
                             _("Include fully transparent pixels in the warning"),
                             TRUE,
-                            GIMP_PARAM_STATIC_STRINGS);
+                            CLAY_PARAM_STATIC_STRINGS);
 
   display_class->name            = _("Clip Warning");
-  display_class->help_id         = "gimp-colordisplay-clip-warning";
-  display_class->icon_name       = GIMP_ICON_DISPLAY_FILTER_CLIP_WARNING;
+  display_class->help_id         = "clay-colordisplay-clip-warning";
+  display_class->icon_name       = CLAY_ICON_DISPLAY_FILTER_CLIP_WARNING;
 
   display_class->convert_buffer  = cdisplay_clip_warning_convert_buffer;
 
@@ -386,7 +386,7 @@ cdisplay_clip_warning_set_property (GObject      *object,
       {
         cdisplay_clip_warning_update_colors (clip_warning);
         g_object_notify (G_OBJECT (clip_warning), pspec->name);
-        gimp_color_display_changed (GIMP_COLOR_DISPLAY (clip_warning));
+        clay_color_display_changed (CLAY_COLOR_DISPLAY (clip_warning));
       }
 
 #undef SET_MEMBER_PTR
@@ -394,7 +394,7 @@ cdisplay_clip_warning_set_property (GObject      *object,
 }
 
 static void
-cdisplay_clip_warning_convert_buffer (GimpColorDisplay *display,
+cdisplay_clip_warning_convert_buffer (ClayColorDisplay *display,
                                       GeglBuffer       *buffer,
                                       GeglRectangle    *area)
 {
@@ -479,7 +479,7 @@ cdisplay_clip_warning_set_member (CdisplayClipWarning *clip_warning,
       cdisplay_clip_warning_update_colors (clip_warning);
 
       g_object_notify (G_OBJECT (clip_warning), property_name);
-      gimp_color_display_changed (GIMP_COLOR_DISPLAY (clip_warning));
+      clay_color_display_changed (CLAY_COLOR_DISPLAY (clip_warning));
     }
 }
 

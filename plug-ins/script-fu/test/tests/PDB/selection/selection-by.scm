@@ -8,38 +8,38 @@
 ; Function to reset the selection
 (define (testResetSelection testImage)
   (test! "Resetting selection to none")
-  (assert `(gimp-selection-none ,testImage))
-  (assert `(gimp-selection-is-empty ,testImage))
+  (assert `(clay-selection-none ,testImage))
+  (assert `(clay-selection-is-empty ,testImage))
   ; The value of the selection mask at coords 64,64 is 0
   ; A value of the selection mask is in range [0,255]
-  (assert `(= (gimp-selection-value ,testImage 64 64)
+  (assert `(= (clay-selection-value ,testImage 64 64)
             0)))
 
 
 ; setup
 (define testImage (testing:load-test-image-basic-v3))
-(define testLayer (vector-ref (gimp-image-get-layers testImage)
+(define testLayer (vector-ref (clay-image-get-layers testImage)
                                   0))
 ; a layer mask from alpha
-(define testLayerMask (gimp-layer-create-mask
+(define testLayerMask (clay-layer-create-mask
                               testLayer
                               ADD-MASK-ALPHA))
-(gimp-layer-add-mask testLayer testLayerMask)
+(clay-layer-add-mask testLayer testLayerMask)
 
 
 
 (test! "new image has no initial selection")
 ; returns #t
-(assert `(gimp-selection-is-empty ,testImage))
+(assert `(clay-selection-is-empty ,testImage))
 
 
 
 (test! "selection by given color")
 
 ; returns void
-(assert `(gimp-image-select-color ,testImage CHANNEL-OP-ADD ,testLayer "black"))
+(assert `(clay-image-select-color ,testImage CHANNEL-OP-ADD ,testLayer "black"))
 ; effective: test image has some black pixels, now selection is not empty
-(assert `(not (gimp-selection-is-empty ,testImage)))
+(assert `(not (clay-selection-is-empty ,testImage)))
 
 
 (testResetSelection testImage)
@@ -56,12 +56,12 @@
 ; but a transparent pixel at 125,125
 
 
-; gimp-image-select-contiguous-color does not throw
-(assert `(gimp-image-select-contiguous-color ,testImage CHANNEL-OP-ADD ,testLayer 64 64))
+; clay-image-select-contiguous-color does not throw
+(assert `(clay-image-select-contiguous-color ,testImage CHANNEL-OP-ADD ,testLayer 64 64))
 ; effective, now selection is not empty
-(assert `(not (gimp-selection-is-empty ,testImage)))
+(assert `(not (clay-selection-is-empty ,testImage)))
 ; effective, the selection value at the picked coords is "totally selected"
-(assert `(= (gimp-selection-value ,testImage 64 64)
+(assert `(= (clay-selection-value ,testImage 64 64)
             255))
 
 
@@ -70,18 +70,18 @@
 (test! "selection from item same layer")
 
 ; selection from the layer itself: selects same as layer's alpha
-(assert `(gimp-image-select-item ,testImage CHANNEL-OP-ADD ,testLayer))
+(assert `(clay-image-select-item ,testImage CHANNEL-OP-ADD ,testLayer))
 ; effective: selection is not empty
-(assert `(not (gimp-selection-is-empty ,testImage)))
+(assert `(not (clay-selection-is-empty ,testImage)))
 
 (testResetSelection testImage)
 
 (test! "selection from layer mask")
 
 ; layer mask to selection succeeds
-(assert `(gimp-image-select-item ,testImage CHANNEL-OP-ADD ,testLayerMask))
+(assert `(clay-image-select-item ,testImage CHANNEL-OP-ADD ,testLayerMask))
 ; effective: selection is not empty
-(assert `(not (gimp-selection-is-empty ,testImage)))
+(assert `(not (clay-selection-is-empty ,testImage)))
 
 ; TODO selection from
 ; channel, vectors
@@ -89,6 +89,6 @@
 
 
 ; for debugging individual test file:
-; (gimp-display-new testImage)
+; (clay-display-new testImage)
 
 (script-fu-use-v2)

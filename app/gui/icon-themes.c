@@ -25,44 +25,44 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "gui-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
 #include "icon-themes.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static gboolean icons_apply_theme         (Gimp          *gimp,
+static gboolean icons_apply_theme         (Clay          *clay,
                                            const gchar   *icon_theme_name);
 static void     icons_list_icons_foreach  (gpointer       key,
                                            gpointer       value,
                                            gpointer       data);
 static gint     icons_name_compare        (const void    *p1,
                                            const void    *p2);
-static void     icons_theme_change_notify (GimpGuiConfig *config,
+static void     icons_theme_change_notify (ClayGuiConfig *config,
                                            GParamSpec    *pspec,
-                                           Gimp          *gimp);
+                                           Clay          *clay);
 
 
 static GHashTable *icon_themes_hash = NULL;
 
 
 void
-icon_themes_init (Gimp *gimp)
+icon_themes_init (Clay *clay)
 {
-  GimpGuiConfig *config;
+  ClayGuiConfig *config;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  config = GIMP_GUI_CONFIG (gimp->config);
+  config = CLAY_GUI_CONFIG (clay->config);
 
   icon_themes_hash = g_hash_table_new_full (g_str_hash,
                                             g_str_equal,
@@ -74,7 +74,7 @@ icon_themes_init (Gimp *gimp)
       GList *path;
       GList *list;
 
-      path = gimp_config_path_expand_to_files (config->icon_theme_path, NULL);
+      path = clay_config_path_expand_to_files (config->icon_theme_path, NULL);
 
       for (list = path; list; list = g_list_next (list))
         {
@@ -112,7 +112,7 @@ icon_themes_init (Gimp *gimp)
                           const gchar *name;
                           gchar       *basename;
 
-                          name     = gimp_file_get_utf8_name (file);
+                          name     = clay_file_get_utf8_name (file);
                           basename = g_path_get_basename (name);
 
                           if (strcmp ("hicolor", basename))
@@ -125,7 +125,7 @@ icon_themes_init (Gimp *gimp)
                                 }
                               else
                                 {
-                                  if (gimp->be_verbose)
+                                  if (clay->be_verbose)
                                     g_print ("Adding icon theme '%s' (%s)\n",
                                              basename, name);
 
@@ -155,21 +155,21 @@ icon_themes_init (Gimp *gimp)
 
   g_signal_connect (config, "notify::icon-theme",
                     G_CALLBACK (icons_theme_change_notify),
-                    gimp);
+                    clay);
 
-  icons_theme_change_notify (config, NULL, gimp);
+  icons_theme_change_notify (config, NULL, clay);
 }
 
 void
-icon_themes_exit (Gimp *gimp)
+icon_themes_exit (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   if (icon_themes_hash)
     {
-      g_signal_handlers_disconnect_by_func (gimp->config,
+      g_signal_handlers_disconnect_by_func (clay->config,
                                             icons_theme_change_notify,
-                                            gimp);
+                                            clay);
 
       g_hash_table_destroy (icon_themes_hash);
       icon_themes_hash = NULL;
@@ -177,23 +177,23 @@ icon_themes_exit (Gimp *gimp)
 }
 
 gboolean
-icon_themes_theme_is_default (Gimp        *gimp,
+icon_themes_theme_is_default (Clay        *clay,
                               const gchar *theme_name)
 {
   gboolean is_default = FALSE;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (theme_name != NULL, FALSE);
 
-  if (g_strcmp0 (theme_name, GIMP_CONFIG_DEFAULT_ICON_THEME) == 0)
+  if (g_strcmp0 (theme_name, CLAY_CONFIG_DEFAULT_ICON_THEME) == 0)
     {
       GFile *theme_dir;
       GFile *parent_dir;
       GFile *system_dir;
 
-      theme_dir  = icon_themes_get_theme_dir (gimp, theme_name);
+      theme_dir  = icon_themes_get_theme_dir (clay, theme_name);
       parent_dir = g_file_get_parent (theme_dir);
-      system_dir = gimp_file_new_for_config_path ("${gimp_data_dir}/icons", NULL);
+      system_dir = clay_file_new_for_config_path ("${clay_data_dir}/icons", NULL);
 
       is_default = g_file_equal (system_dir, parent_dir);
 
@@ -205,12 +205,12 @@ icon_themes_theme_is_default (Gimp        *gimp,
 }
 
 gboolean
-icon_themes_theme_is_legacy (Gimp        *gimp,
+icon_themes_theme_is_legacy (Clay        *clay,
                              const gchar *theme_name)
 {
   gboolean is_default = FALSE;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (theme_name != NULL, FALSE);
 
   if (g_strcmp0 (theme_name, "Legacy") == 0)
@@ -219,9 +219,9 @@ icon_themes_theme_is_legacy (Gimp        *gimp,
       GFile *parent_dir;
       GFile *system_dir;
 
-      theme_dir  = icon_themes_get_theme_dir (gimp, theme_name);
+      theme_dir  = icon_themes_get_theme_dir (clay, theme_name);
       parent_dir = g_file_get_parent (theme_dir);
-      system_dir = gimp_file_new_for_config_path ("${gimp_data_dir}/icons", NULL);
+      system_dir = clay_file_new_for_config_path ("${clay_data_dir}/icons", NULL);
 
       is_default = g_file_equal (system_dir, parent_dir);
 
@@ -233,10 +233,10 @@ icon_themes_theme_is_legacy (Gimp        *gimp,
 }
 
 gchar **
-icon_themes_list_themes (Gimp *gimp,
+icon_themes_list_themes (Clay *clay,
                          gint *n_icon_themes)
 {
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (n_icon_themes != NULL, NULL);
 
   *n_icon_themes = g_hash_table_size (icon_themes_hash);
@@ -261,25 +261,55 @@ icon_themes_list_themes (Gimp *gimp,
 }
 
 GFile *
-icon_themes_get_theme_dir (Gimp        *gimp,
+icon_themes_get_theme_dir (Clay        *clay,
                            const gchar *icon_theme_name)
 {
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
   if (! icon_theme_name)
-    icon_theme_name = GIMP_CONFIG_DEFAULT_ICON_THEME;
+    icon_theme_name = CLAY_CONFIG_DEFAULT_ICON_THEME;
 
   return g_hash_table_lookup (icon_themes_hash, icon_theme_name);
 }
 
 gboolean
-icon_themes_current_prefer_symbolic (Gimp *gimp)
+icon_themes_current_prefer_symbolic (Clay *clay)
 {
   GtkIconTheme *icon_theme;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
 
   icon_theme = gtk_icon_theme_get_default ();
+
+  /* Colour-only icon themes (White, Black, Blue, Color) ship no symbolic
+   * Wilber of their own; they always win over "prefer-symbolic-icons",
+   * otherwise GTK would repaint their icons in the text colour.
+   */
+  {
+    GFile *theme_dir = icon_themes_get_theme_dir (clay,
+                                                  CLAY_GUI_CONFIG (clay->config)->icon_theme);
+
+    if (theme_dir)
+      {
+        GFile    *regular;
+        GFile    *symbolic;
+        gboolean  colour_only;
+
+        regular  = g_file_resolve_relative_path (theme_dir,
+                                                 "scalable/apps/" CLAY_ICON_WILBER ".svg");
+        symbolic = g_file_resolve_relative_path (theme_dir,
+                                                 "scalable/apps/" CLAY_ICON_WILBER "-symbolic.svg");
+
+        colour_only = (g_file_query_exists (regular, NULL) &&
+                       ! g_file_query_exists (symbolic, NULL));
+
+        g_object_unref (regular);
+        g_object_unref (symbolic);
+
+        if (colour_only)
+          return FALSE;
+      }
+  }
 
   /* If the current icon theme is purely symbolic or purely color, we want to
    * override the "prefer-symbolic-icons" property, not only to avoid
@@ -287,50 +317,50 @@ icon_themes_current_prefer_symbolic (Gimp *gimp)
    * icons from the system icon theme while the chosen theme has the right icon
    * (yet simply not in the preferred style). See Issue #9410.
    */
-  if (gtk_icon_theme_has_icon (icon_theme, GIMP_ICON_WILBER) &&
-      ! gtk_icon_theme_has_icon (icon_theme, GIMP_ICON_WILBER "-symbolic"))
+  if (gtk_icon_theme_has_icon (icon_theme, CLAY_ICON_WILBER) &&
+      ! gtk_icon_theme_has_icon (icon_theme, CLAY_ICON_WILBER "-symbolic"))
     return FALSE;
-  else if (! gtk_icon_theme_has_icon (icon_theme, GIMP_ICON_WILBER) &&
-           gtk_icon_theme_has_icon (icon_theme, GIMP_ICON_WILBER "-symbolic"))
+  else if (! gtk_icon_theme_has_icon (icon_theme, CLAY_ICON_WILBER) &&
+           gtk_icon_theme_has_icon (icon_theme, CLAY_ICON_WILBER "-symbolic"))
     return TRUE;
 
-  return GIMP_GUI_CONFIG (gimp->config)->prefer_symbolic_icons;
+  return CLAY_GUI_CONFIG (clay->config)->prefer_symbolic_icons;
 }
 
 
 /* Private functions */
 
 static gboolean
-icons_apply_theme (Gimp        *gimp,
+icons_apply_theme (Clay        *clay,
                    const gchar *icon_theme_name)
 {
   gboolean applied;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
 
   if (! icon_theme_name)
-    icon_theme_name = GIMP_CONFIG_DEFAULT_ICON_THEME;
+    icon_theme_name = CLAY_CONFIG_DEFAULT_ICON_THEME;
 
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("Loading icon theme '%s'\n", icon_theme_name);
 
-  if (g_getenv ("GIMP_TESTING_ABS_TOP_SRCDIR"))
+  if (g_getenv ("CLAY_TESTING_ABS_TOP_SRCDIR"))
     {
       GFile *file;
       gchar *path;
 
-      path = g_build_filename (g_getenv ("GIMP_TESTING_ABS_TOP_SRCDIR"),
-                               "gimp-data", "icons", icon_theme_name, NULL);
+      path = g_build_filename (g_getenv ("CLAY_TESTING_ABS_TOP_SRCDIR"),
+                               "clay-data", "icons", icon_theme_name, NULL);
       file = g_file_new_for_path (path);
 
-      applied = gimp_icons_set_icon_theme (file);
+      applied = clay_icons_set_icon_theme (file);
 
       g_object_unref (file);
       g_free (path);
     }
   else
     {
-      applied = gimp_icons_set_icon_theme (icon_themes_get_theme_dir (gimp, icon_theme_name));
+      applied = clay_icons_set_icon_theme (icon_themes_get_theme_dir (clay, icon_theme_name));
     }
 
   return applied;
@@ -356,14 +386,14 @@ icons_name_compare (const void *p1,
 }
 
 static void
-icons_theme_change_notify (GimpGuiConfig *config,
+icons_theme_change_notify (ClayGuiConfig *config,
                            GParamSpec    *pspec,
-                           Gimp          *gimp)
+                           Clay          *clay)
 {
-  if (! icons_apply_theme (gimp, config->icon_theme))
+  if (! icons_apply_theme (clay, config->icon_theme))
     {
-      g_return_if_fail (g_strcmp0 (config->icon_theme, GIMP_CONFIG_DEFAULT_ICON_THEME) != 0);
+      g_return_if_fail (g_strcmp0 (config->icon_theme, CLAY_CONFIG_DEFAULT_ICON_THEME) != 0);
 
-      g_object_set (config, "icon-theme", GIMP_CONFIG_DEFAULT_ICON_THEME, NULL);
+      g_object_set (config, "icon-theme", CLAY_CONFIG_DEFAULT_ICON_THEME, NULL);
     }
 }

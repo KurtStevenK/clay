@@ -1,4 +1,4 @@
-/* tiff exporting for GIMP
+/* tiff exporting for Clay
  *  -Peter Mattis
  *
  * The TIFF loading code has been completely revamped by Nick Lamb
@@ -50,17 +50,17 @@
 #include <tiffio.h>
 #include <gexiv2/gexiv2.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "file-tiff.h"
 #include "file-tiff-io.h"
 #include "file-tiff-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
-#define PLUG_IN_ROLE "gimp-file-tiff-export"
+#define PLUG_IN_ROLE "clay-file-tiff-export"
 
 
 static void         update_format_options    (GtkWidget    *dialog,
@@ -84,7 +84,7 @@ static const char * get_layer_key            (gshort        bitspersample);
 static const Babl * get_extra_format         (gshort        bitspersample,
                                               gshort        sampleformat);
 
-static gboolean     should_export_layer_info (GimpImage    *orig_image);
+static gboolean     should_export_layer_info (ClayImage    *orig_image);
 
 
 /*
@@ -108,11 +108,11 @@ static gboolean
 save_layer (TIFF        *tif,
             GObject     *config,
             const Babl  *space,
-            GimpImage   *image,
-            GimpLayer   *layer,
+            ClayImage   *image,
+            ClayLayer   *layer,
             gint32       page,
             gint32       num_pages,
-            GimpImage   *orig_image, /* the export function might
+            ClayImage   *orig_image, /* the export function might
                                       * have created a duplicate  */
             gint         origin_x,
             gint         origin_y,
@@ -139,11 +139,11 @@ save_layer (TIFF        *tif,
   gshort            sampleformat;
   guchar           *src = NULL;
   guchar           *data = NULL;
-  GimpPalette      *palette;
+  ClayPalette      *palette;
   guchar           *cmap;
   gint              num_colors;
   gint              success;
-  GimpImageType     drawable_type;
+  ClayImageType     drawable_type;
   GeglBuffer       *buffer = NULL;
   gint              tile_height;
   gint              y, yend;
@@ -166,7 +166,7 @@ save_layer (TIFF        *tif,
   gboolean          config_save_resources;
   gboolean          config_save_profile;
   gboolean          config_cmyk;
-  GimpFormat        config_format;
+  ClayFormat        config_format;
   GList            *channels;
   gushort           extra;
   GeglBuffer      **channel_buffers = NULL;
@@ -177,7 +177,7 @@ save_layer (TIFF        *tif,
   gsize             bytesperrow_alloc;
 
   g_object_get (config,
-                "gimp-comment",            &config_comment,
+                "clay-comment",            &config_comment,
                 "include-comment",         &config_save_comment,
                 "save-transparent-pixels", &config_save_transp_pixels,
                 "save-geotiff",            &config_save_geotiff_tags,
@@ -186,11 +186,11 @@ save_layer (TIFF        *tif,
                 "cmyk",                    &config_cmyk,
                 NULL);
 
-  config_compression = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "compression");
-  compression = gimp_compression_to_tiff_compression (config_compression);
-  config_format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "format");
+  config_compression = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "compression");
+  compression = clay_compression_to_tiff_compression (config_compression);
+  config_format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "format");
 
-  layer_name = gimp_item_get_name (GIMP_ITEM (layer));
+  layer_name = clay_item_get_name (CLAY_ITEM (layer));
 
   /* Disabled because this isn't in older releases of libtiff, and it
    * wasn't helping much anyway
@@ -201,23 +201,23 @@ save_layer (TIFF        *tif,
 #endif
 
   predictor = 0;
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   rowsperstrip = tile_height;
 
-  drawable_type = gimp_drawable_type (GIMP_DRAWABLE (layer));
-  buffer        = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  drawable_type = clay_drawable_type (CLAY_DRAWABLE (layer));
+  buffer        = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   format = gegl_buffer_get_format (buffer);
   type   = babl_format_get_type (format, 0);
 
-  switch (gimp_image_get_precision (image))
+  switch (clay_image_get_precision (image))
     {
-    case GIMP_PRECISION_U8_LINEAR:
-    case GIMP_PRECISION_U8_NON_LINEAR:
-    case GIMP_PRECISION_U8_PERCEPTUAL:
+    case CLAY_PRECISION_U8_LINEAR:
+    case CLAY_PRECISION_U8_NON_LINEAR:
+    case CLAY_PRECISION_U8_PERCEPTUAL:
       /* Promote to 16-bit if storage and export TRC don't match. */
-      if ((gimp_image_get_precision (image) == GIMP_PRECISION_U8_LINEAR && out_linear) ||
-          (gimp_image_get_precision (image) != GIMP_PRECISION_U8_LINEAR && ! out_linear))
+      if ((clay_image_get_precision (image) == CLAY_PRECISION_U8_LINEAR && out_linear) ||
+          (clay_image_get_precision (image) != CLAY_PRECISION_U8_LINEAR && ! out_linear))
         {
           bitspersample = 8;
           sampleformat  = SAMPLEFORMAT_UINT;
@@ -230,38 +230,38 @@ save_layer (TIFF        *tif,
         }
       break;
 
-    case GIMP_PRECISION_U16_LINEAR:
-    case GIMP_PRECISION_U16_NON_LINEAR:
-    case GIMP_PRECISION_U16_PERCEPTUAL:
+    case CLAY_PRECISION_U16_LINEAR:
+    case CLAY_PRECISION_U16_NON_LINEAR:
+    case CLAY_PRECISION_U16_PERCEPTUAL:
       bitspersample = 16;
       sampleformat  = SAMPLEFORMAT_UINT;
       break;
 
-    case GIMP_PRECISION_U32_LINEAR:
-    case GIMP_PRECISION_U32_NON_LINEAR:
-    case GIMP_PRECISION_U32_PERCEPTUAL:
+    case CLAY_PRECISION_U32_LINEAR:
+    case CLAY_PRECISION_U32_NON_LINEAR:
+    case CLAY_PRECISION_U32_PERCEPTUAL:
       bitspersample = 32;
       sampleformat  = SAMPLEFORMAT_UINT;
       break;
 
-    case GIMP_PRECISION_HALF_LINEAR:
-    case GIMP_PRECISION_HALF_NON_LINEAR:
-    case GIMP_PRECISION_HALF_PERCEPTUAL:
+    case CLAY_PRECISION_HALF_LINEAR:
+    case CLAY_PRECISION_HALF_NON_LINEAR:
+    case CLAY_PRECISION_HALF_PERCEPTUAL:
       bitspersample = 16;
       sampleformat  = SAMPLEFORMAT_IEEEFP;
       break;
 
     default:
-    case GIMP_PRECISION_FLOAT_LINEAR:
-    case GIMP_PRECISION_FLOAT_NON_LINEAR:
-    case GIMP_PRECISION_FLOAT_PERCEPTUAL:
+    case CLAY_PRECISION_FLOAT_LINEAR:
+    case CLAY_PRECISION_FLOAT_NON_LINEAR:
+    case CLAY_PRECISION_FLOAT_PERCEPTUAL:
       bitspersample = 32;
       sampleformat  = SAMPLEFORMAT_IEEEFP;
       break;
 
-    case GIMP_PRECISION_DOUBLE_LINEAR:
-    case GIMP_PRECISION_DOUBLE_NON_LINEAR:
-    case GIMP_PRECISION_DOUBLE_PERCEPTUAL:
+    case CLAY_PRECISION_DOUBLE_LINEAR:
+    case CLAY_PRECISION_DOUBLE_NON_LINEAR:
+    case CLAY_PRECISION_DOUBLE_PERCEPTUAL:
       bitspersample = 64;
       sampleformat  = SAMPLEFORMAT_IEEEFP;
       break;
@@ -272,7 +272,7 @@ save_layer (TIFF        *tif,
   cols = gegl_buffer_get_width (buffer);
   rows = gegl_buffer_get_height (buffer);
 
-  channels = gimp_image_list_channels (orig_image);
+  channels = clay_image_list_channels (orig_image);
   extra    = g_list_length (channels);
 
   if (extra > 0)
@@ -280,9 +280,9 @@ save_layer (TIFF        *tif,
       channel_buffers = g_new (GeglBuffer *, extra);
       for (gint j = 0; j < extra; j++)
         {
-          GimpDrawable *temp_channel = g_list_nth_data (channels, j);
+          ClayDrawable *temp_channel = g_list_nth_data (channels, j);
 
-          channel_buffers[j] = gimp_drawable_get_buffer (temp_channel);
+          channel_buffers[j] = clay_drawable_get_buffer (temp_channel);
         }
     }
 
@@ -290,7 +290,7 @@ save_layer (TIFF        *tif,
 
   switch (drawable_type)
     {
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       predictor       = 2;
       samplesperpixel = 3 + extra;
       photometric     = PHOTOMETRIC_RGB;
@@ -315,7 +315,7 @@ save_layer (TIFF        *tif,
         }
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       samplesperpixel = 1 + extra;
       photometric     = PHOTOMETRIC_MINISBLACK;
       alpha           = FALSE;
@@ -335,7 +335,7 @@ save_layer (TIFF        *tif,
         }
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       predictor       = 2;
       samplesperpixel = 3 + 1 + extra;
       photometric     = PHOTOMETRIC_RGB;
@@ -388,7 +388,7 @@ save_layer (TIFF        *tif,
         }
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       samplesperpixel = 1 + 1 + extra;
       photometric     = PHOTOMETRIC_MINISBLACK;
       alpha           = TRUE;
@@ -432,13 +432,13 @@ save_layer (TIFF        *tif,
         }
       break;
 
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
-      palette = gimp_image_get_palette (image);
-      format  = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
-      cmap    = gimp_palette_get_colormap (palette, babl_format_with_space ("R'G'B' u8", format), &num_colors, NULL);
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
+      palette = clay_image_get_palette (image);
+      format  = clay_drawable_get_format (CLAY_DRAWABLE (layer));
+      cmap    = clay_palette_get_colormap (palette, babl_format_with_space ("R'G'B' u8", format), &num_colors, NULL);
 
-      if (drawable_type == GIMP_INDEXED_IMAGE && (num_colors == 2 || num_colors == 1))
+      if (drawable_type == CLAY_INDEXED_IMAGE && (num_colors == 2 || num_colors == 1))
         {
           is_bw = (memcmp (cmap, bw_map, 3 * num_colors) == 0);
           photometric = PHOTOMETRIC_MINISWHITE;
@@ -469,8 +469,8 @@ save_layer (TIFF        *tif,
             }
         }
 
-      samplesperpixel = 1 + (drawable_type == GIMP_INDEXEDA_IMAGE ? 1 : 0) + extra;
-      alpha           = (drawable_type == GIMP_INDEXEDA_IMAGE);
+      samplesperpixel = 1 + (drawable_type == CLAY_INDEXEDA_IMAGE ? 1 : 0) + extra;
+      alpha           = (drawable_type == CLAY_INDEXEDA_IMAGE);
 
       g_free (cmap);
       break;
@@ -525,7 +525,7 @@ save_layer (TIFF        *tif,
 
   if (compression == COMPRESSION_JPEG)
     {
-      if (gimp_image_get_base_type (image) == GIMP_INDEXED)
+      if (clay_image_get_base_type (image) == CLAY_INDEXED)
         {
           g_set_error_literal (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                _("Indexed pictures cannot be compressed "
@@ -539,24 +539,24 @@ save_layer (TIFF        *tif,
     {
       const guint8     *icc_data     = NULL;
       gsize             icc_length;
-      GimpColorProfile *profile;
-      GimpColorProfile *cmyk_profile = NULL;
+      ClayColorProfile *profile;
+      ClayColorProfile *cmyk_profile = NULL;
 
-      profile = gimp_image_get_effective_color_profile (orig_image);
+      profile = clay_image_get_effective_color_profile (orig_image);
       if (config_cmyk)
-        cmyk_profile = gimp_image_get_simulation_profile (image);
+        cmyk_profile = clay_image_get_simulation_profile (image);
 
       /* If a non-CMYK profile was assigned as the simulation profile,
        * set it back to NULL and save the RGB profile instead
        */
-      if (cmyk_profile && ! gimp_color_profile_is_cmyk (cmyk_profile))
+      if (cmyk_profile && ! clay_color_profile_is_cmyk (cmyk_profile))
         g_clear_object (&cmyk_profile);
 
       /* Write the RGB or CMYK color profile to the TIFF file */
       if (profile && ! config_cmyk)
-        icc_data = gimp_color_profile_get_icc_profile (profile, &icc_length);
+        icc_data = clay_color_profile_get_icc_profile (profile, &icc_length);
       else if (cmyk_profile)
-        icc_data = gimp_color_profile_get_icc_profile (cmyk_profile, &icc_length);
+        icc_data = clay_color_profile_get_icc_profile (cmyk_profile, &icc_length);
 
       if (icc_data)
         TIFFSetField (tif, TIFFTAG_ICCPROFILE, icc_length, icc_data);
@@ -636,7 +636,7 @@ save_layer (TIFF        *tif,
                * given color could be set to different alpha on different
                * pixels, hence it cannot be premultiplied).
                */
-              drawable_type == GIMP_INDEXEDA_IMAGE)
+              drawable_type == CLAY_INDEXEDA_IMAGE)
             extra_samples [0] = EXTRASAMPLE_UNASSALPHA;
           else
             extra_samples [0] = EXTRASAMPLE_ASSOCALPHA;
@@ -649,9 +649,9 @@ save_layer (TIFF        *tif,
     }
 
   /* resolution fields */
-  gimp_image_get_resolution (orig_image, &xresolution, &yresolution);
+  clay_image_get_resolution (orig_image, &xresolution, &yresolution);
 
-  if (gimp_unit_is_metric (gimp_image_get_unit (orig_image)))
+  if (clay_unit_is_metric (clay_image_get_unit (orig_image)))
     {
       save_unit = RESUNIT_CENTIMETER;
       xresolution /= 2.54;
@@ -665,7 +665,7 @@ save_layer (TIFF        *tif,
       TIFFSetField (tif, TIFFTAG_RESOLUTIONUNIT, save_unit);
     }
 
-  gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &offset_x, &offset_y);
+  clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &offset_x, &offset_y);
 
   offset_x -= origin_x;
   offset_y -= origin_y;
@@ -677,33 +677,33 @@ save_layer (TIFF        *tif,
     }
 
   if (! is_bw && ! config_cmyk &&
-      (drawable_type == GIMP_INDEXED_IMAGE || drawable_type == GIMP_INDEXEDA_IMAGE))
+      (drawable_type == CLAY_INDEXED_IMAGE || drawable_type == CLAY_INDEXEDA_IMAGE))
     TIFFSetField (tif, TIFFTAG_COLORMAP, red, grn, blu);
 
   /* Save Photoshop image resources (paths, channel names, ...) to TIFFTAG_PHOTOSHOP */
   if (config_save_resources &&
-      ((config_format == GIMP_TIFF_FORMAT_STANDARD_TIFF && page == 0) ||
-        config_format == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF))
+      ((config_format == CLAY_TIFF_FORMAT_STANDARD_TIFF && page == 0) ||
+        config_format == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF))
     {
       GFile             *temp_file     = NULL;
-      GimpProcedure     *procedure;
-      GimpValueArray    *return_vals   = NULL;
-      GimpPDBStatusType  export_status;
+      ClayProcedure     *procedure;
+      ClayValueArray    *return_vals   = NULL;
+      ClayPDBStatusType  export_status;
       guchar            *data_buffer   = NULL;
       gsize              data_length   = 0;
 
-      temp_file   = gimp_temp_file ("tmp");
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      temp_file   = clay_temp_file ("tmp");
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                "file-psd-export-metadata");
-      return_vals = gimp_procedure_run (procedure,
+      return_vals = clay_procedure_run (procedure,
                                         "file",          temp_file,
                                         "image",         orig_image,
                                         "metadata-type", FALSE,
                                         "cmyk",          config_cmyk,
                                         NULL);
 
-      export_status = GIMP_VALUES_GET_ENUM (return_vals, 0);
-      if (export_status == GIMP_PDB_SUCCESS)
+      export_status = CLAY_VALUES_GET_ENUM (return_vals, 0);
+      if (export_status == CLAY_PDB_SUCCESS)
         {
           if (g_file_get_contents (g_file_peek_path (temp_file),
                                    (gchar **) &data_buffer,
@@ -717,34 +717,34 @@ save_layer (TIFF        *tif,
       g_free (data_buffer);
       g_file_delete (temp_file, NULL, NULL);
       g_object_unref (temp_file);
-      gimp_value_array_unref (return_vals);
+      clay_value_array_unref (return_vals);
     }
 
   /* Save Photoshop layer data to TIFFTAG_IMAGESOURCEDATA */
-  if (config_format == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF &&
+  if (config_format == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF &&
       should_export_layer_info (orig_image))
     {
       GFile             *temp_file     = NULL;
-      GimpProcedure     *procedure;
-      GimpValueArray    *return_vals   = NULL;
-      GimpPDBStatusType  export_status;
+      ClayProcedure     *procedure;
+      ClayValueArray    *return_vals   = NULL;
+      ClayPDBStatusType  export_status;
       guchar            *data_buffer   = NULL;
       gsize              data_length   = 0;
       guchar            *tag_buffer    = NULL;
       gsize              tag_length    = 0;
 
-      temp_file   = gimp_temp_file ("tmp");
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      temp_file   = clay_temp_file ("tmp");
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                "file-psd-export-metadata");
-      return_vals = gimp_procedure_run (procedure,
+      return_vals = clay_procedure_run (procedure,
                                         "file",          temp_file,
                                         "image",         orig_image,
                                         "metadata-type", TRUE,
                                         "cmyk",          config_cmyk,
                                         NULL);
 
-      export_status = GIMP_VALUES_GET_ENUM (return_vals, 0);
-      if (export_status == GIMP_PDB_SUCCESS)
+      export_status = CLAY_VALUES_GET_ENUM (return_vals, 0);
+      if (export_status == CLAY_PDB_SUCCESS)
         {
           if (g_file_get_contents (g_file_peek_path (temp_file),
                                    (gchar **) &data_buffer,
@@ -774,7 +774,7 @@ save_layer (TIFF        *tif,
       g_free (data_buffer);
       g_file_delete (temp_file, NULL, NULL);
       g_object_unref (temp_file);
-      gimp_value_array_unref (return_vals);
+      clay_value_array_unref (return_vals);
     }
 
   /* array to rearrange data */
@@ -814,8 +814,8 @@ save_layer (TIFF        *tif,
 
           switch (drawable_type)
             {
-            case GIMP_INDEXED_IMAGE:
-            case GIMP_INDEXEDA_IMAGE:
+            case CLAY_INDEXED_IMAGE:
+            case CLAY_INDEXEDA_IMAGE:
               if (is_bw)
                 {
                   byte2bit (src_row_base, base_bytesperrow, data, invert);
@@ -827,10 +827,10 @@ save_layer (TIFF        *tif,
                 }
               break;
 
-            case GIMP_GRAY_IMAGE:
-            case GIMP_GRAYA_IMAGE:
-            case GIMP_RGB_IMAGE:
-            case GIMP_RGBA_IMAGE:
+            case CLAY_GRAY_IMAGE:
+            case CLAY_GRAYA_IMAGE:
+            case CLAY_RGB_IMAGE:
+            case CLAY_RGBA_IMAGE:
               {
                 mask_format = get_extra_format (bitspersample, sampleformat);
 
@@ -880,88 +880,88 @@ save_layer (TIFF        *tif,
         }
 
       if ((row % 32) == 0)
-        gimp_progress_update (progress_base + progress_fraction
+        clay_progress_update (progress_base + progress_fraction
                               * (gdouble) row / (gdouble) rows);
     }
 
   /* Save GeoTIFF tags to file, if available */
   if (config_save_geotiff_tags)
     {
-      GimpParasite *parasite = NULL;
+      ClayParasite *parasite = NULL;
       gchar        *parasite_data;
       guint32       parasite_size;
 
-      parasite = gimp_image_get_parasite (image,"Gimp_GeoTIFF_ModelPixelScale");
+      parasite = clay_image_get_parasite (image,"Clay_GeoTIFF_ModelPixelScale");
       if (parasite)
         {
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           TIFFSetField (tif,
                         GEOTIFF_MODELPIXELSCALE,
                         (parasite_size / TIFFDataWidth (TIFF_DOUBLE)),
                         parasite_data);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
 
-      parasite = gimp_image_get_parasite (image,"Gimp_GeoTIFF_ModelTiePoint");
+      parasite = clay_image_get_parasite (image,"Clay_GeoTIFF_ModelTiePoint");
       if (parasite)
         {
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           TIFFSetField (tif,
                         GEOTIFF_MODELTIEPOINT,
                         (parasite_size / TIFFDataWidth (TIFF_DOUBLE)),
                         parasite_data);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
 
-      parasite = gimp_image_get_parasite (image,"Gimp_GeoTIFF_ModelTransformation");
+      parasite = clay_image_get_parasite (image,"Clay_GeoTIFF_ModelTransformation");
       if (parasite)
         {
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           TIFFSetField (tif,
                         GEOTIFF_MODELTRANSFORMATION,
                         (parasite_size / TIFFDataWidth (TIFF_DOUBLE)),
                         parasite_data);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
 
-      parasite = gimp_image_get_parasite (image,"Gimp_GeoTIFF_KeyDirectory");
+      parasite = clay_image_get_parasite (image,"Clay_GeoTIFF_KeyDirectory");
       if (parasite)
         {
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           TIFFSetField (tif,
                         GEOTIFF_KEYDIRECTORY,
                         (parasite_size / TIFFDataWidth (TIFF_SHORT)),
                         parasite_data);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
 
-      parasite = gimp_image_get_parasite (image,"Gimp_GeoTIFF_DoubleParams");
+      parasite = clay_image_get_parasite (image,"Clay_GeoTIFF_DoubleParams");
       if (parasite)
         {
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           TIFFSetField (tif,
                         GEOTIFF_DOUBLEPARAMS,
                         (parasite_size / TIFFDataWidth (TIFF_DOUBLE)),
                         parasite_data);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
 
-      parasite = gimp_image_get_parasite (image,"Gimp_GeoTIFF_Asciiparams");
+      parasite = clay_image_get_parasite (image,"Clay_GeoTIFF_Asciiparams");
       if (parasite)
         {
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           parasite_data = g_strndup (parasite_data, parasite_size);
           TIFFSetField (tif,
                         GEOTIFF_ASCIIPARAMS,
                         parasite_data);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
           g_free (parasite_data);
         }
     }
 
   TIFFWriteDirectory (tif);
 
-  gimp_progress_update (progress_base + progress_fraction);
+  clay_progress_update (progress_base + progress_fraction);
 
   status = TRUE;
 
@@ -989,13 +989,13 @@ out:
 
 /* FIXME Most of the stuff in save_metadata except the
  * thumbnail saving should probably be moved to
- * gimpmetadata.c and gimpmetadata-save.c.
+ * claymetadata.c and claymetadata-save.c.
  */
 static void
 save_metadata (GFile        *file,
                GObject      *config,
-               GimpImage    *image,
-               GimpMetadata *metadata,
+               ClayImage    *image,
+               ClayMetadata *metadata,
                gint          saved_bpp,
                gboolean      cmyk)
 {
@@ -1052,21 +1052,21 @@ save_metadata (GFile        *file,
         gexiv2_metadata_try_clear_tag (GEXIV2_METADATA (metadata), *tag, NULL);
     }
 
-  gimp_metadata_set_bits_per_sample (metadata, saved_bpp);
+  clay_metadata_set_bits_per_sample (metadata, saved_bpp);
   if (cmyk)
-    gimp_metadata_set_colorspace (metadata, GIMP_METADATA_COLORSPACE_UNCALIBRATED);
+    clay_metadata_set_colorspace (metadata, CLAY_METADATA_COLORSPACE_UNCALIBRATED);
 
-  gimp_procedure_config_save_metadata (GIMP_PROCEDURE_CONFIG (config),
+  clay_procedure_config_save_metadata (CLAY_PROCEDURE_CONFIG (config),
                                        image, file);
 }
 
 gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpImage     *orig_image, /* the export function might
+              ClayImage     *image,
+              ClayImage     *orig_image, /* the export function might
                                           * have created a duplicate */
               GObject       *config,
-              GimpMetadata  *metadata,
+              ClayMetadata  *metadata,
               GError       **error)
 {
   TIFF       *tif           = NULL;
@@ -1084,7 +1084,7 @@ export_image (GFile         *file,
   gboolean    config_save_profile;
   gboolean    config_save_thumbnail;
   gboolean    config_cmyk;
-  GimpFormat  config_format;
+  ClayFormat  config_format;
 
   g_object_get (config,
                 "bigtiff",               &bigtiff,
@@ -1093,14 +1093,14 @@ export_image (GFile         *file,
                 "cmyk",                  &config_cmyk,
                 NULL);
 
-  config_format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG(config), "format");
+  config_format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG(config), "format");
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   layers = g_list_reverse (layers);
   num_layers = g_list_length (layers);
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /* Open file and write some global data */
   tif = tiff_open (file, (bigtiff ? "wb8" : "wb"), error);
@@ -1110,39 +1110,39 @@ export_image (GFile         *file,
       if (! error)
         g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                      _("Could not open '%s' for writing: %s"),
-                     gimp_file_get_utf8_name (file), g_strerror (errno));
+                     clay_file_get_utf8_name (file), g_strerror (errno));
       goto out;
     }
 
   if (config_save_profile || config_cmyk)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
       GError           *error = NULL;
 
       if (config_cmyk)
         {
-          profile = gimp_image_get_simulation_profile (image);
+          profile = clay_image_get_simulation_profile (image);
 
-          if (profile && ! gimp_color_profile_is_cmyk (profile))
+          if (profile && ! clay_color_profile_is_cmyk (profile))
             g_clear_object (&profile);
         }
       else
         {
-          profile = gimp_image_get_effective_color_profile (orig_image);
+          profile = clay_image_get_effective_color_profile (orig_image);
         }
 
       /* Curve of the exported data depends on the saved profile, i.e.
        * any explicitly-set profile in priority, or the default one for
        * the storage format as fallback.
        */
-      out_linear = (profile != NULL && gimp_color_profile_is_linear (profile));
+      out_linear = (profile != NULL && clay_color_profile_is_linear (profile));
 
       if (profile)
         {
-          space = gimp_color_profile_get_space (profile,
+          space = clay_color_profile_get_space (profile,
                                                 config_cmyk ?
-                                                gimp_image_get_simulation_intent (image) :
-                                                GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+                                                clay_image_get_simulation_intent (image) :
+                                                CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                                 &error);
           g_object_unref (profile);
         }
@@ -1159,24 +1159,24 @@ export_image (GFile         *file,
   /* calculate the top-left coordinates */
   for (iter = layers; iter; iter = g_list_next (iter))
     {
-      GimpDrawable *drawable = iter->data;
+      ClayDrawable *drawable = iter->data;
       gint          offset_x, offset_y;
 
-      gimp_drawable_get_offsets (drawable, &offset_x, &offset_y);
+      clay_drawable_get_offsets (drawable, &offset_x, &offset_y);
 
       origin_x = MIN (origin_x, offset_x);
       origin_y = MIN (origin_y, offset_y);
     }
 
   /* === Photoshop-TIFF MODE === */
-  if (config_format == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF)
+  if (config_format == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF)
     {
       /* flatten for composite image (merges layer & removes alpha) */
-      gimp_image_flatten (image);
+      clay_image_flatten (image);
 
       g_list_free (layers);
 
-      layers     = gimp_image_list_layers (image);
+      layers     = clay_image_list_layers (image);
       num_layers = g_list_length (layers);
 
       /* write composite image */
@@ -1231,7 +1231,7 @@ export_image (GFile         *file,
             g_set_error (error, G_FILE_ERROR,
                           g_file_error_from_errno (errno),
                           _("Could not open '%s' for writing: %s"),
-                          gimp_file_get_utf8_name (file),
+                          clay_file_get_utf8_name (file),
                           g_strerror (errno));
           goto out;
         }
@@ -1260,7 +1260,7 @@ export_image (GFile         *file,
               goto out;
             }
 
-          gimp_progress_update ((gdouble) (current_layer + 1) / num_layers);
+          clay_progress_update ((gdouble) (current_layer + 1) / num_layers);
         }
     }
 
@@ -1274,7 +1274,7 @@ out:
       TIFFClose (tif);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_list_free (layers);
 
@@ -1282,8 +1282,8 @@ out:
 }
 
 gboolean
-export_dialog (GimpImage     *image,
-               GimpProcedure *procedure,
+export_dialog (ClayImage     *image,
+               ClayProcedure *procedure,
                GObject       *config,
                gboolean       has_alpha,
                gboolean       is_monochrome,
@@ -1294,14 +1294,14 @@ export_dialog (GimpImage     *image,
   GtkWidget         *dialog;
   GtkWidget         *profile_label;
   gchar            **parasites;
-  GimpCompression    compression;
+  ClayCompression    compression;
   gboolean           run;
   gboolean           has_geotiff  = FALSE;
   gint               i;
-  GimpColorProfile  *cmyk_profile = NULL;
+  ClayColorProfile  *cmyk_profile = NULL;
   GParamSpec        *compression_spec;
-  GimpChoice        *compression_choice;
-  GimpFormat         format;
+  ClayChoice        *compression_choice;
+  ClayFormat         format;
   gboolean           save_transparent_pixels;
   gboolean           transparent_pixels_available;
   gboolean           save_layers;
@@ -1310,16 +1310,16 @@ export_dialog (GimpImage     *image,
 
   compression_spec   = g_object_class_find_property (G_OBJECT_GET_CLASS (config),
                                                      "compression");
-  compression_choice = gimp_param_spec_choice_get_choice (compression_spec);
+  compression_choice = clay_param_spec_choice_get_choice (compression_spec);
 
-  gimp_choice_set_sensitive (compression_choice, "ccittfax3", is_monochrome);
-  gimp_choice_set_sensitive (compression_choice, "ccittfax4", is_monochrome);
-  gimp_choice_set_sensitive (compression_choice, "jpeg",      ! is_indexed);
+  clay_choice_set_sensitive (compression_choice, "ccittfax3", is_monochrome);
+  clay_choice_set_sensitive (compression_choice, "ccittfax4", is_monochrome);
+  clay_choice_set_sensitive (compression_choice, "jpeg",      ! is_indexed);
 
-  parasites = gimp_image_get_parasite_list (image);
+  parasites = clay_image_get_parasite_list (image);
   for (i = 0; i < g_strv_length (parasites); i++)
     {
-      if (g_str_has_prefix (parasites[i], "Gimp_GeoTIFF_"))
+      if (g_str_has_prefix (parasites[i], "Clay_GeoTIFF_"))
         {
           has_geotiff = TRUE;
           break;
@@ -1327,8 +1327,8 @@ export_dialog (GimpImage     *image,
     }
   g_strfreev (parasites);
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /* Save initial values (from config) and availability flags (from image/export state).
@@ -1341,7 +1341,7 @@ export_dialog (GimpImage     *image,
   transparent_pixels_available = has_alpha && ! is_indexed;
   save_layers_available        = is_multi_layer;
 
-  format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "format");
 
   g_object_get (config,
@@ -1381,7 +1381,7 @@ export_dialog (GimpImage     *image,
                               _("Warning: maximum TIFF file size exceeded. "
                                 "Retry as BigTIFF or with a different compression algorithm, "
                                 "or cancel."));
-      label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                "big-tif-warning", text,
                                                FALSE, FALSE);
       g_free (text);
@@ -1391,47 +1391,47 @@ export_dialog (GimpImage     *image,
       gtk_label_set_max_width_chars (GTK_LABEL (label), 60);
     }
 
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog),
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog),
                                              "save-geotiff");
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog),
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog),
                                              "save-resources");
 
   /* Profile label. */
-  profile_label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  profile_label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                    "profile-label",
                                                    _("No soft-proofing profile"),
                                                    FALSE, FALSE);
   gtk_widget_set_margin_bottom (profile_label, 6);
   gtk_label_set_xalign (GTK_LABEL (profile_label), 0.0);
   gtk_label_set_ellipsize (GTK_LABEL (profile_label), PANGO_ELLIPSIZE_END);
-  gimp_label_set_attributes (GTK_LABEL (profile_label),
+  clay_label_set_attributes (GTK_LABEL (profile_label),
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                              -1);
-  gimp_help_set_help_data (profile_label,
+  clay_help_set_help_data (profile_label,
                            _("Name of the color profile used for CMYK export."),
                            NULL);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "cmyk-box",
                                   "profile-label",
                                   NULL);
 
   /* ...and make that box the content of a frame controlled by the "cmyk" toggle. */
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "cmyk-frame",
                                     "cmyk",
                                     FALSE,
                                     "cmyk-box");
 
-  cmyk_profile = gimp_image_get_simulation_profile (image);
+  cmyk_profile = clay_image_get_simulation_profile (image);
   if (cmyk_profile)
     {
       gchar *label_text;
 
-      if (gimp_color_profile_is_cmyk (cmyk_profile))
+      if (clay_color_profile_is_cmyk (cmyk_profile))
         {
           label_text = g_strdup_printf (_("Profile: %s"),
-                                        gimp_color_profile_get_label (cmyk_profile));
+                                        clay_color_profile_get_label (cmyk_profile));
         }
       else
         {
@@ -1440,7 +1440,7 @@ export_dialog (GimpImage     *image,
         }
 
       gtk_label_set_text (GTK_LABEL (profile_label), label_text);
-      gimp_label_set_attributes (GTK_LABEL (profile_label),
+      clay_label_set_attributes (GTK_LABEL (profile_label),
                                  PANGO_ATTR_STYLE, PANGO_STYLE_NORMAL,
                                  -1);
       g_free (label_text);
@@ -1449,7 +1449,7 @@ export_dialog (GimpImage     *image,
     }
 
   if (classic_tiff_failed)
-    gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+    clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                 "big-tif-warning",
                                 "compression",
                                 "bigtiff",
@@ -1460,7 +1460,7 @@ export_dialog (GimpImage     *image,
                                 "crop-layers",
                                 NULL);
   else
-    gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+    clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                 "compression",
                                 "bigtiff",
                                 "cmyk-frame",
@@ -1471,7 +1471,7 @@ export_dialog (GimpImage     *image,
                                 NULL);
 
   /* GeoTIFF option only makes sense when GeoTIFF parasites exist. */
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "save-geotiff",
                                        has_geotiff,
                                        NULL, NULL, FALSE);
@@ -1484,22 +1484,22 @@ export_dialog (GimpImage     *image,
   /* Run once to bring UI/config into a consistent initial state */
   evaluate_format_options (config, NULL, dialog);
 
-  compression = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  compression = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                      "compression");
 
   if (! is_monochrome)
     {
-      if (compression == GIMP_COMPRESSION_CCITTFAX3 ||
-          compression == GIMP_COMPRESSION_CCITTFAX4)
+      if (compression == CLAY_COMPRESSION_CCITTFAX3 ||
+          compression == CLAY_COMPRESSION_CCITTFAX4)
         g_object_set (config, "compression", "none", NULL);
     }
 
-  if (is_indexed && compression == GIMP_COMPRESSION_JPEG)
+  if (is_indexed && compression == CLAY_COMPRESSION_JPEG)
     g_object_set (config, "compression", "none", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -1519,7 +1519,7 @@ update_format_options (GtkWidget *dialog,
    *   ("last-save-*") BEFORE we force Photoshop-recommended values.
    * - On Photoshop -> Standard: restore from dialog data.
    */
-  GimpFormat format;
+  ClayFormat format;
   gboolean   save_layers                  = FALSE;
   gboolean   save_resources               = FALSE;
   gboolean   save_transparent_pixels      = FALSE;
@@ -1527,7 +1527,7 @@ update_format_options (GtkWidget *dialog,
   gboolean   last_save_resources          = FALSE;
   gboolean   last_save_transparent_pixels = FALSE;
 
-  format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                "format");
 
   /* Current config state. */
@@ -1564,7 +1564,7 @@ update_format_options (GtkWidget *dialog,
                          GINT_TO_POINTER (save_transparent_pixels));
     }
 
-  if (format == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF)
+  if (format == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF)
     {
       /* Photoshop TIFF => force a consistent "recommended" set. */
       if (! save_resources)
@@ -1577,17 +1577,17 @@ update_format_options (GtkWidget *dialog,
         g_object_set (config, "save-transparent-pixels", FALSE, NULL);
 
       /* Lock options in Photoshop mode */
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-resources",
                                            FALSE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-layers",
                                            FALSE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-transparent-pixels",
                                            FALSE,
                                            NULL, NULL, FALSE);
@@ -1595,17 +1595,17 @@ update_format_options (GtkWidget *dialog,
   else
     {
       /* Standard TIFF: unlock controls first (actual availability below). */
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-resources",
                                            TRUE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-layers",
                                            TRUE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-transparent-pixels",
                                            TRUE,
                                            NULL, NULL, FALSE);
@@ -1624,12 +1624,12 @@ update_format_options (GtkWidget *dialog,
         }
 
       /* Apply availability-derived sensitivity (layers + transparent pixels only). */
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-layers",
                                            save_layers_available,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "save-transparent-pixels",
                                            transparent_pixels_available,
                                            NULL, NULL, FALSE);
@@ -1650,9 +1650,9 @@ evaluate_format_options (GObject    *config,
   GtkWidget  *dialog = GTK_WIDGET (user_data);
   gboolean    transparent_pixels_available;
   gboolean    save_layers_available;
-  GimpFormat  format;
+  ClayFormat  format;
   gpointer    prev_p;
-  GimpFormat  prev_format;
+  ClayFormat  prev_format;
   gboolean    entering_photoshop;
   gboolean    leaving_photoshop_mode;
 
@@ -1665,19 +1665,19 @@ evaluate_format_options (GObject    *config,
                                         "save-layers-available"));
 
   /* Detect format transitions. */
-  format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "format");
 
   prev_p      = g_object_get_data (G_OBJECT (dialog), "tiff-prev-format");
-  prev_format = (GimpFormat) GPOINTER_TO_INT (prev_p);
+  prev_format = (ClayFormat) GPOINTER_TO_INT (prev_p);
 
   leaving_photoshop_mode =
-    (prev_format == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF &&
-     format      != GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF);
+    (prev_format == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF &&
+     format      != CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF);
 
   entering_photoshop =
-    (prev_format != GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF &&
-     format      == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF);
+    (prev_format != CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF &&
+     format      == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF);
 
   /* Store current as previous for next time. */
   g_object_set_data (G_OBJECT (dialog),
@@ -1799,20 +1799,20 @@ get_extra_format (gshort bitspersample, gshort sampleformat)
 }
 
 static gboolean
-should_export_layer_info (GimpImage *orig_image)
+should_export_layer_info (ClayImage *orig_image)
 {
   gint       image_width;
   gint       image_height;
   GList     *layers;
-  GimpLayer *layer;
+  ClayLayer *layer;
   gint       layer_width;
   gint       layer_height;
   gint       layer_offset_x;
   gint       layer_offset_y;
 
-  image_width  = gimp_image_get_width (orig_image);
-  image_height = gimp_image_get_height (orig_image);
-  layers       = gimp_image_list_layers (orig_image);
+  image_width  = clay_image_get_width (orig_image);
+  image_height = clay_image_get_height (orig_image);
+  layers       = clay_image_list_layers (orig_image);
 
   if (layers && layers->data)
     {
@@ -1821,25 +1821,25 @@ should_export_layer_info (GimpImage *orig_image)
       if (layers->next)
         goto export_true;
 
-      if (gimp_drawable_has_alpha (GIMP_DRAWABLE (layer)))
+      if (clay_drawable_has_alpha (CLAY_DRAWABLE (layer)))
         goto export_true;
 
-      if (gimp_layer_get_mask (layer))
+      if (clay_layer_get_mask (layer))
         goto export_true;
 
-      if (gimp_layer_get_opacity (layer) < 100.0)
+      if (clay_layer_get_opacity (layer) < 100.0)
         goto export_true;
 
-      if (gimp_layer_get_mode (layer) != GIMP_LAYER_MODE_NORMAL)
+      if (clay_layer_get_mode (layer) != CLAY_LAYER_MODE_NORMAL)
         goto export_true;
 
-      layer_width  = gimp_drawable_get_width (GIMP_DRAWABLE (layer));
-      layer_height = gimp_drawable_get_height (GIMP_DRAWABLE (layer));
+      layer_width  = clay_drawable_get_width (CLAY_DRAWABLE (layer));
+      layer_height = clay_drawable_get_height (CLAY_DRAWABLE (layer));
 
       if (layer_width != image_width || layer_height != image_height)
         goto export_true;
 
-      gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &layer_offset_x,
+      clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &layer_offset_x,
                                  &layer_offset_y);
 
       if (layer_offset_x != 0 || layer_offset_y != 0)

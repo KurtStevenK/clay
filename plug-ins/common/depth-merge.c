@@ -24,10 +24,10 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define DEBUG
@@ -42,7 +42,7 @@
 #define PLUG_IN_PROC    "plug-in-depth-merge"
 #define PLUG_IN_VERSION "August 1998"
 #define PLUG_IN_BINARY  "depth-merge"
-#define PLUG_IN_ROLE    "gimp-depth-merge"
+#define PLUG_IN_ROLE    "clay-depth-merge"
 
 #define PREVIEW_SIZE    256
 
@@ -52,7 +52,7 @@ typedef struct _MergeClass MergeClass;
 
 struct _Merge
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 
   gint       selectionX;
   gint       selectionY;
@@ -69,12 +69,12 @@ struct _Merge
   guchar    *previewDepthMap1;
   guchar    *previewDepthMap2;
 
-  GimpProcedureConfig *config;
+  ClayProcedureConfig *config;
 };
 
 struct _MergeClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -85,21 +85,21 @@ GType                   merge_get_type                     (void);
 
 static void             merge_finalize                     (GObject              *object);
 
-static GList          * merge_query_procedures             (GimpPlugIn           *plug_in);
-static GimpProcedure  * merge_create_procedure             (GimpPlugIn           *plug_in,
+static GList          * merge_query_procedures             (ClayPlugIn           *plug_in);
+static ClayProcedure  * merge_create_procedure             (ClayPlugIn           *plug_in,
                                                            const gchar          *name);
 
-static GimpValueArray * merge_run                          (GimpProcedure        *procedure,
-                                                            GimpRunMode           run_mode,
-                                                            GimpImage            *image,
-                                                            GimpDrawable        **drawables,
-                                                            GimpProcedureConfig  *config,
+static ClayValueArray * merge_run                          (ClayProcedure        *procedure,
+                                                            ClayRunMode           run_mode,
+                                                            ClayImage            *image,
+                                                            ClayDrawable        **drawables,
+                                                            ClayProcedureConfig  *config,
                                                             gpointer              run_data);
 
 static gint32           DepthMerge_execute                 (Merge                *dm,
-                                                            GimpDrawable         *resultDrawable,
-                                                            GimpProcedureConfig  *config);
-static void             DepthMerge_executeRegion           (GimpProcedureConfig  *config,
+                                                            ClayDrawable         *resultDrawable,
+                                                            ClayProcedureConfig  *config);
+static void             DepthMerge_executeRegion           (ClayProcedureConfig  *config,
                                                             guchar               *source1Row,
                                                             guchar               *source2Row,
                                                             guchar               *depthMap1Row,
@@ -111,19 +111,19 @@ static void             DepthMerge_executeRegion           (GimpProcedureConfig 
                                                             gfloat                scale1,
                                                             gfloat                scale2);
 static gboolean         DepthMerge_dialog                  (Merge                *merge,
-                                                            GimpProcedure        *procedure,
-                                                            GimpProcedureConfig  *config);
+                                                            ClayProcedure        *procedure,
+                                                            ClayProcedureConfig  *config);
 static void             DepthMerge_buildPreviewSourceImage (Merge                *dm,
-                                                            GimpProcedureConfig  *config);
+                                                            ClayProcedureConfig  *config);
 static void             DepthMerge_updatePreview           (Merge                *dm,
-                                                            GimpProcedureConfig  *config);
+                                                            ClayProcedureConfig  *config);
 
 
 static void             util_fillReducedBuffer             (guchar               *dest,
                                                             const Babl           *dest_format,
                                                             gint                  destWidth,
                                                             gint                  destHeight,
-                                                            GimpDrawable         *sourceDrawable,
+                                                            ClayDrawable         *sourceDrawable,
                                                             gint                  x0,
                                                             gint                  y0,
                                                             gint                  sourceWidth,
@@ -132,14 +132,14 @@ static void             util_fillReducedBuffer             (guchar              
 static void              merge_preview_size_allocate       (GtkWidget            *widget,
                                                             GtkAllocation        *allocation,
                                                             Merge                *dm);
-static void              merge_preview_config_notify       (GimpProcedureConfig  *config,
+static void              merge_preview_config_notify       (ClayProcedureConfig  *config,
                                                             const GParamSpec     *pspec,
                                                             Merge                *dm);
 
 
-G_DEFINE_TYPE (Merge, merge, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Merge, merge, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (MERGE_TYPE)
+CLAY_MAIN (MERGE_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -147,7 +147,7 @@ static void
 merge_class_init (MergeClass *klass)
 {
   GObjectClass    *object_class  = G_OBJECT_CLASS (klass);
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   object_class->finalize          = merge_finalize;
 
@@ -179,31 +179,31 @@ merge_finalize (GObject *object)
 }
 
 static GList *
-merge_query_procedures (GimpPlugIn *plug_in)
+merge_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-merge_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+merge_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             merge_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Depth Merge..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Combine");
+      clay_procedure_set_menu_label (procedure, _("_Depth Merge..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Combine");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Combine two images using depth "
                                           "maps (z-buffers)"),
                                         "Taking as input two full-color, "
@@ -213,54 +213,54 @@ merge_create_procedure (GimpPlugIn  *plug_in,
                                         "on which is closer (has a lower depth "
                                         "map value) at each point.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Sean Cier",
                                       "Sean Cier",
                                       PLUG_IN_VERSION);
 
-      gimp_procedure_add_drawable_argument (procedure, "source-1",
+      clay_procedure_add_drawable_argument (procedure, "source-1",
                                             _("Source _1"),
                                             _("Source 1"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "depth-map-1",
+      clay_procedure_add_drawable_argument (procedure, "depth-map-1",
                                             _("_Depth map 1"),
                                             _("Depth map 1"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "source-2",
+      clay_procedure_add_drawable_argument (procedure, "source-2",
                                             _("Source _2"),
                                             _("Source 2"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "depth-map-2",
+      clay_procedure_add_drawable_argument (procedure, "depth-map-2",
                                             _("Depth _map 2"),
                                             _("Depth map 2"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "overlap",
+      clay_procedure_add_double_argument (procedure, "overlap",
                                           _("O_verlap"),
                                           _("Overlap"),
                                           0, 2, 0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "offset",
+      clay_procedure_add_double_argument (procedure, "offset",
                                           _("O_ffset"),
                                           _("Depth relative offset"),
                                           -1, 1, 0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "scale-1",
+      clay_procedure_add_double_argument (procedure, "scale-1",
                                           _("Sc_ale 1"),
                                           _("Depth relative scale 1"),
                                           -1, 1, 1,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "scale-2",
+      clay_procedure_add_double_argument (procedure, "scale-2",
                                           _("Scal_e 2"),
                                           _("Depth relative scale 2"),
                                           -1, 1, 1,
@@ -270,29 +270,29 @@ merge_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-merge_run (GimpProcedure        *procedure,
-           GimpRunMode           run_mode,
-           GimpImage            *image,
-           GimpDrawable        **drawables,
-           GimpProcedureConfig  *config,
+static ClayValueArray *
+merge_run (ClayProcedure        *procedure,
+           ClayRunMode           run_mode,
+           ClayImage            *image,
+           ClayDrawable        **drawables,
+           ClayProcedureConfig  *config,
            gpointer              run_data)
 {
-  GimpDrawable *drawable;
-  Merge        *merge = MERGE (gimp_procedure_get_plug_in (procedure));
+  ClayDrawable *drawable;
+  Merge        *merge = MERGE (clay_procedure_get_plug_in (procedure));
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -301,16 +301,16 @@ merge_run (GimpProcedure        *procedure,
     }
 
   merge->config = config;
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &(merge->selectionX), &(merge->selectionY),
                                       &(merge->selectionWidth),
                                       &(merge->selectionHeight)))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
-                                             g_error_new_literal (GIMP_PLUG_IN_ERROR, 0,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
+                                             g_error_new_literal (CLAY_PLUG_IN_ERROR, 0,
                                                                   _("The selection does not intersect with the input drawable.")));
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       g_object_set (config,
                     "source-1",    drawable,
@@ -320,26 +320,26 @@ merge_run (GimpProcedure        *procedure,
                     NULL);
 
       if (! DepthMerge_dialog (merge, procedure, config))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
     }
 
   if (! DepthMerge_execute (merge, drawable, config))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR, NULL);
-  else if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR, NULL);
+  else if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 /* ----- DepthMerge ----- */
 
 static gint32
 DepthMerge_execute (Merge               *dm,
-                    GimpDrawable        *resultDrawable,
-                    GimpProcedureConfig *config)
+                    ClayDrawable        *resultDrawable,
+                    ClayProcedureConfig *config)
 {
   int           x, y;
   GeglBuffer   *source1_buffer   = NULL;
@@ -352,16 +352,16 @@ DepthMerge_execute (Merge               *dm,
   guchar       *resultRow;
   guchar       *tempRow;
 
-  GimpDrawable *source1Drawable = NULL;
-  GimpDrawable *source2Drawable = NULL;
-  GimpDrawable *depthMap1Drawable = NULL;
-  GimpDrawable *depthMap2Drawable = NULL;
+  ClayDrawable *source1Drawable = NULL;
+  ClayDrawable *source2Drawable = NULL;
+  ClayDrawable *depthMap1Drawable = NULL;
+  ClayDrawable *depthMap2Drawable = NULL;
   gdouble       overlap = 0.0;
   gdouble       offset = 0.0;
   gdouble       scale1 = 0.0;
   gdouble       scale2 = 0.0;
 
-  gimp_progress_init (_("Depth-merging"));
+  clay_progress_init (_("Depth-merging"));
 
   g_object_get (config,
                 "source-1",    &source1Drawable,
@@ -383,7 +383,7 @@ DepthMerge_execute (Merge               *dm,
 
   if (source1Drawable)
     {
-      source1_buffer = gimp_drawable_get_buffer (source1Drawable);
+      source1_buffer = clay_drawable_get_buffer (source1Drawable);
     }
   else
     {
@@ -398,7 +398,7 @@ DepthMerge_execute (Merge               *dm,
 
   if (source2Drawable)
     {
-      source2_buffer = gimp_drawable_get_buffer (source2Drawable);
+      source2_buffer = clay_drawable_get_buffer (source2Drawable);
     }
   else
     {
@@ -413,7 +413,7 @@ DepthMerge_execute (Merge               *dm,
 
   if (depthMap1Drawable)
     {
-      depthMap1_buffer = gimp_drawable_get_buffer (depthMap1Drawable);
+      depthMap1_buffer = clay_drawable_get_buffer (depthMap1Drawable);
     }
   else
     {
@@ -423,7 +423,7 @@ DepthMerge_execute (Merge               *dm,
 
   if (depthMap2Drawable)
     {
-      depthMap2_buffer = gimp_drawable_get_buffer (depthMap2Drawable);
+      depthMap2_buffer = clay_drawable_get_buffer (depthMap2Drawable);
     }
   else
     {
@@ -431,7 +431,7 @@ DepthMerge_execute (Merge               *dm,
         depthMap2Row[x] = 0;
     }
 
-  result_buffer = gimp_drawable_get_shadow_buffer (resultDrawable);
+  result_buffer = clay_drawable_get_shadow_buffer (resultDrawable);
 
   for (y = dm->selectionY; y < (dm->selectionY + dm->selectionHeight); y++)
     {
@@ -474,7 +474,7 @@ DepthMerge_execute (Merge               *dm,
                        babl_format ("R'G'B'A u8"), resultRow,
                        GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((double)(y-dm->selectionY) /
+      clay_progress_update ((double)(y-dm->selectionY) /
                             (double)(dm->selectionHeight - 1));
     }
 
@@ -489,7 +489,7 @@ DepthMerge_execute (Merge               *dm,
   g_free (depthMap2Row);
   g_free (tempRow);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_clear_object (&source1_buffer);
   g_clear_object (&source2_buffer);
@@ -497,8 +497,8 @@ DepthMerge_execute (Merge               *dm,
   g_clear_object (&depthMap2_buffer);
   g_clear_object (&result_buffer);
 
-  gimp_drawable_merge_shadow (resultDrawable, TRUE);
-  gimp_drawable_update (resultDrawable,
+  clay_drawable_merge_shadow (resultDrawable, TRUE);
+  clay_drawable_update (resultDrawable,
                         dm->selectionX, dm->selectionY,
                         dm->selectionWidth, dm->selectionHeight);
 
@@ -506,7 +506,7 @@ DepthMerge_execute (Merge               *dm,
 }
 
 static void
-DepthMerge_executeRegion (GimpProcedureConfig *config,
+DepthMerge_executeRegion (ClayProcedureConfig *config,
                           guchar              *source1Row,
                           guchar              *source2Row,
                           guchar              *depthMap1Row,
@@ -602,21 +602,21 @@ DepthMerge_executeRegion (GimpProcedureConfig *config,
 
 static gboolean
 DepthMerge_dialog (Merge               *merge,
-                   GimpProcedure       *procedure,
-                   GimpProcedureConfig *config)
+                   ClayProcedure       *procedure,
+                   ClayProcedureConfig *config)
 {
   GtkWidget *dialog;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Depth Merge"));
   /* Preview */
   merge->previewWidth  = MIN (merge->selectionWidth,  PREVIEW_SIZE);
   merge->previewHeight = MIN (merge->selectionHeight, PREVIEW_SIZE);
-  merge->preview = gimp_preview_area_new ();
+  merge->preview = clay_preview_area_new ();
   DepthMerge_buildPreviewSourceImage (merge, config);
   g_signal_connect (merge->preview, "size-allocate",
                     G_CALLBACK (merge_preview_size_allocate),
@@ -632,8 +632,8 @@ DepthMerge_dialog (Merge               *merge,
                     G_CALLBACK (merge_preview_config_notify),
                     merge);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -642,12 +642,12 @@ DepthMerge_dialog (Merge               *merge,
 
 static void
 DepthMerge_buildPreviewSourceImage (Merge               *dm,
-                                    GimpProcedureConfig *config)
+                                    ClayProcedureConfig *config)
 {
-  GimpDrawable *source1Drawable;
-  GimpDrawable *source2Drawable;
-  GimpDrawable *depthMap1Drawable;
-  GimpDrawable *depthMap2Drawable;
+  ClayDrawable *source1Drawable;
+  ClayDrawable *source2Drawable;
+  ClayDrawable *depthMap1Drawable;
+  ClayDrawable *depthMap2Drawable;
 
   g_object_get (config,
                 "source-1",    &source1Drawable,
@@ -700,7 +700,7 @@ DepthMerge_buildPreviewSourceImage (Merge               *dm,
 
 static void
 DepthMerge_updatePreview (Merge               *dm,
-                          GimpProcedureConfig *config)
+                          ClayProcedureConfig *config)
 {
   gint    y;
   guchar *source1Row, *source2Row;
@@ -738,11 +738,11 @@ DepthMerge_updatePreview (Merge               *dm,
                                 dm->previewWidth, overlap, offset, scale1, scale2);
     }
 
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (dm->preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (dm->preview),
                           0, 0,
                           dm->previewWidth,
                           dm->previewHeight,
-                          GIMP_RGBA_IMAGE,
+                          CLAY_RGBA_IMAGE,
                           resultRGBA,
                           dm->previewWidth * 4);
   gtk_widget_set_visible (dm->preview, TRUE);
@@ -757,7 +757,7 @@ util_fillReducedBuffer (guchar       *dest,
                         const Babl   *dest_format,
                         gint          destWidth,
                         gint          destHeight,
-                        GimpDrawable *sourceDrawable,
+                        ClayDrawable *sourceDrawable,
                         gint          x0,
                         gint          y0,
                         gint          sourceWidth,
@@ -785,7 +785,7 @@ util_fillReducedBuffer (guchar       *dest,
   reducedRowBuffer      = g_new (guchar, destWidth   * destBPP);
   sourceRowOffsetLookup = g_new (int, destWidth);
 
-  buffer = gimp_drawable_get_buffer (sourceDrawable);
+  buffer = clay_drawable_get_buffer (sourceDrawable);
 
   for (x = 0; x < destWidth; x++)
     sourceRowOffsetLookup[x] = (x * (sourceWidth - 1) / (destWidth - 1)) * destBPP;
@@ -832,11 +832,11 @@ merge_preview_size_allocate (GtkWidget     *widget,
 }
 
 static void
-merge_preview_config_notify (GimpProcedureConfig *config,
+merge_preview_config_notify (ClayProcedureConfig *config,
                              const GParamSpec    *pspec,
                              Merge               *dm)
 {
-  GimpDrawable *drawable = NULL;
+  ClayDrawable *drawable = NULL;
   guchar       *dest     = NULL;
   const Babl   *format   = NULL;
 

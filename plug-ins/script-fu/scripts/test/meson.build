@@ -31,11 +31,11 @@ scripts = [
 
 install_data(
   scripts,
-  install_dir: gimpdatadir / 'scripts',
+  install_dir: claydatadir / 'scripts',
 )
 
 
-# scripts interpreted by gimp-script-fu-interpreter
+# scripts interpreted by clay-script-fu-interpreter
 # Each installed in subdirectory of /plug-in
 # Each have a shebang and executable permission.
 # Like other interpreted plugins.
@@ -53,6 +53,6 @@ foreach plugin : scripts_independent
   srcs = plugin.get('srcs', name + '.scm')
 
   install_data(srcs,
-               install_dir: gimpplugindir / 'plug-ins' / name,
+               install_dir: clayplugindir / 'plug-ins' / name,
                install_mode: 'rwxr-xr-x')
 endforeach

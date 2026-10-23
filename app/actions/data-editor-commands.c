@@ -22,7 +22,7 @@
 
 #include "actions-types.h"
 
-#include "widgets/gimpdataeditor.h"
+#include "widgets/claydataeditor.h"
 
 #include "data-editor-commands.h"
 
@@ -30,14 +30,14 @@
 /*  public functions */
 
 void
-data_editor_edit_active_cmd_callback (GimpAction *action,
+data_editor_edit_active_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpDataEditor *editor = GIMP_DATA_EDITOR (data);
+  ClayDataEditor *editor = CLAY_DATA_EDITOR (data);
   gboolean        edit_active;
 
   edit_active = g_variant_get_boolean (value);
 
-  gimp_data_editor_set_edit_active (editor, edit_active);
+  clay_data_editor_set_edit_active (editor, edit_active);
 }

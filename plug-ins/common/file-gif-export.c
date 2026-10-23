@@ -1,4 +1,4 @@
-/* GIF exporting file filter for GIMP
+/* GIF exporting file filter for Clay
  *
  *    Copyright
  *    - Adam D. Moss
@@ -30,10 +30,10 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-gif-export"
@@ -57,12 +57,12 @@ typedef struct _GifClass GifClass;
 
 struct _Gif
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GifClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -71,46 +71,46 @@ struct _GifClass
 
 GType                           gif_get_type         (void);
 
-static GList                  * gif_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure          * gif_create_procedure (GimpPlugIn           *plug_in,
+static GList                  * gif_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure          * gif_create_procedure (ClayPlugIn           *plug_in,
                                                       const gchar          *name);
 
-static GimpValueArray         * gif_export           (GimpProcedure        *procedure,
-                                                      GimpRunMode           run_mode,
-                                                      GimpImage            *image,
+static ClayValueArray         * gif_export           (ClayProcedure        *procedure,
+                                                      ClayRunMode           run_mode,
+                                                      ClayImage            *image,
                                                       GFile                *file,
-                                                      GimpExportOptions    *options,
-                                                      GimpMetadata         *metadata,
-                                                      GimpProcedureConfig  *config,
+                                                      ClayExportOptions    *options,
+                                                      ClayMetadata         *metadata,
+                                                      ClayProcedureConfig  *config,
                                                       gpointer              run_data);
 
 static gboolean                 export_image         (GFile                *file,
-                                                      GimpImage            *image,
-                                                      GimpDrawable         *drawable,
-                                                      GimpImage            *orig_image,
+                                                      ClayImage            *image,
+                                                      ClayDrawable         *drawable,
+                                                      ClayImage            *orig_image,
                                                       GObject              *config,
                                                       GError              **error);
 
-static GimpExportCapabilities   export_edit_options  (GimpProcedure        *procedure,
-                                                      GimpProcedureConfig  *config,
-                                                      GimpExportOptions    *options,
+static ClayExportCapabilities   export_edit_options  (ClayProcedure        *procedure,
+                                                      ClayProcedureConfig  *config,
+                                                      ClayExportOptions    *options,
                                                       gpointer              create_data);
 
-static GimpPDBStatusType        sanity_check         (GFile                *file,
-                                                      GimpImage           **image,
-                                                      GimpRunMode           run_mode,
+static ClayPDBStatusType        sanity_check         (GFile                *file,
+                                                      ClayImage           **image,
+                                                      ClayRunMode           run_mode,
                                                       GError              **error);
 static gboolean                 bad_bounds_dialog    (void);
 
-static gboolean                 save_dialog          (GimpImage            *image,
-                                                      GimpImage            *orig_image,
-                                                      GimpProcedure        *procedure,
+static gboolean                 save_dialog          (ClayImage            *image,
+                                                      ClayImage            *orig_image,
+                                                      ClayProcedure        *procedure,
                                                       GObject              *config);
 
 
-G_DEFINE_TYPE (Gif, gif, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Gif, gif, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIF_TYPE)
+CLAY_MAIN (GIF_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -120,7 +120,7 @@ static gint Interlace; /* For compression code */
 static void
 gif_class_init (GifClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = gif_query_procedures;
   plug_in_class->create_procedure = gif_create_procedure;
@@ -133,30 +133,30 @@ gif_init (Gif *gif)
 }
 
 static GList *
-gif_query_procedures (GimpPlugIn *plug_in)
+gif_query_procedures (ClayPlugIn *plug_in)
 {
   return  g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-gif_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+gif_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, gif_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED*, GRAY*");
+      clay_procedure_set_image_types (procedure, "INDEXED*, GRAY*");
 
-      gimp_procedure_set_menu_label (procedure, _("GIF image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("GIF image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("GIF"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("exports files in GIF "
                                           "file format"),
                                         /* xgettext: no-c-format */
@@ -169,128 +169,128 @@ gif_create_procedure (GimpPlugIn  *plug_in,
                                           "interpret <50% alpha as transparent. "
                                           "When run non-interactively, the value "
                                           "for the comment is taken from the "
-                                          "'gimp-comment' parasite."),
+                                          "'clay-comment' parasite."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball, Peter Mattis, "
                                       "Adam Moss, David Koblas",
                                       "Spencer Kimball, Peter Mattis, "
                                       "Adam Moss, David Koblas",
                                       "1995-1997");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/gif");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "gif");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
                                               0, export_edit_options, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "interlace",
+      clay_procedure_add_boolean_argument (procedure, "interlace",
                                            _("_Interlace"),
                                            _("Try to export as interlaced"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "loop",
+      clay_procedure_add_boolean_argument (procedure, "loop",
                                            _("Loop _Forever"),
                                            _("(animated gif) Loop infinitely"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "number-of-repeats",
+      clay_procedure_add_int_argument (procedure, "number-of-repeats",
                                        _("_Number of repeats"),
                                        _("(animated gif) Number of repeats "
                                          "(Ignored if 'loop' is TRUE)"),
                                        0, G_MAXSHORT - 1, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "default-delay",
+      clay_procedure_add_int_argument (procedure, "default-delay",
                                        _("_Delay between frames when unspecified"),
                                        _("(animated gif) Default delay between frames "
                                          "in milliseconds"),
                                        0, G_MAXINT, 100,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "default-dispose",
+      clay_procedure_add_choice_argument (procedure, "default-dispose",
                                           _("Frame disposal _when unspecified"),
                                           _("(animated gif) Default disposal type"),
-                                          gimp_choice_new_with_values ("unspecified", DISPOSE_UNSPECIFIED, _("I don't care"),                  NULL,
+                                          clay_choice_new_with_values ("unspecified", DISPOSE_UNSPECIFIED, _("I don't care"),                  NULL,
                                                                        "combine",     DISPOSE_COMBINE,     _("Cumulative layers (combine)"),   NULL,
                                                                        "replace",     DISPOSE_REPLACE,     _("One frame per layer (replace)"), NULL,
                                                                        NULL),
                                           "unspecified",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "as-animation",
+      clay_procedure_add_boolean_argument (procedure, "as-animation",
                                            _("_As animation"),
                                            _("Export GIF as animation?"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "force-delay",
+      clay_procedure_add_boolean_argument (procedure, "force-delay",
                                            _("_Use delay entered above for all frames"),
                                            _("(animated gif) Use specified delay for all frames"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "force-dispose",
+      clay_procedure_add_boolean_argument (procedure, "force-dispose",
                                            _("Use dis_posal entered above "
                                              "for all frames"),
                                            _("(animated gif) Use specified disposal for all frames"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "include-comment",
+      clay_procedure_add_boolean_aux_argument (procedure, "include-comment",
                                                _("Sa_ve comment"),
                                                _("Save the image comment in the GIF file"),
-                                               gimp_export_comment (),
+                                               clay_export_comment (),
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_aux_argument (procedure, "gimp-comment",
+      clay_procedure_add_string_aux_argument (procedure, "clay-comment",
                                               _("Commen_t"),
                                               _("Image comment"),
-                                              gimp_get_default_comment (),
+                                              clay_get_default_comment (),
                                               G_PARAM_READWRITE);
 
-      gimp_procedure_set_argument_sync (procedure, "gimp-comment",
-                                        GIMP_ARGUMENT_SYNC_PARASITE);
+      clay_procedure_set_argument_sync (procedure, "clay-comment",
+                                        CLAY_ARGUMENT_SYNC_PARASITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-gif_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+gif_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status          = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export          = GIMP_EXPORT_IGNORE;
-  GimpImage         *orig_image;
-  GimpImage         *sanitized_image = NULL;
-  GimpParasite      *parasite        = NULL;
+  ClayPDBStatusType  status          = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export          = CLAY_EXPORT_IGNORE;
+  ClayImage         *orig_image;
+  ClayImage         *sanitized_image = NULL;
+  ClayParasite      *parasite        = NULL;
   GError            *error           = NULL;
 
   gegl_init (NULL, NULL);
 
   orig_image = image;
 
-  if (run_mode == GIMP_RUN_INTERACTIVE ||
-      run_mode == GIMP_RUN_WITH_LAST_VALS)
-    gimp_ui_init (PLUG_IN_BINARY);
+  if (run_mode == CLAY_RUN_INTERACTIVE ||
+      run_mode == CLAY_RUN_WITH_LAST_VALS)
+    clay_ui_init (PLUG_IN_BINARY);
 
   status = sanity_check (file, &image, run_mode, &error);
 
   /* Get the export options */
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       /* If the sanity check succeeded, the image_ID will point to a
        * duplicate image to delete later.
@@ -299,14 +299,14 @@ gif_export (GimpProcedure        *procedure,
 
       /* If imported as an animation, set the animation configurations
        * when overwriting the file */
-      parasite = gimp_image_get_parasite (image, "gif/animated");
+      parasite = clay_image_get_parasite (image, "gif/animated");
       if (parasite)
         {
           gint     num_loops;
           gchar   *parasite_data;
           guint32  parasite_size;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           parasite_data = g_strndup (parasite_data, parasite_size);
 
 #ifndef _UCRT
@@ -324,46 +324,46 @@ gif_export (GimpProcedure        *procedure,
                             NULL);
             }
 
-          gimp_image_detach_parasite (image, "gif/animated");
+          clay_image_detach_parasite (image, "gif/animated");
           g_free (parasite);
           g_free (parasite_data);
         }
 
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         {
           if (! save_dialog (image, orig_image, procedure, G_OBJECT (config)))
             {
-              gimp_image_delete (sanitized_image);
+              clay_image_delete (sanitized_image);
 
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_CANCEL,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_CANCEL,
                                                        NULL);
             }
         }
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       GList                  *drawables;
 
-      export = gimp_export_options_get_image (options, &image);
-      drawables = gimp_image_list_layers (image);
+      export = clay_export_options_get_image (options, &image);
+      drawables = clay_image_list_layers (image);
 
       if (! export_image (file, image, drawables->data, orig_image,
                           G_OBJECT (config), &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
-      gimp_image_delete (sanitized_image);
+      clay_image_delete (sanitized_image);
       g_list_free (drawables);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 /* ppmtogif.c - read a portable pixmap and produce a GIF file
@@ -648,10 +648,10 @@ parse_disposal_tag (const gchar *str,
 }
 
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 sanity_check (GFile        *file,
-              GimpImage   **image,
-              GimpRunMode   run_mode,
+              ClayImage   **image,
+              ClayRunMode   run_mode,
               GError      **error)
 {
   GList *layers;
@@ -659,8 +659,8 @@ sanity_check (GFile        *file,
   gint   image_width;
   gint   image_height;
 
-  image_width  = gimp_image_get_width (*image);
-  image_height = gimp_image_get_height (*image);
+  image_width  = clay_image_get_width (*image);
+  image_height = clay_image_get_height (*image);
 
   if (image_width > G_MAXUSHORT || image_height > G_MAXUSHORT)
     {
@@ -668,22 +668,22 @@ sanity_check (GFile        *file,
                    _("Unable to export '%s'.  "
                      "The GIF file format does not support images that are "
                      "more than %d pixels wide or tall."),
-                   gimp_file_get_utf8_name (file), G_MAXUSHORT);
+                   clay_file_get_utf8_name (file), G_MAXUSHORT);
 
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  *image = gimp_image_duplicate (*image);
+  *image = clay_image_duplicate (*image);
 
   /* Convert image to 8 bit precision if necessary */
-  if (gimp_image_get_precision (*image) != GIMP_PRECISION_U8_NON_LINEAR &&
-      gimp_image_get_precision (*image) != GIMP_PRECISION_U8_LINEAR     &&
-      gimp_image_get_precision (*image) != GIMP_PRECISION_U8_PERCEPTUAL)
+  if (clay_image_get_precision (*image) != CLAY_PRECISION_U8_NON_LINEAR &&
+      clay_image_get_precision (*image) != CLAY_PRECISION_U8_LINEAR     &&
+      clay_image_get_precision (*image) != CLAY_PRECISION_U8_PERCEPTUAL)
     {
       gboolean converted = FALSE;
 
-      converted = gimp_image_convert_precision (*image,
-                                                GIMP_PRECISION_U8_NON_LINEAR);
+      converted = clay_image_convert_precision (*image,
+                                                CLAY_PRECISION_U8_NON_LINEAR);
 
       if (! converted)
         {
@@ -692,28 +692,28 @@ sanity_check (GFile        *file,
                          "Please convert your image to 8 bit integer "
                          "precision, as the GIF file format does not "
                          "support higher precisions."),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
 
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
   /*** Iterate through the layers to make sure they're all ***/
   /*** within the bounds of the image                      ***/
-  layers = gimp_image_list_layers (*image);
+  layers = clay_image_list_layers (*image);
 
   for (list = layers; list; list = g_list_next (list))
     {
-      GimpDrawable *drawable = list->data;
+      ClayDrawable *drawable = list->data;
       gint          offset_x;
       gint          offset_y;
 
-      gimp_drawable_get_offsets (drawable, &offset_x, &offset_y);
+      clay_drawable_get_offsets (drawable, &offset_x, &offset_y);
 
       if (offset_x < 0 ||
           offset_y < 0 ||
-          offset_x + gimp_drawable_get_width (drawable) > image_width ||
-          offset_y + gimp_drawable_get_height (drawable) > image_height)
+          offset_x + clay_drawable_get_width (drawable) > image_width ||
+          offset_y + clay_drawable_get_height (drawable) > image_height)
         {
           g_list_free (layers);
 
@@ -722,34 +722,34 @@ sanity_check (GFile        *file,
           /* Do the crop if we can't talk to the user, or if we asked
            * the user and they said yes.
            */
-          if ((run_mode == GIMP_RUN_NONINTERACTIVE) || bad_bounds_dialog ())
+          if ((run_mode == CLAY_RUN_NONINTERACTIVE) || bad_bounds_dialog ())
             {
-              gimp_image_crop (*image, image_width, image_height, 0, 0);
-              return GIMP_PDB_SUCCESS;
+              clay_image_crop (*image, image_width, image_height, 0, 0);
+              return CLAY_PDB_SUCCESS;
             }
           else
             {
-              gimp_image_delete (*image);
-              return GIMP_PDB_CANCEL;
+              clay_image_delete (*image);
+              return CLAY_PDB_CANCEL;
             }
         }
     }
 
   g_list_free (layers);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
-              GimpImage     *orig_image,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
+              ClayImage     *orig_image,
               GObject       *config,
               GError       **error)
 {
   GeglBuffer    *buffer;
-  GimpImageType  drawable_type;
+  ClayImageType  drawable_type;
   const Babl    *format = NULL;
   GOutputStream *output;
   gint           Red[MAXCOLORS];
@@ -802,10 +802,10 @@ export_image (GFile         *file,
                 "force-dispose",     &config_use_default_dispose,
                 "as-animation",      &config_as_animation,
                 "include-comment",   &config_save_comment,
-                "gimp-comment",      &config_comment,
+                "clay-comment",      &config_comment,
                 NULL);
   config_default_dispose =
-    gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                          "default-dispose");
 
   /* The GIF spec says 7bit ASCII for the comment block. */
@@ -836,10 +836,10 @@ export_image (GFile         *file,
     }
 
   /* get a list of layers for this image */
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   nlayers = g_list_length (layers);
 
-  drawable_type = gimp_drawable_type (layers->data);
+  drawable_type = clay_drawable_type (layers->data);
 
   /* If the image has multiple layers (i.e. will be animated), a
    * comment, or transparency, then it must be encoded as a GIF89a
@@ -851,15 +851,15 @@ export_image (GFile         *file,
 
       /* Layers can be with or without alpha channel. Make sure we set
        * alpha if there is at least one layer with alpha channel. */
-      if (drawable_type == GIMP_GRAY_IMAGE ||
-          drawable_type == GIMP_INDEXED_IMAGE)
+      if (drawable_type == CLAY_GRAY_IMAGE ||
+          drawable_type == CLAY_INDEXED_IMAGE)
         {
           for (list = layers; list; list = g_list_next (list))
             {
-              GimpImageType dr_type = gimp_drawable_type (list->data);
+              ClayImageType dr_type = clay_drawable_type (list->data);
 
-              if (dr_type == GIMP_GRAYA_IMAGE ||
-                  dr_type == GIMP_INDEXEDA_IMAGE)
+              if (dr_type == CLAY_GRAYA_IMAGE ||
+                  dr_type == CLAY_INDEXEDA_IMAGE)
                 {
                   drawable_type = dr_type;
                   break;
@@ -873,16 +873,16 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       is_gif89 = TRUE;
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_INDEXED_IMAGE:
         {
           GeglColor *background;
           guchar     bg[3];
 
-          cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+          cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
 
-          background = gimp_context_get_background ();
+          background = clay_context_get_background ();
           gegl_color_get_pixel (background, babl_format_with_space ("R'G'B' u8", NULL), bg);
           g_object_unref (background);
           bgred   = bg[0];
@@ -903,9 +903,9 @@ export_image (GFile         *file,
             }
         }
       break;
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       is_gif89 = TRUE;
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       colors = 256;                   /* FIXME: Not ideal. */
       for ( i = 0;  i < 256; i++)
         {
@@ -941,8 +941,8 @@ export_image (GFile         *file,
 
 
   /* init the progress meter */
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
 
   /* open the destination file for writing */
@@ -977,21 +977,21 @@ export_image (GFile         *file,
        * wasted indices.
        */
       liberalBPP = BitsPerPixel =
-        colors_to_bpp (colors + ((drawable_type==GIMP_INDEXEDA_IMAGE) ? 1 : 0));
+        colors_to_bpp (colors + ((drawable_type==CLAY_INDEXEDA_IMAGE) ? 1 : 0));
     }
   else
     {
       liberalBPP = BitsPerPixel =
         colors_to_bpp (256);
 
-      if (drawable_type == GIMP_INDEXEDA_IMAGE)
+      if (drawable_type == CLAY_INDEXEDA_IMAGE)
         {
           g_printerr ("GIF: Too many colors?\n");
         }
     }
 
-  cols = gimp_image_get_width (image);
-  rows = gimp_image_get_height (image);
+  cols = clay_image_get_width (image);
+  rows = clay_image_get_height (image);
   Interlace = config_interlace;
   if (! gif_encode_header (output, is_gif89, cols, rows, bgindex,
                            BitsPerPixel, Red, Green, Blue, get_pixel,
@@ -1033,22 +1033,22 @@ export_image (GFile         *file,
        list && i >= 0;
        list = g_list_next (list), i--, cur_progress = (nlayers - i) * rows)
     {
-      GimpDrawable *drawable = list->data;
+      ClayDrawable *drawable = list->data;
 
-      drawable_type = gimp_drawable_type (drawable);
-      if (drawable_type == GIMP_GRAYA_IMAGE)
+      drawable_type = clay_drawable_type (drawable);
+      if (drawable_type == CLAY_GRAYA_IMAGE)
         {
           format = babl_format ("Y'A u8");
         }
-      else if (drawable_type == GIMP_GRAY_IMAGE)
+      else if (drawable_type == CLAY_GRAY_IMAGE)
         {
           format = babl_format ("Y' u8");
         }
 
-      buffer = gimp_drawable_get_buffer (drawable);
-      gimp_drawable_get_offsets (drawable, &offset_x, &offset_y);
-      cols      = gimp_drawable_get_width (drawable);
-      rows      = gimp_drawable_get_height (drawable);
+      buffer = clay_drawable_get_buffer (drawable);
+      clay_drawable_get_offsets (drawable, &offset_x, &offset_y);
+      cols      = clay_drawable_get_width (drawable);
+      rows      = clay_drawable_get_height (drawable);
       rowstride = cols;
 
       if (! g_size_checked_mul (&pixel_size, cols, rows))
@@ -1056,8 +1056,8 @@ export_image (GFile         *file,
           g_object_unref (buffer);
           return FALSE;
         }
-      if (((drawable_type == GIMP_INDEXEDA_IMAGE) ||
-           (drawable_type == GIMP_GRAYA_IMAGE))   &&
+      if (((drawable_type == CLAY_INDEXEDA_IMAGE) ||
+           (drawable_type == CLAY_GRAYA_IMAGE))   &&
           ! g_size_checked_mul (&pixel_size, pixel_size, 2))
         {
           g_object_unref (buffer);
@@ -1075,8 +1075,8 @@ export_image (GFile         *file,
                        GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
       /* sort out whether we need to do transparency jiggery-pokery */
-      if ((drawable_type == GIMP_INDEXEDA_IMAGE) ||
-          (drawable_type == GIMP_GRAYA_IMAGE))
+      if ((drawable_type == CLAY_INDEXEDA_IMAGE) ||
+          (drawable_type == CLAY_GRAYA_IMAGE))
         {
           /* Try to find an entry which isn't actually used in the
            * image, for a transparency index.
@@ -1123,7 +1123,7 @@ export_image (GFile         *file,
         {
           if (i > 0 && ! config_use_default_dispose)
             {
-              layer_name = gimp_item_get_name (list->next->data);
+              layer_name = clay_item_get_name (list->next->data);
               Disposal = parse_disposal_tag (layer_name,
                                              config_default_dispose);
               g_free (layer_name);
@@ -1133,7 +1133,7 @@ export_image (GFile         *file,
               Disposal = config_default_dispose;
             }
 
-          layer_name = gimp_item_get_name (GIMP_ITEM (drawable));
+          layer_name = clay_item_get_name (CLAY_ITEM (drawable));
           Delay89 = parse_ms_tag (layer_name);
           g_free (layer_name);
 
@@ -1175,7 +1175,7 @@ export_image (GFile         *file,
                                    error))
         return FALSE;
 
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
 
       g_object_unref (buffer);
 
@@ -1190,25 +1190,25 @@ export_image (GFile         *file,
   return TRUE;
 }
 
-static GimpExportCapabilities
-export_edit_options (GimpProcedure        *procedure,
-                     GimpProcedureConfig  *config,
-                     GimpExportOptions    *options,
+static ClayExportCapabilities
+export_edit_options (ClayProcedure        *procedure,
+                     ClayProcedureConfig  *config,
+                     ClayExportOptions    *options,
                      gpointer              create_data)
 {
-  GimpExportCapabilities capabilities;
+  ClayExportCapabilities capabilities;
   gboolean               as_animation;
 
   g_object_get (G_OBJECT (config),
                 "as-animation", &as_animation,
                 NULL);
 
-  capabilities = (GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                  GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                  GIMP_EXPORT_CAN_HANDLE_ALPHA);
+  capabilities = (CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                  CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                  CLAY_EXPORT_CAN_HANDLE_ALPHA);
 
   if (as_animation)
-    capabilities |= GIMP_EXPORT_CAN_HANDLE_LAYERS;
+    capabilities |= CLAY_EXPORT_CAN_HANDLE_LAYERS;
 
   return capabilities;
 }
@@ -1230,12 +1230,12 @@ bad_bounds_dialog (void)
                           _("Cr_op"),   GTK_RESPONSE_OK,
                           NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
                                             _("The GIF file format does not "
@@ -1254,48 +1254,48 @@ bad_bounds_dialog (void)
 }
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpImage     *orig_image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayImage     *orig_image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget     *dialog;
   GtkWidget     *vbox;
   GtkWidget     *text_view;
   GtkTextBuffer *text_buffer;
-  GimpLayer    **layers;
+  ClayLayer    **layers;
   gint32         n_layers;
   gboolean       animation_supported;
   gboolean       run;
 
-  layers   = gimp_image_get_layers (image);
-  n_layers = gimp_core_object_array_get_length ((GObject **) layers);
+  layers   = clay_image_get_layers (image);
+  n_layers = clay_core_object_array_get_length ((GObject **) layers);
   g_free (layers);
 
   animation_supported = n_layers > 1;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /* Warn user that image will be converted to 8 bits if not already */
-  if (gimp_image_get_precision (orig_image) != GIMP_PRECISION_U8_NON_LINEAR &&
-      gimp_image_get_precision (orig_image) != GIMP_PRECISION_U8_LINEAR     &&
-      gimp_image_get_precision (orig_image) != GIMP_PRECISION_U8_PERCEPTUAL)
+  if (clay_image_get_precision (orig_image) != CLAY_PRECISION_U8_NON_LINEAR &&
+      clay_image_get_precision (orig_image) != CLAY_PRECISION_U8_LINEAR     &&
+      clay_image_get_precision (orig_image) != CLAY_PRECISION_U8_PERCEPTUAL)
     {
       GtkWidget *hint;
 
       /* Used to create vbox to store hintbox in */
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "spacer-8-bit", " ",
                                        FALSE, FALSE);
 
-      vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                              "8-bit-warning-vbox", "spacer-8-bit",
                                              NULL);
 
-      hint = g_object_new (GIMP_TYPE_HINT_BOX,
-                           "icon-name", GIMP_ICON_DIALOG_WARNING,
+      hint = g_object_new (CLAY_TYPE_HINT_BOX,
+                           "icon-name", CLAY_ICON_DIALOG_WARNING,
                            "hint",      _("The GIF format only supports 8 bit "
                                           "integer precision.\n"
                                           "Your image will be converted on "
@@ -1307,28 +1307,28 @@ save_dialog (GimpImage     *image,
       gtk_box_pack_start (GTK_BOX (vbox), hint, FALSE, FALSE, 0);
       gtk_box_reorder_child (GTK_BOX (vbox), hint, 0);
 
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "8-bit-warning-vbox", NULL);
     }
 
 #define MAX_COMMENT 240
 
-  text_view = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                                "gimp-comment",
+  text_view = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                                "clay-comment",
                                                 GTK_TYPE_TEXT_VIEW);
   text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
   g_object_set_data (G_OBJECT (text_buffer), "max-len",
                      GINT_TO_POINTER (MAX_COMMENT));
 
-  gimp_procedure_dialog_fill_scrolled_window (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_scrolled_window (CLAY_PROCEDURE_DIALOG (dialog),
                                               "comment-scrolled",
-                                              "gimp-comment");
+                                              "clay-comment");
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "comment-frame", "include-comment", FALSE,
                                     "comment-scrolled");
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "interlace", "comment-frame", NULL);
 
   if (animation_supported)
@@ -1341,28 +1341,28 @@ save_dialog (GimpImage     *image,
       gtk_grid_set_row_spacing (GTK_GRID (grid), 6);
       gtk_widget_set_visible (grid, TRUE);
 
-      widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+      widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                  "number-of-repeats",
-                                                 GIMP_TYPE_LABEL_SPIN);
+                                                 CLAY_TYPE_LABEL_SPIN);
       gtk_grid_attach (GTK_GRID (grid), widget, 0, 0, 1, 1);
       gtk_widget_set_visible (widget, TRUE);
 
-      widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+      widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                  "loop", GTK_TYPE_CHECK_BUTTON);
       gtk_grid_attach (GTK_GRID (grid), widget, 1, 0, 1, 1);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "number-of-repeats", TRUE,
                                            config, "loop",
                                            TRUE);
 
-      widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+      widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                  "default-delay",
-                                                 GIMP_TYPE_LABEL_SPIN);
+                                                 CLAY_TYPE_LABEL_SPIN);
       gtk_grid_attach (GTK_GRID (grid), widget, 0, 1, 1, 1);
       gtk_widget_set_visible (widget, TRUE);
 
-      widget = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      widget = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "milliseconds",
                                                 _("milliseconds"),
                                                 FALSE, FALSE);
@@ -1370,24 +1370,24 @@ save_dialog (GimpImage     *image,
       gtk_grid_attach (GTK_GRID (grid), widget, 1, 1, 1, 1);
       gtk_widget_set_visible (widget, TRUE);
 
-      widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+      widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                  "default-dispose",
                                                  G_TYPE_NONE);
       gtk_grid_attach (GTK_GRID (grid), widget, 0, 2, 2, 1);
       gtk_widget_set_visible (widget, TRUE);
 
-      vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                              "animation-vbox", "force-delay",
                                              "force-dispose", NULL);
 
       gtk_box_pack_start (GTK_BOX (vbox), grid, FALSE, FALSE, 0);
       gtk_box_reorder_child (GTK_BOX (vbox), grid, 0);
 
-      gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                         "ani-frame", "as-animation", FALSE,
                                         "animation-vbox");
 
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "ani-frame", NULL);
     }
   else
@@ -1395,18 +1395,18 @@ save_dialog (GimpImage     *image,
       GtkWidget *hint;
 
       /* Used to create vbox to store hintbox in */
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "spacer", " ",
                                        FALSE, FALSE);
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "no-ani-title", _("Animated GIF"),
                                        FALSE, FALSE);
 
-      vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                              "no-animation-vbox", "spacer",
                                              NULL);
 
-      hint = gimp_hint_box_new (_("You can only export as animation when the "
+      hint = clay_hint_box_new (_("You can only export as animation when the "
                                   "image has more than one layer.\n"
                                   "The image you are trying to export only "
                                   "has one layer."));
@@ -1415,17 +1415,17 @@ save_dialog (GimpImage     *image,
       gtk_widget_set_visible (hint, TRUE);
       gtk_box_reorder_child (GTK_BOX (vbox), hint, 0);
 
-      gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                         "no-ani-frame", "no-ani-title", FALSE,
                                         "no-animation-vbox");
 
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "no-ani-frame", NULL);
     }
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -1523,7 +1523,7 @@ bump_pixel (void)
       cur_progress++;
 
       if ((cur_progress % 20) == 0)
-        gimp_progress_update ((gdouble) cur_progress / (gdouble) max_progress);
+        clay_progress_update ((gdouble) cur_progress / (gdouble) max_progress);
 
       curx = 0;
 

@@ -33,12 +33,12 @@
 #include <math.h>
 #include <errno.h>
 
-#include "libgimpcolor/gimpcolor-private.h"
+#include "libclaycolor/claycolor-private.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC        "file-pnm-load"
@@ -49,7 +49,7 @@
 #define PAM_EXPORT_PROC  "file-pam-export"
 #define PFM_EXPORT_PROC  "file-pfm-export"
 #define PLUG_IN_BINARY   "file-pnm"
-#define PLUG_IN_ROLE     "gimp-file-pnm"
+#define PLUG_IN_ROLE     "clay-file-pnm"
 
 
 /* Declare local data types
@@ -129,12 +129,12 @@ typedef struct _PnmClass PnmClass;
 
 struct _Pnm
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PnmClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -143,38 +143,38 @@ struct _PnmClass
 
 GType                   pnm_get_type         (void);
 
-static GList          * pnm_query_procedures (GimpPlugIn             *plug_in);
-static GimpProcedure  * pnm_create_procedure (GimpPlugIn             *plug_in,
+static GList          * pnm_query_procedures (ClayPlugIn             *plug_in);
+static ClayProcedure  * pnm_create_procedure (ClayPlugIn             *plug_in,
                                               const gchar            *name);
 
-static GimpValueArray * pnm_load             (GimpProcedure          *procedure,
-                                              GimpRunMode             run_mode,
+static ClayValueArray * pnm_load             (ClayProcedure          *procedure,
+                                              ClayRunMode             run_mode,
                                               GFile                  *file,
-                                              GimpMetadata           *metadata,
-                                              GimpMetadataLoadFlags  *flags,
-                                              GimpProcedureConfig    *config,
+                                              ClayMetadata           *metadata,
+                                              ClayMetadataLoadFlags  *flags,
+                                              ClayProcedureConfig    *config,
                                               gpointer                run_data);
-static GimpValueArray * pnm_export           (GimpProcedure          *procedure,
-                                              GimpRunMode             run_mode,
-                                              GimpImage              *image,
+static ClayValueArray * pnm_export           (ClayProcedure          *procedure,
+                                              ClayRunMode             run_mode,
+                                              ClayImage              *image,
                                               GFile                  *file,
-                                              GimpExportOptions      *options,
-                                              GimpMetadata           *metadata,
-                                              GimpProcedureConfig    *config,
+                                              ClayExportOptions      *options,
+                                              ClayMetadata           *metadata,
+                                              ClayProcedureConfig    *config,
                                               gpointer                run_data);
 
-static GimpImage      * load_image           (GFile                  *file,
+static ClayImage      * load_image           (GFile                  *file,
                                               GError                **error);
 static gint             export_image         (GFile                  *file,
-                                              GimpImage              *image,
-                                              GimpDrawable           *drawable,
+                                              ClayImage              *image,
+                                              ClayDrawable           *drawable,
                                               FileType                file_type,
                                               GObject                *config,
                                               GError                **error);
 
-static gboolean         save_dialog          (GimpProcedure          *procedure,
+static gboolean         save_dialog          (ClayProcedure          *procedure,
                                               GObject                *config,
-                                              GimpImage              *image);
+                                              ClayImage              *image);
 
 static void             process_pam_header   (PNMScanner             *scan,
                                               PNMInfo                *info);
@@ -195,7 +195,7 @@ static void             pnm_load_rawpfm      (PNMScanner             *scan,
 static void         create_pam_header        (const gchar           **header_string,
                                               PNMRowInfo             *rowinfo,
                                               PNMExportrowFunc       *saverow,
-                                              GimpImageType           drawable_type,
+                                              ClayImageType           drawable_type,
                                               GeglBuffer             *buffer,
                                               const Babl            **format,
                                               gint                   *rowbufsize,
@@ -246,9 +246,9 @@ static void         pnmscanner_getheaderline (PNMScanner             *s,
           { g_message (__VA_ARGS__); longjmp ((jmpbuf), 1); }
 
 
-G_DEFINE_TYPE (Pnm, pnm, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pnm, pnm, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PNM_TYPE)
+CLAY_MAIN (PNM_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -277,7 +277,7 @@ static const struct
 static void
 pnm_class_init (PnmClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pnm_query_procedures;
   plug_in_class->create_procedure = pnm_create_procedure;
@@ -290,7 +290,7 @@ pnm_init (Pnm *pnm)
 }
 
 static GList *
-pnm_query_procedures (GimpPlugIn *plug_in)
+pnm_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -305,82 +305,82 @@ pnm_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-pnm_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pnm_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            pnm_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("PNM Image"));
+      clay_procedure_set_menu_label (procedure, _("PNM Image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in the PNM file format"),
                                         _("This plug-in loads files in the "
                                           "various Netpbm portable file formats."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Erik Nygren",
                                       "Erik Nygren",
                                       "1996");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-anymap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pnm,ppm,pgm,pbm,pfm,pam");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,P1,0,string,P2,0,string,P3,"
                                       "0,string,P4,0,string,P5,0,string,P6,"
                                       "0,string,P7,0,string,PF,0,string,Pf");
     }
   else if (! strcmp (name, PNM_EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pnm_export,
                                              GINT_TO_POINTER (FILE_TYPE_PNM),
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
 
-      gimp_procedure_set_menu_label (procedure, _("PNM image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("PNM image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PNM"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the PNM file format"),
                                         _("PNM export handles all image types "
                                           "without transparency."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Erik Nygren",
                                       "Erik Nygren",
                                       "1996");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-anymap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pnm");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB  |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB  |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "raw",
+      clay_procedure_add_choice_argument (procedure, "raw",
                                           _("_Data formatting"),
                                           _("Whether to export ASCII or raw output"),
-                                          gimp_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
+                                          clay_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
                                                                        "raw-output",   1, _("Raw"),   NULL,
                                                                        NULL),
                                           "raw-output",
@@ -388,42 +388,42 @@ pnm_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, PBM_EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pnm_export,
                                              GINT_TO_POINTER (FILE_TYPE_PBM),
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PBM"));
-      gimp_procedure_set_menu_label (procedure, _("PBM image"));
+      clay_procedure_set_menu_label (procedure, _("PBM image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the PBM file format"),
                                         _("PBM exporting produces mono images "
                                           "without transparency."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Erik Nygren",
                                       "Erik Nygren",
                                       "1996");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-bitmap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pbm");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_BITMAP,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_BITMAP,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "raw",
+      clay_procedure_add_choice_argument (procedure, "raw",
                                           _("_Data formatting"),
                                           _("Whether to export ASCII or raw output"),
-                                          gimp_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
+                                          clay_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
                                                                        "raw-output",   1, _("Raw"),   NULL,
                                                                        NULL),
                                           "raw-output",
@@ -431,42 +431,42 @@ pnm_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, PGM_EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pnm_export,
                                              GINT_TO_POINTER (FILE_TYPE_PGM),
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
 
-      gimp_procedure_set_menu_label (procedure, _("PGM image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("PGM image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PGM"));
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the PGM file format"),
                                         _("PGM exporting produces grayscale "
                                           "images without transparency."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Erik Nygren",
                                       "Erik Nygren",
                                       "1996");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-graymap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pgm");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "raw",
+      clay_procedure_add_choice_argument (procedure, "raw",
                                           _("_Data formatting"),
                                           _("Whether to export ASCII or raw output"),
-                                          gimp_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
+                                          clay_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
                                                                        "raw-output",   1, _("Raw"),   NULL,
                                                                        NULL),
                                           "raw-output",
@@ -474,43 +474,43 @@ pnm_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, PPM_EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pnm_export,
                                              GINT_TO_POINTER (FILE_TYPE_PPM),
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
 
-      gimp_procedure_set_menu_label (procedure, _("PPM image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("PPM image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PPM"));
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the PPM file format"),
                                         _("PPM export handles RGB images "
                                           "without transparency."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Erik Nygren",
                                       "Erik Nygren",
                                       "1996");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-pixmap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ppm");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "raw",
+      clay_procedure_add_choice_argument (procedure, "raw",
                                           _("_Data formatting"),
                                           _("Whether to export ASCII or raw output"),
-                                          gimp_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
+                                          clay_choice_new_with_values ("ascii-output", 0, _("ASCII"), NULL,
                                                                        "raw-output",   1, _("Raw"),   NULL,
                                                                        NULL),
                                           "raw-output",
@@ -518,72 +518,72 @@ pnm_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, PAM_EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pnm_export,
                                              GINT_TO_POINTER (FILE_TYPE_PAM),
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*, INDEXED*");
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*, INDEXED*");
 
-      gimp_procedure_set_menu_label (procedure, _("PAM image"));
+      clay_procedure_set_menu_label (procedure, _("PAM image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the PAM file format"),
                                         _("PAM export handles RGB images "
                                           "with or without transparency."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Jörg Walter",
                                       "Jörg Walter",
                                       "2009");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-arbitrarymap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pam");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB   |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY  |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB   |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY  |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
     }
   else if (! strcmp (name, PFM_EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pnm_export,
                                              GINT_TO_POINTER (FILE_TYPE_PFM),
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
 
-      gimp_procedure_set_menu_label (procedure, _("PFM image"));
+      clay_procedure_set_menu_label (procedure, _("PFM image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the PFM file format"),
                                         _("PFM export handles all images "
                                           "without transparency."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Mukund Sivaraman",
                                       "Mukund Sivaraman",
                                       "2015");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-portable-floatmap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pfm");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY,
                                               NULL, NULL, NULL);
 
     }
@@ -591,17 +591,17 @@ pnm_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-pnm_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+pnm_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -609,32 +609,32 @@ pnm_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pnm_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+pnm_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
   FileType           file_type = GPOINTER_TO_INT (run_data);
-  GimpPDBStatusType  status    = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export    = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status    = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export    = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error     = NULL;
 
@@ -642,50 +642,50 @@ pnm_export (GimpProcedure        *procedure,
 
   if (file_type != FILE_TYPE_PFM &&
       file_type != FILE_TYPE_PAM &&
-      run_mode  == GIMP_RUN_INTERACTIVE)
+      run_mode  == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export    = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export    = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data, file_type,
                           G_OBJECT (config), &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
   GInputStream    *input;
   GeglBuffer      *buffer    = NULL;
-  GimpImage * volatile image = NULL;
-  GimpLayer       *layer;
+  ClayImage * volatile image = NULL;
+  ClayLayer       *layer;
   char             buf[BUFLEN + 4];  /* buffer for random things like scanning */
   PNMInfo         *pnminfo;
   PNMScanner      *volatile scan;
   gint             ctr;
-  GimpPrecision    precision;
+  ClayPrecision    precision;
   gboolean         is_pam    = FALSE;
-  GimpImageType    layer_type;
+  ClayImageType    layer_type;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
+  clay_progress_init_printf (_("Opening '%s'"),
                              g_file_get_parse_name (file));
 
   input = G_INPUT_STREAM (g_file_read (file, NULL, error));
@@ -712,7 +712,7 @@ load_image (GFile   *file,
         g_object_unref (buffer);
 
       if (image)
-        gimp_image_delete (image);
+        clay_image_delete (image);
 
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error reading data. Image may be corrupt."));
@@ -761,7 +761,7 @@ load_image (GFile   *file,
       pnminfo->xres = g_ascii_isdigit(*buf) ? atoi (buf) : 0;
       CHECK_FOR_ERROR (pnminfo->xres <= 0, pnminfo->jmpbuf,
                        _("Invalid X resolution."));
-      CHECK_FOR_ERROR (pnminfo->xres > GIMP_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
+      CHECK_FOR_ERROR (pnminfo->xres > CLAY_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
                        _("Image width is larger than Clay can handle."));
 
       pnmscanner_gettoken (scan, buf, BUFLEN);
@@ -770,7 +770,7 @@ load_image (GFile   *file,
       pnminfo->yres = g_ascii_isdigit (*buf) ? atoi (buf) : 0;
       CHECK_FOR_ERROR (pnminfo->yres <= 0, pnminfo->jmpbuf,
                        _("Invalid Y resolution."));
-      CHECK_FOR_ERROR (pnminfo->yres > GIMP_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
+      CHECK_FOR_ERROR (pnminfo->yres > CLAY_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
                        _("Image height is larger than Clay can handle."));
 
     }
@@ -788,7 +788,7 @@ load_image (GFile   *file,
                        pnminfo->jmpbuf, _("Bogus scale factor."));
       CHECK_FOR_ERROR (! isnormal (pnminfo->scale_factor),
                        pnminfo->jmpbuf, _("Unsupported scale factor."));
-      precision = GIMP_PRECISION_FLOAT_LINEAR;
+      precision = CLAY_PRECISION_FLOAT_LINEAR;
     }
   else if (pnminfo->np != 0)         /* pbm's don't have a maxval field */
     {
@@ -805,54 +805,54 @@ load_image (GFile   *file,
 
       if (pnminfo->maxval < 256)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
         }
     }
   else
     {
-      precision = GIMP_PRECISION_U8_NON_LINEAR;
+      precision = CLAY_PRECISION_U8_NON_LINEAR;
     }
 
   /* Create a new image of the proper size and associate the filename
    * with it.
    */
-  image = gimp_image_new_with_precision (pnminfo->xres, pnminfo->yres,
-                                         (pnminfo->np >= 3) ? GIMP_RGB : GIMP_GRAY,
+  image = clay_image_new_with_precision (pnminfo->xres, pnminfo->yres,
+                                         (pnminfo->np >= 3) ? CLAY_RGB : CLAY_GRAY,
                                          precision);
 
   switch (pnminfo->np)
     {
     case 0:
     case 1:
-      layer_type = GIMP_GRAY_IMAGE;
+      layer_type = CLAY_GRAY_IMAGE;
       break;
 
     case 2:
-      layer_type = GIMP_GRAYA_IMAGE;
+      layer_type = CLAY_GRAYA_IMAGE;
       break;
 
     case 3:
-      layer_type = GIMP_RGB_IMAGE;
+      layer_type = CLAY_RGB_IMAGE;
       break;
 
     case 4:
-      layer_type = GIMP_RGBA_IMAGE;
+      layer_type = CLAY_RGBA_IMAGE;
       break;
 
     default:
-      layer_type = GIMP_GRAY_IMAGE;
+      layer_type = CLAY_GRAY_IMAGE;
     }
 
-  layer = gimp_layer_new (image, _("Background"), pnminfo->xres, pnminfo->yres,
+  layer = clay_layer_new (image, _("Background"), pnminfo->xres, pnminfo->yres,
                           layer_type, 100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   pnminfo->loader (scan, pnminfo, buffer);
 
@@ -935,7 +935,7 @@ process_pam_header (PNMScanner *scan,
     }
     CHECK_FOR_ERROR (pnmscanner_eof (scan), pnminfo->jmpbuf,
                      _("PAM: Premature end of file."));
-    CHECK_FOR_ERROR (pnminfo->xres > GIMP_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
+    CHECK_FOR_ERROR (pnminfo->xres > CLAY_MAX_IMAGE_SIZE, pnminfo->jmpbuf,
                      _("Image width is larger than Clay can handle."));
     CHECK_FOR_ERROR (pnminfo->xres <= 0, pnminfo->jmpbuf,
                      _("PAM: Invalid X resolution."));
@@ -970,8 +970,8 @@ pnm_load_ascii (PNMScanner *scan,
   else
     bpc = 1;
 
-  /* No overflow as long as gimp_tile_height() < 1365 = 2^(31 - 18) / 6 */
-  data = g_new (guchar, gimp_tile_height () * info->xres * np * bpc);
+  /* No overflow as long as clay_tile_height() < 1365 = 2^(31 - 18) / 6 */
+  data = g_new (guchar, clay_tile_height () * info->xres * np * bpc);
 
   /* Buffer reads to increase performance */
   pnmscanner_createbuffer (scan, 4096);
@@ -979,7 +979,7 @@ pnm_load_ascii (PNMScanner *scan,
   for (y = 0; y < info->yres; y += scanlines)
     {
       start = y;
-      end   = y + gimp_tile_height ();
+      end   = y + clay_tile_height ();
       end   = MIN (end, info->yres);
 
       scanlines = end - start;
@@ -1048,12 +1048,12 @@ pnm_load_ascii (PNMScanner *scan,
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, y, info->xres, scanlines), 0,
                        NULL, data, GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((double) y / (double) info->yres);
+      clay_progress_update ((double) y / (double) info->yres);
     }
 
   g_free (data);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static void
@@ -1075,8 +1075,8 @@ pnm_load_raw (PNMScanner *scan,
   else
     bpc = 1;
 
-  /* No overflow as long as gimp_tile_height() < 1365 = 2^(31 - 18) / 6 */
-  if (! g_size_checked_mul (&data_size, gimp_tile_height (), info->xres) ||
+  /* No overflow as long as clay_tile_height() < 1365 = 2^(31 - 18) / 6 */
+  if (! g_size_checked_mul (&data_size, clay_tile_height (), info->xres) ||
       ! g_size_checked_mul (&data_size, data_size, info->np)             ||
       ! g_size_checked_mul (&data_size, data_size, bpc))
     CHECK_FOR_ERROR (FALSE, info->jmpbuf, _("Unsupported maximum value."));
@@ -1088,7 +1088,7 @@ pnm_load_raw (PNMScanner *scan,
   for (y = 0; y < info->yres; y += scanlines)
     {
       start = y;
-      end = y + gimp_tile_height ();
+      end = y + clay_tile_height ();
       end = MIN (end, info->yres);
       scanlines = end - start;
       d = data;
@@ -1148,12 +1148,12 @@ pnm_load_raw (PNMScanner *scan,
                        GEGL_RECTANGLE (0, y, info->xres, scanlines), 0,
                        format, data, GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((double) y / (double) info->yres);
+      clay_progress_update ((double) y / (double) info->yres);
     }
 
   g_free (data);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static void
@@ -1172,13 +1172,13 @@ pnm_load_rawpbm (PNMScanner *scan,
   input = pnmscanner_input (scan);
 
   rowlen = (int)ceil ((double)(info->xres)/8.0);
-  data = g_new (guchar, gimp_tile_height () * info->xres);
+  data = g_new (guchar, clay_tile_height () * info->xres);
   buf = g_new (guchar, rowlen);
 
   for (y = 0; y < info->yres; y += scanlines)
     {
       start = y;
-      end = y + gimp_tile_height ();
+      end = y + clay_tile_height ();
       end = MIN (end, info->yres);
       scanlines = end - start;
       d = data;
@@ -1217,13 +1217,13 @@ pnm_load_rawpbm (PNMScanner *scan,
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, y, info->xres, scanlines), 0,
                        NULL, data, GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((double) y / (double) info->yres);
+      clay_progress_update ((double) y / (double) info->yres);
     }
 
   g_free (buf);
   g_free (data);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static void
@@ -1289,12 +1289,12 @@ pnm_load_rawpfm (PNMScanner *scan,
                        NULL, data, GEGL_AUTO_ROWSTRIDE);
 
       if (y % 32 == 0)
-        gimp_progress_update ((double) (info->yres - y) / (double) info->yres);
+        clay_progress_update ((double) (info->yres - y) / (double) info->yres);
     }
 
   g_free (data);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static gboolean
@@ -1310,7 +1310,7 @@ static void
 create_pam_header (const gchar      **header_string,
                    PNMRowInfo        *rowinfo,
                    PNMExportrowFunc  *saverow,
-                   GimpImageType      drawable_type,
+                   ClayImageType      drawable_type,
                    GeglBuffer        *buffer,
                    const Babl       **format,
                    gint              *rowbufsize,
@@ -1323,7 +1323,7 @@ create_pam_header (const gchar      **header_string,
   gchar *tupltype = NULL;
 
   comment = g_strdup_printf ("# Created by Clay version %s PNM plug-in",
-                             GIMP_VERSION);
+                             CLAY_VERSION);
   *saverow = pnmsaverow_raw;
 
   if (rowinfo->bpc == 2)
@@ -1331,7 +1331,7 @@ create_pam_header (const gchar      **header_string,
 
   switch (drawable_type)
     {
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       tupltype = "GRAYSCALE";
       *np      = 1;
       if (rowinfo->bpc == 1)
@@ -1346,7 +1346,7 @@ create_pam_header (const gchar      **header_string,
         }
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       tupltype = "GRAYSCALE_ALPHA";
       *np      = 2;
       if (rowinfo->bpc == 1)
@@ -1361,7 +1361,7 @@ create_pam_header (const gchar      **header_string,
         }
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       tupltype = "RGB";
       *np      = 3;
       if (rowinfo->bpc == 1)
@@ -1376,7 +1376,7 @@ create_pam_header (const gchar      **header_string,
         }
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       tupltype = "RGB_ALPHA";
       *np      = 4;
       if (rowinfo->bpc == 1)
@@ -1391,14 +1391,14 @@ create_pam_header (const gchar      **header_string,
         }
       break;
 
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_INDEXED_IMAGE:
       tupltype    = "RGB";
       *np         = 3;
       *format     = babl_format ("R'G'B' u8");
       *rowbufsize = xres * 3;
       break;
 
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       tupltype    = "RGB_ALPHA";
       *np         = 4;
       *format     = babl_format ("R'G'B'A u8");
@@ -1593,8 +1593,8 @@ pnmsaverow_ascii_indexed (PNMRowInfo    *ri,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               FileType       file_type,
               GObject       *config,
               GError       **error)
@@ -1604,7 +1604,7 @@ export_image (GFile         *file,
   GeglBuffer      *buffer = NULL;
   const Babl      *format = NULL;
   const gchar     *header_string = NULL;
-  GimpImageType    drawable_type;
+  ClayImageType    drawable_type;
   PNMRowInfo       rowinfo;
   PNMExportrowFunc saverow = NULL;
   guchar           red[256];
@@ -1620,18 +1620,18 @@ export_image (GFile         *file,
   gboolean         config_raw = TRUE;
 
   if (file_type != FILE_TYPE_PFM && file_type != FILE_TYPE_PAM)
-    config_raw = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    config_raw = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                       "raw");
 
   /*  Make sure we're not saving an image with an alpha channel
    *  unless we're exporting a PAM file  */
-  if (file_type != FILE_TYPE_PAM && gimp_drawable_has_alpha (drawable))
+  if (file_type != FILE_TYPE_PAM && clay_drawable_has_alpha (drawable))
     {
       g_message (_("Cannot export images with alpha channel."));
       goto out;
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
+  clay_progress_init_printf (_("Exporting '%s'"),
                              g_file_get_parse_name (file));
 
   /* open the file */
@@ -1641,18 +1641,18 @@ export_image (GFile         *file,
   if (! output)
     goto out;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   xres = gegl_buffer_get_width  (buffer);
   yres = gegl_buffer_get_height (buffer);
 
-  drawable_type = gimp_drawable_type (drawable);
+  drawable_type = clay_drawable_type (drawable);
 
-  switch (gimp_image_get_precision (image))
+  switch (clay_image_get_precision (image))
     {
-    case GIMP_PRECISION_U8_LINEAR:
-    case GIMP_PRECISION_U8_NON_LINEAR:
-    case GIMP_PRECISION_U8_PERCEPTUAL:
+    case CLAY_PRECISION_U8_LINEAR:
+    case CLAY_PRECISION_U8_NON_LINEAR:
+    case CLAY_PRECISION_U8_PERCEPTUAL:
       rowinfo.bpc = 1;
       break;
     default:
@@ -1680,7 +1680,7 @@ export_image (GFile         *file,
         {
           switch (drawable_type)
             {
-            case GIMP_GRAY_IMAGE:
+            case CLAY_GRAY_IMAGE:
               header_string = "P2\n";
               if (rowinfo.bpc == 1)
                 {
@@ -1696,7 +1696,7 @@ export_image (GFile         *file,
               saverow = pnmsaverow_ascii;
               break;
 
-            case GIMP_RGB_IMAGE:
+            case CLAY_RGB_IMAGE:
               header_string = "P3\n";
               if (rowinfo.bpc == 1)
                 {
@@ -1712,7 +1712,7 @@ export_image (GFile         *file,
               saverow = pnmsaverow_ascii;
               break;
 
-            case GIMP_INDEXED_IMAGE:
+            case CLAY_INDEXED_IMAGE:
               header_string = "P3\n";
               format = gegl_buffer_get_format (buffer);
               np = 1;
@@ -1740,7 +1740,7 @@ export_image (GFile         *file,
         {
           switch (drawable_type)
             {
-            case GIMP_GRAY_IMAGE:
+            case CLAY_GRAY_IMAGE:
               header_string = "P5\n";
               if (rowinfo.bpc == 1)
                 {
@@ -1756,7 +1756,7 @@ export_image (GFile         *file,
               saverow = pnmsaverow_raw;
               break;
 
-            case GIMP_RGB_IMAGE:
+            case CLAY_RGB_IMAGE:
               header_string = "P6\n";
               if (rowinfo.bpc == 1)
                 {
@@ -1772,7 +1772,7 @@ export_image (GFile         *file,
               saverow = pnmsaverow_raw;
               break;
 
-            case GIMP_INDEXED_IMAGE:
+            case CLAY_INDEXED_IMAGE:
               header_string = "P6\n";
               format = gegl_buffer_get_format (buffer);
               np = 1;
@@ -1790,13 +1790,13 @@ export_image (GFile         *file,
     {
       switch (drawable_type)
         {
-        case GIMP_GRAY_IMAGE:
+        case CLAY_GRAY_IMAGE:
           header_string = "Pf\n";
           format = babl_format ("Y float");
           np = 1;
           break;
 
-        case GIMP_RGB_IMAGE:
+        case CLAY_RGB_IMAGE:
           header_string = "PF\n";
           format = babl_format ("RGB float");
           np = 3;
@@ -1813,13 +1813,13 @@ export_image (GFile         *file,
 
   rowinfo.zero_is_black = FALSE;
 
-  if (drawable_type == GIMP_INDEXED_IMAGE ||
-      drawable_type == GIMP_INDEXEDA_IMAGE)
+  if (drawable_type == CLAY_INDEXED_IMAGE ||
+      drawable_type == CLAY_INDEXEDA_IMAGE)
     {
       guchar *cmap;
       gint    num_colors;
 
-      cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &num_colors, NULL);
+      cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &num_colors, NULL);
 
       if (file_type == FILE_TYPE_PBM)
         {
@@ -1827,16 +1827,16 @@ export_image (GFile         *file,
           switch (num_colors)
             {
             case 1:
-              rowinfo.zero_is_black = (GIMP_RGB_LUMINANCE (cmap[0],
+              rowinfo.zero_is_black = (CLAY_RGB_LUMINANCE (cmap[0],
                                                            cmap[1],
                                                            cmap[2]) < 128);
               break;
 
             case 2:
-              rowinfo.zero_is_black = (GIMP_RGB_LUMINANCE (cmap[0],
+              rowinfo.zero_is_black = (CLAY_RGB_LUMINANCE (cmap[0],
                                                            cmap[1],
                                                            cmap[2]) <
-                                       GIMP_RGB_LUMINANCE (cmap[3],
+                                       CLAY_RGB_LUMINANCE (cmap[3],
                                                            cmap[4],
                                                            cmap[5]));
               break;
@@ -1856,14 +1856,14 @@ export_image (GFile         *file,
               red[i] = *c++;
               grn[i] = *c++;
               blu[i] = *c++;
-              if (drawable_type == GIMP_INDEXEDA_IMAGE)
+              if (drawable_type == CLAY_INDEXEDA_IMAGE)
                 alpha[i] = 255;
             }
 
           rowinfo.red = red;
           rowinfo.grn = grn;
           rowinfo.blu = blu;
-          if (drawable_type == GIMP_INDEXEDA_IMAGE)
+          if (drawable_type == CLAY_INDEXEDA_IMAGE)
             rowinfo.alpha = alpha;
           else
             rowinfo.alpha = NULL;
@@ -1876,7 +1876,7 @@ export_image (GFile         *file,
     {
       /* write out comment string */
       comment = g_strdup_printf("# Created by Clay version %s PNM plug-in\n",
-                                GIMP_VERSION);
+                                CLAY_VERSION);
 
       if (! output_write (output, comment, strlen (comment), error))
         goto out;
@@ -1910,7 +1910,7 @@ export_image (GFile         *file,
 
       /* allocate a buffer for retrieving information from the pixel region  */
       data = g_new (guchar,
-                    gimp_tile_height () * xres *
+                    clay_tile_height () * xres *
                     babl_format_get_bytes_per_pixel (format));
 
       rowbuf = g_new (gchar, rowbufsize + 1);
@@ -1925,9 +1925,9 @@ export_image (GFile         *file,
       /* Write the body out */
       for (ypos = 0; ypos < yres; ypos++)
         {
-          if ((ypos % gimp_tile_height ()) == 0)
+          if ((ypos % clay_tile_height ()) == 0)
             {
-              yend = ypos + gimp_tile_height ();
+              yend = ypos + clay_tile_height ();
               yend = MIN (yend, yres);
 
               gegl_buffer_get (buffer,
@@ -1948,7 +1948,7 @@ export_image (GFile         *file,
           d += xres * (np ? np : 1) * rowinfo.bpc;
 
           if (ypos % 32 == 0)
-            gimp_progress_update ((double) ypos / (double) yres);
+            clay_progress_update ((double) ypos / (double) yres);
         }
 
       g_free (rowbuf);
@@ -1981,13 +1981,13 @@ export_image (GFile         *file,
             }
 
           if (ypos % 32 == 0)
-            gimp_progress_update ((double) (yres - ypos) / (double) yres);
+            clay_progress_update ((double) (yres - ypos) / (double) yres);
         }
 
       g_free (data);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
   status = TRUE;
 
  out:
@@ -2011,26 +2011,26 @@ export_image (GFile         *file,
 }
 
 static gboolean
-save_dialog (GimpProcedure *procedure,
+save_dialog (ClayProcedure *procedure,
              GObject       *config,
-             GimpImage     *image)
+             ClayImage     *image)
 {
   GtkWidget    *dialog;
   GtkWidget    *frame;
   gboolean      run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
   /*  file save type  */
-  frame = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "raw", GIMP_TYPE_INT_RADIO_FRAME);
+  frame = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "raw", CLAY_TYPE_INT_RADIO_FRAME);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

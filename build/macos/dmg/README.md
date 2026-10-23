@@ -1,18 +1,18 @@
-# GIMP Apple HowTo
+# Clay Apple HowTo
 
 If you are a macOS package maintainer, check the documentation at:
 <https://testing.developer.gimp.org/core/maintainer/accounts/appledev/>
 
 ## Clay release DMG on a developer Mac
 
-`3_dist-gimp-apple.sh` only signs and notarizes on GitLab CI. To make a
+`3_dist-clay-apple.sh` only signs and notarizes on GitLab CI. To make a
 signed, notarized Clay DMG locally with Homebrew:
 
 1. Build babl, GEGL and Clay with `build/macos/1_build-deps-macports.sh` and
-   `build/macos/2_build-gimp-macports.sh` (both use Homebrew when MacPorts
+   `build/macos/2_build-clay-macports.sh` (both use Homebrew when MacPorts
    is not installed).
 2. Reconfigure the Clay build dir for a bundle and install it, which runs
-   `2_bundle-gimp-uni_base.py` and writes `clay-<arch>.app` here:
+   `2_bundle-clay-uni_base.py` and writes `clay-<arch>.app` here:
 
    ```sh
    meson configure <build dir> -Drelocatable-bundle=yes -Ddmg=true

@@ -25,110 +25,110 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpparamspecs-desc.h"
-#include "core/gimpparamspecs.h"
-#include "gimp-pdb-compat.h"
-#include "gimppdb-query.h"
-#include "plug-in/gimpplugin-proc.h"
-#include "plug-in/gimppluginmanager-data.h"
-#include "plug-in/gimppluginmanager.h"
-#include "plug-in/gimppluginprocedure.h"
+#include "clay-pdb-compat.h"
+#include "claypdb-query.h"
+#include "core/clay.h"
+#include "core/clayparamspecs-desc.h"
+#include "core/clayparamspecs.h"
+#include "plug-in/clayplugin-proc.h"
+#include "plug-in/claypluginmanager-data.h"
+#include "plug-in/claypluginmanager.h"
+#include "plug-in/claypluginprocedure.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpProcedure *
-lookup_procedure (GimpPDB          *pdb,
+static ClayProcedure *
+lookup_procedure (ClayPDB          *pdb,
                   const gchar      *proc_name,
                   GError          **error)
 {
-  GimpProcedure *proc = gimp_pdb_lookup_procedure (pdb, proc_name);
+  ClayProcedure *proc = clay_pdb_lookup_procedure (pdb, proc_name);
 
   if (! proc)
     {
-      const gchar *compat_name = gimp_pdb_lookup_compat_proc_name (pdb,
+      const gchar *compat_name = clay_pdb_lookup_compat_proc_name (pdb,
                                                                    proc_name);
 
       if (compat_name)
-        proc = gimp_pdb_lookup_procedure (pdb, compat_name);
+        proc = clay_pdb_lookup_procedure (pdb, compat_name);
     }
 
   if (! proc)
-    g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_PROCEDURE_NOT_FOUND,
+    g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_PROCEDURE_NOT_FOUND,
                  _("Procedure '%s' not found"), proc_name);
 
   return proc;
 }
 
-static GimpValueArray *
-pdb_temp_name_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+pdb_temp_name_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar *temp_name = NULL;
 
   static gint proc_number = 0;
 
   temp_name = g_strdup_printf ("temp-procedure-number-%d", proc_number++);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_take_string (gimp_value_array_index (return_vals, 1), temp_name);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_take_string (clay_value_array_index (return_vals, 1), temp_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_dump_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+pdb_dump_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
   gboolean success = TRUE;
   GFile *file;
 
-  file = g_value_get_object (gimp_value_array_index (args, 0));
+  file = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       if (file)
-        success = gimp_pdb_dump (gimp->pdb, file, error);
+        success = clay_pdb_dump (clay->pdb, file, error);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_query_invoker (GimpProcedure         *procedure,
-                   Gimp                  *gimp,
-                   GimpContext           *context,
-                   GimpProgress          *progress,
-                   const GimpValueArray  *args,
+static ClayValueArray *
+pdb_query_invoker (ClayProcedure         *procedure,
+                   Clay                  *clay,
+                   ClayContext           *context,
+                   ClayProgress          *progress,
+                   const ClayValueArray  *args,
                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
   const gchar *blurb;
   const gchar *help;
@@ -138,61 +138,61 @@ pdb_query_invoker (GimpProcedure         *procedure,
   const gchar *proc_type;
   gchar **procedure_names = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
-  blurb = g_value_get_string (gimp_value_array_index (args, 1));
-  help = g_value_get_string (gimp_value_array_index (args, 2));
-  authors = g_value_get_string (gimp_value_array_index (args, 3));
-  copyright = g_value_get_string (gimp_value_array_index (args, 4));
-  date = g_value_get_string (gimp_value_array_index (args, 5));
-  proc_type = g_value_get_string (gimp_value_array_index (args, 6));
+  name = g_value_get_string (clay_value_array_index (args, 0));
+  blurb = g_value_get_string (clay_value_array_index (args, 1));
+  help = g_value_get_string (clay_value_array_index (args, 2));
+  authors = g_value_get_string (clay_value_array_index (args, 3));
+  copyright = g_value_get_string (clay_value_array_index (args, 4));
+  date = g_value_get_string (clay_value_array_index (args, 5));
+  proc_type = g_value_get_string (clay_value_array_index (args, 6));
 
   if (success)
     {
-      success = gimp_pdb_query (gimp->pdb,
+      success = clay_pdb_query (clay->pdb,
                                 name, blurb, help, authors,
                                 copyright, date, proc_type,
                                 &procedure_names,
                                 error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), procedure_names);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), procedure_names);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_proc_exists_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+pdb_proc_exists_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gboolean exists = FALSE;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = gimp_pdb_lookup_procedure (gimp->pdb,
+          ClayProcedure *proc = clay_pdb_lookup_procedure (clay->pdb,
                                                            procedure_name);
 
           if (! proc)
             {
-              procedure_name = gimp_pdb_lookup_compat_proc_name (gimp->pdb,
+              procedure_name = clay_pdb_lookup_compat_proc_name (clay->pdb,
                                                                  procedure_name);
 
               if (procedure_name)
-                proc = gimp_pdb_lookup_procedure (gimp->pdb, procedure_name);
+                proc = clay_pdb_lookup_procedure (clay->pdb, procedure_name);
             }
 
           exists = (proc != NULL && ! proc->is_private);
@@ -203,37 +203,37 @@ pdb_proc_exists_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), exists);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), exists);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_get_proc_info_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_info_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gint proc_type = 0;
   gint num_args = 0;
   gint num_values = 0;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
           if (proc)
@@ -249,41 +249,41 @@ pdb_get_proc_info_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_enum (gimp_value_array_index (return_vals, 1), proc_type);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), num_args);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), num_values);
+      g_value_set_enum (clay_value_array_index (return_vals, 1), proc_type);
+      g_value_set_int (clay_value_array_index (return_vals, 2), num_args);
+      g_value_set_int (clay_value_array_index (return_vals, 3), num_values);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_get_proc_argument_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_argument_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gint arg_num;
   GParamSpec *param_spec = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  arg_num = g_value_get_int (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  arg_num = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
           if (proc && (arg_num >= 0 && arg_num < proc->num_args))
@@ -297,37 +297,37 @@ pdb_get_proc_argument_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_param (gimp_value_array_index (return_vals, 1), param_spec);
+    g_value_take_param (clay_value_array_index (return_vals, 1), param_spec);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_get_proc_return_value_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_return_value_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gint val_num;
   GParamSpec *param_spec = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  val_num = g_value_get_int (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  val_num = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
           if (proc && (val_num >= 0 && val_num < proc->num_values))
@@ -341,73 +341,73 @@ pdb_get_proc_return_value_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_param (gimp_value_array_index (return_vals, 1), param_spec);
+    g_value_take_param (clay_value_array_index (return_vals, 1), param_spec);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_proc_image_types_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_image_types_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   const gchar *image_types;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  image_types = g_value_get_string (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  image_types = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_image_types (plug_in, procedure_name,
+          success = clay_plug_in_set_proc_image_types (plug_in, procedure_name,
                                                        image_types, error);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_proc_image_types_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_image_types_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gchar *image_types = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
-          if (GIMP_IS_PLUG_IN_PROCEDURE (proc))
+          if (CLAY_IS_PLUG_IN_PROCEDURE (proc))
             {
-              image_types = g_strdup (GIMP_PLUG_IN_PROCEDURE (proc)->image_types);
+              image_types = g_strdup (CLAY_PLUG_IN_PROCEDURE (proc)->image_types);
             }
           else
             success = FALSE;
@@ -416,106 +416,106 @@ pdb_get_proc_image_types_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), image_types);
+    g_value_take_string (clay_value_array_index (return_vals, 1), image_types);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_proc_sensitivity_mask_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_sensitivity_mask_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   gint mask;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  mask = g_value_get_int (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  mask = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_sensitivity_mask (plug_in, procedure_name,
+          success = clay_plug_in_set_proc_sensitivity_mask (plug_in, procedure_name,
                                                             mask, error);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_proc_menu_label_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_menu_label_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   const gchar *menu_label;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  menu_label = g_value_get_string (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  menu_label = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_menu_label (plug_in, procedure_name,
+          success = clay_plug_in_set_proc_menu_label (plug_in, procedure_name,
                                                       menu_label, error);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_proc_menu_label_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_menu_label_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gchar *menu_label = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
-          if (GIMP_IS_PLUG_IN_PROCEDURE (proc))
+          if (CLAY_IS_PLUG_IN_PROCEDURE (proc))
             {
-              menu_label = g_strdup (GIMP_PLUG_IN_PROCEDURE (proc)->menu_label);
+              menu_label = g_strdup (CLAY_PLUG_IN_PROCEDURE (proc)->menu_label);
             }
           else
             success = FALSE;
@@ -524,73 +524,73 @@ pdb_get_proc_menu_label_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), menu_label);
+    g_value_take_string (clay_value_array_index (return_vals, 1), menu_label);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_add_proc_menu_path_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+pdb_add_proc_menu_path_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   const gchar *menu_path;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  menu_path = g_value_get_string (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  menu_path = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_add_proc_menu_path (plug_in, procedure_name,
+          success = clay_plug_in_add_proc_menu_path (plug_in, procedure_name,
                                                      menu_path, error);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_proc_menu_paths_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_menu_paths_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gchar **menu_paths = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
-          if (GIMP_IS_PLUG_IN_PROCEDURE (proc))
+          if (CLAY_IS_PLUG_IN_PROCEDURE (proc))
             {
-              GimpPlugInProcedure *plug_in_proc = GIMP_PLUG_IN_PROCEDURE (proc);
+              ClayPlugInProcedure *plug_in_proc = CLAY_PLUG_IN_PROCEDURE (proc);
               guint num_menu_paths;
 
               num_menu_paths = g_list_length (plug_in_proc->menu_paths);
@@ -617,21 +617,21 @@ pdb_get_proc_menu_paths_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), menu_paths);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), menu_paths);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_proc_icon_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_icon_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
@@ -639,18 +639,18 @@ pdb_set_proc_icon_invoker (GimpProcedure         *procedure,
   gint icon_type;
   GBytes *icon_data;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  icon_type = g_value_get_enum (gimp_value_array_index (args, 1));
-  icon_data = g_value_get_boxed (gimp_value_array_index (args, 2));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  icon_type = g_value_get_enum (clay_value_array_index (args, 1));
+  icon_data = g_value_get_boxed (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_icon (plug_in, procedure_name,
+          success = clay_plug_in_set_proc_icon (plug_in, procedure_name,
                                                 icon_type,
                                                 g_bytes_get_data (icon_data, NULL),
                                                 g_bytes_get_size (icon_data),
@@ -660,16 +660,16 @@ pdb_set_proc_icon_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_proc_documentation_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_documentation_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
@@ -678,58 +678,58 @@ pdb_set_proc_documentation_invoker (GimpProcedure         *procedure,
   const gchar *help;
   const gchar *help_id;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  blurb = g_value_get_string (gimp_value_array_index (args, 1));
-  help = g_value_get_string (gimp_value_array_index (args, 2));
-  help_id = g_value_get_string (gimp_value_array_index (args, 3));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  blurb = g_value_get_string (clay_value_array_index (args, 1));
+  help = g_value_get_string (clay_value_array_index (args, 2));
+  help_id = g_value_get_string (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_help (plug_in, procedure_name,
+          success = clay_plug_in_set_proc_help (plug_in, procedure_name,
                                                 blurb, help, help_id, error);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_proc_documentation_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_documentation_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gchar *blurb = NULL;
   gchar *help = NULL;
   gchar *help_id = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
           if (proc)
             {
-              blurb   = g_strdup (gimp_procedure_get_blurb   (proc));
-              help    = g_strdup (gimp_procedure_get_help    (proc));
-              help_id = g_strdup (gimp_procedure_get_help_id (proc));
+              blurb   = g_strdup (clay_procedure_get_blurb   (proc));
+              help    = g_strdup (clay_procedure_get_help    (proc));
+              help_id = g_strdup (clay_procedure_get_help_id (proc));
             }
           else
             success = FALSE;
@@ -738,25 +738,25 @@ pdb_get_proc_documentation_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_string (gimp_value_array_index (return_vals, 1), blurb);
-      g_value_take_string (gimp_value_array_index (return_vals, 2), help);
-      g_value_take_string (gimp_value_array_index (return_vals, 3), help_id);
+      g_value_take_string (clay_value_array_index (return_vals, 1), blurb);
+      g_value_take_string (clay_value_array_index (return_vals, 2), help);
+      g_value_take_string (clay_value_array_index (return_vals, 3), help_id);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_proc_attribution_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_attribution_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
@@ -765,19 +765,19 @@ pdb_set_proc_attribution_invoker (GimpProcedure         *procedure,
   const gchar *copyright;
   const gchar *date;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  authors = g_value_get_string (gimp_value_array_index (args, 1));
-  copyright = g_value_get_string (gimp_value_array_index (args, 2));
-  date = g_value_get_string (gimp_value_array_index (args, 3));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  authors = g_value_get_string (clay_value_array_index (args, 1));
+  copyright = g_value_get_string (clay_value_array_index (args, 2));
+  date = g_value_get_string (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_attribution (plug_in, procedure_name,
+          success = clay_plug_in_set_proc_attribution (plug_in, procedure_name,
                                                        authors, copyright, date,
                                                        error);
         }
@@ -785,32 +785,32 @@ pdb_set_proc_attribution_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_proc_attribution_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_attribution_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   gchar *authors = NULL;
   gchar *copyright = NULL;
   gchar *date = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name,
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name,
                                                   error);
 
           if (proc)
@@ -826,25 +826,25 @@ pdb_get_proc_attribution_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_string (gimp_value_array_index (return_vals, 1), authors);
-      g_value_take_string (gimp_value_array_index (return_vals, 2), copyright);
-      g_value_take_string (gimp_value_array_index (return_vals, 3), date);
+      g_value_take_string (clay_value_array_index (return_vals, 1), authors);
+      g_value_take_string (clay_value_array_index (return_vals, 2), copyright);
+      g_value_take_string (clay_value_array_index (return_vals, 3), date);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_file_proc_load_handler_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_load_handler_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
@@ -854,20 +854,20 @@ pdb_set_file_proc_load_handler_invoker (GimpProcedure         *procedure,
   const gchar *prefixes;
   const gchar *magics;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  extensions = g_value_get_string (gimp_value_array_index (args, 1));
-  meta_extensions = g_value_get_string (gimp_value_array_index (args, 2));
-  prefixes = g_value_get_string (gimp_value_array_index (args, 3));
-  magics = g_value_get_string (gimp_value_array_index (args, 4));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  extensions = g_value_get_string (clay_value_array_index (args, 1));
+  meta_extensions = g_value_get_string (clay_value_array_index (args, 2));
+  prefixes = g_value_get_string (clay_value_array_index (args, 3));
+  magics = g_value_get_string (clay_value_array_index (args, 4));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_load_handler (plug_in,
+          success = clay_plug_in_set_file_proc_load_handler (plug_in,
                                                              procedure_name,
                                                              extensions, meta_extensions,
                                                              prefixes, magics, error);
@@ -878,16 +878,16 @@ pdb_set_file_proc_load_handler_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_export_handler_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_export_handler_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
@@ -896,19 +896,19 @@ pdb_set_file_proc_export_handler_invoker (GimpProcedure         *procedure,
   const gchar *meta_extensions;
   const gchar *prefixes;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  extensions = g_value_get_string (gimp_value_array_index (args, 1));
-  meta_extensions = g_value_get_string (gimp_value_array_index (args, 2));
-  prefixes = g_value_get_string (gimp_value_array_index (args, 3));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  extensions = g_value_get_string (clay_value_array_index (args, 1));
+  meta_extensions = g_value_get_string (clay_value_array_index (args, 2));
+  prefixes = g_value_get_string (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_save_handler (plug_in,
+          success = clay_plug_in_set_file_proc_save_handler (plug_in,
                                                              procedure_name,
                                                              extensions, meta_extensions,
                                                              prefixes, error);
@@ -919,33 +919,33 @@ pdb_set_file_proc_export_handler_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_priority_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_priority_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   gint priority;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  priority = g_value_get_int (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  priority = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_priority (plug_in,
+          success = clay_plug_in_set_file_proc_priority (plug_in,
                                                          procedure_name,
                                                          priority, error);
         }
@@ -953,33 +953,33 @@ pdb_set_file_proc_priority_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_mime_types_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_mime_types_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   const gchar *mime_types;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  mime_types = g_value_get_string (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  mime_types = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_mime_types (plug_in,
+          success = clay_plug_in_set_file_proc_mime_types (plug_in,
                                                            procedure_name,
                                                            mime_types, error);
         }
@@ -987,31 +987,31 @@ pdb_set_file_proc_mime_types_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_handles_remote_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_handles_remote_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_handles_remote (plug_in,
+          success = clay_plug_in_set_file_proc_handles_remote (plug_in,
                                                                procedure_name,
                                                                error);
         }
@@ -1019,31 +1019,31 @@ pdb_set_file_proc_handles_remote_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_handles_raw_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_handles_raw_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_handles_raw (plug_in,
+          success = clay_plug_in_set_file_proc_handles_raw (plug_in,
                                                             procedure_name,
                                                             error);
         }
@@ -1051,31 +1051,31 @@ pdb_set_file_proc_handles_raw_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_handles_vector_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_handles_vector_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_file_proc_handles_vector (plug_in,
+          success = clay_plug_in_set_file_proc_handles_vector (plug_in,
                                                                procedure_name,
                                                                error);
         }
@@ -1083,34 +1083,34 @@ pdb_set_file_proc_handles_vector_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_file_proc_thumbnail_loader_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_file_proc_thumbnail_loader_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
   const gchar *load_proc;
   const gchar *thumb_proc;
 
-  load_proc = g_value_get_string (gimp_value_array_index (args, 0));
-  thumb_proc = g_value_get_string (gimp_value_array_index (args, 1));
+  load_proc = g_value_get_string (clay_value_array_index (args, 0));
+  thumb_proc = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (load_proc, error) &&
-          gimp_pdb_is_canonical_procedure (thumb_proc, error))
+          clay_pdb_is_canonical_procedure (load_proc, error) &&
+          clay_pdb_is_canonical_procedure (thumb_proc, error))
         {
-          success = gimp_plug_in_set_file_proc_thumb_loader (plug_in,
+          success = clay_plug_in_set_file_proc_thumb_loader (plug_in,
                                                              load_proc, thumb_proc,
                                                              error);
         }
@@ -1118,33 +1118,33 @@ pdb_set_file_proc_thumbnail_loader_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_set_proc_help_uri_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_proc_help_uri_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   const gchar *help_uri;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  help_uri = g_value_get_string (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  help_uri = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_proc_help_uri (plug_in, procedure_name, help_uri, error);
+          success = clay_plug_in_set_proc_help_uri (plug_in, procedure_name, help_uri, error);
         }
       else
         {
@@ -1152,34 +1152,34 @@ pdb_set_proc_help_uri_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_proc_help_file_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_proc_help_file_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *procedure_name;
   GFile *help_file = NULL;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_is_canonical_procedure (procedure_name, error))
+      if (clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          GimpProcedure *proc = lookup_procedure (gimp->pdb, procedure_name, error);
+          ClayProcedure *proc = lookup_procedure (clay->pdb, procedure_name, error);
 
           if (proc)
             {
-              GimpPlugInProcedure *pproc = GIMP_PLUG_IN_PROCEDURE (proc);
+              ClayPlugInProcedure *pproc = CLAY_PLUG_IN_PROCEDURE (proc);
 
               if (pproc->help_file)
                 help_file = g_object_ref (pproc->help_file);
@@ -1197,38 +1197,38 @@ pdb_get_proc_help_file_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), help_file);
+    g_value_take_object (clay_value_array_index (return_vals, 1), help_file);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_batch_interpreter_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_batch_interpreter_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   const gchar *procedure_name;
   const gchar *interpreter_name;
 
-  procedure_name = g_value_get_string (gimp_value_array_index (args, 0));
-  interpreter_name = g_value_get_string (gimp_value_array_index (args, 1));
+  procedure_name = g_value_get_string (clay_value_array_index (args, 0));
+  interpreter_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in &&
-          gimp_pdb_is_canonical_procedure (procedure_name, error))
+          clay_pdb_is_canonical_procedure (procedure_name, error))
         {
-          success = gimp_plug_in_set_batch_interpreter (plug_in,
+          success = clay_plug_in_set_batch_interpreter (plug_in,
                                                         procedure_name,
                                                         interpreter_name,
                                                         error);
@@ -1237,33 +1237,33 @@ pdb_set_batch_interpreter_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pdb_get_data_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+pdb_get_data_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *identifier;
   GBytes *data = NULL;
 
-  identifier = g_value_get_string (gimp_value_array_index (args, 0));
+  identifier = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_is_canonical_identifier (identifier))
+      if (clay_is_canonical_identifier (identifier))
         {
           const guint8 *orig_data;
           gint          bytes;
 
-          orig_data = gimp_plug_in_manager_get_data (gimp->plug_in_manager,
+          orig_data = clay_plug_in_manager_get_data (clay->plug_in_manager,
                                                      identifier, &bytes);
 
           if (orig_data)
@@ -1273,1170 +1273,1170 @@ pdb_get_data_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Data label '%s' is not a canonical identifier"),
                        identifier);
           success = FALSE;
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), data);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), data);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pdb_set_data_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+pdb_set_data_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
   const gchar *identifier;
   GBytes *data;
 
-  identifier = g_value_get_string (gimp_value_array_index (args, 0));
-  data = g_value_get_boxed (gimp_value_array_index (args, 1));
+  identifier = g_value_get_string (clay_value_array_index (args, 0));
+  data = g_value_get_boxed (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_is_canonical_identifier (identifier))
+      if (clay_is_canonical_identifier (identifier))
         {
-          gimp_plug_in_manager_set_data (gimp->plug_in_manager,
+          clay_plug_in_manager_set_data (clay->plug_in_manager,
                                          identifier,
                                          g_bytes_get_size (data),
                                          g_bytes_get_data (data, NULL));
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Data label '%s' is not a canonical identifier"),
                        identifier);
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_pdb_procs (GimpPDB *pdb)
+register_pdb_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-pdb-temp-name
+   * clay-pdb-temp-name
    */
-  procedure = gimp_procedure_new (pdb_temp_name_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-temp-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_temp_name_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-temp-name");
+  clay_procedure_set_static_help (procedure,
                                   "Generates a unique temporary PDB name.",
                                   "This procedure generates a temporary PDB entry name that is guaranteed to be unique.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("temp-name",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("temp-name",
                                                            "temp name",
                                                            "A unique temporary name for a temporary PDB entry",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-dump
+   * clay-pdb-dump
    */
-  procedure = gimp_procedure_new (pdb_dump_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-dump");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_dump_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-dump");
+  clay_procedure_set_static_help (procedure,
                                   "Dumps the current contents of the procedural database",
                                   "This procedure dumps the contents of the procedural database to the specified file. The file will contain all of the information provided for each registered procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Josh MacDonald",
                                          "Spencer Kimball & Josh MacDonald & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "file",
                                                     "The dump filename",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-query
+   * clay-pdb-query
    */
-  procedure = gimp_procedure_new (pdb_query_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-query");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_query_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-query");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for its contents using regular expression matching.",
                                   "This procedure queries the contents of the procedural database. It is supplied with seven arguments matching procedures on { name, blurb, help, authors, copyright, date, procedure type}. This is accomplished using regular expression matching. For instance, to find all procedures with \"jpeg\" listed in the blurb, all seven arguments can be supplied as \".*\", except for the second, which can be supplied as \".*jpeg.*\". There are two return arguments for this procedure. The first is the number of procedures matching the query. The second is a concatenated list of procedure names corresponding to those matching the query. If no matching entries are found, then the returned string is NULL and the number of entries is 0.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The regex for procedure name",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("blurb",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("blurb",
                                                        "blurb",
                                                        "The regex for procedure blurb",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("help",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("help",
                                                        "help",
                                                        "The regex for procedure help",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("authors",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("authors",
                                                        "authors",
                                                        "The regex for procedure authors",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("copyright",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("copyright",
                                                        "copyright",
                                                        "The regex for procedure copyright",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("date",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("date",
                                                        "date",
                                                        "The regex for procedure date",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("proc-type",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("proc-type",
                                                        "proc type",
-                                                       "The regex for procedure type: { 'Internal GIMP procedure', 'GIMP Plug-in', 'GIMP Extension', 'Temporary Procedure' }",
+                                                       "The regex for procedure type: { 'Internal Clay procedure', 'Clay Plug-in', 'Clay Extension', 'Temporary Procedure' }",
                                                        TRUE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("procedure-names",
                                                        "procedure names",
                                                        "The list of procedure names",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-proc-exists
+   * clay-pdb-proc-exists
    */
-  procedure = gimp_procedure_new (pdb_proc_exists_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-proc-exists");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_proc_exists_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-proc-exists");
+  clay_procedure_set_static_help (procedure,
                                   "Checks if the specified procedure exists in the procedural database",
                                   "This procedure checks if the specified procedure is registered in the procedural database.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2008");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("exists",
                                                          "exists",
                                                          "Whether a procedure of that name is registered",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-info
+   * clay-pdb-get-proc-info
    */
-  procedure = gimp_procedure_new (pdb_get_proc_info_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-info");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_info_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-info");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for information on the specified procedure.",
-                                  "This procedure returns information on the specified procedure. The procedure type, number of input, and number of return values are returned. For specific information on each input argument and return value, use the 'gimp-pdb-db-proc-argument' and 'gimp-pdb-db-proc-return-value' procedures.",
+                                  "This procedure returns information on the specified procedure. The procedure type, number of input, and number of return values are returned. For specific information on each input argument and return value, use the 'clay-pdb-db-proc-argument' and 'clay-pdb-db-proc-return-value' procedures.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("proc-type",
                                                       "proc type",
                                                       "The procedure type",
-                                                      GIMP_TYPE_PDB_PROC_TYPE,
-                                                      GIMP_PDB_PROC_TYPE_INTERNAL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_TYPE_PDB_PROC_TYPE,
+                                                      CLAY_PDB_PROC_TYPE_INTERNAL,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-args",
                                                      "num args",
                                                      "The number of input arguments",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-values",
                                                      "num values",
                                                      "The number of return values",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-argument
+   * clay-pdb-get-proc-argument
    */
-  procedure = gimp_procedure_new (pdb_get_proc_argument_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-argument");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_argument_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-argument");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for information on the specified procedure's argument.",
                                   "This procedure returns the #GParamSpec of procedure_name's argument.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("arg-num",
                                                  "arg num",
                                                  "The argument number",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_param ("param-spec",
                                                        "param spec",
                                                        "The GParamSpec of the argument",
                                                        G_TYPE_PARAM,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-return-value
+   * clay-pdb-get-proc-return-value
    */
-  procedure = gimp_procedure_new (pdb_get_proc_return_value_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-return-value");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_return_value_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-return-value");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for information on the specified procedure's return value.",
                                   "This procedure returns the #GParamSpec of procedure_name's return value.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("val-num",
                                                  "val num",
                                                  "The return value number",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_param ("param-spec",
                                                        "param spec",
                                                        "The GParamSpec of the return value",
                                                        G_TYPE_PARAM,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-image-types
+   * clay-pdb-set-proc-image-types
    */
-  procedure = gimp_procedure_new (pdb_set_proc_image_types_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-image-types");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_image_types_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-image-types");
+  clay_procedure_set_static_help (procedure,
                                   "Set the supported image types for a plug-in procedure.",
                                   "This procedure sets the supported images types for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the menu path",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("image-types",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("image-types",
                                                        "image types",
                                                        "The procedure's supported image types",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-image-types
+   * clay-pdb-get-proc-image-types
    */
-  procedure = gimp_procedure_new (pdb_get_proc_image_types_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-image-types");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_image_types_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-image-types");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for the image types supported by the specified procedure.",
                                   "This procedure returns the image types supported by the specified procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("image-types",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("image-types",
                                                            "image types",
                                                            "The image types",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-sensitivity-mask
+   * clay-pdb-set-proc-sensitivity-mask
    */
-  procedure = gimp_procedure_new (pdb_set_proc_sensitivity_mask_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-sensitivity-mask");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_sensitivity_mask_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-sensitivity-mask");
+  clay_procedure_set_static_help (procedure,
                                   "Set the sensitivity mask for a plug-in procedure.",
                                   "This procedure sets the sensitivity mask for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2021");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("mask",
                                                  "mask",
                                                  "The procedure's sensitivity mask",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-menu-label
+   * clay-pdb-set-proc-menu-label
    */
-  procedure = gimp_procedure_new (pdb_set_proc_menu_label_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-menu-label");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_menu_label_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-menu-label");
+  clay_procedure_set_static_help (procedure,
                                   "Set the menu label for a plug-in procedure.",
                                   "This procedure sets the menu label for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the menu path",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("menu-label",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("menu-label",
                                                        "menu label",
                                                        "The procedure's menu label",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-menu-label
+   * clay-pdb-get-proc-menu-label
    */
-  procedure = gimp_procedure_new (pdb_get_proc_menu_label_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-menu-label");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_menu_label_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-menu-label");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for the procedure's menu label.",
                                   "This procedure returns the menu label of the specified procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("menu-label",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("menu-label",
                                                            "menu label",
                                                            "The menu_label",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-add-proc-menu-path
+   * clay-pdb-add-proc-menu-path
    */
-  procedure = gimp_procedure_new (pdb_add_proc_menu_path_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-add-proc-menu-path");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_add_proc_menu_path_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-add-proc-menu-path");
+  clay_procedure_set_static_help (procedure,
                                   "Register an additional menu path for a plug-in procedure.",
                                   "This procedure installs an additional menu entry for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the menu path",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("menu-path",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("menu-path",
                                                        "menu path",
                                                        "The procedure's additional menu path",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-menu-paths
+   * clay-pdb-get-proc-menu-paths
    */
-  procedure = gimp_procedure_new (pdb_get_proc_menu_paths_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-menu-paths");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_menu_paths_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-menu-paths");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for the procedure's menu paths.",
                                   "This procedure returns the menu paths of the specified procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("menu-paths",
                                                        "menu paths",
                                                        "The menu paths of the plug-in",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-icon
+   * clay-pdb-set-proc-icon
    */
-  procedure = gimp_procedure_new (pdb_set_proc_icon_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-icon");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_icon_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-icon");
+  clay_procedure_set_static_help (procedure,
                                   "Register an icon for a plug-in procedure.",
                                   "This procedure installs an icon for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the icon",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("icon-type",
                                                   "icon type",
                                                   "The type of the icon",
-                                                  GIMP_TYPE_ICON_TYPE,
-                                                  GIMP_ICON_TYPE_ICON_NAME,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_ICON_TYPE,
+                                                  CLAY_ICON_TYPE_ICON_NAME,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("icon-data",
                                                    "icon data",
                                                    "The procedure's icon. The format depends on the 'icon_type' parameter",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-documentation
+   * clay-pdb-set-proc-documentation
    */
-  procedure = gimp_procedure_new (pdb_set_proc_documentation_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-documentation");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_documentation_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-documentation");
+  clay_procedure_set_static_help (procedure,
                                   "Set the documentation for a plug-in procedure.",
                                   "This procedure sets the documentation for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the menu path",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("blurb",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("blurb",
                                                        "blurb",
                                                        "A short blurb",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("help",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("help",
                                                        "help",
                                                        "Detailed procedure help",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("help-id",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("help-id",
                                                        "help id",
                                                        "The procedure help_id",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-documentation
+   * clay-pdb-get-proc-documentation
    */
-  procedure = gimp_procedure_new (pdb_get_proc_documentation_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-documentation");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_documentation_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-documentation");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for documentation on the specified procedure.",
                                   "This procedure returns documentation on the specified procedure. A short blurb, detailed help and help_id.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("blurb",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("blurb",
                                                            "blurb",
                                                            "A short blurb",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("help",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("help",
                                                            "help",
                                                            "Detailed procedure help",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("help-id",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("help-id",
                                                            "help id",
                                                            "The procedure help_id",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-attribution
+   * clay-pdb-set-proc-attribution
    */
-  procedure = gimp_procedure_new (pdb_set_proc_attribution_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-attribution");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_attribution_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-attribution");
+  clay_procedure_set_static_help (procedure,
                                   "Set the attribution for a plug-in procedure.",
                                   "This procedure sets the attribution for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the menu path",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("authors",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("authors",
                                                        "authors",
                                                        "Authors of the procedure",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("copyright",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("copyright",
                                                        "copyright",
                                                        "The copyright",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("date",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("date",
                                                        "date",
                                                        "Copyright date",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-attribution
+   * clay-pdb-get-proc-attribution
    */
-  procedure = gimp_procedure_new (pdb_get_proc_attribution_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-attribution");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_attribution_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-attribution");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for attribution information on the specified procedure.",
                                   "This procedure returns attribution information on the specified procedure. The authors, copyright information and date are returned.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("authors",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("authors",
                                                            "authors",
                                                            "Authors of the procedure",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("copyright",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("copyright",
                                                            "copyright",
                                                            "The copyright",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("date",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("date",
                                                            "date",
                                                            "Copyright date",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-load-handler
+   * clay-pdb-set-file-proc-load-handler
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_load_handler_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-load-handler");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_load_handler_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-load-handler");
+  clay_procedure_set_static_help (procedure,
                                   "Registers a file load handler procedure.",
                                   "Registers a procedural database procedure to be called to load files of a particular file format using magic file information.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to be used for loading",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("extensions",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("extensions",
                                                        "extensions",
                                                        "comma separated list of extensions this handler can load (i.e. \"jpg,jpeg\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("meta-extensions",
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("meta-extensions",
                                                        "meta extensions",
                                                        "comma separated list of meta extensions this handler can load (i.e. \"gz\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("prefixes",
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("prefixes",
                                                        "prefixes",
                                                        "comma separated list of prefixes this handler can load (i.e. \"http:,ftp:\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("magics",
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("magics",
                                                        "magics",
                                                        "comma separated list of magic file information this handler can load (i.e. \"0,string,GIF\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-export-handler
+   * clay-pdb-set-file-proc-export-handler
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_export_handler_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-export-handler");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_export_handler_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-export-handler");
+  clay_procedure_set_static_help (procedure,
                                   "Registers a file export handler procedure.",
                                   "Registers a procedural database procedure to be called to export files in a particular file format.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to be used for saving",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("extensions",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("extensions",
                                                        "extensions",
                                                        "comma separated list of extensions this handler can export as (i.e. \"jpg,jpeg\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("meta-extensions",
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("meta-extensions",
                                                        "meta extensions",
                                                        "comma separated list of meta extensions this handler can load (i.e. \"gz\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("prefixes",
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("prefixes",
                                                        "prefixes",
                                                        "comma separated list of prefixes this handler can export to (i.e. \"http:,ftp:\")",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-priority
+   * clay-pdb-set-file-proc-priority
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_priority_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-priority");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_priority_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-priority");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the priority of a file handler procedure.",
                                   "Sets the priority of a file handler procedure. When more than one procedure matches a given file, the procedure with the lowest priority is used; if more than one procedure has the lowest priority, it is unspecified which one of them is used. The default priority for file handler procedures is 0.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ell",
                                          "Ell",
                                          "2018");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to set the priority of.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("priority",
                                                  "priority",
                                                  "The procedure priority.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-mime-types
+   * clay-pdb-set-file-proc-mime-types
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_mime_types_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-mime-types");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_mime_types_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-mime-types");
+  clay_procedure_set_static_help (procedure,
                                   "Associates MIME types with a file handler procedure.",
-                                  "Registers MIME types for a file handler procedure. This allows GIMP to determine the MIME type of the file opened or exported using this procedure. It is recommended that only one MIME type is registered per file procedure; when registering more than one MIME type, GIMP will associate the first one with files opened or exported with this procedure.",
+                                  "Registers MIME types for a file handler procedure. This allows Clay to determine the MIME type of the file opened or exported using this procedure. It is recommended that only one MIME type is registered per file procedure; when registering more than one MIME type, Clay will associate the first one with files opened or exported with this procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to associate a MIME type with.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("mime-types",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("mime-types",
                                                        "mime types",
                                                        "A comma-separated list of MIME types, such as \"image/jpeg\".",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-handles-remote
+   * clay-pdb-set-file-proc-handles-remote
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_handles_remote_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-handles-remote");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_handles_remote_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-handles-remote");
+  clay_procedure_set_static_help (procedure,
                                   "Registers a file handler procedure as capable of handling remote URIs.",
-                                  "Registers a file handler procedure as capable of handling remote URIs. This allows GIMP to call the procedure directly for all kinds of URIs, not only on local file:// URIs.",
+                                  "Registers a file handler procedure as capable of handling remote URIs. This allows Clay to call the procedure directly for all kinds of URIs, not only on local file:// URIs.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to enable remote URIs for.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-handles-raw
+   * clay-pdb-set-file-proc-handles-raw
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_handles_raw_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-handles-raw");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_handles_raw_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-handles-raw");
+  clay_procedure_set_static_help (procedure,
                                   "Registers a file handler procedure as capable of handling raw camera files.",
                                   "Registers a file handler procedure as capable of handling raw digital camera files. Use this procedure only to register raw load handlers, calling it on an export handler will generate an error.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2017");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to enable raw handling for.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-handles-vector
+   * clay-pdb-set-file-proc-handles-vector
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_handles_vector_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-handles-vector");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_handles_vector_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-handles-vector");
+  clay_procedure_set_static_help (procedure,
                                   "Registers a load handler procedure as handling vector formats.",
-                                  "Registers a file handler procedure as handling vector image formats. Use this procedure only to register a GimpVectorLoadProcedure, calling it on any other handler will generate an error.",
+                                  "Registers a file handler procedure as handling vector image formats. Use this procedure only to register a ClayVectorLoadProcedure, calling it on any other handler will generate an error.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the vector load procedure.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-file-proc-thumbnail-loader
+   * clay-pdb-set-file-proc-thumbnail-loader
    */
-  procedure = gimp_procedure_new (pdb_set_file_proc_thumbnail_loader_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-file-proc-thumbnail-loader");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_file_proc_thumbnail_loader_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-file-proc-thumbnail-loader");
+  clay_procedure_set_static_help (procedure,
                                   "Associates a thumbnail loader with a file load procedure.",
-                                  "Some file formats allow for embedded thumbnails, other file formats contain a scalable image or provide the image data in different resolutions. A file plug-in for such a format may register a special procedure that allows GIMP to load a thumbnail preview of the image. This procedure is then associated with the standard load procedure using this function.",
+                                  "Some file formats allow for embedded thumbnails, other file formats contain a scalable image or provide the image data in different resolutions. A file plug-in for such a format may register a special procedure that allows Clay to load a thumbnail preview of the image. This procedure is then associated with the standard load procedure using this function.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("load-proc",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("load-proc",
                                                        "load proc",
                                                        "The name of the file load procedure.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("thumb-proc",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("thumb-proc",
                                                        "thumb proc",
                                                        "The name of the thumbnail load procedure.",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-proc-help-uri
+   * clay-pdb-set-proc-help-uri
    */
-  procedure = gimp_procedure_new (pdb_set_proc_help_uri_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-proc-help-uri");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_proc_help_uri_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-proc-help-uri");
+  clay_procedure_set_static_help (procedure,
                                   "Set the documentation URI for a plug-in procedure.",
                                   "This procedure sets the documentation URI for the given procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2026");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure for which to install the menu path",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("help-uri",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("help-uri",
                                                        "help uri",
                                                        "URI Reference of the procedure help",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-proc-help-file
+   * clay-pdb-get-proc-help-file
    */
-  procedure = gimp_procedure_new (pdb_get_proc_help_file_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-proc-help-file");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_proc_help_file_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-proc-help-file");
+  clay_procedure_set_static_help (procedure,
                                   "Queries the procedural database for documentation file of the specified procedure.",
                                   "This procedure returns the documentation file of the specified procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2026");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The procedure name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_object ("help-file",
                                                         "help file",
                                                         "URI file of the procedure help",
                                                         G_TYPE_FILE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-batch-interpreter
+   * clay-pdb-set-batch-interpreter
    */
-  procedure = gimp_procedure_new (pdb_set_batch_interpreter_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-batch-interpreter");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_batch_interpreter_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-batch-interpreter");
+  clay_procedure_set_static_help (procedure,
                                   "Registers a batch interpreter procedure.",
                                   "Registers a procedural database procedure to be called with the command line interface options --batch-interpreter and --batch.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("procedure-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("procedure-name",
                                                        "procedure name",
                                                        "The name of the procedure to be used for running batch commands",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("interpreter-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("interpreter-name",
                                                        "interpreter name",
                                                        "A public-facing name for the interpreter, such as \"Python 3\".",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-get-data
+   * clay-pdb-get-data
    */
-  procedure = gimp_procedure_new (pdb_get_data_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-get-data");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_get_data_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-get-data");
+  clay_procedure_set_static_help (procedure,
                                   "Returns data associated with the specified identifier.",
                                   "This procedure returns any data which may have been associated with the specified identifier. The data is a variable length array of bytes. If no data has been associated with the identifier, an error is returned.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("identifier",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("identifier",
                                                        "identifier",
                                                        "The identifier associated with data",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("data",
                                                        "data",
                                                        "A byte array containing data",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pdb-set-data
+   * clay-pdb-set-data
    */
-  procedure = gimp_procedure_new (pdb_set_data_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pdb-set-data");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pdb_set_data_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pdb-set-data");
+  clay_procedure_set_static_help (procedure,
                                   "Associates the specified identifier with the supplied data.",
                                   "This procedure associates the supplied data with the provided identifier. The data may be subsequently retrieved by a call to 'procedural-db-get-data'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("identifier",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("identifier",
                                                        "identifier",
                                                        "The identifier associated with data",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("data",
                                                    "data",
                                                    "A byte array containing data",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

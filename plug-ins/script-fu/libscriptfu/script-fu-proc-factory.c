@@ -17,7 +17,7 @@
 
 #include "config.h"
 #include <glib.h>
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "tinyscheme/scheme-private.h"
 #include "script-fu-types.h"
@@ -27,7 +27,7 @@
 #include "script-fu-proc-factory.h"
 
 /* Local functions */
-static void  script_fu_add_menu_to_procedure (GimpProcedure *procedure,
+static void  script_fu_add_menu_to_procedure (ClayProcedure *procedure,
                                               SFScript      *script);
 
 
@@ -58,12 +58,12 @@ static void  script_fu_add_menu_to_procedure (GimpProcedure *procedure,
  * Loaded .scm file(s) may have defined many procedures.
  * Create a PDB procedure only for the one passed name.
  */
-GimpProcedure *
-script_fu_proc_factory_make_PLUGIN (GimpPlugIn  *plug_in,
+ClayProcedure *
+script_fu_proc_factory_make_PLUGIN (ClayPlugIn  *plug_in,
                                     const gchar *proc_name)
 {
   SFScript      * script    = NULL;
-  GimpProcedure * procedure = NULL;
+  ClayProcedure * procedure = NULL;
 
   /* Require SFScripts already defined, one or more. */
 
@@ -75,7 +75,7 @@ script_fu_proc_factory_make_PLUGIN (GimpPlugIn  *plug_in,
       procedure = script_fu_script_create_PDB_procedure (
         plug_in,
         script,
-        GIMP_PDB_PROC_TYPE_PLUGIN);
+        CLAY_PDB_PROC_TYPE_PLUGIN);
       script_fu_add_menu_to_procedure (procedure, script);
     }
   else
@@ -119,7 +119,7 @@ script_fu_append_script_names (gpointer      *foo G_GNUC_UNUSED,
  * Return a list of the names.
  */
 GList *
-script_fu_proc_factory_list_names (GimpPlugIn *plug_in,
+script_fu_proc_factory_list_names (ClayPlugIn *plug_in,
                                    GList      *paths)
 {
   GList * result_list = NULL;
@@ -146,12 +146,12 @@ script_fu_proc_factory_list_names (GimpPlugIn *plug_in,
  * Derived from script_fu_install_menu, but that is specific to TEMPORARY procs.
  * Also, unlike script_fu_install_menu, we don't nuke the menu list as we proceed.
  *
- * For each "create" of a procedure, the gimp-script-fu-interpreter is started anew,
+ * For each "create" of a procedure, the clay-script-fu-interpreter is started anew,
  * and a new script_menu_list is derived from the .scm file.
  * We don't traverse the menu list more than once per session, which soon exits.
  */
 static void
-script_fu_add_menu_to_procedure (GimpProcedure *procedure,
+script_fu_add_menu_to_procedure (ClayProcedure *procedure,
                                   SFScript      *script)
 {
   GList    *menu_list;
@@ -170,7 +170,7 @@ script_fu_add_menu_to_procedure (GimpProcedure *procedure,
       if (menu->script == script)
         {
           g_debug ("Add menu: %s", menu->menu_path);
-          gimp_procedure_add_menu_path (procedure, menu->menu_path);
+          clay_procedure_add_menu_path (procedure, menu->menu_path);
           did_add_menu = TRUE;
           break;
         }
@@ -178,7 +178,7 @@ script_fu_add_menu_to_procedure (GimpProcedure *procedure,
 
   /* Some procedures don't have menu path.
    * It is normal, but not common, to define procs of type PLUGIN that don't appear in the menus.
-   * No part of GIMP defaults a menu path for procedures.
+   * No part of Clay defaults a menu path for procedures.
    * A menu label without a menu path is probably a mistake by the script author.
    */
   if ( ! did_add_menu )

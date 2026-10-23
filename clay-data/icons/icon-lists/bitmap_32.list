@@ -1,0 +1,20 @@
+clay-channel-alpha
+clay-channel-blue
+clay-channel-gray
+clay-channel-green
+clay-channel-indexed
+clay-channel-red
+clay-channel
+# In data/tool-presets/FX/Glow-Lights.gtp preset icon, which can be
+# viewed in "Tool Presets" list/grid as CLAY_VIEW_SIZE_MEDIUM.
+clay-color-triangle
+clay-floating-selection
+clay-image
+clay-layer-mask
+clay-layer
+clay-text-layer
+clay-user-manual
+clay-wilber
+
+# CLAY_ICON_PALETTE used for Palettes dialog as CLAY_VIEW_SIZE_MEDIUM
+gtk-select-color

@@ -1,0 +1,34 @@
+/* Sakura theme, light scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(58,31,43);
+@define-color bg-color                   rgb(251,233,239);
+@define-color border-color               rgb(224,205,212);
+@define-color dimmed-fg-color            rgb(106,82,92);
+@define-color disabled-fg-color          rgb(145,122,131);
+@define-color disabled-button-color      rgb(189,168,176);
+@define-color hover-color                rgb(228,209,215);
+@define-color widget-bg-color            rgb(241,223,229);
+@define-color selected-color             rgb(216,197,204);
+@define-color extreme-bg-color           rgb(253,244,247);
+@define-color extreme-selected-color     rgb(224,205,212);
+@define-color strong-border-color        rgb(183,162,170);
+@define-color stronger-border-color      rgb(183,162,170);
+@define-color edge-border-color          rgb(183,162,170);
+@define-color scrollbar-slider-color     rgb(183,162,170);
+@define-color scrollbar-trough-color     rgb(251,233,239);
+@define-color ruler-color                rgba(224,205,212,0.3);
+@define-color accent-color               rgb(214,69,122);
+@define-color accent-hover-color         rgb(221,102,146);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(196,43,28);
+@define-color good-color                 rgb(31,122,63);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

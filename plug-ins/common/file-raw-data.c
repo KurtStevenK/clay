@@ -3,7 +3,7 @@
  * by tim copperfield [timecop@japan.co.jp]
  * http://www.ne.jp/asahi/linux/timecop
  *
- * Updated for Gimp 2.1 by pg@futureware.at and mitch@gimp.org
+ * Updated for Clay 2.1 by pg@futureware.at and mitch@gimp.org
  *
  * This plugin is not based on any other plugin.
  *
@@ -47,10 +47,10 @@
 #define _O_BINARY 0
 #endif
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-raw-load"
@@ -58,21 +58,21 @@
 #define LOAD_HRZ_PROC  "file-hrz-load"
 #define EXPORT_PROC    "file-raw-export"
 #define PLUG_IN_BINARY "file-raw-data"
-#define PLUG_IN_ROLE   "gimp-file-raw-data"
+#define PLUG_IN_ROLE   "clay-file-raw-data"
 #define PREVIEW_SIZE   350
 
 
-#define GIMP_PLUGIN_HGT_LOAD_ERROR gimp_plugin_hgt_load_error_quark ()
+#define CLAY_PLUGIN_HGT_LOAD_ERROR clay_plugin_hgt_load_error_quark ()
 
 typedef enum
 {
-  GIMP_PLUGIN_HGT_LOAD_ARGUMENT_ERROR
-} GimpPluginHGTError;
+  CLAY_PLUGIN_HGT_LOAD_ARGUMENT_ERROR
+} ClayPluginHGTError;
 
 static GQuark
-gimp_plugin_hgt_load_error_quark (void)
+clay_plugin_hgt_load_error_quark (void)
 {
-  return g_quark_from_static_string ("gimp-plugin-hgt-load-error-quark");
+  return g_quark_from_static_string ("clay-plugin-hgt-load-error-quark");
 }
 
 
@@ -143,10 +143,10 @@ typedef enum
 typedef struct
 {
   FILE         *fp;        /* pointer to the already open file */
-  GeglBuffer   *buffer;    /* gimp drawable buffer             */
-  GimpImage    *image;     /* gimp image                       */
+  GeglBuffer   *buffer;    /* clay drawable buffer             */
+  ClayImage    *image;     /* clay image                       */
   guchar        cmap[768]; /* color map for indexed images     */
-} RawGimpData;
+} RawClayData;
 
 
 typedef struct _Raw      Raw;
@@ -154,12 +154,12 @@ typedef struct _RawClass RawClass;
 
 struct _Raw
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _RawClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -168,36 +168,36 @@ struct _RawClass
 
 GType                   raw_get_type         (void);
 
-static GList          * raw_query_procedures (GimpPlugIn               *plug_in);
-static GimpProcedure  * raw_create_procedure (GimpPlugIn               *plug_in,
+static GList          * raw_query_procedures (ClayPlugIn               *plug_in);
+static ClayProcedure  * raw_create_procedure (ClayPlugIn               *plug_in,
                                               const gchar              *name);
 
-static GimpValueArray * raw_load             (GimpProcedure            *procedure,
-                                              GimpRunMode               run_mode,
+static ClayValueArray * raw_load             (ClayProcedure            *procedure,
+                                              ClayRunMode               run_mode,
                                               GFile                    *file,
-                                              GimpMetadata             *metadata,
-                                              GimpMetadataLoadFlags    *flags,
-                                              GimpProcedureConfig      *config,
+                                              ClayMetadata             *metadata,
+                                              ClayMetadataLoadFlags    *flags,
+                                              ClayProcedureConfig      *config,
                                               gpointer                  run_data);
-static GimpValueArray * raw_export           (GimpProcedure            *procedure,
-                                              GimpRunMode               run_mode,
-                                              GimpImage                *image,
+static ClayValueArray * raw_export           (ClayProcedure            *procedure,
+                                              ClayRunMode               run_mode,
+                                              ClayImage                *image,
                                               GFile                    *file,
-                                              GimpExportOptions        *options,
-                                              GimpMetadata             *metadata,
-                                              GimpProcedureConfig      *config,
+                                              ClayExportOptions        *options,
+                                              ClayMetadata             *metadata,
+                                              ClayProcedureConfig      *config,
                                               gpointer                  run_data);
 
-static GimpValueArray * hrz_load             (GimpProcedure            *procedure,
-                                              GimpRunMode               run_mode,
+static ClayValueArray * hrz_load             (ClayProcedure            *procedure,
+                                              ClayRunMode               run_mode,
                                               GFile                    *file,
-                                              GimpMetadata             *metadata,
-                                              GimpMetadataLoadFlags    *flags,
-                                              GimpProcedureConfig      *config,
+                                              ClayMetadata             *metadata,
+                                              ClayMetadataLoadFlags    *flags,
+                                              ClayProcedureConfig      *config,
                                               gpointer                  run_data);
 
 /* prototypes for the new load functions */
-static gboolean         raw_load_standard    (RawGimpData              *data,
+static gboolean         raw_load_standard    (RawClayData              *data,
                                               gint                      width,
                                               gint                      height,
                                               gint                      bpp,
@@ -206,7 +206,7 @@ static gboolean         raw_load_standard    (RawGimpData              *data,
                                               gboolean                  is_big_endian,
                                               gboolean                  is_signed,
                                               gboolean                  is_float);
-static gboolean         raw_load_planar      (RawGimpData              *data,
+static gboolean         raw_load_planar      (RawClayData              *data,
                                               gint                      width,
                                               gint                      height,
                                               gint                      bpp,
@@ -215,19 +215,19 @@ static gboolean         raw_load_planar      (RawGimpData              *data,
                                               gboolean                  is_big_endian,
                                               gboolean                  is_signed,
                                               gboolean                  is_float);
-static gboolean         raw_load_gray        (RawGimpData              *data,
+static gboolean         raw_load_gray        (RawClayData              *data,
                                               gint                      width,
                                               gint                      height,
                                               guint                     offset,
                                               gint                      bpp,
                                               gint                      bitspp);
-static gboolean         raw_load_rgb565      (RawGimpData              *data,
+static gboolean         raw_load_rgb565      (RawClayData              *data,
                                               gint                      width,
                                               gint                      height,
                                               guint                     offset,
                                               RawType                   type,
                                               RawEndianness             endianness);
-static gboolean         raw_load_palette     (RawGimpData              *data,
+static gboolean         raw_load_palette     (RawClayData              *data,
                                               guint                     palette_offset,
                                               RawPaletteType            palette_type,
                                               GFile                    *palette_file);
@@ -249,22 +249,22 @@ static void             rgb_565_to_888       (guint16                  *in,
                                               RawType                   type,
                                               RawEndianness             endianness);
 
-static GimpImage      * load_image           (GFile                    *file,
-                                              GimpProcedureConfig      *config,
+static ClayImage      * load_image           (GFile                    *file,
+                                              ClayProcedureConfig      *config,
                                               GError                  **error);
 static gboolean         export_image         (GFile                    *file,
-                                              GimpImage                *image,
-                                              GimpDrawable             *drawable,
-                                              GimpProcedureConfig      *config,
+                                              ClayImage                *image,
+                                              ClayDrawable             *drawable,
+                                              ClayProcedureConfig      *config,
                                               GError                  **error);
 
-static void            get_bpp               (GimpProcedureConfig      *config,
+static void            get_bpp               (ClayProcedureConfig      *config,
                                               gint                     *bpp,
                                               gint                     *bitspp);
-static gboolean        detect_sample_spacing (GimpProcedureConfig      *config,
+static gboolean        detect_sample_spacing (ClayProcedureConfig      *config,
                                               GFile                    *file,
                                               GError                  **error);
-static void           get_load_config_values (GimpProcedureConfig      *config,
+static void           get_load_config_values (ClayProcedureConfig      *config,
                                               guint32                  *file_offset,
                                               gint32                   *image_width,
                                               gint32                   *image_height,
@@ -281,27 +281,27 @@ static void             halfp2singles        (uint32_t                 *xp,
                                               const uint16_t           *hp,
                                               int                       numel);
 
-static void             preview_update       (GimpPreviewArea          *preview,
+static void             preview_update       (ClayPreviewArea          *preview,
                                               gboolean                  preview_cmap_update);
-static void             preview_update_size  (GimpPreviewArea          *preview);
-static void             load_config_notify   (GimpProcedureConfig      *config,
+static void             preview_update_size  (ClayPreviewArea          *preview);
+static void             load_config_notify   (ClayProcedureConfig      *config,
                                               GParamSpec               *pspec,
-                                              GimpPreviewArea          *preview);
-static void             preview_allocate     (GimpPreviewArea          *preview,
+                                              ClayPreviewArea          *preview);
+static void             preview_allocate     (ClayPreviewArea          *preview,
                                               GtkAllocation            *allocation,
                                               gpointer                  user_data);
 static gboolean         load_dialog          (GFile                    *file,
-                                              GimpProcedure            *procedure,
+                                              ClayProcedure            *procedure,
                                               GObject                  *config,
                                               gboolean                  is_hgt);
-static gboolean         save_dialog          (GimpImage                *image,
-                                              GimpProcedure            *procedure,
+static gboolean         save_dialog          (ClayImage                *image,
+                                              ClayProcedure            *procedure,
                                               gboolean                  has_alpha,
                                               GObject                  *config);
 
-G_DEFINE_TYPE (Raw, raw, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Raw, raw, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (RAW_TYPE)
+CLAY_MAIN (RAW_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -312,7 +312,7 @@ static guchar     preview_cmap[1024];
 static void
 raw_class_init (RawClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = raw_query_procedures;
   plug_in_class->create_procedure = raw_create_procedure;
@@ -325,7 +325,7 @@ raw_init (Raw *raw)
 }
 
 static GList *
-raw_query_procedures (GimpPlugIn *plug_in)
+raw_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -337,53 +337,53 @@ raw_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-raw_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+raw_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            raw_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Raw image data"));
+      clay_procedure_set_menu_label (procedure, _("Raw image data"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load raw images, specifying image information"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "timecop, pg@futureware.at",
                                       "timecop, pg@futureware.at",
                                       "Aug 2004");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "data");
 
       /* Properties for image data. */
 
-      gimp_procedure_add_int_argument (procedure, "width",
+      clay_procedure_add_int_argument (procedure, "width",
                                        _("_Width"),
                                        _("Image width in number of pixels"),
-                                       1, GIMP_MAX_IMAGE_SIZE, PREVIEW_SIZE,
+                                       1, CLAY_MAX_IMAGE_SIZE, PREVIEW_SIZE,
                                        G_PARAM_READWRITE);
-      gimp_procedure_add_int_argument (procedure, "height",
+      clay_procedure_add_int_argument (procedure, "height",
                                        _("_Height"),
                                        _("Image height in number of pixels"),
-                                       1, GIMP_MAX_IMAGE_SIZE, PREVIEW_SIZE,
+                                       1, CLAY_MAX_IMAGE_SIZE, PREVIEW_SIZE,
                                        G_PARAM_READWRITE);
-      gimp_procedure_add_uint_argument (procedure, "offset",
+      clay_procedure_add_uint_argument (procedure, "offset",
                                         _("O_ffset"),
                                         _("Offset to beginning of image in raw data"),
                                         0, G_MAXUINT, 0,
                                         G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "pixel-format",
+      clay_procedure_add_choice_argument (procedure, "pixel-format",
                                           _("Pi_xel format"),
                                           _("The layout of pixel data, such as components and their order"),
-                                          gimp_choice_new_with_values ("rgb-8bpc",              RAW_RGB_8BPC,    _("RGB 8-bit"),                NULL,
+                                          clay_choice_new_with_values ("rgb-8bpc",              RAW_RGB_8BPC,    _("RGB 8-bit"),                NULL,
                                                                        "rgb-16bpc",             RAW_RGB_16BPC,   _("RGB 16-bit"),               NULL,
                                                                        "rgb-32bpc",             RAW_RGB_32BPC,   _("RGB 32-bit"),               NULL,
                                                                        "rgba-8bpc",             RAW_RGBA_8BPC,   _("RGBA 8-bit"),               NULL,
@@ -404,61 +404,61 @@ raw_create_procedure (GimpPlugIn  *plug_in,
                                                                        "indexed-alpha",         RAW_INDEXEDA,    _("Indexed Alpha"),            NULL,
                                                                        NULL),
                                           "rgb-8bpc", G_PARAM_READWRITE);
-      gimp_procedure_add_choice_argument (procedure, "data-type",
+      clay_procedure_add_choice_argument (procedure, "data-type",
                                           _("_Data type"),
                                           _("Data type used to represent pixel values"),
-                                          gimp_choice_new_with_values ("unsigned", RAW_ENCODING_UNSIGNED,   _("Unsigned Integer"),  NULL,
+                                          clay_choice_new_with_values ("unsigned", RAW_ENCODING_UNSIGNED,   _("Unsigned Integer"),  NULL,
                                                                        "signed",   RAW_ENCODING_SIGNED,     _("Signed Integer"),    NULL,
                                                                        "float",    RAW_ENCODING_FLOAT,      _("Floating Point"),    NULL,
                                                                        NULL),
                                           "unsigned", G_PARAM_READWRITE);
-      gimp_procedure_add_choice_argument (procedure, "endianness",
+      clay_procedure_add_choice_argument (procedure, "endianness",
                                           _("_Endianness"),
                                           _("Order of sequences of bytes"),
-                                          gimp_choice_new_with_values ("little-endian", RAW_LITTLE_ENDIAN, _("Little Endian"),    NULL,
+                                          clay_choice_new_with_values ("little-endian", RAW_LITTLE_ENDIAN, _("Little Endian"),    NULL,
                                                                        "big-endian",    RAW_BIG_ENDIAN,    _("Big Endian"),       NULL,
                                                                        NULL),
                                           "little-endian", G_PARAM_READWRITE);
-      gimp_procedure_add_choice_argument (procedure, "planar-configuration",
+      clay_procedure_add_choice_argument (procedure, "planar-configuration",
                                           _("Planar confi_guration"),
                                           _("How color pixel data are stored"),
-                                          gimp_choice_new_with_values ("contiguous", RAW_PLANAR_CONTIGUOUS, _("Contiguous"),    NULL,
+                                          clay_choice_new_with_values ("contiguous", RAW_PLANAR_CONTIGUOUS, _("Contiguous"),    NULL,
                                                                        "planar",     RAW_PLANAR_SEPARATE,   _("Planar"),        NULL,
                                                                        NULL),
                                           "contiguous", G_PARAM_READWRITE);
 
       /* Properties for palette data. */
 
-      gimp_procedure_add_uint_argument (procedure, "palette-offset",
+      clay_procedure_add_uint_argument (procedure, "palette-offset",
                                         _("Palette Offse_t"),
                                         _("Offset to beginning of data in the palette file"),
                                         0, G_MAXUINT, 0,
                                         G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "palette-type",
+      clay_procedure_add_choice_argument (procedure, "palette-type",
                                           _("Palette's la_yout"),
                                           _("The layout for the palette's color channels"),
-                                          gimp_choice_new_with_values ("rgb", RAW_PALETTE_RGB, _("R, G, B (normal)"),        NULL,
+                                          clay_choice_new_with_values ("rgb", RAW_PALETTE_RGB, _("R, G, B (normal)"),        NULL,
                                                                        "bgr", RAW_PALETTE_BGR, _("B, G, R, X (BMP style)"),  NULL,
                                                                        NULL),
                                           "rgb", G_PARAM_READWRITE);
-      gimp_procedure_add_file_argument (procedure, "palette-file",
+      clay_procedure_add_file_argument (procedure, "palette-file",
                                         _("_Palette File"),
                                         _("The file containing palette data"),
-                                        GIMP_FILE_CHOOSER_ACTION_OPEN,
+                                        CLAY_FILE_CHOOSER_ACTION_OPEN,
                                         TRUE, NULL,
                                         G_PARAM_READWRITE);
     }
   else if (! strcmp (name, LOAD_HGT_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            raw_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Digital Elevation Model data"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load HGT data as images"),
                                         _("Load Digital Elevation Model data "
                                           "in HGT format from the Shuttle Radar "
@@ -472,17 +472,17 @@ raw_create_procedure (GimpPlugIn  *plug_in,
                                           "instance with the \"Gradient Map\" "
                                           "plug-in."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       NULL, NULL,
                                       "2017-12-09");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "hgt");
 
-      gimp_procedure_add_choice_argument (procedure, "sample-spacing",
+      clay_procedure_add_choice_argument (procedure, "sample-spacing",
                                           _("Sa_mple spacing"),
                                           _("The sample spacing of the data."),
-                                          gimp_choice_new_with_values ("auto-detect", HGT_SRTM_AUTO_DETECT, _("Auto-Detect"),            NULL,
+                                          clay_choice_new_with_values ("auto-detect", HGT_SRTM_AUTO_DETECT, _("Auto-Detect"),            NULL,
                                                                        "srtm-1",      HGT_SRTM_1,           _("SRTM-1 (1 arc second)"),  NULL,
                                                                        "srtm-3",      HGT_SRTM_3,           _("SRTM-3 (3 arc seconds)"),  NULL,
                                                                        NULL),
@@ -490,117 +490,117 @@ raw_create_procedure (GimpPlugIn  *plug_in,
 
       /* Properties for palette data. */
 
-      gimp_procedure_add_uint_argument (procedure, "palette-offset",
+      clay_procedure_add_uint_argument (procedure, "palette-offset",
                                         _("Palette Offse_t"),
                                         _("Offset to beginning of data in the palette file"),
                                         0, G_MAXUINT, 0,
                                         G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "palette-type",
+      clay_procedure_add_choice_argument (procedure, "palette-type",
                                           _("Palette's la_yout"),
                                           _("The layout for the palette's color channels"),
-                                          gimp_choice_new_with_values ("rgb", RAW_PALETTE_RGB, _("R, G, B (normal)"),        NULL,
+                                          clay_choice_new_with_values ("rgb", RAW_PALETTE_RGB, _("R, G, B (normal)"),        NULL,
                                                                        "bgr", RAW_PALETTE_BGR, _("B, G, R, X (BMP style)"),  NULL,
                                                                        NULL),
                                           "rgb", G_PARAM_READWRITE);
-      gimp_procedure_add_file_argument (procedure, "palette-file",
+      clay_procedure_add_file_argument (procedure, "palette-file",
                                         _("_Palette File"),
                                         _("The file containing palette data"),
-                                        GIMP_FILE_CHOOSER_ACTION_OPEN,
+                                        CLAY_FILE_CHOOSER_ACTION_OPEN,
                                         TRUE, NULL,
                                         G_PARAM_READWRITE);
     }
   else if (! strcmp (name, LOAD_HRZ_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            hrz_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      "Slow-scan television data");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Load HRZ data as images",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Albert Cahalan",
                                       "Albert Cahalan",
                                       "1997");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "hrz");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, raw_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED, GRAY, RGB, RGBA");
+      clay_procedure_set_image_types (procedure, "INDEXED, GRAY, RGB, RGBA");
 
-      gimp_procedure_set_menu_label (procedure, _("Raw image data"));
+      clay_procedure_set_menu_label (procedure, _("Raw image data"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Dump images to disk in raw format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Björn Kautler, Bjoern@Kautler.net",
                                       "Björn Kautler, Bjoern@Kautler.net",
                                       "April 2014");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "data,raw");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "planar-configuration",
+      clay_procedure_add_choice_argument (procedure, "planar-configuration",
                                           _("Planar configuration"),
                                           _("How color pixel data are stored"),
-                                          gimp_choice_new_with_values ("contiguous", RAW_PLANAR_CONTIGUOUS, _("Contiguous"),    NULL,
+                                          clay_choice_new_with_values ("contiguous", RAW_PLANAR_CONTIGUOUS, _("Contiguous"),    NULL,
                                                                        "planar",     RAW_PLANAR_SEPARATE,   _("Planar"),        NULL,
                                                                        NULL),
                                           "contiguous", G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "palette-type",
+      clay_procedure_add_choice_argument (procedure, "palette-type",
                                           _("Palette's la_yout"),
                                           _("The layout for the palette's color channels"),
-                                          gimp_choice_new_with_values ("rgb", RAW_PALETTE_RGB, _("R, G, B (normal)"),        NULL,
+                                          clay_choice_new_with_values ("rgb", RAW_PALETTE_RGB, _("R, G, B (normal)"),        NULL,
                                                                        "bgr", RAW_PALETTE_BGR, _("B, G, R, X (BMP style)"),  NULL,
                                                                        NULL),
                                           "rgb", G_PARAM_READWRITE);
     }
 
-  gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+  clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                        _("Raw Data"));
 
   return procedure;
 }
 
-static GimpValueArray *
-raw_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+raw_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray    *return_vals;
+  ClayValueArray    *return_vals;
   gboolean           is_hgt;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpImage         *image  = NULL;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayImage         *image  = NULL;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  is_hgt = (! strcmp (gimp_procedure_get_name (procedure), LOAD_HGT_PROC));
+  is_hgt = (! strcmp (clay_procedure_get_name (procedure), LOAD_HGT_PROC));
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       preview_fd = g_open (g_file_peek_path (file), O_RDONLY | _O_BINARY, 0);
       if (preview_fd < 0)
@@ -608,10 +608,10 @@ raw_load (GimpProcedure         *procedure,
           g_set_error (&error,
                        G_FILE_ERROR, g_file_error_from_errno (errno),
                        _("Could not open '%s' for reading: %s"),
-                       gimp_file_get_utf8_name (file),
+                       clay_file_get_utf8_name (file),
                        g_strerror (errno));
 
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
       else
         {
@@ -621,7 +621,7 @@ raw_load (GimpProcedure         *procedure,
                            G_FILE_ERROR, G_FILE_ERROR_FAILED,
                            _("Unexpected end of file"));
 
-              status = GIMP_PDB_EXECUTION_ERROR;
+              status = CLAY_PDB_EXECUTION_ERROR;
             }
           else
             {
@@ -632,9 +632,9 @@ raw_load (GimpProcedure         *procedure,
               gboolean show_dialog = (! is_hgt || ! detect_sample_spacing (config, file, &error));
 
               if (error != NULL)
-                status = GIMP_PDB_EXECUTION_ERROR;
+                status = CLAY_PDB_EXECUTION_ERROR;
               else if (show_dialog && ! load_dialog (file, procedure, G_OBJECT (config), is_hgt))
-                status = GIMP_PDB_CANCEL;
+                status = CLAY_PDB_CANCEL;
             }
 
           close (preview_fd);
@@ -644,19 +644,19 @@ raw_load (GimpProcedure         *procedure,
     {
       HgtSampleSpacing sample_spacing = HGT_SRTM_AUTO_DETECT;
 
-      sample_spacing = gimp_procedure_config_get_choice_id (config, "sample-spacing");
+      sample_spacing = clay_procedure_config_get_choice_id (config, "sample-spacing");
 
       if (sample_spacing < HGT_SRTM_AUTO_DETECT ||
           sample_spacing > HGT_SRTM_3)
         {
           g_set_error (&error,
-                       GIMP_PLUGIN_HGT_LOAD_ERROR,
-                       GIMP_PLUGIN_HGT_LOAD_ARGUMENT_ERROR,
+                       CLAY_PLUGIN_HGT_LOAD_ERROR,
+                       CLAY_PLUGIN_HGT_LOAD_ARGUMENT_ERROR,
                        _("%d is not a valid sample spacing. "
                          "Valid values are: 0 (auto-detect), 1 and 3."),
                        sample_spacing);
 
-          status = GIMP_PDB_CALLING_ERROR;
+          status = CLAY_PDB_CALLING_ERROR;
         }
       else if (sample_spacing == HGT_SRTM_AUTO_DETECT &&
                ! detect_sample_spacing (config, file, &error))
@@ -670,9 +670,9 @@ raw_load (GimpProcedure         *procedure,
                            "or its variant is not supported yet. "
                            "Supported HGT files are: SRTM-1 and SRTM-3. "
                            "If you know the variant, run with argument 1 or 3."),
-                         gimp_file_get_utf8_name (file));
+                         clay_file_get_utf8_name (file));
 
-          status = GIMP_PDB_CALLING_ERROR;
+          status = CLAY_PDB_CALLING_ERROR;
         }
     }
   else
@@ -684,7 +684,7 @@ raw_load (GimpProcedure         *procedure,
                     "width",  &width,
                     "height", &height,
                     NULL);
-      /* This is a very crappy way to stop GIMP from automatic runs,
+      /* This is a very crappy way to stop Clay from automatic runs,
        * e.g. when generating previews (which usually makes no sense on
        * raw data files as we can't guess the actual width/height).
        * Unfortunately it means that we also break the odd case when one
@@ -695,99 +695,99 @@ raw_load (GimpProcedure         *procedure,
       if (width == PREVIEW_SIZE && height == PREVIEW_SIZE)
         {
           /* TODO: set an error message after the string freeze. */
-          status = GIMP_PDB_CALLING_ERROR;
+          status = CLAY_PDB_CALLING_ERROR;
         }
     }
 
   /* we are okay, and the user clicked OK in the load dialog */
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     image = load_image (file, config, &error);
 
-  if (status != GIMP_PDB_SUCCESS && error)
+  if (status != CLAY_PDB_SUCCESS && error)
     {
       g_printerr ("Loading \"%s\" failed with error: %s",
-                  gimp_file_get_utf8_name (file),
+                  clay_file_get_utf8_name (file),
                   error->message);
     }
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure, status, error);
+    return clay_procedure_new_return_values (procedure, status, error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-raw_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+raw_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType       status = GIMP_PDB_SUCCESS;
-  GimpExportReturn        export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType       status = CLAY_PDB_SUCCESS;
+  ClayExportReturn        export = CLAY_EXPORT_IGNORE;
   GList                  *drawables;
   RawPlanarConfiguration  planar_conf;
   GError                 *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  planar_conf = gimp_procedure_config_get_choice_id (config, "planar-configuration");
+  planar_conf = clay_procedure_config_get_choice_id (config, "planar-configuration");
 
   if ((planar_conf != RAW_PLANAR_CONTIGUOUS) && (planar_conf != RAW_PLANAR_SEPARATE))
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                NULL);
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! save_dialog (image, procedure,
-                         gimp_drawable_has_alpha (drawables->data),
+                         clay_drawable_has_alpha (drawables->data),
                          G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data, config, &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpValueArray *
-hrz_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+hrz_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  RawGimpData       *data;
-  GimpLayer         *layer;
+  ClayValueArray    *return_vals;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  RawClayData       *data;
+  ClayLayer         *layer;
   guchar            *pixels;
   gint               pixel_len = 256 * 240 * 3;
   gsize              file_size;
@@ -795,20 +795,20 @@ hrz_load (GimpProcedure         *procedure,
 
   gegl_init (NULL, NULL);
 
-  data = g_new0 (RawGimpData, 1);
+  data = g_new0 (RawClayData, 1);
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   data->fp = g_fopen (g_file_peek_path (file), "rb");
 
   if (! data->fp)
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
       g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return gimp_procedure_new_return_values (procedure, status, error);
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return clay_procedure_new_return_values (procedure, status, error);
     }
 
   /* Check file size - it must be exactly 184,320 bytes */
@@ -820,22 +820,22 @@ hrz_load (GimpProcedure         *procedure,
     {
       fclose (data->fp);
 
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
       g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Invalid file."));
-      return gimp_procedure_new_return_values (procedure, status, error);
+      return clay_procedure_new_return_values (procedure, status, error);
     }
 
   /* HRZ files are always exactly 256 x 240 pixels */
-  data->image = gimp_image_new_with_precision (256, 240, GIMP_RGB,
-                                               GIMP_PRECISION_U8_NON_LINEAR);
+  data->image = clay_image_new_with_precision (256, 240, CLAY_RGB,
+                                               CLAY_PRECISION_U8_NON_LINEAR);
 
-  layer = gimp_layer_new (data->image, _("Background"),
-                          256, 240, GIMP_RGB_IMAGE, 100,
-                          gimp_image_get_default_new_layer_mode (data->image));
-  gimp_image_insert_layer (data->image, layer, NULL, 0);
+  layer = clay_layer_new (data->image, _("Background"),
+                          256, 240, CLAY_RGB_IMAGE, 100,
+                          clay_image_get_default_new_layer_mode (data->image));
+  clay_image_insert_layer (data->image, layer, NULL, 0);
 
-  data->buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  data->buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   raw_load_standard (data, 256, 240, 3, 0, RAW_RGB_8BPC,
                      TRUE, TRUE, FALSE);
@@ -862,11 +862,11 @@ hrz_load (GimpProcedure         *procedure,
   g_object_unref (data->buffer);
   g_free (pixels);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, data->image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, data->image);
 
   return return_vals;
 }
@@ -933,7 +933,7 @@ mmap_read (gint    fd,
  * bytes.
  */
 static gboolean
-raw_load_standard (RawGimpData *data,
+raw_load_standard (RawClayData *data,
                    gint         width,
                    gint         height,
                    gint         bpp,
@@ -1081,7 +1081,7 @@ raw_load_standard (RawGimpData *data,
 }
 
 static gboolean
-raw_load_planar (RawGimpData *data,
+raw_load_planar (RawClayData *data,
                  gint         width,
                  gint         height,
                  gint         bpp,
@@ -1235,7 +1235,7 @@ raw_load_planar (RawGimpData *data,
  * pixel images - hopefully lots of binaries too
  */
 static gboolean
-raw_load_gray (RawGimpData *data,
+raw_load_gray (RawClayData *data,
                gint         width,
                gint         height,
                guint        offset,
@@ -1320,7 +1320,7 @@ raw_load_gray (RawGimpData *data,
 
 /* this handles RGB565 images */
 static gboolean
-raw_load_rgb565 (RawGimpData   *data,
+raw_load_rgb565 (RawClayData   *data,
                  gint           width,
                  gint           height,
                  guint          offset,
@@ -1415,7 +1415,7 @@ rgb_565_to_888 (guint16       *in,
 }
 
 static gboolean
-raw_load_palette (RawGimpData    *data,
+raw_load_palette (RawClayData    *data,
                   guint           palette_offset,
                   RawPaletteType  palette_type,
                   GFile          *palette_file)
@@ -1462,7 +1462,7 @@ raw_load_palette (RawGimpData    *data,
         }
     }
 
-  gimp_palette_set_colormap (gimp_image_get_palette (data->image), babl_format ("R'G'B' u8"), data->cmap, 256 * 3);
+  clay_palette_set_colormap (clay_image_get_palette (data->image), babl_format ("R'G'B' u8"), data->cmap, 256 * 3);
 
   return TRUE;
 }
@@ -1471,9 +1471,9 @@ raw_load_palette (RawGimpData    *data,
 
 static gboolean
 export_image (GFile                *file,
-              GimpImage            *image,
-              GimpDrawable         *drawable,
-              GimpProcedureConfig  *config,
+              ClayImage            *image,
+              ClayDrawable         *drawable,
+              ClayProcedureConfig  *config,
               GError              **error)
 {
   GeglBuffer             *buffer;
@@ -1492,12 +1492,12 @@ export_image (GFile                *file,
   RawPaletteType          palette_type;   /* type of palette (RGB/BGR)   */
   gboolean                ret = FALSE;
 
-  planar_conf  = gimp_procedure_config_get_choice_id (config, "planar-configuration");
-  palette_type = gimp_procedure_config_get_choice_id (config, "palette-type");
+  planar_conf  = clay_procedure_config_get_choice_id (config, "planar-configuration");
+  palette_type = clay_procedure_config_get_choice_id (config, "palette-type");
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
-  format = gimp_drawable_get_format (drawable);
+  format = clay_drawable_get_format (drawable);
 
   n_components = babl_format_get_n_components (format);
   bpp          = babl_format_get_bytes_per_pixel (format);
@@ -1505,8 +1505,8 @@ export_image (GFile                *file,
 
   g_return_val_if_fail (bpc * n_components == bpp, FALSE);
 
-  if (gimp_drawable_is_indexed (drawable))
-    cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &palsize, NULL);
+  if (clay_drawable_is_indexed (drawable))
+    cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &palsize, NULL);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
@@ -1515,7 +1515,7 @@ export_image (GFile                *file,
       ! g_size_checked_mul (&buf_size, buf_size, bpp) ||
       ! (buf = g_try_new0 (guchar, buf_size)))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       return FALSE;
@@ -1533,7 +1533,7 @@ export_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -1562,7 +1562,7 @@ export_image (GFile                *file,
             {
               g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                            _("Could not open '%s' for writing: %s"),
-                           gimp_filename_to_utf8 (newfile), g_strerror (errno));
+                           clay_filename_to_utf8 (newfile), g_strerror (errno));
               return FALSE;
             }
 
@@ -1714,27 +1714,27 @@ get_pixel_format_sizes (RawType  image_type,
 }
 
 static void
-get_bpp (GimpProcedureConfig *config,
+get_bpp (ClayProcedureConfig *config,
          gint                *bpp,
          gint                *bitspp)
 {
-  GimpProcedure *procedure = gimp_procedure_config_get_procedure (config);
+  ClayProcedure *procedure = clay_procedure_config_get_procedure (config);
 
-  if (g_strcmp0 (gimp_procedure_get_name (procedure), LOAD_HGT_PROC) == 0)
+  if (g_strcmp0 (clay_procedure_get_name (procedure), LOAD_HGT_PROC) == 0)
     {
       *bitspp = 8;
       *bpp = 2;
     }
   else
     {
-      RawType image_type = gimp_procedure_config_get_choice_id (config, "pixel-format");
+      RawType image_type = clay_procedure_config_get_choice_id (config, "pixel-format");
 
       get_pixel_format_sizes (image_type, bpp, bitspp);
     }
 }
 
 static gboolean
-detect_sample_spacing (GimpProcedureConfig  *config,
+detect_sample_spacing (ClayProcedureConfig  *config,
                        GFile                *file,
                        GError              **error)
 {
@@ -1747,7 +1747,7 @@ detect_sample_spacing (GimpProcedureConfig  *config,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for size verification: %s"),
-                   gimp_file_get_utf8_name (file),
+                   clay_file_get_utf8_name (file),
                    g_strerror (errno));
     }
   else
@@ -1780,7 +1780,7 @@ detect_sample_spacing (GimpProcedureConfig  *config,
 }
 
 static void
-get_load_config_values (GimpProcedureConfig     *config,
+get_load_config_values (ClayProcedureConfig     *config,
                         guint32                 *file_offset,
                         gint32                  *image_width,
                         gint32                  *image_height,
@@ -1792,15 +1792,15 @@ get_load_config_values (GimpProcedureConfig     *config,
                         RawPaletteType          *palette_type,
                         GFile                  **palette_file)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
-  procedure = gimp_procedure_config_get_procedure (config);
+  procedure = clay_procedure_config_get_procedure (config);
 
-  if (g_strcmp0 (gimp_procedure_get_name (procedure), LOAD_HGT_PROC) == 0)
+  if (g_strcmp0 (clay_procedure_get_name (procedure), LOAD_HGT_PROC) == 0)
     {
       gint sample_spacing;
 
-      sample_spacing = gimp_procedure_config_get_choice_id (config, "sample-spacing");
+      sample_spacing = clay_procedure_config_get_choice_id (config, "sample-spacing");
 
       if (sample_spacing == HGT_SRTM_3)
         *image_width = *image_height = 1201;
@@ -1825,26 +1825,26 @@ get_load_config_values (GimpProcedureConfig     *config,
                     "palette-offset",       palette_offset,
                     "palette-file",         palette_file,
                     NULL);
-      *image_type   = gimp_procedure_config_get_choice_id (config, "pixel-format");
-      *encoding     = gimp_procedure_config_get_choice_id (config, "data-type");
-      *endianness   = gimp_procedure_config_get_choice_id (config, "endianness");
-      *palette_type = gimp_procedure_config_get_choice_id (config, "palette-type");
+      *image_type   = clay_procedure_config_get_choice_id (config, "pixel-format");
+      *encoding     = clay_procedure_config_get_choice_id (config, "data-type");
+      *endianness   = clay_procedure_config_get_choice_id (config, "endianness");
+      *palette_type = clay_procedure_config_get_choice_id (config, "palette-type");
 
       *planar_configuration =
-        gimp_procedure_config_get_choice_id (config, "planar-configuration");
+        clay_procedure_config_get_choice_id (config, "planar-configuration");
     }
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile                *file,
-            GimpProcedureConfig  *config,
+            ClayProcedureConfig  *config,
             GError              **error)
 {
-  RawGimpData       *data;
-  GimpLayer         *layer     = NULL;
-  GimpImageType      ltype     = GIMP_RGB_IMAGE;
-  GimpImageBaseType  itype     = GIMP_RGB;
-  GimpPrecision      precision = GIMP_PRECISION_U8_NON_LINEAR;
+  RawClayData       *data;
+  ClayLayer         *layer     = NULL;
+  ClayImageType      ltype     = CLAY_RGB_IMAGE;
+  ClayImageBaseType  itype     = CLAY_RGB;
+  ClayPrecision      precision = CLAY_PRECISION_U8_NON_LINEAR;
   RawType            pixel_format;
   RawEncoding        encoding;
   RawEndianness      endianness;
@@ -1860,10 +1860,10 @@ load_image (GFile                *file,
   RawPaletteType     palette_type;
   GFile             *palette_file;
 
-  data = g_new0 (RawGimpData, 1);
+  data = g_new0 (RawClayData, 1);
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   data->fp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -1871,7 +1871,7 @@ load_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -1895,39 +1895,39 @@ load_image (GFile                *file,
     case RAW_GRAY_1BPP:
     case RAW_GRAY_2BPP:
     case RAW_GRAY_4BPP:
-      ltype = GIMP_RGB_IMAGE;
-      itype = GIMP_RGB;
+      ltype = CLAY_RGB_IMAGE;
+      itype = CLAY_RGB;
       break;
 
     case RAW_RGBA_8BPC:
     case RAW_RGBA_16BPC:
     case RAW_RGBA_32BPC:
-      ltype = GIMP_RGBA_IMAGE;
-      itype = GIMP_RGB;
+      ltype = CLAY_RGBA_IMAGE;
+      itype = CLAY_RGB;
       break;
 
     case RAW_GRAY_8BPP:
     case RAW_GRAY_16BPP:
     case RAW_GRAY_32BPP:
-      ltype = GIMP_GRAY_IMAGE;
-      itype = GIMP_GRAY;
+      ltype = CLAY_GRAY_IMAGE;
+      itype = CLAY_GRAY;
       break;
 
     case RAW_INDEXED: /* Indexed */
-      ltype = GIMP_INDEXED_IMAGE;
-      itype = GIMP_INDEXED;
+      ltype = CLAY_INDEXED_IMAGE;
+      itype = CLAY_INDEXED;
       break;
 
     case RAW_INDEXEDA: /* Indexed + alpha */
-      ltype = GIMP_INDEXEDA_IMAGE;
-      itype = GIMP_INDEXED;
+      ltype = CLAY_INDEXEDA_IMAGE;
+      itype = CLAY_INDEXED;
       break;
 
     case RAW_GRAYA_8BPC:
     case RAW_GRAYA_16BPC:
     case RAW_GRAYA_32BPC:
-      ltype = GIMP_GRAYA_IMAGE;
-      itype = GIMP_GRAY;
+      ltype = CLAY_GRAYA_IMAGE;
+      itype = CLAY_GRAY;
       break;
     }
 
@@ -1938,9 +1938,9 @@ load_image (GFile                *file,
     case RAW_GRAY_16BPP:
     case RAW_GRAYA_16BPC:
       if (encoding == RAW_ENCODING_FLOAT)
-        precision = GIMP_PRECISION_HALF_NON_LINEAR;
+        precision = CLAY_PRECISION_HALF_NON_LINEAR;
       else
-        precision = GIMP_PRECISION_U16_NON_LINEAR;
+        precision = CLAY_PRECISION_U16_NON_LINEAR;
       break;
 
     case RAW_RGB_32BPC:
@@ -1948,13 +1948,13 @@ load_image (GFile                *file,
     case RAW_GRAY_32BPP:
     case RAW_GRAYA_32BPC:
       if (encoding == RAW_ENCODING_FLOAT)
-        precision = GIMP_PRECISION_FLOAT_NON_LINEAR;
+        precision = CLAY_PRECISION_FLOAT_NON_LINEAR;
       else
-        precision = GIMP_PRECISION_U32_NON_LINEAR;
+        precision = CLAY_PRECISION_U32_NON_LINEAR;
       break;
 
     default:
-      precision = GIMP_PRECISION_U8_NON_LINEAR;
+      precision = CLAY_PRECISION_U8_NON_LINEAR;
       break;
     }
 
@@ -1962,14 +1962,14 @@ load_image (GFile                *file,
   if (height > (size / width / bpp * 8 / bitspp))
     height = size / width / bpp * 8 / bitspp;
 
-  data->image = gimp_image_new_with_precision (width, height, itype, precision);
+  data->image = clay_image_new_with_precision (width, height, itype, precision);
 
-  layer = gimp_layer_new (data->image, _("Background"),
+  layer = clay_layer_new (data->image, _("Background"),
                           width, height, ltype, 100,
-                          gimp_image_get_default_new_layer_mode (data->image));
-  gimp_image_insert_layer (data->image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (data->image));
+  clay_image_insert_layer (data->image, layer, NULL, 0);
 
-  data->buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  data->buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   switch (pixel_format)
     {
@@ -2088,10 +2088,10 @@ halfp2singles (uint32_t       *xp,
 }
 
 static void
-preview_update (GimpPreviewArea *preview,
+preview_update (ClayPreviewArea *preview,
                 gboolean         preview_cmap_update)
 {
-  GimpImageType        preview_type = GIMP_RGB_IMAGE;
+  ClayImageType        preview_type = CLAY_RGB_IMAGE;
   gint                 preview_width;
   gint                 preview_height;
   gint32               pos;
@@ -2104,7 +2104,7 @@ preview_update (GimpPreviewArea *preview,
   gboolean             is_signed;
   gboolean             is_float;
 
-  GimpProcedureConfig *config;
+  ClayProcedureConfig *config;
   RawType              pixel_format;
   RawEncoding          encoding;
   RawEndianness        endianness;
@@ -2117,7 +2117,7 @@ preview_update (GimpPreviewArea *preview,
   guint                palette_offset;
   RawPaletteType       palette_type;
 
-  gimp_preview_area_get_size (preview, &preview_width, &preview_height);
+  clay_preview_area_get_size (preview, &preview_width, &preview_height);
 
   config = g_object_get_data (G_OBJECT (preview), "procedure-config");
 
@@ -2127,7 +2127,7 @@ preview_update (GimpPreviewArea *preview,
   width  = MIN (width,  preview_width);
   height = MIN (height, preview_height);
 
-  gimp_preview_area_fill (preview,
+  clay_preview_area_fill (preview,
                           0, 0, preview_width, preview_height,
                           255, 255, 255);
 
@@ -2153,7 +2153,7 @@ preview_update (GimpPreviewArea *preview,
           bpp = 16;
         }
       n_components = 4;
-      preview_type = GIMP_RGBA_IMAGE;
+      preview_type = CLAY_RGBA_IMAGE;
 
     case RAW_RGB_8BPC:
       if (bpc == 0)
@@ -2176,7 +2176,7 @@ preview_update (GimpPreviewArea *preview,
       if (n_components == 0)
         {
           n_components = 3;
-          preview_type = GIMP_RGB_IMAGE;
+          preview_type = CLAY_RGB_IMAGE;
         }
 
     case RAW_GRAYA_8BPC:
@@ -2200,7 +2200,7 @@ preview_update (GimpPreviewArea *preview,
       if (n_components == 0)
         {
           n_components = 2;
-          preview_type = GIMP_GRAYA_IMAGE;
+          preview_type = CLAY_GRAYA_IMAGE;
         }
 
     case RAW_GRAY_16BPP:
@@ -2219,7 +2219,7 @@ preview_update (GimpPreviewArea *preview,
       if (n_components == 0)
         {
           n_components = 1;
-          preview_type = GIMP_GRAY_IMAGE;
+          preview_type = CLAY_GRAY_IMAGE;
         }
 
       if (planar_configuration == RAW_PLANAR_CONTIGUOUS)
@@ -2306,7 +2306,7 @@ preview_update (GimpPreviewArea *preview,
                     }
                 }
 
-              gimp_preview_area_draw (preview, 0, y, width, 1,
+              clay_preview_area_draw (preview, 0, y, width, 1,
                                       preview_type, row, width * n_components);
             }
 
@@ -2397,7 +2397,7 @@ preview_update (GimpPreviewArea *preview,
                     }
                 }
 
-              gimp_preview_area_draw (preview, 0, y, width, 1,
+              clay_preview_area_draw (preview, 0, y, width, 1,
                                       preview_type, row, width * n_components);
             }
 
@@ -2419,8 +2419,8 @@ preview_update (GimpPreviewArea *preview,
             mmap_read (preview_fd, in, width * 2, pos, width * 2);
             rgb_565_to_888 (in, row, width, pixel_format, endianness);
 
-            gimp_preview_area_draw (preview, 0, y, width, 1,
-                                    GIMP_RGB_IMAGE, row, width * 3);
+            clay_preview_area_draw (preview, 0, y, width, 1,
+                                    CLAY_RGB_IMAGE, row, width * 3);
           }
 
         g_free (row);
@@ -2488,8 +2488,8 @@ preview_update (GimpPreviewArea *preview,
               }
           }
 
-        gimp_preview_area_draw (preview, 0, 0, width, height,
-                                GIMP_RGB_IMAGE, out_raw, width * 3);
+        clay_preview_area_draw (preview, 0, 0, width, height,
+                                CLAY_RGB_IMAGE, out_raw, width * 3);
         g_free (in_raw);
         g_free (out_raw);
       }
@@ -2565,8 +2565,8 @@ preview_update (GimpPreviewArea *preview,
                       }
                   }
 
-                gimp_preview_area_draw (preview, 0, y, width, 1,
-                                        GIMP_RGBA_IMAGE, row, width * 4);
+                clay_preview_area_draw (preview, 0, y, width, 1,
+                                        CLAY_RGBA_IMAGE, row, width * 4);
               }
             else
               {
@@ -2590,8 +2590,8 @@ preview_update (GimpPreviewArea *preview,
                       }
                   }
 
-                gimp_preview_area_draw (preview, 0, y, width, 1,
-                                        GIMP_RGB_IMAGE, row, width * 3);
+                clay_preview_area_draw (preview, 0, y, width, 1,
+                                        CLAY_RGB_IMAGE, row, width * 3);
               }
           }
 
@@ -2605,7 +2605,7 @@ preview_update (GimpPreviewArea *preview,
 }
 
 static void
-preview_update_size (GimpPreviewArea *preview)
+preview_update_size (ClayPreviewArea *preview)
 {
   GObject *config;
   gint     width;
@@ -2624,7 +2624,7 @@ preview_update_size (GimpPreviewArea *preview)
     {
       gint sample_spacing;
 
-      sample_spacing = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+      sample_spacing = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                             "sample-spacing");
 
       if (sample_spacing == HGT_SRTM_3)
@@ -2640,10 +2640,10 @@ static gboolean
 image_type_combox_box_sensitivity_func (const gchar *id,
                                         gpointer     data)
 {
-  GimpChoice          *choice    = NULL;
-  GimpPreviewArea     *preview   = data;
-  GimpProcedureConfig *config    = NULL;
-  GimpProcedure       *procedure = NULL;
+  ClayChoice          *choice    = NULL;
+  ClayPreviewArea     *preview   = data;
+  ClayProcedureConfig *config    = NULL;
+  ClayProcedure       *procedure = NULL;
   GFile               *file      = NULL;
   GParamSpec          *pspec     = NULL;
   gboolean             sensitive = FALSE;
@@ -2657,11 +2657,11 @@ image_type_combox_box_sensitivity_func (const gchar *id,
 
   file_size_bits = get_file_size (file) * 8;
 
-  procedure = gimp_procedure_config_get_procedure (config);
-  pspec     = gimp_procedure_find_argument (procedure, "pixel-format");
-  choice    = gimp_param_spec_choice_get_choice (pspec);
+  procedure = clay_procedure_config_get_procedure (config);
+  pspec     = clay_procedure_find_argument (procedure, "pixel-format");
+  choice    = clay_param_spec_choice_get_choice (pspec);
 
-  get_pixel_format_sizes (gimp_choice_get_id (choice, id),
+  get_pixel_format_sizes (clay_choice_get_id (choice, id),
                           &bpp, &bitspp);
   pixel_size_bits = bpp * bitspp;
 
@@ -2679,7 +2679,7 @@ image_type_combox_box_sensitivity_func (const gchar *id,
                     "pixel-format", &current_id,
                     NULL);
 
-      get_pixel_format_sizes (gimp_choice_get_id (choice, current_id),
+      get_pixel_format_sizes (clay_choice_get_id (choice, current_id),
                               &bpp, &bitspp);
       pixel_size_bits = bpp * bitspp;
 
@@ -2698,9 +2698,9 @@ image_type_combox_box_sensitivity_func (const gchar *id,
 }
 
 static void
-load_config_notify (GimpProcedureConfig  *config,
+load_config_notify (ClayProcedureConfig  *config,
                     GParamSpec           *pspec,
-                    GimpPreviewArea      *preview)
+                    ClayPreviewArea      *preview)
 {
   gboolean preview_cmap_update = FALSE;
   gboolean width_update        = FALSE;
@@ -2803,10 +2803,10 @@ load_config_notify (GimpProcedureConfig  *config,
               if (spec != NULL)
                 G_PARAM_SPEC_INT (spec)->maximum = new_maximum;
 
-              entry = gimp_procedure_dialog_get_scale_entry (GIMP_PROCEDURE_DIALOG (dialog),
+              entry = clay_procedure_dialog_get_scale_entry (CLAY_PROCEDURE_DIALOG (dialog),
                                                              prop, 1.0);
 
-              gimp_scale_entry_set_bounds (GIMP_SCALE_ENTRY (entry), new_minimum, new_maximum, FALSE);
+              clay_scale_entry_set_bounds (CLAY_SCALE_ENTRY (entry), new_minimum, new_maximum, FALSE);
             }
         }
 
@@ -2827,7 +2827,7 @@ load_config_notify (GimpProcedureConfig  *config,
 }
 
 static void
-preview_allocate (GimpPreviewArea   *preview,
+preview_allocate (ClayPreviewArea   *preview,
                   GtkAllocation     *allocation,
                   gpointer           user_data)
 {
@@ -2836,7 +2836,7 @@ preview_allocate (GimpPreviewArea   *preview,
 
 static gboolean
 load_dialog (GFile         *file,
-             GimpProcedure *procedure,
+             ClayProcedure *procedure,
              GObject       *config,
              gboolean       is_hgt)
 {
@@ -2852,7 +2852,7 @@ load_dialog (GFile         *file,
   gint       height = 0;
 
   if (is_hgt)
-    sample_spacing = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    sample_spacing = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                           "sample-spacing");
   else
     g_object_get (config,
@@ -2860,10 +2860,10 @@ load_dialog (GFile         *file,
                   "height", &height,
                   NULL);
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (GIMP_PROCEDURE (procedure),
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (CLAY_PROCEDURE (procedure),
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Load Image from Raw Data"));
 
   /* Preview frame. */
@@ -2879,7 +2879,7 @@ load_dialog (GFile         *file,
   gtk_container_add (GTK_CONTAINER (sw), viewport);
   gtk_widget_set_visible (viewport, TRUE);
 
-  preview = gimp_preview_area_new ();
+  preview = clay_preview_area_new ();
   if (is_hgt)
     gtk_widget_set_size_request (preview,
                                  sample_spacing == HGT_SRTM_3 ? 1201 : 3601,
@@ -2901,7 +2901,7 @@ load_dialog (GFile         *file,
                           G_CALLBACK (preview_allocate),
                           NULL);
 
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "preview-frame", NULL, FALSE,
                                             NULL);
   gtk_container_add (GTK_CONTAINER (frame), sw);
@@ -2929,7 +2929,7 @@ load_dialog (GFile         *file,
 
   if (is_hgt)
     {
-      gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "image-box", "sample-spacing", NULL);
     }
   else
@@ -2941,25 +2941,25 @@ load_dialog (GFile         *file,
 
       file_size = get_file_size (file);
 
-      label_string_widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+      label_string_widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                               "pixel-format", GTK_TYPE_COMBO_BOX);
-      combobox = gimp_label_string_widget_get_widget (GIMP_LABEL_STRING_WIDGET (label_string_widget));
-      gimp_string_combo_box_set_sensitivity (GIMP_STRING_COMBO_BOX (combobox),
+      combobox = clay_label_string_widget_get_widget (CLAY_LABEL_STRING_WIDGET (label_string_widget));
+      clay_string_combo_box_set_sensitivity (CLAY_STRING_COMBO_BOX (combobox),
                                              image_type_combox_box_sensitivity_func,
                                              preview, NULL);
 
-      entry = gimp_procedure_dialog_get_scale_entry (GIMP_PROCEDURE_DIALOG (dialog),
+      entry = clay_procedure_dialog_get_scale_entry (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "offset", 1.0);
       /* Setting offset needs to leave at least one pixel for reading. */
-      gimp_scale_entry_set_bounds (GIMP_SCALE_ENTRY (entry), 0, file_size - 1, FALSE);
-      entry = gimp_procedure_dialog_get_scale_entry (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_scale_entry_set_bounds (CLAY_SCALE_ENTRY (entry), 0, file_size - 1, FALSE);
+      entry = clay_procedure_dialog_get_scale_entry (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "width", 1.0);
-      gimp_scale_entry_set_bounds (GIMP_SCALE_ENTRY (entry), 1, file_size, FALSE);
-      entry = gimp_procedure_dialog_get_scale_entry (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_scale_entry_set_bounds (CLAY_SCALE_ENTRY (entry), 1, file_size, FALSE);
+      entry = clay_procedure_dialog_get_scale_entry (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "height", 1.0);
-      gimp_scale_entry_set_bounds (GIMP_SCALE_ENTRY (entry), 1, file_size, FALSE);
+      clay_scale_entry_set_bounds (CLAY_SCALE_ENTRY (entry), 1, file_size, FALSE);
 
-      gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                       "image-box",
                                       "pixel-format",
                                       "data-type", "endianness",
@@ -2968,7 +2968,7 @@ load_dialog (GFile         *file,
                                       NULL);
     }
 
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "image-frame", NULL, FALSE,
                                             "image-box");
   if (is_hgt)
@@ -2992,24 +2992,24 @@ load_dialog (GFile         *file,
       gtk_frame_set_label (GTK_FRAME (frame), _("Image"));
     }
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "palette-box",
                                   "palette-offset",
                                   "palette-type",
                                   "palette-file",
                                   NULL);
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "palette-frame", NULL, FALSE,
                                             "palette-box");
   gtk_frame_set_label (GTK_FRAME (frame), _("Palette"));
 
   /* Adjust layout to be accessible for smaller screens */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "settings-box",
                                   "image-frame", "palette-frame",
                                   NULL);
 
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "layout-box",
                                         "preview-frame", "settings-box",
                                         NULL);
@@ -3018,7 +3018,7 @@ load_dialog (GFile         *file,
   gtk_box_set_spacing (GTK_BOX (box), 12);
   gtk_widget_set_size_request (box, PREVIEW_SIZE * 2, -1);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "layout-box", NULL);
 
   g_signal_connect_swapped (config, "notify::width",
@@ -3035,11 +3035,11 @@ load_dialog (GFile         *file,
    * created with the proper maximum values right after start. Ideally this
    * would be called outside of load_dialog() but load_config_notify() expects
    * the preview. */
-  load_config_notify (GIMP_PROCEDURE_CONFIG (config),
-                      gimp_procedure_find_argument (procedure, "pixel-format"),
-                      GIMP_PREVIEW_AREA (preview));
+  load_config_notify (CLAY_PROCEDURE_CONFIG (config),
+                      clay_procedure_find_argument (procedure, "pixel-format"),
+                      CLAY_PREVIEW_AREA (preview));
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -3047,8 +3047,8 @@ load_dialog (GFile         *file,
 }
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              gboolean       has_alpha,
              GObject       *config)
 {
@@ -3059,12 +3059,12 @@ save_dialog (GimpImage     *image,
   gchar        *planar_label;
   gboolean      run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  switch (gimp_image_get_base_type (image))
+  switch (clay_image_get_base_type (image))
     {
-    case GIMP_RGB:
-    case GIMP_INDEXED:
+    case CLAY_RGB:
+    case CLAY_INDEXED:
       if (has_alpha)
         {
           contiguous_sample = "RGBA,RGBA,RGBA";
@@ -3076,7 +3076,7 @@ save_dialog (GimpImage     *image,
           planar_sample     = "RRR,GGG,BBB";
         }
       break;
-    case GIMP_GRAY:
+    case CLAY_GRAY:
       if (has_alpha)
         {
           contiguous_sample = "YA,YA,YA";
@@ -3103,29 +3103,29 @@ save_dialog (GimpImage     *image,
   else
     planar_label = g_strdup (_("_Planar"));
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /* Image type combo */
   /* No need to give a choice for 1-channel cases where both contiguous
    * and planar are the same.
    */
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "planar-configuration",
                                        contiguous_sample != NULL,
                                        NULL, NULL, FALSE);
 
   /* Palette type combo */
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "palette-type",
-                                       gimp_image_get_base_type (image) == GIMP_INDEXED,
+                                       clay_image_get_base_type (image) == CLAY_INDEXED,
                                        NULL, NULL, FALSE);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

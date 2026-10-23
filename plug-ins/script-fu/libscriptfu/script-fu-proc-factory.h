@@ -18,9 +18,9 @@
 #ifndef __SCRIPT_FU_PDB_PROC_FACTORY_H__
 #define __SCRIPT_FU_PDB_PROC_FACTORY_H__
 
-GimpProcedure *script_fu_proc_factory_make_PLUGIN (GimpPlugIn  *plug_in,
+ClayProcedure *script_fu_proc_factory_make_PLUGIN (ClayPlugIn  *plug_in,
                                                    const gchar *name);
-GList         *script_fu_proc_factory_list_names  (GimpPlugIn  *plug_in,
+GList         *script_fu_proc_factory_list_names  (ClayPlugIn  *plug_in,
                                                    GList       *paths);
 
 #endif /*  __SCRIPT_FU_PDB_PROC_FACTORY__  */

@@ -29,7 +29,7 @@ explicit procedure calls.
 
 
 The new channel still needs to be added to the image, as this is not
-automatic. Add the new channel with [method@Gimp.Image.insert_channel].
+automatic. Add the new channel with [method@Clay.Image.insert_channel].
 
 
 The channel's contents are undefined initially.
@@ -42,9 +42,9 @@ HELP
 	  desc => 'The image to which to add the channel' },
 	{ name => 'name', type => 'string',
 	  desc => 'The channel name' },
-	{ name => 'width', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'width', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'The channel width' },
-	{ name => 'height', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'height', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'The channel height' },
 	{ name => 'opacity', type => '0 <= double <= 100',
 	  desc => 'The channel opacity' },
@@ -61,8 +61,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_color_set_alpha (color, opacity / 100.0);
-  channel = gimp_channel_new (image, width, height, name, color);
+  clay_color_set_alpha (color, opacity / 100.0);
+  channel = clay_channel_new (image, width, height, name, color);
 
   if (! channel)
     success = FALSE;
@@ -79,7 +79,7 @@ This procedure copies the specified channel and returns the copy.
 
 
 The new channel still needs to be added to the image, as this is not
-automatic. Add the new channel with [method@Gimp.Image.insert_channel].
+automatic. Add the new channel with [method@Clay.Image.insert_channel].
 HELP
 
     &std_pdb_misc;
@@ -97,15 +97,15 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpImage *image  = gimp_item_get_image (GIMP_ITEM (channel));
-  gint       width  = gimp_image_get_width  (image);
-  gint       height = gimp_image_get_height (image);
+  ClayImage *image  = clay_item_get_image (CLAY_ITEM (channel));
+  gint       width  = clay_image_get_width  (image);
+  gint       height = clay_image_get_height (image);
 
-  if (gimp_item_get_width  (GIMP_ITEM (channel)) == width &&
-      gimp_item_get_height (GIMP_ITEM (channel)) == height)
+  if (clay_item_get_width  (CLAY_ITEM (channel)) == width &&
+      clay_item_get_height (CLAY_ITEM (channel)) == height)
     {
-      channel_copy = GIMP_CHANNEL (gimp_item_duplicate (GIMP_ITEM (channel),
-                                                        GIMP_TYPE_CHANNEL));
+      channel_copy = CLAY_CHANNEL (clay_item_duplicate (CLAY_ITEM (channel),
+                                                        CLAY_TYPE_CHANNEL));
 
       if (! channel_copy)
         success = FALSE;
@@ -132,7 +132,7 @@ HELP
 	  desc => 'The channel1' },
 	{ name => 'channel2', type => 'channel',
 	  desc => 'The channel2' },
-	{ name => 'operation', type => 'enum GimpChannelOps',
+	{ name => 'operation', type => 'enum ClayChannelOps',
 	  desc => 'The selection operation' },
 	{ name => 'offx', type => 'int32',
 	  desc => 'x offset between upper left corner of
@@ -143,13 +143,13 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpchannel-combine.h" "gimp-intl.h") ],
+        headers => [ qw("core/claychannel-combine.h" "clay-intl.h") ],
         code => <<'CODE'
 {
-  if (gimp_item_is_attached (GIMP_ITEM (channel1)))
-    gimp_channel_push_undo (channel1, _("Combine Masks"));
+  if (clay_item_is_attached (CLAY_ITEM (channel1)))
+    clay_channel_push_undo (channel1, _("Combine Masks"));
 
-  gimp_channel_combine_mask (channel1, channel2, operation, offx, offy);
+  clay_channel_combine_mask (channel1, channel2, operation, offx, offy);
 }
 CODE
     );
@@ -163,7 +163,7 @@ This procedure creates a new channel from a color component.
 
 
 The new channel still needs to be added to the image, as this is not
-automatic. Add the new channel with [method@Gimp.Image.insert_channel].
+automatic. Add the new channel with [method@Clay.Image.insert_channel].
 
 
 Other attributes, such as channel visibility, should be set with
@@ -175,7 +175,7 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image to which to add the channel' },
-	{ name => 'component', type => 'enum GimpChannelType',
+	{ name => 'component', type => 'enum ClayChannelType',
 	  desc => 'The image component' },
 	{ name => 'name', type => 'string',
 	  desc => 'The channel name' },
@@ -189,12 +189,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_image_get_component_format (image, component) != NULL)
-    channel = gimp_channel_new_from_component (image,
+  if (clay_image_get_component_format (image, component) != NULL)
+    channel = clay_channel_new_from_component (image,
                                                component, name, NULL);
 
   if (channel)
-    gimp_item_set_visible (GIMP_ITEM (channel), FALSE, FALSE);
+    clay_item_set_visible (CLAY_ITEM (channel), FALSE, FALSE);
   else
     success = FALSE;
 }
@@ -226,7 +226,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  show_masked = gimp_channel_get_show_masked (channel);
+  show_masked = clay_channel_get_show_masked (channel);
 }
 CODE
     );
@@ -253,7 +253,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_channel_set_show_masked (channel, show_masked);
+  clay_channel_set_show_masked (channel, show_masked);
 }
 CODE
     );
@@ -281,7 +281,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  opacity = gimp_channel_get_opacity (channel) * 100;
+  opacity = clay_channel_get_opacity (channel) * 100;
 }
 CODE
     );
@@ -306,7 +306,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_channel_set_opacity (channel, opacity / 100.0, TRUE);
+  clay_channel_set_opacity (channel, opacity / 100.0, TRUE);
 }
 CODE
     );
@@ -334,8 +334,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  color = gegl_color_duplicate (gimp_channel_get_color (channel));
-  gimp_color_set_alpha (color, 1.0);
+  color = gegl_color_duplicate (clay_channel_get_color (channel));
+  clay_color_set_alpha (color, 1.0);
 }
 CODE
     );
@@ -363,8 +363,8 @@ HELP
   gdouble alpha;
 
   gegl_color_get_rgba (channel->color, NULL, NULL, NULL, &alpha);
-  gimp_color_set_alpha (color, alpha);
-  gimp_channel_set_color (channel, color, TRUE);
+  clay_color_set_alpha (color, alpha);
+  clay_channel_set_color (channel, color, TRUE);
 }
 CODE
     );
@@ -372,8 +372,8 @@ CODE
 
 
 @headers = qw(<cairo.h>
-              "libgimpbase/gimpbase.h"
-              "libgimpcolor/gimpcolor.h");
+              "libclaybase/claybase.h"
+              "libclaycolor/claycolor.h");
 
 @procs = qw(channel_new
             channel_new_from_component
@@ -386,7 +386,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Channel';
-$doc_title = 'gimpchannel';
+$doc_title = 'claychannel';
 $doc_short_desc = 'Functions for manipulating channels.';
 $doc_long_desc = 'Functions for manipulating channels.';
 

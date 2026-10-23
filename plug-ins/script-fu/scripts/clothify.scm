@@ -1,62 +1,62 @@
 ; CLOTHIFY version 1.02
 ; Gives the current layer in the indicated image a cloth-like texture.
-; Process invented by Zach Beane (Xath@irc.gimp.net)
+; Process invented by Zach Beane (Xath@irc.clay.net)
 ;
 ; Tim Newsome <drz@froody.bloke.com> 4/11/97
 
 (define (script-fu-clothify timg tdrawables bx by azimuth elevation depth)
   (let* (
         (tdrawable (vector-ref tdrawables 0))
-        (width (car (gimp-drawable-get-width tdrawable)))
-        (height (car (gimp-drawable-get-height tdrawable)))
-        (img (car (gimp-image-new width height RGB)))
-;       (layer-two (car (gimp-layer-new img "Y Dots" width height RGB-IMAGE 100 LAYER-MODE-MULTIPLY)))
-        (layer-one (car (gimp-layer-new img "X Dots" width height RGB-IMAGE 100 LAYER-MODE-NORMAL)))
+        (width (car (clay-drawable-get-width tdrawable)))
+        (height (car (clay-drawable-get-height tdrawable)))
+        (img (car (clay-image-new width height RGB)))
+;       (layer-two (car (clay-layer-new img "Y Dots" width height RGB-IMAGE 100 LAYER-MODE-MULTIPLY)))
+        (layer-one (car (clay-layer-new img "X Dots" width height RGB-IMAGE 100 LAYER-MODE-NORMAL)))
         (layer-two 0)
         (bump-layer 0)
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
-    (gimp-image-undo-disable img)
+    (clay-image-undo-disable img)
 
-    (gimp-image-insert-layer img layer-one 0 0)
+    (clay-image-insert-layer img layer-one 0 0)
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-edit-fill layer-one FILL-BACKGROUND)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-edit-fill layer-one FILL-BACKGROUND)
 
-    (gimp-drawable-merge-new-filter layer-one "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer-one "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
                                     "independent" FALSE "red" 0.7 "alpha" 0.7
                                     "correlated" FALSE "seed" (msrg-rand) "linear" TRUE)
 
-    (set! layer-two (car (gimp-layer-copy layer-one)))
-    (gimp-layer-set-mode layer-two LAYER-MODE-MULTIPLY)
-    (gimp-image-insert-layer img layer-two 0 0)
+    (set! layer-two (car (clay-layer-copy layer-one)))
+    (clay-layer-set-mode layer-two LAYER-MODE-MULTIPLY)
+    (clay-image-insert-layer img layer-two 0 0)
 
-    (gimp-drawable-merge-new-filter layer-one "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 bx) "std-dev-y" 0.0 "filter" "auto")
-    (gimp-drawable-merge-new-filter layer-two "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 0.0 "std-dev-y" (* 0.32 by) "filter" "auto")
-    (gimp-image-flatten img)
-    (set! bump-layer (vector-ref (car (gimp-image-get-selected-layers img)) 0))
+    (clay-drawable-merge-new-filter layer-one "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 bx) "std-dev-y" 0.0 "filter" "auto")
+    (clay-drawable-merge-new-filter layer-two "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 0.0 "std-dev-y" (* 0.32 by) "filter" "auto")
+    (clay-image-flatten img)
+    (set! bump-layer (vector-ref (car (clay-image-get-selected-layers img)) 0))
 
-    (gimp-drawable-merge-new-filter bump-layer "gegl:stretch-contrast" 0 LAYER-MODE-REPLACE 1.0 "keep-colors" FALSE)
-    (gimp-drawable-merge-new-filter bump-layer "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter bump-layer "gegl:stretch-contrast" 0 LAYER-MODE-REPLACE 1.0 "keep-colors" FALSE)
+    (clay-drawable-merge-new-filter bump-layer "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
                                     "independent" FALSE "red" 0.2 "alpha" 0.2
                                     "correlated" FALSE "seed" (msrg-rand) "linear" TRUE)
 
-    (let* ((filter (car (gimp-drawable-filter-new tdrawable "gegl:bump-map" ""))))
-      (gimp-drawable-filter-configure filter LAYER-MODE-REPLACE 1.0
+    (let* ((filter (car (clay-drawable-filter-new tdrawable "gegl:bump-map" ""))))
+      (clay-drawable-filter-configure filter LAYER-MODE-REPLACE 1.0
                                       "azimuth" azimuth "elevation" elevation "depth" depth
                                       "offset-x" 0 "offset-y" 0 "waterlevel" 0.0 "ambient" 0.0
                                       "compensate" FALSE "invert" FALSE "type" "linear"
                                       "tiled" FALSE)
-      (gimp-drawable-filter-set-aux-input filter "aux" bump-layer)
-      (gimp-drawable-merge-filter tdrawable filter)
+      (clay-drawable-filter-set-aux-input filter "aux" bump-layer)
+      (clay-drawable-merge-filter tdrawable filter)
     )
-    (gimp-image-delete img)
-    (gimp-displays-flush)
+    (clay-image-delete img)
+    (clay-displays-flush)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

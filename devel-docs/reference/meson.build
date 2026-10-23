@@ -1,2 +1,2 @@
-subdir('gimp')
-subdir('gimp-ui')
+subdir('clay')
+subdir('clay-ui')

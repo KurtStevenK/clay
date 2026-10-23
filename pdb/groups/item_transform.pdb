@@ -23,16 +23,16 @@
 sub transform_invoke {
     my ($progress_text, $assemble_matrix, $check) = @_;
     my $success_check = <<"CODE";
-  success = gimp_pdb_item_is_attached (item, NULL,
-                                       GIMP_PDB_ITEM_CONTENT |
-                                       GIMP_PDB_ITEM_POSITION, error);
+  success = clay_pdb_item_is_attached (item, NULL,
+                                       CLAY_PDB_ITEM_CONTENT |
+                                       CLAY_PDB_ITEM_POSITION, error);
 CODE
 
     if ($check) {
         $success_check = <<"CODE"
-  success = (gimp_pdb_item_is_attached (item, NULL,
-                                        GIMP_PDB_ITEM_CONTENT |
-                                        GIMP_PDB_ITEM_POSITION, error) &&
+  success = (clay_pdb_item_is_attached (item, NULL,
+                                        CLAY_PDB_ITEM_CONTENT |
+                                        CLAY_PDB_ITEM_POSITION, error) &&
 	     $check);
 CODE
     }
@@ -45,15 +45,15 @@ CODE
 $success_check
 
   if (success &&
-      gimp_item_mask_intersect (item, &x, &y, &width, &height))
+      clay_item_mask_intersect (item, &x, &y, &width, &height))
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
-      GimpImage      *image       = gimp_item_get_image (item);
-      GimpChannel    *mask        = gimp_image_get_mask (image);
-      GimpMatrix3     matrix;
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
+      ClayImage      *image       = clay_item_get_image (item);
+      ClayChannel    *mask        = clay_image_get_mask (image);
+      ClayMatrix3     matrix;
       gint            off_x, off_y;
 
-      gimp_item_get_offset (item, &off_x, &off_y);
+      clay_item_get_offset (item, &off_x, &off_y);
       x += off_x;
       y += off_y;
 
@@ -61,16 +61,16 @@ $success_check
 $assemble_matrix
 
       if (progress)
-        gimp_progress_start (progress, FALSE, _(\"$progress_text\"));
+        clay_progress_start (progress, FALSE, _(\"$progress_text\"));
 
-      if (GIMP_IS_DRAWABLE (item)                             &&
-          item != GIMP_ITEM (mask)                            &&
-          ! gimp_viewable_get_children (GIMP_VIEWABLE (item)) &&
-          gimp_drawable_transform_needs_cut (GIMP_DRAWABLE (item), mask))
+      if (CLAY_IS_DRAWABLE (item)                             &&
+          item != CLAY_ITEM (mask)                            &&
+          ! clay_viewable_get_children (CLAY_VIEWABLE (item)) &&
+          clay_drawable_transform_needs_cut (CLAY_DRAWABLE (item), mask))
         {
-          GimpDrawable *drawable;
+          ClayDrawable *drawable;
 
-          drawable = gimp_drawable_transform_affine (GIMP_DRAWABLE (item),
+          drawable = clay_drawable_transform_affine (CLAY_DRAWABLE (item),
                                                      context, &matrix,
                                                      pdb_context->transform_direction,
                                                      pdb_context->interpolation,
@@ -78,22 +78,22 @@ $assemble_matrix
                                                      progress);
 
           if (drawable)
-            item = GIMP_ITEM (drawable);
+            item = CLAY_ITEM (drawable);
           else
             success = FALSE;
         }
       else
         {
-          gimp_item_transform (item, context, &matrix,
+          clay_item_transform (item, context, &matrix,
                                pdb_context->transform_direction,
                                pdb_context->interpolation,
-                               gimp_item_get_clip (
+                               clay_item_get_clip (
                                  item, pdb_context->transform_resize),
                                progress);
         }
 
       if (progress)
-        gimp_progress_end (progress);
+        clay_progress_end (progress);
     }
 }
 CODE
@@ -131,9 +131,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_modifiable (item,
-                                   GIMP_PDB_ITEM_POSITION, error))
-    gimp_item_translate (item, off_x, off_y, TRUE);
+  if (clay_pdb_item_is_modifiable (item,
+                                   CLAY_PDB_ITEM_POSITION, error))
+    clay_item_translate (item, off_x, off_y, TRUE);
   else
     success = FALSE;
 }
@@ -165,7 +165,7 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_transform_resize().
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2004', '2.2');
@@ -174,7 +174,7 @@ HELP
 	{ name => 'item', type => 'item',
 	  desc => 'The affected item' },
         { name => 'flip_type',
-	  type => 'enum GimpOrientationType (no GIMP_ORIENTATION_UNKNOWN)',
+	  type => 'enum ClayOrientationType (no CLAY_ORIENTATION_UNKNOWN)',
           desc => 'Type of flip' },
         { name => 'auto_center', type => 'boolean',
           desc => 'Whether to automatically position the axis in the selection center' },
@@ -192,46 +192,46 @@ HELP
 {
   gint x, y, width, height;
 
-  success = gimp_pdb_item_is_attached (item, NULL,
-                                       GIMP_PDB_ITEM_CONTENT |
-                                       GIMP_PDB_ITEM_POSITION, error);
+  success = clay_pdb_item_is_attached (item, NULL,
+                                       CLAY_PDB_ITEM_CONTENT |
+                                       CLAY_PDB_ITEM_POSITION, error);
 
   if (success &&
-      gimp_item_mask_intersect (item, &x, &y, &width, &height))
+      clay_item_mask_intersect (item, &x, &y, &width, &height))
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
-      GimpImage      *image       = gimp_item_get_image (item);
-      GimpChannel    *mask        = gimp_image_get_mask (image);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
+      ClayImage      *image       = clay_item_get_image (item);
+      ClayChannel    *mask        = clay_image_get_mask (image);
       gint            off_x, off_y;
 
-      gimp_item_get_offset (item, &off_x, &off_y);
+      clay_item_get_offset (item, &off_x, &off_y);
       x += off_x;
       y += off_y;
 
-      gimp_transform_get_flip_axis (x, y, width, height,
+      clay_transform_get_flip_axis (x, y, width, height,
                                     flip_type, auto_center, &axis);
 
-      if (GIMP_IS_DRAWABLE (item)                             &&
-          item != GIMP_ITEM (mask)                            &&
-          ! gimp_viewable_get_children (GIMP_VIEWABLE (item)) &&
-          gimp_drawable_transform_needs_cut (GIMP_DRAWABLE (item), mask))
+      if (CLAY_IS_DRAWABLE (item)                             &&
+          item != CLAY_ITEM (mask)                            &&
+          ! clay_viewable_get_children (CLAY_VIEWABLE (item)) &&
+          clay_drawable_transform_needs_cut (CLAY_DRAWABLE (item), mask))
         {
-          GimpDrawable *drawable;
+          ClayDrawable *drawable;
 
-          drawable = gimp_drawable_transform_flip (GIMP_DRAWABLE (item), context,
+          drawable = clay_drawable_transform_flip (CLAY_DRAWABLE (item), context,
                                                    flip_type, axis,
                                                    pdb_context->transform_resize);
 
           if (drawable)
-            item = GIMP_ITEM (drawable);
+            item = CLAY_ITEM (drawable);
           else
             success = FALSE;
         }
       else
         {
-          gimp_item_flip (item, context,
+          clay_item_flip (item, context,
                           flip_type, axis,
-                          gimp_item_get_clip (
+                          clay_item_get_clip (
                             item, pdb_context->transform_resize));
         }
     }
@@ -263,8 +263,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -288,8 +288,8 @@ HELP
     );
 
     transform_invoke ("Flipping", <<CODE);
-      gimp_matrix3_identity (&matrix);
-      gimp_transform_matrix_flip_free (&matrix, x0, y0, x1, y1);
+      clay_matrix3_identity (&matrix);
+      clay_transform_matrix_flip_free (&matrix, x0, y0, x1, y1);
 CODE
 }
 
@@ -326,8 +326,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -367,8 +367,8 @@ HELP
     );
 
     transform_invoke ("Perspective", <<CODE);
-      gimp_matrix3_identity (&matrix);
-      gimp_transform_matrix_perspective (&matrix,
+      clay_matrix3_identity (&matrix);
+      clay_transform_matrix_perspective (&matrix,
                                          x, y, width, height,
                                          x0, y0, x1, y1,
                                          x2, y2, x3, y3);
@@ -402,7 +402,7 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_transform_resize().
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -410,7 +410,7 @@ HELP
     @inargs = (
 	{ name => 'item', type => 'item',
 	  desc => 'The affected item' },
-        { name => 'rotate_type', type => 'enum GimpRotationType',
+        { name => 'rotate_type', type => 'enum ClayRotationType',
           desc => 'Type of rotation' },
         { name => 'auto_center', type => 'boolean',
           desc => 'Whether to automatically rotate around the selection center' },
@@ -430,49 +430,49 @@ HELP
 {
   gint x, y, width, height;
 
-  success = gimp_pdb_item_is_attached (item, NULL,
-                                       GIMP_PDB_ITEM_CONTENT |
-                                       GIMP_PDB_ITEM_POSITION, error);
+  success = clay_pdb_item_is_attached (item, NULL,
+                                       CLAY_PDB_ITEM_CONTENT |
+                                       CLAY_PDB_ITEM_POSITION, error);
 
   if (success &&
-      gimp_item_mask_intersect (item, &x, &y, &width, &height))
+      clay_item_mask_intersect (item, &x, &y, &width, &height))
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
-      GimpImage      *image       = gimp_item_get_image (item);
-      GimpChannel    *mask        = gimp_image_get_mask (image);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
+      ClayImage      *image       = clay_item_get_image (item);
+      ClayChannel    *mask        = clay_image_get_mask (image);
       gint            off_x, off_y;
 
-      gimp_item_get_offset (item, &off_x, &off_y);
+      clay_item_get_offset (item, &off_x, &off_y);
       x += off_x;
       y += off_y;
 
-      gimp_transform_get_rotate_center (x, y, width, height,
+      clay_transform_get_rotate_center (x, y, width, height,
                                         auto_center, &center_x, &center_y);
 
-      if (GIMP_IS_DRAWABLE (item)                             &&
-          item != GIMP_ITEM (mask)                            &&
-          ! gimp_viewable_get_children (GIMP_VIEWABLE (item)) &&
-          gimp_drawable_transform_needs_cut (GIMP_DRAWABLE (item), mask))
+      if (CLAY_IS_DRAWABLE (item)                             &&
+          item != CLAY_ITEM (mask)                            &&
+          ! clay_viewable_get_children (CLAY_VIEWABLE (item)) &&
+          clay_drawable_transform_needs_cut (CLAY_DRAWABLE (item), mask))
         {
-          GimpDrawable *drawable;
+          ClayDrawable *drawable;
 
-          drawable = gimp_drawable_transform_rotate (GIMP_DRAWABLE (item),
+          drawable = clay_drawable_transform_rotate (CLAY_DRAWABLE (item),
                                                      context,
                                                      rotate_type,
                                                      center_x, center_y,
                                                      pdb_context->transform_resize);
 
           if (drawable)
-            item = GIMP_ITEM (drawable);
+            item = CLAY_ITEM (drawable);
           else
             success = FALSE;
         }
       else
         {
-          gimp_item_rotate (item, context,
+          clay_item_rotate (item, context,
                             rotate_type,
                             center_x, center_y,
-                            gimp_item_get_clip (
+                            clay_item_get_clip (
                               item, pdb_context->transform_resize));
         }
     }
@@ -509,8 +509,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -534,12 +534,12 @@ HELP
     );
 
     transform_invoke ("Rotating", <<CODE);
-      gimp_matrix3_identity (&matrix);
+      clay_matrix3_identity (&matrix);
       if (auto_center)
-        gimp_transform_matrix_rotate_rect (&matrix,
+        clay_transform_matrix_rotate_rect (&matrix,
                                            x, y, width, height, angle);
       else
-        gimp_transform_matrix_rotate_center (&matrix,
+        clay_transform_matrix_rotate_center (&matrix,
                                              center_x, center_y, angle);
 CODE
 }
@@ -569,8 +569,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -598,8 +598,8 @@ HELP
     );
 
     transform_invoke ("Scaling", <<CODE, 'x0 < x1 && y0 < y1');
-      gimp_matrix3_identity (&matrix);
-      gimp_transform_matrix_scale (&matrix,
+      clay_matrix3_identity (&matrix);
+      clay_transform_matrix_scale (&matrix,
                                    x, y, width, height,
                                    x0, y0, x1 - x0, y1 - y0);
 CODE
@@ -633,8 +633,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -643,7 +643,7 @@ HELP
 	{ name => 'item', type => 'item',
 	  desc => 'The affected item' },
         { name => 'shear_type',
-	  type => 'enum GimpOrientationType (no GIMP_ORIENTATION_UNKNOWN)',
+	  type => 'enum ClayOrientationType (no CLAY_ORIENTATION_UNKNOWN)',
           desc => 'Type of shear' },
         { name => 'magnitude', type => 'double',
           desc => 'The magnitude of the shear' }
@@ -655,8 +655,8 @@ HELP
     );
 
     transform_invoke ("Shearing", <<CODE);
-      gimp_matrix3_identity (&matrix);
-      gimp_transform_matrix_shear (&matrix,
+      clay_matrix3_identity (&matrix);
+      clay_transform_matrix_shear (&matrix,
                                    x, y, width, height,
                                    shear_type, magnitude);
 CODE
@@ -689,8 +689,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -720,11 +720,11 @@ HELP
     );
 
     transform_invoke ("2D Transform", <<CODE);
-      gimp_matrix3_identity  (&matrix);
-      gimp_matrix3_translate (&matrix, -source_x, -source_y);
-      gimp_matrix3_scale     (&matrix, scale_x, scale_y);
-      gimp_matrix3_rotate    (&matrix, angle);
-      gimp_matrix3_translate (&matrix, dest_x, dest_y);
+      clay_matrix3_identity  (&matrix);
+      clay_matrix3_translate (&matrix, -source_x, -source_y);
+      clay_matrix3_scale     (&matrix, scale_x, scale_y);
+      clay_matrix3_rotate    (&matrix, angle);
+      clay_matrix3_translate (&matrix, dest_x, dest_y);
 CODE
 }
 
@@ -753,8 +753,8 @@ The return value will be equal to the item ID supplied as input.
 
 
 This procedure is affected by the following context setters:
-gimp_context_set_interpolation(), gimp_context_set_transform_direction(),
-gimp_context_set_transform_resize().
+clay_context_set_interpolation(), clay_context_set_transform_direction(),
+clay_context_set_transform_resize().
 HELP
 
     &mitch_pdb_misc('2010', '2.8');
@@ -801,16 +801,16 @@ CODE
 }
 
 
-@headers = qw("libgimpmath/gimpmath.h"
-              "core/gimp-transform-utils.h"
-              "core/gimpchannel.h"
-              "core/gimpdrawable.h"
-              "core/gimpdrawable-transform.h"
-              "core/gimpimage.h"
-              "core/gimpprogress.h"
-              "gimppdb-utils.h"
-              "gimppdbcontext.h"
-              "gimp-intl.h");
+@headers = qw("libclaymath/claymath.h"
+              "core/clay-transform-utils.h"
+              "core/claychannel.h"
+              "core/claydrawable.h"
+              "core/claydrawable-transform.h"
+              "core/clayimage.h"
+              "core/clayprogress.h"
+              "claypdb-utils.h"
+              "claypdbcontext.h"
+              "clay-intl.h");
 
 @procs = qw(item_transform_translate
             item_transform_flip_simple
@@ -826,7 +826,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Transformation procedures';
-$doc_title = 'gimpitemtransform';
+$doc_title = 'clayitemtransform';
 $doc_short_desc = 'Functions to perform transformations on items.';
 $doc_long_desc = 'Functions to perform transformations on items.';
 

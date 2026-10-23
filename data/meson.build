@@ -10,16 +10,16 @@ subdir('tool-presets')
 
 meson.add_install_script(python, '-c',
   'from pathlib import Path; import sys, os; destdir = os.environ.get("MESON_INSTALL_DESTDIR_PREFIX"); (Path(destdir) / sys.argv[1] / "fonts").mkdir(parents=True, exist_ok=True)',
-  gimpdatadir
+  claydatadir
 )
 release_conf = configuration_data()
 release_conf.set('REVISION', get_option('revision'))
 
-gimp_release = 'gimp-release'
+clay_release = 'clay-release'
 configure_file(
-  input : gimp_release + '.in',
-  output: gimp_release,
+  input : clay_release + '.in',
+  output: clay_release,
   configuration: release_conf,
   install: true,
-  install_dir: gimpdatadir,
+  install_dir: claydatadir,
 )

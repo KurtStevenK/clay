@@ -27,114 +27,114 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppattern.h"
-#include "core/gimptempbuf.h"
-#include "gegl/gimp-babl-compat.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
+#include "core/claypattern.h"
+#include "core/claytempbuf.h"
+#include "gegl/clay-babl-compat.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-pattern_get_by_name_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+pattern_get_by_name_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpPattern *pattern = NULL;
+  ClayPattern *pattern = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      pattern = GIMP_PATTERN (gimp_pdb_get_resource (gimp, GIMP_TYPE_PATTERN, name, GIMP_PDB_DATA_ACCESS_READ, error));
+      pattern = CLAY_PATTERN (clay_pdb_get_resource (clay, CLAY_TYPE_PATTERN, name, CLAY_PDB_DATA_ACCESS_READ, error));
 
       /* Ignore "not found" error, just return NULL. */
       g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), pattern);
+    g_value_set_object (clay_value_array_index (return_vals, 1), pattern);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pattern_get_info_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+pattern_get_info_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPattern *pattern;
+  ClayValueArray *return_vals;
+  ClayPattern *pattern;
   gint width = 0;
   gint height = 0;
   gint bpp = 0;
 
-  pattern = g_value_get_object (gimp_value_array_index (args, 0));
+  pattern = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       const Babl *format;
 
-      format = gimp_babl_compat_u8_format (
-        gimp_temp_buf_get_format (pattern->mask));
+      format = clay_babl_compat_u8_format (
+        clay_temp_buf_get_format (pattern->mask));
 
-      width  = gimp_temp_buf_get_width  (pattern->mask);
-      height = gimp_temp_buf_get_height (pattern->mask);
+      width  = clay_temp_buf_get_width  (pattern->mask);
+      height = clay_temp_buf_get_height (pattern->mask);
       bpp    = babl_format_get_bytes_per_pixel (format);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_int (gimp_value_array_index (return_vals, 1), width);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), height);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), bpp);
+      g_value_set_int (clay_value_array_index (return_vals, 1), width);
+      g_value_set_int (clay_value_array_index (return_vals, 2), height);
+      g_value_set_int (clay_value_array_index (return_vals, 3), bpp);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-pattern_get_pixels_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+pattern_get_pixels_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPattern *pattern;
+  ClayValueArray *return_vals;
+  ClayPattern *pattern;
   gint width = 0;
   gint height = 0;
   gint bpp = 0;
   GBytes *color_bytes = NULL;
 
-  pattern = g_value_get_object (gimp_value_array_index (args, 0));
+  pattern = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -142,158 +142,158 @@ pattern_get_pixels_invoker (GimpProcedure         *procedure,
       const Babl *format;
       gpointer    data;
 
-      format = gimp_babl_compat_u8_format (
-        gimp_temp_buf_get_format (pattern->mask));
-      data   = gimp_temp_buf_lock (pattern->mask, format, GEGL_ACCESS_READ);
+      format = clay_babl_compat_u8_format (
+        clay_temp_buf_get_format (pattern->mask));
+      data   = clay_temp_buf_lock (pattern->mask, format, GEGL_ACCESS_READ);
 
-      width           = gimp_temp_buf_get_width  (pattern->mask);
-      height          = gimp_temp_buf_get_height (pattern->mask);
+      width           = clay_temp_buf_get_width  (pattern->mask);
+      height          = clay_temp_buf_get_height (pattern->mask);
       bpp             = babl_format_get_bytes_per_pixel (format);
-      color_bytes     = g_bytes_new (data, gimp_temp_buf_get_data_size (pattern->mask));
+      color_bytes     = g_bytes_new (data, clay_temp_buf_get_data_size (pattern->mask));
 
-      gimp_temp_buf_unlock (pattern->mask, data);
+      clay_temp_buf_unlock (pattern->mask, data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_int (gimp_value_array_index (return_vals, 1), width);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), height);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), bpp);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 4), color_bytes);
+      g_value_set_int (clay_value_array_index (return_vals, 1), width);
+      g_value_set_int (clay_value_array_index (return_vals, 2), height);
+      g_value_set_int (clay_value_array_index (return_vals, 3), bpp);
+      g_value_take_boxed (clay_value_array_index (return_vals, 4), color_bytes);
     }
 
   return return_vals;
 }
 
 void
-register_pattern_procs (GimpPDB *pdb)
+register_pattern_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-pattern-get-by-name
+   * clay-pattern-get-by-name
    */
-  procedure = gimp_procedure_new (pattern_get_by_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pattern-get-by-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pattern_get_by_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pattern-get-by-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the pattern with the given name.",
                                   "Returns an existing pattern having the given name. Returns %NULL when no pattern exists of that name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The name of the pattern",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_pattern ("pattern",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_pattern ("pattern",
                                                             "pattern",
                                                             "The pattern",
                                                             TRUE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pattern-get-info
+   * clay-pattern-get-info
    */
-  procedure = gimp_procedure_new (pattern_get_info_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pattern-get-info");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pattern_get_info_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pattern-get-info");
+  clay_procedure_set_static_help (procedure,
                                   "Gets information about the pattern.",
                                   "Gets information about the pattern: the pattern extents (width and height) and bytes per pixel.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_pattern ("pattern",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_pattern ("pattern",
                                                         "pattern",
                                                         "The pattern",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("width",
                                                      "width",
                                                      "The pattern width",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("height",
                                                      "height",
                                                      "The pattern height",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("bpp",
                                                      "bpp",
                                                      "The pattern bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pattern-get-pixels
+   * clay-pattern-get-pixels
    */
-  procedure = gimp_procedure_new (pattern_get_pixels_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pattern-get-pixels");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pattern_get_pixels_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pattern-get-pixels");
+  clay_procedure_set_static_help (procedure,
                                   "Gets information about the pattern (including pixels).",
                                   "Gets information about the pattern: the pattern extents (width and height), its bpp, and its pixel data.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_pattern ("pattern",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_pattern ("pattern",
                                                         "pattern",
                                                         "The pattern",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("width",
                                                      "width",
                                                      "The pattern width",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("height",
                                                      "height",
                                                      "The pattern height",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("bpp",
                                                      "bpp",
                                                      "The pattern bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("color-bytes",
                                                        "color bytes",
                                                        "The pattern data.",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

@@ -22,10 +22,10 @@
 
 const System = imports.system
 
-imports.gi.versions.Gimp = '3.0';
-const Gimp = imports.gi.Gimp;
-imports.gi.versions.GimpUi = '3.0';
-const GimpUi = imports.gi.GimpUi;
+imports.gi.versions.Clay = '3.0';
+const Clay = imports.gi.Clay;
+imports.gi.versions.ClayUi = '3.0';
+const ClayUi = imports.gi.ClayUi;
 imports.gi.versions.Gegl = '0.4';
 const Gegl = imports.gi.Gegl;
 imports.gi.versions.Gtk = '3.0';
@@ -42,26 +42,26 @@ const Gio = imports.gi.Gio;
  */
 ARGV.unshift(System.programInvocationName);
 
-let url = "https://gitlab.gnome.org/GNOME/gimp/blob/master/extensions/goat-exercises/goat-exercise-gjs.js";
+let url = "https://github.com/KurtStevenK/clay/blob/master/extensions/goat-exercises/goat-exercise-gjs.js";
 
 function _(message) { return GLib.dgettext(null, message); }
 
 var Goat = GObject.registerClass({
     GTypeName: 'Goat',
-}, class Goat extends Gimp.PlugIn {
+}, class Goat extends Clay.PlugIn {
 
     vfunc_query_procedures() {
         return ["plug-in-goat-exercise-gjs"];
     }
 
     vfunc_create_procedure(name) {
-        let procedure = Gimp.ImageProcedure.new(this, name, Gimp.PDBProcType.PLUGIN, this.run);
+        let procedure = Clay.ImageProcedure.new(this, name, Clay.PDBProcType.PLUGIN, this.run);
 
         procedure.set_image_types("*");
-        procedure.set_sensitivity_mask(Gimp.ProcedureSensitivityMask.DRAWABLE);
+        procedure.set_sensitivity_mask(Clay.ProcedureSensitivityMask.DRAWABLE);
 
         procedure.set_menu_label(_("Plug-In Example in _JavaScript"));
-        procedure.set_icon_name(GimpUi.ICON_GEGL);
+        procedure.set_icon_name(ClayUi.ICON_GEGL);
         procedure.add_menu_path ('<Image>/Filters/Development/Plug-In Examples/');
 
         procedure.set_documentation(_("Plug-in example in JavaScript (GJS)"),
@@ -77,22 +77,22 @@ var Goat = GObject.registerClass({
 
         if (drawables.length != 1) {
             let msg = `Procedure '${procedure.get_name()}' only works with one drawable.`;
-            let error = GLib.Error.new_literal(Gimp.PlugIn.error_quark(), 0, msg);
-            return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR, error)
+            let error = GLib.Error.new_literal(Clay.PlugIn.error_quark(), 0, msg);
+            return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR, error)
         }
 
         let drawable = drawables[0];
 
-        if (run_mode == Gimp.RunMode.INTERACTIVE) {
-            GimpUi.init("goat-exercise-gjs");
+        if (run_mode == Clay.RunMode.INTERACTIVE) {
+            ClayUi.init("goat-exercise-gjs");
             /* TODO: help function and ID. */
             let use_header_bar = Gtk.Settings.get_default().gtk_dialogs_use_header;
-            let dialog = new GimpUi.Dialog({
+            let dialog = new ClayUi.Dialog({
               title: _("Plug-In Example in JavaScript (GJS)"),
               role: "goat-exercise-JavaScript",
               use_header_bar: use_header_bar,
             });
-            GimpUi.window_set_transient(dialog);
+            ClayUi.window_set_transient(dialog);
             dialog.add_button(_("_Cancel"), Gtk.ResponseType.CANCEL);
             dialog.add_button(_("_Source"), Gtk.ResponseType.APPLY);
             dialog.add_button(_("_OK"), Gtk.ResponseType.OK);
@@ -152,7 +152,7 @@ var Goat = GObject.registerClass({
                 }
                 else { /* CANCEL, CLOSE, DELETE_EVENT */
                     dialog.destroy();
-                    return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, null)
+                    return procedure.new_return_values(Clay.PDBStatusType.CANCEL, null)
                 }
             }
         }
@@ -183,11 +183,11 @@ var Goat = GObject.registerClass({
 
             drawable.merge_shadow(true);
             drawable.update(x, y, width, height);
-            Gimp.displays_flush();
+            Clay.displays_flush();
         }
 
-        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, null);
+        return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, null);
     }
 });
 
-Gimp.main(Goat.$gtype, ARGV);
+Clay.main(Goat.$gtype, ARGV);

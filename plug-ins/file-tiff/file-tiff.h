@@ -1,4 +1,4 @@
-/* tiff for GIMP
+/* tiff for Clay
  *  -Peter Mattis
  */
 
@@ -12,25 +12,25 @@
 
 typedef enum
 {
- GIMP_COMPRESSION_NONE,
- GIMP_COMPRESSION_LZW,
- GIMP_COMPRESSION_PACKBITS,
- GIMP_COMPRESSION_ADOBE_DEFLATE,
- GIMP_COMPRESSION_JPEG,
- GIMP_COMPRESSION_CCITTFAX3,
- GIMP_COMPRESSION_CCITTFAX4
-} GimpCompression;
+ CLAY_COMPRESSION_NONE,
+ CLAY_COMPRESSION_LZW,
+ CLAY_COMPRESSION_PACKBITS,
+ CLAY_COMPRESSION_ADOBE_DEFLATE,
+ CLAY_COMPRESSION_JPEG,
+ CLAY_COMPRESSION_CCITTFAX3,
+ CLAY_COMPRESSION_CCITTFAX4
+} ClayCompression;
 
 
 typedef enum
 {
-  GIMP_TIFF_FORMAT_STANDARD_TIFF,
-  GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF,
-} GimpFormat;
+  CLAY_TIFF_FORMAT_STANDARD_TIFF,
+  CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF,
+} ClayFormat;
 
-gint              gimp_compression_to_tiff_compression (GimpCompression  compression);
-GimpCompression   tiff_compression_to_gimp_compression (gint             compression);
-const gchar     * gimp_compression_to_nick             (GimpCompression  compression);
+gint              clay_compression_to_tiff_compression (ClayCompression  compression);
+ClayCompression   tiff_compression_to_clay_compression (gint             compression);
+const gchar     * clay_compression_to_nick             (ClayCompression  compression);
 
 
 #endif /* __FILE_TIFF_H__ */

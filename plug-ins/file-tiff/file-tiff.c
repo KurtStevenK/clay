@@ -1,4 +1,4 @@
-/* tiff loading for GIMP
+/* tiff loading for Clay
  *  -Peter Mattis
  *
  * The TIFF loading code has been completely revamped by Nick Lamb
@@ -46,15 +46,15 @@
 
 #include <tiffio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "file-tiff.h"
 #include "file-tiff-io.h"
 #include "file-tiff-load.h"
 #include "file-tiff-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_BINARY "file-tiff"
@@ -65,15 +65,15 @@ typedef struct _TiffClass TiffClass;
 
 struct _Tiff
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 
-  GimpChoice     *format_choice;
-  GimpChoice     *compression_choice;
+  ClayChoice     *format_choice;
+  ClayChoice     *compression_choice;
 };
 
 struct _TiffClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -82,59 +82,59 @@ struct _TiffClass
 
 GType                           tiff_get_type         (void);
 
-static GList                  * tiff_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure          * tiff_create_procedure (GimpPlugIn            *plug_in,
+static GList                  * tiff_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure          * tiff_create_procedure (ClayPlugIn            *plug_in,
                                                        const gchar           *name);
 
-static GimpValueArray         * tiff_load             (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
+static ClayValueArray         * tiff_load             (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
                                                        GFile                 *file,
-                                                       GimpMetadata          *metadata,
-                                                       GimpMetadataLoadFlags *flags,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayMetadata          *metadata,
+                                                       ClayMetadataLoadFlags *flags,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
-static GimpValueArray         * tiff_export           (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
-                                                       GimpImage             *image,
+static ClayValueArray         * tiff_export           (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
+                                                       ClayImage             *image,
                                                        GFile                 *file,
-                                                       GimpExportOptions     *options,
-                                                       GimpMetadata          *metadata,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayExportOptions     *options,
+                                                       ClayMetadata          *metadata,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
-static GimpPDBStatusType        tiff_export_rec       (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
-                                                       GimpImage             *orig_image,
+static ClayPDBStatusType        tiff_export_rec       (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
+                                                       ClayImage             *orig_image,
                                                        GFile                 *file,
-                                                       GimpProcedureConfig   *config,
-                                                       GimpExportOptions     *options,
-                                                       GimpMetadata          *metadata,
+                                                       ClayProcedureConfig   *config,
+                                                       ClayExportOptions     *options,
+                                                       ClayMetadata          *metadata,
                                                        gboolean               retried,
                                                        GError               **error);
-static GimpExportCapabilities   export_edit_options   (GimpProcedure         *procedure,
-                                                       GimpProcedureConfig   *config,
-                                                       GimpExportOptions     *options,
+static ClayExportCapabilities   export_edit_options   (ClayProcedure         *procedure,
+                                                       ClayProcedureConfig   *config,
+                                                       ClayExportOptions     *options,
                                                        gpointer               create_data);
 
-static gboolean                 image_is_monochrome   (GimpImage             *image);
+static gboolean                 image_is_monochrome   (ClayImage             *image);
 static gboolean                 item_is_psd_composite_layer
-                                                      (GimpItem              *item);
-static void                     image_get_all_layers  (GimpImage             *image,
+                                                      (ClayItem              *item);
+static void                     image_get_all_layers  (ClayImage             *image,
                                                        GList                **normal_layers,
                                                        GList                **psd_composite_layers);
 static void                     image_remove_psd_composite_layers
-                                                      (GimpImage             *image);
+                                                      (ClayImage             *image);
 
 
-G_DEFINE_TYPE (Tiff, tiff, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Tiff, tiff, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (TIFF_TYPE)
+CLAY_MAIN (TIFF_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 tiff_class_init (TiffClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = tiff_query_procedures;
   plug_in_class->create_procedure = tiff_create_procedure;
@@ -144,23 +144,23 @@ tiff_class_init (TiffClass *klass)
 static void
 tiff_init (Tiff *tiff)
 {
-  tiff->format_choice = gimp_choice_new_with_values (
-    "multi-page-tiff", GIMP_TIFF_FORMAT_STANDARD_TIFF,  _("Standard (pages)"),            _("Store layers in TIFF directories (IFDs)"),
-    "photoshop-tiff",  GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF, _("Photoshop (embedded layers)"), _("Store layers in TIFF tags (ImageSourceData/Photoshop)"),
+  tiff->format_choice = clay_choice_new_with_values (
+    "multi-page-tiff", CLAY_TIFF_FORMAT_STANDARD_TIFF,  _("Standard (pages)"),            _("Store layers in TIFF directories (IFDs)"),
+    "photoshop-tiff",  CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF, _("Photoshop (embedded layers)"), _("Store layers in TIFF tags (ImageSourceData/Photoshop)"),
     NULL);
 
-  tiff->compression_choice = gimp_choice_new_with_values ("none",          GIMP_COMPRESSION_NONE,          _("None"),              NULL,
-                                                          "lzw",           GIMP_COMPRESSION_LZW,           _("LZW"),               NULL,
-                                                          "packbits",      GIMP_COMPRESSION_PACKBITS,      _("Pack Bits"),         NULL,
-                                                          "adobe_deflate", GIMP_COMPRESSION_ADOBE_DEFLATE, _("Deflate"),           NULL,
-                                                          "jpeg",          GIMP_COMPRESSION_JPEG,          _("JPEG"),              NULL,
-                                                          "ccittfax3",     GIMP_COMPRESSION_CCITTFAX3,     _("CCITT Group 3 fax"), NULL,
-                                                          "ccittfax4",     GIMP_COMPRESSION_CCITTFAX4,     _("CCITT Group 4 fax"), NULL,
+  tiff->compression_choice = clay_choice_new_with_values ("none",          CLAY_COMPRESSION_NONE,          _("None"),              NULL,
+                                                          "lzw",           CLAY_COMPRESSION_LZW,           _("LZW"),               NULL,
+                                                          "packbits",      CLAY_COMPRESSION_PACKBITS,      _("Pack Bits"),         NULL,
+                                                          "adobe_deflate", CLAY_COMPRESSION_ADOBE_DEFLATE, _("Deflate"),           NULL,
+                                                          "jpeg",          CLAY_COMPRESSION_JPEG,          _("JPEG"),              NULL,
+                                                          "ccittfax3",     CLAY_COMPRESSION_CCITTFAX3,     _("CCITT Group 3 fax"), NULL,
+                                                          "ccittfax4",     CLAY_COMPRESSION_CCITTFAX4,     _("CCITT Group 4 fax"), NULL,
                                                           NULL);
 }
 
 static GList *
-tiff_query_procedures (GimpPlugIn *plug_in)
+tiff_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -170,125 +170,125 @@ tiff_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-tiff_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+tiff_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
   Tiff          *tiff      = TIFF (plug_in);
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            tiff_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("TIFF or BigTIFF image"));
+      clay_procedure_set_menu_label (procedure, _("TIFF or BigTIFF image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files of the TIFF and BigTIFF file formats"),
                                         _("Loads files of the Tag Image File Format (TIFF) and "
                                           "its 64-bit offsets variant (BigTIFF)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball, Peter Mattis & Nick Lamb",
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       "1995-1996,1998-2003");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/tiff");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "tif,tiff");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,II*\\0,0,string,MM\\0*");
 
-      gimp_procedure_add_boolean_argument (procedure, "keep-composite-image",
+      clay_procedure_add_boolean_argument (procedure, "keep-composite-image",
                                            _("Keep composite image"),
                                            _("Keep the composite image of Sketchbook or "
                                              "Photoshop TIFF files as additional layer"),
-                                           TRUE, GIMP_PARAM_READWRITE);
+                                           TRUE, CLAY_PARAM_READWRITE);
 
       /* TODO: the 2 below AUX arguments should likely be real arguments, but I
-       * just wanted to get rid of gimp_get_data/gimp_set_data() usage at first
+       * just wanted to get rid of clay_get_data/clay_set_data() usage at first
        * and didn't dig much into proper and full usage. Since it's always
        * possible to add arguments, but not to remove them, I prefer to make
        * them AUX for now and leave it as further exercise to decide whether it
        * should be part of the PDB API.
        */
-      gimp_procedure_add_enum_aux_argument (procedure, "target",
+      clay_procedure_add_enum_aux_argument (procedure, "target",
                                             "Open _pages as", NULL,
-                                            GIMP_TYPE_PAGE_SELECTOR_TARGET,
-                                            GIMP_PAGE_SELECTOR_TARGET_LAYERS,
+                                            CLAY_TYPE_PAGE_SELECTOR_TARGET,
+                                            CLAY_PAGE_SELECTOR_TARGET_LAYERS,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "keep-empty-space",
+      clay_procedure_add_boolean_aux_argument (procedure, "keep-empty-space",
                                                _("_Keep empty space around imported layers"),
-                                               NULL, TRUE, GIMP_PARAM_READWRITE);
+                                               NULL, TRUE, CLAY_PARAM_READWRITE);
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              TRUE, tiff_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("TIFF or BigTIFF image"));
+      clay_procedure_set_menu_label (procedure, _("TIFF or BigTIFF image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the TIFF or BigTIFF file formats"),
                                         _("Exports files in the Tag Image File Format (TIFF) or "
                                           "its 64-bit offsets variant (BigTIFF) able to support "
                                           "much bigger file sizes"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball & Peter Mattis",
                                       "Spencer Kimball & Peter Mattis",
                                       "1995-1996,2000-2003");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("TIFF"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/tiff");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "tif,tiff");
 
       /* TIFF capabilities are so dependent on export settings, we can't assign
        * defaults until we know how the user wants to export it */
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
                                               0, export_edit_options, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "bigtiff",
+      clay_procedure_add_boolean_argument (procedure, "bigtiff",
                                            _("Export in _BigTIFF variant file format"),
                                            _("The BigTIFF variant file format uses 64-bit offsets, "
                                              "hence supporting over 4GiB files and bigger"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "compression",
+      clay_procedure_add_choice_argument (procedure, "compression",
                                           _("Co_mpression"),
                                           _("Compression type"),
                                           tiff->compression_choice,
                                           "none", G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "save-transparent-pixels",
+      clay_procedure_add_boolean_argument (procedure, "save-transparent-pixels",
                                            _("Save color _values from transparent pixels"),
                                            _("Keep the color data masked by an alpha channel "
                                              "intact (do not store premultiplied components)"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "cmyk",
+      clay_procedure_add_boolean_argument (procedure, "cmyk",
                                            _("Export as CMY_K"),
                                            _("Create a CMYK TIFF image using the soft-proofing color profile"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "format",
+      clay_procedure_add_choice_argument (procedure, "format",
                                           _("Format"),
                                           _("How layers are stored: as TIFF directories (IFDs) "
                                             "or as TIFF tags (Photoshop/ImageSourceData)"),
@@ -296,64 +296,64 @@ tiff_create_procedure (GimpPlugIn  *plug_in,
                                           "multi-page-tiff",
                                           G_PARAM_READWRITE);
 
-     gimp_procedure_add_boolean_aux_argument (procedure, "save-layers",
+     clay_procedure_add_boolean_aux_argument (procedure, "save-layers",
                                                _("Save La_yers"),
                                                _("Save Layers"),
                                                TRUE,
                                                G_PARAM_READWRITE);
 
-     gimp_procedure_add_boolean_aux_argument (procedure, "crop-layers",
+     clay_procedure_add_boolean_aux_argument (procedure, "crop-layers",
                                                _("Crop L_ayers"),
                                                _("Crop Layers"),
                                                TRUE,
                                                G_PARAM_READWRITE);
 
-     gimp_procedure_add_boolean_aux_argument (procedure, "save-geotiff",
+     clay_procedure_add_boolean_aux_argument (procedure, "save-geotiff",
                                                _("Save _GeoTIFF data"),
                                                _("Save GeoTIFF data"),
                                                TRUE,
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "save-resources",
+      clay_procedure_add_boolean_aux_argument (procedure, "save-resources",
                                                _("Save Photoshop metadata"),
                                                _("Store Photoshop image resources (paths, alpha "
                                                  "channel names, ...) in TIFF tag (Photoshop)"),
                                                TRUE,
                                                G_PARAM_READWRITE);
 
-      gimp_export_procedure_set_support_exif      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_iptc      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_xmp       (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_exif      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_iptc      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_xmp       (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
 #ifdef TIFFTAG_ICCPROFILE
-      gimp_export_procedure_set_support_profile   (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_profile   (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
 #endif
-      gimp_export_procedure_set_support_thumbnail (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_comment   (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_thumbnail (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_comment   (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-tiff_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+tiff_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpPDBStatusType  status;
-  GimpImage         *image              = NULL;
+  ClayValueArray    *return_vals;
+  ClayPDBStatusType  status;
+  ClayImage         *image              = NULL;
   gboolean           resolution_loaded  = FALSE;
   gboolean           profile_loaded     = FALSE;
   GError            *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
-    gimp_ui_init (PLUG_IN_BINARY);
+  if (run_mode == CLAY_RUN_INTERACTIVE)
+    clay_ui_init (PLUG_IN_BINARY);
 
   status = load_image (procedure,
                        file, run_mode, &image,
@@ -362,43 +362,43 @@ tiff_load (GimpProcedure         *procedure,
                        config, &error);
 
   if (!image)
-    return gimp_procedure_new_return_values (procedure, status, error);
+    return clay_procedure_new_return_values (procedure, status, error);
 
   if (resolution_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_RESOLUTION;
+    *flags &= ~CLAY_METADATA_LOAD_RESOLUTION;
 
   if (profile_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_COLORSPACE;
+    *flags &= ~CLAY_METADATA_LOAD_COLORSPACE;
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-tiff_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+tiff_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
   GError            *error   = NULL;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
 
   gegl_init (NULL, NULL);
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
-      gimp_ui_init (PLUG_IN_BINARY);
+    case CLAY_RUN_INTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
+      clay_ui_init (PLUG_IN_BINARY);
       break;
     default:
       break;
@@ -407,31 +407,31 @@ tiff_export (GimpProcedure        *procedure,
   status = tiff_export_rec (procedure, run_mode, image, file,
                             config, options, metadata, FALSE, &error);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpPDBStatusType
-tiff_export_rec (GimpProcedure        *procedure,
-                 GimpRunMode           run_mode,
-                 GimpImage            *orig_image,
+static ClayPDBStatusType
+tiff_export_rec (ClayProcedure        *procedure,
+                 ClayRunMode           run_mode,
+                 ClayImage            *orig_image,
                  GFile                *file,
-                 GimpProcedureConfig  *config,
-                 GimpExportOptions    *options,
-                 GimpMetadata         *metadata,
+                 ClayProcedureConfig  *config,
+                 ClayExportOptions    *options,
+                 ClayMetadata         *metadata,
                  gboolean              retried,
                  GError              **error)
 {
-  GimpImage         *image              = orig_image;
+  ClayImage         *image              = orig_image;
   GList             *normal_layers      = NULL;
   guint              n_normal_layers    = 0;
   GList             *composite_layers   = NULL;
   guint              n_composite_layers = 0;
-  GimpPDBStatusType  status             = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export             = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status             = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export             = CLAY_EXPORT_IGNORE;
   gboolean           bigtiff            = FALSE;
-  GimpFormat         format             = GIMP_TIFF_FORMAT_STANDARD_TIFF;
-  GimpImage         *tif_image          = NULL; /* will be flattened */
-  GimpImage         *psd_image          = NULL; /* layered base for PSD metadata */
+  ClayFormat         format             = CLAY_TIFF_FORMAT_STANDARD_TIFF;
+  ClayImage         *tif_image          = NULL; /* will be flattened */
+  ClayImage         *psd_image          = NULL; /* layered base for PSD metadata */
   gboolean           delete_tif_image   = FALSE;
   gboolean           delete_psd_image   = FALSE;
   gboolean           has_composite      = FALSE;
@@ -445,21 +445,21 @@ tiff_export_rec (GimpProcedure        *procedure,
   has_composite      = n_composite_layers > 0;
 
   if (n_normal_layers == 1)
-    has_alpha = gimp_drawable_has_alpha (GIMP_DRAWABLE (normal_layers->data));
+    has_alpha = clay_drawable_has_alpha (CLAY_DRAWABLE (normal_layers->data));
 
   /* Run export dialog */
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! export_dialog (orig_image, procedure, G_OBJECT (config),
                            has_alpha,
                            image_is_monochrome (orig_image),
-                           (gimp_image_get_base_type (orig_image) == GIMP_INDEXED),
+                           (clay_image_get_base_type (orig_image) == CLAY_INDEXED),
                            n_normal_layers > 1,
                            retried))
         {
           g_list_free (normal_layers);
           g_list_free (composite_layers);
-          return GIMP_PDB_CANCEL;
+          return CLAY_PDB_CANCEL;
         }
     }
 
@@ -467,34 +467,34 @@ tiff_export_rec (GimpProcedure        *procedure,
   g_list_free (composite_layers);
 
   /* Image becomes either orig_image (IGNORE) or a duplicate (EXPORT) */
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
 
   /* Obtain export settings */
   g_object_get (config, "bigtiff", &bigtiff, NULL);
-  format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "format");
 
   /* TODO: Remove when gexiv2 supports BigTIFF metadata export */
   if (bigtiff)
-    gimp_export_procedure_set_export_metadata (GIMP_EXPORT_PROCEDURE (procedure),
+    clay_export_procedure_set_export_metadata (CLAY_EXPORT_PROCEDURE (procedure),
                                                FALSE);
 
   /* Prepare tif_image */
-  if (format == GIMP_TIFF_FORMAT_STANDARD_TIFF)
+  if (format == CLAY_TIFF_FORMAT_STANDARD_TIFF)
     {
       /*
        * Multi-Page TIFF: no flatten needed.
        * Only duplicate when we must mutate to remove composite and we don't
        * already have an owned duplicate from the export pipeline.
        */
-      if (export == GIMP_EXPORT_EXPORT)
+      if (export == CLAY_EXPORT_EXPORT)
         {
           tif_image        = image;
           delete_tif_image = TRUE;
         }
       else if (has_composite)
         {
-          tif_image        = gimp_image_duplicate (orig_image);
+          tif_image        = clay_image_duplicate (orig_image);
           delete_tif_image = TRUE;
         }
       else
@@ -509,14 +509,14 @@ tiff_export_rec (GimpProcedure        *procedure,
        * Photoshop TIFF: flatten is needed.
        * Always ensure flatten is not performed on orig_image.
        */
-      if (export == GIMP_EXPORT_EXPORT)
+      if (export == CLAY_EXPORT_EXPORT)
         {
           tif_image        = image;
           delete_tif_image = TRUE;
         }
       else
         {
-          tif_image        = gimp_image_duplicate (orig_image);
+          tif_image        = clay_image_duplicate (orig_image);
           delete_tif_image = TRUE;
         }
     }
@@ -526,7 +526,7 @@ tiff_export_rec (GimpProcedure        *procedure,
     image_remove_psd_composite_layers (tif_image);
 
   /* Prepare psd_image (only meaningful for Photoshop TIFF) */
-  if (format == GIMP_TIFF_FORMAT_PHOTOSHOP_TIFF && has_composite)
+  if (format == CLAY_TIFF_FORMAT_PHOTOSHOP_TIFF && has_composite)
     {
       /*
        * PSD metadata export must use an unflattened, cleaned image.
@@ -534,7 +534,7 @@ tiff_export_rec (GimpProcedure        *procedure,
        * pipeline may modify tif_image (e.g. apply masks), which would lose
        * information needed for PSD metadata/layer data.
        */
-      psd_image = gimp_image_duplicate (orig_image);
+      psd_image = clay_image_duplicate (orig_image);
       delete_psd_image = TRUE;
 
       image_remove_psd_composite_layers (psd_image);
@@ -552,28 +552,28 @@ tiff_export_rec (GimpProcedure        *procedure,
       g_set_error (&error, G_FILE_ERROR, 0,
                    _("\"Save layers\" option not set while trying to export multiple layers."));
 
-      status = GIMP_PDB_CALLING_ERROR;
+      status = CLAY_PDB_CALLING_ERROR;
     }
 #endif
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file,
                           tif_image, /* flattened internally */
                           psd_image, /* layered base for PSD metadata export */
                           G_OBJECT (config), metadata, error))
-        status = GIMP_PDB_EXECUTION_ERROR;
+        status = CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Cleanup */
   if (delete_psd_image && psd_image)
-    gimp_image_delete (psd_image);
+    clay_image_delete (psd_image);
 
   if (delete_tif_image && tif_image)
-    gimp_image_delete (tif_image);
+    clay_image_delete (tif_image);
 
-  if (status == GIMP_PDB_EXECUTION_ERROR &&
-      run_mode == GIMP_RUN_INTERACTIVE   &&
+  if (status == CLAY_PDB_EXECUTION_ERROR &&
+      run_mode == CLAY_RUN_INTERACTIVE   &&
       ! retried && ! bigtiff && tiff_got_file_size_error ())
     {
       /*
@@ -590,14 +590,14 @@ tiff_export_rec (GimpProcedure        *procedure,
   return status;
 }
 
-static GimpExportCapabilities
-export_edit_options (GimpProcedure        *procedure,
-                     GimpProcedureConfig  *config,
-                     GimpExportOptions    *options,
+static ClayExportCapabilities
+export_edit_options (ClayProcedure        *procedure,
+                     ClayProcedureConfig  *config,
+                     ClayExportOptions    *options,
                      gpointer              create_data)
 {
-  GimpExportCapabilities capabilities;
-  GimpCompression        compression;
+  ClayExportCapabilities capabilities;
+  ClayCompression        compression;
   gboolean               save_layers;
   gboolean               crop_layers;
 
@@ -605,49 +605,49 @@ export_edit_options (GimpProcedure        *procedure,
                 "save-layers", &save_layers,
                 "crop-layers", &crop_layers,
                 NULL);
-  compression = gimp_procedure_config_get_choice_id (config, "compression");
+  compression = clay_procedure_config_get_choice_id (config, "compression");
 
-  if (compression == GIMP_COMPRESSION_CCITTFAX3 ||
-      compression == GIMP_COMPRESSION_CCITTFAX4)
+  if (compression == CLAY_COMPRESSION_CCITTFAX3 ||
+      compression == CLAY_COMPRESSION_CCITTFAX4)
     {
       /* G3/G4 are fax compressions. They only support
        * monochrome images without alpha support.
        */
-      capabilities = GIMP_EXPORT_CAN_HANDLE_INDEXED;
+      capabilities = CLAY_EXPORT_CAN_HANDLE_INDEXED;
     }
   else
     {
-      capabilities = (GIMP_EXPORT_CAN_HANDLE_RGB     |
-                      GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                      GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                      GIMP_EXPORT_CAN_HANDLE_ALPHA);
+      capabilities = (CLAY_EXPORT_CAN_HANDLE_RGB     |
+                      CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                      CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                      CLAY_EXPORT_CAN_HANDLE_ALPHA);
     }
 
   if (save_layers)
     {
-      capabilities |= GIMP_EXPORT_CAN_HANDLE_LAYERS;
+      capabilities |= CLAY_EXPORT_CAN_HANDLE_LAYERS;
 
       if (crop_layers)
-        capabilities |= GIMP_EXPORT_NEEDS_CROP;
+        capabilities |= CLAY_EXPORT_NEEDS_CROP;
     }
 
   return capabilities;
 }
 
 static gboolean
-image_is_monochrome (GimpImage *image)
+image_is_monochrome (ClayImage *image)
 {
-  GimpPalette *palette;
+  ClayPalette *palette;
   gboolean     monochrome = FALSE;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), FALSE);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
 
-  palette = gimp_image_get_palette (image);
+  palette = clay_image_get_palette (image);
   if (palette)
     {
       gint num_colors;
 
-      num_colors = gimp_palette_get_color_count (palette);
+      num_colors = clay_palette_get_color_count (palette);
 
       if (num_colors == 2 || num_colors == 1)
         {
@@ -655,7 +655,7 @@ image_is_monochrome (GimpImage *image)
           const guchar  bw_map[] = { 0, 0, 0, 255, 255, 255 };
           const guchar  wb_map[] = { 255, 255, 255, 0, 0, 0 };
 
-          colors = gimp_palette_get_colormap (palette, babl_format ("R'G'B' u8"), &num_colors, NULL);
+          colors = clay_palette_get_colormap (palette, babl_format ("R'G'B' u8"), &num_colors, NULL);
 
           if (memcmp (colors, bw_map, 3 * num_colors) == 0 ||
               memcmp (colors, wb_map, 3 * num_colors) == 0)
@@ -671,15 +671,15 @@ image_is_monochrome (GimpImage *image)
 }
 
 static gboolean
-item_is_psd_composite_layer (GimpItem *item)
+item_is_psd_composite_layer (ClayItem *item)
 {
-  GimpParasite *psd_composite_parasite;
+  ClayParasite *psd_composite_parasite;
 
-  psd_composite_parasite = gimp_item_get_parasite (item,
+  psd_composite_parasite = clay_item_get_parasite (item,
                                                    TIFF_PSD_COMPOSITE_PARASITE);
   if (psd_composite_parasite)
     {
-      gimp_parasite_free (psd_composite_parasite);
+      clay_parasite_free (psd_composite_parasite);
       return TRUE;
     }
 
@@ -687,7 +687,7 @@ item_is_psd_composite_layer (GimpItem *item)
 }
 
 static void
-image_get_all_layers (GimpImage  *image,
+image_get_all_layers (ClayImage  *image,
                       GList     **normal_layers,
                       GList     **psd_composite_layers)
 {
@@ -696,11 +696,11 @@ image_get_all_layers (GimpImage  *image,
   GList *composite = NULL;
   GList *stack     = NULL;
 
-  top = gimp_image_list_layers (image);
+  top = clay_image_list_layers (image);
 
   for (GList *iter = top; iter; iter = iter->next)
     {
-      GimpItem *item = iter->data;
+      ClayItem *item = iter->data;
 
       if (item_is_psd_composite_layer (item))
         {
@@ -708,7 +708,7 @@ image_get_all_layers (GimpImage  *image,
           continue;
         }
 
-      if (gimp_item_is_group (item))
+      if (clay_item_is_group (item))
         stack = g_list_prepend (stack, item);
       else
         normal = g_list_append (normal, item);
@@ -718,18 +718,18 @@ image_get_all_layers (GimpImage  *image,
 
   while (stack)
     {
-      GimpItem *group;
+      ClayItem *group;
       GList    *children;
 
       group    = stack->data;
       stack    = g_list_delete_link (stack, stack);
-      children = gimp_item_list_children (group);
+      children = clay_item_list_children (group);
 
       for (GList *iter = children; iter; iter = iter->next)
         {
-          GimpItem *child = iter->data;
+          ClayItem *child = iter->data;
 
-          if (gimp_item_is_group (child))
+          if (clay_item_is_group (child))
             stack = g_list_prepend (stack, child);
           else
             normal = g_list_append (normal, child);
@@ -743,68 +743,68 @@ image_get_all_layers (GimpImage  *image,
 }
 
 static void
-image_remove_psd_composite_layers (GimpImage *image)
+image_remove_psd_composite_layers (ClayImage *image)
 {
   GList        *layers;
   GList        *layers_iter;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
 
   for (layers_iter = layers; layers_iter; layers_iter = layers_iter->next)
     if (item_is_psd_composite_layer (layers_iter->data))
-      gimp_image_remove_layer (image, GIMP_LAYER (layers_iter->data));
+      clay_image_remove_layer (image, CLAY_LAYER (layers_iter->data));
 
   g_list_free (layers);
 }
 
 gint
-gimp_compression_to_tiff_compression (GimpCompression compression)
+clay_compression_to_tiff_compression (ClayCompression compression)
 {
   switch (compression)
     {
-    case GIMP_COMPRESSION_NONE:          return COMPRESSION_NONE;
-    case GIMP_COMPRESSION_LZW:           return COMPRESSION_LZW;
-    case GIMP_COMPRESSION_PACKBITS:      return COMPRESSION_PACKBITS;
-    case GIMP_COMPRESSION_ADOBE_DEFLATE: return COMPRESSION_ADOBE_DEFLATE;
-    case GIMP_COMPRESSION_JPEG:          return COMPRESSION_JPEG;
-    case GIMP_COMPRESSION_CCITTFAX3:     return COMPRESSION_CCITTFAX3;
-    case GIMP_COMPRESSION_CCITTFAX4:     return COMPRESSION_CCITTFAX4;
+    case CLAY_COMPRESSION_NONE:          return COMPRESSION_NONE;
+    case CLAY_COMPRESSION_LZW:           return COMPRESSION_LZW;
+    case CLAY_COMPRESSION_PACKBITS:      return COMPRESSION_PACKBITS;
+    case CLAY_COMPRESSION_ADOBE_DEFLATE: return COMPRESSION_ADOBE_DEFLATE;
+    case CLAY_COMPRESSION_JPEG:          return COMPRESSION_JPEG;
+    case CLAY_COMPRESSION_CCITTFAX3:     return COMPRESSION_CCITTFAX3;
+    case CLAY_COMPRESSION_CCITTFAX4:     return COMPRESSION_CCITTFAX4;
     }
 
   return COMPRESSION_NONE;
 }
 
-GimpCompression
-tiff_compression_to_gimp_compression (gint compression)
+ClayCompression
+tiff_compression_to_clay_compression (gint compression)
 {
   switch (compression)
     {
-    case COMPRESSION_NONE:          return GIMP_COMPRESSION_NONE;
-    case COMPRESSION_LZW:           return GIMP_COMPRESSION_LZW;
-    case COMPRESSION_PACKBITS:      return GIMP_COMPRESSION_PACKBITS;
-    case COMPRESSION_DEFLATE:       return GIMP_COMPRESSION_ADOBE_DEFLATE;
-    case COMPRESSION_ADOBE_DEFLATE: return GIMP_COMPRESSION_ADOBE_DEFLATE;
-    case COMPRESSION_OJPEG:         return GIMP_COMPRESSION_JPEG;
-    case COMPRESSION_JPEG:          return GIMP_COMPRESSION_JPEG;
-    case COMPRESSION_CCITTFAX3:     return GIMP_COMPRESSION_CCITTFAX3;
-    case COMPRESSION_CCITTFAX4:     return GIMP_COMPRESSION_CCITTFAX4;
+    case COMPRESSION_NONE:          return CLAY_COMPRESSION_NONE;
+    case COMPRESSION_LZW:           return CLAY_COMPRESSION_LZW;
+    case COMPRESSION_PACKBITS:      return CLAY_COMPRESSION_PACKBITS;
+    case COMPRESSION_DEFLATE:       return CLAY_COMPRESSION_ADOBE_DEFLATE;
+    case COMPRESSION_ADOBE_DEFLATE: return CLAY_COMPRESSION_ADOBE_DEFLATE;
+    case COMPRESSION_OJPEG:         return CLAY_COMPRESSION_JPEG;
+    case COMPRESSION_JPEG:          return CLAY_COMPRESSION_JPEG;
+    case COMPRESSION_CCITTFAX3:     return CLAY_COMPRESSION_CCITTFAX3;
+    case COMPRESSION_CCITTFAX4:     return CLAY_COMPRESSION_CCITTFAX4;
     }
 
-  return GIMP_COMPRESSION_NONE;
+  return CLAY_COMPRESSION_NONE;
 }
 
 const gchar *
-gimp_compression_to_nick (GimpCompression compression)
+clay_compression_to_nick (ClayCompression compression)
 {
   GList      *nicks;
-  GimpPlugIn *plug_in = gimp_get_plug_in ();
+  ClayPlugIn *plug_in = clay_get_plug_in ();
   Tiff       *tiff    = TIFF (plug_in);
 
-  nicks = gimp_choice_list_nicks (tiff->compression_choice);
+  nicks = clay_choice_list_nicks (tiff->compression_choice);
 
   for (GList *iter = nicks; iter; iter = iter->next)
     {
-      if (gimp_choice_get_id (tiff->compression_choice, iter->data) == compression)
+      if (clay_choice_get_id (tiff->compression_choice, iter->data) == compression)
         return iter->data;
     }
 

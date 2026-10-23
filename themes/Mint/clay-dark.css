@@ -1,0 +1,34 @@
+/* Mint theme, dark scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(227,250,240);
+@define-color bg-color                   rgb(15,42,36);
+@define-color border-color               rgb(45,71,65);
+@define-color dimmed-fg-color            rgb(174,198,189);
+@define-color disabled-fg-color          rgb(132,156,148);
+@define-color disabled-button-color      rgb(83,109,101);
+@define-color hover-color                rgb(45,71,65);
+@define-color widget-bg-color            rgb(28,54,48);
+@define-color selected-color             rgb(57,84,77);
+@define-color extreme-bg-color           rgb(10,29,25);
+@define-color extreme-selected-color     rgb(45,71,65);
+@define-color strong-border-color        rgb(89,115,107);
+@define-color stronger-border-color      rgb(89,115,107);
+@define-color edge-border-color          rgb(89,115,107);
+@define-color scrollbar-slider-color     rgb(89,115,107);
+@define-color scrollbar-trough-color     rgb(10,29,25);
+@define-color ruler-color                rgba(45,71,65,0.3);
+@define-color accent-color               rgb(110,231,183);
+@define-color accent-hover-color         rgb(139,236,197);
+@define-color on-accent-color            rgb(8,21,18);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

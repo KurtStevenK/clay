@@ -1,6 +1,6 @@
 /*
  * pat plug-in version 1.01
- * Loads/exports version 1 GIMP .pat files, by Tim Newsome <drz@frody.bloke.com>
+ * Loads/exports version 1 Clay .pat files, by Tim Newsome <drz@frody.bloke.com>
  *
  * xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
@@ -21,10 +21,10 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-pat-export"
@@ -36,12 +36,12 @@ typedef struct _PatClass PatClass;
 
 struct _Pat
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PatClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -50,34 +50,34 @@ struct _PatClass
 
 GType                   pat_get_type         (void);
 
-static GList          * pat_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * pat_create_procedure (GimpPlugIn           *plug_in,
+static GList          * pat_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * pat_create_procedure (ClayPlugIn           *plug_in,
                                               const gchar          *name);
 
-static GimpValueArray * pat_export           (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
+static ClayValueArray * pat_export           (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
                                               GFile                *file,
-                                              GimpExportOptions    *options,
-                                              GimpMetadata         *metadata,
-                                              GimpProcedureConfig  *config,
+                                              ClayExportOptions    *options,
+                                              ClayMetadata         *metadata,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
-static gboolean         save_dialog          (GimpImage            *image,
-                                              GimpProcedure        *procedure,
+static gboolean         save_dialog          (ClayImage            *image,
+                                              ClayProcedure        *procedure,
                                               GObject              *config);
 
 
-G_DEFINE_TYPE (Pat, pat, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pat, pat, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PAT_TYPE)
+CLAY_MAIN (PAT_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 pat_class_init (PatClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pat_query_procedures;
   plug_in_class->create_procedure = pat_create_procedure;
@@ -90,78 +90,78 @@ pat_init (Pat *pat)
 }
 
 static GList *
-pat_query_procedures (GimpPlugIn *plug_in)
+pat_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-pat_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pat_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pat_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Clay pattern"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_PATTERN);
+      clay_procedure_set_menu_label (procedure, _("Clay pattern"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_PATTERN);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports Clay pattern file (.PAT)"),
                                         _("New Clay patterns can be created "
                                           "by exporting them in the "
                                           "appropriate place with this plug-in."),
                                         EXPORT_PROC);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tim Newsome",
                                       "Tim Newsome",
                                       "1997");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("Pattern"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
-                                          "image/x-gimp-pat");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
+                                          "image/x-clay-pat");
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pat");
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_string_argument (procedure, "description",
+      clay_procedure_add_string_argument (procedure, "description",
                                           _("_Description"),
                                           _("Short description of the pattern"),
                                           _("Clay Pattern"),
-                                          GIMP_PARAM_READWRITE);
+                                          CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-pat_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+pat_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
-  GimpLayer        **layers;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
+  ClayLayer        **layers;
   gchar             *description;
   GError            *error  = NULL;
 
@@ -171,7 +171,7 @@ pat_export (GimpProcedure        *procedure,
 
   if (! description || ! strlen (description))
     {
-      gchar *name = g_path_get_basename (gimp_file_get_utf8_name (file));
+      gchar *name = g_path_get_basename (clay_file_get_utf8_name (file));
 
       if (g_str_has_suffix (name, ".pat"))
         name[strlen (name) - 4] = '\0';
@@ -186,59 +186,59 @@ pat_export (GimpProcedure        *procedure,
 
   g_free (description);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  layers = gimp_image_get_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  layers = clay_image_get_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpProcedure   *procedure;
-      GimpValueArray  *save_retvals;
+      ClayProcedure   *procedure;
+      ClayValueArray  *save_retvals;
 
       g_object_get (config,
                     "description", &description,
                     NULL);
 
-      procedure    = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      procedure    = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                 "file-pat-export-internal");
-      save_retvals = gimp_procedure_run (procedure,
+      save_retvals = clay_procedure_run (procedure,
                                          "image",     image,
-                                         "drawables", (GimpDrawable **) layers,
+                                         "drawables", (ClayDrawable **) layers,
                                          "file",      file,
                                          "name",      description,
                                          NULL);
 
-      if (GIMP_VALUES_GET_ENUM (save_retvals, 0) != GIMP_PDB_SUCCESS)
+      if (CLAY_VALUES_GET_ENUM (save_retvals, 0) != CLAY_PDB_SUCCESS)
         {
           g_set_error (&error, 0, 0,
                        "Running procedure 'file-pat-export-internal' "
                        "failed: %s",
-                       gimp_pdb_get_last_error (gimp_get_pdb ()));
+                       clay_pdb_get_last_error (clay_get_pdb ()));
 
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
-      gimp_value_array_unref (save_retvals);
+      clay_value_array_unref (save_retvals);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_free (layers);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget *dialog;
@@ -246,22 +246,22 @@ save_dialog (GimpImage     *image,
   GtkWidget *real_entry;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  entry = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "description", GIMP_TYPE_LABEL_ENTRY);
-  real_entry = gimp_label_entry_get_entry (GIMP_LABEL_ENTRY (entry));
+  entry = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "description", CLAY_TYPE_LABEL_ENTRY);
+  real_entry = clay_label_entry_get_entry (CLAY_LABEL_ENTRY (entry));
   gtk_entry_set_max_length (GTK_ENTRY (real_entry), 256);
   gtk_entry_set_width_chars (GTK_ENTRY (real_entry), 20);
   gtk_entry_set_activates_default (GTK_ENTRY (real_entry), TRUE);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

@@ -48,7 +48,7 @@
  *      * plug-ins/gfig
  *      * plug-ins/gflare
  *      * plug-ins/gfli
- *      * plug-ins/gimpressionist
+ *      * plug-ins/clayressionist
  *      * plug-ins/ifscompose
  *      * plug-ins/jpeg
  *      * plug-ins/maze
@@ -108,7 +108,7 @@
 
 #include "sgi-lib.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /*

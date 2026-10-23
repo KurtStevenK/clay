@@ -19,9 +19,9 @@
 #pragma once
 
 
-GimpValueArray * file_gex_load_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+ClayValueArray * file_gex_load_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error);

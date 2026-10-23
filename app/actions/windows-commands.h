@@ -18,32 +18,32 @@
 #pragma once
 
 
-void  windows_hide_docks_cmd_callback             (GimpAction *action,
+void  windows_hide_docks_cmd_callback             (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void  windows_use_single_window_mode_cmd_callback (GimpAction *action,
-                                                   GVariant   *value,
-                                                   gpointer    data);
-
-void  windows_show_tabs_cmd_callback              (GimpAction *action,
-                                                   GVariant   *value,
-                                                   gpointer    data);
-void  windows_set_tabs_position_cmd_callback      (GimpAction *action,
+void  windows_use_single_window_mode_cmd_callback (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
 
-void  windows_show_display_next_cmd_callback      (GimpAction *action,
+void  windows_show_tabs_cmd_callback              (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void  windows_show_display_previous_cmd_callback  (GimpAction *action,
+void  windows_set_tabs_position_cmd_callback      (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void  windows_show_display_cmd_callback           (GimpAction *action,
+
+void  windows_show_display_next_cmd_callback      (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void  windows_show_dock_cmd_callback              (GimpAction *action,
+void  windows_show_display_previous_cmd_callback  (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void  windows_open_recent_cmd_callback            (GimpAction *action,
+void  windows_show_display_cmd_callback           (ClayAction *action,
+                                                   GVariant   *value,
+                                                   gpointer    data);
+void  windows_show_dock_cmd_callback              (ClayAction *action,
+                                                   GVariant   *value,
+                                                   gpointer    data);
+void  windows_open_recent_cmd_callback            (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);

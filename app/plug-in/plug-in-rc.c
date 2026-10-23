@@ -23,21 +23,21 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpbase/gimpprotocol-private.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclaybase/clayprotocol-private.h"
+#include "libclayconfig/clayconfig.h"
 
-#include "libgimp/gimpgpparams.h"
+#include "libclay/claygpparams.h"
 
 #include "plug-in-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "gimpplugindef.h"
-#include "gimppluginprocedure.h"
+#include "clayplugindef.h"
+#include "claypluginprocedure.h"
 #include "plug-in-rc.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define PLUG_IN_RC_FILE_VERSION 18
@@ -49,27 +49,27 @@
  *  or G_TOKEN_ERROR if the function already set an error itself.
  */
 
-static GTokenType plug_in_def_deserialize        (Gimp                 *gimp,
+static GTokenType plug_in_def_deserialize        (Clay                 *clay,
                                                   GScanner             *scanner,
                                                   GSList              **plug_in_defs);
 static GTokenType plug_in_procedure_deserialize  (GScanner             *scanner,
-                                                  Gimp                 *gimp,
-                                                  GimpPlugInDef        *plug_in_def,
-                                                  GimpPlugInProcedure **proc);
+                                                  Clay                 *clay,
+                                                  ClayPlugInDef        *plug_in_def,
+                                                  ClayPlugInProcedure **proc);
 static GTokenType plug_in_menu_path_deserialize  (GScanner             *scanner,
-                                                  GimpPlugInProcedure  *proc);
+                                                  ClayPlugInProcedure  *proc);
 static GTokenType plug_in_icon_deserialize       (GScanner             *scanner,
-                                                  GimpPlugInProcedure  *proc);
+                                                  ClayPlugInProcedure  *proc);
 static GTokenType plug_in_file_or_batch_proc_deserialize  (GScanner             *scanner,
-                                                           GimpPlugInProcedure  *proc);
+                                                           ClayPlugInProcedure  *proc);
 static GTokenType plug_in_proc_arg_deserialize   (GScanner             *scanner,
-                                                  Gimp                 *gimp,
-                                                  GimpProcedure        *procedure,
+                                                  Clay                 *clay,
+                                                  ClayProcedure        *procedure,
                                                   gboolean              return_value);
 static GTokenType plug_in_help_def_deserialize   (GScanner             *scanner,
-                                                  GimpPlugInDef        *plug_in_def);
+                                                  ClayPlugInDef        *plug_in_def);
 static GTokenType plug_in_has_init_deserialize   (GScanner             *scanner,
-                                                  GimpPlugInDef        *plug_in_def);
+                                                  ClayPlugInDef        *plug_in_def);
 
 
 enum
@@ -100,27 +100,27 @@ enum
 
 
 GSList *
-plug_in_rc_parse (Gimp    *gimp,
+plug_in_rc_parse (Clay    *clay,
                   GFile   *file,
                   GError **error)
 {
   GScanner   *scanner;
   GEnumClass *enum_class;
   GSList     *plug_in_defs     = NULL;
-  gint        protocol_version = GIMP_PROTOCOL_VERSION;
+  gint        protocol_version = CLAY_PROTOCOL_VERSION;
   gint        file_version     = PLUG_IN_RC_FILE_VERSION;
   GTokenType  token;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (G_IS_FILE (file), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  scanner = gimp_scanner_new_file (file, error);
+  scanner = clay_scanner_new_file (file, error);
 
   if (! scanner)
     return NULL;
 
-  enum_class = g_type_class_ref (GIMP_TYPE_ICON_TYPE);
+  enum_class = g_type_class_ref (CLAY_TYPE_ICON_TYPE);
 
   g_scanner_scope_add_symbol (scanner, 0,
                               "protocol-version",
@@ -186,7 +186,7 @@ plug_in_rc_parse (Gimp    *gimp,
 
   token = G_TOKEN_LEFT_PAREN;
 
-  while (protocol_version == GIMP_PROTOCOL_VERSION   &&
+  while (protocol_version == CLAY_PROTOCOL_VERSION   &&
          file_version     == PLUG_IN_RC_FILE_VERSION &&
          g_scanner_peek_next_token (scanner) == token)
     {
@@ -203,19 +203,19 @@ plug_in_rc_parse (Gimp    *gimp,
             {
             case PROTOCOL_VERSION:
               token = G_TOKEN_INT;
-              if (gimp_scanner_parse_int (scanner, &protocol_version))
+              if (clay_scanner_parse_int (scanner, &protocol_version))
                 token = G_TOKEN_RIGHT_PAREN;
               break;
 
             case FILE_VERSION:
               token = G_TOKEN_INT;
-              if (gimp_scanner_parse_int (scanner, &file_version))
+              if (clay_scanner_parse_int (scanner, &file_version))
                 token = G_TOKEN_RIGHT_PAREN;
               break;
 
             case PLUG_IN_DEF:
               g_scanner_set_scope (scanner, PLUG_IN_DEF);
-              token = plug_in_def_deserialize (gimp, scanner, &plug_in_defs);
+              token = plug_in_def_deserialize (clay, scanner, &plug_in_defs);
               g_scanner_set_scope (scanner, 0);
               break;
             default:
@@ -232,23 +232,23 @@ plug_in_rc_parse (Gimp    *gimp,
         }
     }
 
-  if (protocol_version != GIMP_PROTOCOL_VERSION   ||
+  if (protocol_version != CLAY_PROTOCOL_VERSION   ||
       file_version     != PLUG_IN_RC_FILE_VERSION ||
       token            != G_TOKEN_LEFT_PAREN)
     {
-      if (protocol_version != GIMP_PROTOCOL_VERSION)
+      if (protocol_version != CLAY_PROTOCOL_VERSION)
         {
           g_set_error (error,
-                       GIMP_CONFIG_ERROR, GIMP_CONFIG_ERROR_VERSION,
+                       CLAY_CONFIG_ERROR, CLAY_CONFIG_ERROR_VERSION,
                        _("Skipping '%s': wrong Clay protocol version."),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
         }
       else if (file_version != PLUG_IN_RC_FILE_VERSION)
         {
           g_set_error (error,
-                       GIMP_CONFIG_ERROR, GIMP_CONFIG_ERROR_VERSION,
+                       CLAY_CONFIG_ERROR, CLAY_CONFIG_ERROR_VERSION,
                        _("Skipping '%s': wrong pluginrc file format version."),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
         }
       else if (token != G_TOKEN_ERROR)
         {
@@ -263,18 +263,18 @@ plug_in_rc_parse (Gimp    *gimp,
 
   g_type_class_unref (enum_class);
 
-  gimp_scanner_unref (scanner);
+  clay_scanner_unref (scanner);
 
   return g_slist_reverse (plug_in_defs);
 }
 
 static GTokenType
-plug_in_def_deserialize (Gimp      *gimp,
+plug_in_def_deserialize (Clay      *clay,
                          GScanner  *scanner,
                          GSList   **plug_in_defs)
 {
-  GimpPlugInDef       *plug_in_def;
-  GimpPlugInProcedure *proc = NULL;
+  ClayPlugInDef       *plug_in_def;
+  ClayPlugInProcedure *proc = NULL;
   gchar               *path;
   GFile               *file;
   GFile               *root_folder;
@@ -282,7 +282,7 @@ plug_in_def_deserialize (Gimp      *gimp,
   GTokenType           token;
   GError              *error = NULL;
 
-  if (! gimp_scanner_parse_string (scanner, &path))
+  if (! clay_scanner_parse_string (scanner, &path))
     return G_TOKEN_STRING;
 
   if (! (path && *path))
@@ -291,7 +291,7 @@ plug_in_def_deserialize (Gimp      *gimp,
       return G_TOKEN_ERROR;
     }
 
-  file = gimp_file_new_for_config_path (path, &error);
+  file = clay_file_new_for_config_path (path, &error);
   g_free (path);
 
   if (! file)
@@ -303,7 +303,7 @@ plug_in_def_deserialize (Gimp      *gimp,
       return G_TOKEN_ERROR;
     }
 
-  if (! gimp_scanner_parse_string (scanner, &path))
+  if (! clay_scanner_parse_string (scanner, &path))
     return G_TOKEN_STRING;
 
   if (! (path && *path))
@@ -312,7 +312,7 @@ plug_in_def_deserialize (Gimp      *gimp,
       return G_TOKEN_ERROR;
     }
 
-  root_folder = gimp_file_new_for_config_path (path, &error);
+  root_folder = clay_file_new_for_config_path (path, &error);
   g_free (path);
 
   if (! root_folder)
@@ -324,11 +324,11 @@ plug_in_def_deserialize (Gimp      *gimp,
       return G_TOKEN_ERROR;
     }
 
-  plug_in_def = gimp_plug_in_def_new (file, root_folder);
+  plug_in_def = clay_plug_in_def_new (file, root_folder);
   g_object_unref (file);
   g_object_unref (root_folder);
 
-  if (! gimp_scanner_parse_int64 (scanner, &mtime))
+  if (! clay_scanner_parse_int64 (scanner, &mtime))
     {
       g_object_unref (plug_in_def);
       return G_TOKEN_INT;
@@ -352,12 +352,12 @@ plug_in_def_deserialize (Gimp      *gimp,
           switch (GPOINTER_TO_INT (scanner->value.v_symbol))
             {
             case PROC_DEF:
-              token = plug_in_procedure_deserialize (scanner, gimp,
+              token = plug_in_procedure_deserialize (scanner, clay,
                                                      plug_in_def,
                                                      &proc);
 
               if (token == G_TOKEN_LEFT_PAREN)
-                gimp_plug_in_def_add_procedure (plug_in_def, proc);
+                clay_plug_in_def_add_procedure (plug_in_def, proc);
 
               if (proc)
                 g_object_unref (proc);
@@ -389,7 +389,7 @@ plug_in_def_deserialize (Gimp      *gimp,
     {
       token = G_TOKEN_RIGHT_PAREN;
 
-      if (gimp_scanner_parse_token (scanner, token))
+      if (clay_scanner_parse_token (scanner, token))
         {
           *plug_in_defs = g_slist_prepend (*plug_in_defs, plug_in_def);
           return G_TOKEN_LEFT_PAREN;
@@ -403,11 +403,11 @@ plug_in_def_deserialize (Gimp      *gimp,
 
 static GTokenType
 plug_in_procedure_deserialize (GScanner             *scanner,
-                               Gimp                 *gimp,
-                               GimpPlugInDef        *plug_in_def,
-                               GimpPlugInProcedure **proc)
+                               Clay                 *clay,
+                               ClayPlugInDef        *plug_in_def,
+                               ClayPlugInProcedure **proc)
 {
-  GimpProcedure   *procedure;
+  ClayProcedure   *procedure;
   GTokenType       token;
   gchar           *str;
   gint             proc_type;
@@ -417,7 +417,7 @@ plug_in_procedure_deserialize (GScanner             *scanner,
   gint             sensitivity_mask;
   gint             i;
 
-  if (! gimp_scanner_parse_string (scanner, &str))
+  if (! clay_scanner_parse_string (scanner, &str))
     return G_TOKEN_STRING;
 
   if (! (str && *str))
@@ -426,14 +426,14 @@ plug_in_procedure_deserialize (GScanner             *scanner,
       return G_TOKEN_ERROR;
     }
 
-  if (! gimp_scanner_parse_int (scanner, &proc_type))
+  if (! clay_scanner_parse_int (scanner, &proc_type))
     {
       g_free (str);
       return G_TOKEN_INT;
     }
 
-  if (proc_type != GIMP_PDB_PROC_TYPE_PLUGIN &&
-      proc_type != GIMP_PDB_PROC_TYPE_PERSISTENT)
+  if (proc_type != CLAY_PDB_PROC_TYPE_PLUGIN &&
+      proc_type != CLAY_PDB_PROC_TYPE_PERSISTENT)
     {
       g_free (str);
       g_scanner_error (scanner, "procedure type %d is out of range",
@@ -441,32 +441,32 @@ plug_in_procedure_deserialize (GScanner             *scanner,
       return G_TOKEN_ERROR;
     }
 
-  procedure = gimp_plug_in_procedure_new (proc_type, plug_in_def->file, plug_in_def->root_folder);
+  procedure = clay_plug_in_procedure_new (proc_type, plug_in_def->file, plug_in_def->root_folder);
 
-  *proc = GIMP_PLUG_IN_PROCEDURE (procedure);
+  *proc = CLAY_PLUG_IN_PROCEDURE (procedure);
 
-  gimp_object_take_name (GIMP_OBJECT (procedure), str);
+  clay_object_take_name (CLAY_OBJECT (procedure), str);
   str = NULL;
 
-  if (! gimp_scanner_parse_string (scanner, &procedure->blurb))
+  if (! clay_scanner_parse_string (scanner, &procedure->blurb))
     return G_TOKEN_STRING;
-  if (! gimp_scanner_parse_string (scanner, &procedure->help))
+  if (! clay_scanner_parse_string (scanner, &procedure->help))
     return G_TOKEN_STRING;
-  if (! gimp_scanner_parse_string (scanner, &procedure->authors))
+  if (! clay_scanner_parse_string (scanner, &procedure->authors))
     return G_TOKEN_STRING;
-  if (! gimp_scanner_parse_string (scanner, &procedure->copyright))
+  if (! clay_scanner_parse_string (scanner, &procedure->copyright))
     return G_TOKEN_STRING;
-  if (! gimp_scanner_parse_string (scanner, &procedure->date))
+  if (! clay_scanner_parse_string (scanner, &procedure->date))
     return G_TOKEN_STRING;
-  if (! gimp_scanner_parse_string (scanner, &(*proc)->menu_label))
+  if (! clay_scanner_parse_string (scanner, &(*proc)->menu_label))
     return G_TOKEN_STRING;
-  if (! gimp_scanner_parse_string (scanner, &str))
+  if (! clay_scanner_parse_string (scanner, &str))
     return G_TOKEN_STRING;
   if (str && *str)
     {
       GError *error = NULL;
 
-      if (! gimp_plug_in_procedure_set_help_uri (*proc, str, &error))
+      if (! clay_plug_in_procedure_set_help_uri (*proc, str, &error))
         {
           g_scanner_error (scanner, "procedure URI is invalid: %s", error->message);
           g_clear_error (&error);
@@ -476,7 +476,7 @@ plug_in_procedure_deserialize (GScanner             *scanner,
     }
   g_free (str);
 
-  if (! gimp_scanner_parse_int (scanner, &n_menu_paths))
+  if (! clay_scanner_parse_int (scanner, &n_menu_paths))
     return G_TOKEN_INT;
 
   for (i = 0; i < n_menu_paths; i++)
@@ -494,37 +494,37 @@ plug_in_procedure_deserialize (GScanner             *scanner,
   if (token != G_TOKEN_LEFT_PAREN)
     return token;
 
-  if (! gimp_scanner_parse_string (scanner, &str))
+  if (! clay_scanner_parse_string (scanner, &str))
     return G_TOKEN_STRING;
 
-  gimp_plug_in_procedure_set_image_types (*proc, str);
+  clay_plug_in_procedure_set_image_types (*proc, str);
   g_free (str);
 
-  if (! gimp_scanner_parse_int (scanner, &sensitivity_mask))
+  if (! clay_scanner_parse_int (scanner, &sensitivity_mask))
     return G_TOKEN_INT;
 
-  gimp_plug_in_procedure_set_sensitivity_mask (*proc, sensitivity_mask);
+  clay_plug_in_procedure_set_sensitivity_mask (*proc, sensitivity_mask);
 
-  if (! gimp_scanner_parse_int (scanner, (gint *) &n_args))
+  if (! clay_scanner_parse_int (scanner, (gint *) &n_args))
     return G_TOKEN_INT;
-  if (! gimp_scanner_parse_int (scanner, (gint *) &n_return_vals))
+  if (! clay_scanner_parse_int (scanner, (gint *) &n_return_vals))
     return G_TOKEN_INT;
 
   for (i = 0; i < n_args; i++)
     {
-      token = plug_in_proc_arg_deserialize (scanner, gimp, procedure, FALSE);
+      token = plug_in_proc_arg_deserialize (scanner, clay, procedure, FALSE);
       if (token != G_TOKEN_LEFT_PAREN)
         return token;
     }
 
   for (i = 0; i < n_return_vals; i++)
     {
-      token = plug_in_proc_arg_deserialize (scanner, gimp, procedure, TRUE);
+      token = plug_in_proc_arg_deserialize (scanner, clay, procedure, TRUE);
       if (token != G_TOKEN_LEFT_PAREN)
         return token;
     }
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   return G_TOKEN_LEFT_PAREN;
@@ -532,23 +532,23 @@ plug_in_procedure_deserialize (GScanner             *scanner,
 
 static GTokenType
 plug_in_menu_path_deserialize (GScanner            *scanner,
-                               GimpPlugInProcedure *proc)
+                               ClayPlugInProcedure *proc)
 {
   gchar *menu_path;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
     return G_TOKEN_LEFT_PAREN;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_SYMBOL) ||
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_SYMBOL) ||
       GPOINTER_TO_INT (scanner->value.v_symbol) != MENU_PATH)
     return G_TOKEN_SYMBOL;
 
-  if (! gimp_scanner_parse_string (scanner, &menu_path))
+  if (! clay_scanner_parse_string (scanner, &menu_path))
     return G_TOKEN_STRING;
 
   proc->menu_paths = g_list_append (proc->menu_paths, menu_path);
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   return G_TOKEN_LEFT_PAREN;
@@ -556,23 +556,23 @@ plug_in_menu_path_deserialize (GScanner            *scanner,
 
 static GTokenType
 plug_in_icon_deserialize (GScanner            *scanner,
-                          GimpPlugInProcedure *proc)
+                          ClayPlugInProcedure *proc)
 {
   GEnumClass   *enum_class;
   GEnumValue   *enum_value;
-  GimpIconType  icon_type;
+  ClayIconType  icon_type;
   gint          icon_data_length;
   gchar        *icon_name;
   guint8       *icon_data;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
     return G_TOKEN_LEFT_PAREN;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_SYMBOL) ||
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_SYMBOL) ||
       GPOINTER_TO_INT (scanner->value.v_symbol) != ICON)
     return G_TOKEN_SYMBOL;
 
-  enum_class = g_type_class_peek (GIMP_TYPE_ICON_TYPE);
+  enum_class = g_type_class_peek (CLAY_TYPE_ICON_TYPE);
 
   switch (g_scanner_peek_next_token (scanner))
     {
@@ -615,35 +615,35 @@ plug_in_icon_deserialize (GScanner            *scanner,
 
   icon_type = enum_value->value;
 
-  if (! gimp_scanner_parse_int (scanner, &icon_data_length))
+  if (! clay_scanner_parse_int (scanner, &icon_data_length))
     return G_TOKEN_INT;
 
   switch (icon_type)
     {
-    case GIMP_ICON_TYPE_ICON_NAME:
-    case GIMP_ICON_TYPE_IMAGE_FILE:
+    case CLAY_ICON_TYPE_ICON_NAME:
+    case CLAY_ICON_TYPE_IMAGE_FILE:
       icon_data_length = -1;
 
-      if (! gimp_scanner_parse_string_no_validate (scanner, &icon_name))
+      if (! clay_scanner_parse_string_no_validate (scanner, &icon_name))
         return G_TOKEN_STRING;
 
       icon_data = (guint8 *) icon_name;
       break;
 
-    case GIMP_ICON_TYPE_PIXBUF:
+    case CLAY_ICON_TYPE_PIXBUF:
       if (icon_data_length < 0)
         return G_TOKEN_STRING;
 
-      if (! gimp_scanner_parse_data (scanner, icon_data_length, &icon_data))
+      if (! clay_scanner_parse_data (scanner, icon_data_length, &icon_data))
         return G_TOKEN_STRING;
       break;
     }
 
-  gimp_plug_in_procedure_take_icon (proc, icon_type,
+  clay_plug_in_procedure_take_icon (proc, icon_type,
                                     icon_data, icon_data_length,
                                     NULL);
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   return G_TOKEN_LEFT_PAREN;
@@ -651,15 +651,15 @@ plug_in_icon_deserialize (GScanner            *scanner,
 
 static GTokenType
 plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
-                                        GimpPlugInProcedure *proc)
+                                        ClayPlugInProcedure *proc)
 {
   GTokenType token;
   gint       symbol;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
     return G_TOKEN_LEFT_PAREN;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_SYMBOL))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_SYMBOL))
     return G_TOKEN_SYMBOL;
 
   symbol = GPOINTER_TO_INT (scanner->value.v_symbol);
@@ -670,10 +670,10 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
     {
       gchar *interpreter_name;
 
-      if (! gimp_scanner_parse_string (scanner, &interpreter_name))
+      if (! clay_scanner_parse_string (scanner, &interpreter_name))
         return G_TOKEN_STRING;
 
-      gimp_plug_in_procedure_set_batch_interpreter (proc, interpreter_name);
+      clay_plug_in_procedure_set_batch_interpreter (proc, interpreter_name);
       g_free (interpreter_name);
     }
   else
@@ -689,7 +689,7 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
           if (token != G_TOKEN_LEFT_PAREN)
             return token;
 
-          if (! gimp_scanner_parse_token (scanner, G_TOKEN_SYMBOL))
+          if (! clay_scanner_parse_token (scanner, G_TOKEN_SYMBOL))
             return G_TOKEN_SYMBOL;
 
           symbol = GPOINTER_TO_INT (scanner->value.v_symbol);
@@ -700,7 +700,7 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
                 {
                   gchar *extensions;
 
-                  if (! gimp_scanner_parse_string (scanner, &extensions))
+                  if (! clay_scanner_parse_string (scanner, &extensions))
                     return G_TOKEN_STRING;
 
                   g_free (proc->extensions);
@@ -712,7 +712,7 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
                 {
                   gchar *extensions;
 
-                  if (! gimp_scanner_parse_string (scanner, &extensions))
+                  if (! clay_scanner_parse_string (scanner, &extensions))
                     return G_TOKEN_STRING;
 
                   g_free (proc->meta_extensions);
@@ -724,7 +724,7 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
                 {
                   gchar *prefixes;
 
-                  if (! gimp_scanner_parse_string (scanner, &prefixes))
+                  if (! clay_scanner_parse_string (scanner, &prefixes))
                     return G_TOKEN_STRING;
 
                   g_free (proc->prefixes);
@@ -736,7 +736,7 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
                 {
                   gchar *magics;
 
-                  if (! gimp_scanner_parse_string_no_validate (scanner, &magics))
+                  if (! clay_scanner_parse_string_no_validate (scanner, &magics))
                     return G_TOKEN_STRING;
 
                   g_free (proc->magics);
@@ -748,10 +748,10 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
                 {
                   gint priority;
 
-                  if (! gimp_scanner_parse_int (scanner, &priority))
+                  if (! clay_scanner_parse_int (scanner, &priority))
                     return G_TOKEN_INT;
 
-                  gimp_plug_in_procedure_set_priority (proc, priority);
+                  clay_plug_in_procedure_set_priority (proc, priority);
                 }
               break;
 
@@ -759,35 +759,35 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
                 {
                   gchar *mime_types;
 
-                  if (! gimp_scanner_parse_string (scanner, &mime_types))
+                  if (! clay_scanner_parse_string (scanner, &mime_types))
                     return G_TOKEN_STRING;
 
-                  gimp_plug_in_procedure_set_mime_types (proc, mime_types);
+                  clay_plug_in_procedure_set_mime_types (proc, mime_types);
 
                   g_free (mime_types);
                 }
               break;
 
             case HANDLES_REMOTE:
-              gimp_plug_in_procedure_set_handles_remote (proc);
+              clay_plug_in_procedure_set_handles_remote (proc);
               break;
 
             case HANDLES_RAW:
-              gimp_plug_in_procedure_set_handles_raw (proc);
+              clay_plug_in_procedure_set_handles_raw (proc);
               break;
 
             case HANDLES_VECTOR:
-              gimp_plug_in_procedure_set_handles_vector (proc);
+              clay_plug_in_procedure_set_handles_vector (proc);
               break;
 
             case THUMB_LOADER:
                 {
                   gchar *thumb_loader;
 
-                  if (! gimp_scanner_parse_string (scanner, &thumb_loader))
+                  if (! clay_scanner_parse_string (scanner, &thumb_loader))
                     return G_TOKEN_STRING;
 
-                  gimp_plug_in_procedure_set_thumb_loader (proc, thumb_loader);
+                  clay_plug_in_procedure_set_thumb_loader (proc, thumb_loader);
 
                   g_free (thumb_loader);
                 }
@@ -796,12 +796,12 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
             default:
               return G_TOKEN_SYMBOL;
             }
-          if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+          if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
             return G_TOKEN_RIGHT_PAREN;
         }
     }
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   g_scanner_set_scope (scanner, PLUG_IN_DEF);
@@ -811,39 +811,39 @@ plug_in_file_or_batch_proc_deserialize (GScanner            *scanner,
 
 static GTokenType
 plug_in_proc_arg_deserialize (GScanner      *scanner,
-                              Gimp          *gimp,
-                              GimpProcedure *procedure,
+                              Clay          *clay,
+                              ClayProcedure *procedure,
                               gboolean       return_value)
 {
   GTokenType  token;
   GPParamDef  param_def = { 0, };
   GParamSpec *pspec;
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_LEFT_PAREN))
     {
       token = G_TOKEN_LEFT_PAREN;
       goto error;
     }
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_SYMBOL) ||
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_SYMBOL) ||
       GPOINTER_TO_INT (scanner->value.v_symbol) != PROC_ARG)
     {
       token = G_TOKEN_SYMBOL;
       goto error;
     }
 
-  if (! gimp_scanner_parse_int (scanner, (gint *) &param_def.param_def_type))
+  if (! clay_scanner_parse_int (scanner, (gint *) &param_def.param_def_type))
     {
       token = G_TOKEN_INT;
       goto error;
     }
 
-  if (! gimp_scanner_parse_string (scanner, &param_def.type_name)       ||
-      ! gimp_scanner_parse_string (scanner, &param_def.value_type_name) ||
-      ! gimp_scanner_parse_string (scanner, &param_def.name)            ||
-      ! gimp_scanner_parse_string (scanner, &param_def.nick)            ||
-      ! gimp_scanner_parse_string (scanner, &param_def.blurb)           ||
-      ! gimp_scanner_parse_int    (scanner, (gint *) &param_def.flags))
+  if (! clay_scanner_parse_string (scanner, &param_def.type_name)       ||
+      ! clay_scanner_parse_string (scanner, &param_def.value_type_name) ||
+      ! clay_scanner_parse_string (scanner, &param_def.name)            ||
+      ! clay_scanner_parse_string (scanner, &param_def.nick)            ||
+      ! clay_scanner_parse_string (scanner, &param_def.blurb)           ||
+      ! clay_scanner_parse_int    (scanner, (gint *) &param_def.flags))
     {
       token = G_TOKEN_STRING;
       goto error;
@@ -855,11 +855,11 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_INT:
-      if (! gimp_scanner_parse_int64 (scanner,
+      if (! clay_scanner_parse_int64 (scanner,
                                       &param_def.meta.m_int.min_val) ||
-          ! gimp_scanner_parse_int64 (scanner,
+          ! clay_scanner_parse_int64 (scanner,
                                       &param_def.meta.m_int.max_val) ||
-          ! gimp_scanner_parse_int64 (scanner,
+          ! clay_scanner_parse_int64 (scanner,
                                       &param_def.meta.m_int.default_val))
         {
           token = G_TOKEN_INT;
@@ -868,11 +868,11 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_UNIT:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_unit.allow_pixels) ||
-          ! gimp_scanner_parse_int (scanner,
+          ! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_unit.allow_percent) ||
-          ! gimp_scanner_parse_int (scanner,
+          ! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_unit.default_val))
         {
           token = G_TOKEN_INT;
@@ -881,7 +881,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_ENUM:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_enum.default_val))
         {
           token = G_TOKEN_STRING;
@@ -891,18 +891,18 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
 
     case GP_PARAM_DEF_TYPE_CHOICE:
         {
-          GimpChoice *choice;
+          ClayChoice *choice;
           gint        n_choices;
 
-          if (! gimp_scanner_parse_string (scanner,
+          if (! clay_scanner_parse_string (scanner,
                                            &param_def.meta.m_choice.default_val) ||
-              ! gimp_scanner_parse_int (scanner, &n_choices))
+              ! clay_scanner_parse_int (scanner, &n_choices))
             {
               token = G_TOKEN_INT;
               goto error;
             }
 
-          choice = gimp_choice_new ();
+          choice = clay_choice_new ();
           param_def.meta.m_choice.choice = choice;
 
           for (int i = 0; i < n_choices; i++)
@@ -915,18 +915,18 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
               gint      id;
               gboolean  is_deprecated;
 
-              if (! gimp_scanner_parse_string (scanner, &nick))
+              if (! clay_scanner_parse_string (scanner, &nick))
                 {
                   token = G_TOKEN_STRING;
                   goto error;
                 }
-              if (! gimp_scanner_parse_int (scanner, &id))
+              if (! clay_scanner_parse_int (scanner, &id))
                 {
                   token = G_TOKEN_INT;
                   goto error;
                 }
-              if (! gimp_scanner_parse_string (scanner, &label) ||
-                  ! gimp_scanner_parse_string (scanner, &help))
+              if (! clay_scanner_parse_string (scanner, &label) ||
+                  ! clay_scanner_parse_string (scanner, &help))
                 {
                   token = G_TOKEN_STRING;
                   g_free (nick);
@@ -934,26 +934,26 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
                   g_free (help);
                   goto error;
                 }
-              if (! gimp_scanner_parse_int (scanner, &is_deprecated))
+              if (! clay_scanner_parse_int (scanner, &is_deprecated))
                 {
                   token = G_TOKEN_INT;
                   goto error;
                 }
-              if (! gimp_scanner_parse_string (scanner, &redirect))
+              if (! clay_scanner_parse_string (scanner, &redirect))
                 {
                   token = G_TOKEN_STRING;
                   goto error;
                 }
-              if (! gimp_scanner_parse_string (scanner, &reason))
+              if (! clay_scanner_parse_string (scanner, &reason))
                 {
                   token = G_TOKEN_STRING;
                   goto error;
                 }
 
               if (! is_deprecated)
-                gimp_choice_add (choice, nick, id, label, help);
+                clay_choice_add (choice, nick, id, label, help);
               else
-                gimp_choice_add_deprecated (choice, nick, id, redirect, reason);
+                clay_choice_add_deprecated (choice, nick, id, redirect, reason);
 
               g_free (nick);
               g_free (label);
@@ -965,7 +965,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_BOOLEAN:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_boolean.default_val))
         {
           token = G_TOKEN_INT;
@@ -974,11 +974,11 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_DOUBLE:
-      if (! gimp_scanner_parse_double (scanner,
+      if (! clay_scanner_parse_double (scanner,
                                        &param_def.meta.m_double.min_val) ||
-          ! gimp_scanner_parse_double (scanner,
+          ! clay_scanner_parse_double (scanner,
                                        &param_def.meta.m_double.max_val) ||
-          ! gimp_scanner_parse_double (scanner,
+          ! clay_scanner_parse_double (scanner,
                                        &param_def.meta.m_double.default_val))
         {
           token = G_TOKEN_FLOAT;
@@ -987,7 +987,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_STRING:
-      if (! gimp_scanner_parse_string (scanner,
+      if (! clay_scanner_parse_string (scanner,
                                        &param_def.meta.m_string.default_val))
         {
           token = G_TOKEN_STRING;
@@ -1004,7 +1004,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
           gint          profile_size  = 0;
           guint8       *profile_data  = NULL;
 
-          if (! gimp_scanner_parse_int (scanner,
+          if (! clay_scanner_parse_int (scanner,
                                         &param_def.meta.m_gegl_color.has_alpha))
             {
               token = G_TOKEN_INT;
@@ -1021,11 +1021,11 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
               g_scanner_get_next_token (scanner);
               /* NULL default color. Skip. */
             }
-          else if (! gimp_scanner_parse_int (scanner, &bpp)                         ||
+          else if (! clay_scanner_parse_int (scanner, &bpp)                         ||
                    bpp > 40                                                         ||
-                   ! gimp_scanner_parse_data (scanner, bpp, &data)                  ||
-                   ! gimp_scanner_parse_string (scanner, &encoding)                 ||
-                   ! gimp_scanner_parse_int (scanner, &profile_size))
+                   ! clay_scanner_parse_data (scanner, bpp, &data)                  ||
+                   ! clay_scanner_parse_string (scanner, &encoding)                 ||
+                   ! clay_scanner_parse_int (scanner, &profile_size))
             {
               g_free (data);
               g_free (encoding);
@@ -1033,7 +1033,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
               token = G_TOKEN_INT;
               goto error;
             }
-          if (profile_size > 0 && ! gimp_scanner_parse_data (scanner, profile_size, &profile_data))
+          if (profile_size > 0 && ! clay_scanner_parse_data (scanner, profile_size, &profile_data))
             {
               g_free (profile_data);
 
@@ -1063,7 +1063,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_ID:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_id.none_ok))
         {
           token = G_TOKEN_INT;
@@ -1072,7 +1072,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_ID_ARRAY:
-      if (! gimp_scanner_parse_string (scanner,
+      if (! clay_scanner_parse_string (scanner,
                                        &param_def.meta.m_id_array.type_name))
         {
           token = G_TOKEN_STRING;
@@ -1084,11 +1084,11 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_RESOURCE:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_resource.none_ok) ||
-          ! gimp_scanner_parse_int (scanner,
+          ! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_resource.default_to_context) ||
-          ! gimp_scanner_parse_int (scanner,
+          ! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_resource.default_resource_id))
         {
           token = G_TOKEN_INT;
@@ -1097,15 +1097,15 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_FILE:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     (gint *) &param_def.meta.m_file.action) ||
-          ! gimp_scanner_parse_int (scanner,
+          ! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_file.none_ok))
         {
           token = G_TOKEN_INT;
           goto error;
         }
-      if (! gimp_scanner_parse_string (scanner,
+      if (! clay_scanner_parse_string (scanner,
                                        &param_def.meta.m_file.default_uri))
         {
           token = G_TOKEN_STRING;
@@ -1114,7 +1114,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
 
     case GP_PARAM_DEF_TYPE_CURVE:
-      if (! gimp_scanner_parse_int (scanner,
+      if (! clay_scanner_parse_int (scanner,
                                     &param_def.meta.m_curve.none_ok))
         {
           token = G_TOKEN_INT;
@@ -1123,7 +1123,7 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
       break;
     }
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     {
       token = G_TOKEN_RIGHT_PAREN;
       goto error;
@@ -1131,12 +1131,12 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
 
   token = G_TOKEN_LEFT_PAREN;
 
-  pspec = _gimp_gp_param_def_to_param_spec (&param_def);
+  pspec = _clay_gp_param_def_to_param_spec (&param_def);
 
   if (return_value)
-    gimp_procedure_add_return_value (procedure, pspec);
+    clay_procedure_add_return_value (procedure, pspec);
   else
-    gimp_procedure_add_argument (procedure, pspec);
+    clay_procedure_add_argument (procedure, pspec);
 
  error:
 
@@ -1202,23 +1202,23 @@ plug_in_proc_arg_deserialize (GScanner      *scanner,
 
 static GTokenType
 plug_in_help_def_deserialize (GScanner      *scanner,
-                              GimpPlugInDef *plug_in_def)
+                              ClayPlugInDef *plug_in_def)
 {
   gchar *domain_name;
   gchar *domain_uri;
 
-  if (! gimp_scanner_parse_string (scanner, &domain_name))
+  if (! clay_scanner_parse_string (scanner, &domain_name))
     return G_TOKEN_STRING;
 
-  if (! gimp_scanner_parse_string (scanner, &domain_uri))
+  if (! clay_scanner_parse_string (scanner, &domain_uri))
     domain_uri = NULL;
 
-  gimp_plug_in_def_set_help_domain (plug_in_def, domain_name, domain_uri);
+  clay_plug_in_def_set_help_domain (plug_in_def, domain_name, domain_uri);
 
   g_free (domain_name);
   g_free (domain_uri);
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   return G_TOKEN_LEFT_PAREN;
@@ -1226,11 +1226,11 @@ plug_in_help_def_deserialize (GScanner      *scanner,
 
 static GTokenType
 plug_in_has_init_deserialize (GScanner      *scanner,
-                              GimpPlugInDef *plug_in_def)
+                              ClayPlugInDef *plug_in_def)
 {
-  gimp_plug_in_def_set_has_init (plug_in_def, TRUE);
+  clay_plug_in_def_set_has_init (plug_in_def, TRUE);
 
-  if (! gimp_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
+  if (! clay_scanner_parse_token (scanner, G_TOKEN_RIGHT_PAREN))
     return G_TOKEN_RIGHT_PAREN;
 
   return G_TOKEN_LEFT_PAREN;
@@ -1240,22 +1240,22 @@ plug_in_has_init_deserialize (GScanner      *scanner,
 /* serialize functions */
 
 static void
-plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
+plug_in_rc_write_proc_arg (ClayConfigWriter *writer,
                            GParamSpec       *pspec)
 {
   GPParamDef param_def = { 0, };
 
-  _gimp_param_spec_to_gp_param_def (pspec, &param_def, FALSE);
+  _clay_param_spec_to_gp_param_def (pspec, &param_def, FALSE);
 
-  gimp_config_writer_open (writer, "proc-arg");
-  gimp_config_writer_printf (writer, "%d", param_def.param_def_type);
+  clay_config_writer_open (writer, "proc-arg");
+  clay_config_writer_printf (writer, "%d", param_def.param_def_type);
 
-  gimp_config_writer_string (writer, param_def.type_name);
-  gimp_config_writer_string (writer, param_def.value_type_name);
-  gimp_config_writer_string (writer, g_param_spec_get_name (pspec));
-  gimp_config_writer_string (writer, g_param_spec_get_nick (pspec));
-  gimp_config_writer_string (writer, g_param_spec_get_blurb (pspec));
-  gimp_config_writer_printf (writer, "%d", pspec->flags);
+  clay_config_writer_string (writer, param_def.type_name);
+  clay_config_writer_string (writer, param_def.value_type_name);
+  clay_config_writer_string (writer, g_param_spec_get_name (pspec));
+  clay_config_writer_string (writer, g_param_spec_get_nick (pspec));
+  clay_config_writer_string (writer, g_param_spec_get_blurb (pspec));
+  clay_config_writer_printf (writer, "%d", pspec->flags);
 
   switch (param_def.param_def_type)
     {
@@ -1265,7 +1265,7 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
       break;
 
     case GP_PARAM_DEF_TYPE_INT:
-      gimp_config_writer_printf (writer,
+      clay_config_writer_printf (writer,
                                  "%" G_GINT64_FORMAT
                                  " %" G_GINT64_FORMAT
                                  " %" G_GINT64_FORMAT,
@@ -1275,14 +1275,14 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
       break;
 
     case GP_PARAM_DEF_TYPE_UNIT:
-      gimp_config_writer_printf (writer, "%d %d %d",
+      clay_config_writer_printf (writer, "%d %d %d",
                                  param_def.meta.m_unit.allow_pixels,
                                  param_def.meta.m_unit.allow_percent,
                                  param_def.meta.m_unit.default_val);
       break;
 
     case GP_PARAM_DEF_TYPE_ENUM:
-      gimp_config_writer_printf (writer, "%d",
+      clay_config_writer_printf (writer, "%d",
                                  param_def.meta.m_enum.default_val);
       break;
 
@@ -1290,9 +1290,9 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
         {
           GList *choices;
 
-          choices = gimp_choice_list_nicks (param_def.meta.m_choice.choice);
-          gimp_config_writer_string (writer, param_def.meta.m_choice.default_val);
-          gimp_config_writer_printf (writer, "%d", g_list_length (choices));
+          choices = clay_choice_list_nicks (param_def.meta.m_choice.choice);
+          clay_config_writer_string (writer, param_def.meta.m_choice.default_val);
+          clay_config_writer_printf (writer, "%d", g_list_length (choices));
           for (GList *iter = choices; iter; iter = iter->next)
             {
               const gchar *nick = iter->data;
@@ -1303,26 +1303,26 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
               gint         id;
               gboolean     is_deprecated;
 
-              gimp_choice_get_documentation (param_def.meta.m_choice.choice,
+              clay_choice_get_documentation (param_def.meta.m_choice.choice,
                                              nick, &label, &help);
               is_deprecated =
-                gimp_choice_is_deprecated (param_def.meta.m_choice.choice,
+                clay_choice_is_deprecated (param_def.meta.m_choice.choice,
                                            nick, &redirect, &reason);
 
-              id = gimp_choice_get_id (param_def.meta.m_choice.choice, nick);
-              gimp_config_writer_string (writer, nick);
-              gimp_config_writer_printf (writer, "%d", id);
-              gimp_config_writer_string (writer, label);
-              gimp_config_writer_string (writer, help);
-              gimp_config_writer_printf (writer, "%d", is_deprecated);
-              gimp_config_writer_string (writer, redirect);
-              gimp_config_writer_string (writer, reason);
+              id = clay_choice_get_id (param_def.meta.m_choice.choice, nick);
+              clay_config_writer_string (writer, nick);
+              clay_config_writer_printf (writer, "%d", id);
+              clay_config_writer_string (writer, label);
+              clay_config_writer_string (writer, help);
+              clay_config_writer_printf (writer, "%d", is_deprecated);
+              clay_config_writer_string (writer, redirect);
+              clay_config_writer_string (writer, reason);
             }
         }
       break;
 
     case GP_PARAM_DEF_TYPE_BOOLEAN:
-      gimp_config_writer_printf (writer, "%d",
+      clay_config_writer_printf (writer, "%d",
                                  param_def.meta.m_boolean.default_val);
       break;
 
@@ -1333,12 +1333,12 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
                       param_def.meta.m_double.max_val),
       g_ascii_dtostr (buf[2], sizeof (buf[2]),
                       param_def.meta.m_double.default_val);
-      gimp_config_writer_printf (writer, "%s %s %s",
+      clay_config_writer_printf (writer, "%s %s %s",
                                  buf[0], buf[1], buf[2]);
       break;
 
     case GP_PARAM_DEF_TYPE_STRING:
-      gimp_config_writer_string (writer,
+      clay_config_writer_string (writer,
                                  param_def.meta.m_string.default_val);
       break;
 
@@ -1350,7 +1350,7 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
           guint32  profile_size  = 0;
           guint8  *profile_data  = NULL;
 
-          gimp_config_writer_printf (writer, "%d",
+          clay_config_writer_printf (writer, "%d",
                                      param_def.meta.m_gegl_color.has_alpha);
 
           if (param_def.meta.m_gegl_color.default_val &&
@@ -1362,28 +1362,28 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
               profile_size = param_def.meta.m_gegl_color.default_val->format.profile_size;
               profile_data = param_def.meta.m_gegl_color.default_val->format.profile_data;
 
-              gimp_config_writer_printf (writer, "%d", bpp);
-              gimp_config_writer_data (writer, bpp, data);
-              gimp_config_writer_string (writer, encoding);
+              clay_config_writer_printf (writer, "%d", bpp);
+              clay_config_writer_data (writer, bpp, data);
+              clay_config_writer_string (writer, encoding);
 
-              gimp_config_writer_printf (writer, "%d", profile_size);
+              clay_config_writer_printf (writer, "%d", profile_size);
               if (profile_size > 0)
-                gimp_config_writer_data (writer, profile_size, profile_data);
+                clay_config_writer_data (writer, profile_size, profile_data);
             }
           else
             {
-              gimp_config_writer_printf (writer, "%s", "NULL");
+              clay_config_writer_printf (writer, "%s", "NULL");
             }
         }
       break;
 
     case GP_PARAM_DEF_TYPE_ID:
-      gimp_config_writer_printf (writer, "%d",
+      clay_config_writer_printf (writer, "%d",
                                  param_def.meta.m_id.none_ok);
       break;
 
     case GP_PARAM_DEF_TYPE_ID_ARRAY:
-      gimp_config_writer_string (writer,
+      clay_config_writer_string (writer,
                                  param_def.meta.m_id_array.type_name);
       break;
 
@@ -1391,27 +1391,27 @@ plug_in_rc_write_proc_arg (GimpConfigWriter *writer,
       break;
 
     case GP_PARAM_DEF_TYPE_RESOURCE:
-      gimp_config_writer_printf (writer, "%d %d %d",
+      clay_config_writer_printf (writer, "%d %d %d",
                                  param_def.meta.m_resource.none_ok,
                                  param_def.meta.m_resource.default_to_context,
                                  param_def.meta.m_resource.default_resource_id);
       break;
 
     case GP_PARAM_DEF_TYPE_FILE:
-      gimp_config_writer_printf (writer, "%d %d",
+      clay_config_writer_printf (writer, "%d %d",
                                  param_def.meta.m_file.action,
                                  param_def.meta.m_file.none_ok);
-      gimp_config_writer_string (writer,
+      clay_config_writer_string (writer,
                                  param_def.meta.m_file.default_uri);
       break;
 
     case GP_PARAM_DEF_TYPE_CURVE:
-      gimp_config_writer_printf (writer, "%d",
+      clay_config_writer_printf (writer, "%d",
                                  param_def.meta.m_curve.none_ok);
       break;
     }
 
-  gimp_config_writer_close (writer);
+  clay_config_writer_close (writer);
 }
 
 gboolean
@@ -1419,11 +1419,11 @@ plug_in_rc_write (GSList  *plug_in_defs,
                   GFile   *file,
                   GError **error)
 {
-  GimpConfigWriter *writer;
+  ClayConfigWriter *writer;
   GEnumClass       *enum_class;
   GSList           *list;
 
-  writer = gimp_config_writer_new_from_file (file,
+  writer = clay_config_writer_new_from_file (file,
                                              FALSE,
                                              "Clay pluginrc\n\n"
                                              "This file can safely be removed and "
@@ -1433,21 +1433,21 @@ plug_in_rc_write (GSList  *plug_in_defs,
   if (! writer)
     return FALSE;
 
-  enum_class = g_type_class_ref (GIMP_TYPE_ICON_TYPE);
+  enum_class = g_type_class_ref (CLAY_TYPE_ICON_TYPE);
 
-  gimp_config_writer_open (writer, "protocol-version");
-  gimp_config_writer_printf (writer, "%d", GIMP_PROTOCOL_VERSION);
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "protocol-version");
+  clay_config_writer_printf (writer, "%d", CLAY_PROTOCOL_VERSION);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_open (writer, "file-version");
-  gimp_config_writer_printf (writer, "%d", PLUG_IN_RC_FILE_VERSION);
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "file-version");
+  clay_config_writer_printf (writer, "%d", PLUG_IN_RC_FILE_VERSION);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_linefeed (writer);
+  clay_config_writer_linefeed (writer);
 
   for (list = plug_in_defs; list; list = list->next)
     {
-      GimpPlugInDef *plug_in_def = list->data;
+      ClayPlugInDef *plug_in_def = list->data;
 
       if (plug_in_def->procedures)
         {
@@ -1455,18 +1455,18 @@ plug_in_rc_write (GSList  *plug_in_defs,
           gchar  *path;
           gchar  *root_folder;
 
-          path = gimp_file_get_config_path (plug_in_def->file, NULL);
+          path = clay_file_get_config_path (plug_in_def->file, NULL);
           if (! path)
             continue;
 
-          root_folder = gimp_file_get_config_path (plug_in_def->root_folder, NULL);
+          root_folder = clay_file_get_config_path (plug_in_def->root_folder, NULL);
           if (! root_folder)
             continue;
 
-          gimp_config_writer_open (writer, "plug-in-def");
-          gimp_config_writer_string (writer, path);
-          gimp_config_writer_string (writer, root_folder);
-          gimp_config_writer_printf (writer, "%"G_GINT64_FORMAT,
+          clay_config_writer_open (writer, "plug-in-def");
+          clay_config_writer_string (writer, path);
+          clay_config_writer_string (writer, root_folder);
+          clay_config_writer_printf (writer, "%"G_GINT64_FORMAT,
                                      plug_in_def->mtime);
 
           g_free (path);
@@ -1474,8 +1474,8 @@ plug_in_rc_write (GSList  *plug_in_defs,
 
           for (list2 = plug_in_def->procedures; list2; list2 = list2->next)
             {
-              GimpPlugInProcedure *proc      = list2->data;
-              GimpProcedure       *procedure = GIMP_PROCEDURE (proc);
+              ClayPlugInProcedure *proc      = list2->data;
+              ClayProcedure       *procedure = CLAY_PROCEDURE (proc);
               GEnumValue          *enum_value;
               GList               *list3;
               gint                 i;
@@ -1483,156 +1483,156 @@ plug_in_rc_write (GSList  *plug_in_defs,
               if (proc->installed_during_init)
                 continue;
 
-              gimp_config_writer_open (writer, "proc-def");
-              gimp_config_writer_printf (writer, "\"%s\" %d",
-                                         gimp_object_get_name (procedure),
+              clay_config_writer_open (writer, "proc-def");
+              clay_config_writer_printf (writer, "\"%s\" %d",
+                                         clay_object_get_name (procedure),
                                          procedure->proc_type);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, procedure->blurb);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, procedure->help);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, procedure->authors);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, procedure->copyright);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, procedure->date);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, proc->menu_label);
-              gimp_config_writer_linefeed (writer);
-              gimp_config_writer_string (writer, proc->help_uri);
-              gimp_config_writer_linefeed (writer);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, procedure->blurb);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, procedure->help);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, procedure->authors);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, procedure->copyright);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, procedure->date);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, proc->menu_label);
+              clay_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, proc->help_uri);
+              clay_config_writer_linefeed (writer);
 
-              gimp_config_writer_printf (writer, "%d",
+              clay_config_writer_printf (writer, "%d",
                                          g_list_length (proc->menu_paths));
               for (list3 = proc->menu_paths; list3; list3 = list3->next)
                 {
-                  gimp_config_writer_open (writer, "menu-path");
-                  gimp_config_writer_string (writer, list3->data);
-                  gimp_config_writer_close (writer);
+                  clay_config_writer_open (writer, "menu-path");
+                  clay_config_writer_string (writer, list3->data);
+                  clay_config_writer_close (writer);
                 }
 
-              gimp_config_writer_open (writer, "icon");
+              clay_config_writer_open (writer, "icon");
               enum_value = g_enum_get_value (enum_class, proc->icon_type);
-              gimp_config_writer_identifier (writer, enum_value->value_nick);
-              gimp_config_writer_printf (writer, "%d",
+              clay_config_writer_identifier (writer, enum_value->value_nick);
+              clay_config_writer_printf (writer, "%d",
                                          proc->icon_data_length);
 
               switch (proc->icon_type)
                 {
-                case GIMP_ICON_TYPE_ICON_NAME:
-                case GIMP_ICON_TYPE_IMAGE_FILE:
-                  gimp_config_writer_string (writer, (gchar *) proc->icon_data);
+                case CLAY_ICON_TYPE_ICON_NAME:
+                case CLAY_ICON_TYPE_IMAGE_FILE:
+                  clay_config_writer_string (writer, (gchar *) proc->icon_data);
                   break;
 
-                case GIMP_ICON_TYPE_PIXBUF:
-                  gimp_config_writer_data (writer, proc->icon_data_length,
+                case CLAY_ICON_TYPE_PIXBUF:
+                  clay_config_writer_data (writer, proc->icon_data_length,
                                            proc->icon_data);
                   break;
                 }
 
-              gimp_config_writer_close (writer);
+              clay_config_writer_close (writer);
 
               if (proc->file_proc)
                 {
-                  gimp_config_writer_open (writer,
+                  clay_config_writer_open (writer,
                                            proc->image_types ?
                                            "save-proc" : "load-proc");
 
                   if (proc->extensions && *proc->extensions)
                     {
-                      gimp_config_writer_open (writer, "extensions");
-                      gimp_config_writer_string (writer, proc->extensions);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "extensions");
+                      clay_config_writer_string (writer, proc->extensions);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->meta_extensions && *proc->meta_extensions)
                     {
-                      gimp_config_writer_open (writer, "meta-extensions");
-                      gimp_config_writer_string (writer, proc->meta_extensions);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "meta-extensions");
+                      clay_config_writer_string (writer, proc->meta_extensions);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->prefixes && *proc->prefixes)
                     {
-                      gimp_config_writer_open (writer, "prefixes");
-                      gimp_config_writer_string (writer, proc->prefixes);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "prefixes");
+                      clay_config_writer_string (writer, proc->prefixes);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->magics && *proc->magics)
                     {
-                      gimp_config_writer_open (writer, "magics");
-                      gimp_config_writer_string (writer, proc->magics);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "magics");
+                      clay_config_writer_string (writer, proc->magics);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->priority)
                     {
-                      gimp_config_writer_open (writer, "priority");
-                      gimp_config_writer_printf (writer, "%d", proc->priority);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "priority");
+                      clay_config_writer_printf (writer, "%d", proc->priority);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->mime_types && *proc->mime_types)
                     {
-                      gimp_config_writer_open (writer, "mime-types");
-                      gimp_config_writer_string (writer, proc->mime_types);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "mime-types");
+                      clay_config_writer_string (writer, proc->mime_types);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->priority)
                     {
-                      gimp_config_writer_open (writer, "priority");
-                      gimp_config_writer_printf (writer, "%d", proc->priority);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "priority");
+                      clay_config_writer_printf (writer, "%d", proc->priority);
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->handles_remote)
                     {
-                      gimp_config_writer_open (writer, "handles-remote");
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "handles-remote");
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->handles_raw && ! proc->image_types)
                     {
-                      gimp_config_writer_open (writer, "handles-raw");
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "handles-raw");
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->handles_vector)
                     {
-                      gimp_config_writer_open (writer, "handles-vector");
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "handles-vector");
+                      clay_config_writer_close (writer);
                     }
 
                   if (proc->thumb_loader)
                     {
-                      gimp_config_writer_open (writer, "thumb-loader");
-                      gimp_config_writer_string (writer, proc->thumb_loader);
-                      gimp_config_writer_close (writer);
+                      clay_config_writer_open (writer, "thumb-loader");
+                      clay_config_writer_string (writer, proc->thumb_loader);
+                      clay_config_writer_close (writer);
                     }
 
-                  gimp_config_writer_close (writer);
+                  clay_config_writer_close (writer);
                 }
               else if (proc->batch_interpreter)
                 {
-                  gimp_config_writer_open (writer, "batch-interpreter");
-                  gimp_config_writer_string (writer, proc->batch_interpreter_name);
-                  gimp_config_writer_close (writer);
+                  clay_config_writer_open (writer, "batch-interpreter");
+                  clay_config_writer_string (writer, proc->batch_interpreter_name);
+                  clay_config_writer_close (writer);
                 }
 
 
-              gimp_config_writer_linefeed (writer);
+              clay_config_writer_linefeed (writer);
 
-              gimp_config_writer_string (writer, proc->image_types);
-              gimp_config_writer_linefeed (writer);
+              clay_config_writer_string (writer, proc->image_types);
+              clay_config_writer_linefeed (writer);
 
-              gimp_config_writer_printf (writer, "%d",
+              clay_config_writer_printf (writer, "%d",
                                          proc->sensitivity_mask);
-              gimp_config_writer_linefeed (writer);
+              clay_config_writer_linefeed (writer);
 
-              gimp_config_writer_printf (writer, "%d %d",
+              clay_config_writer_printf (writer, "%d %d",
                                          procedure->num_args,
                                          procedure->num_values);
 
@@ -1650,33 +1650,33 @@ plug_in_rc_write (GSList  *plug_in_defs,
                   plug_in_rc_write_proc_arg (writer, pspec);
                 }
 
-              gimp_config_writer_close (writer);
+              clay_config_writer_close (writer);
             }
 
           if (plug_in_def->help_domain_name)
             {
-              gimp_config_writer_open (writer, "help-def");
-              gimp_config_writer_string (writer,
+              clay_config_writer_open (writer, "help-def");
+              clay_config_writer_string (writer,
                                          plug_in_def->help_domain_name);
 
               if (plug_in_def->help_domain_uri)
-                gimp_config_writer_string (writer,
+                clay_config_writer_string (writer,
                                            plug_in_def->help_domain_uri);
 
-             gimp_config_writer_close (writer);
+             clay_config_writer_close (writer);
             }
 
           if (plug_in_def->has_init)
             {
-              gimp_config_writer_open (writer, "has-init");
-              gimp_config_writer_close (writer);
+              clay_config_writer_open (writer, "has-init");
+              clay_config_writer_close (writer);
             }
 
-          gimp_config_writer_close (writer);
+          clay_config_writer_close (writer);
         }
     }
 
   g_type_class_unref (enum_class);
 
-  return gimp_config_writer_finish (writer, "end of pluginrc", error);
+  return clay_config_writer_finish (writer, "end of pluginrc", error);
 }

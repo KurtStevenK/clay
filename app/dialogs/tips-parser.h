@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * tips-parser.h - Parse the gimp-tips.xml file.
+ * tips-parser.h - Parse the clay-tips.xml file.
  * Copyright (C) 2002, 2008  Sven Neumann <sven@gimp.org>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,20 +21,20 @@
 #pragma once
 
 
-typedef struct _GimpTip GimpTip;
+typedef struct _ClayTip ClayTip;
 
-struct _GimpTip
+struct _ClayTip
 {
   gchar *text;
   gchar *help_id;
 };
 
 
-GimpTip * gimp_tip_new        (const gchar  *title,
+ClayTip * clay_tip_new        (const gchar  *title,
                                const gchar  *format,
                                ...) G_GNUC_PRINTF(2, 3);
-void      gimp_tip_free       (GimpTip      *tip);
+void      clay_tip_free       (ClayTip      *tip);
 
-GList   * gimp_tips_from_file (GFile        *file,
+GList   * clay_tips_from_file (GFile        *file,
                                GError      **error);
-void      gimp_tips_free      (GList        *tips);
+void      clay_tips_free      (GList        *tips);

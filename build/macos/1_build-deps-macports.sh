@@ -66,14 +66,14 @@ printf "\e[0Ksection_end:`date +%s`:deps_install\r\e[0K\n"
 if find "$OPT_PREFIX/lib" -maxdepth 1 -name "libX11*.dylib" | grep -q .; then printf "\033[33m(WARNING)\033[0m: X11 is installed on macOS. Please remove the wrong dependency from all-deps-uni.txt or report to $( [ -f "$OPT_PREFIX/bin/port" ] && echo MacPorts || echo Homebrew )\n"; fi
 
 
-# Prepare env (only GIMP_PREFIX is needed for flatpak)
-GIMP_DIR="$PWD"
-cd ${GIMP_DIR}${PARENT_DIR}
+# Prepare env (only CLAY_PREFIX is needed for flatpak)
+CLAY_DIR="$PWD"
+cd ${CLAY_DIR}${PARENT_DIR}
 
-if [ -z "$GIMP_PREFIX" ]; then
-  export GIMP_PREFIX="$PWD/_install"
+if [ -z "$CLAY_PREFIX" ]; then
+  export CLAY_PREFIX="$PWD/_install"
 fi
-eval "$(sed -n -e 's/- //' -e '/macos_environ\[/,/macos_environ/p' $GIMP_DIR/.gitlab-ci.yml)"
+eval "$(sed -n -e 's/- //' -e '/macos_environ\[/,/macos_environ/p' $CLAY_DIR/.gitlab-ci.yml)"
 
 
 # Build some deps (including babl and GEGL)
@@ -81,9 +81,9 @@ self_build()
 {
   dep=$(basename "$1" .git)
   printf "\e[0Ksection_start:`date +%s`:${dep}_build[collapsed=true]\r\e[0KBuilding $dep\n"
-  if echo "$GIMP_CI_MACOS" | grep -q '[1-9]' && [ -z "$CI_COMMIT_TAG" ] && [ "$CI_PIPELINE_SOURCE" != 'schedule' ]; then
-    #needed to avoid broken GIMP revisions with untagged babl/gegl
-    printf '\033[31m(ERROR)\033[0m revision is set but no GIMP tag found. Please, tag the revision.\n'
+  if echo "$CLAY_CI_MACOS" | grep -q '[1-9]' && [ -z "$CI_COMMIT_TAG" ] && [ "$CI_PIPELINE_SOURCE" != 'schedule' ]; then
+    #needed to avoid broken Clay revisions with untagged babl/gegl
+    printf '\033[31m(ERROR)\033[0m revision is set but no Clay tag found. Please, tag the revision.\n'
     exit 1
   fi
   if [ ! -d "$dep" ]; then
@@ -100,13 +100,13 @@ self_build()
   cd $dep
   if echo "$2" | grep -q '.patch' || echo "$3" | grep -q '.patch'; then
     for patch in $(if echo "$2" | grep -q '.patch'; then echo "$2"; else echo "$3"; fi); do
-      git apply -v "$GIMP_DIR/$patch"
+      git apply -v "$CLAY_DIR/$patch"
     done
   fi
 
   # Configure and build
   if [ ! -f "_build-$(uname -m)/build.ninja" ]; then
-    meson setup _build-$(uname -m) -Dprefix="$GIMP_PREFIX" $PKGCONF_RELOCATABLE_OPTION $WARN_AS_ERROR_ON_CI \
+    meson setup _build-$(uname -m) -Dprefix="$CLAY_PREFIX" $PKGCONF_RELOCATABLE_OPTION $WARN_AS_ERROR_ON_CI \
                 -Dbuildtype=debugoptimized \
                 -Dc_args="-I${OPT_PREFIX}/include" -Dcpp_args="-I${OPT_PREFIX}/include" -Dc_link_args="-L${OPT_PREFIX}/lib" -Dcpp_link_args="-L${OPT_PREFIX}/lib" \
                 $(if [ "${2#-}" != "$2" ]; then echo "$2"; elif [ "${3#-}" != "$3" ]; then echo "$3"; else echo "$4"; fi)
@@ -121,4 +121,4 @@ self_build()
 self_build https://gitlab.gnome.org/GNOME/babl
 self_build https://gitlab.gnome.org/GNOME/gegl
 
-cd $GIMP_DIR
+cd $CLAY_DIR

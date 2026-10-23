@@ -23,42 +23,42 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimprc.h"
+#include "config/clayrc.h"
 
-#include "core/gimp.h"
-#include "core/gimpimagefile.h"
+#include "core/clay.h"
+#include "core/clayimagefile.h"
 
 #include "file/file-open.h"
 
-#include "widgets/gimpcontainerlistview.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpprefsbox.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claycontainerlistview.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayprefsbox.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "menus/menus.h"
 
 #include "gui/icon-themes.h"
 
 #include "file-open-dialog.h"
-#include "gimp-version.h"
+#include "clay-version.h"
 #include "preferences-dialog-utils.h"
 #include "welcome-dialog.h"
 #include "welcome-dialog-data.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GtkWidget * welcome_dialog_new                (Gimp          *gimp,
-                                                      GimpConfig    *config,
+static GtkWidget * welcome_dialog_new                (Clay          *clay,
+                                                      ClayConfig    *config,
                                                       gboolean       show_welcome_page);
 static void   welcome_dialog_response                (GtkWidget     *widget,
                                                       gint           response_id,
@@ -76,21 +76,21 @@ static void   welcome_add_link                       (GtkGrid        *grid,
 static void   welcome_size_allocate                  (GtkWidget      *welcome_dialog,
                                                       GtkAllocation  *allocation,
                                                       gpointer        user_data);
-static void   welcome_dialog_create_welcome_page     (Gimp           *gimp,
+static void   welcome_dialog_create_welcome_page     (Clay           *clay,
                                                       GtkWidget      *welcome_dialog,
                                                       GtkWidget      *main_vbox);
-static void   welcome_dialog_create_personalize_page (Gimp           *gimp,
-                                                      GimpConfig     *config,
+static void   welcome_dialog_create_personalize_page (Clay           *clay,
+                                                      ClayConfig     *config,
                                                       GtkWidget      *welcome_dialog,
                                                       GtkWidget      *main_vbox);
-static void   welcome_dialog_create_contribute_page  (Gimp           *gimp,
+static void   welcome_dialog_create_contribute_page  (Clay           *clay,
                                                       GtkWidget      *welcome_dialog,
                                                       GtkWidget      *main_vbox);
-static void   welcome_dialog_create_creation_page    (Gimp           *gimp,
-                                                      GimpConfig     *config,
+static void   welcome_dialog_create_creation_page    (Clay           *clay,
+                                                      ClayConfig     *config,
                                                       GtkWidget      *welcome_dialog,
                                                       GtkWidget      *main_vbox);
-static void   welcome_dialog_create_release_page     (Gimp           *gimp,
+static void   welcome_dialog_create_release_page     (Clay           *clay,
                                                       GtkWidget      *welcome_dialog,
                                                       GtkWidget      *main_vbox);
 
@@ -103,11 +103,11 @@ static void   welcome_dialog_new_dialog_response     (GtkWidget      *dialog,
                                                       GtkWidget      *welcome_dialog);
 static void   welcome_dialog_open_dialog_close       (GtkWidget      *dialog,
                                                       GtkWidget      *welcome_dialog);
-static void   welcome_open_activated_callback        (GimpContainerView *view,
-                                                      GimpViewable   *viewable,
+static void   welcome_open_activated_callback        (ClayContainerView *view,
+                                                      ClayViewable   *viewable,
                                                       GtkWidget      *welcome_dialog);
 static void   welcome_open_images_callback           (GtkWidget      *button,
-                                                      GimpContainerView *view);
+                                                      ClayContainerView *view);
 static void   welcome_dialog_new_image_accelerator   (GtkAccelGroup  *accel_group,
                                                       GObject        *accelerator_widget,
                                                       guint           keyval,
@@ -131,25 +131,25 @@ static gboolean welcome_scrollable_resize            (gpointer        data);
 static GtkWidget *welcome_dialog;
 
 GtkWidget *
-welcome_dialog_create (Gimp     *gimp,
+welcome_dialog_create (Clay     *clay,
                        gboolean  show_welcome_page)
 {
-  GimpConfig *config;
-  GimpConfig *config_copy;
-  GimpConfig *config_orig;
+  ClayConfig *config;
+  ClayConfig *config_copy;
+  ClayConfig *config_orig;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
-  g_return_val_if_fail (GIMP_IS_CONFIG (gimp->edit_config), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
+  g_return_val_if_fail (CLAY_IS_CONFIG (clay->edit_config), NULL);
 
   if (welcome_dialog)
     return welcome_dialog;
 
   /*  turn off autosaving while the prefs dialog is open  */
-  gimp_rc_set_autosave (GIMP_RC (gimp->edit_config), FALSE);
+  clay_rc_set_autosave (CLAY_RC (clay->edit_config), FALSE);
 
-  config       = GIMP_CONFIG (gimp->edit_config);
-  config_copy  = gimp_config_duplicate (config);
-  config_orig  = gimp_config_duplicate (config);
+  config       = CLAY_CONFIG (clay->edit_config);
+  config_copy  = clay_config_duplicate (config);
+  config_orig  = clay_config_duplicate (config);
 
   g_signal_connect_object (config, "notify",
                            G_CALLBACK (prefs_config_notify),
@@ -159,9 +159,9 @@ welcome_dialog_create (Gimp     *gimp,
                            config, 0);
 
   g_set_weak_pointer (&welcome_dialog,
-                      welcome_dialog_new (gimp, config_copy, show_welcome_page));
+                      welcome_dialog_new (clay, config_copy, show_welcome_page));
 
-  g_object_set_data (G_OBJECT (welcome_dialog), "gimp", gimp);
+  g_object_set_data (G_OBJECT (welcome_dialog), "clay", clay);
 
   g_object_set_data_full (G_OBJECT (welcome_dialog), "config-copy", config_copy,
                           (GDestroyNotify) g_object_unref);
@@ -169,14 +169,14 @@ welcome_dialog_create (Gimp     *gimp,
                           (GDestroyNotify) g_object_unref);
 
   gtk_style_context_add_class (gtk_widget_get_style_context (welcome_dialog),
-                               "gimp-welcome-dialog");
+                               "clay-welcome-dialog");
 
   return welcome_dialog;
 }
 
 static GtkWidget *
-welcome_dialog_new (Gimp       *gimp,
-                    GimpConfig *config,
+welcome_dialog_new (Clay       *clay,
+                    ClayConfig *config,
                     gboolean    show_welcome_page)
 {
   GtkWidget      *dialog;
@@ -197,13 +197,13 @@ welcome_dialog_new (Gimp       *gimp,
   gchar         **accels;
 
   /* Translators: the %s string will be the version, e.g. "3.0". */
-  title = g_strdup_printf (_("Welcome to Clay %s"), GIMP_VERSION);
-  windows = gimp_get_image_windows (gimp);
-  dialog = gimp_dialog_new (title,
-                            "gimp-welcome-dialog",
+  title = g_strdup_printf (_("Welcome to Clay %s"), CLAY_VERSION);
+  windows = clay_get_image_windows (clay);
+  dialog = clay_dialog_new (title,
+                            "clay-welcome-dialog",
                             windows ?  windows->data : NULL,
-                            0, gimp_standard_help_func,
-                            GIMP_HELP_WELCOME_DIALOG,
+                            0, clay_standard_help_func,
+                            CLAY_HELP_WELCOME_DIALOG,
                             _("_Close"), GTK_RESPONSE_CLOSE,
                             NULL);
   g_list_free (windows);
@@ -221,10 +221,10 @@ welcome_dialog_new (Gimp       *gimp,
   /* Page Switcher */
   /*****************/
   switcher  = gtk_stack_switcher_new ();
-  prefs_box = gimp_prefs_box_new ();
-  stack     = gimp_prefs_box_get_stack (GIMP_PREFS_BOX (prefs_box));
+  prefs_box = clay_prefs_box_new ();
+  stack     = clay_prefs_box_get_stack (CLAY_PREFS_BOX (prefs_box));
 
-  gimp_prefs_box_set_header_visible (GIMP_PREFS_BOX (prefs_box), FALSE);
+  clay_prefs_box_set_header_visible (CLAY_PREFS_BOX (prefs_box), FALSE);
   gtk_stack_switcher_set_stack (GTK_STACK_SWITCHER (switcher),
                                 GTK_STACK (stack));
   gtk_container_set_border_width (GTK_CONTAINER (switcher), 2);
@@ -238,17 +238,17 @@ welcome_dialog_new (Gimp       *gimp,
                       prefs_box, TRUE, TRUE, 0);
   gtk_widget_set_visible (prefs_box, TRUE);
 
-  tree_view = gimp_prefs_box_get_tree_view (GIMP_PREFS_BOX (prefs_box));
+  tree_view = clay_prefs_box_get_tree_view (CLAY_PREFS_BOX (prefs_box));
   /* Hide the side panel selection since we're using GtkStackSwitcher */
   gtk_widget_set_visible (gtk_widget_get_parent (tree_view), FALSE);
 
   g_object_set_data (G_OBJECT (dialog), "prefs-box", prefs_box);
 
-  main_vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                       "gimp-wilber",
+  main_vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                       "clay-wilber",
                                        _("Welcome"),
                                        _("Welcome"),
-                                       "gimp-welcome",
+                                       "clay-welcome",
                                        NULL,
                                        &top_iter);
   gtk_widget_set_margin_top (main_vbox, 0);
@@ -256,61 +256,61 @@ welcome_dialog_new (Gimp       *gimp,
   gtk_widget_set_margin_start (main_vbox, 0);
   gtk_widget_set_margin_end (main_vbox, 0);
 
-  welcome_dialog_create_welcome_page (gimp, dialog, main_vbox);
+  welcome_dialog_create_welcome_page (clay, dialog, main_vbox);
   gtk_widget_set_visible (main_vbox, TRUE);
 
-  main_vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                       "gimp-wilber",
+  main_vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                       "clay-wilber",
                                        _("Personalize"),
                                        _("Personalize"),
-                                       "gimp-welcome-personalize",
+                                       "clay-welcome-personalize",
                                        NULL,
                                        &top_iter);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
 
-  welcome_dialog_create_personalize_page (gimp, config, dialog, main_vbox);
+  welcome_dialog_create_personalize_page (clay, config, dialog, main_vbox);
   gtk_widget_set_visible (main_vbox, TRUE);
 
-  main_vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                       "gimp-wilber",
+  main_vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                       "clay-wilber",
                                        _("Contribute"),
                                        _("Contribute"),
-                                       "gimp-welcome-contribute",
+                                       "clay-welcome-contribute",
                                        NULL,
                                        &top_iter);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
 
-  welcome_dialog_create_contribute_page (gimp, dialog, main_vbox);
+  welcome_dialog_create_contribute_page (clay, dialog, main_vbox);
   gtk_widget_set_visible (main_vbox, TRUE);
 
-  main_vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                       "gimp-wilber",
+  main_vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                       "clay-wilber",
                                        _("Create"),
                                        _("Create"),
-                                       "gimp-welcome-create",
+                                       "clay-welcome-create",
                                        NULL,
                                        &top_iter);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
 
-  welcome_dialog_create_creation_page (gimp, config, dialog, main_vbox);
+  welcome_dialog_create_creation_page (clay, config, dialog, main_vbox);
   gtk_widget_set_visible (main_vbox, TRUE);
 
   /* If dialog is set to always show on load, switch to the Create page */
   if (! show_welcome_page)
-    gtk_stack_set_visible_child_name (GTK_STACK (stack), "gimp-welcome-create");
+    gtk_stack_set_visible_child_name (GTK_STACK (stack), "clay-welcome-create");
 
-  if (gimp_welcome_dialog_n_items > 0)
+  if (clay_welcome_dialog_n_items > 0)
     {
-      main_vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                           "gimp-wilber",
+      main_vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                           "clay-wilber",
                                            _("Release Notes"),
                                            _("Release Notes"),
-                                           "gimp-welcome-release_notes",
+                                           "clay-welcome-release_notes",
                                            NULL,
                                            &top_iter);
       gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
 
-      welcome_dialog_create_release_page (gimp, dialog, main_vbox);
+      welcome_dialog_create_release_page (clay, dialog, main_vbox);
       gtk_widget_set_visible (main_vbox, TRUE);
     }
 
@@ -324,7 +324,7 @@ welcome_dialog_new (Gimp       *gimp,
   accel_group = gtk_accel_group_new ();
   gtk_window_add_accel_group (GTK_WINDOW (dialog), accel_group);
 
-  accels = gtk_application_get_accels_for_action (GTK_APPLICATION (gimp->app),
+  accels = gtk_application_get_accels_for_action (GTK_APPLICATION (clay->app),
                                                   "app.image-new");
   if (accels && accels[0])
     {
@@ -336,7 +336,7 @@ welcome_dialog_new (Gimp       *gimp,
       g_strfreev (accels);
     }
 
-  accels = gtk_application_get_accels_for_action (GTK_APPLICATION (gimp->app),
+  accels = gtk_application_get_accels_for_action (GTK_APPLICATION (clay->app),
                                                   "app.file-open");
   if (accels && accels[0])
     {
@@ -353,7 +353,7 @@ welcome_dialog_new (Gimp       *gimp,
       gchar accel_str[24];
 
       g_snprintf (accel_str, sizeof (accel_str), "app.file-open-recent-%02u", i + 1);
-      accels = gtk_application_get_accels_for_action (GTK_APPLICATION (gimp->app),
+      accels = gtk_application_get_accels_for_action (GTK_APPLICATION (clay->app),
                                                       accel_str);
       if (accels && accels[0])
         {
@@ -374,7 +374,7 @@ welcome_dialog_response (GtkWidget *widget,
                          gint       response_id,
                          GtkWidget *dialog)
 {
-  Gimp    *gimp = g_object_get_data (G_OBJECT (dialog), "gimp");
+  Clay    *clay = g_object_get_data (G_OBJECT (dialog), "clay");
   GObject *config_copy;
   GList   *restart_diff;
   GList   *confirm_diff;
@@ -387,11 +387,11 @@ welcome_dialog_response (GtkWidget *widget,
 
   gtk_widget_set_sensitive (GTK_WIDGET (dialog), FALSE);
 
-  confirm_diff = gimp_config_diff (G_OBJECT (gimp->edit_config),
+  confirm_diff = clay_config_diff (G_OBJECT (clay->edit_config),
                                    config_copy,
-                                   GIMP_CONFIG_PARAM_CONFIRM);
+                                   CLAY_CONFIG_PARAM_CONFIRM);
 
-  g_object_freeze_notify (G_OBJECT (gimp->edit_config));
+  g_object_freeze_notify (G_OBJECT (clay->edit_config));
 
   for (list = confirm_diff; list; list = g_list_next (list))
     {
@@ -402,24 +402,24 @@ welcome_dialog_response (GtkWidget *widget,
 
       g_object_get_property (config_copy,
                              param_spec->name, &value);
-      g_object_set_property (G_OBJECT (gimp->edit_config),
+      g_object_set_property (G_OBJECT (clay->edit_config),
                              param_spec->name, &value);
 
       g_value_unset (&value);
     }
 
-  g_object_thaw_notify (G_OBJECT (gimp->edit_config));
+  g_object_thaw_notify (G_OBJECT (clay->edit_config));
 
   g_list_free (confirm_diff);
 
-  gimp_rc_save (GIMP_RC (gimp->edit_config));
+  clay_rc_save (CLAY_RC (clay->edit_config));
 
   /*  spit out a solely informational warning about changed values
    *  which need restart
    */
-  restart_diff = gimp_config_diff (G_OBJECT (gimp->edit_config),
-                                   G_OBJECT (gimp->config),
-                                   GIMP_CONFIG_PARAM_RESTART);
+  restart_diff = clay_config_diff (G_OBJECT (clay->edit_config),
+                                   G_OBJECT (clay->config),
+                                   CLAY_CONFIG_PARAM_RESTART);
 
   if (restart_diff)
     {
@@ -450,7 +450,7 @@ welcome_dialog_response (GtkWidget *widget,
 }
 
 static void
-welcome_dialog_create_welcome_page (Gimp      *gimp,
+welcome_dialog_create_welcome_page (Clay      *clay,
                                     GtkWidget *welcome_dialog,
                                     GtkWidget *main_vbox)
 {
@@ -466,7 +466,7 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
   /* Welcome page */
   /****************/
 
-  image = gtk_image_new_from_icon_name ("gimp-wilber",
+  image = gtk_image_new_from_icon_name ("clay-wilber",
                                         GTK_ICON_SIZE_DIALOG);
   gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
   gtk_box_pack_start (GTK_BOX (main_vbox), image, TRUE, TRUE, 0);
@@ -488,7 +488,7 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
   gtk_widget_set_visible (grid, TRUE);
 
   /* Translators: the %s string will be the version, e.g. "3.0". */
-  tmp = g_strdup_printf (_("You installed Clay %s"), GIMP_VERSION);
+  tmp = g_strdup_printf (_("You installed Clay %s"), CLAY_VERSION);
   widget = gtk_label_new (NULL);
   /* XXX For GTK4, we may just replace with gtk_widget_add_css_class() AFAICS. */
   gtk_style_context_add_class (gtk_widget_get_style_context (widget), "title-3");
@@ -587,8 +587,8 @@ welcome_dialog_create_welcome_page (Gimp      *gimp,
 }
 
 static void
-welcome_dialog_create_personalize_page (Gimp       *gimp,
-                                        GimpConfig *config,
+welcome_dialog_create_personalize_page (Clay       *clay,
+                                        ClayConfig *config,
                                         GtkWidget  *welcome_dialog,
                                         GtkWidget  *main_vbox)
 {
@@ -635,7 +635,7 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
 
   /* Icon Theme */
   store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
-  themes = icon_themes_list_themes (gimp, &n_themes);
+  themes = icon_themes_list_themes (clay, &n_themes);
   for (gint i = 0; i < n_themes; i++)
     gtk_list_store_insert_with_values (store, NULL,
                                        -1,
@@ -644,7 +644,7 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
                                        -1);
   g_strfreev (themes);
 
-  widget = gimp_prop_string_combo_box_new (object, "icon-theme",
+  widget = clay_prop_string_combo_box_new (object, "icon-theme",
                                            GTK_TREE_MODEL (store), 0, 1);
   gtk_widget_set_visible (widget, TRUE);
 
@@ -682,10 +682,10 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
   gtk_scale_add_mark (GTK_SCALE (scale), 3.0, GTK_POS_BOTTOM,
                       _("Huge"));
   gtk_range_set_value (GTK_RANGE (scale),
-                       (gdouble) GIMP_GUI_CONFIG (object)->custom_icon_size);
+                       (gdouble) CLAY_GUI_CONFIG (object)->custom_icon_size);
   g_signal_connect (G_OBJECT (scale), "value-changed",
                     G_CALLBACK (prefs_icon_size_value_changed),
-                    GIMP_GUI_CONFIG (object));
+                    CLAY_GUI_CONFIG (object));
   g_signal_connect (G_OBJECT (object), "notify::custom-icon-size",
                     G_CALLBACK (prefs_gui_config_notify_icon_size),
                     scale);
@@ -697,7 +697,7 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
                           G_BINDING_SYNC_CREATE);
 
   vbox = prefs_frame_new (_("Font Scaling"), GTK_CONTAINER (main_vbox), FALSE);
-  gimp_help_set_help_data (vbox,
+  clay_help_set_help_data (vbox,
                            _("Font scaling will not work with themes using absolute sizes."),
                            NULL);
   scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL,
@@ -712,10 +712,10 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
   gtk_scale_add_mark (GTK_SCALE (scale), 200.0, GTK_POS_BOTTOM,
                       _("200%"));
   gtk_range_set_value (GTK_RANGE (scale),
-                       GIMP_GUI_CONFIG (object)->font_relative_size * 100.0);
+                       CLAY_GUI_CONFIG (object)->font_relative_size * 100.0);
   g_signal_connect (G_OBJECT (scale), "value-changed",
                     G_CALLBACK (prefs_font_size_value_changed),
-                    GIMP_GUI_CONFIG (object));
+                    CLAY_GUI_CONFIG (object));
   g_signal_connect (G_OBJECT (object), "notify::font-relative-size",
                     G_CALLBACK (prefs_gui_config_notify_font_size),
                     scale);
@@ -737,7 +737,7 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
 #endif
 
 #ifdef CHECK_UPDATE
-  if (gimp_version_check_update ())
+  if (clay_version_check_update ())
     {
       prefs_switch_add (object, "check-updates",
                         _("Enable check for updates (requires internet)"),
@@ -753,8 +753,8 @@ welcome_dialog_create_personalize_page (Gimp       *gimp,
 }
 
 static void
-welcome_dialog_create_creation_page (Gimp       *gimp,
-                                     GimpConfig *config,
+welcome_dialog_create_creation_page (Clay       *clay,
+                                     ClayConfig *config,
                                      GtkWidget  *welcome_dialog,
                                      GtkWidget  *main_vbox)
 {
@@ -796,10 +796,10 @@ welcome_dialog_create_creation_page (Gimp       *gimp,
   vbox = prefs_frame_new (_("Recent Images"), GTK_CONTAINER (main_vbox),
                           TRUE);
 
-  view = gimp_container_list_view_new (gimp->documents,
-                                       gimp_get_user_context (gimp),
+  view = clay_container_list_view_new (clay->documents,
+                                       clay_get_user_context (clay),
                                        32, 0);
-  gimp_container_view_set_selection_mode (GIMP_CONTAINER_VIEW (view),
+  clay_container_view_set_selection_mode (CLAY_CONTAINER_VIEW (view),
                                           GTK_SELECTION_MULTIPLE);
   gtk_box_pack_start (GTK_BOX (vbox), view, TRUE, TRUE, 0);
   gtk_widget_set_visible (view, TRUE);
@@ -827,7 +827,7 @@ welcome_dialog_create_creation_page (Gimp       *gimp,
 }
 
 static void
-welcome_dialog_create_contribute_page (Gimp       *gimp,
+welcome_dialog_create_contribute_page (Clay       *clay,
                                        GtkWidget  *welcome_dialog,
                                        GtkWidget  *main_vbox)
 {
@@ -916,7 +916,7 @@ welcome_dialog_create_contribute_page (Gimp       *gimp,
 }
 
 static void
-welcome_dialog_create_release_page (Gimp      *gimp,
+welcome_dialog_create_release_page (Clay      *clay,
                                     GtkWidget *welcome_dialog,
                                     GtkWidget *main_vbox)
 {
@@ -933,7 +933,7 @@ welcome_dialog_create_release_page (Gimp      *gimp,
   /*****************/
   /* Release Notes */
   /*****************/
-  if (gimp_welcome_dialog_n_items > 0)
+  if (clay_welcome_dialog_n_items > 0)
     {
       gint n_demos = 0;
 
@@ -944,7 +944,7 @@ welcome_dialog_create_release_page (Gimp      *gimp,
       gtk_widget_set_visible (hbox, TRUE);
 
       /* Translators: the %s string will be the version, e.g. "3.0". */
-      tmp = g_strdup_printf (_("Clay %s Release Notes"), GIMP_VERSION);
+      tmp = g_strdup_printf (_("Clay %s Release Notes"), CLAY_VERSION);
       markup = g_strdup_printf ("<b><big>%s</big></b>", tmp);
       g_free (tmp);
       widget = gtk_label_new (NULL);
@@ -956,7 +956,7 @@ welcome_dialog_create_release_page (Gimp      *gimp,
       gtk_box_pack_start (GTK_BOX (hbox), widget, TRUE, TRUE, 0);
       gtk_widget_set_visible (widget, TRUE);
 
-      image = gtk_image_new_from_icon_name ("gimp-user-manual",
+      image = gtk_image_new_from_icon_name ("clay-user-manual",
                                             GTK_ICON_SIZE_DIALOG);
       gtk_widget_set_valign (image, GTK_ALIGN_START);
       gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
@@ -964,17 +964,17 @@ welcome_dialog_create_release_page (Gimp      *gimp,
 
       /* Release note introduction. */
 
-      if (gimp_welcome_dialog_intro_n_paragraphs)
+      if (clay_welcome_dialog_intro_n_paragraphs)
         {
           GString *introduction = NULL;
 
-          for (gint i = 0; i < gimp_welcome_dialog_intro_n_paragraphs; i++)
+          for (gint i = 0; i < clay_welcome_dialog_intro_n_paragraphs; i++)
             {
               if (i == 0)
-                introduction = g_string_new (_(gimp_welcome_dialog_intro[i]));
+                introduction = g_string_new (_(clay_welcome_dialog_intro[i]));
               else
                 g_string_append_printf (introduction, "\n%s",
-                                        _(gimp_welcome_dialog_intro[i]));
+                                        _(clay_welcome_dialog_intro[i]));
             }
           widget = gtk_label_new (NULL);
           gtk_label_set_markup (GTK_LABEL (widget), introduction->str);
@@ -998,17 +998,17 @@ welcome_dialog_create_release_page (Gimp      *gimp,
       gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET (listbox)),
                                    "view");
 
-      for (gint i = 0; i < gimp_welcome_dialog_n_items; i++)
+      for (gint i = 0; i < clay_welcome_dialog_n_items; i++)
         {
           GtkWidget *row;
           gchar     *markup;
           gchar     *text;
 
-          text = g_markup_escape_text (_((gchar *) gimp_welcome_dialog_items[i]), -1);
+          text = g_markup_escape_text (_((gchar *) clay_welcome_dialog_items[i]), -1);
 
           /* Add a bold dot for pretty listing. */
-          if (i < gimp_welcome_dialog_n_items &&
-              gimp_welcome_dialog_demos[i] != NULL)
+          if (i < clay_welcome_dialog_n_items &&
+              clay_welcome_dialog_demos[i] != NULL)
             {
               markup = g_strdup_printf ("<span weight='ultrabold'>\xe2\x96\xb6</span>  %s", text);
               n_demos++;
@@ -1040,7 +1040,7 @@ welcome_dialog_create_release_page (Gimp      *gimp,
 
       g_signal_connect (listbox, "row-activated",
                         G_CALLBACK (welcome_dialog_release_item_activated),
-                        gimp);
+                        clay);
       gtk_widget_set_visible (listbox, TRUE);
 
       if (n_demos > 0)
@@ -1078,21 +1078,21 @@ welcome_dialog_create_release_page (Gimp      *gimp,
       gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
       gtk_widget_set_visible (hbox, TRUE);
 
-      if (GIMP_MINOR_VERSION % 2 == 0)
+      if (CLAY_MINOR_VERSION % 2 == 0)
         {
-          if (GIMP_MICRO_VERSION == 0)
-#ifdef GIMP_RC_VERSION
+          if (CLAY_MICRO_VERSION == 0)
+#ifdef CLAY_RC_VERSION
             release_link = g_strdup_printf ("https://www.gimp.org/release/%d.%d.0-RC%d/",
-                                            GIMP_MAJOR_VERSION, GIMP_MINOR_VERSION,
-                                            GIMP_RC_VERSION);
+                                            CLAY_MAJOR_VERSION, CLAY_MINOR_VERSION,
+                                            CLAY_RC_VERSION);
 #else
-            release_link = g_strdup_printf ("https://www.gimp.org/release-notes/gimp-%d.%d.html",
-                                            GIMP_MAJOR_VERSION, GIMP_MINOR_VERSION);
+            release_link = g_strdup_printf ("https://www.gimp.org/release-notes/clay-%d.%d.html",
+                                            CLAY_MAJOR_VERSION, CLAY_MINOR_VERSION);
 #endif
           else
             release_link = g_strdup_printf ("https://www.gimp.org/release/%d.%d.%d/",
-                                            GIMP_MAJOR_VERSION, GIMP_MINOR_VERSION,
-                                            GIMP_MICRO_VERSION);
+                                            CLAY_MAJOR_VERSION, CLAY_MINOR_VERSION,
+                                            CLAY_MICRO_VERSION);
         }
       else
         {
@@ -1111,20 +1111,20 @@ static void
 welcome_dialog_new_image_dialog (GtkWidget *button,
                                  GtkWidget *welcome_dialog)
 {
-  GimpUIManager *manager;
-  Gimp          *gimp;
+  ClayUIManager *manager;
+  Clay          *clay;
   GtkWidget     *dialog;
 
-  gimp    = g_object_get_data (G_OBJECT (welcome_dialog), "gimp");
-  manager = menus_get_image_manager_singleton (gimp);
+  clay    = g_object_get_data (G_OBJECT (welcome_dialog), "clay");
+  manager = menus_get_image_manager_singleton (clay);
 
   /* XXX: to avoid code duplication and divergence, we just call the "image-new"
    * action, then we check that the new dialog singleton exists in order to
    * handle its responses.
    */
-  if (gimp_ui_manager_activate_action (manager, "image", "image-new") &&
-      (dialog = gimp_dialog_factory_find_widget (gimp_dialog_factory_get_singleton (),
-                                                 "gimp-image-new-dialog")))
+  if (clay_ui_manager_activate_action (manager, "image", "image-new") &&
+      (dialog = clay_dialog_factory_find_widget (clay_dialog_factory_get_singleton (),
+                                                 "clay-image-new-dialog")))
     {
       gtk_widget_set_visible (welcome_dialog, FALSE);
       g_signal_connect (dialog, "response",
@@ -1140,13 +1140,13 @@ static void
 welcome_dialog_open_image_dialog (GtkWidget *button,
                                   GtkWidget *welcome_dialog)
 {
-  Gimp          *gimp    = g_object_get_data (G_OBJECT (welcome_dialog), "gimp");
-  GtkWidget     *dialog  = file_open_dialog_new (gimp);
-  GimpUIManager *manager = menus_get_image_manager_singleton (gimp);
+  Clay          *clay    = g_object_get_data (G_OBJECT (welcome_dialog), "clay");
+  GtkWidget     *dialog  = file_open_dialog_new (clay);
+  ClayUIManager *manager = menus_get_image_manager_singleton (clay);
 
-  if (gimp_ui_manager_activate_action (manager, "file", "file-open") &&
-      (dialog = gimp_dialog_factory_find_widget (gimp_dialog_factory_get_singleton (),
-                                                 "gimp-file-open-dialog")))
+  if (clay_ui_manager_activate_action (manager, "file", "file-open") &&
+      (dialog = clay_dialog_factory_find_widget (clay_dialog_factory_get_singleton (),
+                                                 "clay-file-open-dialog")))
     {
       gtk_widget_set_visible (welcome_dialog, FALSE);
 
@@ -1207,8 +1207,8 @@ welcome_dialog_open_dialog_close (GtkWidget *dialog,
 }
 
 static void
-welcome_open_activated_callback (GimpContainerView *view,
-                                 GimpViewable      *viewable,
+welcome_open_activated_callback (ClayContainerView *view,
+                                 ClayViewable      *viewable,
                                  GtkWidget         *welcome_dialog)
 {
   welcome_open_images_callback (NULL, view);
@@ -1216,9 +1216,9 @@ welcome_open_activated_callback (GimpContainerView *view,
 
 static void
 welcome_open_images_callback (GtkWidget         *button,
-                              GimpContainerView *view)
+                              ClayContainerView *view)
 {
-  Gimp      *gimp;
+  Clay      *clay;
   GList     *images;
   GtkWidget *widget;
   gboolean   opened = FALSE;
@@ -1226,11 +1226,11 @@ welcome_open_images_callback (GtkWidget         *button,
   if (! welcome_dialog)
     return;
 
-  gimp = g_object_get_data (G_OBJECT (welcome_dialog), "gimp");
+  clay = g_object_get_data (G_OBJECT (welcome_dialog), "clay");
 
   widget = GTK_WIDGET (view);
 
-  if (gimp_container_view_get_selected (view, &images) > 0)
+  if (clay_container_view_get_selected (view, &images) > 0)
     {
       GList *iter;
 
@@ -1239,23 +1239,23 @@ welcome_open_images_callback (GtkWidget         *button,
       for (iter = images; iter; iter = g_list_next (iter))
         {
           GFile              *file;
-          GimpImage          *image;
-          GimpPDBStatusType   status;
+          ClayImage          *image;
+          ClayPDBStatusType   status;
           GError             *error = NULL;
 
-          file = gimp_imagefile_get_file (iter->data);
+          file = clay_imagefile_get_file (iter->data);
 
-          image = file_open_with_display (gimp,
-                                          gimp_get_user_context (gimp),
+          image = file_open_with_display (clay,
+                                          clay_get_user_context (clay),
                                           NULL, file, FALSE,
-                                          G_OBJECT (gimp_widget_get_monitor (widget)),
+                                          G_OBJECT (clay_widget_get_monitor (widget)),
                                           &status, &error);
 
-          if (! image && status != GIMP_PDB_CANCEL)
+          if (! image && status != CLAY_PDB_CANCEL)
             {
-              gimp_message (gimp, G_OBJECT (view), GIMP_MESSAGE_ERROR,
+              clay_message (clay, G_OBJECT (view), CLAY_MESSAGE_ERROR,
                             _("Opening '%s' failed:\n\n%s"),
-                            gimp_file_get_utf8_name (file), error->message);
+                            clay_file_get_utf8_name (file), error->message);
               g_clear_error (&error);
             }
 
@@ -1277,7 +1277,7 @@ welcome_dialog_release_item_activated (GtkListBox    *listbox,
                                        GtkListBoxRow *row,
                                        gpointer       user_data)
 {
-  Gimp         *gimp          = user_data;
+  Clay         *clay          = user_data;
   GList        *blink_script  = NULL;
   const gchar  *script_string;
   gchar       **script_steps;
@@ -1286,9 +1286,9 @@ welcome_dialog_release_item_activated (GtkListBox    *listbox,
 
   row_index = gtk_list_box_row_get_index (row);
 
-  g_return_if_fail (row_index < gimp_welcome_dialog_n_items);
+  g_return_if_fail (row_index < clay_welcome_dialog_n_items);
 
-  script_string = gimp_welcome_dialog_demos[row_index];
+  script_string = clay_welcome_dialog_demos[row_index];
 
   if (script_string == NULL)
     /* Not an error. Some release items have no demos. */
@@ -1327,19 +1327,19 @@ welcome_dialog_release_item_activated (GtkListBox    *listbox,
       if (widget_id != NULL)
         widget_id = g_strstrip (widget_id);
 
-      /* All our dockable IDs start with "gimp-". This allows to write
+      /* All our dockable IDs start with "clay-". This allows to write
        * shorter names in the demo script.
        */
-      if (! g_str_has_prefix (dockable_id, "gimp-"))
+      if (! g_str_has_prefix (dockable_id, "clay-"))
         {
-          gchar *tmp = g_strdup_printf ("gimp-%s", dockable_id);
+          gchar *tmp = g_strdup_printf ("clay-%s", dockable_id);
 
           g_free (ids[0]);
           dockable_id = ids[0] = tmp;
         }
 
       /* Blink widget. */
-      if (g_strcmp0 (dockable_id, "gimp-toolbox") == 0)
+      if (g_strcmp0 (dockable_id, "clay-toolbox") == 0)
         {
           /* All tool button IDs start with "tools-". This allows to
            * write shorter tool names in the demo script.
@@ -1352,11 +1352,11 @@ welcome_dialog_release_item_activated (GtkListBox    *listbox,
               widget_id = settings[0] = tmp;
             }
 
-          gimp_blink_toolbox (gimp, widget_id, &blink_script);
+          clay_blink_toolbox (clay, widget_id, &blink_script);
         }
       else
         {
-          gimp_blink_dockable (gimp, dockable_id,
+          clay_blink_dockable (clay, dockable_id,
                                widget_id, settings_value,
                                &blink_script);
         }
@@ -1367,7 +1367,7 @@ welcome_dialog_release_item_activated (GtkListBox    *listbox,
     }
   if (blink_script != NULL)
     {
-      GList *windows = gimp_get_image_windows (gimp);
+      GList *windows = clay_get_image_windows (clay);
 
       /* Losing focus on the welcome dialog on purpose for the main GUI
        * to be more readable.
@@ -1375,7 +1375,7 @@ welcome_dialog_release_item_activated (GtkListBox    *listbox,
       if (windows)
         gtk_window_present (windows->data);
 
-      gimp_blink_play_script (blink_script);
+      clay_blink_play_script (blink_script);
 
       g_list_free (windows);
     }
@@ -1435,7 +1435,7 @@ welcome_size_allocate (GtkWidget     *welcome_dialog,
   if (gdk_window)
     monitor = gdk_display_get_monitor_at_window (gdk_display_get_default (), gdk_window);
   else
-    monitor = gimp_get_monitor_at_pointer ();
+    monitor = clay_get_monitor_at_pointer ();
   gdk_monitor_get_workarea (monitor, &workarea);
 
   if (gtk_image_get_storage_type (GTK_IMAGE (image)) == GTK_IMAGE_PIXBUF)
@@ -1454,11 +1454,11 @@ welcome_size_allocate (GtkWidget     *welcome_dialog,
   image_width = MAX (allocation->width - 2, workarea.width / 4);
   image_width = MIN (image_width, workarea.width / 3);
   /* Splash screens are fullHD. We should not load it bigger.
-   * See: https://gitlab.gnome.org/GNOME/gimp-data/-/blob/main/images/README.md#requirements
+   * See: https://github.com/KurtStevenK/clay/-/blob/main/images/README.md#requirements
    */
   image_width = MIN (image_width, 1920);
 
-  splash_file = gimp_data_directory_file ("images", "gimp-splash.png", NULL);
+  splash_file = clay_data_directory_file ("images", "clay-splash.png", NULL);
   pixbuf = gdk_pixbuf_new_from_file_at_scale (g_file_peek_path (splash_file),
                                               image_width, -1,
                                               TRUE, &error);
@@ -1489,7 +1489,7 @@ welcome_scrollable_resize (gpointer data)
 
       /* Make the first page scrollable to prevent height issues on
        * smaller screens */
-      gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), main_vbox, TRUE);
+      clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), main_vbox, TRUE);
 
       gtk_widget_queue_resize (GTK_WIDGET (welcome_dialog));
     }
@@ -1528,13 +1528,13 @@ welcome_dialog_open_image_accelerator (GtkAccelGroup  *accel_group,
                                        GdkModifierType mods,
                                        gpointer        user_data)
 {
-  Gimp          *gimp    = g_object_get_data (G_OBJECT (welcome_dialog), "gimp");
-  GimpUIManager *manager = menus_get_image_manager_singleton (gimp);
+  Clay          *clay    = g_object_get_data (G_OBJECT (welcome_dialog), "clay");
+  ClayUIManager *manager = menus_get_image_manager_singleton (clay);
   guint          index   = GPOINTER_TO_UINT (user_data);
   gchar          action_name[20];
 
   g_snprintf (action_name, sizeof (action_name), "file-open-recent-%02u", index + 1);
 
-  if (gimp_ui_manager_activate_action (manager, "file", action_name))
+  if (clay_ui_manager_activate_action (manager, "file", action_name))
     gtk_widget_destroy (welcome_dialog);
 }

@@ -20,21 +20,21 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpdashboard.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claydashboard.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "dashboard-actions.h"
 #include "dashboard-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry dashboard_actions[] =
+static const ClayActionEntry dashboard_actions[] =
 {
   { "dashboard-groups", NULL,
     NC_("dashboard-action", "_Groups") },
@@ -43,32 +43,32 @@ static const GimpActionEntry dashboard_actions[] =
   { "dashboard-history-duration", NULL,
     NC_("dashboard-action", "_History Duration") },
 
-  { "dashboard-log-record", GIMP_ICON_RECORD,
+  { "dashboard-log-record", CLAY_ICON_RECORD,
     NC_("dashboard-action", "_Start/Stop Recording..."), NULL, { NULL },
     NC_("dashboard-action", "Start/stop recording performance log"),
     dashboard_log_record_cmd_callback,
-    GIMP_HELP_DASHBOARD_LOG_RECORD },
-  { "dashboard-log-add-marker", GIMP_ICON_MARKER,
+    CLAY_HELP_DASHBOARD_LOG_RECORD },
+  { "dashboard-log-add-marker", CLAY_ICON_MARKER,
     NC_("dashboard-action", "_Add Marker..."), NULL, { NULL },
     NC_("dashboard-action", "Add an event marker "
                             "to the performance log"),
     dashboard_log_add_marker_cmd_callback,
-    GIMP_HELP_DASHBOARD_LOG_ADD_MARKER },
-  { "dashboard-log-add-empty-marker", GIMP_ICON_MARKER,
+    CLAY_HELP_DASHBOARD_LOG_ADD_MARKER },
+  { "dashboard-log-add-empty-marker", CLAY_ICON_MARKER,
     NC_("dashboard-action", "Add _Empty Marker"), NULL, { NULL },
     NC_("dashboard-action", "Add an empty event marker "
                             "to the performance log"),
     dashboard_log_add_empty_marker_cmd_callback,
-    GIMP_HELP_DASHBOARD_LOG_ADD_EMPTY_MARKER },
+    CLAY_HELP_DASHBOARD_LOG_ADD_EMPTY_MARKER },
 
-  { "dashboard-reset", GIMP_ICON_RESET,
+  { "dashboard-reset", CLAY_ICON_RESET,
     NC_("dashboard-action", "_Reset"), NULL, { NULL },
     NC_("dashboard-action", "Reset cumulative data"),
     dashboard_reset_cmd_callback,
-    GIMP_HELP_DASHBOARD_RESET },
+    CLAY_HELP_DASHBOARD_RESET },
 };
 
-static const GimpToggleActionEntry dashboard_toggle_actions[] =
+static const ClayToggleActionEntry dashboard_toggle_actions[] =
 {
   { "dashboard-low-swap-space-warning", NULL,
     NC_("dashboard-action", "_Low Swap Space Warning"), NULL, { NULL },
@@ -76,85 +76,85 @@ static const GimpToggleActionEntry dashboard_toggle_actions[] =
                             "the swap size approaches its limit"),
     dashboard_low_swap_space_warning_cmd_callback,
     FALSE,
-    GIMP_HELP_DASHBOARD_LOW_SWAP_SPACE_WARNING }
+    CLAY_HELP_DASHBOARD_LOW_SWAP_SPACE_WARNING }
 };
 
-static const GimpRadioActionEntry dashboard_update_interval_actions[] =
+static const ClayRadioActionEntry dashboard_update_interval_actions[] =
 {
   { "dashboard-update-interval-0-25-sec", NULL,
     NC_("dashboard-update-interval", "0.25 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_UPDATE_INTERVAL_0_25_SEC,
-    GIMP_HELP_DASHBOARD_UPDATE_INTERVAL },
+    CLAY_DASHBOARD_UPDATE_INTERVAL_0_25_SEC,
+    CLAY_HELP_DASHBOARD_UPDATE_INTERVAL },
 
   { "dashboard-update-interval-0-5-sec", NULL,
     NC_("dashboard-update-interval", "0.5 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_UPDATE_INTERVAL_0_5_SEC,
-    GIMP_HELP_DASHBOARD_UPDATE_INTERVAL },
+    CLAY_DASHBOARD_UPDATE_INTERVAL_0_5_SEC,
+    CLAY_HELP_DASHBOARD_UPDATE_INTERVAL },
 
   { "dashboard-update-interval-1-sec", NULL,
     NC_("dashboard-update-interval", "1 Second"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_UPDATE_INTERVAL_1_SEC,
-    GIMP_HELP_DASHBOARD_UPDATE_INTERVAL },
+    CLAY_DASHBOARD_UPDATE_INTERVAL_1_SEC,
+    CLAY_HELP_DASHBOARD_UPDATE_INTERVAL },
 
   { "dashboard-update-interval-2-sec", NULL,
     NC_("dashboard-update-interval", "2 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_UPDATE_INTERVAL_2_SEC,
-    GIMP_HELP_DASHBOARD_UPDATE_INTERVAL },
+    CLAY_DASHBOARD_UPDATE_INTERVAL_2_SEC,
+    CLAY_HELP_DASHBOARD_UPDATE_INTERVAL },
 
   { "dashboard-update-interval-4-sec", NULL,
     NC_("dashboard-update-interval", "4 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_UPDATE_INTERVAL_4_SEC,
-    GIMP_HELP_DASHBOARD_UPDATE_INTERVAL }
+    CLAY_DASHBOARD_UPDATE_INTERVAL_4_SEC,
+    CLAY_HELP_DASHBOARD_UPDATE_INTERVAL }
 };
 
-static const GimpRadioActionEntry dashboard_history_duration_actions[] =
+static const ClayRadioActionEntry dashboard_history_duration_actions[] =
 {
   { "dashboard-history-duration-15-sec", NULL,
     NC_("dashboard-history-duration", "15 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_HISTORY_DURATION_15_SEC,
-    GIMP_HELP_DASHBOARD_HISTORY_DURATION },
+    CLAY_DASHBOARD_HISTORY_DURATION_15_SEC,
+    CLAY_HELP_DASHBOARD_HISTORY_DURATION },
 
   { "dashboard-history-duration-30-sec", NULL,
     NC_("dashboard-history-duration", "30 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_HISTORY_DURATION_30_SEC,
-    GIMP_HELP_DASHBOARD_HISTORY_DURATION },
+    CLAY_DASHBOARD_HISTORY_DURATION_30_SEC,
+    CLAY_HELP_DASHBOARD_HISTORY_DURATION },
 
   { "dashboard-history-duration-60-sec", NULL,
     NC_("dashboard-history-duration", "60 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_HISTORY_DURATION_60_SEC,
-    GIMP_HELP_DASHBOARD_HISTORY_DURATION },
+    CLAY_DASHBOARD_HISTORY_DURATION_60_SEC,
+    CLAY_HELP_DASHBOARD_HISTORY_DURATION },
 
   { "dashboard-history-duration-120-sec", NULL,
     NC_("dashboard-history-duration", "120 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_HISTORY_DURATION_120_SEC,
-    GIMP_HELP_DASHBOARD_HISTORY_DURATION },
+    CLAY_DASHBOARD_HISTORY_DURATION_120_SEC,
+    CLAY_HELP_DASHBOARD_HISTORY_DURATION },
 
   { "dashboard-history-duration-240-sec", NULL,
     NC_("dashboard-history-duration", "240 Seconds"), NULL, { NULL }, NULL,
-    GIMP_DASHBOARD_HISTORY_DURATION_240_SEC,
-    GIMP_HELP_DASHBOARD_HISTORY_DURATION }
+    CLAY_DASHBOARD_HISTORY_DURATION_240_SEC,
+    CLAY_HELP_DASHBOARD_HISTORY_DURATION }
 };
 
 
 void
-dashboard_actions_setup (GimpActionGroup *group)
+dashboard_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "dashboard-action",
+  clay_action_group_add_actions (group, "dashboard-action",
                                  dashboard_actions,
                                  G_N_ELEMENTS (dashboard_actions));
 
-  gimp_action_group_add_toggle_actions (group, "dashboard-action",
+  clay_action_group_add_toggle_actions (group, "dashboard-action",
                                         dashboard_toggle_actions,
                                         G_N_ELEMENTS (dashboard_toggle_actions));
 
-  gimp_action_group_add_radio_actions (group, "dashboard-update-interval",
+  clay_action_group_add_radio_actions (group, "dashboard-update-interval",
                                        dashboard_update_interval_actions,
                                        G_N_ELEMENTS (dashboard_update_interval_actions),
                                        NULL,
                                        0,
                                        dashboard_update_interval_cmd_callback);
 
-  gimp_action_group_add_radio_actions (group, "dashboard-history-duration",
+  clay_action_group_add_radio_actions (group, "dashboard-history-duration",
                                        dashboard_history_duration_actions,
                                        G_N_ELEMENTS (dashboard_history_duration_actions),
                                        NULL,
@@ -163,53 +163,53 @@ dashboard_actions_setup (GimpActionGroup *group)
 }
 
 void
-dashboard_actions_update (GimpActionGroup *group,
+dashboard_actions_update (ClayActionGroup *group,
                           gpointer         data)
 {
-  GimpDashboard *dashboard = GIMP_DASHBOARD (data);
+  ClayDashboard *dashboard = CLAY_DASHBOARD (data);
   gboolean       recording;
 
-  recording = gimp_dashboard_log_is_recording (dashboard);
+  recording = clay_dashboard_log_is_recording (dashboard);
 
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 #define SET_ACTIVE(action,condition) \
-        gimp_action_group_set_action_active (group, action, (condition) != 0)
+        clay_action_group_set_action_active (group, action, (condition) != 0)
 
-  switch (gimp_dashboard_get_update_interval (dashboard))
+  switch (clay_dashboard_get_update_interval (dashboard))
     {
-    case GIMP_DASHBOARD_UPDATE_INTERVAL_0_25_SEC:
+    case CLAY_DASHBOARD_UPDATE_INTERVAL_0_25_SEC:
       SET_ACTIVE ("dashboard-update-interval-0-25-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_UPDATE_INTERVAL_0_5_SEC:
+    case CLAY_DASHBOARD_UPDATE_INTERVAL_0_5_SEC:
       SET_ACTIVE ("dashboard-update-interval-0-5-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_UPDATE_INTERVAL_1_SEC:
+    case CLAY_DASHBOARD_UPDATE_INTERVAL_1_SEC:
       SET_ACTIVE ("dashboard-update-interval-1-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_UPDATE_INTERVAL_2_SEC:
+    case CLAY_DASHBOARD_UPDATE_INTERVAL_2_SEC:
       SET_ACTIVE ("dashboard-update-interval-2-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_UPDATE_INTERVAL_4_SEC:
+    case CLAY_DASHBOARD_UPDATE_INTERVAL_4_SEC:
       SET_ACTIVE ("dashboard-update-interval-4-sec", TRUE);
       break;
     }
 
-  switch (gimp_dashboard_get_history_duration (dashboard))
+  switch (clay_dashboard_get_history_duration (dashboard))
     {
-    case GIMP_DASHBOARD_HISTORY_DURATION_15_SEC:
+    case CLAY_DASHBOARD_HISTORY_DURATION_15_SEC:
       SET_ACTIVE ("dashboard-history-duration-15-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_HISTORY_DURATION_30_SEC:
+    case CLAY_DASHBOARD_HISTORY_DURATION_30_SEC:
       SET_ACTIVE ("dashboard-history-duration-30-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_HISTORY_DURATION_60_SEC:
+    case CLAY_DASHBOARD_HISTORY_DURATION_60_SEC:
       SET_ACTIVE ("dashboard-history-duration-60-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_HISTORY_DURATION_120_SEC:
+    case CLAY_DASHBOARD_HISTORY_DURATION_120_SEC:
       SET_ACTIVE ("dashboard-history-duration-120-sec", TRUE);
       break;
-    case GIMP_DASHBOARD_HISTORY_DURATION_240_SEC:
+    case CLAY_DASHBOARD_HISTORY_DURATION_240_SEC:
       SET_ACTIVE ("dashboard-history-duration-240-sec", TRUE);
       break;
     }
@@ -219,7 +219,7 @@ dashboard_actions_update (GimpActionGroup *group,
   SET_SENSITIVE ("dashboard-reset",                !recording);
 
   SET_ACTIVE ("dashboard-low-swap-space-warning",
-              gimp_dashboard_get_low_swap_space_warning (dashboard));
+              clay_dashboard_get_low_swap_space_warning (dashboard));
 
 #undef SET_SENSITIVE
 #undef SET_ACTIVE

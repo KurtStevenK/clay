@@ -107,8 +107,8 @@
 
 
 ; symbol
-(assert `(string=? (atom->string 'gimp-message)
-                    "gimp-message"))
+(assert `(string=? (atom->string 'clay-message)
+                    "clay-message"))
 ; symbol having multibyte char
 (assert `(string=? (atom->string 'λ)
                     "λ"))
@@ -167,7 +167,7 @@
 ; atom->string does not work for [#t, nil, closure, port, list, vector, foreign function]
 
 ; foreign function
-(assert-error `(atom->string gimp-message)
+(assert-error `(atom->string clay-message)
               "atom->string: not an atom:")
 ; nil aka '()
 (assert-error `(atom->string '() )

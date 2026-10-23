@@ -20,7 +20,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimpui.h>
+#include <libclay/clayui.h>
 
 #ifdef GDK_WINDOWING_QUARTZ
 #import <Cocoa/Cocoa.h>
@@ -40,21 +40,21 @@
  * The dialog is modal for the script:
  * OK button hides the dialog then runs the script once.
  *
- * The dialog is non-modal with respect to the GIMP app GUI, which remains responsive.
+ * The dialog is non-modal with respect to the Clay app GUI, which remains responsive.
  *
  * When called from plugin extension-script-fu, the dialog is modal on the extension:
- * although GIMP app continues responsive, a user choosing a menu item
+ * although Clay app continues responsive, a user choosing a menu item
  * that is also implemented by a script and extension-script-fu
  * will not show a dialog until the first called script finishes.
  * TODO combine these paragraphs
  * We don't prevent concurrent dialogs as in script-fu-interface.c.
- * For extension-script-fu, Gimp is already preventing concurrent dialogs.
- * For gimp-script-fu-interpreter, each plugin is a separate process
+ * For extension-script-fu, Clay is already preventing concurrent dialogs.
+ * For clay-script-fu-interpreter, each plugin is a separate process
  * so concurrent dialogs CAN occur.
  *
- * There is no progress widget in GimpProcedureDialog.
- * Also, we don't need to update the progress in Gimp UI,
- * because Gimp shows progress: the name of all called PDB procedures.
+ * There is no progress widget in ClayProcedureDialog.
+ * Also, we don't need to update the progress in Clay UI,
+ * because Clay shows progress: the name of all called PDB procedures.
  *
  * Run dialog entails: create config, create dialog for config, show dialog, and return a config.
  * The config has one property for each arg of the script.
@@ -68,7 +68,7 @@
 
 #if DEBUG_CONFIG_PROPERTIES
 static void
-dump_properties (GimpProcedureConfig *config)
+dump_properties (ClayProcedureConfig *config)
 {
   GParamSpec **pspecs;
   guint        n_pspecs;
@@ -81,7 +81,7 @@ dump_properties (GimpProcedureConfig *config)
 }
 
 static void
-dump_objects (GimpProcedureConfig *config)
+dump_objects (ClayProcedureConfig *config)
 {
   /* Check it will return non-null objects. */
   GParamSpec **pspecs;
@@ -122,14 +122,14 @@ dump_objects (GimpProcedureConfig *config)
  * of the procedure.
  */
 static gboolean
-sf_dialog_can_be_run (GimpProcedure        *procedure,
+sf_dialog_can_be_run (ClayProcedure        *procedure,
                       SFScript             *script,
-                      GimpProcedureConfig  *config)
+                      ClayProcedureConfig  *config)
 {
   guint n_specs;
 
   if ( (! G_IS_OBJECT (procedure)) ||
-       (! GIMP_IS_PROCEDURE_CONFIG (config)) ||
+       (! CLAY_IS_PROCEDURE_CONFIG (config)) ||
        script == NULL)
     return FALSE;
 
@@ -149,7 +149,7 @@ sf_dialog_can_be_run (GimpProcedure        *procedure,
  * Caller must free the list.
  */
 static GList*
-sf_get_suffix_of_config_prop_names (GimpProcedureConfig  *config)
+sf_get_suffix_of_config_prop_names (ClayProcedureConfig  *config)
 {
   guint n_specs;
   GParamSpec ** pspecs  = g_object_class_list_properties (G_OBJECT_GET_CLASS (config), &n_specs);
@@ -169,17 +169,17 @@ sf_get_suffix_of_config_prop_names (GimpProcedureConfig  *config)
  * When should_skip_runmode, the config has a run-mode property
  * the dialog does not show.
  *
- * Procedure may be GimpImageProcedure or ordinary GimpProcedure.
+ * Procedure may be ClayImageProcedure or ordinary ClayProcedure.
  *
- * Requires gimp_ui_init already called.
+ * Requires clay_ui_init already called.
  */
 static gboolean
-sf_dialog_run (GimpProcedure        *procedure,
+sf_dialog_run (ClayProcedure        *procedure,
                SFScript             *script,
-               GimpProcedureConfig  *config,
+               ClayProcedureConfig  *config,
                gboolean              should_skip_runmode)
 {
-  GimpProcedureDialog *dialog = NULL;
+  ClayProcedureDialog *dialog = NULL;
   gboolean            not_canceled;
 
 #if DEBUG_CONFIG_PROPERTIES
@@ -200,7 +200,7 @@ sf_dialog_run (GimpProcedure        *procedure,
    * Title dialog with the menu item, not the procedure name.
    * Assert menu item is localized.
    */
-  dialog = (GimpProcedureDialog*) gimp_procedure_dialog_new (
+  dialog = (ClayProcedureDialog*) clay_procedure_dialog_new (
                                       procedure,
                                       config,
                                       script_fu_script_get_title (script));
@@ -214,30 +214,30 @@ sf_dialog_run (GimpProcedure        *procedure,
     {
       GList *property_names = sf_get_suffix_of_config_prop_names (config);
 
-      gimp_procedure_dialog_fill_list (dialog, property_names);
+      clay_procedure_dialog_fill_list (dialog, property_names);
       g_list_free (property_names);
     }
   else
     {
       /* NULL means: all properties. */
-      gimp_procedure_dialog_fill_list (dialog, NULL);
+      clay_procedure_dialog_fill_list (dialog, NULL);
     }
 
 #ifdef GDK_WINDOWING_QUARTZ
 
-  /* The user chose a plugin from gimp app, now ensure this process is active.
-   * The gimp app was active, but now the plugin should be active.
-   * This is also called in gimpui_init(), but that is not sufficient
+  /* The user chose a plugin from clay app, now ensure this process is active.
+   * The clay app was active, but now the plugin should be active.
+   * This is also called in clayui_init(), but that is not sufficient
    * for second calls of plugins served by long-running extension-script-fu.
-   * The user can still raise other gimp windows, hiding the dialog.
+   * The user can still raise other clay windows, hiding the dialog.
    */
   [NSApp activateIgnoringOtherApps:YES];
 #endif
 
-  /* focus the first spin/text entry like on GIMP 2.10 */
+  /* focus the first spin/text entry like on Clay 2.10 */
   script_fu_widgets_grab_focus_on_first_entry (GTK_WIDGET (dialog));
 
-  not_canceled = gimp_procedure_dialog_run (dialog);
+  not_canceled = clay_procedure_dialog_run (dialog);
 
 #if DEBUG_CONFIG_PROPERTIES
   dump_objects (config);
@@ -252,20 +252,20 @@ sf_dialog_run (GimpProcedure        *procedure,
  *
  * Interpret: marshal config into Scheme text for function call, then interpret script.
  */
-GimpValueArray*
+ClayValueArray*
 script_fu_dialog_run_image_proc (
-                      GimpProcedure        *procedure,
+                      ClayProcedure        *procedure,
                       SFScript             *script,
-                      GimpImage            *image,
-                      GimpDrawable        **drawables,
-                      GimpProcedureConfig  *config)
+                      ClayImage            *image,
+                      ClayDrawable        **drawables,
+                      ClayProcedureConfig  *config)
 
 {
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
   gboolean        not_canceled;
 
   if (! sf_dialog_can_be_run (procedure, script, config))
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR, NULL);
 
   not_canceled = sf_dialog_run (procedure, script, config, FALSE);
   /* Assert config holds validated arg values from a user interaction. */
@@ -275,24 +275,24 @@ script_fu_dialog_run_image_proc (
                                              image, drawables,
                                              config);
   else
-    result = gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL, NULL);
+    result = clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL, NULL);
 
 
   return result;
 }
 
-/* Run a dialog for a generic GimpProcedure, then interpret the script. */
-GimpValueArray*
-script_fu_dialog_run_regular_proc (GimpProcedure        *procedure,
+/* Run a dialog for a generic ClayProcedure, then interpret the script. */
+ClayValueArray*
+script_fu_dialog_run_regular_proc (ClayProcedure        *procedure,
                                    SFScript             *script,
-                                   GimpProcedureConfig  *config)
+                                   ClayProcedureConfig  *config)
 
 {
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
   gboolean        not_canceled;
 
   if (! sf_dialog_can_be_run (procedure, script, config))
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR, NULL);
 
   not_canceled = sf_dialog_run (procedure, script, config,
                                 TRUE);  /* skip run-mode prop of config. */
@@ -301,7 +301,7 @@ script_fu_dialog_run_regular_proc (GimpProcedure        *procedure,
   if (not_canceled)
     result = script_fu_interpret_regular_proc (procedure, script, config);
   else
-    result = gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL, NULL);
+    result = clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL, NULL);
 
 
   return result;

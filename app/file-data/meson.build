@@ -10,7 +10,7 @@ libappfiledata_sources = [
 libappfiledata = static_library('appfiledata',
   libappfiledata_sources,
   include_directories: [ rootInclude, rootAppInclude, ],
-  c_args: '-DG_LOG_DOMAIN="Gimp-File-Data"',
+  c_args: '-DG_LOG_DOMAIN="Clay-File-Data"',
   dependencies: [
     appstream,
     cairo,

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -45,5 +45,5 @@ gfig_icons_init (void)
 
   icon_theme = gtk_icon_theme_get_default ();
 
-  gtk_icon_theme_add_resource_path (icon_theme, "/org/gimp/gfig/icons");
+  gtk_icon_theme_add_resource_path (icon_theme, "/org/clay/gfig/icons");
 }

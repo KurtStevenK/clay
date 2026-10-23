@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 #include "script-fu-eval.h"
 
@@ -25,11 +25,11 @@
 #include "script-fu-intl.h"
 
 
-GimpValueArray *
-script_fu_eval_run (GimpProcedure        *procedure,
-                    GimpRunMode           run_mode,
+ClayValueArray *
+script_fu_eval_run (ClayProcedure        *procedure,
+                    ClayRunMode           run_mode,
                     const gchar          *code,
-                    GimpProcedureConfig  *config)
+                    ClayProcedureConfig  *config)
 {
   script_fu_set_run_mode (run_mode);
 
@@ -38,20 +38,20 @@ script_fu_eval_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       if (script_fu_interpret_string (code) != 0)
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_EXECUTION_ERROR,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_EXECUTION_ERROR,
                                                  script_fu_get_gerror ());
       else
-        return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+        return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 
     default:
       {
         GError *error = g_error_new_literal (g_quark_from_string ("scriptfu"), 0,
            _("Script-Fu evaluation mode only allows non-interactive invocation"));
 
-        return gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR, error);
+        return clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR, error);
       }
     }
 }

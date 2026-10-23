@@ -68,9 +68,9 @@ HELP
         code => <<'CODE'
 {
   if (drawable &&
-      (! gimp_pdb_item_is_attached (GIMP_ITEM (drawable), image,
-                                    GIMP_PDB_ITEM_CONTENT, error) ||
-       ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error)))
+      (! clay_pdb_item_is_attached (CLAY_ITEM (drawable), image,
+                                    CLAY_PDB_ITEM_CONTENT, error) ||
+       ! clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error)))
     success = FALSE;
 
   if (success)
@@ -127,7 +127,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  success = text_get_extents (gimp,
+  success = text_get_extents (clay,
                               font, size, text,
                               &width, &height,
                               &ascent, &descent);
@@ -137,9 +137,9 @@ CODE
 }
 
 
-@headers = qw("libgimpbase/gimpbase.h"
-              "text/gimptext-compat.h"
-              "gimppdb-utils.h");
+@headers = qw("libclaybase/claybase.h"
+              "text/claytext-compat.h"
+              "claypdb-utils.h");
 
 @procs = qw(text_font
             text_get_extents_font);
@@ -147,7 +147,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Text procedures';
-$doc_title = 'gimptexttool';
+$doc_title = 'claytexttool';
 $doc_short_desc = 'Functions for controlling the text tool.';
 $doc_long_desc = 'Functions for controlling the text tool.';
 

@@ -34,12 +34,12 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "ifs-compose.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define RESPONSE_RESET           1
@@ -55,7 +55,7 @@
 #define PLUG_IN_PARASITE "ifscompose-parasite"
 #define PLUG_IN_PROC     "plug-in-ifscompose"
 #define PLUG_IN_BINARY   "ifs-compose"
-#define PLUG_IN_ROLE     "gimp-ifs-compose"
+#define PLUG_IN_ROLE     "clay-ifs-compose"
 
 typedef enum
 {
@@ -175,13 +175,13 @@ typedef struct
 } IfsComposeInterface;
 
 
-struct _GimpIfs
+struct _ClayIfs
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 
   GtkApplication *app;
   GtkWidget      *dialog;
-  GimpDrawable   *drawable;
+  ClayDrawable   *drawable;
   gint            response_id;
 
   GtkWidget      *delete_button;
@@ -192,35 +192,35 @@ struct _GimpIfs
 };
 
 
-#define GIMP_TYPE_IFS (gimp_ifs_get_type ())
-G_DECLARE_FINAL_TYPE (GimpIfs, gimp_ifs, GIMP, IFS, GimpPlugIn)
+#define CLAY_TYPE_IFS (clay_ifs_get_type ())
+G_DECLARE_FINAL_TYPE (ClayIfs, clay_ifs, CLAY, IFS, ClayPlugIn)
 
 GType                   ifs_get_type         (void);
 
-static void             gimp_ifs_finalize    (GObject              *object);
+static void             clay_ifs_finalize    (GObject              *object);
 
-static GList          * ifs_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * ifs_create_procedure (GimpPlugIn           *plug_in,
+static GList          * ifs_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * ifs_create_procedure (ClayPlugIn           *plug_in,
                                               const gchar          *name);
 
-static GimpValueArray * ifs_run              (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
-                                              GimpDrawable        **drawables,
-                                              GimpProcedureConfig  *config,
+static ClayValueArray * ifs_run              (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
+                                              ClayDrawable        **drawables,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
 /*  user interface functions  */
 static void           on_app_activate             (GApplication *gapp,
                                                    gpointer      user_data);
-static gint           ifs_compose_dialog          (GimpIfs      *ifs,
-                                                   GimpDrawable *drawable);
+static gint           ifs_compose_dialog          (ClayIfs      *ifs,
+                                                   ClayDrawable *drawable);
 static void           ifs_options_dialog          (void);
 static void           ifs_options_dialog_hide     (GtkWidget    *dialog);
 static GtkWidget    * ifs_compose_trans_page      (void);
 static GtkWidget    * ifs_compose_color_page      (void);
 static void           design_op_actions_update    (void);
-static void           design_area_create          (GimpIfs      *ifs,
+static void           design_area_create          (ClayIfs      *ifs,
                                                    GtkWidget    *window,
                                                    gint          design_width,
                                                    gint          design_height);
@@ -233,7 +233,7 @@ static gint design_area_draw                (GtkWidget         *widget,
                                              cairo_t           *cr);
 static gint design_area_button_press        (GtkWidget         *widget,
                                              GdkEventButton    *event,
-                                             GimpIfs           *ifs);
+                                             ClayIfs           *ifs);
 static gint design_area_button_release      (GtkWidget         *widget,
                                              GdkEventButton    *event);
 static void design_area_select_all_action   (GSimpleAction     *action,
@@ -261,7 +261,7 @@ static void recompute_center_action       (GSimpleAction *action,
                                            GVariant      *parameter,
                                            gpointer       user_data);
 
-static void ifs_compose                   (GimpDrawable *drawable);
+static void ifs_compose                   (ClayDrawable *drawable);
 
 static ColorMap *color_map_create         (const gchar  *name,
                                            GeglColor    *orig_color,
@@ -309,7 +309,7 @@ static void ifs_compose_response          (GtkWidget       *widget,
 
 /* GAction helper methods */
 static void        window_destroy         (GtkWidget       *widget,
-                                           GimpIfs         *ifs);
+                                           ClayIfs         *ifs);
 
 static GtkWidget * add_tool_button        (GtkWidget       *toolbar,
                                            const char      *action,
@@ -325,16 +325,16 @@ static void        add_tool_separator     (GtkWidget       *toolbar,
                                            gboolean         expand);
 
 
-G_DEFINE_TYPE (GimpIfs, gimp_ifs, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayIfs, clay_ifs, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_TYPE_IFS)
+CLAY_MAIN (CLAY_TYPE_IFS)
 DEFINE_STD_SET_I18N
 
 
 static IfsDialog        *ifsD       = NULL;
 static IfsOptionsDialog *ifsOptD    = NULL;
 static IfsDesignArea    *ifsDesign  = NULL;
-static GimpIfs          *ifs        = NULL;
+static ClayIfs          *ifs        = NULL;
 
 static AffElement **elements = NULL;
 static gint        *element_selected = NULL;
@@ -381,12 +381,12 @@ static const GActionEntry ACTIONS[] =
 
 
 static void
-gimp_ifs_class_init (GimpIfsClass *klass)
+clay_ifs_class_init (ClayIfsClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
   GObjectClass    *object_class  = G_OBJECT_CLASS (klass);
 
-  object_class->finalize          = gimp_ifs_finalize;
+  object_class->finalize          = clay_ifs_finalize;
 
   plug_in_class->query_procedures = ifs_query_procedures;
   plug_in_class->create_procedure = ifs_create_procedure;
@@ -394,48 +394,48 @@ gimp_ifs_class_init (GimpIfsClass *klass)
 }
 
 static void
-gimp_ifs_init (GimpIfs *ifs)
+clay_ifs_init (ClayIfs *ifs)
 {
   ifs->builder = NULL;
 }
 
 static void
-gimp_ifs_finalize (GObject *object)
+clay_ifs_finalize (GObject *object)
 {
-  GimpIfs *ifs = GIMP_IFS (object);
+  ClayIfs *ifs = CLAY_IFS (object);
 
-  G_OBJECT_CLASS (gimp_ifs_parent_class)->finalize (object);
+  G_OBJECT_CLASS (clay_ifs_parent_class)->finalize (object);
 
   g_clear_object (&ifs->builder);
 }
 
 static GList *
-ifs_query_procedures (GimpPlugIn *plug_in)
+ifs_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-ifs_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+ifs_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             ifs_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_IFS Fractal..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("_IFS Fractal..."));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Render/Fractals");
 
-      gimp_procedure_set_documentation
+      clay_procedure_set_documentation
         (procedure,
          _("Create an Iterated Function System (IFS) fractal"),
          "Interactively create an Iterated Function System "
@@ -447,53 +447,53 @@ ifs_create_procedure (GimpPlugIn  *plug_in,
          "will be rendered with a transparent background if "
          "the current image has an alpha channel.",
          name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Owen Taylor",
                                       "Owen Taylor",
                                       "1997");
 
-      gimp_procedure_add_string_aux_argument (procedure, "fractal-str",
+      clay_procedure_add_string_aux_argument (procedure, "fractal-str",
                                               "The fractal description serialized as string",
                                               NULL, NULL,
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-ifs_run (GimpProcedure        *procedure,
-         GimpRunMode           run_mode,
-         GimpImage            *image,
-         GimpDrawable        **drawables,
-         GimpProcedureConfig  *config,
+static ClayValueArray *
+ifs_run (ClayProcedure        *procedure,
+         ClayRunMode           run_mode,
+         ClayImage            *image,
+         ClayDrawable        **drawables,
+         ClayProcedureConfig  *config,
          gpointer              run_data)
 {
-  GimpDrawable *drawable;
-  GimpParasite *parasite = NULL;
+  ClayDrawable *drawable;
+  ClayParasite *parasite = NULL;
   gboolean      found_parasite = FALSE;
 
-  ifs = GIMP_IFS (gimp_procedure_get_plug_in (procedure));
+  ifs = CLAY_IFS (clay_procedure_get_plug_in (procedure));
 #if GLIB_CHECK_VERSION(2,74,0)
   ifs->app = gtk_application_new (NULL, G_APPLICATION_DEFAULT_FLAGS);
 #else
   ifs->app = gtk_application_new (NULL, G_APPLICATION_FLAGS_NONE);
 #endif
 
-  ifs->builder = gtk_builder_new_from_resource ("/org/gimp/ifs/ifs-menus.ui");
+  ifs->builder = gtk_builder_new_from_resource ("/org/clay/ifs/ifs-menus.ui");
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -503,21 +503,21 @@ ifs_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       /*  Possibly retrieve data; first look for a parasite -
        *  if not found, fall back to global values
        */
-      parasite = gimp_item_get_parasite (GIMP_ITEM (drawable),
+      parasite = clay_item_get_parasite (CLAY_ITEM (drawable),
                                          PLUG_IN_PARASITE);
       if (parasite)
         {
           gchar   *parasite_data;
           guint32  parasite_size;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           parasite_data = g_strndup (parasite_data, parasite_size);
           found_parasite = ifsvals_parse_string (parasite_data, &ifsvals, &elements);
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
           g_free (parasite_data);
         }
 
@@ -542,18 +542,18 @@ ifs_run (GimpProcedure        *procedure,
       g_clear_object (&ifs->app);
 
       if (! ifscint.run)
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+    case CLAY_RUN_NONINTERACTIVE:
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                NULL);
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
         {
           gchar *data = NULL;
 
@@ -582,12 +582,12 @@ ifs_run (GimpProcedure        *procedure,
       break;
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       gchar        *str;
-      GimpParasite *parasite;
+      ClayParasite *parasite;
 
-      gimp_image_undo_group_start (image);
+      clay_image_undo_group_start (image);
 
       /*  run the effect  */
       ifs_compose (drawable);
@@ -598,18 +598,18 @@ ifs_run (GimpProcedure        *procedure,
       str = ifsvals_stringify (&ifsvals, elements);
       g_object_set (config, "fractal-str", str, NULL);
 
-      parasite = gimp_parasite_new (PLUG_IN_PARASITE,
-                                    GIMP_PARASITE_PERSISTENT |
-                                    GIMP_PARASITE_UNDOABLE,
+      parasite = clay_parasite_new (PLUG_IN_PARASITE,
+                                    CLAY_PARASITE_PERSISTENT |
+                                    CLAY_PARASITE_UNDOABLE,
                                     strlen (str) + 1, str);
-      gimp_item_attach_parasite (GIMP_ITEM (drawable), parasite);
-      gimp_parasite_free (parasite);
+      clay_item_attach_parasite (CLAY_ITEM (drawable), parasite);
+      clay_parasite_free (parasite);
 
       g_free (str);
 
-      gimp_image_undo_group_end (image);
+      clay_image_undo_group_end (image);
 
-      gimp_displays_flush ();
+      clay_displays_flush ();
     }
   else
     {
@@ -617,7 +617,7 @@ ifs_run (GimpProcedure        *procedure,
       ifs_compose (drawable);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static GtkWidget *
@@ -845,7 +845,7 @@ static void
 on_app_activate (GApplication *gapp,
                  gpointer      user_data)
 {
-  GimpIfs        *ifs = GIMP_IFS (user_data);
+  ClayIfs        *ifs = CLAY_IFS (user_data);
 
   ifs_compose_dialog (ifs, ifs->drawable);
 
@@ -864,8 +864,8 @@ on_app_activate (GApplication *gapp,
 }
 
 static gint
-ifs_compose_dialog (GimpIfs      *ifs,
-                    GimpDrawable *drawable)
+ifs_compose_dialog (ClayIfs      *ifs,
+                    ClayDrawable *drawable)
 {
   GtkWidget *label;
   GtkWidget *vbox;
@@ -875,8 +875,8 @@ ifs_compose_dialog (GimpIfs      *ifs,
   GtkWidget *aspect_frame;
   GtkWidget *notebook;
   GtkWidget *page;
-  gint       design_width  = gimp_drawable_get_width  (drawable);
-  gint       design_height = gimp_drawable_get_height (drawable);
+  gint       design_width  = clay_drawable_get_width  (drawable);
+  gint       design_height = clay_drawable_get_height (drawable);
 
   if (design_width > design_height)
     {
@@ -897,16 +897,16 @@ ifs_compose_dialog (GimpIfs      *ifs,
 
   ifsD = g_new0 (IfsDialog, 1);
 
-  ifsD->drawable_width  = gimp_drawable_get_width  (drawable);
-  ifsD->drawable_height = gimp_drawable_get_height (drawable);
+  ifsD->drawable_width  = clay_drawable_get_width  (drawable);
+  ifsD->drawable_height = clay_drawable_get_height (drawable);
   ifsD->preview_width   = design_width;
   ifsD->preview_height  = design_height;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  ifs->dialog = gimp_dialog_new (_("IFS Fractal"), PLUG_IN_ROLE,
+  ifs->dialog = clay_dialog_new (_("IFS Fractal"), PLUG_IN_ROLE,
                                  NULL, 0,
-                                 gimp_standard_help_func, PLUG_IN_PROC,
+                                 clay_standard_help_func, PLUG_IN_PROC,
 
                                  _("_Open"),   RESPONSE_OPEN,
                                  _("_Save"),   RESPONSE_SAVE,
@@ -916,7 +916,7 @@ ifs_compose_dialog (GimpIfs      *ifs,
 
                                  NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (ifs->dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (ifs->dialog),
                                            RESPONSE_OPEN,
                                            RESPONSE_SAVE,
                                            RESPONSE_RESET,
@@ -925,7 +925,7 @@ ifs_compose_dialog (GimpIfs      *ifs,
                                            -1);
 
   gtk_window_set_application (GTK_WINDOW (ifs->dialog), ifs->app);
-  gimp_window_set_transient (GTK_WINDOW (ifs->dialog));
+  clay_window_set_transient (GTK_WINDOW (ifs->dialog));
 
   g_object_add_weak_pointer (G_OBJECT (ifs->dialog), (gpointer) &ifs->dialog);
 
@@ -947,27 +947,27 @@ ifs_compose_dialog (GimpIfs      *ifs,
                       main_vbox, TRUE, TRUE, 0);
 
   toolbar = gtk_toolbar_new ();
-  add_toggle_button (toolbar, "app.transform::move", GIMP_ICON_TOOL_MOVE,
+  add_toggle_button (toolbar, "app.transform::move", CLAY_ICON_TOOL_MOVE,
                      NULL, _("Move"));
-  add_toggle_button (toolbar, "app.transform::rotate", GIMP_ICON_TOOL_ROTATE,
+  add_toggle_button (toolbar, "app.transform::rotate", CLAY_ICON_TOOL_ROTATE,
                      NULL, _("Rotate"));
-  add_toggle_button (toolbar, "app.transform::stretch", GIMP_ICON_TOOL_PERSPECTIVE,
+  add_toggle_button (toolbar, "app.transform::stretch", CLAY_ICON_TOOL_PERSPECTIVE,
                      NULL, _("Stretch"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.new", GIMP_ICON_DOCUMENT_NEW,
+  add_tool_button (toolbar, "app.new", CLAY_ICON_DOCUMENT_NEW,
                    NULL, _("New"));
-  ifs->delete_button = add_tool_button (toolbar, "app.delete", GIMP_ICON_EDIT_DELETE,
+  ifs->delete_button = add_tool_button (toolbar, "app.delete", CLAY_ICON_EDIT_DELETE,
                        NULL, _("Delete"));
-  ifs->undo_button = add_tool_button (toolbar, "app.undo", GIMP_ICON_EDIT_UNDO,
+  ifs->undo_button = add_tool_button (toolbar, "app.undo", CLAY_ICON_EDIT_UNDO,
                        NULL, _("Undo"));
-  ifs->redo_button = add_tool_button (toolbar, "app.redo", GIMP_ICON_EDIT_REDO,
+  ifs->redo_button = add_tool_button (toolbar, "app.redo", CLAY_ICON_EDIT_REDO,
                        NULL, _("Redo"));
-  add_tool_button (toolbar, "app.select-all", GIMP_ICON_SELECTION_ALL,
+  add_tool_button (toolbar, "app.select-all", CLAY_ICON_SELECTION_ALL,
                    NULL, _("Select All"));
-  add_tool_button (toolbar, "app.center", GIMP_ICON_CENTER,
+  add_tool_button (toolbar, "app.center", CLAY_ICON_CENTER,
                    NULL, _("Recompute Center"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.options", GIMP_ICON_PREFERENCES_SYSTEM,
+  add_tool_button (toolbar, "app.options", CLAY_ICON_PREFERENCES_SYSTEM,
                    NULL, _("Render Options"));
   gtk_box_pack_start (GTK_BOX (main_vbox), toolbar, FALSE, FALSE, 0);
   gtk_widget_set_visible (toolbar, TRUE);
@@ -999,7 +999,7 @@ ifs_compose_dialog (GimpIfs      *ifs,
   gtk_frame_set_shadow_type (GTK_FRAME (aspect_frame), GTK_SHADOW_IN);
   gtk_box_pack_start (GTK_BOX (hbox), aspect_frame, TRUE, TRUE, 0);
 
-  ifsD->preview = gimp_preview_area_new ();
+  ifsD->preview = clay_preview_area_new ();
   gtk_widget_set_size_request (ifsD->preview,
                                ifsD->preview_width,
                                ifsD->preview_height);
@@ -1012,7 +1012,7 @@ ifs_compose_dialog (GimpIfs      *ifs,
 
   /* The current transformation frame */
 
-  ifsD->current_frame = gimp_frame_new (NULL);
+  ifsD->current_frame = clay_frame_new (NULL);
   gtk_box_pack_start (GTK_BOX (main_vbox), ifsD->current_frame,
                       FALSE, FALSE, 0);
 
@@ -1138,7 +1138,7 @@ ifs_compose_dialog (GimpIfs      *ifs,
 }
 
 static void
-design_area_create (GimpIfs   *ifs,
+design_area_create (ClayIfs   *ifs,
                     GtkWidget *window,
                     gint       design_width,
                     gint       design_height)
@@ -1207,9 +1207,9 @@ ifs_options_dialog (void)
       ifsOptD = g_new0 (IfsOptionsDialog, 1);
 
       ifsOptD->dialog =
-        gimp_dialog_new (_("IFS Fractal Render Options"), PLUG_IN_ROLE,
+        clay_dialog_new (_("IFS Fractal Render Options"), PLUG_IN_ROLE,
                          NULL, 0,
-                         gimp_standard_help_func, PLUG_IN_PROC,
+                         clay_standard_help_func, PLUG_IN_PROC,
 
                          _("_Close"), GTK_RESPONSE_CLOSE,
 
@@ -1308,12 +1308,12 @@ ifs_options_dialog_hide (GtkWidget *dialog)
 }
 
 static void
-ifs_compose (GimpDrawable *drawable)
+ifs_compose (ClayDrawable *drawable)
 {
-  GeglBuffer *buffer = gimp_drawable_get_shadow_buffer (drawable);
-  gint        width  = gimp_drawable_get_width (drawable);
-  gint        height = gimp_drawable_get_height (drawable);
-  gboolean    alpha  = gimp_drawable_has_alpha (drawable);
+  GeglBuffer *buffer = clay_drawable_get_shadow_buffer (drawable);
+  gint        width  = clay_drawable_get_width (drawable);
+  gint        height = clay_drawable_get_height (drawable);
+  gboolean    alpha  = clay_drawable_has_alpha (drawable);
   const Babl *format;
   gint        num_bands;
   gint        band_height;
@@ -1342,7 +1342,7 @@ ifs_compose (GimpDrawable *drawable)
   data  = g_new (guchar, width * band_height * SQR (ifsvals.subdivide) * 3);
   nhits = g_new (guchar, width * band_height * SQR (ifsvals.subdivide));
 
-  color = gimp_context_get_background ();
+  color = clay_context_get_background ();
   gegl_color_get_pixel (color, babl_format_with_space ("R'G'B' u8", NULL), c);
   g_object_unref (color);
 
@@ -1351,7 +1351,7 @@ ifs_compose (GimpDrawable *drawable)
       GeglBufferIterator *iter;
       GeglRectangle      *roi;
 
-      gimp_progress_init_printf (_("Rendering IFS (%d/%d)"),
+      clay_progress_init_printf (_("Rendering IFS (%d/%d)"),
                                  band_no + 1, num_bands);
 
       /* render the band to a buffer */
@@ -1458,8 +1458,8 @@ ifs_compose (GimpDrawable *drawable)
 
   g_object_unref (buffer);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, 0, 0, width, height);
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, 0, 0, width, height);
 }
 
 static void
@@ -1629,7 +1629,7 @@ design_area_size_allocate (GtkWidget     *widget,
 static gint
 design_area_button_press (GtkWidget      *widget,
                           GdkEventButton *event,
-                          GimpIfs        *ifs)
+                          ClayIfs        *ifs)
 {
   GtkAllocation allocation;
   gint          i;
@@ -2059,7 +2059,7 @@ color_map_create (const gchar *name,
     color_map->color = gegl_color_duplicate (data ? data : orig_color);
   else
     color_map->color = gegl_color_new ("black");
-  gimp_color_set_alpha (color_map->color, 1.0);
+  clay_color_set_alpha (color_map->color, 1.0);
   color_map->fixed_point = fixed_point;
   color_map->hbox        = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
 
@@ -2068,8 +2068,8 @@ color_map_create (const gchar *name,
   gtk_box_pack_start (GTK_BOX (color_map->hbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
-  color_map->orig_preview = gimp_color_area_new (fixed_point ? color_map->color : orig_color,
-                                                 GIMP_COLOR_AREA_FLAT, 0);
+  color_map->orig_preview = clay_color_area_new (fixed_point ? color_map->color : orig_color,
+                                                 CLAY_COLOR_AREA_FLAT, 0);
   gtk_drag_dest_unset (color_map->orig_preview);
   gtk_widget_set_size_request (color_map->orig_preview,
                                COLOR_SAMPLE_SIZE, COLOR_SAMPLE_SIZE);
@@ -2081,11 +2081,11 @@ color_map_create (const gchar *name,
   gtk_box_pack_start (GTK_BOX (color_map->hbox), arrow, FALSE, FALSE, 0);
   gtk_widget_set_visible (arrow, TRUE);
 
-  color_map->button = gimp_color_button_new (name,
+  color_map->button = clay_color_button_new (name,
                                              COLOR_SAMPLE_SIZE,
                                              COLOR_SAMPLE_SIZE,
                                              color_map->color,
-                                             GIMP_COLOR_AREA_FLAT);
+                                             CLAY_COLOR_AREA_FLAT);
   gtk_box_pack_start (GTK_BOX (color_map->hbox), color_map->button,
                       FALSE, FALSE, 0);
   gtk_widget_set_visible (color_map->button, TRUE);
@@ -2109,7 +2109,7 @@ color_map_color_changed_cb (GtkWidget *widget,
                             ColorMap  *color_map)
 {
   g_clear_object (&color_map->color);
-  color_map->color = gimp_color_button_get_color (GIMP_COLOR_BUTTON (widget));
+  color_map->color = clay_color_button_get_color (CLAY_COLOR_BUTTON (widget));
 
   if (ifsD->in_update)
     return;
@@ -2140,11 +2140,11 @@ color_map_color_changed_cb (GtkWidget *widget,
 static void
 color_map_update (ColorMap *color_map)
 {
-  gimp_color_button_set_color (GIMP_COLOR_BUTTON (color_map->button),
+  clay_color_button_set_color (CLAY_COLOR_BUTTON (color_map->button),
                                color_map->color);
 
   if (color_map->fixed_point)
-    gimp_color_area_set_color (GIMP_COLOR_AREA (color_map->orig_preview), color_map->color);
+    clay_color_area_set_color (CLAY_COLOR_AREA (color_map->orig_preview), color_map->color);
 }
 
 static void
@@ -2202,7 +2202,7 @@ value_pair_create (gpointer      data,
                                                (upper - lower) / 100,
                                                (upper - lower) / 10,
                                                0.0);
-  value_pair->spin = gimp_spin_button_new (value_pair->adjustment, 1.0, 3);
+  value_pair->spin = clay_spin_button_new (value_pair->adjustment, 1.0, 3);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (value_pair->spin), TRUE);
   gtk_widget_set_size_request (value_pair->spin, 72, -1);
 
@@ -2380,7 +2380,7 @@ ifs_compose_set_defaults (void)
   GeglColor *color;
   gint       i;
 
-  color = gimp_context_get_foreground ();
+  color = clay_context_get_foreground ();
 
   ifsvals.aspect_ratio =
     (gdouble)ifsD->drawable_height / ifsD->drawable_width;
@@ -2473,7 +2473,7 @@ ifsfile_save_response (GtkNativeDialog *dialog,
         {
           gchar *message =
             g_strdup_printf (_("Could not open '%s' for writing: %s"),
-                             gimp_filename_to_utf8 (filename),
+                             clay_filename_to_utf8 (filename),
                              g_strerror (errno));
 
           ifscompose_message_dialog (GTK_MESSAGE_ERROR, NULL,
@@ -2570,7 +2570,7 @@ ifsfile_load_response (GtkNativeDialog *dialog,
         {
           gchar *message = g_strdup_printf (_("File '%s' doesn't seem to be "
                                               "an IFS Fractal file."),
-                                            gimp_filename_to_utf8 (filename));
+                                            clay_filename_to_utf8 (filename));
 
           ifscompose_message_dialog (GTK_MESSAGE_ERROR, NULL,
                                      _("Open failed"), message);
@@ -2659,7 +2659,7 @@ ifs_compose_new_action (GSimpleAction *action,
 
   undo_begin ();
 
-  color = gimp_context_get_foreground ();
+  color = clay_context_get_foreground ();
 
   elem = aff_element_new (0.5, 0.5 * allocation.height / allocation.width,
                           color, ++count_for_naming);
@@ -2768,9 +2768,9 @@ preview_idle_render (gpointer data)
 
   ifsD->preview_iterations -= iterations;
 
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (ifsD->preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (ifsD->preview),
                           0, 0, allocation.width, allocation.height,
-                          GIMP_RGB_IMAGE,
+                          CLAY_RGB_IMAGE,
                           ifsD->preview_data,
                           allocation.width * 3);
 
@@ -2815,7 +2815,7 @@ ifs_compose_preview (void)
   if (!ifsD->preview_data)
     ifsD->preview_data = g_new (guchar, 3 * width * height);
 
-  color = gimp_context_get_background ();
+  color = clay_context_get_background ();
   gegl_color_get_pixel (color, babl_format_with_space ("R'G'B' u8", NULL), c);
   g_object_unref (color);
 
@@ -2885,7 +2885,7 @@ ifs_compose_response (GtkWidget *widget,
 
 static void
 window_destroy (GtkWidget *widget,
-                GimpIfs   *ifs)
+                ClayIfs   *ifs)
 {
   if (ifsOptD)
     gtk_widget_destroy (ifsOptD->dialog);

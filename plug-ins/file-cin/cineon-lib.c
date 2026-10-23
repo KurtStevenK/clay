@@ -31,12 +31,12 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "cineon-lib.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static gboolean       read_8bpc_line  (GeglBuffer *buffer,
@@ -60,17 +60,17 @@ static gboolean       read_10bpc_line (GeglBuffer *buffer,
                                        gboolean    is_network_order,
                                        GError    **error);
 
-GimpImage *
+ClayImage *
 cineon_open (GFile   *file,
              GError **error)
 {
   CineonGenericHeader  header;
   FILE                *fp;
-  GimpImage           *image  = NULL;
-  GimpImageBaseType    image_type;
-  GimpImageType        layer_type;
-  GimpLayer           *layer;
-  GimpPrecision        precision;
+  ClayImage           *image  = NULL;
+  ClayImageBaseType    image_type;
+  ClayImageType        layer_type;
+  ClayLayer           *layer;
+  ClayPrecision        precision;
   GeglBuffer          *cin_buffer;
   guint                width;
   guint                height;
@@ -88,7 +88,7 @@ cineon_open (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -107,10 +107,10 @@ cineon_open (GFile   *file,
   bpp    = header.imageInfo.channel[0].bits_per_pixel;
   offset = g_ntohl (header.fileInfo.image_offset);
 
-  if (width > GIMP_MAX_IMAGE_SIZE  ||
-      height > GIMP_MAX_IMAGE_SIZE)
+  if (width > CLAY_MAX_IMAGE_SIZE  ||
+      height > CLAY_MAX_IMAGE_SIZE)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       fclose (fp);
@@ -120,17 +120,17 @@ cineon_open (GFile   *file,
   switch (depth)
     {
     case 1:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAY_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAY_IMAGE;
       break;
 
     case 3:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGB_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGB_IMAGE;
       break;
 
     default:
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image with %d channels not yet supported."),
                    depth);
       fclose (fp);
@@ -140,17 +140,17 @@ cineon_open (GFile   *file,
   switch (bpp)
     {
     case 8:
-      precision     = GIMP_PRECISION_U8_NON_LINEAR;
+      precision     = CLAY_PRECISION_U8_NON_LINEAR;
       buffer_length = ceil ((width * depth) / 4.0);
       break;
 
     case 10:
-      precision     = GIMP_PRECISION_U16_NON_LINEAR;
+      precision     = CLAY_PRECISION_U16_NON_LINEAR;
       buffer_length = ((width * depth) + 2) / 3;
       break;
 
     default:
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image with %d bpc not yet supported."),
                    bpp);
       fclose (fp);
@@ -165,7 +165,7 @@ cineon_open (GFile   *file,
 
   if (! buffer || (! pixels && ! pixels_8))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Memory could not be allocated."));
       fclose (fp);
       g_free (buffer);
@@ -179,7 +179,7 @@ cineon_open (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read image data from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       g_free (buffer);
       g_free (pixels);
@@ -187,15 +187,15 @@ cineon_open (GFile   *file,
       return NULL;
     }
 
-  image = gimp_image_new_with_precision (width, height, image_type,
+  image = clay_image_new_with_precision (width, height, image_type,
                                          precision);
 
-  layer = gimp_layer_new (image, NULL, width, height,
+  layer = clay_layer_new (image, NULL, width, height,
                           layer_type, 100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  cin_buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  cin_buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
   for (gint y = 0; y < height; y++)
     {
       gint read_index = 0;
@@ -205,7 +205,7 @@ cineon_open (GFile   *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not read image data from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           fclose (fp);
           g_object_unref (cin_buffer);
           g_free (buffer);

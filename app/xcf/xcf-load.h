@@ -18,21 +18,21 @@
 #pragma once
 
 
-GimpImage * xcf_load_image         (Gimp           *gimp,
+ClayImage * xcf_load_image         (Clay           *clay,
                                     XcfInfo        *info,
                                     GError        **error);
 
-gboolean    xcf_load_magic_version (Gimp           *gimp,
+gboolean    xcf_load_magic_version (Clay           *clay,
                                     GInputStream   *input,
                                     GFile          *input_file,
-                                    GimpProgress   *progress,
+                                    ClayProgress   *progress,
                                     XcfInfo        *info);
-gboolean    xcf_load_image_header  (Gimp           *gimp,
+gboolean    xcf_load_image_header  (Clay           *clay,
                                     XcfInfo        *info,
                                     gint           *width,
                                     gint           *height,
                                     gint           *image_type,
-                                    GimpPrecision  *precision,
+                                    ClayPrecision  *precision,
                                     GList          *prev_files,
                                     GList         **loop_files,
                                     gboolean       *loop_found,

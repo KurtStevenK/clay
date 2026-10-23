@@ -28,7 +28,7 @@
 
 #include <gtk/gtk.h>
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 #include "tinyscheme/scheme-private.h"
 #if USE_DL
@@ -73,7 +73,7 @@ static pointer  script_fu_marshal_arg_to_value                    (scheme       
                                                                    GValue              *value,
                                                                    gchar              **strvalue);
 
-static pointer  script_fu_gimp_show_uri                           (scheme              *sc,
+static pointer  script_fu_clay_show_uri                           (scheme              *sc,
                                                                    pointer              a);
 
 static pointer  script_fu_marshal_procedure_call                  (scheme              *sc,
@@ -92,8 +92,8 @@ static pointer  script_fu_marshal_procedure_exists                (scheme       
 static pointer  script_fu_marshal_drawable_create_filter          (scheme              *sc,
                                                                    pointer              a,
                                                                    const gchar         *proc_name,
-                                                                   GimpDrawable       **drawable,
-                                                                   GimpDrawableFilter **filter);
+                                                                   ClayDrawable       **drawable,
+                                                                   ClayDrawableFilter **filter);
 static pointer  script_fu_marshal_drawable_filter_configure_call  (scheme              *sc,
                                                                    pointer              a);
 static pointer  script_fu_marshal_drawable_filter_set_aux_call    (scheme              *sc,
@@ -138,23 +138,23 @@ typedef struct
 /* LHS is text in a script, RHS is constant defined in C. */
 static const NamedConstant script_constants[] =
 {
-  /* Useful values from libgimpbase/gimplimits.h */
-  { "MIN-IMAGE-SIZE", GIMP_MIN_IMAGE_SIZE },
-  { "MAX-IMAGE-SIZE", GIMP_MAX_IMAGE_SIZE },
+  /* Useful values from libclaybase/claylimits.h */
+  { "MIN-IMAGE-SIZE", CLAY_MIN_IMAGE_SIZE },
+  { "MAX-IMAGE-SIZE", CLAY_MAX_IMAGE_SIZE },
   /* Note conversion to int, loss of precision: 0.005=>0 */
-  { "MIN-RESOLUTION", (gint) GIMP_MIN_RESOLUTION },
-  { "MAX-RESOLUTION", GIMP_MAX_RESOLUTION },
+  { "MIN-RESOLUTION", (gint) CLAY_MIN_RESOLUTION },
+  { "MAX-RESOLUTION", CLAY_MAX_RESOLUTION },
 
   /* Useful misc stuff */
   { "TRUE",           TRUE  },
   { "FALSE",          FALSE },
 
   /* Builtin units */
-  { "UNIT-PIXEL",     GIMP_UNIT_PIXEL },
-  { "UNIT-INCH",      GIMP_UNIT_INCH  },
-  { "UNIT-MM",        GIMP_UNIT_MM    },
-  { "UNIT-POINT",     GIMP_UNIT_POINT },
-  { "UNIT-PICA",      GIMP_UNIT_PICA  },
+  { "UNIT-PIXEL",     CLAY_UNIT_PIXEL },
+  { "UNIT-INCH",      CLAY_UNIT_INCH  },
+  { "UNIT-MM",        CLAY_UNIT_MM    },
+  { "UNIT-POINT",     CLAY_UNIT_POINT },
+  { "UNIT-PICA",      CLAY_UNIT_PICA  },
 
   /* Script-Fu types */
 
@@ -253,14 +253,14 @@ tinyscheme_init (GList    *path,
 
   /* Fetch the typelib */
   repo = g_irepository_get_default ();
-  typelib = g_irepository_require (repo, "Gimp", NULL, 0, &error);
+  typelib = g_irepository_require (repo, "Clay", NULL, 0, &error);
   if (!typelib)
     {
       g_warning ("%s", error->message);
       g_clear_error (&error);
       return;
     }
-  typelib = g_irepository_require (repo, "GimpUi", NULL, 0, &error);
+  typelib = g_irepository_require (repo, "ClayUi", NULL, 0, &error);
   if (!typelib)
     {
       g_warning ("%s", error->message);
@@ -268,7 +268,7 @@ tinyscheme_init (GList    *path,
       return;
     }
 
-  /* register in the interpreter the gimp functions and types. */
+  /* register in the interpreter the clay functions and types. */
   ts_init_constants (&sc, repo);
   ts_init_procedures (&sc, register_scripts);
 
@@ -276,10 +276,10 @@ tinyscheme_init (GList    *path,
 }
 
 /* Create an SF-RUN-MODE constant for use in scripts.
- * It is set to the run mode state determined by GIMP.
+ * It is set to the run mode state determined by Clay.
  */
 void
-ts_set_run_mode (GimpRunMode run_mode)
+ts_set_run_mode (ClayRunMode run_mode)
 {
   pointer symbol;
 
@@ -386,7 +386,7 @@ ts_register_post_command_callback (TsCallbackFunc callback)
 
 /*
  * Below can be found the functions responsible for registering the
- * gimp functions and types against the scheme interpreter.
+ * clay functions and types against the scheme interpreter.
  */
 
 /* Define a symbol into interpreter state, bound to a string, immutable. */
@@ -406,11 +406,11 @@ static void
 ts_init_constants (scheme       *sc,
                    GIRepository *repo)
 {
-  ts_define_constant_string (sc, "gimp-directory",         gimp_directory ());
-  ts_define_constant_string (sc, "gimp-data-directory",    gimp_data_directory ());
-  ts_define_constant_string (sc, "gimp-plug-in-directory", gimp_plug_in_directory ());
-  ts_define_constant_string (sc, "gimp-locale-directory",  gimp_locale_directory ());
-  ts_define_constant_string (sc, "gimp-sysconf-directory", gimp_sysconf_directory ());
+  ts_define_constant_string (sc, "clay-directory",         clay_directory ());
+  ts_define_constant_string (sc, "clay-data-directory",    clay_data_directory ());
+  ts_define_constant_string (sc, "clay-plug-in-directory", clay_plug_in_directory ());
+  ts_define_constant_string (sc, "clay-locale-directory",  clay_locale_directory ());
+  ts_define_constant_string (sc, "clay-sysconf-directory", clay_sysconf_directory ());
 
   {
     gchar *path;
@@ -423,8 +423,8 @@ ts_init_constants (scheme       *sc,
     g_free (path);
   }
 
-  ts_init_enums (sc, repo, "Gimp");
-  ts_init_enums (sc, repo, "GimpUi");
+  ts_init_enums (sc, repo, "Clay");
+  ts_init_enums (sc, repo, "ClayUi");
   ts_init_enums (sc, repo, "Gegl");
 
   /* Constants used in the register block of scripts e.g. SF-ADJUSTMENT */
@@ -474,12 +474,12 @@ ts_init_enum (scheme     *sc,
         }
 
       /* Scheme-ify the name */
-      if (g_strcmp0 (namespace, "Gimp") == 0 ||
-          g_strcmp0 (namespace, "GimpUi") == 0)
+      if (g_strcmp0 (namespace, "Clay") == 0 ||
+          g_strcmp0 (namespace, "ClayUi") == 0)
         {
-          /* Skip the GIMP prefix for GIMP enums */
-          if (g_str_has_prefix (c_identifier, "GIMP_"))
-            c_identifier += strlen ("GIMP_");
+          /* Skip the Clay prefix for Clay enums */
+          if (g_str_has_prefix (c_identifier, "CLAY_"))
+            c_identifier += strlen ("CLAY_");
         }
       else
         {
@@ -582,28 +582,28 @@ ts_define_procedure (sc, "load-extension", scm_load_ext);
   ts_define_procedure (sc, "script-fu-use-v2",    script_fu_use_v2_call);
   ts_define_procedure (sc, "script-fu-quit",      script_fu_quit_call);
 
-  ts_define_procedure (sc, "gimp-show-uri", script_fu_gimp_show_uri);
+  ts_define_procedure (sc, "clay-show-uri", script_fu_clay_show_uri);
 
   /* Define wrapper functions, not used in scripts.
    * FUTURE: eliminate all but one, deprecated and permissive is obsolete.
    */
-  ts_define_procedure (sc, "gimp-proc-db-call",   script_fu_marshal_procedure_call_strict);
-  ts_define_procedure (sc, "-gimp-proc-db-call",  script_fu_marshal_procedure_call_permissive);
-  ts_define_procedure (sc, "--gimp-proc-db-call", script_fu_marshal_procedure_call_deprecated);
+  ts_define_procedure (sc, "clay-proc-db-call",   script_fu_marshal_procedure_call_strict);
+  ts_define_procedure (sc, "-clay-proc-db-call",  script_fu_marshal_procedure_call_permissive);
+  ts_define_procedure (sc, "--clay-proc-db-call", script_fu_marshal_procedure_call_deprecated);
 
-  ts_define_procedure (sc, "gimp-pdb-procedure-exists", script_fu_marshal_procedure_exists);
+  ts_define_procedure (sc, "clay-pdb-procedure-exists", script_fu_marshal_procedure_exists);
 
-  ts_define_procedure (sc, "gimp-drawable-filter-configure", script_fu_marshal_drawable_filter_configure_call);
-  ts_define_procedure (sc, "gimp-drawable-filter-set-aux-input", script_fu_marshal_drawable_filter_set_aux_call);
-  ts_define_procedure (sc, "gimp-drawable-merge-filter", script_fu_marshal_drawable_merge_filter_call);
-  ts_define_procedure (sc, "gimp-drawable-append-filter", script_fu_marshal_drawable_append_filter_call);
-  ts_define_procedure (sc, "gimp-drawable-merge-new-filter", script_fu_marshal_drawable_merge_new_filter_call);
-  ts_define_procedure (sc, "gimp-drawable-append-new-filter", script_fu_marshal_drawable_append_new_filter_call);
+  ts_define_procedure (sc, "clay-drawable-filter-configure", script_fu_marshal_drawable_filter_configure_call);
+  ts_define_procedure (sc, "clay-drawable-filter-set-aux-input", script_fu_marshal_drawable_filter_set_aux_call);
+  ts_define_procedure (sc, "clay-drawable-merge-filter", script_fu_marshal_drawable_merge_filter_call);
+  ts_define_procedure (sc, "clay-drawable-append-filter", script_fu_marshal_drawable_append_filter_call);
+  ts_define_procedure (sc, "clay-drawable-merge-new-filter", script_fu_marshal_drawable_merge_new_filter_call);
+  ts_define_procedure (sc, "clay-drawable-append-new-filter", script_fu_marshal_drawable_append_new_filter_call);
 
   /* Define each PDB procedure as a scheme func.
    * Each call passes through one of the wrapper funcs.
    */
-  proc_list = gimp_pdb_query_procedures (gimp_get_pdb (),
+  proc_list = clay_pdb_query_procedures (clay_get_pdb (),
                                          ".*", ".*", ".*", ".*",
                                          ".*", ".*", ".*", ".*");
   num_procs = proc_list ? g_strv_length (proc_list) : 0;
@@ -615,13 +615,13 @@ ts_define_procedure (sc, "load-extension", scm_load_ext);
       /* Build a define that will call the foreign function.
        * The Scheme statement was suggested by Simon Budig.
        *
-       * Call the procedure through -gimp-proc-db-call, which is a more
-       * permissive version of gimp-proc-db-call, that accepts (and ignores)
+       * Call the procedure through -clay-proc-db-call, which is a more
+       * permissive version of clay-proc-db-call, that accepts (and ignores)
        * any number of arguments for nullary procedures, for backward
        * compatibility.
        */
       buff = g_strdup_printf (" (define (%s . args)"
-                              " (apply -gimp-proc-db-call \"%s\" args))",
+                              " (apply -clay-proc-db-call \"%s\" args))",
                               proc_list[i], proc_list[i]);
 
       /*  Execute the 'define'  */
@@ -783,7 +783,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           GParamSpecInt *ispec = G_PARAM_SPEC_INT (arg_spec);
           gint           v     = sc->vptr->ivalue (sc->vptr->pair_car (a));
 
-          if (! (arg_spec->flags & GIMP_PARAM_NO_VALIDATE) &&
+          if (! (arg_spec->flags & CLAY_PARAM_NO_VALIDATE) &&
               (v < ispec->minimum || v > ispec->maximum))
             return script_int_range_error (sc, arg_index, proc_name,
                                            ispec->minimum, ispec->maximum, v);
@@ -804,7 +804,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           GParamSpecUInt *ispec = G_PARAM_SPEC_UINT (arg_spec);
           gint            v     = sc->vptr->ivalue (arg_val);
 
-          if (! (arg_spec->flags & GIMP_PARAM_NO_VALIDATE) &&
+          if (! (arg_spec->flags & CLAY_PARAM_NO_VALIDATE) &&
               (v < ispec->minimum || v > ispec->maximum))
             return script_int_range_error (sc, arg_index, proc_name,
                                            ispec->minimum, ispec->maximum, v);
@@ -825,7 +825,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           GParamSpecUChar *cspec = G_PARAM_SPEC_UCHAR (arg_spec);
           gint             c     = sc->vptr->ivalue (arg_val);
 
-          if (! (arg_spec->flags & GIMP_PARAM_NO_VALIDATE) &&
+          if (! (arg_spec->flags & CLAY_PARAM_NO_VALIDATE) &&
               (c < cspec->minimum || c > cspec->maximum))
             return script_int_range_error (sc, arg_index, proc_name,
                                            cspec->minimum, cspec->maximum, c);
@@ -846,7 +846,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           GParamSpecDouble *dspec = G_PARAM_SPEC_DOUBLE (arg_spec);
           gdouble           d     = sc->vptr->rvalue (arg_val);
 
-          if (! (arg_spec->flags & GIMP_PARAM_NO_VALIDATE) &&
+          if (! (arg_spec->flags & CLAY_PARAM_NO_VALIDATE) &&
               (d < dspec->minimum || d > dspec->maximum))
             return script_float_range_error (sc, arg_index, proc_name, dspec->minimum, dspec->maximum, d);
 
@@ -992,7 +992,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             }
         }
     }
-  else if (GIMP_VALUE_HOLDS_DISPLAY (value))
+  else if (CLAY_VALUE_HOLDS_DISPLAY (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1000,10 +1000,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpDisplay *display;
+          ClayDisplay *display;
           gint         id = sc->vptr->ivalue (arg_val);
 
-          display = gimp_display_get_by_id (id);
+          display = clay_display_get_by_id (id);
 
           g_value_set_object (value, display);
 
@@ -1011,7 +1011,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_IMAGE (value))
+  else if (CLAY_VALUE_HOLDS_IMAGE (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1019,10 +1019,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpImage *image;
+          ClayImage *image;
           gint       id = sc->vptr->ivalue (arg_val);
 
-          image = gimp_image_get_by_id (id);
+          image = clay_image_get_by_id (id);
 
           g_value_set_object (value, image);
 
@@ -1030,7 +1030,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_LAYER (value))
+  else if (CLAY_VALUE_HOLDS_LAYER (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1038,10 +1038,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpLayer *layer;
+          ClayLayer *layer;
           gint       id = sc->vptr->ivalue (arg_val);
 
-          layer = gimp_layer_get_by_id (id);
+          layer = clay_layer_get_by_id (id);
 
           g_value_set_object (value, layer);
 
@@ -1049,7 +1049,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_LAYER_MASK (value))
+  else if (CLAY_VALUE_HOLDS_LAYER_MASK (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1057,10 +1057,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpLayerMask *layer_mask;
+          ClayLayerMask *layer_mask;
           gint           id = sc->vptr->ivalue (arg_val);
 
-          layer_mask = gimp_layer_mask_get_by_id (id);
+          layer_mask = clay_layer_mask_get_by_id (id);
 
           g_value_set_object (value, layer_mask);
 
@@ -1068,7 +1068,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_CHANNEL (value))
+  else if (CLAY_VALUE_HOLDS_CHANNEL (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1076,10 +1076,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpChannel *channel;
+          ClayChannel *channel;
           gint         id = sc->vptr->ivalue (arg_val);
 
-          channel = gimp_channel_get_by_id (id);
+          channel = clay_channel_get_by_id (id);
 
           g_value_set_object (value, channel);
 
@@ -1087,7 +1087,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_DRAWABLE (value))
+  else if (CLAY_VALUE_HOLDS_DRAWABLE (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1105,7 +1105,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_PATH (value))
+  else if (CLAY_VALUE_HOLDS_PATH (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1113,10 +1113,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpPath *path;
+          ClayPath *path;
           gint      id = sc->vptr->ivalue (arg_val);
 
-          path = gimp_path_get_by_id (id);
+          path = clay_path_get_by_id (id);
 
           g_value_set_object (value, path);
 
@@ -1124,7 +1124,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_ITEM (value))
+  else if (CLAY_VALUE_HOLDS_ITEM (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1134,9 +1134,9 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         {
           gint id = sc->vptr->ivalue (arg_val);
 
-          if (gimp_item_id_is_valid (id))
+          if (clay_item_id_is_valid (id))
             {
-              GimpItem *item = gimp_item_get_by_id (id);
+              ClayItem *item = clay_item_get_by_id (id);
               g_value_set_object (value, item);
             }
           else
@@ -1151,7 +1151,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_DRAWABLE_FILTER (value))
+  else if (CLAY_VALUE_HOLDS_DRAWABLE_FILTER (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1161,9 +1161,9 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         {
           gint id = sc->vptr->ivalue (arg_val);
 
-          if (gimp_drawable_filter_id_is_valid (id))
+          if (clay_drawable_filter_id_is_valid (id))
             {
-              GimpDrawableFilter *filter = gimp_drawable_filter_get_by_id (id);
+              ClayDrawableFilter *filter = clay_drawable_filter_get_by_id (id);
 
               g_value_set_object (value, filter);
             }
@@ -1179,7 +1179,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_UNIT (value))
+  else if (CLAY_VALUE_HOLDS_UNIT (value))
     {
       if (! sc->vptr->is_number (arg_val))
         {
@@ -1187,10 +1187,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpUnit *unit;
+          ClayUnit *unit;
           gint      id = sc->vptr->ivalue (arg_val);
 
-          unit = gimp_unit_get_by_id (id);
+          unit = clay_unit_get_by_id (id);
 
           g_value_set_object (value, unit);
 
@@ -1198,7 +1198,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_INT32_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_INT32_ARRAY (value))
     {
       vector = arg_val;
       if (! sc->vptr->is_vector (vector))
@@ -1253,7 +1253,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
                 g_string_append_printf (v, "%s%d", j == 0 ? "" : " ", array[j]);
             }
 
-          gimp_value_take_int32_array (value, array, n_elements);
+          clay_value_take_int32_array (value, array, n_elements);
           if (v)
             {
               *strvalue = g_strdup_printf ("#(%s)", v->str);
@@ -1308,7 +1308,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           debug_vector (sc, vector, "%ld");
         }
     }
-  else if (GIMP_VALUE_HOLDS_DOUBLE_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_DOUBLE_ARRAY (value))
     {
       vector = arg_val;
       if (! sc->vptr->is_vector (vector))
@@ -1342,7 +1342,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
                 g_string_append_printf (v, "%s%f", j == 0 ? "" : " ", array[j]);
             }
 
-          gimp_value_take_double_array (value, array, n_elements);
+          clay_value_take_double_array (value, array, n_elements);
           if (v)
             {
               *strvalue = g_strdup_printf ("#(%s)", v->str);
@@ -1352,7 +1352,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           debug_vector (sc, vector, "%f");
         }
     }
-  else if (GIMP_VALUE_HOLDS_COLOR (value))
+  else if (CLAY_VALUE_HOLDS_COLOR (value))
     {
       GeglColor *color = NULL;
 
@@ -1381,7 +1381,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
       /* Transfer ownership. */
       g_value_take_object (value, color);
     }
-  else if (GIMP_VALUE_HOLDS_COLOR_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_COLOR_ARRAY (value))
     {
       vector = arg_val;
       if (! sc->vptr->is_vector (vector))
@@ -1410,7 +1410,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
                      sc->vptr->list_length (sc,
                                             sc->vptr->pair_car (v_element)) == 3))
                 {
-                  gimp_color_array_free (colors);
+                  clay_color_array_free (colors);
                   g_snprintf (error_str, sizeof (error_str),
                               "Item %d in vector is not a color "
                               "(argument %d for function %s)",
@@ -1446,7 +1446,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
           g_debug ("color vector has %ld elements", sc->vptr->vector_length (vector));
         }
     }
-  else if (GIMP_VALUE_HOLDS_PARASITE (value))
+  else if (CLAY_VALUE_HOLDS_PARASITE (value))
     {
       if (! sc->vptr->is_list (sc, arg_val) ||
           sc->vptr->list_length (sc, arg_val) != 3)
@@ -1455,7 +1455,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
         }
       else
         {
-          GimpParasite parasite;
+          ClayParasite parasite;
           pointer      temp_val;
 
           /* parasite->name */
@@ -1504,7 +1504,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             }
         }
     }
-  else if (GIMP_VALUE_HOLDS_CORE_OBJECT_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_CORE_OBJECT_ARRAY (value))
     {
       /* Now PDB procedures take arrays of Item (Drawable, Vectors, etc.).
        * When future PDB procedures take arrays of Image, Display, Resource, etc.
@@ -1532,14 +1532,14 @@ script_fu_marshal_arg_to_value (scheme       *sc,
       if (strvalue)
         *strvalue = g_strdup_printf ("%s", sc->vptr->string_value (arg_val));
     }
-  else if (G_VALUE_TYPE (value) == GIMP_TYPE_PDB_STATUS_TYPE)
+  else if (G_VALUE_TYPE (value) == CLAY_TYPE_PDB_STATUS_TYPE)
     {
       /* A PDB procedure signature wrongly requires a status. */
       return implementation_error (sc,
                                    "Status is for return types, not arguments",
                                    arg_val);
     }
-  else if (GIMP_VALUE_HOLDS_RESOURCE (value))
+  else if (CLAY_VALUE_HOLDS_RESOURCE (value))
     {
       if (! sc->vptr->is_integer (arg_val))
         {
@@ -1548,7 +1548,7 @@ script_fu_marshal_arg_to_value (scheme       *sc,
       else
         {
           /* Create new instance of a resource object. */
-          GimpResource *resource;
+          ClayResource *resource;
 
           gint resource_id = sc->vptr->ivalue (arg_val);
           /* Resource is abstract superclass. Concrete subclass is e.g. Brush.
@@ -1556,12 +1556,12 @@ script_fu_marshal_arg_to_value (scheme       *sc,
            * ID's are unique across all instances of Resource.
            */
 
-          if (! gimp_resource_id_is_valid (resource_id))
+          if (! clay_resource_id_is_valid (resource_id))
             {
               /* Not the ID of any instance of Resource. */
               return script_error (sc, "runtime: invalid resource ID", a);
             }
-          resource = gimp_resource_get_by_id (resource_id);
+          resource = clay_resource_get_by_id (resource_id);
           if (! g_value_type_compatible (G_OBJECT_TYPE (resource), G_VALUE_TYPE (value)))
             {
               /* not the required subclass held by the gvalue */
@@ -1572,17 +1572,17 @@ script_fu_marshal_arg_to_value (scheme       *sc,
             *strvalue = g_strdup_printf ("%d", resource_id);
         }
     }
-  else if (GIMP_VALUE_HOLDS_EXPORT_OPTIONS (value))
+  else if (CLAY_VALUE_HOLDS_EXPORT_OPTIONS (value))
     {
       /* ExportOptions is work in progress.
-       * For now, you can't instantiate (no gimp_export_options_new())
+       * For now, you can't instantiate (no clay_export_options_new())
        * and a script must always pass the equivalent of NULL
        * when calling PDB functions having formal arg type ExportOptions.
        *
        * TEMPORARY: eat the actual Scheme arg but bind to C NULL.
        * FUTURE: (unlikely) ScriptFu plugins can use non-NULL export options.
        * check Scheme type of actual arg, must be int ID
-       * create a GimpExportOptions (actually a proxy?)
+       * create a ClayExportOptions (actually a proxy?)
        */
       g_value_set_object (value, NULL);
       if (strvalue)
@@ -1600,10 +1600,10 @@ script_fu_marshal_arg_to_value (scheme       *sc,
 }
 
 static pointer
-script_fu_gimp_show_uri (scheme  *sc,
+script_fu_clay_show_uri (scheme  *sc,
                          pointer  a)
 {
-  const gchar *proc_name = "gimp-show-uri";
+  const gchar *proc_name = "clay-show-uri";
   const gchar *uri;
   GError      *error     = NULL;
   gchar        error_str[1024];
@@ -1644,16 +1644,16 @@ script_fu_gimp_show_uri (scheme  *sc,
   return sc->T;
 }
 
-/* Called by the Scheme interpreter on calls to GIMP PDB procedures */
+/* Called by the Scheme interpreter on calls to Clay PDB procedures */
 static pointer
 script_fu_marshal_procedure_call (scheme   *sc,
                                   pointer   a,
                                   gboolean  permissive,
                                   gboolean  deprecated)
 {
-  GimpProcedure        *procedure;
-  GimpProcedureConfig  *config;
-  GimpValueArray       *values = NULL;
+  ClayProcedure        *procedure;
+  ClayProcedureConfig  *config;
+  ClayValueArray       *values = NULL;
   gchar                *proc_name;
   GParamSpec          **arg_specs;
   gint                  n_arg_specs;
@@ -1691,7 +1691,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
     script_fu_progress_report (proc_name);
 
   /*  Attempt to fetch the procedure from the database  */
-  procedure = gimp_pdb_lookup_procedure (gimp_get_pdb (), proc_name);
+  procedure = clay_pdb_lookup_procedure (clay_get_pdb (), proc_name);
 
   if (! procedure)
     {
@@ -1700,8 +1700,8 @@ script_fu_marshal_procedure_call (scheme   *sc,
       return script_error (sc, error_str, 0);
     }
 
-  config    = gimp_procedure_create_config (procedure);
-  arg_specs = gimp_procedure_get_arguments (procedure, &n_arg_specs);
+  config    = clay_procedure_create_config (procedure);
+  arg_specs = clay_procedure_get_arguments (procedure, &n_arg_specs);
   actual_arg_count = sc->vptr->list_length (sc, a) - 1;
 
   a = sc->vptr->pair_cdr (a);
@@ -1717,7 +1717,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
    * Extra supplied args can be discarded.
    * Formerly, this was a deprecated behavior depending on "permissive".
    */
-  if (gimp_procedure_is_internal (procedure))
+  if (clay_procedure_is_internal (procedure))
     {
       if (actual_arg_count > n_arg_specs)
         {
@@ -1733,19 +1733,19 @@ script_fu_marshal_procedure_call (scheme   *sc,
     }
 
   /*  Marshall the supplied arguments  */
-  if ((gimp_procedure_is_internal (procedure) &&
-       /* Internal procedures not starting with "gimp-" are compat
+  if ((clay_procedure_is_internal (procedure) &&
+       /* Internal procedures not starting with "clay-" are compat
         * procedures (former Plug-in procedures which got moved to core
         * PDB) and therefore scripts in the wild may use the named
         * argument syntax. As an exception, we won't forbid these to run
         * and simply output a deprecation warning.
         */
-       g_str_has_prefix (proc_name, "gimp-")) ||
+       g_str_has_prefix (proc_name, "clay-")) ||
       ! sc->vptr->is_arg_name (sc->vptr->pair_car (a)))
     {
       GString *deprecation_warning = NULL;
 
-      if (! gimp_procedure_is_internal (procedure))
+      if (! clay_procedure_is_internal (procedure))
         {
           deprecation_warning = g_string_new ("Calling Plug-In PDB procedures with arguments as an ordered list is deprecated.\n"
                                               "Please use named arguments: (");
@@ -1760,7 +1760,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
 
           consumed_arg_count++;
 
-          if (gimp_procedure_is_internal (procedure) &&
+          if (clay_procedure_is_internal (procedure) &&
               sc->vptr->is_arg_name (sc->vptr->pair_car (a)))
             {
               g_snprintf (error_str, sizeof (error_str),
@@ -1793,7 +1793,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
             }
 
           debug_gvalue (&value);
-          if (! (arg_spec->flags & GIMP_PARAM_NO_VALIDATE) &&
+          if (! (arg_spec->flags & CLAY_PARAM_NO_VALIDATE) &&
               g_param_value_validate (arg_spec, &value))
             {
               gchar error_message[1024];
@@ -1826,7 +1826,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
     }
   else
     {
-      if (gimp_procedure_is_internal (procedure))
+      if (clay_procedure_is_internal (procedure))
         /* This is a compat procedure, i.e. a former official plug-in
          * which we transformed into a core PDB procedure. As an
          * exception, we don't forbid calling it with the named argument
@@ -1895,7 +1895,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
       return script_error (sc, "A script cannot refresh scripts", 0);
 
   g_debug ("%s, calling:%s", G_STRFUNC, proc_name);
-  values = gimp_procedure_run_config (procedure, config);
+  values = clay_procedure_run_config (procedure, config);
   g_clear_object (&config);
 
   /*  Check the return status  */
@@ -1925,7 +1925,7 @@ script_fu_marshal_procedure_call (scheme   *sc,
   g_free (proc_name);
 
   /*  free executed procedure return values  */
-  gimp_value_array_unref (values);
+  clay_value_array_unref (values);
 
   /*  free arguments and values  */
 
@@ -1960,7 +1960,7 @@ static pointer
 script_fu_marshal_procedure_exists (scheme  *sc,
                                     pointer  a)
 {
-  const gchar *proc_name  = "gimp-pdb-procedure-exists";
+  const gchar *proc_name  = "clay-pdb-procedure-exists";
   const gchar *test_proc_name;
   gboolean     exists     = FALSE;
   gchar        error_str[1024];
@@ -1990,7 +1990,7 @@ script_fu_marshal_procedure_exists (scheme  *sc,
 
   test_proc_name = sc->vptr->string_value (sc->vptr->pair_car (a));
 
-  exists = gimp_pdb_procedure_exists (gimp_get_pdb (), test_proc_name);
+  exists = clay_pdb_procedure_exists (clay_get_pdb (), test_proc_name);
 
   if (is_interpret_v3_dialect ())
     return exists ? sc->T : sc->F;
@@ -2012,12 +2012,12 @@ script_fu_marshal_drawable_filter_configure (scheme             *sc,
                                              pointer             a,
                                              const gchar        *proc_name,
                                              gint                arg_index,
-                                             GimpDrawableFilter *filter)
+                                             ClayDrawableFilter *filter)
 {
   pointer                   return_val  = sc->NIL;
-  GimpLayerMode             mode        = GIMP_LAYER_MODE_REPLACE;
+  ClayLayerMode             mode        = CLAY_LAYER_MODE_REPLACE;
   gdouble                   opacity     = 1.0;
-  GimpDrawableFilterConfig *config;
+  ClayDrawableFilterConfig *config;
   gchar                     error_str[1024];
 
   if (sc->vptr->list_length (sc, a) > 0)
@@ -2031,10 +2031,10 @@ script_fu_marshal_drawable_filter_configure (scheme             *sc,
       opacity = sc->vptr->rvalue (sc->vptr->pair_car (a));
       a = sc->vptr->pair_cdr (a);
     }
-  gimp_drawable_filter_set_opacity (filter, opacity);
-  gimp_drawable_filter_set_blend_mode (filter, mode);
+  clay_drawable_filter_set_opacity (filter, opacity);
+  clay_drawable_filter_set_blend_mode (filter, mode);
 
-  config = gimp_drawable_filter_get_config (filter);
+  config = clay_drawable_filter_get_config (filter);
   while (sc->vptr->list_length (sc, a) > 1)
     {
       gchar      *argname;
@@ -2056,7 +2056,7 @@ script_fu_marshal_drawable_filter_configure (scheme             *sc,
           g_snprintf (error_str, sizeof (error_str),
                       "Invalid argument name: %s", argname);
           g_free (argname);
-          gimp_drawable_filter_delete (filter);
+          clay_drawable_filter_delete (filter);
           return script_error (sc, error_str, 0);
         }
       g_value_init (&value, arg_spec->value_type);
@@ -2068,7 +2068,7 @@ script_fu_marshal_drawable_filter_configure (scheme             *sc,
         {
           g_value_unset (&value);
           g_free (argname);
-          gimp_drawable_filter_delete (filter);
+          clay_drawable_filter_delete (filter);
           return return_val;
         }
 
@@ -2086,8 +2086,8 @@ static pointer
 script_fu_marshal_drawable_create_filter (scheme              *sc,
                                           pointer              a,
                                           const gchar         *proc_name,
-                                          GimpDrawable       **drawable,
-                                          GimpDrawableFilter **filter)
+                                          ClayDrawable       **drawable,
+                                          ClayDrawableFilter **filter)
 {
   gchar *operation_name;
   gchar *filter_name = NULL;
@@ -2119,20 +2119,20 @@ script_fu_marshal_drawable_create_filter (scheme              *sc,
     }
   else
     {
-      GimpItem *item;
+      ClayItem *item;
       gint      id;
 
       id   = sc->vptr->ivalue (sc->vptr->pair_car (a));
-      item = gimp_item_get_by_id (id);
+      item = clay_item_get_by_id (id);
 
-      if (item == NULL || ! GIMP_IS_DRAWABLE (item))
+      if (item == NULL || ! CLAY_IS_DRAWABLE (item))
         {
           g_snprintf (error_str, sizeof (error_str),
                       "Invalid Drawable ID: %d", id);
           return script_error (sc, error_str, 0);
         }
 
-      *drawable = GIMP_DRAWABLE (item);
+      *drawable = CLAY_DRAWABLE (item);
     }
 
   a = sc->vptr->pair_cdr (a);
@@ -2146,7 +2146,7 @@ script_fu_marshal_drawable_create_filter (scheme              *sc,
       a = sc->vptr->pair_cdr (a);
     }
 
-  *filter = gimp_drawable_filter_new (*drawable, operation_name, filter_name);
+  *filter = clay_drawable_filter_new (*drawable, operation_name, filter_name);
   g_free (filter_name);
 
   if (*filter == NULL)
@@ -2165,8 +2165,8 @@ static pointer
 script_fu_marshal_drawable_filter_configure_call (scheme  *sc,
                                                   pointer  a)
 {
-  GimpDrawableFilter *filter    = NULL;
-  const gchar        *proc_name = "gimp-drawable-filter-configure";
+  ClayDrawableFilter *filter    = NULL;
+  const gchar        *proc_name = "clay-drawable-filter-configure";
   gchar               error_str[1024];
 
   if (sc->vptr->list_length (sc, a) < 3)
@@ -2198,9 +2198,9 @@ script_fu_marshal_drawable_filter_configure_call (scheme  *sc,
       gint id;
 
       id     = sc->vptr->ivalue (sc->vptr->pair_car (a));
-      filter = gimp_drawable_filter_get_by_id (id);
+      filter = clay_drawable_filter_get_by_id (id);
 
-      if (filter == NULL || ! GIMP_IS_DRAWABLE_FILTER (filter))
+      if (filter == NULL || ! CLAY_IS_DRAWABLE_FILTER (filter))
         {
           g_snprintf (error_str, sizeof (error_str),
                       "Invalid Drawable Filter ID: %d", id);
@@ -2217,9 +2217,9 @@ static pointer
 script_fu_marshal_drawable_filter_set_aux_call (scheme  *sc,
                                                 pointer  a)
 {
-  const gchar        *proc_name = "gimp-drawable-filter-set-aux-input";
-  GimpDrawableFilter *filter    = NULL;
-  GimpItem           *input     = NULL;
+  const gchar        *proc_name = "clay-drawable-filter-set-aux-input";
+  ClayDrawableFilter *filter    = NULL;
+  ClayItem           *input     = NULL;
   gchar              *pad_name  = NULL;
   gint                id;
   gchar               error_str[1024];
@@ -2238,8 +2238,8 @@ script_fu_marshal_drawable_filter_set_aux_call (scheme  *sc,
      return script_type_error (sc, "numeric", 0, proc_name);
 
   id     = sc->vptr->ivalue (sc->vptr->pair_car (a));
-  filter = gimp_drawable_filter_get_by_id (id);
-  if (filter == NULL || ! GIMP_IS_DRAWABLE_FILTER (filter))
+  filter = clay_drawable_filter_get_by_id (id);
+  if (filter == NULL || ! CLAY_IS_DRAWABLE_FILTER (filter))
     {
       g_snprintf (error_str, sizeof (error_str),
                   "Invalid Drawable Filter ID: %d", id);
@@ -2257,15 +2257,15 @@ script_fu_marshal_drawable_filter_set_aux_call (scheme  *sc,
      return script_type_error (sc, "numeric", 2, proc_name);
 
   id    = sc->vptr->ivalue (sc->vptr->pair_car (a));
-  input = gimp_item_get_by_id (id);
-  if (input == NULL || ! GIMP_IS_DRAWABLE (input))
+  input = clay_item_get_by_id (id);
+  if (input == NULL || ! CLAY_IS_DRAWABLE (input))
     {
       g_snprintf (error_str, sizeof (error_str),
                   "Invalid Drawable ID: %d", id);
       return script_error (sc, error_str, 0);
     }
 
-  gimp_drawable_filter_set_aux_input (filter, pad_name, GIMP_DRAWABLE (input));
+  clay_drawable_filter_set_aux_input (filter, pad_name, CLAY_DRAWABLE (input));
 
   return sc->NIL;
 }
@@ -2274,9 +2274,9 @@ static pointer
 script_fu_marshal_drawable_merge_filter_call (scheme  *sc,
                                               pointer  a)
 {
-  const gchar        *proc_name = "gimp-drawable-merge-filter";
-  GimpItem           *item;
-  GimpDrawableFilter *filter;
+  const gchar        *proc_name = "clay-drawable-merge-filter";
+  ClayItem           *item;
+  ClayDrawableFilter *filter;
   gint                id;
   gchar               error_str[1024];
 
@@ -2292,8 +2292,8 @@ script_fu_marshal_drawable_merge_filter_call (scheme  *sc,
     }
 
   id   = sc->vptr->ivalue (sc->vptr->pair_car (a));
-  item = gimp_item_get_by_id (id);
-  if (item == NULL || ! GIMP_IS_DRAWABLE (item))
+  item = clay_item_get_by_id (id);
+  if (item == NULL || ! CLAY_IS_DRAWABLE (item))
     {
       g_snprintf (error_str, sizeof (error_str),
                   "Invalid Drawable ID: %d", id);
@@ -2302,15 +2302,15 @@ script_fu_marshal_drawable_merge_filter_call (scheme  *sc,
   a = sc->vptr->pair_cdr (a);
 
   id     = sc->vptr->ivalue (sc->vptr->pair_car (a));
-  filter = gimp_drawable_filter_get_by_id (id);
-  if (filter == NULL || ! GIMP_IS_DRAWABLE_FILTER (filter))
+  filter = clay_drawable_filter_get_by_id (id);
+  if (filter == NULL || ! CLAY_IS_DRAWABLE_FILTER (filter))
     {
       g_snprintf (error_str, sizeof (error_str),
                   "Invalid Drawable Filter ID: %d", id);
       return script_error (sc, error_str, 0);
     }
 
-  gimp_drawable_merge_filter (GIMP_DRAWABLE (item), filter);
+  clay_drawable_merge_filter (CLAY_DRAWABLE (item), filter);
 
   return sc->NIL;
 }
@@ -2319,9 +2319,9 @@ static pointer
 script_fu_marshal_drawable_append_filter_call (scheme  *sc,
                                                pointer  a)
 {
-  const gchar        *proc_name = "gimp-drawable-append-filter";
-  GimpItem           *item;
-  GimpDrawableFilter *filter;
+  const gchar        *proc_name = "clay-drawable-append-filter";
+  ClayItem           *item;
+  ClayDrawableFilter *filter;
   gint                id;
   gchar               error_str[1024];
 
@@ -2337,8 +2337,8 @@ script_fu_marshal_drawable_append_filter_call (scheme  *sc,
     }
 
   id   = sc->vptr->ivalue (sc->vptr->pair_car (a));
-  item = gimp_item_get_by_id (id);
-  if (item == NULL || ! GIMP_IS_DRAWABLE (item))
+  item = clay_item_get_by_id (id);
+  if (item == NULL || ! CLAY_IS_DRAWABLE (item))
     {
       g_snprintf (error_str, sizeof (error_str),
                   "Invalid Drawable ID: %d", id);
@@ -2347,15 +2347,15 @@ script_fu_marshal_drawable_append_filter_call (scheme  *sc,
   a = sc->vptr->pair_cdr (a);
 
   id     = sc->vptr->ivalue (sc->vptr->pair_car (a));
-  filter = gimp_drawable_filter_get_by_id (id);
-  if (filter == NULL || ! GIMP_IS_DRAWABLE_FILTER (filter))
+  filter = clay_drawable_filter_get_by_id (id);
+  if (filter == NULL || ! CLAY_IS_DRAWABLE_FILTER (filter))
     {
       g_snprintf (error_str, sizeof (error_str),
                   "Invalid Drawable Filter ID: %d", id);
       return script_error (sc, error_str, 0);
     }
 
-  gimp_drawable_append_filter (GIMP_DRAWABLE (item), filter);
+  clay_drawable_append_filter (CLAY_DRAWABLE (item), filter);
 
   return sc->NIL;
 }
@@ -2364,17 +2364,17 @@ static pointer
 script_fu_marshal_drawable_merge_new_filter_call (scheme  *sc,
                                                   pointer  a)
 {
-  GimpDrawable       *drawable = NULL;
-  GimpDrawableFilter *filter   = NULL;
+  ClayDrawable       *drawable = NULL;
+  ClayDrawableFilter *filter   = NULL;
   pointer             return_val;
 
   return_val = script_fu_marshal_drawable_create_filter (sc, a,
-                                                         "gimp-drawable-merge-new-filter",
+                                                         "clay-drawable-merge-new-filter",
                                                          &drawable, &filter);
   if (return_val != sc->NIL)
     return return_val;
 
-  gimp_drawable_merge_filter (drawable, filter);
+  clay_drawable_merge_filter (drawable, filter);
 
   return sc->NIL;
 }
@@ -2383,19 +2383,19 @@ static pointer
 script_fu_marshal_drawable_append_new_filter_call (scheme  *sc,
                                                    pointer  a)
 {
-  GimpDrawable       *drawable    = NULL;
-  GimpDrawableFilter *filter      = NULL;
+  ClayDrawable       *drawable    = NULL;
+  ClayDrawableFilter *filter      = NULL;
   pointer             return_val;
 
   return_val = script_fu_marshal_drawable_create_filter (sc, a,
-                                                         "gimp-drawable-append-new-filter",
+                                                         "clay-drawable-append-new-filter",
                                                          &drawable, &filter);
   if (return_val != sc->NIL)
     return return_val;
 
-  gimp_drawable_append_filter (drawable, filter);
+  clay_drawable_append_filter (drawable, filter);
 
-  return sc->vptr->mk_integer (sc, gimp_drawable_filter_get_id (filter));
+  return sc->vptr->mk_integer (sc, clay_drawable_filter_get_id (filter));
 }
 
 static pointer

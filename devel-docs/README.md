@@ -1,44 +1,44 @@
 # This file is read-only, please check https://developer.gimp.org
 
 All the developer documentation is exclusively hosted on
-[GIMP Developer website](https://developer.gimp.org/).
+[Clay Developer website](https://developer.gimp.org/).
 
 The `devel-docs` dir only contains some branch-specific information that
 can not be hosted on the developer website, which is mainly the
 **os-support.txt** file and the **modules explanation** below.
 
-![gimp-module-dependencies.svg](gimp-module-dependencies.svg){height=1120px}.
+![clay-module-dependencies.svg](clay-module-dependencies.svg){height=1120px}.
 
-GIMP source tree can be divided into the main application, libraries, plug-ins,
+Clay source tree can be divided into the main application, libraries, plug-ins,
 data files and some stuff that don't fit into these categories. Here are the
 top-level directories:
 
 | Folder          | Description |
 | ---             | ---         |
-| app/            | Source code of the main GIMP application                                              |
+| app/            | Source code of the main Clay application                                              |
 | app-tools/      | Source code of distributed tools                                                      |
 | build/          | Scripts for creating binary packages                                                  |
 | data/           | Data files: dynamics, gradients, palettes…                                            |
 | desktop/        | Desktop integration files                                                             |
 | devel-docs/     | Developers documentation generation files                                             |
 | docs/           | CLI and rc files documentation (manpages)                                             |
-| etc/            | Configuration files installed with GIMP                                               |
+| etc/            | Configuration files installed with Clay                                               |
 | extensions/     | Source code of extensions                                                             |
-| gimp-data/      | Raster or image data files                                                            |
-| **libgimp/**    | Library for plug-ins (core does not link against) (**can have auto-generated files**) |
-| libgimpbase/    | Basic functions shared by core and plug-ins                                           |
-| libgimpcolor/   | Color-related functions shared by core and plug-ins                                   |
-| libgimpconfig/  | Config functions shared by core and plug-ins                                          |
-| libgimpmath/    | Mathematic operations useful for core and plug-ins                                    |
-| libgimpmodule/  | Abstracts dynamic loading of modules (used to implement loadable color selectors and display filters) |
-| libgimpthumb/   | Thumbnail functions shared by core and plug-ins                                       |
-| libgimpwidgets/ | User interface elements (widgets) and utility functions shared by core and plug-ins   |
+| clay-data/      | Raster or image data files                                                            |
+| **libclay/**    | Library for plug-ins (core does not link against) (**can have auto-generated files**) |
+| libclaybase/    | Basic functions shared by core and plug-ins                                           |
+| libclaycolor/   | Color-related functions shared by core and plug-ins                                   |
+| libclayconfig/  | Config functions shared by core and plug-ins                                          |
+| libclaymath/    | Mathematic operations useful for core and plug-ins                                    |
+| libclaymodule/  | Abstracts dynamic loading of modules (used to implement loadable color selectors and display filters) |
+| libclaythumb/   | Thumbnail functions shared by core and plug-ins                                       |
+| libclaywidgets/ | User interface elements (widgets) and utility functions shared by core and plug-ins   |
 | menus/          | XML/XSL files used to generate menus                                                  |
 | modules/        | Color selectors and display filters loadable at run-time                              |
 | pdb/            | Scripts for PDB source code generation                                                |
-| plug-ins/       | Source code for plug-ins distributed with GIMP                                        |
+| plug-ins/       | Source code for plug-ins distributed with Clay                                        |
 | po/             | Translations of strings used in the core application                                  |
-| po-libgimp/     | Translations of strings used in libgimp                                               |
+| po-libclay/     | Translations of strings used in libclay                                               |
 | po-plug-ins/    | Translations of strings used in C plug-ins                                            |
 | po-python/      | Translations of strings used in Python plug-ins                                       |
 | po-script-fu/   | Translations of strings used in Script-Fu scripts                                     |
@@ -46,20 +46,20 @@ top-level directories:
 | po-tips/        | Translations of strings used in tips                                                  |
 | po-windows-installer/ | Translations of strings used in the Windows installer                           |
 | themes/         | Official themes                                                                       |
-| tools/          | Source code for non-distributed GIMP-related tools                                    |
+| tools/          | Source code for non-distributed Clay-related tools                                    |
 | .gitlab/        | Gitlab-related templates or scripts                                                   |
 
-The source code of the main GIMP application is found in the `app/` directory:
+The source code of the main Clay application is found in the `app/` directory:
 
 | Folder          | Description |
 | ---             | ---         |
-| app/actions/    | Code of actions (`GimpAction*` defined in `app/widgets/`) (depends: GTK)         |
-| app/config/     | Config files handling: GimpConfig interface and GimpRc object (depends: GObject) |
-| app/core/       | Core of GIMP **core** (depends: GObject)                                         |
+| app/actions/    | Code of actions (`ClayAction*` defined in `app/widgets/`) (depends: GTK)         |
+| app/config/     | Config files handling: ClayConfig interface and ClayRc object (depends: GObject) |
+| app/core/       | Core of Clay **core** (depends: GObject)                                         |
 | app/dialogs/    | Dialog widgets (depends: GTK)                                                    |
 | app/display/    | Handles displays (e.g. image windows) (depends: GTK)                             |
 | app/file/       | File handling routines in **core** (depends: GIO)                                |
-| app/file-data/  | GIMP file formats (gbr, gex, gih, pat) support (depends: GIO)                    |
+| app/file-data/  | Clay file formats (gbr, gex, gih, pat) support (depends: GIO)                    |
 | app/gegl/       | Wrapper code for babl and GEGL API (depends: babl, GEGL)                         |
 | app/gui/        | Code that puts the user interface together (depends: GTK)                        |
 | app/menus/      | Code for menus (depends: GTK)                                                    |
@@ -78,5 +78,5 @@ The source code of the main GIMP application is found in the `app/` directory:
 This README file is read-only.
 
 Remember: all the developer documentation is exclusively hosted on
-[GIMP Developer website](https://developer.gimp.org/). Do
+[Clay Developer website](https://developer.gimp.org/). Do
 not search nor add documentation files on this dir.

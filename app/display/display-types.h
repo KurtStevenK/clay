@@ -22,28 +22,28 @@
 #include "display/display-enums.h"
 
 
-typedef struct _GimpCanvas               GimpCanvas;
-typedef struct _GimpCanvasGroup          GimpCanvasGroup;
-typedef struct _GimpCanvasItem           GimpCanvasItem;
+typedef struct _ClayCanvas               ClayCanvas;
+typedef struct _ClayCanvasGroup          ClayCanvasGroup;
+typedef struct _ClayCanvasItem           ClayCanvasItem;
 
-typedef struct _GimpDisplayShell         GimpDisplayShell;
-typedef struct _GimpMotionBuffer         GimpMotionBuffer;
+typedef struct _ClayDisplayShell         ClayDisplayShell;
+typedef struct _ClayMotionBuffer         ClayMotionBuffer;
 
-typedef struct _GimpImageWindow          GimpImageWindow;
-typedef struct _GimpMultiWindowStrategy  GimpMultiWindowStrategy;
-typedef struct _GimpSingleWindowStrategy GimpSingleWindowStrategy;
+typedef struct _ClayImageWindow          ClayImageWindow;
+typedef struct _ClayMultiWindowStrategy  ClayMultiWindowStrategy;
+typedef struct _ClaySingleWindowStrategy ClaySingleWindowStrategy;
 
-typedef struct _GimpCursorView           GimpCursorView;
-typedef struct _GimpNavigationEditor     GimpNavigationEditor;
-typedef struct _GimpScaleComboBox        GimpScaleComboBox;
-typedef struct _GimpStatusbar            GimpStatusbar;
+typedef struct _ClayCursorView           ClayCursorView;
+typedef struct _ClayNavigationEditor     ClayNavigationEditor;
+typedef struct _ClayScaleComboBox        ClayScaleComboBox;
+typedef struct _ClayStatusbar            ClayStatusbar;
 
-typedef struct _GimpToolDialog           GimpToolDialog;
-typedef struct _GimpToolGui              GimpToolGui;
-typedef struct _GimpToolWidget           GimpToolWidget;
-typedef struct _GimpToolWidgetGroup      GimpToolWidgetGroup;
+typedef struct _ClayToolDialog           ClayToolDialog;
+typedef struct _ClayToolGui              ClayToolGui;
+typedef struct _ClayToolWidget           ClayToolWidget;
+typedef struct _ClayToolWidgetGroup      ClayToolWidgetGroup;
 
-typedef struct _GimpDisplayXfer          GimpDisplayXfer;
+typedef struct _ClayDisplayXfer          ClayDisplayXfer;
 typedef struct _Selection                Selection;
 
-typedef struct _GimpModifiersManager     GimpModifiersManager;
+typedef struct _ClayModifiersManager     ClayModifiersManager;

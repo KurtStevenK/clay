@@ -19,10 +19,10 @@
 
 
 #ifdef G_OS_WIN32
-#define GIMP_UNIQUE_WIN32_WINDOW_CLASS  L"GimpWin32UniqueHandler"
-#define GIMP_UNIQUE_WIN32_WINDOW_NAME   L"GimpProxy"
+#define CLAY_UNIQUE_WIN32_WINDOW_CLASS  L"ClayWin32UniqueHandler"
+#define CLAY_UNIQUE_WIN32_WINDOW_NAME   L"ClayProxy"
 #endif
 
 
-void  gui_unique_init (Gimp *gimp);
+void  gui_unique_init (Clay *clay);
 void  gui_unique_exit (void);

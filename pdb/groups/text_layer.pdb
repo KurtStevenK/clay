@@ -34,7 +34,7 @@ method.
 
 The arguments are kept as simple as necessary for the basic case. All
 text attributes, however, can be modified with the appropriate
-`gimp_text_layer_set_*()` procedures.
+`clay_text_layer_set_*()` procedures.
 HELP
 
     &marcus_pdb_misc('2008', '2.6');
@@ -54,7 +54,7 @@ HELP
 
     @outargs = (
         { name => 'layer', type => 'text_layer',
-          desc => 'The new text layer. The object belongs to libgimp and you should not free it.' }
+          desc => 'The new text layer. The object belongs to libclay and you should not free it.' }
     );
 
     %invoke = (
@@ -62,7 +62,7 @@ HELP
 {
   if (font == NULL || unit == NULL)
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    /* TODO: write a more explicit error message after
                     * string freeze.
                     */
@@ -73,26 +73,26 @@ HELP
 
   if (success)
     {
-      GimpText  *gimp_text;
+      ClayText  *clay_text;
       GeglColor *color;
 
-      color = gimp_context_get_foreground (context);
+      color = clay_context_get_foreground (context);
 
-      gimp_text = g_object_new (GIMP_TYPE_TEXT,
+      clay_text = g_object_new (CLAY_TYPE_TEXT,
                                 "text",           text,
-                                "gimp",           gimp,
+                                "clay",           clay,
                                 "font",           font,
                                 "font-size",      size,
                                 "font-size-unit", unit,
                                 "color",          color,
                                 NULL);
 
-      layer = GIMP_TEXT_LAYER (gimp_text_layer_new (image, gimp_text));
-      g_object_unref (gimp_text);
+      layer = CLAY_TEXT_LAYER (clay_text_layer_new (image, clay_text));
+      g_object_unref (clay_text);
 
       if (! layer)
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Failed to create text layer"));
 
           success = FALSE;
@@ -125,7 +125,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "text", &text,
                 NULL);
 }
@@ -152,7 +152,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "text", text,
                        NULL);
@@ -185,7 +185,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "markup", &markup,
                 NULL);
 }
@@ -201,7 +201,7 @@ This procedure sets the markup of the styles for a text layer.
 The markup should be in the form of Pango's markup - See
 https://docs.gtk.org/Pango/pango_markup.html for a reference.
 
-Note that GIMP's text tool does not support all of Pango markup. Any unsupported
+Note that Clay's text tool does not support all of Pango markup. Any unsupported
 markup will still be applied to your text layer, yet would be dropped as soon as
 you edit text with the tool.
 HELP
@@ -232,7 +232,7 @@ HELP
 
   if (pango_parse_markup (markup_ptr, -1, 0, NULL, NULL, NULL, error))
     {
-      gimp_text_layer_set (layer,
+      clay_text_layer_set (layer,
                            _("Set text layer markup"),
                            "markup", markup_ptr,
                            NULL);
@@ -270,10 +270,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "font", &font,
                 NULL);
-  /* The GimpText keeps a reference. Therefore unref before returning the
+  /* The ClayText keeps a reference. Therefore unref before returning the
    * pointer so that we don't leak a reference.
    */
   g_object_unref (font);
@@ -301,7 +301,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "font", font,
                        NULL);
@@ -336,7 +336,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-   g_object_get (gimp_text_layer_get_text (layer),
+   g_object_get (clay_text_layer_get_text (layer),
                  "font-size",      &font_size,
                  "font-size-unit", &unit,
                  NULL);
@@ -367,7 +367,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "font-size-unit", unit,
                        "font-size",      font_size,
@@ -399,7 +399,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "antialias", &antialias,
                 NULL);
 }
@@ -426,7 +426,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "antialias", antialias,
                        NULL);
@@ -452,14 +452,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'style', type => 'enum GimpTextHintStyle',
+        { name => 'style', type => 'enum ClayTextHintStyle',
           desc => 'The hint style used for font outlines' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "hint-style", &style,
                 NULL);
 }
@@ -481,14 +481,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'style', type => 'enum GimpTextHintStyle',
+        { name => 'style', type => 'enum ClayTextHintStyle',
           desc => 'The new hint style' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "hint-style", style,
                        NULL);
@@ -519,7 +519,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "kerning", &kerning,
                 NULL);
 }
@@ -546,7 +546,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "kerning", kerning,
                        NULL);
@@ -578,7 +578,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "language", &language,
                 NULL);
 }
@@ -606,7 +606,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "language", language,
                        NULL);
@@ -631,14 +631,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'direction', type => 'enum GimpTextDirection',
+        { name => 'direction', type => 'enum ClayTextDirection',
           desc => 'The based direction used for the text layer.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "base-direction", &direction,
                 NULL);
 }
@@ -659,14 +659,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'direction', type => 'enum GimpTextDirection',
+        { name => 'direction', type => 'enum ClayTextDirection',
           desc => 'The base direction of the text.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "base-direction", direction,
                        NULL);
@@ -691,14 +691,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'justify', type => 'enum GimpTextJustification',
+        { name => 'justify', type => 'enum ClayTextJustification',
           desc => 'The justification used in the text layer.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "justify", &justify,
                 NULL);
 }
@@ -719,14 +719,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'justify', type => 'enum GimpTextJustification',
+        { name => 'justify', type => 'enum ClayTextJustification',
           desc => 'The justification for your text.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "justify", justify,
                        NULL);
@@ -757,7 +757,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  color = gegl_color_duplicate (gimp_text_layer_get_text (layer)->color);
+  color = gegl_color_duplicate (clay_text_layer_get_text (layer)->color);
 }
 CODE
     );
@@ -782,7 +782,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "color", color,
                        NULL);
@@ -813,7 +813,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "indent", &indent,
                 NULL);
 }
@@ -840,7 +840,7 @@ HELP
      %invoke = (
          code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "indent", indent,
                        NULL);
@@ -871,7 +871,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "line-spacing", &line_spacing,
                 NULL);
 }
@@ -898,7 +898,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "line-spacing", line_spacing,
                        NULL);
@@ -930,7 +930,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "letter-spacing", &letter_spacing,
                 NULL);
 }
@@ -958,7 +958,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "letter-spacing", letter_spacing,
                        NULL);
@@ -1001,13 +1001,13 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpTextLayout *layout = gimp_text_layer_get_layout (layer);
+  ClayTextLayout *layout = clay_text_layer_get_layout (layer);
 
   if (layout == NULL)
     success = FALSE;
   else
     {
-       gimp_text_layout_get_offsets (layout, &x, &y);
+       clay_text_layout_get_offsets (layout, &x, &y);
        g_object_unref (layout);
     }
 }
@@ -1030,14 +1030,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'outline', type => 'enum GimpTextOutline',
+        { name => 'outline', type => 'enum ClayTextOutline',
           desc => 'The type of outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "outline", &outline,
                 NULL);
 }
@@ -1057,14 +1057,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'outline', type => 'enum GimpTextOutline',
+        { name => 'outline', type => 'enum ClayTextOutline',
           desc => 'The type of outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline", outline,
                        NULL);
@@ -1095,7 +1095,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-   g_object_get (gimp_text_layer_get_text (layer),
+   g_object_get (clay_text_layer_get_text (layer),
                  "outline-antialias", &outline_antialias,
                  NULL);
 }
@@ -1122,7 +1122,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-antialias", outline_antialias,
                        NULL);
@@ -1146,14 +1146,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'outline_cap_style', type => 'enum GimpCapStyle',
+        { name => 'outline_cap_style', type => 'enum ClayCapStyle',
           desc => 'The cap style of the outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "outline-cap-style", &outline_cap_style,
                 NULL);
 }
@@ -1173,14 +1173,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'outline_cap_style', type => 'enum GimpCapStyle',
+        { name => 'outline_cap_style', type => 'enum ClayCapStyle',
           desc => 'The cap style of the outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-cap-style", outline_cap_style,
                        NULL);
@@ -1211,7 +1211,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  color = gegl_color_duplicate (gimp_text_layer_get_text (layer)->outline_foreground);
+  color = gegl_color_duplicate (clay_text_layer_get_text (layer)->outline_foreground);
 }
 CODE
     );
@@ -1236,7 +1236,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-foreground", color,
                        NULL);
@@ -1267,7 +1267,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-   g_object_get (gimp_text_layer_get_text (layer),
+   g_object_get (clay_text_layer_get_text (layer),
                  "outline-dash-offset", &outline_dash_offset,
                  NULL);
 }
@@ -1294,7 +1294,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-dash-offset", outline_dash_offset,
                        NULL);
@@ -1318,14 +1318,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'outline_direction', type => 'enum GimpTextOutlineDirection',
+        { name => 'outline_direction', type => 'enum ClayTextOutlineDirection',
           desc => 'The direction of the outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "outline-direction", &outline_direction,
                 NULL);
 }
@@ -1345,14 +1345,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'outline_direction', type => 'enum GimpTextOutlineDirection',
+        { name => 'outline_direction', type => 'enum ClayTextOutlineDirection',
           desc => 'The direction of the outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-direction", outline_direction,
                        NULL);
@@ -1376,14 +1376,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'outline_join_style', type => 'enum GimpJoinStyle',
+        { name => 'outline_join_style', type => 'enum ClayJoinStyle',
           desc => 'The join style of the outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  g_object_get (gimp_text_layer_get_text (layer),
+  g_object_get (clay_text_layer_get_text (layer),
                 "outline-join-style", &outline_join_style,
                 NULL);
 }
@@ -1403,14 +1403,14 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'outline_join_style', type => 'enum GimpJoinStyle',
+        { name => 'outline_join_style', type => 'enum ClayJoinStyle',
           desc => 'The join style of the outline in the text layer' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-join-style", outline_join_style,
                        NULL);
@@ -1441,7 +1441,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-   g_object_get (gimp_text_layer_get_text (layer),
+   g_object_get (clay_text_layer_get_text (layer),
                  "outline-miter-limit", &outline_miter_limit,
                  NULL);
 }
@@ -1468,7 +1468,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-miter-limit", outline_miter_limit,
                        NULL);
@@ -1501,7 +1501,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-   g_object_get (gimp_text_layer_get_text (layer),
+   g_object_get (clay_text_layer_get_text (layer),
                  "outline-width", &outline_width,
                  "outline-unit",  &outline_unit,
                  NULL);
@@ -1531,7 +1531,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
                        "outline-width", outline_width,
                        "outline-unit",  outline_unit,
@@ -1566,7 +1566,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-    is_dynamic = gimp_text_layer_get_text (layer)->box_mode == GIMP_TEXT_BOX_DYNAMIC;
+    is_dynamic = clay_text_layer_get_text (layer)->box_mode == CLAY_TEXT_BOX_DYNAMIC;
 }
 CODE
     );
@@ -1578,7 +1578,7 @@ sub text_layer_resize {
     $help = <<'HELP';
 This procedure changes the width and height of a text layer while
 keeping it as a text layer and not converting it to a bitmap like
-gimp_layer_resize() would do.
+clay_layer_resize() would do.
 HELP
 
     barak_pdb_misc('2009', '2.8');
@@ -1586,28 +1586,28 @@ HELP
     @inargs = (
         { name => 'layer', type => 'text_layer',
           desc => 'The text layer' },
-        { name => 'width', type => '0.0 <= double <= GIMP_MAX_IMAGE_SIZE',
+        { name => 'width', type => '0.0 <= double <= CLAY_MAX_IMAGE_SIZE',
           desc => 'The new box width in pixels' },
-        { name => 'height', type => '0.0 <= double <= GIMP_MAX_IMAGE_SIZE',
+        { name => 'height', type => '0.0 <= double <= CLAY_MAX_IMAGE_SIZE',
           desc => 'The new box height in pixels' },
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpText *text = gimp_text_layer_get_text (layer);
+  ClayText *text = clay_text_layer_get_text (layer);
   gdouble   xres, yres;
 
-  gimp_image_get_resolution (gimp_item_get_image (GIMP_ITEM (layer)),
+  clay_image_get_resolution (clay_item_get_image (CLAY_ITEM (layer)),
                              &xres, &yres);
 
-  gimp_text_layer_set (layer,
+  clay_text_layer_set (layer,
                        _("Set text layer attribute"),
-                       "box-mode",   GIMP_TEXT_BOX_FIXED,
-                       "box-width",  gimp_pixels_to_units (width,
+                       "box-mode",   CLAY_TEXT_BOX_FIXED,
+                       "box-width",  clay_pixels_to_units (width,
                                                            text->box_unit,
                                                            xres),
-                       "box-height", gimp_pixels_to_units (height,
+                       "box-height", clay_pixels_to_units (height,
                                                            text->box_unit,
                                                            yres),
                        NULL);
@@ -1617,16 +1617,16 @@ CODE
 }
 
 @headers = qw(<pango/pango.h>
-              "libgimpbase/gimpbase.h"
-              "core/gimpcontext.h"
-              "core/gimpdashpattern.h"
-              "text/gimpfont.h"
-              "text/gimptext.h"
-              "text/gimptextlayer.h"
-              "text/gimptextlayout.h"
-              "gimppdb-utils.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+              "libclaybase/claybase.h"
+              "core/claycontext.h"
+              "core/claydashpattern.h"
+              "text/clayfont.h"
+              "text/claytext.h"
+              "text/claytextlayer.h"
+              "text/claytextlayout.h"
+              "claypdb-utils.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(text_layer_new
             text_layer_get_text
@@ -1682,7 +1682,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Text layer procedures';
-$doc_title = 'gimptextlayer';
+$doc_title = 'claytextlayer';
 $doc_short_desc = 'Functions for querying and manipulating text layers.';
 $doc_long_desc = 'Functions for querying and manipulating text layers.';
 

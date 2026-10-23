@@ -6,8 +6,8 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "map-object-main.h"
 #include "map-object-ui.h"
@@ -41,8 +41,8 @@ static void draw_line               (cairo_t    *cr,
                                      gdouble     cy1,
                                      gdouble     cx2,
                                      gdouble     cy2,
-                                     GimpVector3 a,
-                                     GimpVector3 b);
+                                     ClayVector3 a,
+                                     ClayVector3 b);
 static void draw_wireframe          (cairo_t *cr,
                                      gint startx,
                                      gint starty,
@@ -87,10 +87,10 @@ compute_preview (gint x,
   gdouble      ypostab[PREVIEW_HEIGHT];
   gdouble      realw;
   gdouble      realh;
-  GimpVector3  p1, p2;
+  ClayVector3  p1, p2;
   gdouble      color[4];
-  gdouble      lightcheck[4] = { GIMP_CHECK_LIGHT, GIMP_CHECK_LIGHT, GIMP_CHECK_LIGHT, 1.0 };
-  gdouble      darkcheck[4]  = { GIMP_CHECK_DARK, GIMP_CHECK_DARK, GIMP_CHECK_DARK, 1.0 };
+  gdouble      lightcheck[4] = { CLAY_CHECK_LIGHT, CLAY_CHECK_LIGHT, CLAY_CHECK_LIGHT, 1.0 };
+  gdouble      darkcheck[4]  = { CLAY_CHECK_DARK, CLAY_CHECK_DARK, CLAY_CHECK_DARK, 1.0 };
   gint         xcnt, ycnt, f1, f2;
   guchar       r, g, b;
   glong        index = 0;
@@ -127,15 +127,15 @@ compute_preview (gint x,
     {
       GeglColor *gegl_color;
 
-      gegl_color = gimp_context_get_background ();
-      gimp_color_set_alpha (gegl_color, 1.0);
+      gegl_color = clay_context_get_background ();
+      clay_color_set_alpha (gegl_color, 1.0);
       gegl_color_get_rgba_with_space (gegl_color, &background[0], &background[1],
                                       &background[2], &background[3], NULL);
 
       g_object_unref (gegl_color);
     }
 
-  gimp_vector3_set (&p2, -1.0, -1.0, 0.0);
+  clay_vector3_set (&p2, -1.0, -1.0, 0.0);
 
   cairo_surface_flush (preview_surface);
 
@@ -185,7 +185,7 @@ compute_preview (gint x,
           r = (guchar) (color[0] * 255);
           g = (guchar) (color[1] * 255);
           b = (guchar) (color[2] * 255);
-          GIMP_CAIRO_RGB24_SET_PIXEL((preview_rgb_data + index), r, g, b);
+          CLAY_CAIRO_RGB24_SET_PIXEL((preview_rgb_data + index), r, g, b);
           index += 4;
         }
     }
@@ -257,7 +257,7 @@ draw_lights (cairo_t *cr,
   gdouble dxpos, dypos;
   gint    xpos, ypos;
 
-  gimp_vector_3d_to_2d (startx, starty, pw, ph,
+  clay_vector_3d_to_2d (startx, starty, pw, ph,
                         &dxpos, &dypos, &mapvals.viewpoint,
                         &mapvals.lightsource.position);
   xpos = RINT (dxpos);
@@ -285,7 +285,7 @@ update_light (gint xpos,
   startx = (PREVIEW_WIDTH  - pw) / 2;
   starty = (PREVIEW_HEIGHT - ph) / 2;
 
-  gimp_vector_2d_to_3d (startx, starty, pw, ph, xpos, ypos,
+  clay_vector_2d_to_3d (startx, starty, pw, ph, xpos, ypos,
                         &mapvals.viewpoint, &mapvals.lightsource.position);
 
   gtk_widget_queue_draw (previewarea);
@@ -397,7 +397,7 @@ draw_wireframe_plane (cairo_t *cr,
                       gint pw,
                       gint ph)
 {
-  GimpVector3 v1, v2, a, b, c, d, dir1, dir2;
+  ClayVector3 v1, v2, a, b, c, d, dir1, dir2;
   gint        cnt;
   gdouble     x1, y1, x2, y2, fac;
 
@@ -407,57 +407,57 @@ draw_wireframe_plane (cairo_t *cr,
   /* Find rotated box corners */
   /* ======================== */
 
-  gimp_vector3_set (&v1, 0.5, 0.0, 0.0);
-  gimp_vector3_set (&v2, 0.0, 0.5, 0.0);
+  clay_vector3_set (&v1, 0.5, 0.0, 0.0);
+  clay_vector3_set (&v2, 0.0, 0.5, 0.0);
 
-  gimp_vector3_rotate (&v1,
-                       gimp_deg_to_rad (mapvals.alpha),
-                       gimp_deg_to_rad (mapvals.beta),
-                       gimp_deg_to_rad (mapvals.gamma));
+  clay_vector3_rotate (&v1,
+                       clay_deg_to_rad (mapvals.alpha),
+                       clay_deg_to_rad (mapvals.beta),
+                       clay_deg_to_rad (mapvals.gamma));
 
-  gimp_vector3_rotate (&v2,
-                       gimp_deg_to_rad (mapvals.alpha),
-                       gimp_deg_to_rad (mapvals.beta),
-                       gimp_deg_to_rad (mapvals.gamma));
+  clay_vector3_rotate (&v2,
+                       clay_deg_to_rad (mapvals.alpha),
+                       clay_deg_to_rad (mapvals.beta),
+                       clay_deg_to_rad (mapvals.gamma));
 
-  dir1 = v1; gimp_vector3_normalize (&dir1);
-  dir2 = v2; gimp_vector3_normalize (&dir2);
+  dir1 = v1; clay_vector3_normalize (&dir1);
+  dir2 = v2; clay_vector3_normalize (&dir2);
 
   fac = 1.0 / (gdouble) WIRESIZE;
 
-  gimp_vector3_mul (&dir1, fac);
-  gimp_vector3_mul (&dir2, fac);
+  clay_vector3_mul (&dir1, fac);
+  clay_vector3_mul (&dir2, fac);
 
-  gimp_vector3_add (&a, &mapvals.position, &v1);
-  gimp_vector3_sub (&b, &a, &v2);
-  gimp_vector3_add (&a, &a, &v2);
-  gimp_vector3_sub (&d, &mapvals.position, &v1);
-  gimp_vector3_sub (&d, &d, &v2);
+  clay_vector3_add (&a, &mapvals.position, &v1);
+  clay_vector3_sub (&b, &a, &v2);
+  clay_vector3_add (&a, &a, &v2);
+  clay_vector3_sub (&d, &mapvals.position, &v1);
+  clay_vector3_sub (&d, &d, &v2);
 
   c = b;
 
   for (cnt = 0; cnt <= WIRESIZE; cnt++)
     {
-      gimp_vector_3d_to_2d (startx, starty, pw, ph,
+      clay_vector_3d_to_2d (startx, starty, pw, ph,
                             &x1, &y1, &mapvals.viewpoint, &a);
-      gimp_vector_3d_to_2d (startx, starty, pw, ph,
+      clay_vector_3d_to_2d (startx, starty, pw, ph,
                             &x2, &y2, &mapvals.viewpoint, &b);
 
       cairo_move_to (cr, RINT (x1) + 0.5, RINT (y1) + 0.5);
       cairo_line_to (cr, RINT (x2) + 0.5, RINT (y2) + 0.5);
 
-      gimp_vector_3d_to_2d (startx, starty, pw, ph,
+      clay_vector_3d_to_2d (startx, starty, pw, ph,
                             &x1, &y1, &mapvals.viewpoint, &c);
-      gimp_vector_3d_to_2d (startx, starty, pw, ph,
+      clay_vector_3d_to_2d (startx, starty, pw, ph,
                             &x2, &y2, &mapvals.viewpoint, &d);
 
       cairo_move_to (cr, RINT (x1) + 0.5, RINT (y1) + 0.5);
       cairo_line_to (cr, RINT (x2) + 0.5, RINT (y2) + 0.5);
 
-      gimp_vector3_sub (&a, &a, &dir1);
-      gimp_vector3_sub (&b, &b, &dir1);
-      gimp_vector3_add (&c, &c, &dir2);
-      gimp_vector3_add (&d, &d, &dir2);
+      clay_vector3_sub (&a, &a, &dir1);
+      clay_vector3_sub (&b, &b, &dir1);
+      clay_vector3_add (&c, &c, &dir2);
+      clay_vector3_add (&d, &d, &dir2);
     }
 
   cairo_set_line_width (cr, 3.0);
@@ -474,7 +474,7 @@ draw_wireframe_sphere (cairo_t *cr,
                        gint pw,
                        gint ph)
 {
-  GimpVector3 p[2 * (WIRESIZE + 5)];
+  ClayVector3 p[2 * (WIRESIZE + 5)];
   gint        cnt, cnt2;
   gdouble     x1, y1, x2, y2, twopifac;
 
@@ -491,11 +491,11 @@ draw_wireframe_sphere (cairo_t *cr,
       p[cnt].x = mapvals.radius * cos ((gdouble) cnt * twopifac);
       p[cnt].y = 0.0;
       p[cnt].z = mapvals.radius * sin ((gdouble) cnt * twopifac);
-      gimp_vector3_rotate (&p[cnt],
-                           gimp_deg_to_rad (mapvals.alpha),
-                           gimp_deg_to_rad (mapvals.beta),
-                           gimp_deg_to_rad (mapvals.gamma));
-      gimp_vector3_add (&p[cnt], &p[cnt], &mapvals.position);
+      clay_vector3_rotate (&p[cnt],
+                           clay_deg_to_rad (mapvals.alpha),
+                           clay_deg_to_rad (mapvals.beta),
+                           clay_deg_to_rad (mapvals.gamma));
+      clay_vector3_add (&p[cnt], &p[cnt], &mapvals.position);
     }
 
   p[cnt] = p[0];
@@ -505,11 +505,11 @@ draw_wireframe_sphere (cairo_t *cr,
       p[cnt].x = mapvals.radius * cos ((gdouble) (cnt-(WIRESIZE+1))*twopifac);
       p[cnt].y = mapvals.radius * sin ((gdouble) (cnt-(WIRESIZE+1))*twopifac);
       p[cnt].z = 0.0;
-      gimp_vector3_rotate (&p[cnt],
-                           gimp_deg_to_rad (mapvals.alpha),
-                           gimp_deg_to_rad (mapvals.beta),
-                           gimp_deg_to_rad (mapvals.gamma));
-      gimp_vector3_add (&p[cnt], &p[cnt], &mapvals.position);
+      clay_vector3_rotate (&p[cnt],
+                           clay_deg_to_rad (mapvals.alpha),
+                           clay_deg_to_rad (mapvals.beta),
+                           clay_deg_to_rad (mapvals.gamma));
+      clay_vector3_add (&p[cnt], &p[cnt], &mapvals.position);
     }
 
   p[cnt] = p[WIRESIZE+1];
@@ -519,27 +519,27 @@ draw_wireframe_sphere (cairo_t *cr,
   /* Find rotated axis */
   /* ================= */
 
-  gimp_vector3_set (&p[cnt], 0.0, -0.35, 0.0);
-  gimp_vector3_rotate (&p[cnt],
-                       gimp_deg_to_rad (mapvals.alpha),
-                       gimp_deg_to_rad (mapvals.beta),
-                       gimp_deg_to_rad (mapvals.gamma));
+  clay_vector3_set (&p[cnt], 0.0, -0.35, 0.0);
+  clay_vector3_rotate (&p[cnt],
+                       clay_deg_to_rad (mapvals.alpha),
+                       clay_deg_to_rad (mapvals.beta),
+                       clay_deg_to_rad (mapvals.gamma));
   p[cnt+1] = mapvals.position;
 
-  gimp_vector3_set (&p[cnt+2], 0.0, 0.0, -0.35);
-  gimp_vector3_rotate (&p[cnt+2],
-                       gimp_deg_to_rad (mapvals.alpha),
-                       gimp_deg_to_rad (mapvals.beta),
-                       gimp_deg_to_rad (mapvals.gamma));
+  clay_vector3_set (&p[cnt+2], 0.0, 0.0, -0.35);
+  clay_vector3_rotate (&p[cnt+2],
+                       clay_deg_to_rad (mapvals.alpha),
+                       clay_deg_to_rad (mapvals.beta),
+                       clay_deg_to_rad (mapvals.gamma));
   p[cnt+3] = mapvals.position;
 
   p[cnt + 4] = p[cnt];
-  gimp_vector3_mul (&p[cnt + 4], -1.0);
+  clay_vector3_mul (&p[cnt + 4], -1.0);
   p[cnt + 5] = p[cnt + 1];
 
-  gimp_vector3_add (&p[cnt],     &p[cnt],     &mapvals.position);
-  gimp_vector3_add (&p[cnt + 2], &p[cnt + 2], &mapvals.position);
-  gimp_vector3_add (&p[cnt + 4], &p[cnt + 4], &mapvals.position);
+  clay_vector3_add (&p[cnt],     &p[cnt],     &mapvals.position);
+  clay_vector3_add (&p[cnt + 2], &p[cnt + 2], &mapvals.position);
+  clay_vector3_add (&p[cnt + 4], &p[cnt + 4], &mapvals.position);
 
   /* Draw the circles (equator and zero meridian) */
   /* ============================================ */
@@ -548,9 +548,9 @@ draw_wireframe_sphere (cairo_t *cr,
     {
       if (p[cnt].z > mapvals.position.z && p[cnt + 1].z > mapvals.position.z)
         {
-          gimp_vector_3d_to_2d (startx, starty, pw, ph,
+          clay_vector_3d_to_2d (startx, starty, pw, ph,
                                 &x1, &y1, &mapvals.viewpoint, &p[cnt]);
-          gimp_vector_3d_to_2d (startx, starty, pw, ph,
+          clay_vector_3d_to_2d (startx, starty, pw, ph,
                                 &x2, &y2, &mapvals.viewpoint, &p[cnt + 1]);
 
           cairo_move_to (cr, (gint) (x1 + 0.5) + 0.5, (gint) (y1 + 0.5) + 0.5);
@@ -563,9 +563,9 @@ draw_wireframe_sphere (cairo_t *cr,
 
   for (cnt = 0; cnt < 3; cnt++)
     {
-      gimp_vector_3d_to_2d (startx, starty, pw, ph,
+      clay_vector_3d_to_2d (startx, starty, pw, ph,
                             &x1, &y1, &mapvals.viewpoint, &p[cnt2]);
-      gimp_vector_3d_to_2d (startx, starty, pw, ph,
+      clay_vector_3d_to_2d (startx, starty, pw, ph,
                             &x2, &y2, &mapvals.viewpoint, &p[cnt2 + 1]);
 
       cairo_move_to (cr, RINT (x1) + 0.5, RINT (y1) + 0.5);
@@ -591,14 +591,14 @@ draw_line (cairo_t    *cr,
            gdouble     cy1,
            gdouble     cx2,
            gdouble     cy2,
-           GimpVector3 a,
-           GimpVector3 b)
+           ClayVector3 a,
+           ClayVector3 b)
 {
   gdouble x1, y1, x2, y2;
 
-  gimp_vector_3d_to_2d (startx, starty, pw, ph,
+  clay_vector_3d_to_2d (startx, starty, pw, ph,
                         &x1, &y1, &mapvals.viewpoint, &a);
-  gimp_vector_3d_to_2d (startx, starty, pw, ph,
+  clay_vector_3d_to_2d (startx, starty, pw, ph,
                         &x2, &y2, &mapvals.viewpoint, &b);
 
   cairo_move_to (cr, RINT (x1) + 0.5, RINT (y1) + 0.5);
@@ -612,7 +612,7 @@ draw_wireframe_box (cairo_t *cr,
                     gint pw,
                     gint ph)
 {
-  GimpVector3 p[8], tmp, scale;
+  ClayVector3 p[8], tmp, scale;
   gint        i;
   gdouble     cx1, cy1, cx2, cy2;
 
@@ -625,17 +625,17 @@ draw_wireframe_box (cairo_t *cr,
   init_compute ();
 
   scale = mapvals.scale;
-  gimp_vector3_mul (&scale, 0.5);
+  clay_vector3_mul (&scale, 0.5);
 
-  gimp_vector3_set (&p[0], -scale.x, -scale.y, scale.z);
-  gimp_vector3_set (&p[1],  scale.x, -scale.y, scale.z);
-  gimp_vector3_set (&p[2],  scale.x,  scale.y, scale.z);
-  gimp_vector3_set (&p[3], -scale.x,  scale.y, scale.z);
+  clay_vector3_set (&p[0], -scale.x, -scale.y, scale.z);
+  clay_vector3_set (&p[1],  scale.x, -scale.y, scale.z);
+  clay_vector3_set (&p[2],  scale.x,  scale.y, scale.z);
+  clay_vector3_set (&p[3], -scale.x,  scale.y, scale.z);
 
-  gimp_vector3_set (&p[4], -scale.x, -scale.y, -scale.z);
-  gimp_vector3_set (&p[5],  scale.x, -scale.y, -scale.z);
-  gimp_vector3_set (&p[6],  scale.x,  scale.y, -scale.z);
-  gimp_vector3_set (&p[7], -scale.x,  scale.y, -scale.z);
+  clay_vector3_set (&p[4], -scale.x, -scale.y, -scale.z);
+  clay_vector3_set (&p[5],  scale.x, -scale.y, -scale.z);
+  clay_vector3_set (&p[6],  scale.x,  scale.y, -scale.z);
+  clay_vector3_set (&p[7], -scale.x,  scale.y, -scale.z);
 
   /* Rotate and translate points */
   /* =========================== */
@@ -643,7 +643,7 @@ draw_wireframe_box (cairo_t *cr,
   for (i = 0; i < 8; i++)
     {
       vecmulmat (&tmp, &p[i], rotmat);
-      gimp_vector3_add (&p[i], &tmp, &mapvals.position);
+      clay_vector3_add (&p[i], &tmp, &mapvals.position);
     }
 
   /* Draw the box */
@@ -683,7 +683,7 @@ draw_wireframe_cylinder (cairo_t *cr,
                          gint pw,
                          gint ph)
 {
-  GimpVector3 p[2*8], a, axis, scale;
+  ClayVector3 p[2*8], a, axis, scale;
   gint        i;
   gdouble     cx1, cy1, cx2, cy2;
   gfloat      m[16], l, angle;
@@ -697,18 +697,18 @@ draw_wireframe_cylinder (cairo_t *cr,
   init_compute ();
 
   scale = mapvals.scale;
-  gimp_vector3_mul (&scale, 0.5);
+  clay_vector3_mul (&scale, 0.5);
 
   l = mapvals.cylinder_length / 2.0;
   angle = 0;
 
-  gimp_vector3_set (&axis, 0.0, 1.0, 0.0);
+  clay_vector3_set (&axis, 0.0, 1.0, 0.0);
 
   for (i = 0; i < 8; i++)
     {
       rotatemat (angle, &axis, m);
 
-      gimp_vector3_set (&a, mapvals.cylinder_radius, 0.0, 0.0);
+      clay_vector3_set (&a, mapvals.cylinder_radius, 0.0, 0.0);
 
       vecmulmat (&p[i], &a, m);
 
@@ -726,7 +726,7 @@ draw_wireframe_cylinder (cairo_t *cr,
   for (i = 0; i < 16; i++)
     {
       vecmulmat (&a, &p[i], rotmat);
-      gimp_vector3_add (&p[i], &a, &mapvals.position);
+      clay_vector3_add (&p[i], &a, &mapvals.position);
     }
 
   /* Draw the box */

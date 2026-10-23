@@ -38,7 +38,7 @@
 
 #include "language.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 static gchar * language_get_system_lang_id (void);
@@ -766,7 +766,7 @@ language_init (const gchar  *language,
 #endif
 
   /*  We already set the locale according to the environment, so just
-   *  return early if no language is set in gimprc.
+   *  return early if no language is set in clayrc.
    */
   if (! language || strlen (language) == 0)
     {
@@ -815,12 +815,12 @@ language_init (const gchar  *language,
 
 #ifdef PLATFORM_OSX
   /* keep the monetary sign characters ASCII so GtkSpinButton accepts
-     the '-' (minus) character. See GNOME/gimp#13641 and GNOME/GTK!8802. */
+     the '-' (minus) character. See GNOME/clay#13641 and GNOME/GTK!8802. */
   setlocale (LC_MONETARY, "C");
 
   /* localize the native parts of the menu bar (the "Window" menu items,
      the "Help" search field etc). (NOTE: the "About/Hide"/"Quit" entries of
-     Clay app menu are from GTK (see: build/macos/2_bundle-gimp-uni_base.py) */
+     Clay app menu are from GTK (see: build/macos/2_bundle-clay-uni_base.py) */
   language_set_macos_menu_bar_lang (language);
 #endif
 
@@ -918,7 +918,7 @@ language_set_macos_menu_bar_lang (const gchar *language)
 {
   /* macOS localize the menu bar with one of the CFBundleLocalizations in Info.plist */
   CFStringRef default_languages = CFSTR ("AppleLanguages");
-  CFStringRef managed_languages = CFSTR ("GIMPAppleLanguages");
+  CFStringRef managed_languages = CFSTR ("CLAYAppleLanguages");
 
   if (language && strlen (language) > 0)
     {

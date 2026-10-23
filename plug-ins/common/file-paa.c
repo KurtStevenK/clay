@@ -27,16 +27,16 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-paa-load"
 #define PLUG_IN_BINARY "file-paa"
-#define PLUG_IN_ROLE   "gimp-file-paa"
+#define PLUG_IN_ROLE   "clay-file-paa"
 
 
 typedef enum
@@ -57,12 +57,12 @@ typedef struct _PaaClass PaaClass;
 
 struct _Paa
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PaaClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -72,21 +72,21 @@ struct _PaaClass
 GType                           paa_get_type          (void);
 
 
-static GList          *         paa_query_procedures  (GimpPlugIn            *plug_in);
-static GimpProcedure  *         paa_create_procedure  (GimpPlugIn            *plug_in,
+static GList          *         paa_query_procedures  (ClayPlugIn            *plug_in);
+static ClayProcedure  *         paa_create_procedure  (ClayPlugIn            *plug_in,
                                                        const gchar           *name);
 
-static GimpValueArray *         paa_load              (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
+static ClayValueArray *         paa_load              (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
                                                        GFile                 *file,
-                                                       GimpMetadata          *metadata,
-                                                       GimpMetadataLoadFlags *flags,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayMetadata          *metadata,
+                                                       ClayMetadataLoadFlags *flags,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
 
-static GimpImage      *         load_image            (GFile                 *file,
-                                                       GimpProcedureConfig   *config,
-                                                       GimpRunMode            run_mode,
+static ClayImage      *         load_image            (GFile                 *file,
+                                                       ClayProcedureConfig   *config,
+                                                       ClayRunMode            run_mode,
                                                        FILE                  *fp,
                                                        GError               **error);
 
@@ -104,16 +104,16 @@ static void                     convert_from_a4r4g4b4 (gushort               dat
                                                        guint                 index,
                                                        guchar               *pixel);
 
-G_DEFINE_TYPE (Paa, paa, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Paa, paa, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PAA_TYPE)
+CLAY_MAIN (PAA_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 paa_class_init (PaaClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = paa_query_procedures;
   plug_in_class->create_procedure = paa_create_procedure;
@@ -126,7 +126,7 @@ paa_init (Paa *paa)
 }
 
 static GList *
-paa_query_procedures (GimpPlugIn *plug_in)
+paa_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -135,49 +135,49 @@ paa_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-paa_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+paa_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            paa_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("PAA Image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file in the PAA file format"),
                                         _("Load file in the Bohemia Interactive "
                                           "PAA file format"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Gruppe Adler",
                                       "Gruppe Adler",
                                       "2020");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "paa");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-paa_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+paa_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   FILE           *fp;
   GError         *error = NULL;
 
@@ -189,9 +189,9 @@ paa_load (GimpProcedure         *procedure,
     {
       g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
@@ -199,30 +199,30 @@ paa_load (GimpProcedure         *procedure,
   fclose (fp);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile                *file,
-            GimpProcedureConfig  *config,
-            GimpRunMode           run_mode,
+            ClayProcedureConfig  *config,
+            ClayRunMode           run_mode,
             FILE                 *fp,
             GError              **error)
 {
-  GimpImage         *image = NULL;
-  GimpLayer         *layer = NULL;
+  ClayImage         *image = NULL;
+  ClayLayer         *layer = NULL;
   GeglBuffer        *buffer;
-  GimpImageBaseType  image_type;
-  GimpImageType      layer_type;
+  ClayImageBaseType  image_type;
+  ClayImageType      layer_type;
   gushort            paa_type;
   gushort            palette_index;
   gint               num_mipmaps = 0;
@@ -231,7 +231,7 @@ load_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read header from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -242,13 +242,13 @@ load_image (GFile                *file,
     case RGBA_4444:
     case RGBA_5551:
     case RGBA_8888:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGBA_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGBA_IMAGE;
       break;
 
     case GRAY_ALPHA:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAYA_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAYA_IMAGE;
       break;
 
     default:
@@ -268,7 +268,7 @@ load_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read header from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -289,7 +289,7 @@ load_image (GFile                *file,
           if (! image)
             g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                          _("Could not read header from '%s'"),
-                         gimp_file_get_utf8_name (file));
+                         clay_file_get_utf8_name (file));
           return image;
         }
       width  = GUINT16_FROM_LE (width);
@@ -311,16 +311,16 @@ load_image (GFile                *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Couldn't read image data from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           return image;
         }
 
       if (image == NULL)
-        image = gimp_image_new (width, height, image_type);
-      layer = gimp_layer_new (image, _("Main surface"), width, height,
+        image = clay_image_new (width, height, image_type);
+      layer = clay_layer_new (image, _("Main surface"), width, height,
                               layer_type, 100,
-                              gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, num_mipmaps);
+                              clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, num_mipmaps);
 
       if (num_mipmaps > 0)
         {
@@ -328,10 +328,10 @@ load_image (GFile                *file,
 
           layer_name = g_strdup_printf ("Mipmap: %dx%d", width, height);
 
-          gimp_item_set_name (GIMP_ITEM (layer), layer_name);
+          clay_item_set_name (CLAY_ITEM (layer), layer_name);
           g_free (layer_name);
         }
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
       /* Non-DDS textures are compressed with LZSS */
       if (paa_type <= RGBA_8888)
@@ -367,7 +367,7 @@ load_image (GFile                *file,
             {
               g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                            _("Couldn't decompress image data from '%s'"),
-                           gimp_file_get_utf8_name (file));
+                           clay_file_get_utf8_name (file));
 
               g_free (raw_data);
               g_free (uncompressed_data);

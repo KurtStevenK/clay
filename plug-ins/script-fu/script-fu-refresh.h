@@ -18,6 +18,6 @@
 #ifndef __SCRIPT_FU_REFRESH_H__
 #define __SCRIPT_FU_REFRESH_H__
 
-void script_fu_register_refresh_procedure (GimpPlugIn *plug_in);
+void script_fu_register_refresh_procedure (ClayPlugIn *plug_in);
 
 #endif /*  __SCRIPT_FU_REFRESH_H__  */

@@ -1,14 +1,14 @@
-gimp_tips = i18n.merge_file(
-  input : 'gimp-tips.xml.in',
+clay_tips = i18n.merge_file(
+  input : 'clay-tips.xml.in',
   output: '@BASENAME@',
   data_dirs: meson.current_source_dir(),
   po_dir: potips_dir,
   install: true,
-  install_dir: gimpdatadir / 'tips',
+  install_dir: claydatadir / 'tips',
 )
 
 fortunes_tips = custom_target('fortunes-tips',
-  input : [ gimp_tips, 'fortunes.xsl', ],
+  input : [ clay_tips, 'fortunes.xsl', ],
   output: 'fortunes-tips',
   command: [
     xsltproc,
@@ -23,9 +23,9 @@ fortunes_tips = custom_target('fortunes-tips',
 if xmllint.found()
   #Copy the DTD to the build directory so xmllint can find it without --path
   #(--path is limited, does not work if the environment have paths with spaces)
-  gimp_tips_dtd = configure_file(
-    input: 'gimp-tips.dtd',
-    output: 'gimp-tips.dtd',
+  clay_tips_dtd = configure_file(
+    input: 'clay-tips.dtd',
+    output: 'clay-tips.dtd',
     copy: true
   )
 
@@ -33,9 +33,9 @@ if xmllint.found()
     command: [
       xmllint,
       '--output', '@OUTPUT@',
-      '--valid', gimp_tips,
+      '--valid', clay_tips,
   ],
-    depend_files: gimp_tips_dtd,
+    depend_files: clay_tips_dtd,
     output: [ 'validate-tips-output.xml' ],
     build_by_default: true,
     install: false

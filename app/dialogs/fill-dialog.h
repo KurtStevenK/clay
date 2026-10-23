@@ -21,21 +21,21 @@
 #pragma once
 
 
-typedef void (* GimpFillCallback) (GtkWidget       *dialog,
+typedef void (* ClayFillCallback) (GtkWidget       *dialog,
                                    GList           *items,
                                    GList           *drawables,
-                                   GimpContext     *context,
-                                   GimpFillOptions *options,
+                                   ClayContext     *context,
+                                   ClayFillOptions *options,
                                    gpointer         user_data);
 
 
 GtkWidget * fill_dialog_new (GList            *items,
                              GList            *drawables,
-                             GimpContext      *context,
+                             ClayContext      *context,
                              const gchar      *title,
                              const gchar      *icon_name,
                              const gchar      *help_id,
                              GtkWidget        *parent,
-                             GimpFillOptions  *options,
-                             GimpFillCallback  callback,
+                             ClayFillOptions  *options,
+                             ClayFillCallback  callback,
                              gpointer          user_data);

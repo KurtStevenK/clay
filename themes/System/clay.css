@@ -1,0 +1,241 @@
+/* Clay theme css file */
+
+* {
+    -gtk-icon-style:                   symbolic;
+    -ClayDockWindow-default-height:    300;
+    -ClayMenuDock-minimal-width:       200;
+    -ClayDockWindow-menu-preview-size: button;
+    -ClayToolPalette-tool-icon-size:   large-toolbar;
+    -ClayToolPalette-button-relief:    none;
+    -ClayDock-tool-icon-size:          large-toolbar;
+    -ClayDockbook-tab-icon-size:       button;
+    -ClayColorNotebook-tab-icon-size:  button;
+    -ClayDockable-content-border:      2;
+    -ClayEditor-content-spacing:       2;
+    -ClayEditor-button-spacing:        2;
+    -ClayEditor-button-icon-size:      menu;
+    -ClayDataEditor-minimal-height:    96;
+    -GtkDialog-content-area-border:    0;
+    -GtkDialog-button-spacing:         6;
+    -GtkDialog-action-area-border:     12;
+    -ClayUnitComboBox-appears-as-list: 0;
+}
+
+ClayToolDialog {
+    -GtkDialog-action-area-border: 6;
+}
+
+ClayColorNotebook tab {
+    padding: 0 0 0 0;
+}
+
+/* Define colors so the nib handle appears in Clay Ink Options */
+ClayBlobEditor {
+  color: @theme_fg_color;
+  background-color: @theme_bg_color;
+  border: 0.1em solid @theme_fg_color;
+}
+
+ClayDock entry,
+ClayDock spinbutton,
+ClayDock ClayColorNotebook spinbutton,
+ClayDock ClayColorNotebook spinbutton entry,
+ClayDock ClayColorScales spinbutton,
+ClayDock ClayColorScales spinbutton entry {
+    min-height: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+ClayColorScale {
+  padding:    2px 12px 2px 12px;
+  min-width:  24px;
+  min-height: 24px;
+}
+ClayColorScale contents trough {
+  min-width:  20px;
+  min-height: 20px;
+}
+ClayColorScale contents trough slider {
+  min-width:  12px;
+  min-height: 12px;
+  margin:     -6px -6px -6px -6px;
+}
+
+ClayColorSelect button.radio  {
+  margin-right: 0px;
+}
+
+ClayColorSelection ColorselCmyk {
+    padding: 2px 2px 2px 2px;
+}
+
+ClayColorHistory button {
+    padding: 3px 3px 3px 3px;
+}
+
+#clay-color-tag-box button {
+    padding: 4px 6px 4px 6px;
+}
+
+tab ClayFgBgView {
+    padding: 6px 6px 6px 6px;
+}
+
+ClayFgBgEditor:active {
+    border-width: 2px 2px 2px 2px;
+}
+
+ClayDock notebook tab {
+    padding: 0 0 0 0;
+}
+
+ClayDock :not(toolbutton) > button,
+ClayOverlayDialog button,
+ClayToolDialog :not(headerbar) button,
+ClayTextStyleEditor button {
+    padding: 0px 2px 0px 2px;
+}
+
+ClayDock :not(toolbutton) > button + button,
+ClayOverlayDialog button + button,
+ClayToolDialog :not(headerbar) button + button,
+ClayTextStyleEditor button + button {
+    margin-right: 4px;
+}
+
+ClayToolDialog headerbar {
+    min-height: 0;
+}
+
+ClayDock frame {
+    -ClayFrame-label-bold:       0;
+    -ClayFrame-label-spacing:    2;
+}
+
+ClayDisplayShell grid > button {
+    min-height: 0;
+    min-width: 0;
+    padding: 0 0 0 0;
+}
+
+ClayDisplayShell progressbar trough,
+ClayDisplayShell progressbar progress {
+    min-height: 1em;
+}
+
+ClayFileDialog progressbar trough,
+ClayFileDialog progressbar progress {
+    min-width: 1px; /* hack */
+    min-height: 1em;
+}
+
+spinbutton entry {
+    border-radius: 3px;
+}
+
+/* 9 button toggles on some transformation tools */
+ClayPivotSelector .toggle {
+  margin-right: 0px;
+}
+
+ClaySpinScale entry {
+    /* Important: prevent overhigh spin scale */
+    min-height: 16px;
+    padding:    0px;
+}
+
+ClaySpinScale entry progress {
+    background-color: @theme_selected_bg_color;
+    border-width:     0px;
+    border-radius:    3px;
+    margin:           0px;
+}
+
+ClaySpinScale button {
+    /* Makes the +- buttons a bit more compact. */
+    padding: 0 1px 0 1px;
+}
+
+
+/* Create appearance of toggle group for enum radio buttons */
+buttonbox button.radio
+{
+  min-height:    24px;
+  min-width:     16px;
+  outline-width: 0px;
+}
+
+buttonbox button.radio image
+{
+  padding: 4px;
+}
+
+buttonbox.horizontal button.radio
+{
+  border-top:    1px solid @borders;
+  border-bottom: 1px solid @borders;
+  border-left:   1px solid @borders;
+}
+
+buttonbox.horizontal button.radio:last-child
+{
+  border-right: 1px solid @borders;
+}
+
+buttonbox.vertical button.radio
+{
+  border-top:   1px solid @borders;
+  border-left:  1px solid @borders;
+  border-right: 1px solid @borders;
+  margin-right: 0px;
+}
+
+buttonbox.vertical button.radio:last-child
+{
+  border-bottom: 1px solid @borders;
+}
+
+buttonbox.horizontal button.radio:not(:first-child)
+{
+  margin-right: -1px;
+}
+
+buttonbox.vertical button.radio:not(:first-child)
+{
+  margin-bottom: -1px;
+}
+
+combobox button {
+  outline-width: 0px;
+}
+
+entry.italic {
+    font-style: italic;
+}
+
+tooltip decoration {
+  box-shadow: 0px 0px;
+}
+
+treeview header button {
+    padding: 6px;
+}
+
+treeview .toggle-icon:not(.visible):hover {
+    border: 1px solid gray;
+    border-radius: 3px;
+}
+
+treeview .toggle-icon:not(.visible):selected {
+    border-color: lightgray;
+}
+
+.metadata-tag-row box {
+    background-color: transparent;
+    margin: 3px;
+}
+
+.metadata-value-label {
+    margin-left: 12px;
+}

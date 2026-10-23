@@ -21,17 +21,17 @@
 #pragma once
 
 
-void        icon_themes_init                    (Gimp        *gimp);
-void        icon_themes_exit                    (Gimp        *gimp);
+void        icon_themes_init                    (Clay        *clay);
+void        icon_themes_exit                    (Clay        *clay);
 
-gboolean    icon_themes_theme_is_default        (Gimp        *gimp,
+gboolean    icon_themes_theme_is_default        (Clay        *clay,
                                                  const gchar *theme_name);
-gboolean    icon_themes_theme_is_legacy         (Gimp        *gimp,
+gboolean    icon_themes_theme_is_legacy         (Clay        *clay,
                                                  const gchar *theme_name);
 
-gchar    ** icon_themes_list_themes             (Gimp        *gimp,
+gchar    ** icon_themes_list_themes             (Clay        *clay,
                                                  gint        *n_themes);
-GFile     * icon_themes_get_theme_dir           (Gimp        *gimp,
+GFile     * icon_themes_get_theme_dir           (Clay        *clay,
                                                  const gchar *theme_name);
 
-gboolean    icon_themes_current_prefer_symbolic (Gimp        *gimp);
+gboolean    icon_themes_current_prefer_symbolic (Clay        *clay);

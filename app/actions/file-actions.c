@@ -20,189 +20,189 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpimage.h"
-#include "core/gimpimagefile.h"
-#include "core/gimpviewable.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/clayimage.h"
+#include "core/clayimagefile.h"
+#include "core/clayviewable.h"
 
-#include "file/gimp-file.h"
+#include "file/clay-file.h"
 
-#include "plug-in/gimppluginmanager-file.h"
+#include "plug-in/claypluginmanager-file.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpactionimpl.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayactionimpl.h"
+#include "widgets/clayhelp-ids.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
 #include "actions.h"
 #include "file-actions.h"
 #include "file-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static void    file_actions_last_opened_update  (GimpContainer   *container,
-                                                 GimpImagefile   *unused,
-                                                 GimpActionGroup *group);
-static void    file_actions_last_opened_reorder (GimpContainer   *container,
-                                                 GimpImagefile   *unused1,
+static void    file_actions_last_opened_update  (ClayContainer   *container,
+                                                 ClayImagefile   *unused,
+                                                 ClayActionGroup *group);
+static void    file_actions_last_opened_reorder (ClayContainer   *container,
+                                                 ClayImagefile   *unused1,
                                                  gint             unused2,
                                                  gint             unused3,
-                                                 GimpActionGroup *group);
-static void    file_actions_close_all_update    (GimpContainer   *images,
-                                                 GimpObject      *unused,
-                                                 GimpActionGroup *group);
+                                                 ClayActionGroup *group);
+static void    file_actions_close_all_update    (ClayContainer   *images,
+                                                 ClayObject      *unused,
+                                                 ClayActionGroup *group);
 static gchar * file_actions_create_label        (const gchar     *format,
                                                  GFile           *file);
 
 
-static const GimpActionEntry file_actions[] =
+static const ClayActionEntry file_actions[] =
 {
-  { "file-open", GIMP_ICON_IMAGE_OPEN,
+  { "file-open", CLAY_ICON_IMAGE_OPEN,
     NC_("file-action", "_Open..."), NULL, { "<primary>O", NULL },
     NC_("file-action", "Open an image file"),
     file_open_cmd_callback,
-    GIMP_HELP_FILE_OPEN },
+    CLAY_HELP_FILE_OPEN },
 
-  { "file-open-as-layers", GIMP_ICON_LAYER,
+  { "file-open-as-layers", CLAY_ICON_LAYER,
     NC_("file-action", "Op_en as Layers..."), NULL, { "<primary><alt>O", NULL },
     NC_("file-action", "Open an image file as layers"),
     file_open_as_layers_cmd_callback,
-    GIMP_HELP_FILE_OPEN_AS_LAYER },
+    CLAY_HELP_FILE_OPEN_AS_LAYER },
 
-  { "file-open-as-link-layers", GIMP_ICON_LAYER,
+  { "file-open-as-link-layers", CLAY_ICON_LAYER,
     NC_("file-action", "Op_en as Link Layer..."), NULL, { "<primary><alt><shift>O", NULL },
     NC_("file-action", "Open an image file as Link layer"),
     file_open_as_link_layer_cmd_callback,
-    GIMP_HELP_FILE_OPEN_AS_LINK_LAYER },
+    CLAY_HELP_FILE_OPEN_AS_LINK_LAYER },
 
-  { "file-open-location", GIMP_ICON_WEB,
+  { "file-open-location", CLAY_ICON_WEB,
     NC_("file-action", "Open _Location..."), NULL, { NULL },
     NC_("file-action", "Open an image file from a specified location"),
     file_open_location_cmd_callback,
-    GIMP_HELP_FILE_OPEN_LOCATION },
+    CLAY_HELP_FILE_OPEN_LOCATION },
 
   { "file-create-template", NULL,
     NC_("file-action", "Create _Template..."), NULL, { NULL },
     NC_("file-action", "Create a new template from this image"),
     file_create_template_cmd_callback,
-    GIMP_HELP_FILE_CREATE_TEMPLATE },
+    CLAY_HELP_FILE_CREATE_TEMPLATE },
 
-  { "file-revert", GIMP_ICON_IMAGE_RELOAD,
+  { "file-revert", CLAY_ICON_IMAGE_RELOAD,
     NC_("file-action", "Re_vert"), NULL, { NULL },
     NC_("file-action", "Reload the image file from disk"),
     file_revert_cmd_callback,
-    GIMP_HELP_FILE_REVERT },
+    CLAY_HELP_FILE_REVERT },
 
-  { "file-close-all", GIMP_ICON_CLOSE_ALL,
+  { "file-close-all", CLAY_ICON_CLOSE_ALL,
     NC_("file-action", "C_lose All"), NULL, { "<primary><shift>W", NULL },
     NC_("file-action", "Close all opened images"),
     file_close_all_cmd_callback,
-    GIMP_HELP_FILE_CLOSE_ALL },
+    CLAY_HELP_FILE_CLOSE_ALL },
 
-  { "file-copy-location", GIMP_ICON_EDIT_COPY,
+  { "file-copy-location", CLAY_ICON_EDIT_COPY,
     NC_("file-action", "Copy _Image Location"), NULL, { NULL },
     NC_("file-action", "Copy image file location to clipboard"),
     file_copy_location_cmd_callback,
-    GIMP_HELP_FILE_COPY_LOCATION },
+    CLAY_HELP_FILE_COPY_LOCATION },
 
-  { "file-show-in-file-manager", GIMP_ICON_FILE_MANAGER,
+  { "file-show-in-file-manager", CLAY_ICON_FILE_MANAGER,
     NC_("file-action", "Show in _File Manager"), NULL, { "<primary><alt>F", NULL },
     NC_("file-action", "Show image file location in the file manager"),
     file_show_in_file_manager_cmd_callback,
-    GIMP_HELP_FILE_SHOW_IN_FILE_MANAGER },
+    CLAY_HELP_FILE_SHOW_IN_FILE_MANAGER },
 
-  { "file-quit", GIMP_ICON_APPLICATION_EXIT,
+  { "file-quit", CLAY_ICON_APPLICATION_EXIT,
     NC_("file-action", "_Quit"), NULL, { "<primary>Q", NULL },
     NC_("file-action", "Quit the Clay Image Beautification Program"),
     file_quit_cmd_callback,
-    GIMP_HELP_FILE_QUIT }
+    CLAY_HELP_FILE_QUIT }
 };
 
-static const GimpEnumActionEntry file_save_actions[] =
+static const ClayEnumActionEntry file_save_actions[] =
 {
-  { "file-save", GIMP_ICON_DOCUMENT_SAVE,
+  { "file-save", CLAY_ICON_DOCUMENT_SAVE,
     NC_("file-action", "_Save"), NULL, { "<primary>S", NULL },
     NC_("file-action", "Save this image"),
-    GIMP_SAVE_MODE_SAVE, FALSE,
-    GIMP_HELP_FILE_SAVE },
+    CLAY_SAVE_MODE_SAVE, FALSE,
+    CLAY_HELP_FILE_SAVE },
 
-  { "file-save-as", GIMP_ICON_DOCUMENT_SAVE_AS,
+  { "file-save-as", CLAY_ICON_DOCUMENT_SAVE_AS,
     NC_("file-action", "Save _As..."), NULL, { "<primary><shift>S", NULL },
     NC_("file-action", "Save this image with a different name"),
-    GIMP_SAVE_MODE_SAVE_AS, FALSE,
-    GIMP_HELP_FILE_SAVE_AS },
+    CLAY_SAVE_MODE_SAVE_AS, FALSE,
+    CLAY_HELP_FILE_SAVE_AS },
 
   { "file-save-a-copy", NULL,
     NC_("file-action", "Save a Cop_y..."), NULL, { NULL },
     NC_("file-action",
         "Save a copy of this image, without affecting the source file "
         "(if any) or the current state of the image"),
-    GIMP_SAVE_MODE_SAVE_A_COPY, FALSE,
-    GIMP_HELP_FILE_SAVE_A_COPY },
+    CLAY_SAVE_MODE_SAVE_A_COPY, FALSE,
+    CLAY_HELP_FILE_SAVE_A_COPY },
 
   { "file-save-and-close", NULL,
     NC_("file-action", "Save and Close..."), NULL, { NULL },
     NC_("file-action", "Save this image and close its window"),
-    GIMP_SAVE_MODE_SAVE_AND_CLOSE, FALSE,
-    GIMP_HELP_FILE_SAVE },
+    CLAY_SAVE_MODE_SAVE_AND_CLOSE, FALSE,
+    CLAY_HELP_FILE_SAVE },
 
   { "file-export", NULL,
     NC_("file-action", "E_xport..."), NULL, { "<primary>E", NULL },
     NC_("file-action", "Export the image"),
-    GIMP_SAVE_MODE_EXPORT, FALSE,
-    GIMP_HELP_FILE_EXPORT },
+    CLAY_SAVE_MODE_EXPORT, FALSE,
+    CLAY_HELP_FILE_EXPORT },
 
   { "file-overwrite", NULL,
     NC_("file-action", "Over_write"), NULL, { NULL },
     NC_("file-action", "Export the image back to the imported file in the import format"),
-    GIMP_SAVE_MODE_OVERWRITE, FALSE,
-    GIMP_HELP_FILE_OVERWRITE },
+    CLAY_SAVE_MODE_OVERWRITE, FALSE,
+    CLAY_HELP_FILE_OVERWRITE },
 
   { "file-export-as", NULL,
     NC_("file-action", "E_xport As..."), NULL, { "<primary><shift>E", NULL },
     NC_("file-action", "Export the image to various file formats such as PNG or JPEG"),
-    GIMP_SAVE_MODE_EXPORT_AS, FALSE,
-    GIMP_HELP_FILE_EXPORT_AS }
+    CLAY_SAVE_MODE_EXPORT_AS, FALSE,
+    CLAY_HELP_FILE_EXPORT_AS }
 };
 
 void
-file_actions_setup (GimpActionGroup *group)
+file_actions_setup (ClayActionGroup *group)
 {
-  GimpEnumActionEntry *entries;
+  ClayEnumActionEntry *entries;
   gint                 n_entries;
   gint                 i;
 
-  gimp_action_group_add_actions (group, "file-action",
+  clay_action_group_add_actions (group, "file-action",
                                  file_actions,
                                  G_N_ELEMENTS (file_actions));
 
-  gimp_action_group_add_enum_actions (group, "file-action",
+  clay_action_group_add_enum_actions (group, "file-action",
                                       file_save_actions,
                                       G_N_ELEMENTS (file_save_actions),
                                       file_save_cmd_callback);
 
-  n_entries = GIMP_GUI_CONFIG (group->gimp->config)->last_opened_size;
+  n_entries = CLAY_GUI_CONFIG (group->clay->config)->last_opened_size;
 
-  entries = g_new0 (GimpEnumActionEntry, n_entries);
+  entries = g_new0 (ClayEnumActionEntry, n_entries);
 
   for (i = 0; i < n_entries; i++)
     {
       entries[i].name           = g_strdup_printf ("file-open-recent-%02d",
                                                    i + 1);
-      entries[i].icon_name      = GIMP_ICON_DOCUMENT_OPEN,
+      entries[i].icon_name      = CLAY_ICON_DOCUMENT_OPEN,
       entries[i].label          = entries[i].name;
       entries[i].tooltip        = NULL;
       entries[i].value          = i;
@@ -216,12 +216,12 @@ file_actions_setup (GimpActionGroup *group)
         entries[i].accelerator[0] = NULL;
     }
 
-  gimp_action_group_add_enum_actions (group, NULL, entries, n_entries,
+  clay_action_group_add_enum_actions (group, NULL, entries, n_entries,
                                       file_open_recent_cmd_callback);
 
   for (i = 0; i < n_entries; i++)
     {
-      gimp_action_group_set_action_visible (group, entries[i].name, FALSE);
+      clay_action_group_set_action_visible (group, entries[i].name, FALSE);
 
       g_free ((gchar *) entries[i].name);
       if (entries[i].accelerator[0])
@@ -230,37 +230,37 @@ file_actions_setup (GimpActionGroup *group)
 
   g_free (entries);
 
-  g_signal_connect_object (group->gimp->documents, "add",
+  g_signal_connect_object (group->clay->documents, "add",
                            G_CALLBACK (file_actions_last_opened_update),
                            group, 0);
-  g_signal_connect_object (group->gimp->documents, "remove",
+  g_signal_connect_object (group->clay->documents, "remove",
                            G_CALLBACK (file_actions_last_opened_update),
                            group, 0);
-  g_signal_connect_object (group->gimp->documents, "reorder",
+  g_signal_connect_object (group->clay->documents, "reorder",
                            G_CALLBACK (file_actions_last_opened_reorder),
                            group, 0);
 
-  file_actions_last_opened_update (group->gimp->documents, NULL, group);
+  file_actions_last_opened_update (group->clay->documents, NULL, group);
 
   /*  also listen to image adding/removal so we catch the case where
    *  the last image is closed but its display stays open.
    */
-  g_signal_connect_object (group->gimp->images, "add",
+  g_signal_connect_object (group->clay->images, "add",
                            G_CALLBACK (file_actions_close_all_update),
                            group, 0);
-  g_signal_connect_object (group->gimp->images, "remove",
+  g_signal_connect_object (group->clay->images, "remove",
                            G_CALLBACK (file_actions_close_all_update),
                            group, 0);
 
-  file_actions_close_all_update (group->gimp->displays, NULL, group);
+  file_actions_close_all_update (group->clay->displays, NULL, group);
 }
 
 void
-file_actions_update (GimpActionGroup *group,
+file_actions_update (ClayActionGroup *group,
                      gpointer         data)
 {
-  Gimp         *gimp           = action_data_get_gimp (data);
-  GimpImage    *image          = action_data_get_image (data);
+  Clay         *clay           = action_data_get_clay (data);
+  ClayImage    *image          = action_data_get_image (data);
   GFile        *file           = NULL;
   GFile        *source         = NULL;
   GFile        *export         = NULL;
@@ -268,21 +268,21 @@ file_actions_update (GimpActionGroup *group,
 
   if (image)
     {
-      file   = gimp_image_get_file (image);
-      source = gimp_image_get_imported_file (image);
-      export = gimp_image_get_exported_file (image);
+      file   = clay_image_get_file (image);
+      source = clay_image_get_imported_file (image);
+      export = clay_image_get_exported_file (image);
     }
 
   show_overwrite =
     (source &&
-     gimp_plug_in_manager_file_procedure_find (gimp->plug_in_manager,
-                                               GIMP_FILE_PROCEDURE_GROUP_EXPORT,
+     clay_plug_in_manager_file_procedure_find (clay->plug_in_manager,
+                                               CLAY_FILE_PROCEDURE_GROUP_EXPORT,
                                                source, NULL));
 
 #define SET_VISIBLE(action,condition) \
-        gimp_action_group_set_action_visible (group, action, (condition) != 0)
+        clay_action_group_set_action_visible (group, action, (condition) != 0)
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 
   SET_SENSITIVE ("file-save",                 image);
   SET_SENSITIVE ("file-save-as",              image);
@@ -300,26 +300,26 @@ file_actions_update (GimpActionGroup *group,
 
   if (file)
     {
-      gimp_action_group_set_action_label (group,
+      clay_action_group_set_action_label (group,
                                           "file-save",
                                           C_("file-action", "_Save"));
     }
   else
     {
-      gimp_action_group_set_action_label (group,
+      clay_action_group_set_action_label (group,
                                           "file-save",
                                           C_("file-action", "_Save..."));
     }
 
   if (export)
     {
-      GimpAction *action;
+      ClayAction *action;
       gchar      *label = file_actions_create_label (_("Export to %s"),
                                                      export);
 
-      gimp_action_group_set_action_label (group, "file-export", label);
+      clay_action_group_set_action_label (group, "file-export", label);
 
-      action = gimp_action_group_get_action (group, "file-export");
+      action = clay_action_group_get_action (group, "file-export");
       g_object_set (action,
                     "ellipsize",       PANGO_ELLIPSIZE_MIDDLE,
                     "max-width-chars", 40,
@@ -329,13 +329,13 @@ file_actions_update (GimpActionGroup *group,
     }
   else if (show_overwrite)
     {
-      GimpAction *action;
+      ClayAction *action;
       gchar      *label = file_actions_create_label (_("Over_write %s"),
                                                      source);
 
-      gimp_action_group_set_action_label (group, "file-overwrite", label);
+      clay_action_group_set_action_label (group, "file-overwrite", label);
 
-      action = gimp_action_group_get_action (group, "file-overwrite");
+      action = clay_action_group_get_action (group, "file-overwrite");
       g_object_set (action,
                     "ellipsize",       PANGO_ELLIPSIZE_MIDDLE,
                     "max-width-chars", 40,
@@ -345,7 +345,7 @@ file_actions_update (GimpActionGroup *group,
     }
   else
     {
-      gimp_action_group_set_action_label (group,
+      clay_action_group_set_action_label (group,
                                           "file-export",
                                           C_("file-action", "E_xport..."));
     }
@@ -360,29 +360,29 @@ file_actions_update (GimpActionGroup *group,
 /*  private functions  */
 
 static void
-file_actions_last_opened_update (GimpContainer   *container,
-                                 GimpImagefile   *unused,
-                                 GimpActionGroup *group)
+file_actions_last_opened_update (ClayContainer   *container,
+                                 ClayImagefile   *unused,
+                                 ClayActionGroup *group)
 {
   gint num_documents;
   gint i;
-  gint n = GIMP_GUI_CONFIG (group->gimp->config)->last_opened_size;
+  gint n = CLAY_GUI_CONFIG (group->clay->config)->last_opened_size;
 
-  num_documents = gimp_container_get_n_children (container);
+  num_documents = clay_container_get_n_children (container);
 
   for (i = 0; i < n; i++)
     {
-      GimpAction *action;
+      ClayAction *action;
       gchar      *name = g_strdup_printf ("file-open-recent-%02d", i + 1);
 
-      action = gimp_action_group_get_action (group, name);
+      action = clay_action_group_get_action (group, name);
 
       if (i < num_documents)
         {
-          GimpImagefile *imagefile = (GimpImagefile *)
-            gimp_container_get_child_by_index (container, i);
+          ClayImagefile *imagefile = (ClayImagefile *)
+            clay_container_get_child_by_index (container, i);
 
-          if (gimp_action_get_viewable (action) != (GimpViewable *) imagefile)
+          if (clay_action_get_viewable (action) != (ClayViewable *) imagefile)
             {
               GFile       *file;
               const gchar *name;
@@ -390,12 +390,12 @@ file_actions_last_opened_update (GimpContainer   *container,
               gchar       *escaped;
               gchar       *label;
 
-              file = gimp_imagefile_get_file (imagefile);
+              file = clay_imagefile_get_file (imagefile);
 
-              name     = gimp_file_get_utf8_name (file);
+              name     = clay_file_get_utf8_name (file);
               basename = g_path_get_basename (name);
 
-              escaped = gimp_escape_uline (basename);
+              escaped = clay_escape_uline (basename);
               g_free (basename);
               /* TRANSLATORS: the %s will be replaced by the file name of a
                * recently opened image.
@@ -433,43 +433,43 @@ file_actions_last_opened_update (GimpContainer   *container,
 }
 
 static void
-file_actions_last_opened_reorder (GimpContainer   *container,
-                                  GimpImagefile   *unused1,
+file_actions_last_opened_reorder (ClayContainer   *container,
+                                  ClayImagefile   *unused1,
                                   gint             unused2,
                                   gint             unused3,
-                                  GimpActionGroup *group)
+                                  ClayActionGroup *group)
 {
   file_actions_last_opened_update (container, unused1, group);
 }
 
 static void
-file_actions_close_all_update (GimpContainer   *images,
-                               GimpObject      *unused,
-                               GimpActionGroup *group)
+file_actions_close_all_update (ClayContainer   *images,
+                               ClayObject      *unused,
+                               ClayActionGroup *group)
 {
-  GimpContainer *container  = group->gimp->displays;
-  gint           n_displays = gimp_container_get_n_children (container);
+  ClayContainer *container  = group->clay->displays;
+  gint           n_displays = clay_container_get_n_children (container);
   gboolean       sensitive  = (n_displays > 0);
 
   if (n_displays == 1)
     {
-      GimpDisplay *display;
+      ClayDisplay *display;
 
-      display = GIMP_DISPLAY (gimp_container_get_first_child (container));
+      display = CLAY_DISPLAY (clay_container_get_first_child (container));
 
-      if (! gimp_display_get_image (display))
+      if (! clay_display_get_image (display))
         sensitive = FALSE;
     }
 
-  gimp_action_group_set_action_sensitive (group, "file-close-all", sensitive, NULL);
+  clay_action_group_set_action_sensitive (group, "file-close-all", sensitive, NULL);
 }
 
 static gchar *
 file_actions_create_label (const gchar *format,
                            GFile       *file)
 {
-  gchar *basename         = g_path_get_basename (gimp_file_get_utf8_name (file));
-  gchar *escaped_basename = gimp_escape_uline (basename);
+  gchar *basename         = g_path_get_basename (clay_file_get_utf8_name (file));
+  gchar *escaped_basename = clay_escape_uline (basename);
   gchar *label            = g_strdup_printf (format, escaped_basename);
 
   g_free (escaped_basename);

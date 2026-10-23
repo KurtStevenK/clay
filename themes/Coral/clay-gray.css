@@ -1,0 +1,34 @@
+/* Coral theme, dim scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(255,233,225);
+@define-color bg-color                   rgb(67,37,30);
+@define-color border-color               rgb(93,64,57);
+@define-color dimmed-fg-color            rgb(208,184,176);
+@define-color disabled-fg-color          rgb(170,145,137);
+@define-color disabled-button-color      rgb(127,100,92);
+@define-color hover-color                rgb(93,64,57);
+@define-color widget-bg-color            rgb(78,49,42);
+@define-color selected-color             rgb(105,76,69);
+@define-color extreme-bg-color           rgb(47,26,21);
+@define-color extreme-selected-color     rgb(93,64,57);
+@define-color strong-border-color        rgb(133,106,98);
+@define-color stronger-border-color      rgb(133,106,98);
+@define-color edge-border-color          rgb(133,106,98);
+@define-color scrollbar-slider-color     rgb(133,106,98);
+@define-color scrollbar-trough-color     rgb(47,26,21);
+@define-color ruler-color                rgba(93,64,57,0.3);
+@define-color accent-color               rgb(255,138,101);
+@define-color accent-hover-color         rgb(255,161,132);
+@define-color on-accent-color            rgb(34,18,15);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

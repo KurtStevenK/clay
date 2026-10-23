@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Gimp-Python - allows the writing of Gimp plugins in Python.
+#   Clay-Python - allows the writing of Clay plugins in Python.
 #   Copyright (C) 2003, 2005  Manish Singh <yosh@gimp.org>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -22,8 +22,8 @@ import os.path
 import sys
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -50,7 +50,7 @@ style_def = """body {
 preamble = """<!DOCTYPE html>
 <html>
 <head>
-<title>CSS Color XHTML written by GIMP</title>
+<title>CSS Color XHTML written by Clay</title>
 %s
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
@@ -63,18 +63,18 @@ postamble = """\n</pre>\n</body>\n</html>\n"""
 def export_colorxhtml(procedure, run_mode, image, file, options, metadata, config, data):
     if file is None:
         error = 'No file given'
-        return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR,
                                            GLib.Error(error))
 
-    if run_mode == Gimp.RunMode.INTERACTIVE:
-        gi.require_version('GimpUi', '3.0')
-        from gi.repository import GimpUi
+    if run_mode == Clay.RunMode.INTERACTIVE:
+        gi.require_version('ClayUi', '3.0')
+        from gi.repository import ClayUi
         gi.require_version('Gtk', '3.0')
         from gi.repository import Gtk
 
-        GimpUi.init ("file-colorxhtml-export")
+        ClayUi.init ("file-colorxhtml-export")
 
-        dialog = GimpUi.ProcedureDialog.new(procedure, config, _("Export as colored HTML text..."))
+        dialog = ClayUi.ProcedureDialog.new(procedure, config, _("Export as colored HTML text..."))
 
         dialog.fill_frame("file-frame", "source-file", False, "aux-file")
         # Set the characters text field as not enabled when the user chooses a file
@@ -83,7 +83,7 @@ def export_colorxhtml(procedure, run_mode, image, file, options, metadata, confi
         dialog.fill(["characters", "file-frame", "font-size", "separate"])
 
         if not dialog.run():
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL,
+            return procedure.new_return_values(Clay.PDBStatusType.CANCEL,
                                                GLib.Error())
 
     source_file = config.get_property("source-file")
@@ -133,7 +133,7 @@ def export_colorxhtml(procedure, run_mode, image, file, options, metadata, confi
     else:
         data = list('X' * 80)
 
-    Gimp.progress_init(_("Saving as colored XHTML"))
+    Clay.progress_init(_("Saving as colored XHTML"))
 
     style = style_def % size
 
@@ -178,7 +178,7 @@ def export_colorxhtml(procedure, run_mode, image, file, options, metadata, confi
 
         html.write('\n')
 
-        Gimp.progress_update(y / float(height))
+        Clay.progress_update(y / float(height))
 
     html.write(postamble)
 
@@ -186,15 +186,15 @@ def export_colorxhtml(procedure, run_mode, image, file, options, metadata, confi
     if separate:
         css.close()
 
-    return Gimp.ValueArray.new_from_values([
-        GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.SUCCESS)
+    return Clay.ValueArray.new_from_values([
+        GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.SUCCESS)
     ])
 
 
-class ColorXhtml(Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class ColorXhtml(Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ 'file-colorxhtml-export' ]
@@ -202,8 +202,8 @@ class ColorXhtml(Gimp.PlugIn):
     def do_create_procedure(self, name):
         procedure = None
         if name == 'file-colorxhtml-export':
-            procedure = Gimp.ExportProcedure.new(self, name,
-                                                 Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.ExportProcedure.new(self, name,
+                                                 Clay.PDBProcType.PLUGIN,
                                                  False, export_colorxhtml, None)
             procedure.set_image_types("RGB")
             procedure.set_documentation (
@@ -232,9 +232,9 @@ class ColorXhtml(Gimp.PlugIn):
                                             False, GObject.ParamFlags.READWRITE)
             #GUI only, used to create a widget to open a file if source-file is enabled
             procedure.add_file_aux_argument ("aux-file", _("Choose File"),
-                                             "", Gimp.FileChooserAction.SAVE,
+                                             "", Clay.FileChooserAction.SAVE,
                                              False, None, GObject.ParamFlags.READWRITE)
 
         return procedure
 
-Gimp.main(ColorXhtml.__gtype__, sys.argv)
+Clay.main(ColorXhtml.__gtype__, sys.argv)

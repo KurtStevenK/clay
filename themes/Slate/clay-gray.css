@@ -1,0 +1,34 @@
+/* Slate theme, dim scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(228,231,235);
+@define-color bg-color                   rgb(43,54,64);
+@define-color border-color               rgb(69,79,88);
+@define-color dimmed-fg-color            rgb(182,187,192);
+@define-color disabled-fg-color          rgb(145,151,158);
+@define-color disabled-button-color      rgb(102,111,119);
+@define-color hover-color                rgb(69,79,88);
+@define-color widget-bg-color            rgb(54,65,74);
+@define-color selected-color             rgb(80,89,98);
+@define-color extreme-bg-color           rgb(30,38,45);
+@define-color extreme-selected-color     rgb(69,79,88);
+@define-color strong-border-color        rgb(108,116,124);
+@define-color stronger-border-color      rgb(108,116,124);
+@define-color edge-border-color          rgb(108,116,124);
+@define-color scrollbar-slider-color     rgb(108,116,124);
+@define-color scrollbar-trough-color     rgb(30,38,45);
+@define-color ruler-color                rgba(69,79,88,0.3);
+@define-color accent-color               rgb(127,179,213);
+@define-color accent-hover-color         rgb(153,194,221);
+@define-color on-accent-color            rgb(22,27,32);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

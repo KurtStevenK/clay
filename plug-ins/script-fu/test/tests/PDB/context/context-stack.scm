@@ -17,27 +17,27 @@
 ; test the sequence push, pop i.e. the normal sequence
 
 ; Test initial condition is context:antialias true
-(assert-PDB-true `(gimp-context-get-antialias))
+(assert-PDB-true `(clay-context-get-antialias))
 
 ; push succeeds
-(assert `(gimp-context-push))
+(assert `(clay-context-push))
 
 ; Set antialias false in new context
 ; FUTURE pass #f
-(assert `(gimp-context-set-antialias 0))
-(assert-PDB-false `(gimp-context-get-antialias))
+(assert `(clay-context-set-antialias 0))
+(assert-PDB-false `(clay-context-get-antialias))
 
 ; pop succeeds
-(assert `(gimp-context-pop))
+(assert `(clay-context-pop))
 
 ; pop effective: original context i.e. antialias true
-(assert-PDB-true `(gimp-context-get-antialias))
+(assert-PDB-true `(clay-context-get-antialias))
 
 
 
 ; test abnormal sequence: pop without a prior push.
 ; Yields an error
-(assert-error `(gimp-context-pop)
-              "Procedure execution of gimp-context-pop failed")
+(assert-error `(clay-context-pop)
+              "Procedure execution of clay-context-pop failed")
 
 

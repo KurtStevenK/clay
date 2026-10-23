@@ -4,7 +4,7 @@
   <menu id="/layers-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="layers-action">Layers Menu</attribute>
-      <attribute name="icon">gimp-layers</attribute>
+      <attribute name="icon">clay-layers</attribute>
 
       <item><attribute name="action">app.layers-edit-text</attribute></item>
       <item><attribute name="action">app.layers-edit-vector</attribute></item>

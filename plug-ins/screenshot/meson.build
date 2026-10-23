@@ -16,7 +16,7 @@ screenshot_icons_images = [
 resourcename = 'screenshot-icons'
 xml_content  = '<?xml version="1.0" encoding="UTF-8"?>\n'
 xml_content += '<gresources>\n'
-xml_content += '  <gresource prefix="/org/gimp/screenshot-icons">\n'
+xml_content += '  <gresource prefix="/org/clay/screenshot-icons">\n'
 foreach file : screenshot_icons_images
   xml_content+='    <file>'+ file +'</file>\n'
 endforeach
@@ -42,17 +42,17 @@ endif
 plugin_exe = executable('screenshot',
                         plugin_sources,
                         dependencies: [
-                          libgimpui_dep,
+                          libclayui_dep,
                           x11, xmu, xext, xfixes,
                         ],
                         win_subsystem: 'windows',
                         install: true,
-                        install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                        install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
 # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
 plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)

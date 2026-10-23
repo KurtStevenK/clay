@@ -12,7 +12,7 @@
 ; setup
 
 (define testImage (testing:load-test-image-basic-v3))
-(define testLayer (vector-ref (gimp-image-get-layers testImage) 0))
+(define testLayer (vector-ref (clay-image-get-layers testImage) 0))
 (define testLayers (vector testLayer))
 
 
@@ -20,7 +20,7 @@
 
 ; This fails: operation not permitted?
 ;(plug-in-web-browser )
-  ; #:url "https://gitlab.gnome.org/GNOME/gimp/issues")
+  ; #:url "https://github.com/KurtStevenK/clay/issues")
 
 
 ; plug-in-tile returns (image drawable) when new-image arg is #t
@@ -110,8 +110,8 @@
 
 (test! "Error call internal procedure w named args")
 ; FIXME is there a technical reason why not?
-(assert-error `(gimp-drawable-get-bpp #:drawable ,testLayer)
-              "in script, expected type: numeric for argument 1 to gimp-drawable-get-bpp")
+(assert-error `(clay-drawable-get-bpp #:drawable ,testLayer)
+              "in script, expected type: numeric for argument 1 to clay-drawable-get-bpp")
 
 
 (test! "Error call /script plugin w named args from extension-script-fu")
@@ -119,7 +119,7 @@
 ; Because it calls the Scheme run-func without a call via PDB,
 ; named args are not allowed.
 ; The error is obscure, it usually is in a PDB procedure deeper in the call tree.
-; e.g. this reports an error calling gimp-image-undo-group-start
+; e.g. this reports an error calling clay-image-undo-group-start
 ;; For some reason, this inf loops in the testing framework.
 ;; It's a problem in the testing framework:
 ;; the framework does not catch TS errors, only PDB error.
@@ -127,7 +127,7 @@
 ;;                  #:run-mode   RUN-NONINTERACTIVE
 ;;                  #:image      ,testImage
 ;;                  #:drawables  ,testLayers)
-;;              "Error: in script, expected type: numeric for argument 1 to gimp-image-undo-group-start ")
+;;              "Error: in script, expected type: numeric for argument 1 to clay-image-undo-group-start ")
 
 ; We can't call this either, the script error ends testing
 ;(script-fu-guides-remove

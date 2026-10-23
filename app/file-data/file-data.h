@@ -18,5 +18,5 @@
 #pragma once
 
 
-void   file_data_init (Gimp *gimp);
-void   file_data_exit (Gimp *gimp);
+void   file_data_init (Clay *clay);
+void   file_data_exit (Clay *clay);

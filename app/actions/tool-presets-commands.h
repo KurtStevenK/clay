@@ -18,9 +18,9 @@
 #pragma once
 
 
-void   tool_presets_save_cmd_callback    (GimpAction *action,
+void   tool_presets_save_cmd_callback    (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data);
-void   tool_presets_restore_cmd_callback (GimpAction *action,
+void   tool_presets_restore_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data);

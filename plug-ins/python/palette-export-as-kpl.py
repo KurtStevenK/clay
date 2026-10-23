@@ -17,8 +17,8 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -40,14 +40,14 @@ def palette_kpl_export(procedure, config, data):
     success = True
     runmode = config.get_property("run-mode")
 
-    if runmode == Gimp.RunMode.INTERACTIVE:
-        gi.require_version('GimpUi', '3.0')
-        from gi.repository import GimpUi
+    if runmode == Clay.RunMode.INTERACTIVE:
+        gi.require_version('ClayUi', '3.0')
+        from gi.repository import ClayUi
         gi.require_version('Gtk', '3.0')
         from gi.repository import Gtk
 
-        GimpUi.init('python-fu-palette-export-as-kpl')
-        dialog = GimpUi.ProcedureDialog(procedure=procedure, config=config)
+        ClayUi.init('python-fu-palette-export-as-kpl')
+        dialog = ClayUi.ProcedureDialog(procedure=procedure, config=config)
 
         # Fill the dialog.
         config.set_property("palette", None)
@@ -62,7 +62,7 @@ def palette_kpl_export(procedure, config, data):
 
         if not dialog.run():
             dialog.destroy()
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
+            return procedure.new_return_values(Clay.PDBStatusType.CANCEL, GLib.Error())
 
     palette   = config.get_property("palette")
     file      = config.get_property("file")
@@ -71,7 +71,7 @@ def palette_kpl_export(procedure, config, data):
 
     if file is None or file.peek_path() is None:
         error = 'No file given'
-        return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR,
                                            GLib.Error(error))
 
     tempdir = tempfile.mkdtemp('python-fu-palette-export-as-kpl')
@@ -145,24 +145,24 @@ def palette_kpl_export(procedure, config, data):
             os.remove(file.peek_path()) # win32 needs that
         os.rename(file.peek_path() + '.tmpsave', file.peek_path())
 
-        return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+        return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
     else:
         kplfile.close()
         os.rmdir(tempdir)
-        return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.EXECUTION_ERROR,
                                            GLib.Error('File exporting failed: {}'.format(file.get_path())))
 
-class PaletteExportAsKPL (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class PaletteExportAsKPL (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ 'python-fu-palette-export-as-kpl' ]
 
     def do_create_procedure(self, name):
-        procedure = Gimp.Procedure.new(self, name,
-                                       Gimp.PDBProcType.PLUGIN,
+        procedure = Clay.Procedure.new(self, name,
+                                       Clay.PDBProcType.PLUGIN,
                                        palette_kpl_export, None)
         if name == 'python-fu-palette-export-as-kpl':
             procedure.set_documentation (_("Export palette as Krita .kpl"),
@@ -175,15 +175,15 @@ class PaletteExportAsKPL (Gimp.PlugIn):
             procedure.add_menu_path('<Palettes>/Palettes Menu/Export as')
 
             procedure.add_enum_argument ("run-mode", _("Run mode"),
-                                         _("The run mode"), Gimp.RunMode,
-                                         Gimp.RunMode.NONINTERACTIVE,
+                                         _("The run mode"), Clay.RunMode,
+                                         Clay.RunMode.NONINTERACTIVE,
                                          GObject.ParamFlags.READWRITE)
             procedure.add_palette_argument ("palette", _("_Palette to export"),
                                              "", True,
                                              None, True, # Default to context.
                                              GObject.ParamFlags.READWRITE)
             procedure.add_file_argument ("file", _("_File (.kpl)"), "",
-                                         Gimp.FileChooserAction.SAVE,
+                                         Clay.FileChooserAction.SAVE,
                                          False, None, GObject.ParamFlags.READWRITE)
             procedure.add_string_argument ("comment", _("Commen_t"),
                                            _("Optional comment"), "",
@@ -194,4 +194,4 @@ class PaletteExportAsKPL (Gimp.PlugIn):
                                             False, GObject.ParamFlags.READWRITE)
         return procedure
 
-Gimp.main(PaletteExportAsKPL.__gtype__, sys.argv)
+Clay.main(PaletteExportAsKPL.__gtype__, sys.argv)

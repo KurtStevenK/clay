@@ -18,25 +18,25 @@
 #pragma once
 
 
-GimpValueArray * procedure_commands_get_run_mode_arg (GimpProcedure  *procedure);
-GimpValueArray * procedure_commands_get_data_args    (GimpProcedure  *procedure,
-                                                      GimpObject     *object);
-GimpValueArray * procedure_commands_get_image_args   (GimpProcedure  *procedure,
-                                                      GimpImage      *image);
-GimpValueArray * procedure_commands_get_items_args   (GimpProcedure  *procedure,
-                                                      GimpImage      *image,
+ClayValueArray * procedure_commands_get_run_mode_arg (ClayProcedure  *procedure);
+ClayValueArray * procedure_commands_get_data_args    (ClayProcedure  *procedure,
+                                                      ClayObject     *object);
+ClayValueArray * procedure_commands_get_image_args   (ClayProcedure  *procedure,
+                                                      ClayImage      *image);
+ClayValueArray * procedure_commands_get_items_args   (ClayProcedure  *procedure,
+                                                      ClayImage      *image,
                                                       GList          *items);
-GimpValueArray * procedure_commands_get_display_args (GimpProcedure  *procedure,
-                                                      GimpDisplay    *display,
-                                                      GimpObject     *settings);
+ClayValueArray * procedure_commands_get_display_args (ClayProcedure  *procedure,
+                                                      ClayDisplay    *display,
+                                                      ClayObject     *settings);
 
-gboolean      procedure_commands_run_procedure       (GimpProcedure  *procedure,
-                                                      Gimp           *gimp,
-                                                      GimpProgress   *progress,
-                                                      GimpValueArray *args);
-gboolean      procedure_commands_run_procedure_async (GimpProcedure  *procedure,
-                                                      Gimp           *gimp,
-                                                      GimpProgress   *progress,
-                                                      GimpRunMode     run_mode,
-                                                      GimpValueArray *args,
-                                                      GimpDisplay    *display);
+gboolean      procedure_commands_run_procedure       (ClayProcedure  *procedure,
+                                                      Clay           *clay,
+                                                      ClayProgress   *progress,
+                                                      ClayValueArray *args);
+gboolean      procedure_commands_run_procedure_async (ClayProcedure  *procedure,
+                                                      Clay           *clay,
+                                                      ClayProgress   *progress,
+                                                      ClayRunMode     run_mode,
+                                                      ClayValueArray *args,
+                                                      ClayDisplay    *display);

@@ -20,144 +20,144 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/claytoolinfo.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimptextbuffer.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claytextbuffer.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
-#include "text/gimptextlayer.h"
+#include "text/claytextlayer.h"
 
-#include "tools/gimptexttool.h"
-#include "tools/gimptexttool-editor.h"
+#include "tools/claytexttool.h"
+#include "tools/claytexttool-editor.h"
 
 #include "dialogs/dialogs.h"
 
 #include "text-tool-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void   text_tool_load_dialog_response (GtkNativeDialog *dialog,
                                               gint             response_id,
-                                              GimpTextTool    *tool);
+                                              ClayTextTool    *tool);
 
 
 /*  public functions  */
 
 void
-text_tool_cut_cmd_callback (GimpAction *action,
+text_tool_cut_cmd_callback (ClayAction *action,
                             GVariant   *value,
                             gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_cut_clipboard (text_tool);
+  clay_text_tool_cut_clipboard (text_tool);
 }
 
 void
-text_tool_copy_cmd_callback (GimpAction *action,
+text_tool_copy_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_copy_clipboard (text_tool);
+  clay_text_tool_copy_clipboard (text_tool);
 }
 
 void
-text_tool_paste_cmd_callback (GimpAction *action,
+text_tool_paste_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_paste_clipboard (text_tool);
+  clay_text_tool_paste_clipboard (text_tool);
 }
 
 void
-text_tool_paste_unformatted_cmd_callback (GimpAction *action,
+text_tool_paste_unformatted_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_paste_clipboard_unformatted (text_tool);
+  clay_text_tool_paste_clipboard_unformatted (text_tool);
 }
 
 void
-text_tool_toggle_bold_cmd_callback (GimpAction *action,
+text_tool_toggle_bold_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_toggle_tag (text_tool, text_tool->buffer->bold_tag);
+  clay_text_tool_toggle_tag (text_tool, text_tool->buffer->bold_tag);
 }
 
 void
-text_tool_toggle_italic_cmd_callback (GimpAction *action,
+text_tool_toggle_italic_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_toggle_tag (text_tool, text_tool->buffer->italic_tag);
+  clay_text_tool_toggle_tag (text_tool, text_tool->buffer->italic_tag);
 }
 
 void
-text_tool_toggle_underline_cmd_callback (GimpAction *action,
+text_tool_toggle_underline_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_toggle_tag (text_tool, text_tool->buffer->underline_tag);
+  clay_text_tool_toggle_tag (text_tool, text_tool->buffer->underline_tag);
 }
 
 void
-text_tool_delete_cmd_callback (GimpAction *action,
+text_tool_delete_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_delete_selection (text_tool);
+  clay_text_tool_delete_selection (text_tool);
 }
 
 void
-text_tool_load_cmd_callback (GimpAction *action,
+text_tool_load_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpTextTool         *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool         *text_tool = CLAY_TEXT_TOOL (data);
   GtkFileChooserNative *dialog;
 
   dialog =
     GTK_FILE_CHOOSER_NATIVE (dialogs_get_native_dialog (G_OBJECT (text_tool),
-                             "gimp-text-file-dialog"));
+                             "clay-text-file-dialog"));
 
   if (! dialog)
     {
       GtkWidget *parent = NULL;
 
-      if (GIMP_TOOL (text_tool)->display)
+      if (CLAY_TOOL (text_tool)->display)
         {
-          GimpDisplayShell *shell;
+          ClayDisplayShell *shell;
 
-          shell = gimp_display_get_shell (GIMP_TOOL (text_tool)->display);
+          shell = clay_display_get_shell (CLAY_TOOL (text_tool)->display);
 
           parent = gtk_widget_get_toplevel (GTK_WIDGET (shell));
         }
@@ -172,7 +172,7 @@ text_tool_load_cmd_callback (GimpAction *action,
                         text_tool);
 
       dialogs_attach_native_dialog (G_OBJECT (text_tool),
-                                    "gimp-text-file-dialog",
+                                    "clay-text-file-dialog",
                                     GTK_NATIVE_DIALOG (dialog));
     }
 
@@ -180,41 +180,41 @@ text_tool_load_cmd_callback (GimpAction *action,
 }
 
 void
-text_tool_clear_cmd_callback (GimpAction *action,
+text_tool_clear_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpTextTool  *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool  *text_tool = CLAY_TEXT_TOOL (data);
   GtkTextBuffer *buffer    = GTK_TEXT_BUFFER (text_tool->buffer);
   GtkTextIter    start, end;
 
   gtk_text_buffer_get_bounds (buffer, &start, &end);
   gtk_text_buffer_select_range (buffer, &start, &end);
-  gimp_text_tool_delete_selection (text_tool);
+  clay_text_tool_delete_selection (text_tool);
 }
 
 void
-text_tool_text_to_path_cmd_callback (GimpAction *action,
+text_tool_text_to_path_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_create_path (text_tool);
+  clay_text_tool_create_path (text_tool);
 }
 
 void
-text_tool_text_along_path_cmd_callback (GimpAction *action,
+text_tool_text_along_path_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
   GError       *error     = NULL;
 
-  if (! gimp_text_tool_create_path_warped (text_tool, &error))
+  if (! clay_text_tool_create_path_warped (text_tool, &error))
     {
-      gimp_message (text_tool->image->gimp, G_OBJECT (text_tool),
-                    GIMP_MESSAGE_ERROR,
+      clay_message (text_tool->image->clay, G_OBJECT (text_tool),
+                    CLAY_MESSAGE_ERROR,
                     _("Text along path failed: %s"),
                     error->message);
       g_clear_error (&error);
@@ -222,14 +222,14 @@ text_tool_text_along_path_cmd_callback (GimpAction *action,
 }
 
 void
-text_tool_direction_cmd_callback (GimpAction *action,
+text_tool_direction_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpTextTool      *text_tool = GIMP_TEXT_TOOL (data);
-  GimpTextDirection  direction;
+  ClayTextTool      *text_tool = CLAY_TEXT_TOOL (data);
+  ClayTextDirection  direction;
 
-  direction = (GimpTextDirection) g_variant_get_int32 (value);
+  direction = (ClayTextDirection) g_variant_get_int32 (value);
 
   g_object_set (text_tool->proxy,
                 "base-direction", direction,
@@ -237,13 +237,13 @@ text_tool_direction_cmd_callback (GimpAction *action,
 }
 
 void
-text_tool_restore_on_canvas_editor_position_cmd_callback (GimpAction *action,
+text_tool_restore_on_canvas_editor_position_cmd_callback (ClayAction *action,
                                                           GVariant   *value,
                                                           gpointer    data)
 {
-  GimpTextTool *text_tool = GIMP_TEXT_TOOL (data);
+  ClayTextTool *text_tool = CLAY_TEXT_TOOL (data);
 
-  gimp_text_tool_restore_on_canvas_editor_position (text_tool);
+  clay_text_tool_restore_on_canvas_editor_position (text_tool);
 }
 
 
@@ -253,19 +253,19 @@ text_tool_restore_on_canvas_editor_position_cmd_callback (GimpAction *action,
 static void
 text_tool_load_dialog_response (GtkNativeDialog *dialog,
                                 gint             response_id,
-                                GimpTextTool    *tool)
+                                ClayTextTool    *tool)
 {
   if (response_id == GTK_RESPONSE_ACCEPT)
     {
       GFile  *file  = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
       GError *error = NULL;
 
-      if (! gimp_text_buffer_load (tool->buffer, file, &error))
+      if (! clay_text_buffer_load (tool->buffer, file, &error))
         {
-          gimp_message (GIMP_TOOL (tool)->tool_info->gimp, G_OBJECT (dialog),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (CLAY_TOOL (tool)->tool_info->clay, G_OBJECT (dialog),
+                        CLAY_MESSAGE_ERROR,
                         _("Could not open '%s' for reading: %s"),
-                        gimp_file_get_utf8_name (file),
+                        clay_file_get_utf8_name (file),
                         error->message);
           g_clear_error (&error);
           g_object_unref (file);

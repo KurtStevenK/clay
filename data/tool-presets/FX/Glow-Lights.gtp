@@ -1,9 +1,9 @@
-# GIMP tool preset file
+# Clay tool preset file
 
-(icon-name "gimp-color-triangle")
+(icon-name "clay-color-triangle")
 (name "Glow Lights (Addition !)")
-(tool-options "GimpPaintOptions"
-    (tool "gimp-paintbrush-tool")
+(tool-options "ClayPaintOptions"
+    (tool "clay-paintbrush-tool")
     (foreground (color-rgb 0.102075 0.183901 0.594317))
     (opacity 0.400000)
     (paint-mode addition)
@@ -23,4 +23,4 @@
 (use-palette no)
 (use-font no)
 
-# end of GIMP tool preset file
+# end of Clay tool preset file

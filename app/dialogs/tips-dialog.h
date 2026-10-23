@@ -18,4 +18,4 @@
 #pragma once
 
 
-GtkWidget * tips_dialog_create (Gimp *gimp);
+GtkWidget * tips_dialog_create (Clay *clay);

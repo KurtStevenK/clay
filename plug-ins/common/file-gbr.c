@@ -17,7 +17,7 @@
 
 /*
  * gbr plug-in version 1.00
- * Loads/exports version 2 GIMP .gbr files, by Tim Newsome <drz@frody.bloke.com>
+ * Loads/exports version 2 Clay .gbr files, by Tim Newsome <drz@frody.bloke.com>
  * Some bits stolen from the .99.7 source tree.
  *
  * Added in GBR version 1 support after learning that there wasn't a
@@ -25,7 +25,7 @@
  * July 6, 1998 by Seth Burgess <sjburges@gimp.org>
  *
  * Dec 17, 2000
- * Load and save GIMP brushes in GRAY or RGBA.  jtl + neo
+ * Load and save Clay brushes in GRAY or RGBA.  jtl + neo
  *
  *
  * TODO: Give some better error reporting on not opening files/bad headers
@@ -34,10 +34,10 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-gbr-export"
@@ -49,12 +49,12 @@ typedef struct _GbrClass GbrClass;
 
 struct _Gbr
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GbrClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -63,34 +63,34 @@ struct _GbrClass
 
 GType                   gbr_get_type         (void);
 
-static GList          * gbr_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * gbr_create_procedure (GimpPlugIn           *plug_in,
+static GList          * gbr_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * gbr_create_procedure (ClayPlugIn           *plug_in,
                                               const gchar          *name);
 
-static GimpValueArray * gbr_export           (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
+static ClayValueArray * gbr_export           (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
                                               GFile                *file,
-                                              GimpExportOptions    *options,
-                                              GimpMetadata         *metadata,
-                                              GimpProcedureConfig  *config,
+                                              ClayExportOptions    *options,
+                                              ClayMetadata         *metadata,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
-static gboolean         save_dialog          (GimpProcedure        *procedure,
+static gboolean         save_dialog          (ClayProcedure        *procedure,
                                               GObject              *config,
-                                              GimpImage            *image);
+                                              ClayImage            *image);
 
 
-G_DEFINE_TYPE (Gbr, gbr, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Gbr, gbr, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GBR_TYPE)
+CLAY_MAIN (GBR_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 gbr_class_init (GbrClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = gbr_query_procedures;
   plug_in_class->create_procedure = gbr_create_procedure;
@@ -103,84 +103,84 @@ gbr_init (Gbr *gbr)
 }
 
 static GList *
-gbr_query_procedures (GimpPlugIn *plug_in)
+gbr_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-gbr_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+gbr_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, gbr_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Clay brush"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("Clay brush"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("Brush"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the Clay brush "
                                           "file format"),
                                         NULL, EXPORT_PROC);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tim Newsome, Jens Lautenbacher, "
                                       "Sven Neumann",
                                       "Tim Newsome, Jens Lautenbacher, "
                                       "Sven Neumann",
                                       "1997-2000");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
-                                          "image/x-gimp-gbr");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
+                                          "image/x-clay-gbr");
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "gbr");
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_int_argument (procedure, "spacing",
+      clay_procedure_add_int_argument (procedure, "spacing",
                                        _("Sp_acing"),
                                        _("Spacing of the brush"),
                                        1, 1000, 10,
-                                       GIMP_PARAM_READWRITE);
+                                       CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "description",
+      clay_procedure_add_string_argument (procedure, "description",
                                           _("_Description"),
                                           _("Short description of the brush"),
                                           _("Clay Brush"),
-                                          GIMP_PARAM_READWRITE);
+                                          CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-gbr_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+gbr_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
-  GimpLayer        **layers;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
+  ClayLayer        **layers;
   gchar             *description;
   GError            *error  = NULL;
 
@@ -190,7 +190,7 @@ gbr_export (GimpProcedure        *procedure,
 
   if (! description || ! strlen (description))
     {
-      gchar *name = g_path_get_basename (gimp_file_get_utf8_name (file));
+      gchar *name = g_path_get_basename (clay_file_get_utf8_name (file));
 
       if (g_str_has_suffix (name, ".gbr"))
         name[strlen (name) - 4] = '\0';
@@ -205,21 +205,21 @@ gbr_export (GimpProcedure        *procedure,
 
   g_free (description);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  layers = gimp_image_get_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  layers = clay_image_get_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpProcedure   *procedure;
-      GimpValueArray  *save_retvals;
+      ClayProcedure   *procedure;
+      ClayValueArray  *save_retvals;
       gint             spacing;
 
       g_object_get (config,
@@ -227,11 +227,11 @@ gbr_export (GimpProcedure        *procedure,
                     "spacing",     &spacing,
                     NULL);
 
-      procedure    = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      procedure    = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                 "file-gbr-export-internal");
-      save_retvals = gimp_procedure_run (procedure,
+      save_retvals = clay_procedure_run (procedure,
                                          "image",     image,
-                                         "drawables", (GimpDrawable **) layers,
+                                         "drawables", (ClayDrawable **) layers,
                                          "file",      file,
                                          "spacing",   spacing,
                                          "name",      description,
@@ -239,30 +239,30 @@ gbr_export (GimpProcedure        *procedure,
 
       g_free (description);
 
-      if (GIMP_VALUES_GET_ENUM (save_retvals, 0) != GIMP_PDB_SUCCESS)
+      if (CLAY_VALUES_GET_ENUM (save_retvals, 0) != CLAY_PDB_SUCCESS)
         {
           g_set_error (&error, 0, 0,
                        "Running procedure 'file-gbr-export-internal' "
                        "failed: %s",
-                       gimp_pdb_get_last_error (gimp_get_pdb ()));
+                       clay_pdb_get_last_error (clay_get_pdb ()));
 
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
-      gimp_value_array_unref (save_retvals);
+      clay_value_array_unref (save_retvals);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_free (layers);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static gboolean
-save_dialog (GimpProcedure *procedure,
+save_dialog (ClayProcedure *procedure,
              GObject       *config,
-             GimpImage     *image)
+             ClayImage     *image)
 {
   GtkWidget *dialog;
   GtkWidget *vbox;
@@ -270,30 +270,30 @@ save_dialog (GimpProcedure *procedure,
   GtkWidget *real_entry;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  entry = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "description", GIMP_TYPE_LABEL_ENTRY);
-  real_entry = gimp_label_entry_get_entry (GIMP_LABEL_ENTRY (entry));
+  entry = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "description", CLAY_TYPE_LABEL_ENTRY);
+  real_entry = clay_label_entry_get_entry (CLAY_LABEL_ENTRY (entry));
   gtk_entry_set_max_length (GTK_ENTRY (real_entry), 256);
   gtk_entry_set_width_chars (GTK_ENTRY (real_entry), 20);
   gtk_entry_set_activates_default (GTK_ENTRY (real_entry), TRUE);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "spacing", 1.0);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "gbr-vbox", "description", "spacing",
                                          NULL);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "gbr-vbox", NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

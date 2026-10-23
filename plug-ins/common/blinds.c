@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Blinds plug-in. Distort an image as though it was stuck to
  * window blinds and the blinds where opened/closed.
@@ -33,16 +33,16 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /***** Magic numbers *****/
 
 #define PLUG_IN_PROC   "plug-in-blinds"
 #define PLUG_IN_BINARY "blinds"
-#define PLUG_IN_ROLE   "gimp-blinds"
+#define PLUG_IN_ROLE   "clay-blinds"
 
 #define MAX_FANS       1024
 
@@ -52,12 +52,12 @@ typedef struct _BlindsClass BlindsClass;
 
 struct _Blinds
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _BlindsClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -66,30 +66,30 @@ struct _BlindsClass
 
 GType                   blinds_get_type         (void);
 
-static GList          * blinds_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * blinds_create_procedure (GimpPlugIn           *plug_in,
+static GList          * blinds_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * blinds_create_procedure (ClayPlugIn           *plug_in,
                                                  const gchar          *name);
 
-static GimpValueArray * blinds_run              (GimpProcedure        *procedure,
-                                                 GimpRunMode           run_mode,
-                                                 GimpImage            *image,
-                                                 GimpDrawable        **drawables,
-                                                 GimpProcedureConfig  *config,
+static ClayValueArray * blinds_run              (ClayProcedure        *procedure,
+                                                 ClayRunMode           run_mode,
+                                                 ClayImage            *image,
+                                                 ClayDrawable        **drawables,
+                                                 ClayProcedureConfig  *config,
                                                  gpointer              run_data);
 
-static gboolean         blinds_dialog           (GimpProcedure        *procedure,
+static gboolean         blinds_dialog           (ClayProcedure        *procedure,
                                                  GObject              *config,
-                                                 GimpDrawable         *drawable);
+                                                 ClayDrawable         *drawable);
 
 static void             dialog_update_preview   (GtkWidget            *widget,
                                                  GObject              *config);
 static void             apply_blinds            (GObject              *config,
-                                                 GimpDrawable         *drawable);
+                                                 ClayDrawable         *drawable);
 
 
-G_DEFINE_TYPE (Blinds, blinds, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Blinds, blinds, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (BLINDS_TYPE)
+CLAY_MAIN (BLINDS_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -102,7 +102,7 @@ static gint fanwidths[MAX_FANS];
 static void
 blinds_class_init (BlindsClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = blinds_query_procedures;
   plug_in_class->create_procedure = blinds_create_procedure;
@@ -115,61 +115,61 @@ blinds_init (Blinds *blinds)
 }
 
 static GList *
-blinds_query_procedures (GimpPlugIn *plug_in)
+blinds_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-blinds_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+blinds_create_procedure (ClayPlugIn  *plug_in,
                          const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             blinds_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Blinds..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Distorts");
+      clay_procedure_set_menu_label (procedure, _("_Blinds..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Distorts");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Simulate an image painted on "
                                           "window blinds"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Andy Thomas",
                                       "Andy Thomas",
                                       "1997");
 
-      gimp_procedure_add_int_argument (procedure, "angle-displacement",
+      clay_procedure_add_int_argument (procedure, "angle-displacement",
                                        _("_Displacement"),
                                        _("Angle of Displacement"),
                                        0, 90, 30,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "num-segments",
+      clay_procedure_add_int_argument (procedure, "num-segments",
                                        _("_Number of segments"),
                                        _("Number of segments in blinds"),
                                        1, MAX_FANS, 3,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "orientation",
+      clay_procedure_add_choice_argument (procedure, "orientation",
                                           _("Orient_ation"),
                                           _("The orientation"),
-                                          gimp_choice_new_with_values ("horizontal", GIMP_ORIENTATION_HORIZONTAL, _("Horizontal"),  NULL,
-                                                                       "vertical",   GIMP_ORIENTATION_VERTICAL,   _("Vertical"),    NULL,
+                                          clay_choice_new_with_values ("horizontal", CLAY_ORIENTATION_HORIZONTAL, _("Horizontal"),  NULL,
+                                                                       "vertical",   CLAY_ORIENTATION_VERTICAL,   _("Vertical"),    NULL,
                                                                        NULL),
                                           "horizontal",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "bg-transparent",
+      clay_procedure_add_boolean_argument (procedure, "bg-transparent",
                                            _("_Transparent"),
                                            _("Background transparent"),
                                            FALSE,
@@ -179,28 +179,28 @@ blinds_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-blinds_run (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
-            GimpDrawable        **drawables,
-            GimpProcedureConfig  *config,
+static ClayValueArray *
+blinds_run (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
+            ClayDrawable        **drawables,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -208,36 +208,36 @@ blinds_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! blinds_dialog (procedure, G_OBJECT (config), drawable))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! blinds_dialog (procedure, G_OBJECT (config), drawable))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
-  if (gimp_drawable_is_rgb  (drawable) ||
-      gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_rgb  (drawable) ||
+      clay_drawable_is_gray (drawable))
     {
-      gimp_progress_init (_("Adding blinds"));
+      clay_progress_init (_("Adding blinds"));
 
       apply_blinds (G_OBJECT (config), drawable);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 
 static gboolean
-blinds_dialog (GimpProcedure *procedure,
+blinds_dialog (ClayProcedure *procedure,
                GObject       *config,
-               GimpDrawable  *drawable)
+               ClayDrawable  *drawable)
 {
   GtkWidget    *dialog;
   GtkWidget    *preview;
@@ -246,26 +246,26 @@ blinds_dialog (GimpProcedure *procedure,
   GtkWidget    *scale;
   gboolean      run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Blinds"));
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "orientation", GIMP_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "orientation", CLAY_TYPE_INT_RADIO_FRAME);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "bg_label", _("Background"), FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "bg-frame", "bg_label", FALSE,
                                     "bg-transparent");
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog), "bg-frame",
-                                       gimp_drawable_has_alpha (drawable),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog), "bg-frame",
+                                       clay_drawable_has_alpha (drawable),
                                        NULL, NULL, FALSE);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "blinds-hbox", "orientation",
                                          "bg-frame", NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -274,21 +274,21 @@ blinds_dialog (GimpProcedure *procedure,
   gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
   gtk_widget_set_margin_bottom (hbox, 12);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "angle-displacement", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "num-segments", 1.0);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "blinds-vbox", "blinds-hbox",
                                          "angle-displacement", "num-segments",
                                          NULL);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
   gtk_widget_set_size_request (vbox, 320, -1);
 
-  preview = gimp_procedure_dialog_get_drawable_preview (GIMP_PROCEDURE_DIALOG (dialog),
+  preview = clay_procedure_dialog_get_drawable_preview (CLAY_PROCEDURE_DIALOG (dialog),
                                                         "preview", drawable);
   gtk_widget_set_margin_bottom (preview, 12);
 
@@ -297,16 +297,16 @@ blinds_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "preview", "blinds-vbox",
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -430,8 +430,8 @@ static void
 dialog_update_preview (GtkWidget *widget,
                        GObject   *config)
 {
-  GimpDrawablePreview *preview  = GIMP_DRAWABLE_PREVIEW (widget);
-  GimpDrawable        *drawable = gimp_drawable_preview_get_drawable (preview);
+  ClayDrawablePreview *preview  = CLAY_DRAWABLE_PREVIEW (widget);
+  ClayDrawable        *drawable = clay_drawable_preview_get_drawable (preview);
   gint                 y;
   const guchar        *p;
   guchar              *buffer;
@@ -442,27 +442,27 @@ dialog_update_preview (GtkWidget *widget,
   gint                 width;
   gint                 height;
   gint                 bpp;
-  GimpOrientationType  orientation;
+  ClayOrientationType  orientation;
   gint                 bg_trans;
 
   g_object_get (config,
                 "bg-transparent", &bg_trans,
                 NULL);
-  orientation = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  orientation = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                      "orientation");
 
-  gimp_preview_get_size (GIMP_PREVIEW (preview), &width, &height);
-  cache = gimp_drawable_get_thumbnail_data (drawable,
+  clay_preview_get_size (CLAY_PREVIEW (preview), &width, &height);
+  cache = clay_drawable_get_thumbnail_data (drawable,
                                             width, height,
                                             &width, &height, &bpp);
   p = cache_start = g_bytes_get_data (cache, NULL);
 
-  color = gimp_context_get_background ();
+  color = clay_context_get_background ();
 
   if (bg_trans)
-    gimp_color_set_alpha (color, 0.0);
+    clay_color_set_alpha (color, 0.0);
 
-  if (gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_gray (drawable))
     {
       guchar luminance[2];
 
@@ -478,7 +478,7 @@ dialog_update_preview (GtkWidget *widget,
 
   buffer = g_new (guchar, width * height * bpp);
 
-  if (orientation == GIMP_ORIENTATION_VERTICAL)
+  if (orientation == CLAY_ORIENTATION_VERTICAL)
     {
       for (y = 0; y < height; y++)
         {
@@ -547,9 +547,9 @@ dialog_update_preview (GtkWidget *widget,
       g_free (dr);
     }
 
-  gimp_preview_draw_buffer (GIMP_PREVIEW (preview), buffer, width * bpp);
-  gimp_preview_set_bounds (GIMP_PREVIEW (preview), 0, 0, width, height);
-  gimp_preview_set_size (GIMP_PREVIEW (preview), width, height);
+  clay_preview_draw_buffer (CLAY_PREVIEW (preview), buffer, width * bpp);
+  clay_preview_set_bounds (CLAY_PREVIEW (preview), 0, 0, width, height);
+  clay_preview_set_size (CLAY_PREVIEW (preview), width, height);
 
   g_free (buffer);
   g_bytes_unref (cache);
@@ -564,7 +564,7 @@ dialog_update_preview (GtkWidget *widget,
 
 static void
 apply_blinds (GObject      *config,
-              GimpDrawable *drawable)
+              ClayDrawable *drawable)
 {
   GeglBuffer          *src_buffer;
   GeglBuffer          *dest_buffer;
@@ -576,42 +576,42 @@ apply_blinds (GObject      *config,
   guchar               bg[4];
   gint                 sel_x1, sel_y1;
   gint                 sel_width, sel_height;
-  GimpOrientationType  orientation;
+  ClayOrientationType  orientation;
   gint                 bg_trans;
 
   g_object_get (config,
                 "bg-transparent", &bg_trans,
                 NULL);
-  orientation = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  orientation = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                      "orientation");
 
-  background = gimp_context_get_background ();
+  background = clay_context_get_background ();
 
   if (bg_trans)
-    gimp_color_set_alpha (background, 0.0);
+    clay_color_set_alpha (background, 0.0);
 
   gegl_color_get_pixel (background, babl_format_with_space ("R'G'B'A u8", NULL), bg);
   g_object_unref (background);
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &sel_x1, &sel_y1,
                                       &sel_width, &sel_height))
     return;
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     format = babl_format ("R'G'B'A u8");
   else
     format = babl_format ("R'G'B' u8");
 
   bytes = babl_format_get_bytes_per_pixel (format);
 
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
   src_rows = g_new (guchar, MAX (sel_width, sel_height) * bytes * STEP);
   des_rows = g_new (guchar, MAX (sel_width, sel_height) * bytes * STEP);
 
-  if (orientation == GIMP_ORIENTATION_VERTICAL)
+  if (orientation == CLAY_ORIENTATION_VERTICAL)
     {
       for (y = 0; y < sel_height; y += STEP)
         {
@@ -642,7 +642,7 @@ apply_blinds (GObject      *config,
                            format, des_rows,
                            GEGL_AUTO_ROWSTRIDE);
 
-          gimp_progress_update ((double) y / (double) sel_height);
+          clay_progress_update ((double) y / (double) sel_height);
         }
     }
   else
@@ -725,7 +725,7 @@ apply_blinds (GObject      *config,
                            format, des_rows,
                            GEGL_AUTO_ROWSTRIDE);
 
-          gimp_progress_update ((double) x / (double) sel_width);
+          clay_progress_update ((double) x / (double) sel_width);
         }
 
       g_free (dst);
@@ -739,9 +739,9 @@ apply_blinds (GObject      *config,
   g_object_unref (src_buffer);
   g_object_unref (dest_buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable,
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable,
                         sel_x1, sel_y1, sel_width, sel_height);
 }

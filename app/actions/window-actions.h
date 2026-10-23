@@ -18,7 +18,7 @@
 #pragma once
 
 
-void   window_actions_setup  (GimpActionGroup *group,
+void   window_actions_setup  (ClayActionGroup *group,
                               const gchar     *move_to_screen_help_id);
-void   window_actions_update (GimpActionGroup *group,
+void   window_actions_update (ClayActionGroup *group,
                               GtkWidget       *window);

@@ -1,0 +1,37 @@
+/* Clay colour scheme "Dracula": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(248,248,242);
+@define-color bg-color                   rgb(40,42,54);
+@define-color border-color               rgb(69,71,80);
+@define-color dimmed-fg-color            rgb(196,196,195);
+@define-color disabled-fg-color          rgb(154,155,157);
+@define-color disabled-button-color      rgb(107,108,114);
+@define-color hover-color                rgb(69,71,80);
+@define-color widget-bg-color            rgb(52,54,65);
+@define-color selected-color             rgb(82,83,92);
+@define-color extreme-bg-color           rgb(28,29,38);
+@define-color extreme-selected-color     rgb(69,71,80);
+@define-color strong-border-color        rgb(113,114,120);
+@define-color stronger-border-color      rgb(113,114,120);
+@define-color edge-border-color          rgb(113,114,120);
+@define-color scrollbar-slider-color     rgb(113,114,120);
+@define-color scrollbar-trough-color     rgb(28,29,38);
+@define-color ruler-color                rgba(69,71,80,0.3);
+@define-color accent-color               rgb(189,147,249);
+@define-color accent-hover-color         rgb(202,169,250);
+@define-color on-accent-color            rgb(40,42,54);
+@define-color destructive-color          rgb(255,85,85);
+@define-color good-color                 rgb(80,250,123);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+/* icon colours */
+@define-color lane-rust     rgb(255,184,108);
+@define-color lane-maroon   rgb(255,121,198);
+@define-color lane-mustard  rgb(241,250,140);
+@define-color lane-purple   rgb(189,147,249);
+@define-color lane-blue     rgb(139,233,253);
+@define-color lane-green    rgb(80,250,123);

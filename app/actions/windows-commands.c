@@ -22,23 +22,23 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpdisplayconfig.h"
-#include "config/gimpguiconfig.h"
+#include "config/claydisplayconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpsessioninfo.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claysessioninfo.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
 
 #include "dialogs/dialogs.h"
 
@@ -46,146 +46,146 @@
 #include "dialogs-actions.h"
 #include "windows-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 void
-windows_hide_docks_cmd_callback (GimpAction *action,
+windows_hide_docks_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  Gimp     *gimp;
+  Clay     *clay;
   gboolean  active;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != GIMP_GUI_CONFIG (gimp->config)->hide_docks)
-    g_object_set (gimp->config,
+  if (active != CLAY_GUI_CONFIG (clay->config)->hide_docks)
+    g_object_set (clay->config,
                   "hide-docks", active,
                   NULL);
 }
 
 void
-windows_use_single_window_mode_cmd_callback (GimpAction *action,
+windows_use_single_window_mode_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data)
 {
-  Gimp     *gimp;
+  Clay     *clay;
   gboolean  active;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != GIMP_GUI_CONFIG (gimp->config)->single_window_mode)
-    g_object_set (gimp->config,
+  if (active != CLAY_GUI_CONFIG (clay->config)->single_window_mode)
+    g_object_set (clay->config,
                   "single-window-mode", active,
                   NULL);
 }
 
 void
-windows_show_tabs_cmd_callback (GimpAction *action,
+windows_show_tabs_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  Gimp     *gimp;
+  Clay     *clay;
   gboolean  active;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != GIMP_GUI_CONFIG (gimp->config)->show_tabs)
-    g_object_set (gimp->config,
+  if (active != CLAY_GUI_CONFIG (clay->config)->show_tabs)
+    g_object_set (clay->config,
                   "show-tabs", active,
                   NULL);
 }
 
 
 void
-windows_set_tabs_position_cmd_callback (GimpAction *action,
+windows_set_tabs_position_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  Gimp         *gimp;
-  GimpPosition  position;
-  return_if_no_gimp (gimp, data);
+  Clay         *clay;
+  ClayPosition  position;
+  return_if_no_clay (clay, data);
 
-  position = (GimpPosition) g_variant_get_int32 (value);
+  position = (ClayPosition) g_variant_get_int32 (value);
 
-  if (position != GIMP_GUI_CONFIG (gimp->config)->tabs_position)
-    g_object_set (gimp->config,
+  if (position != CLAY_GUI_CONFIG (clay->config)->tabs_position)
+    g_object_set (clay->config,
                   "tabs-position", position,
                   NULL);
 }
 
 void
-windows_show_display_next_cmd_callback (GimpAction *action,
+windows_show_display_next_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpDisplay      *display;
-  Gimp             *gimp;
+  ClayDisplay      *display;
+  Clay             *clay;
   gint              index;
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   return_if_no_display (display, data);
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
-  index = gimp_container_get_child_index (gimp->displays,
-                                          GIMP_OBJECT (display));
+  index = clay_container_get_child_index (clay->displays,
+                                          CLAY_OBJECT (display));
   index++;
 
-  if (index >= gimp_container_get_n_children (gimp->displays))
+  if (index >= clay_container_get_n_children (clay->displays))
     index = 0;
 
-  display = GIMP_DISPLAY (gimp_container_get_child_by_index (gimp->displays,
+  display = CLAY_DISPLAY (clay_container_get_child_by_index (clay->displays,
                                                              index));
-  shell = gimp_display_get_shell (display);
-  gimp_display_shell_present (shell);
+  shell = clay_display_get_shell (display);
+  clay_display_shell_present (shell);
 
   /* fix cycling shortcut not working due to nothing focused to catch the key press */
   gtk_widget_grab_focus (shell->canvas);
 }
 
 void
-windows_show_display_previous_cmd_callback (GimpAction *action,
+windows_show_display_previous_cmd_callback (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data)
 {
-  GimpDisplay      *display;
-  Gimp             *gimp;
+  ClayDisplay      *display;
+  Clay             *clay;
   gint              index;
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   return_if_no_display (display, data);
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
 
-  index = gimp_container_get_child_index (gimp->displays,
-                                          GIMP_OBJECT (display));
+  index = clay_container_get_child_index (clay->displays,
+                                          CLAY_OBJECT (display));
   index--;
 
   if (index < 0)
-    index = gimp_container_get_n_children (gimp->displays) - 1;
+    index = clay_container_get_n_children (clay->displays) - 1;
 
-  display = GIMP_DISPLAY (gimp_container_get_child_by_index (gimp->displays,
+  display = CLAY_DISPLAY (clay_container_get_child_by_index (clay->displays,
                                                              index));
-  shell = gimp_display_get_shell (display);
-  gimp_display_shell_present (shell);
+  shell = clay_display_get_shell (display);
+  clay_display_shell_present (shell);
 
   /* fix cycling shortcut not working due to nothing focused to catch the key press */
   gtk_widget_grab_focus (shell->canvas);
 }
 
 void
-windows_show_display_cmd_callback (GimpAction *action,
+windows_show_display_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpDisplay *display = g_object_get_data (G_OBJECT (action), "display");
+  ClayDisplay *display = g_object_get_data (G_OBJECT (action), "display");
 
-  gimp_display_shell_present (gimp_display_get_shell (display));
+  clay_display_shell_present (clay_display_get_shell (display));
 }
 
 void
-windows_show_dock_cmd_callback (GimpAction *action,
+windows_show_dock_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
@@ -195,26 +195,26 @@ windows_show_dock_cmd_callback (GimpAction *action,
 }
 
 void
-windows_open_recent_cmd_callback (GimpAction *action,
+windows_open_recent_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpSessionInfo        *info;
-  GimpDialogFactoryEntry *entry;
-  Gimp                   *gimp;
+  ClaySessionInfo        *info;
+  ClayDialogFactoryEntry *entry;
+  Clay                   *clay;
   GtkWidget              *widget;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
   return_if_no_widget (widget, data);
 
   info  = g_object_get_data (G_OBJECT (action), "info");
-  entry = gimp_session_info_get_factory_entry (info);
+  entry = clay_session_info_get_factory_entry (info);
 
-  if (entry && strcmp ("gimp-toolbox-window", entry->identifier) == 0 &&
-      dialogs_actions_toolbox_exists (gimp))
+  if (entry && strcmp ("clay-toolbox-window", entry->identifier) == 0 &&
+      dialogs_actions_toolbox_exists (clay))
     {
-      gimp_message (gimp,
+      clay_message (clay,
                     G_OBJECT (action_data_get_widget (data)),
-                    GIMP_MESSAGE_WARNING,
+                    CLAY_MESSAGE_WARNING,
                     _("The chosen recent dock contains a toolbox. Please "
                       "close the currently open toolbox and try again."));
       return;
@@ -222,13 +222,13 @@ windows_open_recent_cmd_callback (GimpAction *action,
 
   g_object_ref (info);
 
-  gimp_container_remove (global_recent_docks, GIMP_OBJECT (info));
+  clay_container_remove (global_recent_docks, CLAY_OBJECT (info));
 
-  gimp_dialog_factory_add_session_info (gimp_dialog_factory_get_singleton (),
+  clay_dialog_factory_add_session_info (clay_dialog_factory_get_singleton (),
                                         info);
 
-  gimp_session_info_restore (info, gimp_dialog_factory_get_singleton (),
-                             gimp_widget_get_monitor (widget));
+  clay_session_info_restore (info, clay_dialog_factory_get_singleton (),
+                             clay_widget_get_monitor (widget));
 
   g_object_unref (info);
 }

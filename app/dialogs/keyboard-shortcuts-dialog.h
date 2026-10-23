@@ -18,4 +18,4 @@
 #pragma once
 
 
-GtkWidget * keyboard_shortcuts_dialog_new (Gimp *gimp);
+GtkWidget * keyboard_shortcuts_dialog_new (Clay *clay);

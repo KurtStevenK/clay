@@ -17,10 +17,10 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "openexr-wrapper.h"
 
@@ -34,12 +34,12 @@ typedef struct _ExrClass ExrClass;
 
 struct _Exr
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _ExrClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -48,37 +48,37 @@ struct _ExrClass
 
 GType                   exr_get_type         (void);
 
-static GList          * exr_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * exr_create_procedure (GimpPlugIn            *plug_in,
+static GList          * exr_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * exr_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * exr_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * exr_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
+static ClayImage      * load_image           (GFile                 *file,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
                                               gboolean               interactive,
                                               GError               **error);
 static void             sanitize_comment     (gchar                 *comment);
 void                    load_dialog          (EXRImageType           image_type);
 
 
-G_DEFINE_TYPE (Exr, exr, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Exr, exr, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (EXR_TYPE)
+CLAY_MAIN (EXR_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 exr_class_init (ExrClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = exr_query_procedures;
   plug_in_class->create_procedure = exr_create_procedure;
@@ -91,83 +91,83 @@ exr_init (Exr *exr)
 }
 
 static GList *
-exr_query_procedures (GimpPlugIn *plug_in)
+exr_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (LOAD_PROC));
 }
 
-static GimpProcedure *
-exr_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+exr_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            exr_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("OpenEXR image"));
+      clay_procedure_set_menu_label (procedure, _("OpenEXR image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in the OpenEXR file format"),
                                         "This plug-in loads OpenEXR files. ",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dominik Ernst <dernst@gmx.de>, "
                                       "Mukund Sivaraman <muks@banu.com>",
                                       "Dominik Ernst <dernst@gmx.de>, "
                                       "Mukund Sivaraman <muks@banu.com>",
                                       NULL);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-exr");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "exr");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,long,0x762f3101");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-exr_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+exr_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  image = load_image (file, metadata, flags, run_mode == GIMP_RUN_INTERACTIVE,
+  image = load_image (file, metadata, flags, run_mode == CLAY_RUN_INTERACTIVE,
                       &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals =  gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_SUCCESS,
+  return_vals =  clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_SUCCESS,
                                                    NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile                 *file,
-            GimpMetadata          *metadata,
-            GimpMetadataLoadFlags *flags,
+            ClayMetadata          *metadata,
+            ClayMetadataLoadFlags *flags,
             gboolean               interactive,
             GError               **error)
 {
@@ -175,10 +175,10 @@ load_image (GFile                 *file,
   gint              width;
   gint              height;
   gboolean          has_alpha;
-  GimpImageBaseType image_type;
-  GimpPrecision     image_precision;
-  GimpImage        *image = NULL;
-  GimpImageType     layer_type;
+  ClayImageBaseType image_type;
+  ClayPrecision     image_precision;
+  ClayImage        *image = NULL;
+  ClayImageType     layer_type;
   gint              layer_count = 0;
   gboolean          layers_only;
   const Babl       *format;
@@ -188,14 +188,14 @@ load_image (GFile                 *file,
   gint              begin;
   gint32            success = FALSE;
   gchar            *comment = NULL;
-  GimpColorProfile *profile = NULL;
+  ClayColorProfile *profile = NULL;
   guchar           *exif_data;
   guint             exif_size;
   guchar           *xmp_data;
   guint             xmp_size;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   loader = exr_loader_new (g_file_peek_path (file));
 
@@ -203,7 +203,7 @@ load_image (GFile                 *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Error opening file '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       goto out;
     }
 
@@ -211,11 +211,11 @@ load_image (GFile                 *file,
   height = exr_loader_get_height (loader);
 
   if (width < 1 || height < 1 ||
-      width > GIMP_MAX_IMAGE_SIZE || height > GIMP_MAX_IMAGE_SIZE)
+      width > CLAY_MAX_IMAGE_SIZE || height > CLAY_MAX_IMAGE_SIZE)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Error querying image dimensions from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       goto out;
     }
 
@@ -224,18 +224,18 @@ load_image (GFile                 *file,
   switch (exr_loader_get_precision (loader))
     {
     case PREC_UINT:
-      image_precision = GIMP_PRECISION_U32_LINEAR;
+      image_precision = CLAY_PRECISION_U32_LINEAR;
       break;
     case PREC_HALF:
-      image_precision = GIMP_PRECISION_HALF_LINEAR;
+      image_precision = CLAY_PRECISION_HALF_LINEAR;
       break;
     case PREC_FLOAT:
-      image_precision = GIMP_PRECISION_FLOAT_LINEAR;
+      image_precision = CLAY_PRECISION_FLOAT_LINEAR;
       break;
     default:
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Error querying image precision from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       goto out;
     }
 
@@ -243,29 +243,29 @@ load_image (GFile                 *file,
     {
     case IMAGE_TYPE_RGB:
     case IMAGE_TYPE_YUV:
-      image_type = GIMP_RGB;
-      layer_type = has_alpha ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = has_alpha ? CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE;
       break;
     case IMAGE_TYPE_GRAY:
     case IMAGE_TYPE_UNKNOWN_1_CHANNEL:
-      image_type = GIMP_GRAY;
-      layer_type = has_alpha ? GIMP_GRAYA_IMAGE : GIMP_GRAY_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = has_alpha ? CLAY_GRAYA_IMAGE : CLAY_GRAY_IMAGE;
       break;
     default:
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Error querying image type from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       goto out;
     }
 
-  image = gimp_image_new_with_precision (width, height,
+  image = clay_image_new_with_precision (width, height,
                                          image_type, image_precision);
   if (! image)
     {
       g_set_error (error, 0, 0,
                    _("Could not create new image for '%s': %s"),
-                   gimp_file_get_utf8_name (file),
-                   gimp_pdb_get_last_error (gimp_get_pdb ()));
+                   clay_file_get_utf8_name (file),
+                   clay_pdb_get_last_error (clay_get_pdb ()));
       goto out;
     }
 
@@ -276,12 +276,12 @@ load_image (GFile                 *file,
   /* try to load an icc profile, it will be generated on the fly if
    * chromaticities are given
    */
-  if (image_type == GIMP_RGB)
+  if (image_type == CLAY_RGB)
     {
       profile = exr_loader_get_profile (loader);
 
       if (profile)
-        gimp_image_set_color_profile (image, profile);
+        clay_image_set_color_profile (image, profile);
     }
 
   exr_loader_get_layer_info (loader, &layer_count, &layers_only);
@@ -291,7 +291,7 @@ load_image (GFile                 *file,
    * entirely and just read the layers */
   for (gint i = (-1 + layers_only); i < layer_count; i++)
     {
-      GimpLayer  *layer;
+      ClayLayer  *layer;
       GeglBuffer *buffer     = NULL;
       gchar      *layer_name = NULL;
 
@@ -300,19 +300,19 @@ load_image (GFile                 *file,
       else
         layer_name = _("Background");
 
-      layer = gimp_layer_new (image, layer_name, width, height,
+      layer = clay_layer_new (image, layer_name, width, height,
                               layer_type, 100,
-                              gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, -1);
+                              clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, -1);
 
       if (i > -1)
         g_free (layer_name);
 
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
-      format = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
+      format = clay_drawable_get_format (CLAY_DRAWABLE (layer));
       bpp = babl_format_get_bytes_per_pixel (format);
 
-      tile_height = gimp_tile_height ();
+      tile_height = clay_tile_height ();
       pixels = g_new0 (gchar, tile_height * width * bpp);
 
       for (begin = 0; begin < height; begin += tile_height)
@@ -334,7 +334,7 @@ load_image (GFile                 *file,
                 {
                   g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                _("Error reading pixel data from '%s'"),
-                               gimp_file_get_utf8_name (file));
+                               clay_file_get_utf8_name (file));
                   goto out;
                 }
             }
@@ -342,7 +342,7 @@ load_image (GFile                 *file,
           gegl_buffer_set (buffer, GEGL_RECTANGLE (0, begin, width, num),
                            0, NULL, pixels, GEGL_AUTO_ROWSTRIDE);
 
-          gimp_progress_update ((gdouble) begin / (gdouble) height);
+          clay_progress_update ((gdouble) begin / (gdouble) height);
         }
 
       g_clear_object (&buffer);
@@ -353,15 +353,15 @@ load_image (GFile                 *file,
   comment = exr_loader_get_comment (loader);
   if (comment)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
 
       sanitize_comment (comment);
-      parasite = gimp_parasite_new ("gimp-comment",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("clay-comment",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (comment) + 1,
                                     comment);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
   /* check if the image contains Exif or Xmp data and read it */
@@ -374,7 +374,7 @@ load_image (GFile                 *file,
         {
           GError *error = NULL;
 
-          if (! gimp_metadata_set_from_exif (metadata, exif_data, exif_size, &error))
+          if (! clay_metadata_set_from_exif (metadata, exif_data, exif_size, &error))
             {
               g_message (_("Failed to load metadata: %s"),
                          error ? error->message : _("Unknown reason"));
@@ -388,7 +388,7 @@ load_image (GFile                 *file,
         {
           GError *error = NULL;
 
-          if (! gimp_metadata_set_from_xmp (metadata, xmp_data, xmp_size, &error))
+          if (! clay_metadata_set_from_xmp (metadata, xmp_data, xmp_size, &error))
             {
               g_message (_("Failed to load metadata: %s"),
                          error ? error->message : _("Unknown reason"));
@@ -398,14 +398,14 @@ load_image (GFile                 *file,
         }
 
       if (comment)
-        *flags &= ~GIMP_METADATA_LOAD_COMMENT;
+        *flags &= ~CLAY_METADATA_LOAD_COMMENT;
 
       if (profile)
-        *flags &= ~GIMP_METADATA_LOAD_COLORSPACE;
+        *flags &= ~CLAY_METADATA_LOAD_COLORSPACE;
 
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   success = TRUE;
 
@@ -418,7 +418,7 @@ load_image (GFile                 *file,
     return image;
 
   if (image)
-    gimp_image_delete (image);
+    clay_image_delete (image);
 
   return NULL;
 }
@@ -449,15 +449,15 @@ load_dialog (EXRImageType image_type)
   GtkWidget *vbox;
   gchar     *label_text = NULL;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_dialog_new (_("Import OpenEXR"),
+  dialog = clay_dialog_new (_("Import OpenEXR"),
                             "openexr-notice",
                             NULL, 0, NULL, NULL,
                             _("_OK"), GTK_RESPONSE_OK,
                             NULL);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
@@ -486,7 +486,7 @@ load_dialog (EXRImageType image_type)
   gtk_widget_set_visible (dialog, TRUE);
 
   /* run the dialog */
-  gimp_dialog_run (GIMP_DIALOG (dialog));
+  clay_dialog_run (CLAY_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 }

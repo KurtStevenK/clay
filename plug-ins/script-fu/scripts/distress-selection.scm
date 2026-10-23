@@ -32,11 +32,11 @@
   (let (
        (theImage inImage)
        (inDrawable (vector-ref inDrawables 0))
-       (theWidth (car (gimp-image-get-width inImage)))
-       (theHeight (car (gimp-image-get-height inImage)))
+       (theWidth (car (clay-image-get-width inImage)))
+       (theHeight (car (clay-image-get-height inImage)))
        (theLayer 0)
-       (theMode (car (gimp-image-get-base-type inImage)))
-       (prevLayers (car (gimp-image-get-selected-layers inImage)))
+       (theMode (car (clay-image-get-base-type inImage)))
+       (prevLayers (car (clay-image-get-selected-layers inImage)))
        (horizontalRadius (* 0.32 inSmooth))
        (verticalRadius (* 0.32 inSmooth))
        )
@@ -48,15 +48,15 @@
         (set! verticalRadius 0)
     )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
-    (gimp-image-undo-group-start theImage)
+    (clay-context-push)
+    (clay-context-set-defaults)
+    (clay-image-undo-group-start theImage)
 
     (if (= theMode GRAY)
       (set! theMode GRAYA-IMAGE)
       (set! theMode RGBA-IMAGE)
     )
-    (set! theLayer (car (gimp-layer-new theImage
+    (set! theLayer (car (clay-layer-new theImage
                                         "Distress Scratch Layer"
                                         theWidth
                                         theHeight
@@ -64,46 +64,46 @@
                                         100
                                         LAYER-MODE-NORMAL)))
 
-    (gimp-image-insert-layer theImage theLayer 0 0)
+    (clay-image-insert-layer theImage theLayer 0 0)
 
-    (if (= FALSE (car (gimp-selection-is-empty theImage)))
-        (gimp-drawable-edit-fill theLayer FILL-BACKGROUND)
+    (if (= FALSE (car (clay-selection-is-empty theImage)))
+        (clay-drawable-edit-fill theLayer FILL-BACKGROUND)
     )
 
-    (gimp-selection-invert theImage)
+    (clay-selection-invert theImage)
 
-    (if (= FALSE (car (gimp-selection-is-empty theImage)))
-        (gimp-drawable-edit-clear theLayer)
+    (if (= FALSE (car (clay-selection-is-empty theImage)))
+        (clay-drawable-edit-clear theLayer)
     )
 
-    (gimp-selection-invert theImage)
-    (gimp-selection-none inImage)
+    (clay-selection-invert theImage)
+    (clay-selection-none inImage)
 
-    (gimp-layer-scale theLayer
+    (clay-layer-scale theLayer
                       (/ theWidth inGranu)
                       (/ theHeight inGranu)
                       TRUE)
 
-    (gimp-drawable-merge-new-filter theLayer "gegl:noise-spread" 0 LAYER-MODE-REPLACE 1.0 "amount-x" inSpread "amount-y" inSpread "seed" (msrg-rand))
+    (clay-drawable-merge-new-filter theLayer "gegl:noise-spread" 0 LAYER-MODE-REPLACE 1.0 "amount-x" inSpread "amount-y" inSpread "seed" (msrg-rand))
 
-    (gimp-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
                                     "std-dev-x" horizontalRadius "std-dev-y" verticalRadius "filter" "auto")
-    (gimp-layer-scale theLayer theWidth theHeight TRUE)
-    (gimp-drawable-merge-new-filter theLayer "gimp:threshold-alpha" 0 LAYER-MODE-REPLACE 1.0 "value" inThreshold)
-    (gimp-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
+    (clay-layer-scale theLayer theWidth theHeight TRUE)
+    (clay-drawable-merge-new-filter theLayer "clay:threshold-alpha" 0 LAYER-MODE-REPLACE 1.0 "value" inThreshold)
+    (clay-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
                                     "std-dev-x" 0.32 "std-dev-y" 0.32 "filter" "auto")
-    (gimp-image-select-item inImage CHANNEL-OP-REPLACE theLayer)
-    (gimp-image-remove-layer theImage theLayer)
-    (if (and (= (car (gimp-item-id-is-channel inDrawable)) TRUE)
-             (= (car (gimp-item-id-is-layer-mask inDrawable)) FALSE))
-      (gimp-image-set-selected-channels theImage (make-vector 1 inDrawable))
+    (clay-image-select-item inImage CHANNEL-OP-REPLACE theLayer)
+    (clay-image-remove-layer theImage theLayer)
+    (if (and (= (car (clay-item-id-is-channel inDrawable)) TRUE)
+             (= (car (clay-item-id-is-layer-mask inDrawable)) FALSE))
+      (clay-image-set-selected-channels theImage (make-vector 1 inDrawable))
       )
-    (gimp-image-undo-group-end theImage)
+    (clay-image-undo-group-end theImage)
 
-    (gimp-image-set-selected-layers theImage prevLayers)
+    (clay-image-set-selected-layers theImage prevLayers)
 
-    (gimp-displays-flush)
-    (gimp-context-pop)
+    (clay-displays-flush)
+    (clay-context-pop)
   )
 )
 

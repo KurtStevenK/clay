@@ -23,7 +23,7 @@
 #define LOAD_MPO_PROC   "file-mpo-load"
 #define EXPORT_PROC     "file-jpeg-export"
 #define PLUG_IN_BINARY  "file-jpeg"
-#define PLUG_IN_ROLE    "gimp-file-jpeg"
+#define PLUG_IN_ROLE    "clay-file-jpeg"
 
 /* headers used in some APPn markers */
 #define JPEG_APP_HEADER_EXIF "Exif\0\0"
@@ -52,11 +52,11 @@ typedef enum
   JPEG_SUBSAMPLING_1x2_1x1_1x1 = 3
 } JpegSubsampling;
 
-extern GimpImage * volatile  preview_image;
-extern GimpLayer *      preview_layer;
+extern ClayImage * volatile  preview_image;
+extern ClayLayer *      preview_layer;
 extern gboolean         undo_touched;
 extern gboolean         load_interactive;
-extern GimpDisplay     *display;
+extern ClayDisplay     *display;
 extern gboolean         separate_display;
 
 

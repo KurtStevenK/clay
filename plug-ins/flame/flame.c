@@ -26,17 +26,17 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "flame.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC      "plug-in-flame"
 #define PLUG_IN_BINARY    "flame"
-#define PLUG_IN_ROLE      "gimp-flame"
+#define PLUG_IN_ROLE      "clay-flame"
 
 #define VARIATION_SAME    (-2)
 
@@ -67,12 +67,12 @@ typedef struct _FlameClass FlameClass;
 
 struct _Flame
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _FlameClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -81,41 +81,41 @@ struct _FlameClass
 
 GType                   flame_get_type         (void);
 
-static GList          * flame_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * flame_create_procedure (GimpPlugIn           *plug_in,
+static GList          * flame_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * flame_create_procedure (ClayPlugIn           *plug_in,
                                                 const gchar          *name);
 
-static GimpValueArray * flame_run              (GimpProcedure        *procedure,
-                                                GimpRunMode           run_mode,
-                                                GimpImage            *image,
-                                                GimpDrawable        **drawables,
-                                                GimpProcedureConfig  *proc_config,
+static ClayValueArray * flame_run              (ClayProcedure        *procedure,
+                                                ClayRunMode           run_mode,
+                                                ClayImage            *image,
+                                                ClayDrawable        **drawables,
+                                                ClayProcedureConfig  *proc_config,
                                                 gpointer              run_data);
 
-static void             flame                  (GimpDrawable         *drawable);
+static void             flame                  (ClayDrawable         *drawable);
 
 static gboolean         flame_dialog           (Flame                *flame,
-                                                GimpProcedure        *procedure,
-                                                GimpProcedureConfig  *proc_config);
-static void             set_flame_preview      (GimpProcedureConfig  *proc_config);
+                                                ClayProcedure        *procedure,
+                                                ClayProcedureConfig  *proc_config);
+static void             set_flame_preview      (ClayProcedureConfig  *proc_config);
 static void             load_callback          (GtkWidget            *widget,
-                                                GimpProcedureConfig  *proc_config);
+                                                ClayProcedureConfig  *proc_config);
 static void             save_callback          (GtkWidget            *widget,
-                                                GimpProcedureConfig  *proc_config);
-static void             set_edit_preview       (GimpProcedureConfig  *proc_config);
+                                                ClayProcedureConfig  *proc_config);
+static void             set_edit_preview       (ClayProcedureConfig  *proc_config);
 static void             combo_callback         (GtkWidget            *widget,
                                                 gpointer              data);
-static void             init_mutants           (GimpProcedureConfig  *proc_config);
+static void             init_mutants           (ClayProcedureConfig  *proc_config);
 
 static void    flame_scale_entry_update_double (GtkAdjustment        *adj,
                                                 gdouble              *value);
 
-static void          flame_update_settings_aux (GimpProcedureConfig  *proc_config);
+static void          flame_update_settings_aux (ClayProcedureConfig  *proc_config);
 
 
-G_DEFINE_TYPE (Flame, flame, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Flame, flame, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (FLAME_TYPE)
+CLAY_MAIN (FLAME_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -142,7 +142,7 @@ static frame_spec f = { 0.0, &config.cp, 1, 0.0 };
 static void
 flame_class_init (FlameClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = flame_query_procedures;
   plug_in_class->create_procedure = flame_create_procedure;
@@ -155,95 +155,95 @@ flame_init (Flame *flame)
 }
 
 static GList *
-flame_query_procedures (GimpPlugIn *plug_in)
+flame_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-flame_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+flame_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             flame_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Flame..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("_Flame..."));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Render/Fractals");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create cosmic recursive fractal flames"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Scott Draves",
                                       "Scott Draves",
                                       "1997");
 
-      gimp_procedure_add_double_argument (procedure, "brightness",
+      clay_procedure_add_double_argument (procedure, "brightness",
                                           _("_Brightness"), NULL,
                                           0.0, 5.0, 1.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "contrast",
+      clay_procedure_add_double_argument (procedure, "contrast",
                                           _("Co_ntrast"), NULL,
                                           0.0, 5.0, 1.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "gamma",
+      clay_procedure_add_double_argument (procedure, "gamma",
                                           _("_Gamma"), NULL,
                                           1.0, 5.0, 1.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "sample-density",
+      clay_procedure_add_double_argument (procedure, "sample-density",
                                           _("Sample _density"), NULL,
                                           0.1, 20.0, 5.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "spatial-oversample",
+      clay_procedure_add_int_argument (procedure, "spatial-oversample",
                                           _("Spa_tial oversample"), NULL,
                                           1, 4, 2.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "spatial-filter-radius",
+      clay_procedure_add_double_argument (procedure, "spatial-filter-radius",
                                           _("Spatial _filter radius"), NULL,
                                           0.0, 4.0, 0.75,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "zoom",
+      clay_procedure_add_double_argument (procedure, "zoom",
                                           _("_Zoom"), NULL,
                                           -4.0, 4.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "x",
+      clay_procedure_add_double_argument (procedure, "x",
                                           _("_X"), NULL,
                                           -2.0, 2.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "y",
+      clay_procedure_add_double_argument (procedure, "y",
                                           _("_Y"), NULL,
                                           -2.0, 2.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_bytes_aux_argument (procedure, "settings-data",
+      clay_procedure_add_bytes_aux_argument (procedure, "settings-data",
                                              "Settings data",
                                              "TODO: eventually we must implement proper args for every settings",
-                                             GIMP_PARAM_READWRITE);
+                                             CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
 static void
-maybe_init_cp (GimpProcedureConfig *proc_config)
+maybe_init_cp (ClayProcedureConfig *proc_config)
 {
   if (0 == config.cp.spatial_oversample)
     {
@@ -274,29 +274,29 @@ maybe_init_cp (GimpProcedureConfig *proc_config)
     }
 }
 
-static GimpValueArray *
-flame_run (GimpProcedure        *procedure,
-           GimpRunMode           run_mode,
-           GimpImage            *image,
-           GimpDrawable        **drawables,
-           GimpProcedureConfig  *proc_config,
+static ClayValueArray *
+flame_run (ClayProcedure        *procedure,
+           ClayRunMode           run_mode,
+           ClayImage            *image,
+           ClayDrawable        **drawables,
+           ClayProcedureConfig  *proc_config,
            gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   GBytes       *settings_bytes = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -304,10 +304,10 @@ flame_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  if (run_mode == CLAY_RUN_NONINTERACTIVE)
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                NULL);
     }
 
@@ -322,32 +322,32 @@ flame_run (GimpProcedure        *procedure,
 
   maybe_init_cp (proc_config);
 
-  config.cp.width  = gimp_drawable_get_width  (drawable);
-  config.cp.height = gimp_drawable_get_height (drawable);
+  config.cp.width  = clay_drawable_get_width  (drawable);
+  config.cp.height = clay_drawable_get_height (drawable);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      if (! flame_dialog (FLAME (gimp_procedure_get_plug_in (procedure)), procedure, proc_config))
+      if (! flame_dialog (FLAME (clay_procedure_get_plug_in (procedure)), procedure, proc_config))
         {
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CANCEL,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CANCEL,
                                                    NULL);
         }
     }
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
-      gimp_progress_init (_("Drawing flame"));
+      clay_progress_init (_("Drawing flame"));
 
       flame (drawable);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
@@ -359,7 +359,7 @@ flame_run (GimpProcedure        *procedure,
 
   flame_update_settings_aux (proc_config);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static void
@@ -380,22 +380,22 @@ drawable_to_cmap (control_point *cp)
     }
   else if (GRADIENT_DRAWABLE == config.cmap_drawable_id)
     {
-      GimpGradient  *gradient   = gimp_context_get_gradient ();
+      ClayGradient  *gradient   = clay_context_get_gradient ();
       GeglColor    **colors;
       const Babl    *format_dst = babl_format ("R'G'B' double");
 
       /* FIXME: "reverse" hardcoded to FALSE. */
-      colors = gimp_gradient_get_uniform_samples (gradient, 256, FALSE);
+      colors = clay_gradient_get_uniform_samples (gradient, 256, FALSE);
 
       for (i = 0; i < 256; i++)
         gegl_color_get_pixel (colors[i], format_dst, &(cp->cmap[i][0]));
 
-      gimp_color_array_free (colors);
+      clay_color_array_free (colors);
     }
   else
     {
-      GimpDrawable *drawable = gimp_drawable_get_by_id (config.cmap_drawable_id);
-      GeglBuffer   *buffer   = gimp_drawable_get_buffer (drawable);
+      ClayDrawable *drawable = clay_drawable_get_by_id (config.cmap_drawable_id);
+      GeglBuffer   *buffer   = clay_drawable_get_buffer (drawable);
       gint          width    = gegl_buffer_get_width  (buffer);
       gint          height   = gegl_buffer_get_height (buffer);
       guchar        p[3];
@@ -417,17 +417,17 @@ drawable_to_cmap (control_point *cp)
 }
 
 static void
-flame (GimpDrawable *drawable)
+flame (ClayDrawable *drawable)
 {
   const Babl *format;
   gint        width, height;
   guchar     *tmp;
   gint        bytes;
 
-  width  = gimp_drawable_get_width  (drawable);
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width  (drawable);
+  height = clay_drawable_get_height (drawable);
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     format = babl_format ("R'G'B'A u8");
   else
     format = babl_format ("R'G'B' u8");
@@ -443,13 +443,13 @@ flame (GimpDrawable *drawable)
     random_control_point (&config.cp, config.variation);
   drawable_to_cmap (&config.cp);
   render_rectangle (&f, tmp, width, field_both, 4,
-                    gimp_progress_update);
-  gimp_progress_update (1.0);
+                    clay_progress_update);
+  clay_progress_update (1.0);
 
   /* update destination */
   if (bytes == 4)
     {
-      GeglBuffer *buffer = gimp_drawable_get_shadow_buffer (drawable);
+      GeglBuffer *buffer = clay_drawable_get_shadow_buffer (drawable);
 
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, width, height), 0,
                        format, tmp,
@@ -459,8 +459,8 @@ flame (GimpDrawable *drawable)
     }
   else if (bytes == 3)
     {
-      GeglBuffer *src_buffer  = gimp_drawable_get_buffer (drawable);
-      GeglBuffer *dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+      GeglBuffer *src_buffer  = clay_drawable_get_buffer (drawable);
+      GeglBuffer *dest_buffer = clay_drawable_get_shadow_buffer (drawable);
       gint        i, j;
       guchar     *sl;
 
@@ -503,14 +503,14 @@ flame (GimpDrawable *drawable)
 
   g_free (tmp);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, 0, 0, width, height);
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, 0, 0, width, height);
 }
 
 static void
 file_response_callback (GtkNativeDialog     *chooser,
                         gint                 response_id,
-                        GimpProcedureConfig *proc_config)
+                        ClayProcedureConfig *proc_config)
 {
   if (response_id == GTK_RESPONSE_ACCEPT)
     {
@@ -526,7 +526,7 @@ file_response_callback (GtkNativeDialog     *chooser,
           if (!g_file_test (filename, G_FILE_TEST_IS_REGULAR))
             {
               g_message (_("'%s' is not a regular file"),
-                         gimp_filename_to_utf8 (filename));
+                         clay_filename_to_utf8 (filename));
               g_free (filename);
               return;
             }
@@ -536,7 +536,7 @@ file_response_callback (GtkNativeDialog     *chooser,
           if (f == NULL)
             {
               g_message (_("Could not open '%s' for reading: %s"),
-                         gimp_filename_to_utf8 (filename), g_strerror (errno));
+                         clay_filename_to_utf8 (filename), g_strerror (errno));
               g_free (filename);
               return;
             }
@@ -582,7 +582,7 @@ file_response_callback (GtkNativeDialog     *chooser,
           if (NULL == f)
             {
               g_message (_("Could not open '%s' for writing: %s"),
-                         gimp_filename_to_utf8 (filename), g_strerror (errno));
+                         clay_filename_to_utf8 (filename), g_strerror (errno));
               g_free (filename);
               return;
             }
@@ -606,7 +606,7 @@ file_response_callback (GtkNativeDialog     *chooser,
 static void
 make_file_dialog (const gchar         *title,
                   GtkWidget           *parent,
-                  GimpProcedureConfig *proc_config)
+                  ClayProcedureConfig *proc_config)
 {
   file_dialog = gtk_file_chooser_native_new (title, GTK_WINDOW (parent),
                                              load_save ?
@@ -629,7 +629,7 @@ make_file_dialog (const gchar         *title,
 
 static void
 randomize_callback (GtkWidget           *widget,
-                    GimpProcedureConfig *proc_config)
+                    ClayProcedureConfig *proc_config)
 {
   random_control_point (&edit_cp, config.variation);
   init_mutants (proc_config);
@@ -639,7 +639,7 @@ randomize_callback (GtkWidget           *widget,
 static void
 edit_response (GtkWidget           *widget,
                gint                 response_id,
-               GimpProcedureConfig *proc_config)
+               ClayProcedureConfig *proc_config)
 {
   gtk_widget_set_visible (widget, FALSE);
 
@@ -670,7 +670,7 @@ edit_response (GtkWidget           *widget,
 }
 
 static void
-init_mutants (GimpProcedureConfig *proc_config)
+init_mutants (ClayProcedureConfig *proc_config)
 {
   gint i;
 
@@ -686,7 +686,7 @@ init_mutants (GimpProcedureConfig *proc_config)
 }
 
 static void
-set_edit_preview (GimpProcedureConfig *proc_config)
+set_edit_preview (ClayProcedureConfig *proc_config)
 {
   gint           i, j;
   guchar        *b;
@@ -733,9 +733,9 @@ set_edit_preview (GimpProcedureConfig *proc_config)
 
         render_rectangle (&pf, b, EDIT_PREVIEW_SIZE, field_both, 3, NULL);
 
-        gimp_preview_area_draw (GIMP_PREVIEW_AREA (edit_previews[mut]),
+        clay_preview_area_draw (CLAY_PREVIEW_AREA (edit_previews[mut]),
                                 0, 0, EDIT_PREVIEW_SIZE, EDIT_PREVIEW_SIZE,
-                                GIMP_RGB_IMAGE,
+                                CLAY_RGB_IMAGE,
                                 b,
                                 EDIT_PREVIEW_SIZE * 3);
       }
@@ -745,7 +745,7 @@ set_edit_preview (GimpProcedureConfig *proc_config)
 
 static void
 edit_preview_size_allocate (GtkWidget           *widget,
-                            GimpProcedureConfig *proc_config)
+                            ClayProcedureConfig *proc_config)
 {
   set_edit_preview (proc_config);
 }
@@ -754,7 +754,7 @@ static void
 preview_clicked (GtkWidget *widget,
                  gpointer   data)
 {
-  GimpProcedureConfig *proc_config;
+  ClayProcedureConfig *proc_config;
   gint                 mut = GPOINTER_TO_INT (data);
 
   proc_config = g_object_get_data (G_OBJECT (widget), "config");
@@ -781,7 +781,7 @@ static void
 edit_callback (GtkWidget *widget,
                GtkWidget *parent)
 {
-  GimpProcedureConfig *proc_config;
+  ClayProcedureConfig *proc_config;
 
   proc_config = g_object_get_data (G_OBJECT (parent), "config");
   edit_cp     = config.cp;
@@ -800,16 +800,16 @@ edit_callback (GtkWidget *widget,
       GtkWidget     *scale;
       gint           i, j;
 
-      edit_dialog = gimp_dialog_new (_("Edit Flame"), PLUG_IN_ROLE,
+      edit_dialog = clay_dialog_new (_("Edit Flame"), PLUG_IN_ROLE,
                                      parent, GTK_DIALOG_DESTROY_WITH_PARENT,
-                                     gimp_standard_help_func, PLUG_IN_PROC,
+                                     clay_standard_help_func, PLUG_IN_PROC,
 
                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
                                      _("_OK"),     GTK_RESPONSE_OK,
 
                                      NULL);
 
-      gimp_dialog_set_alternative_button_order (GTK_DIALOG (edit_dialog),
+      clay_dialog_set_alternative_button_order (GTK_DIALOG (edit_dialog),
                                                GTK_RESPONSE_OK,
                                                GTK_RESPONSE_CANCEL,
                                                -1);
@@ -823,7 +823,7 @@ edit_callback (GtkWidget *widget,
       gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (edit_dialog))),
                           main_vbox, FALSE, FALSE, 0);
 
-      frame = gimp_frame_new (_("Directions"));
+      frame = clay_frame_new (_("Directions"));
       gtk_box_pack_start (GTK_BOX (main_vbox), frame, FALSE, FALSE, 0);
       gtk_widget_set_visible (frame, TRUE);
 
@@ -838,7 +838,7 @@ edit_callback (GtkWidget *widget,
           {
             gint mut = i * 3 + j;
 
-            edit_previews[mut] = gimp_preview_area_new ();
+            edit_previews[mut] = clay_preview_area_new ();
             gtk_widget_set_size_request (edit_previews[mut],
                                          EDIT_PREVIEW_SIZE,
                                          EDIT_PREVIEW_SIZE);
@@ -861,7 +861,7 @@ edit_callback (GtkWidget *widget,
                         G_CALLBACK (edit_preview_size_allocate),
                         proc_config);
 
-      frame = gimp_frame_new (_("Controls"));
+      frame = clay_frame_new (_("Controls"));
       gtk_box_pack_start (GTK_BOX (main_vbox), frame, FALSE, FALSE, 0);
       gtk_widget_set_visible (frame, TRUE);
 
@@ -870,7 +870,7 @@ edit_callback (GtkWidget *widget,
       gtk_widget_set_visible (vbox, TRUE);
 
       adj = gtk_adjustment_new (pick_speed, 0.05, 0.5, 0.01, 0.1, 0);
-      scale = gimp_spin_scale_new (adj, _("Speed"), 2);
+      scale = clay_spin_scale_new (adj, _("Speed"), 2);
 
       g_object_set_data (G_OBJECT (adj), "config",  proc_config);
       g_signal_connect (adj, "value-changed",
@@ -898,7 +898,7 @@ edit_callback (GtkWidget *widget,
                                 G_CALLBACK (randomize_callback),
                                 proc_config);
 
-      combo = gimp_int_combo_box_new (_("Same"),         VARIATION_SAME,
+      combo = clay_int_combo_box_new (_("Same"),         VARIATION_SAME,
                                       _("Random"),       variation_random,
                                       _("Linear"),       0,
                                       _("Sinusoidal"),   1,
@@ -931,7 +931,7 @@ edit_callback (GtkWidget *widget,
                                       _("Gaussian"),     28,
                                       NULL);
 
-      gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo),
                                      VARIATION_SAME);
 
       g_object_set_data (G_OBJECT (combo), "config",  proc_config);
@@ -959,7 +959,7 @@ edit_callback (GtkWidget *widget,
 
 static void
 load_callback (GtkWidget           *widget,
-               GimpProcedureConfig *proc_config)
+               ClayProcedureConfig *proc_config)
 {
   if (! file_dialog)
     {
@@ -974,7 +974,7 @@ load_callback (GtkWidget           *widget,
 
 static void
 save_callback (GtkWidget           *widget,
-               GimpProcedureConfig *proc_config)
+               ClayProcedureConfig *proc_config)
 {
   if (! file_dialog)
     {
@@ -991,11 +991,11 @@ static void
 combo_callback (GtkWidget *widget,
                 gpointer   data)
 {
-  GimpProcedureConfig *proc_config;
+  ClayProcedureConfig *proc_config;
 
   proc_config = g_object_get_data (G_OBJECT (widget), "config");
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), (gint *) data);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), (gint *) data);
 
   if (VARIATION_SAME != config.variation)
     random_control_point (&edit_cp, config.variation);
@@ -1007,7 +1007,7 @@ combo_callback (GtkWidget *widget,
 }
 
 static void
-set_flame_preview (GimpProcedureConfig *proc_config)
+set_flame_preview (ClayProcedureConfig *proc_config)
 {
   GBytes *settings_bytes = NULL;
   guchar *b;
@@ -1052,16 +1052,16 @@ set_flame_preview (GimpProcedureConfig *proc_config)
   pcp.spatial_filter_radius = 0.1;
   render_rectangle (&pf, b, preview_width, field_both, 3, NULL);
 
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (flame_preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (flame_preview),
                           0, 0, preview_width, PREVIEW_SIZE,
-                          GIMP_RGB_IMAGE,
+                          CLAY_RGB_IMAGE,
                           b,
                           preview_width * 3);
   g_free (b);
 }
 
 static void
-flame_preview_size_allocate (GimpProcedureConfig *proc_config)
+flame_preview_size_allocate (ClayProcedureConfig *proc_config)
 {
   set_flame_preview (proc_config);
 }
@@ -1101,9 +1101,9 @@ set_cmap_preview (void)
       ptr += 32*3;
     }
 
-  gimp_preview_area_draw (GIMP_PREVIEW_AREA (cmap_preview),
+  clay_preview_area_draw (CLAY_PREVIEW_AREA (cmap_preview),
                           0, 0, 32, 32,
-                          GIMP_RGB_IMAGE,
+                          CLAY_RGB_IMAGE,
                           cmap_buffer,
                           32 * 3);
   g_free (cmap_buffer);
@@ -1111,9 +1111,9 @@ set_cmap_preview (void)
 
 static void
 cmap_callback (GtkWidget           *widget,
-               GimpProcedureConfig *proc_config)
+               ClayProcedureConfig *proc_config)
 {
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget),
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget),
                                  &config.cmap_drawable_id);
 
   g_signal_handlers_block_by_func (proc_config,
@@ -1130,18 +1130,18 @@ cmap_callback (GtkWidget           *widget,
 }
 
 static gboolean
-cmap_constrain (GimpImage *image,
-                GimpItem  *item,
+cmap_constrain (ClayImage *image,
+                ClayItem  *item,
                 gpointer   data)
 {
-  return ! item || ! gimp_drawable_is_indexed (GIMP_DRAWABLE (item));
+  return ! item || ! clay_drawable_is_indexed (CLAY_DRAWABLE (item));
 }
 
 
 static gboolean
 flame_dialog (Flame                *flame,
-              GimpProcedure        *procedure,
-              GimpProcedureConfig  *proc_config)
+              ClayProcedure        *procedure,
+              ClayProcedureConfig  *proc_config)
 {
   GtkWidget *main_vbox;
   GtkWidget *notebook;
@@ -1151,9 +1151,9 @@ flame_dialog (Flame                *flame,
   gulong     notify_handler;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure, proc_config, _("Flame"));
+  dialog = clay_procedure_dialog_new (procedure, proc_config, _("Flame"));
   g_object_set_data (G_OBJECT (dialog), "config",  proc_config);
 
   main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
@@ -1172,7 +1172,7 @@ flame_dialog (Flame                *flame,
   gtk_box_pack_start (GTK_BOX (box), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
-  flame_preview = gimp_preview_area_new ();
+  flame_preview = clay_preview_area_new ();
     {
       gdouble aspect = config.cp.width / (double) config.cp.height;
 
@@ -1233,13 +1233,13 @@ flame_dialog (Flame                *flame,
                         proc_config);
     }
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "brightness", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "contrast", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "gamma", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "sample-density", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "spatial-oversample", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "spatial-filter-radius", 1.0);
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "brightness", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "contrast", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "gamma", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "sample-density", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "spatial-oversample", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "spatial-filter-radius", 1.0);
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "rendering-box",
                                         "brightness", "contrast", "gamma",
                                         "sample-density", "spatial-oversample",
@@ -1258,14 +1258,14 @@ flame_dialog (Flame                *flame,
       gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
       gtk_widget_set_visible (label, TRUE);
 
-      combo = gimp_drawable_combo_box_new (cmap_constrain, NULL, NULL);
+      combo = clay_drawable_combo_box_new (cmap_constrain, NULL, NULL);
 
       gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo);
 
 #if 0
-      gimp_int_combo_box_prepend (GIMP_INT_COMBO_BOX (combo),
-                                  GIMP_INT_STORE_VALUE, BLACK_DRAWABLE,
-                                  GIMP_INT_STORE_LABEL, _("Black"),
+      clay_int_combo_box_prepend (CLAY_INT_COMBO_BOX (combo),
+                                  CLAY_INT_STORE_VALUE, BLACK_DRAWABLE,
+                                  CLAY_INT_STORE_LABEL, _("Black"),
                                   -1);
 #endif
 
@@ -1287,20 +1287,20 @@ flame_dialog (Flame                *flame,
             {
               gint value = TABLE_DRAWABLE - good[i];
 
-              gimp_int_combo_box_prepend (GIMP_INT_COMBO_BOX (combo),
-                                          GIMP_INT_STORE_VALUE, value,
-                                          GIMP_INT_STORE_LABEL, names[i],
+              clay_int_combo_box_prepend (CLAY_INT_COMBO_BOX (combo),
+                                          CLAY_INT_STORE_VALUE, value,
+                                          CLAY_INT_STORE_LABEL, names[i],
                                           -1);
             }
         }
 
-      gimp_int_combo_box_prepend (GIMP_INT_COMBO_BOX (combo),
-                                  GIMP_INT_STORE_VALUE,     GRADIENT_DRAWABLE,
-                                  GIMP_INT_STORE_LABEL,     _("Custom gradient"),
-                                  GIMP_INT_STORE_ICON_NAME, GIMP_ICON_GRADIENT,
+      clay_int_combo_box_prepend (CLAY_INT_COMBO_BOX (combo),
+                                  CLAY_INT_STORE_VALUE,     GRADIENT_DRAWABLE,
+                                  CLAY_INT_STORE_LABEL,     _("Custom gradient"),
+                                  CLAY_INT_STORE_ICON_NAME, CLAY_ICON_GRADIENT,
                                   -1);
 
-      gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                                   config.cmap_drawable_id,
                                   G_CALLBACK (cmap_callback),
                                   proc_config, NULL);
@@ -1308,7 +1308,7 @@ flame_dialog (Flame                *flame,
       gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
       gtk_widget_set_visible (combo, TRUE);
 
-      cmap_preview = gimp_preview_area_new ();
+      cmap_preview = clay_preview_area_new ();
       gtk_widget_set_size_request (cmap_preview, 32, 32);
 
       gtk_box_pack_end (GTK_BOX (hbox), cmap_preview, FALSE, FALSE, 0);
@@ -1317,19 +1317,19 @@ flame_dialog (Flame                *flame,
       set_cmap_preview ();
     }
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "zoom", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "x", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "y", 1.0);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "zoom", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "x", 1.0);
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "y", 1.0);
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "camera-box", "zoom", "x", "y", NULL);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "rendering-label", _("_Rendering"),
                                    FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "camera-label", _("C_amera"),
                                    FALSE, TRUE);
-  notebook = gimp_procedure_dialog_fill_notebook (GIMP_PROCEDURE_DIALOG (dialog),
+  notebook = clay_procedure_dialog_fill_notebook (CLAY_PROCEDURE_DIALOG (dialog),
                                                   "settings-notebook",
                                                   "rendering-label", "rendering-box",
                                                   "camera-label",    "camera-box",
@@ -1341,7 +1341,7 @@ flame_dialog (Flame                *flame,
                                      G_CALLBACK (set_flame_preview),
                                      NULL);
   set_flame_preview (proc_config);
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   g_signal_handler_disconnect (proc_config, notify_handler);
   gtk_widget_destroy (dialog);
@@ -1353,7 +1353,7 @@ static void
 flame_scale_entry_update_double (GtkAdjustment *adj,
                                  gdouble       *value)
 {
-  GimpProcedureConfig *proc_config;
+  ClayProcedureConfig *proc_config;
 
   proc_config = g_object_get_data (G_OBJECT (adj), "config");
 
@@ -1363,7 +1363,7 @@ flame_scale_entry_update_double (GtkAdjustment *adj,
 }
 
 static void
-flame_update_settings_aux (GimpProcedureConfig *proc_config)
+flame_update_settings_aux (ClayProcedureConfig *proc_config)
 {
   GBytes *settings_bytes;
 

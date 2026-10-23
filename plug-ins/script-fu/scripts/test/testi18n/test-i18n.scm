@@ -1,4 +1,4 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 ;!# Close comment started on first line. Needed by gettext.
 
 ; An independently interpreted Scheme plugin
@@ -69,9 +69,9 @@
 ;    for example for French language there exists a file
 ;    .../plug-ins/<plugin_name>/locale/fr/LC_MESSAGES/<plugin_name>.mo
 ;    all installed, for example,
-;    in GIMP's installed data e.g. /usr/lib/share/GIMP/3.0/plug-ins
-;    (when the plugin is an official plugin supported by GIMP)
-;    or in the user's ~/.config/GIMP/3.0/plug-ins
+;    in Clay's installed data e.g. /usr/lib/share/Clay/3.0/plug-ins
+;    (when the plugin is an official plugin supported by Clay)
+;    or in the user's ~/.config/Clay/3.0/plug-ins
 ;    (when the user wrote or installed a third-party plugin for their own private use.)
 ;
 ; 4. The script can call (script-fu-register-i18n "proc_name" "foo_domain" "bar_path")
@@ -106,14 +106,14 @@
 ;    which will contain for example one or more files like
 ;    .../plug-in/proc_name/bar_path/fr/LC_MESSAGES/foo_domain.mo
 ;
-; 5. The script can call (script-fu-register-i18n "proc_name" "gimp30-script-fu")
+; 5. The script can call (script-fu-register-i18n "proc_name" "clay30-script-fu")
 ;    This means use the translation files
-;    common to all Scheme plugins distributed with GIMP.
-;    This is only useful for official plugins distributed with GIMP.
+;    common to all Scheme plugins distributed with Clay.
+;    This is only useful for official plugins distributed with Clay.
 ;    It is not useful for third-party plugins,
-;    since they should not be installed in the sys GIMP data directory
+;    since they should not be installed in the sys Clay data directory
 ;    (else they will be lost in an upgrade)
-;    and also since the official translations data installed with GIMP
+;    and also since the official translations data installed with Clay
 ;    should not be altered by a third-party plugin.
 
 ; Note that one script file may define many PDB procedures
@@ -139,7 +139,7 @@
 ; Case: Standard translation data
 ; As of this writing there exists no mockup translation data for this case.
 ; Expect this will throw an error at plugin run time,
-; to the console where GIMP was started,
+; to the console where Clay was started,
 ; since the standard catalog directory (owned by the plugin) does not yet exist:
 ; .../plug-ins/test-i18n/locale/es/LC_MESSAGES/test-i18n.mo
 ;(script-fu-register-i18n "plug-in-test-i18n" "Standard")
@@ -157,7 +157,7 @@
 ; and contains es/LC_MESSAGES/scriptfu-test.mo.
 ; Expect throws an error at plugin run time when said catalog directory not exist
 ; in a subdirectory of the plugin root dir
-; i.e. /usr/local/lib/gimp/3.0/plug-ins/test-i18n/locale/es/LC_MESSAGES/scriptfu-test.mo
+; i.e. /usr/local/lib/clay/3.0/plug-ins/test-i18n/locale/es/LC_MESSAGES/scriptfu-test.mo
 (script-fu-register-i18n "plug-in-test-i18n-1" ; plugin name
                          "scriptfu-test")     ; domain name
 (script-fu-register-i18n "plug-in-test-i18n-2" ; plugin name
@@ -170,25 +170,25 @@
 ; Expect throws an error at plugin run time when said catalog directory not exist.
 ; (script-fu-register-i18n "plug-in-test-i18n" "fooDomain" "barCatalog")
 
-; Case: Rename the domain to the one shared by official GIMP ScriptFu plugins.
-; Expect plugin translates when GIMP is properly installed,
+; Case: Rename the domain to the one shared by official Clay ScriptFu plugins.
+; Expect plugin translates when Clay is properly installed,
 ; and the shared translations data contains translation pairs
 ; that match translateable strings in the plugin.
-; Expect throws an error at plugin run time when GIMP is not properly installed.
+; Expect throws an error at plugin run time when Clay is not properly installed.
 ; Expect strings in the plugin are in the native language
-; (only since by design the string "Orientation" is in gimp30-script-fu.mo)
-;(script-fu-register-i18n "plug-in-test-i18n" "gimp30-script-fu")
+; (only since by design the string "Orientation" is in clay30-script-fu.mo)
+;(script-fu-register-i18n "plug-in-test-i18n" "clay30-script-fu")
 
 ; Error cases:
 
 ; Error case: a relative path to a catalog above the plugin's directory.
-; GIMP requires the catalog dir is a subdir of, i.e. beneath, a plugins' install dir.
+; Clay requires the catalog dir is a subdir of, i.e. beneath, a plugins' install dir.
 ; Expect this throws an error: "The catalog directory set by set_i18n() is not a subdirectory: ../bar"
 ; at plugin run time, not registration time.
 ;(script-fu-register-i18n "plug-in-test-i18n" "fooDomain" "../bar" )
 
 ; Error case: an absolute path to a catalog.
-; Because GIMP requires path to the catalog dir is not absolute, i.e. starting with "/"
+; Because Clay requires path to the catalog dir is not absolute, i.e. starting with "/"
 ; Expect this throws an error: The catalog directory set by set_i18n() is not relative: /bar
 ; at plugin run time, not registration time.
 ;(script-fu-register-i18n "plug-in-test-i18n" "fooDomain" "/bar" )

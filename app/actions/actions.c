@@ -20,33 +20,33 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpitem.h"
-#include "core/gimptooloptions.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayitem.h"
+#include "core/claytooloptions.h"
+#include "core/claytoolinfo.h"
 
-#include "widgets/gimpactionfactory.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpcontainereditor.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpdock.h"
-#include "widgets/gimpdockable.h"
-#include "widgets/gimpdockwindow.h"
-#include "widgets/gimpimageeditor.h"
-#include "widgets/gimpitemtreeview.h"
+#include "widgets/clayactionfactory.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claycontainereditor.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claydock.h"
+#include "widgets/claydockable.h"
+#include "widgets/claydockwindow.h"
+#include "widgets/clayimageeditor.h"
+#include "widgets/clayitemtreeview.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpimagewindow.h"
-#include "display/gimpnavigationeditor.h"
-#include "display/gimpstatusbar.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/clayimagewindow.h"
+#include "display/claynavigationeditor.h"
+#include "display/claystatusbar.h"
 
 #include "dialogs/dialogs.h"
 
@@ -98,41 +98,41 @@
 #include "view-actions.h"
 #include "windows-actions.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  global variables  */
 
-GimpActionFactory *global_action_factory = NULL;
+ClayActionFactory *global_action_factory = NULL;
 GHashTable        *aux_filter_hash_table = NULL;
 
 
 /*  private variables  */
 
-static const GimpActionFactoryEntry action_groups[] =
+static const ClayActionFactoryEntry action_groups[] =
 {
-  { "brush-editor", N_("Brush Editor"), GIMP_ICON_BRUSH,
+  { "brush-editor", N_("Brush Editor"), CLAY_ICON_BRUSH,
     brush_editor_actions_setup,
     brush_editor_actions_update },
-  { "brushes", N_("Brushes"), GIMP_ICON_BRUSH,
+  { "brushes", N_("Brushes"), CLAY_ICON_BRUSH,
     brushes_actions_setup,
     brushes_actions_update },
-  { "buffers", N_("Buffers"), GIMP_ICON_BUFFER,
+  { "buffers", N_("Buffers"), CLAY_ICON_BUFFER,
     buffers_actions_setup,
     buffers_actions_update },
-  { "channels", N_("Channels"), GIMP_ICON_CHANNEL,
+  { "channels", N_("Channels"), CLAY_ICON_CHANNEL,
     channels_actions_setup,
     channels_actions_update },
-  { "colormap", N_("Colormap"), GIMP_ICON_COLORMAP,
+  { "colormap", N_("Colormap"), CLAY_ICON_COLORMAP,
     colormap_actions_setup,
     colormap_actions_update },
-  { "context", N_("Context"), GIMP_ICON_DIALOG_TOOL_OPTIONS /* well... */,
+  { "context", N_("Context"), CLAY_ICON_DIALOG_TOOL_OPTIONS /* well... */,
     context_actions_setup,
     context_actions_update },
   { "cursor-info", N_("Pointer Information"), NULL,
     cursor_info_actions_setup,
     cursor_info_actions_update },
-  { "dashboard", N_("Dashboard"), GIMP_ICON_DIALOG_DASHBOARD,
+  { "dashboard", N_("Dashboard"), CLAY_ICON_DIALOG_DASHBOARD,
     dashboard_actions_setup,
     dashboard_actions_update },
   { "debug", N_("Debug"), NULL,
@@ -150,100 +150,100 @@ static const GimpActionFactoryEntry action_groups[] =
   { "documents", N_("Document History"), NULL,
     documents_actions_setup,
     documents_actions_update },
-  { "drawable", N_("Drawable"), GIMP_ICON_LAYER,
+  { "drawable", N_("Drawable"), CLAY_ICON_LAYER,
     drawable_actions_setup,
     drawable_actions_update },
-  { "dynamics", N_("Paint Dynamics"), GIMP_ICON_DYNAMICS,
+  { "dynamics", N_("Paint Dynamics"), CLAY_ICON_DYNAMICS,
     dynamics_actions_setup,
     dynamics_actions_update },
-  { "dynamics-editor", N_("Paint Dynamics Editor"), GIMP_ICON_DYNAMICS,
+  { "dynamics-editor", N_("Paint Dynamics Editor"), CLAY_ICON_DYNAMICS,
     dynamics_editor_actions_setup,
     dynamics_editor_actions_update },
-  { "edit", N_("Edit"), GIMP_ICON_EDIT,
+  { "edit", N_("Edit"), CLAY_ICON_EDIT,
     edit_actions_setup,
     edit_actions_update },
-  { "error-console", N_("Error Console"), GIMP_ICON_DIALOG_WARNING,
+  { "error-console", N_("Error Console"), CLAY_ICON_DIALOG_WARNING,
     error_console_actions_setup,
     error_console_actions_update },
   { "file", N_("File"), "text-x-generic",
     file_actions_setup,
     file_actions_update },
-  { "filters", N_("Filters"), GIMP_ICON_GEGL,
+  { "filters", N_("Filters"), CLAY_ICON_GEGL,
     filters_actions_setup,
     filters_actions_update },
-  { "fonts", N_("Fonts"), GIMP_ICON_FONT,
+  { "fonts", N_("Fonts"), CLAY_ICON_FONT,
     fonts_actions_setup,
     fonts_actions_update },
-  { "gradient-editor", N_("Gradient Editor"), GIMP_ICON_GRADIENT,
+  { "gradient-editor", N_("Gradient Editor"), CLAY_ICON_GRADIENT,
     gradient_editor_actions_setup,
     gradient_editor_actions_update },
-  { "gradients", N_("Gradients"), GIMP_ICON_GRADIENT,
+  { "gradients", N_("Gradients"), CLAY_ICON_GRADIENT,
     gradients_actions_setup,
     gradients_actions_update },
-  { "tool-presets", N_("Tool Presets"), GIMP_ICON_TOOL_PRESET,
+  { "tool-presets", N_("Tool Presets"), CLAY_ICON_TOOL_PRESET,
     tool_presets_actions_setup,
     tool_presets_actions_update },
-  { "tool-preset-editor", N_("Tool Preset Editor"), GIMP_ICON_TOOL_PRESET,
+  { "tool-preset-editor", N_("Tool Preset Editor"), CLAY_ICON_TOOL_PRESET,
     tool_preset_editor_actions_setup,
     tool_preset_editor_actions_update },
   { "help", N_("Help"), "help-browser",
     help_actions_setup,
     help_actions_update },
-  { "image", N_("Image"), GIMP_ICON_IMAGE,
+  { "image", N_("Image"), CLAY_ICON_IMAGE,
     image_actions_setup,
     image_actions_update },
-  { "images", N_("Images"), GIMP_ICON_IMAGE,
+  { "images", N_("Images"), CLAY_ICON_IMAGE,
     images_actions_setup,
     images_actions_update },
-  { "layers", N_("Layers"), GIMP_ICON_LAYER,
+  { "layers", N_("Layers"), CLAY_ICON_LAYER,
     layers_actions_setup,
     layers_actions_update },
-  { "mypaint-brushes", N_("MyPaint Brushes"), GIMP_ICON_MYPAINT_BRUSH,
+  { "mypaint-brushes", N_("MyPaint Brushes"), CLAY_ICON_MYPAINT_BRUSH,
     mypaint_brushes_actions_setup,
     mypaint_brushes_actions_update },
-  { "palette-editor", N_("Palette Editor"), GIMP_ICON_PALETTE,
+  { "palette-editor", N_("Palette Editor"), CLAY_ICON_PALETTE,
     palette_editor_actions_setup,
     palette_editor_actions_update },
-  { "palettes", N_("Palettes"), GIMP_ICON_PALETTE,
+  { "palettes", N_("Palettes"), CLAY_ICON_PALETTE,
     palettes_actions_setup,
     palettes_actions_update },
-  { "patterns", N_("Patterns"), GIMP_ICON_PATTERN,
+  { "patterns", N_("Patterns"), CLAY_ICON_PATTERN,
     patterns_actions_setup,
     patterns_actions_update },
-  { "plug-in", N_("Plug-ins"), GIMP_ICON_PLUGIN,
+  { "plug-in", N_("Plug-ins"), CLAY_ICON_PLUGIN,
     plug_in_actions_setup,
     plug_in_actions_update },
-  { "quick-mask", N_("Quick Mask"), GIMP_ICON_QUICK_MASK_ON,
+  { "quick-mask", N_("Quick Mask"), CLAY_ICON_QUICK_MASK_ON,
     quick_mask_actions_setup,
     quick_mask_actions_update },
-  { "sample-points", N_("Sample Points"), GIMP_ICON_SAMPLE_POINT,
+  { "sample-points", N_("Sample Points"), CLAY_ICON_SAMPLE_POINT,
     sample_points_actions_setup,
     sample_points_actions_update },
-  { "select", N_("Select"), GIMP_ICON_SELECTION,
+  { "select", N_("Select"), CLAY_ICON_SELECTION,
     select_actions_setup,
     select_actions_update },
-  { "templates", N_("Templates"), GIMP_ICON_TEMPLATE,
+  { "templates", N_("Templates"), CLAY_ICON_TEMPLATE,
     templates_actions_setup,
     templates_actions_update },
-  { "text-tool", N_("Text Tool"), GIMP_ICON_EDIT,
+  { "text-tool", N_("Text Tool"), CLAY_ICON_EDIT,
     text_tool_actions_setup,
     text_tool_actions_update },
-  { "text-editor", N_("Text Editor"), GIMP_ICON_EDIT,
+  { "text-editor", N_("Text Editor"), CLAY_ICON_EDIT,
     text_editor_actions_setup,
     text_editor_actions_update },
-  { "tool-options", N_("Tool Options"), GIMP_ICON_DIALOG_TOOL_OPTIONS,
+  { "tool-options", N_("Tool Options"), CLAY_ICON_DIALOG_TOOL_OPTIONS,
     tool_options_actions_setup,
     tool_options_actions_update },
-  { "tool-path", N_("Tool Path"), GIMP_ICON_PATH,
+  { "tool-path", N_("Tool Path"), CLAY_ICON_PATH,
     tool_path_actions_setup,
     tool_path_actions_update },
-  { "tools", N_("Tools"), GIMP_ICON_DIALOG_TOOLS,
+  { "tools", N_("Tools"), CLAY_ICON_DIALOG_TOOLS,
     tools_actions_setup,
     tools_actions_update },
-  { "paths", N_("Paths"), GIMP_ICON_PATH,
+  { "paths", N_("Paths"), CLAY_ICON_PATH,
     paths_actions_setup,
     paths_actions_update },
-  { "view", N_("View"), GIMP_ICON_VISIBLE,
+  { "view", N_("View"), CLAY_ICON_VISIBLE,
     view_actions_setup,
     view_actions_update },
   { "windows", N_("Windows"), NULL,
@@ -255,17 +255,17 @@ static const GimpActionFactoryEntry action_groups[] =
 /*  public functions  */
 
 void
-actions_init (Gimp *gimp)
+actions_init (Clay *clay)
 {
   gint i;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
   g_return_if_fail (global_action_factory == NULL);
 
-  global_action_factory = gimp_action_factory_new (gimp);
+  global_action_factory = clay_action_factory_new (clay);
 
   for (i = 0; i < G_N_ELEMENTS (action_groups); i++)
-    gimp_action_factory_group_register (global_action_factory,
+    clay_action_factory_group_register (global_action_factory,
                                         action_groups[i].identifier,
                                         gettext (action_groups[i].label),
                                         action_groups[i].icon_name,
@@ -276,11 +276,11 @@ actions_init (Gimp *gimp)
 }
 
 void
-actions_exit (Gimp *gimp)
+actions_exit (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
   g_return_if_fail (global_action_factory != NULL);
-  g_return_if_fail (global_action_factory->gimp == gimp);
+  g_return_if_fail (global_action_factory->clay == clay);
 
   g_clear_object (&global_action_factory);
   g_hash_table_unref (aux_filter_hash_table);
@@ -302,10 +302,10 @@ actions_filter_get_aux (const gchar *action_name)
   return g_hash_table_lookup (aux_filter_hash_table, action_name) != NULL;
 }
 
-Gimp *
-action_data_get_gimp (gpointer data)
+Clay *
+action_data_get_clay (gpointer data)
 {
-  Gimp            *result    = NULL;
+  Clay            *result    = NULL;
   static gboolean  recursion = FALSE;
 
   if (! data || recursion)
@@ -313,23 +313,23 @@ action_data_get_gimp (gpointer data)
 
   recursion = TRUE;
 
-  if (GIMP_IS_GIMP (data))
+  if (CLAY_IS_CLAY (data))
     result = data;
 
   if (! result)
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
-        result = display->gimp;
+        result = display->clay;
     }
 
   if (! result)
     {
-      GimpContext *context = action_data_get_context (data);
+      ClayContext *context = action_data_get_context (data);
 
       if (context)
-        result = context->gimp;
+        result = context->clay;
     }
 
   recursion = FALSE;
@@ -337,10 +337,10 @@ action_data_get_gimp (gpointer data)
   return result;
 }
 
-GimpContext *
+ClayContext *
 action_data_get_context (gpointer data)
 {
-  GimpContext     *result    = NULL;
+  ClayContext     *result    = NULL;
   static gboolean  recursion = FALSE;
 
   if (! data || recursion)
@@ -348,25 +348,25 @@ action_data_get_context (gpointer data)
 
   recursion = TRUE;
 
-  if (GIMP_IS_DOCK (data))
-    result = gimp_dock_get_context ((GimpDock *) data);
-  else if (GIMP_IS_DOCK_WINDOW (data))
-    result = gimp_dock_window_get_context (((GimpDockWindow *) data));
-  else if (GIMP_IS_CONTAINER_VIEW (data))
-    result = gimp_container_view_get_context ((GimpContainerView *) data);
-  else if (GIMP_IS_CONTAINER_EDITOR (data))
-    result = gimp_container_view_get_context (((GimpContainerEditor *) data)->view);
-  else if (GIMP_IS_IMAGE_EDITOR (data))
-    result = ((GimpImageEditor *) data)->context;
-  else if (GIMP_IS_NAVIGATION_EDITOR (data))
-    result = ((GimpNavigationEditor *) data)->context;
+  if (CLAY_IS_DOCK (data))
+    result = clay_dock_get_context ((ClayDock *) data);
+  else if (CLAY_IS_DOCK_WINDOW (data))
+    result = clay_dock_window_get_context (((ClayDockWindow *) data));
+  else if (CLAY_IS_CONTAINER_VIEW (data))
+    result = clay_container_view_get_context ((ClayContainerView *) data);
+  else if (CLAY_IS_CONTAINER_EDITOR (data))
+    result = clay_container_view_get_context (((ClayContainerEditor *) data)->view);
+  else if (CLAY_IS_IMAGE_EDITOR (data))
+    result = ((ClayImageEditor *) data)->context;
+  else if (CLAY_IS_NAVIGATION_EDITOR (data))
+    result = ((ClayNavigationEditor *) data)->context;
 
   if (! result)
     {
-      Gimp *gimp = action_data_get_gimp (data);
+      Clay *clay = action_data_get_clay (data);
 
-      if (gimp)
-        result = gimp_get_user_context (gimp);
+      if (clay)
+        result = clay_get_user_context (clay);
     }
 
   recursion = FALSE;
@@ -374,10 +374,10 @@ action_data_get_context (gpointer data)
   return result;
 }
 
-GimpImage *
+ClayImage *
 action_data_get_image (gpointer data)
 {
-  GimpImage       *result    = NULL;
+  ClayImage       *result    = NULL;
   static gboolean  recursion = FALSE;
 
   if (! data || recursion)
@@ -385,33 +385,33 @@ action_data_get_image (gpointer data)
 
   recursion = TRUE;
 
-  if (GIMP_IS_ITEM_TREE_VIEW (data))
+  if (CLAY_IS_ITEM_TREE_VIEW (data))
     {
-      result = gimp_item_tree_view_get_image ((GimpItemTreeView *) data);
+      result = clay_item_tree_view_get_image ((ClayItemTreeView *) data);
       recursion = FALSE;
       return result;
     }
-  else if (GIMP_IS_IMAGE_EDITOR (data))
+  else if (CLAY_IS_IMAGE_EDITOR (data))
     {
-      result = ((GimpImageEditor *) data)->image;
+      result = ((ClayImageEditor *) data)->image;
       recursion = FALSE;
       return result;
     }
 
   if (! result)
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
-        result = gimp_display_get_image (display);
+        result = clay_display_get_image (display);
     }
 
   if (! result)
     {
-      GimpContext *context = action_data_get_context (data);
+      ClayContext *context = action_data_get_context (data);
 
       if (context)
-        result = gimp_context_get_image (context);
+        result = clay_context_get_image (context);
     }
 
   recursion = FALSE;
@@ -419,10 +419,10 @@ action_data_get_image (gpointer data)
   return result;
 }
 
-GimpDisplay *
+ClayDisplay *
 action_data_get_display (gpointer data)
 {
-  GimpDisplay     *result    = NULL;
+  ClayDisplay     *result    = NULL;
   static gboolean  recursion = FALSE;
 
   if (! data || recursion)
@@ -430,20 +430,20 @@ action_data_get_display (gpointer data)
 
   recursion = TRUE;
 
-  if (GIMP_IS_DISPLAY (data))
+  if (CLAY_IS_DISPLAY (data))
     result = data;
-  else if (GIMP_IS_IMAGE_WINDOW (data))
+  else if (CLAY_IS_IMAGE_WINDOW (data))
     {
-      GimpDisplayShell *shell = gimp_image_window_get_active_shell (data);
+      ClayDisplayShell *shell = clay_image_window_get_active_shell (data);
       result = shell ? shell->display : NULL;
     }
 
   if (! result)
     {
-      GimpContext *context = action_data_get_context (data);
+      ClayContext *context = action_data_get_context (data);
 
       if (context)
-        result = gimp_context_get_display (context);
+        result = clay_context_get_display (context);
     }
 
   recursion = FALSE;
@@ -451,10 +451,10 @@ action_data_get_display (gpointer data)
   return result;
 }
 
-GimpDisplayShell *
+ClayDisplayShell *
 action_data_get_shell (gpointer data)
 {
-  GimpDisplayShell *result    = NULL;
+  ClayDisplayShell *result    = NULL;
   static gboolean   recursion = FALSE;
 
   if (! data || recursion)
@@ -464,10 +464,10 @@ action_data_get_shell (gpointer data)
 
   if (! result)
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
-        result = gimp_display_get_shell (display);
+        result = clay_display_get_shell (display);
     }
 
   recursion = FALSE;
@@ -491,10 +491,10 @@ action_data_get_widget (gpointer data)
 
   if (! result)
     {
-      GimpDisplay *display = action_data_get_display (data);
+      ClayDisplay *display = action_data_get_display (data);
 
       if (display)
-        result = GTK_WIDGET (gimp_display_get_shell (display));
+        result = GTK_WIDGET (clay_display_get_shell (display));
     }
 
   if (! result)
@@ -508,11 +508,11 @@ action_data_get_widget (gpointer data)
 gint
 action_data_sel_count (gpointer data)
 {
-  if (GIMP_IS_CONTAINER_EDITOR (data))
+  if (CLAY_IS_CONTAINER_EDITOR (data))
     {
-      GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
+      ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
 
-      return gimp_container_view_get_selected (editor->view, NULL);
+      return clay_container_view_get_selected (editor->view, NULL);
     }
   else
     {
@@ -541,7 +541,7 @@ action_data_sel_count (gpointer data)
  * Returns: the computed value to use for the action.
  */
 gdouble
-action_select_value (GimpActionSelectType  select_type,
+action_select_value (ClayActionSelectType  select_type,
                      gdouble               value,
                      gdouble               min,
                      gdouble               max,
@@ -554,48 +554,48 @@ action_select_value (GimpActionSelectType  select_type,
 {
   switch (select_type)
     {
-    case GIMP_ACTION_SELECT_SET_TO_DEFAULT:
+    case CLAY_ACTION_SELECT_SET_TO_DEFAULT:
       value = def;
       break;
 
-    case GIMP_ACTION_SELECT_FIRST:
+    case CLAY_ACTION_SELECT_FIRST:
       value = min;
       break;
 
-    case GIMP_ACTION_SELECT_LAST:
+    case CLAY_ACTION_SELECT_LAST:
       value = max;
       break;
 
-    case GIMP_ACTION_SELECT_SMALL_PREVIOUS:
+    case CLAY_ACTION_SELECT_SMALL_PREVIOUS:
       value -= small_inc;
       break;
 
-    case GIMP_ACTION_SELECT_SMALL_NEXT:
+    case CLAY_ACTION_SELECT_SMALL_NEXT:
       value += small_inc;
       break;
 
-    case GIMP_ACTION_SELECT_PREVIOUS:
+    case CLAY_ACTION_SELECT_PREVIOUS:
       value -= inc;
       break;
 
-    case GIMP_ACTION_SELECT_NEXT:
+    case CLAY_ACTION_SELECT_NEXT:
       value += inc;
       break;
 
-    case GIMP_ACTION_SELECT_SKIP_PREVIOUS:
+    case CLAY_ACTION_SELECT_SKIP_PREVIOUS:
       value -= skip_inc;
       break;
 
-    case GIMP_ACTION_SELECT_SKIP_NEXT:
+    case CLAY_ACTION_SELECT_SKIP_NEXT:
       value += skip_inc;
       break;
 
-    case GIMP_ACTION_SELECT_PERCENT_PREVIOUS:
+    case CLAY_ACTION_SELECT_PERCENT_PREVIOUS:
       g_return_val_if_fail (delta_factor >= 0.0, value);
       value /= (1.0 + delta_factor);
       break;
 
-    case GIMP_ACTION_SELECT_PERCENT_NEXT:
+    case CLAY_ACTION_SELECT_PERCENT_NEXT:
       g_return_val_if_fail (delta_factor >= 0.0, value);
       value *= (1.0 + delta_factor);
       break;
@@ -625,8 +625,8 @@ action_select_value (GimpActionSelectType  select_type,
 }
 
 void
-action_select_property (GimpActionSelectType  select_type,
-                        GimpDisplay          *display,
+action_select_property (ClayActionSelectType  select_type,
+                        ClayDisplay          *display,
                         GObject              *object,
                         const gchar          *property_name,
                         gdouble               small_inc,
@@ -637,7 +637,7 @@ action_select_property (GimpActionSelectType  select_type,
 {
   GParamSpec *pspec;
 
-  g_return_if_fail (display == NULL || GIMP_IS_DISPLAY (display));
+  g_return_if_fail (display == NULL || CLAY_IS_DISPLAY (display));
   g_return_if_fail (G_IS_OBJECT (object));
   g_return_if_fail (property_name != NULL);
 
@@ -702,86 +702,86 @@ action_select_property (GimpActionSelectType  select_type,
     }
 }
 
-GimpObject *
-action_select_object (GimpActionSelectType  select_type,
-                      GimpContainer        *container,
-                      GimpObject           *current)
+ClayObject *
+action_select_object (ClayActionSelectType  select_type,
+                      ClayContainer        *container,
+                      ClayObject           *current)
 {
   gint select_index;
   gint n_children;
 
-  g_return_val_if_fail (GIMP_IS_CONTAINER (container), NULL);
-  g_return_val_if_fail (current == NULL || GIMP_IS_OBJECT (current), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTAINER (container), NULL);
+  g_return_val_if_fail (current == NULL || CLAY_IS_OBJECT (current), NULL);
 
   if (! current                               &&
-      select_type != GIMP_ACTION_SELECT_FIRST &&
-      select_type != GIMP_ACTION_SELECT_LAST)
+      select_type != CLAY_ACTION_SELECT_FIRST &&
+      select_type != CLAY_ACTION_SELECT_LAST)
     return NULL;
 
-  n_children = gimp_container_get_n_children (container);
+  n_children = clay_container_get_n_children (container);
 
   if (n_children == 0)
     return NULL;
 
   switch (select_type)
     {
-    case GIMP_ACTION_SELECT_FIRST:
+    case CLAY_ACTION_SELECT_FIRST:
       select_index = 0;
       break;
 
-    case GIMP_ACTION_SELECT_LAST:
+    case CLAY_ACTION_SELECT_LAST:
       select_index = n_children - 1;
       break;
 
-    case GIMP_ACTION_SELECT_PREVIOUS:
-      select_index = gimp_container_get_child_index (container, current) - 1;
+    case CLAY_ACTION_SELECT_PREVIOUS:
+      select_index = clay_container_get_child_index (container, current) - 1;
       break;
 
-    case GIMP_ACTION_SELECT_NEXT:
-      select_index = gimp_container_get_child_index (container, current) + 1;
+    case CLAY_ACTION_SELECT_NEXT:
+      select_index = clay_container_get_child_index (container, current) + 1;
       break;
 
-    case GIMP_ACTION_SELECT_SKIP_PREVIOUS:
-      select_index = gimp_container_get_child_index (container, current) - 10;
+    case CLAY_ACTION_SELECT_SKIP_PREVIOUS:
+      select_index = clay_container_get_child_index (container, current) - 10;
       break;
 
-    case GIMP_ACTION_SELECT_SKIP_NEXT:
-      select_index = gimp_container_get_child_index (container, current) + 10;
+    case CLAY_ACTION_SELECT_SKIP_NEXT:
+      select_index = clay_container_get_child_index (container, current) + 10;
       break;
 
-    case GIMP_ACTION_SELECT_FLAT_PREVIOUS:
-      /* XXX We only support this case and the next for GimpItem
+    case CLAY_ACTION_SELECT_FLAT_PREVIOUS:
+      /* XXX We only support this case and the next for ClayItem
        * containers.
        */
-      g_return_val_if_fail (GIMP_IS_ITEM (current), NULL);
-      select_index = gimp_container_get_child_index (container, current) - 1;
+      g_return_val_if_fail (CLAY_IS_ITEM (current), NULL);
+      select_index = clay_container_get_child_index (container, current) - 1;
       if (select_index < 0)
         {
-          GimpItem *parent = gimp_item_get_parent (GIMP_ITEM (current));
+          ClayItem *parent = clay_item_get_parent (CLAY_ITEM (current));
 
           if (parent)
-            return GIMP_OBJECT (parent);
+            return CLAY_OBJECT (parent);
           else
             return current;
         }
       else
         {
-          GimpObject    *prev;
-          GimpContainer *prev_container;
+          ClayObject    *prev;
+          ClayContainer *prev_container;
 
-          prev = gimp_container_get_child_by_index (container, select_index);
-          while ((prev_container = gimp_viewable_get_children (GIMP_VIEWABLE (prev))) != NULL)
+          prev = clay_container_get_child_by_index (container, select_index);
+          while ((prev_container = clay_viewable_get_children (CLAY_VIEWABLE (prev))) != NULL)
             {
-              if (gimp_viewable_get_expanded (GIMP_VIEWABLE (prev)))
+              if (clay_viewable_get_expanded (CLAY_VIEWABLE (prev)))
                 {
                   gint n_prev_children;
 
-                  n_prev_children = gimp_container_get_n_children (prev_container);
+                  n_prev_children = clay_container_get_n_children (prev_container);
                   if (n_prev_children > 0)
                     {
                       select_index = n_prev_children - 1;
                       container = prev_container;
-                      prev = gimp_container_get_child_by_index (container, select_index);
+                      prev = clay_container_get_child_by_index (container, select_index);
                       continue;
                     }
                 }
@@ -790,44 +790,44 @@ action_select_object (GimpActionSelectType  select_type,
         }
       break;
 
-    case GIMP_ACTION_SELECT_FLAT_NEXT:
+    case CLAY_ACTION_SELECT_FLAT_NEXT:
         {
-          GimpContainer *current_container;
+          ClayContainer *current_container;
 
-          g_return_val_if_fail (GIMP_IS_ITEM (current), NULL);
+          g_return_val_if_fail (CLAY_IS_ITEM (current), NULL);
 
-          if ((current_container = gimp_viewable_get_children (GIMP_VIEWABLE (current))) != NULL &&
-              gimp_viewable_get_expanded (GIMP_VIEWABLE (current))                               &&
-              gimp_container_get_n_children (current_container) > 0)
+          if ((current_container = clay_viewable_get_children (CLAY_VIEWABLE (current))) != NULL &&
+              clay_viewable_get_expanded (CLAY_VIEWABLE (current))                               &&
+              clay_container_get_n_children (current_container) > 0)
             {
               select_index = 0;
               container = current_container;
             }
           else
             {
-              select_index = gimp_container_get_child_index (container, current) + 1;
+              select_index = clay_container_get_child_index (container, current) + 1;
               if (select_index >= n_children)
                 {
                   while (TRUE)
                     {
-                      GimpItem      *parent;
-                      GimpContainer *parent_container;
+                      ClayItem      *parent;
+                      ClayContainer *parent_container;
                       gint           n_parent_children;
 
-                      parent = gimp_item_get_parent (GIMP_ITEM (current));
+                      parent = clay_item_get_parent (CLAY_ITEM (current));
                       if (parent == NULL)
                         break;
 
-                      parent_container = gimp_item_get_container (parent);
-                      n_parent_children = gimp_container_get_n_children (parent_container);
-                      if (gimp_container_get_child_index (parent_container, GIMP_OBJECT (parent)) + 1 < n_parent_children)
+                      parent_container = clay_item_get_container (parent);
+                      n_parent_children = clay_container_get_n_children (parent_container);
+                      if (clay_container_get_child_index (parent_container, CLAY_OBJECT (parent)) + 1 < n_parent_children)
                         {
                           container = parent_container;
-                          select_index = gimp_container_get_child_index (parent_container, GIMP_OBJECT (parent)) + 1;
+                          select_index = clay_container_get_child_index (parent_container, CLAY_OBJECT (parent)) + 1;
                           break;
                         }
 
-                      current = GIMP_OBJECT (parent);
+                      current = CLAY_OBJECT (parent);
                     }
                 }
             }
@@ -842,36 +842,36 @@ action_select_object (GimpActionSelectType  select_type,
       break;
     }
 
-  n_children = gimp_container_get_n_children (container);
+  n_children = clay_container_get_n_children (container);
   select_index = CLAMP (select_index, 0, n_children - 1);
 
-  return gimp_container_get_child_by_index (container, select_index);
+  return clay_container_get_child_by_index (container, select_index);
 }
 
 void
-action_message (GimpDisplay *display,
+action_message (ClayDisplay *display,
                 GObject     *object,
                 const gchar *format,
                 ...)
 {
-  GimpDisplayShell *shell     = gimp_display_get_shell (display);
-  GimpStatusbar    *statusbar = gimp_display_shell_get_statusbar (shell);
+  ClayDisplayShell *shell     = clay_display_get_shell (display);
+  ClayStatusbar    *statusbar = clay_display_shell_get_statusbar (shell);
   const gchar      *icon_name = NULL;
   va_list           args;
 
-  if (GIMP_IS_TOOL_OPTIONS (object))
+  if (CLAY_IS_TOOL_OPTIONS (object))
     {
-      GimpToolInfo *tool_info = GIMP_TOOL_OPTIONS (object)->tool_info;
+      ClayToolInfo *tool_info = CLAY_TOOL_OPTIONS (object)->tool_info;
 
-      icon_name = gimp_viewable_get_icon_name (GIMP_VIEWABLE (tool_info));
+      icon_name = clay_viewable_get_icon_name (CLAY_VIEWABLE (tool_info));
     }
-  else if (GIMP_IS_VIEWABLE (object))
+  else if (CLAY_IS_VIEWABLE (object))
     {
-      icon_name = gimp_viewable_get_icon_name (GIMP_VIEWABLE (object));
+      icon_name = clay_viewable_get_icon_name (CLAY_VIEWABLE (object));
     }
 
   va_start (args, format);
-  gimp_statusbar_push_temp_valist (statusbar, GIMP_MESSAGE_INFO,
+  clay_statusbar_push_temp_valist (statusbar, CLAY_MESSAGE_INFO,
                                    icon_name, format, args);
   va_end (args);
 }

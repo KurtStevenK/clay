@@ -22,7 +22,7 @@
 
 #include "actions-types.h"
 
-#include "widgets/gimpsamplepointeditor.h"
+#include "widgets/claysamplepointeditor.h"
 
 #include "sample-points-commands.h"
 
@@ -30,12 +30,12 @@
 /*  public functions  */
 
 void
-sample_points_sample_merged_cmd_callback (GimpAction *action,
+sample_points_sample_merged_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data)
 {
-  GimpSamplePointEditor *editor = GIMP_SAMPLE_POINT_EDITOR (data);
+  ClaySamplePointEditor *editor = CLAY_SAMPLE_POINT_EDITOR (data);
   gboolean               active = g_variant_get_boolean (value);
 
-  gimp_sample_point_editor_set_sample_merged (editor, active);
+  clay_sample_point_editor_set_sample_merged (editor, active);
 }

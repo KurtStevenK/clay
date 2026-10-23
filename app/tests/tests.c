@@ -25,25 +25,25 @@
 #include "gui/gui-types.h"
 
 #include "gui/gui.h"
-#include "gui/gimpapp.h"
+#include "gui/clayapp.h"
 
 #include "actions/actions.h"
 
 #include "menus/menus.h"
 
-#include "widgets/gimpsessioninfo.h"
+#include "widgets/claysessioninfo.h"
 
-#include "config/gimpgeglconfig.h"
+#include "config/claygeglconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimp-contexts.h"
+#include "core/clay.h"
+#include "core/clay-contexts.h"
 
-#include "gegl/gimp-gegl.h"
+#include "gegl/clay-gegl.h"
 
-#include "gimp-log.h"
-#include "gimpcoreapp.h"
+#include "clay-log.h"
+#include "claycoreapp.h"
 
-#include "gimp-app-test-utils.h"
+#include "clay-app-test-utils.h"
 #include "tests.h"
 
 #ifdef GDK_WINDOWING_QUARTZ
@@ -52,48 +52,48 @@
 
 
 static void
-gimp_status_func_dummy (const gchar *text1,
+clay_status_func_dummy (const gchar *text1,
                         const gchar *text2,
                         gdouble      percentage)
 {
 }
 
 /**
- * gimp_init_for_testing:
+ * clay_init_for_testing:
  *
- * Initialize the GIMP object system for unit testing. This is a
+ * Initialize the Clay object system for unit testing. This is a
  * selected subset of the initialization happening in app_run().
  **/
-Gimp *
-gimp_init_for_testing (void)
+Clay *
+clay_init_for_testing (void)
 {
-  Gimp *gimp;
+  Clay *clay;
 
-  gimp_log_init ();
+  clay_log_init ();
   gegl_init (NULL, NULL);
 
-  gimp = gimp_new ("Unit Tested GIMP", NULL, NULL, FALSE, TRUE, TRUE, TRUE,
+  clay = clay_new ("Unit Tested Clay", NULL, NULL, FALSE, TRUE, TRUE, TRUE,
                    FALSE, FALSE, TRUE, FALSE, FALSE,
-                   GIMP_STACK_TRACE_QUERY, GIMP_PDB_COMPAT_OFF);
+                   CLAY_STACK_TRACE_QUERY, CLAY_PDB_COMPAT_OFF);
 
-  gimp_load_config (gimp, NULL, NULL);
+  clay_load_config (clay, NULL, NULL);
 
-  gimp_gegl_init (gimp);
-  gimp_initialize (gimp, gimp_status_func_dummy);
-  gimp_restore (gimp, gimp_status_func_dummy, NULL);
+  clay_gegl_init (clay);
+  clay_initialize (clay, clay_status_func_dummy);
+  clay_restore (clay, clay_status_func_dummy, NULL);
 
-  return gimp;
+  return clay;
 }
 
 
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 
 static void
-gimp_init_icon_theme_for_testing (void)
+clay_init_icon_theme_for_testing (void)
 {
   gchar       *icon_root;
 
-  icon_root = g_test_build_filename (G_TEST_BUILT, "gimp-test-icon-theme", NULL);
+  icon_root = g_test_build_filename (G_TEST_BUILT, "clay-test-icon-theme", NULL);
   gtk_icon_theme_prepend_search_path (gtk_icon_theme_get_default (),
                                       icon_root);
   g_free (icon_root);
@@ -102,7 +102,7 @@ gimp_init_icon_theme_for_testing (void)
 
 #ifdef GDK_WINDOWING_QUARTZ
 static gboolean
-gimp_osx_focus_window (gpointer user_data)
+clay_osx_focus_window (gpointer user_data)
 {
   [NSApp activateIgnoringOtherApps:YES];
   return FALSE;
@@ -110,46 +110,46 @@ gimp_osx_focus_window (gpointer user_data)
 #endif
 
 static void
-gimp_test_app_activate_callback (GimpCoreApp *app,
+clay_test_app_activate_callback (ClayCoreApp *app,
                                  gpointer     user_data)
 {
-  Gimp *gimp = NULL;
+  Clay *clay = NULL;
 
-  g_return_if_fail (GIMP_IS_CORE_APP (app));
+  g_return_if_fail (CLAY_IS_CORE_APP (app));
 
-  gimp = gimp_core_app_get_gimp (app);
+  clay = clay_core_app_get_clay (app);
 
-  gimp_core_app_set_exit_status (app, EXIT_SUCCESS);
+  clay_core_app_set_exit_status (app, EXIT_SUCCESS);
 
-  gui_init (gimp, TRUE, NULL, g_getenv ("GIMP_TESTING_ABS_TOP_SRCDIR"), "System Language");
-  gimp_init_icon_theme_for_testing ();
-  gimp_initialize (gimp, gimp_status_func_dummy);
-  gimp_restore (gimp, gimp_status_func_dummy, NULL);
+  gui_init (clay, TRUE, NULL, g_getenv ("CLAY_TESTING_ABS_TOP_SRCDIR"), "System Language");
+  clay_init_icon_theme_for_testing ();
+  clay_initialize (clay, clay_status_func_dummy);
+  clay_restore (clay, clay_status_func_dummy, NULL);
 #ifdef GDK_WINDOWING_QUARTZ
-  g_idle_add (gimp_osx_focus_window, NULL);
+  g_idle_add (clay_osx_focus_window, NULL);
 #endif
-  gimp->initialized = TRUE;
-  gimp_core_app_set_exit_status (app, g_test_run ());
+  clay->initialized = TRUE;
+  clay_core_app_set_exit_status (app, g_test_run ());
 
   /* Don't write files to the source dir */
-  gimp_test_utils_set_gimp3_directory ("GIMP_TESTING_ABS_TOP_BUILDDIR",
-                                       "app/tests/gimpdir-output");
+  clay_test_utils_set_clay3_directory ("CLAY_TESTING_ABS_TOP_BUILDDIR",
+                                       "app/tests/claydir-output");
 
-  gimp_exit (gimp, TRUE);
+  clay_exit (clay, TRUE);
 }
 
-static Gimp *
-gimp_init_for_gui_testing_internal (gboolean  show_gui,
-                                    GFile    *gimprc)
+static Clay *
+clay_init_for_gui_testing_internal (gboolean  show_gui,
+                                    GFile    *clayrc)
 {
-  Gimp           *gimp;
+  Clay           *clay;
 #if defined (G_OS_WIN32)
   GLogLevelFlags  fatal_mask;
 #endif
 
   /* Load configuration from the source dir */
-  gimp_test_utils_set_gimp3_directory ("GIMP_TESTING_ABS_TOP_SRCDIR",
-                                       "app/tests/gimpdir");
+  clay_test_utils_set_clay3_directory ("CLAY_TESTING_ABS_TOP_SRCDIR",
+                                       "app/tests/claydir");
 
 #if defined (G_OS_WIN32)
   /* g_test_init() sets warnings always fatal, which is a usually a good
@@ -161,7 +161,7 @@ gimp_init_for_gui_testing_internal (gboolean  show_gui,
 #endif
 
   /* from main() */
-  gimp_log_init ();
+  clay_log_init ();
   g_object_set (gegl_config (),
                 "use-opencl",          FALSE,
                 "application-license", "GPL3",
@@ -169,60 +169,60 @@ gimp_init_for_gui_testing_internal (gboolean  show_gui,
   gegl_init (NULL, NULL);
 
   /* Introduce an error margin for positions written to sessionrc */
-  gimp_session_info_set_position_accuracy (5);
+  clay_session_info_set_position_accuracy (5);
 
   /* from app_run() */
-  gimp = gimp_new ("Unit Tested GIMP", NULL, NULL, FALSE, TRUE, TRUE, !show_gui,
+  clay = clay_new ("Unit Tested Clay", NULL, NULL, FALSE, TRUE, TRUE, !show_gui,
                    FALSE, FALSE, TRUE, FALSE, FALSE,
-                   GIMP_STACK_TRACE_QUERY, GIMP_PDB_COMPAT_OFF);
-  gimp->app = gimp_app_new (gimp, TRUE, FALSE, FALSE, NULL, NULL, NULL);
+                   CLAY_STACK_TRACE_QUERY, CLAY_PDB_COMPAT_OFF);
+  clay->app = clay_app_new (clay, TRUE, FALSE, FALSE, NULL, NULL, NULL);
 
-  gimp_set_show_gui (gimp, show_gui);
-  gimp_load_config (gimp, gimprc, NULL);
-  gimp_gegl_init (gimp);
+  clay_set_show_gui (clay, show_gui);
+  clay_load_config (clay, clayrc, NULL);
+  clay_gegl_init (clay);
 
-  g_signal_connect (gimp->app, "activate",
-                    G_CALLBACK (gimp_test_app_activate_callback),
+  g_signal_connect (clay->app, "activate",
+                    G_CALLBACK (clay_test_app_activate_callback),
                     NULL);
-  return gimp;
+  return clay;
 }
 
 /**
- * gimp_init_for_gui_testing:
+ * clay_init_for_gui_testing:
  * @show_gui:
  *
- * Initializes a #Gimp instance for use in test cases that rely on GUI
+ * Initializes a #Clay instance for use in test cases that rely on GUI
  * code to be initialized.
  *
- * Returns: The #Gimp instance.
+ * Returns: The #Clay instance.
  **/
-Gimp *
-gimp_init_for_gui_testing (gboolean show_gui)
+Clay *
+clay_init_for_gui_testing (gboolean show_gui)
 {
-  return gimp_init_for_gui_testing_internal (show_gui, NULL);
+  return clay_init_for_gui_testing_internal (show_gui, NULL);
 }
 
 /**
- * gimp_init_for_gui_testing:
+ * clay_init_for_gui_testing:
  * @show_gui:
- * @gimprc:
+ * @clayrc:
  *
- * Like gimp_init_for_gui_testing(), but also allows a custom gimprc
+ * Like clay_init_for_gui_testing(), but also allows a custom clayrc
  * filename to be specified.
  *
- * Returns: The #Gimp instance.
+ * Returns: The #Clay instance.
  **/
-Gimp *
-gimp_init_for_gui_testing_with_rc (gboolean  show_gui,
-                                   GFile    *gimprc)
+Clay *
+clay_init_for_gui_testing_with_rc (gboolean  show_gui,
+                                   GFile    *clayrc)
 {
-  return gimp_init_for_gui_testing_internal (show_gui, gimprc);
+  return clay_init_for_gui_testing_internal (show_gui, clayrc);
 }
 
-#endif /* GIMP_CONSOLE_COMPILATION */
+#endif /* CLAY_CONSOLE_COMPILATION */
 
 static gboolean
-gimp_tests_quit_mainloop (GMainLoop *loop)
+clay_tests_quit_mainloop (GMainLoop *loop)
 {
   g_main_loop_quit (loop);
 
@@ -230,21 +230,21 @@ gimp_tests_quit_mainloop (GMainLoop *loop)
 }
 
 /**
- * gimp_test_run_temp_mainloop:
+ * clay_test_run_temp_mainloop:
  * @running_time: The time to run the main loop.
  *
  * Helper function for tests that wants to run a main loop for a
- * while. Useful when you want GIMP's state to settle before doing
+ * while. Useful when you want Clay's state to settle before doing
  * tests.
  **/
 void
-gimp_test_run_temp_mainloop (guint32 running_time)
+clay_test_run_temp_mainloop (guint32 running_time)
 {
   GMainLoop *loop;
   loop = g_main_loop_new (NULL, FALSE);
 
   g_timeout_add (running_time,
-                 (GSourceFunc) gimp_tests_quit_mainloop,
+                 (GSourceFunc) clay_tests_quit_mainloop,
                  loop);
 
   g_main_loop_run (loop);
@@ -253,17 +253,17 @@ gimp_test_run_temp_mainloop (guint32 running_time)
 }
 
 /**
- * gimp_test_run_mainloop_until_idle:
+ * clay_test_run_mainloop_until_idle:
  *
  * Creates and runs a main loop until it is idle, i.e. has no more
  * work to do.
  **/
 void
-gimp_test_run_mainloop_until_idle (void)
+clay_test_run_mainloop_until_idle (void)
 {
   GMainLoop *loop = g_main_loop_new (NULL, FALSE);
 
-  g_idle_add ((GSourceFunc) gimp_tests_quit_mainloop, loop);
+  g_idle_add ((GSourceFunc) clay_tests_quit_mainloop, loop);
 
   g_main_loop_run (loop);
 
@@ -271,18 +271,18 @@ gimp_test_run_mainloop_until_idle (void)
 }
 
 /**
- * gimp_test_bail_if_no_display:
+ * clay_test_bail_if_no_display:
  * @void:
  *
  * If no DISPLAY is set, call exit(EXIT_SUCCESS). There is no use in
  * having UI tests failing in DISPLAY-less environments.
  **/
 void
-gimp_test_bail_if_no_display (void)
+clay_test_bail_if_no_display (void)
 {
   if (! g_getenv ("DISPLAY"))
     {
       g_message ("No DISPLAY set, not running UI tests\n");
-      exit (GIMP_EXIT_TEST_SKIPPED);
+      exit (CLAY_EXIT_TEST_SKIPPED);
     }
 }

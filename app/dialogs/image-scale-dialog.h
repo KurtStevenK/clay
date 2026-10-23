@@ -18,10 +18,10 @@
 #pragma once
 
 
-GtkWidget * image_scale_dialog_new (GimpImage             *image,
-                                    GimpContext           *context,
+GtkWidget * image_scale_dialog_new (ClayImage             *image,
+                                    ClayContext           *context,
                                     GtkWidget             *parent,
-                                    GimpUnit              *unit,
-                                    GimpInterpolationType  interpolation,
-                                    GimpScaleCallback      callback,
+                                    ClayUnit              *unit,
+                                    ClayInterpolationType  interpolation,
+                                    ClayScaleCallback      callback,
                                     gpointer               user_data);

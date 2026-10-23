@@ -27,16 +27,16 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-farbfeld-load"
 #define EXPORT_PROC    "file-farbfeld-export"
 #define PLUG_IN_BINARY "file-farbfeld"
-#define PLUG_IN_ROLE   "gimp-file-farbfeld"
+#define PLUG_IN_ROLE   "clay-file-farbfeld"
 
 
 typedef struct _Farbfeld      Farbfeld;
@@ -44,12 +44,12 @@ typedef struct _FarbfeldClass FarbfeldClass;
 
 struct _Farbfeld
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _FarbfeldClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -59,46 +59,46 @@ struct _FarbfeldClass
 GType                   farbfeld_get_type         (void);
 
 
-static GList          * farbfeld_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * farbfeld_create_procedure (GimpPlugIn            *plug_in,
+static GList          * farbfeld_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * farbfeld_create_procedure (ClayPlugIn            *plug_in,
                                                    const gchar           *name);
 
-static GimpValueArray * farbfeld_load             (GimpProcedure         *procedure,
-                                                   GimpRunMode            run_mode,
+static ClayValueArray * farbfeld_load             (ClayProcedure         *procedure,
+                                                   ClayRunMode            run_mode,
                                                    GFile                 *file,
-                                                   GimpMetadata          *metadata,
-                                                   GimpMetadataLoadFlags *flags,
-                                                   GimpProcedureConfig   *config,
+                                                   ClayMetadata          *metadata,
+                                                   ClayMetadataLoadFlags *flags,
+                                                   ClayProcedureConfig   *config,
                                                    gpointer               run_data);
-static GimpValueArray * farbfeld_export           (GimpProcedure         *procedure,
-                                                   GimpRunMode            run_mode,
-                                                   GimpImage             *image,
+static ClayValueArray * farbfeld_export           (ClayProcedure         *procedure,
+                                                   ClayRunMode            run_mode,
+                                                   ClayImage             *image,
                                                    GFile                 *file,
-                                                   GimpExportOptions     *options,
-                                                   GimpMetadata          *metadata,
-                                                   GimpProcedureConfig   *config,
+                                                   ClayExportOptions     *options,
+                                                   ClayMetadata          *metadata,
+                                                   ClayProcedureConfig   *config,
                                                    gpointer               run_data);
 
-static GimpImage      * load_image                (GFile                 *file,
+static ClayImage      * load_image                (GFile                 *file,
                                                    GObject               *config,
-                                                   GimpRunMode            run_mode,
+                                                   ClayRunMode            run_mode,
                                                    GError               **error);
 static gboolean         export_image              (GFile                 *file,
-                                                   GimpImage             *image,
-                                                   GimpDrawable          *drawable,
+                                                   ClayImage             *image,
+                                                   ClayDrawable          *drawable,
                                                    GError               **error);
 
 
-G_DEFINE_TYPE (Farbfeld, farbfeld, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Farbfeld, farbfeld, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (FARBFELD_TYPE)
+CLAY_MAIN (FARBFELD_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 farbfeld_class_init (FarbfeldClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = farbfeld_query_procedures;
   plug_in_class->create_procedure = farbfeld_create_procedure;
@@ -111,7 +111,7 @@ farbfeld_init (Farbfeld *farbfeld)
 }
 
 static GList *
-farbfeld_query_procedures (GimpPlugIn *plug_in)
+farbfeld_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -121,77 +121,77 @@ farbfeld_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-farbfeld_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+farbfeld_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            farbfeld_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Farbfeld"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file in the Farbfeld file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2023");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ff");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,farbfeld");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, farbfeld_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Farbfeld"));
+      clay_procedure_set_menu_label (procedure, _("Farbfeld"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Export image in the Farbfeld file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2023");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ff");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-farbfeld_load (GimpProcedure         *procedure,
-               GimpRunMode            run_mode,
+static ClayValueArray *
+farbfeld_load (ClayProcedure         *procedure,
+               ClayRunMode            run_mode,
                GFile                 *file,
-               GimpMetadata          *metadata,
-               GimpMetadataLoadFlags *flags,
-               GimpProcedureConfig   *config,
+               ClayMetadata          *metadata,
+               ClayMetadataLoadFlags *flags,
+               ClayProcedureConfig   *config,
                gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -199,57 +199,57 @@ farbfeld_load (GimpProcedure         *procedure,
   image = load_image (file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-farbfeld_export (GimpProcedure        *procedure,
-                 GimpRunMode           run_mode,
-                 GimpImage            *image,
+static ClayValueArray *
+farbfeld_export (ClayProcedure        *procedure,
+                 ClayRunMode           run_mode,
+                 ClayImage            *image,
                  GFile                *file,
-                 GimpExportOptions    *options,
-                 GimpMetadata         *metadata,
-                 GimpProcedureConfig  *config,
+                 ClayExportOptions    *options,
+                 ClayMetadata         *metadata,
+                 ClayProcedureConfig  *config,
                  gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
   if (! export_image (file, image, drawables->data, &error))
-    status = GIMP_PDB_EXECUTION_ERROR;
+    status = CLAY_PDB_EXECUTION_ERROR;
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage  *image  = NULL;
-  GimpLayer  *layer;
+  ClayImage  *image  = NULL;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   guint16    *pixels;
   guchar      magic_number[8];
@@ -265,7 +265,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -284,36 +284,36 @@ load_image (GFile        *file,
   width = GUINT32_FROM_BE (width);
   height = GUINT32_FROM_BE (height);
 
-  if (width > GIMP_MAX_IMAGE_SIZE  ||
-      height > GIMP_MAX_IMAGE_SIZE ||
+  if (width > CLAY_MAX_IMAGE_SIZE  ||
+      height > CLAY_MAX_IMAGE_SIZE ||
       ! g_size_checked_mul (&row_size, width, (sizeof (guint16) * 4)))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       fclose (fp);
       return NULL;
     }
 
-  image = gimp_image_new_with_precision (width, height, GIMP_RGB,
-                                         GIMP_PRECISION_U16_NON_LINEAR);
+  image = clay_image_new_with_precision (width, height, CLAY_RGB,
+                                         CLAY_PRECISION_U16_NON_LINEAR);
 
-  layer = gimp_layer_new (image, _("Background"), width, height,
-                          GIMP_RGBA_IMAGE, 100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  layer = clay_layer_new (image, _("Background"), width, height,
+                          CLAY_RGBA_IMAGE, 100,
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
   pixels = g_try_malloc (row_size);
   if (pixels == NULL)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("There was not enough memory to complete the "
                      "operation."));
       fclose (fp);
       return NULL;
     }
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
   for (gint i = 0; i < height; i++)
     {
       if (! fread (pixels, row_size, 1, fp))
@@ -341,8 +341,8 @@ load_image (GFile        *file,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GError       **error)
 {
   FILE       *fp;
@@ -355,8 +355,8 @@ export_image (GFile         *file,
   guint32     export_width;
   guint32     export_height;
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "wb");
 
@@ -364,11 +364,11 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   image_width = gegl_buffer_get_width (buffer);
   image_height = gegl_buffer_get_height (buffer);
@@ -399,10 +399,10 @@ export_image (GFile         *file,
         }
 
       g_free (pixels);
-      gimp_progress_update (i / (gdouble) image_height);
+      clay_progress_update (i / (gdouble) image_height);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   fclose (fp);
 

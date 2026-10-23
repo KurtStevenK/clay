@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "console/script-fu-console.h"
 #include "script-fu-eval.h"
@@ -30,40 +30,40 @@
 
 
 #define SCRIPT_FU_TYPE (script_fu_get_type ())
-G_DECLARE_FINAL_TYPE (ScriptFu, script_fu, SCRIPT, FU, GimpPlugIn)
+G_DECLARE_FINAL_TYPE (ScriptFu, script_fu, SCRIPT, FU, ClayPlugIn)
 
 struct _ScriptFu
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
-static GList          * script_fu_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * script_fu_create_procedure (GimpPlugIn           *plug_in,
+static GList          * script_fu_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * script_fu_create_procedure (ClayPlugIn           *plug_in,
                                                     const gchar          *name);
 
-static GimpValueArray * script_fu_run              (GimpProcedure        *procedure,
-                                                    GimpProcedureConfig  *config,
+static ClayValueArray * script_fu_run              (ClayProcedure        *procedure,
+                                                    ClayProcedureConfig  *config,
                                                     gpointer              run_data);
-static GimpValueArray * script_fu_batch_run        (GimpProcedure        *procedure,
-                                                    GimpRunMode           run_mode,
+static ClayValueArray * script_fu_batch_run        (ClayProcedure        *procedure,
+                                                    ClayRunMode           run_mode,
                                                     const gchar          *code,
-                                                    GimpProcedureConfig  *config,
+                                                    ClayProcedureConfig  *config,
                                                     gpointer              run_data);
-static void             script_fu_run_init         (GimpProcedure        *procedure,
-                                                    GimpRunMode           run_mode);
-static void             script_fu_extension_init   (GimpPlugIn           *plug_in);
+static void             script_fu_run_init         (ClayProcedure        *procedure,
+                                                    ClayRunMode           run_mode);
+static void             script_fu_extension_init   (ClayPlugIn           *plug_in);
 
 
-G_DEFINE_TYPE (ScriptFu, script_fu, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ScriptFu, script_fu, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SCRIPT_FU_TYPE)
+CLAY_MAIN (SCRIPT_FU_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 script_fu_class_init (ScriptFuClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = script_fu_query_procedures;
   plug_in_class->create_procedure = script_fu_create_procedure;
@@ -76,7 +76,7 @@ script_fu_init (ScriptFu *script_fu)
 }
 
 static GList *
-script_fu_query_procedures (GimpPlugIn *plug_in)
+script_fu_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -88,95 +88,95 @@ script_fu_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-script_fu_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+script_fu_create_procedure (ClayPlugIn  *plug_in,
                             const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, "extension-script-fu"))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PERSISTENT,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PERSISTENT,
                                       script_fu_run, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "A scheme interpreter for scripting "
                                         "Clay operations",
                                         NULL, NULL);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball & Peter Mattis",
                                       "Spencer Kimball & Peter Mattis",
                                       "1997");
     }
   else if (! strcmp (name, "plug-in-script-fu-console"))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       script_fu_run, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Script-Fu _Console"));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("Script-Fu _Console"));
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Development/Script-Fu");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Interactive console for Script-Fu "
                                           "development"),
                                         "Provides an interface which allows "
                                         "interactive scheme development.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball & Peter Mattis",
                                       "Spencer Kimball & Peter Mattis",
                                       "1997");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_INTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_INTERACTIVE,
                                         G_PARAM_READWRITE);
-      gimp_procedure_add_string_array_aux_argument (procedure, "history",
+      clay_procedure_add_string_array_aux_argument (procedure, "history",
                                                     "Command history",
                                                     "History",
                                                     G_PARAM_READWRITE);
     }
   else if (! strcmp (name, "plug-in-script-fu-text-console"))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       script_fu_run, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Provides a text console mode for "
                                         "script-fu development",
                                         "Provides an interface which allows "
                                         "interactive scheme development.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball & Peter Mattis",
                                       "Spencer Kimball & Peter Mattis",
                                       "1997");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_INTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_INTERACTIVE,
                                         G_PARAM_READWRITE);
     }
   else if (! strcmp (name, "plug-in-script-fu-eval"))
     {
-      procedure = gimp_batch_procedure_new (plug_in, name, "Script-fu (scheme)",
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_batch_procedure_new (plug_in, name, "Script-fu (scheme)",
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             script_fu_batch_run, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Evaluate scheme code",
                                         "Evaluate the code under the scheme "
                                         "interpreter (primarily for batch mode)",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Manish Singh",
                                       "Manish Singh",
                                       "1998");
@@ -185,15 +185,15 @@ script_fu_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-script_fu_run (GimpProcedure        *procedure,
-               GimpProcedureConfig  *config,
+static ClayValueArray *
+script_fu_run (ClayProcedure        *procedure,
+               ClayProcedureConfig  *config,
                gpointer              run_data)
 {
-  GimpPlugIn     *plug_in     = gimp_procedure_get_plug_in (procedure);
-  const gchar    *name        = gimp_procedure_get_name (procedure);
-  GimpValueArray *return_vals = NULL;
-  GimpRunMode     run_mode    = GIMP_RUN_NONINTERACTIVE;
+  ClayPlugIn     *plug_in     = clay_procedure_get_plug_in (procedure);
+  const gchar    *name        = clay_procedure_get_name (procedure);
+  ClayValueArray *return_vals = NULL;
+  ClayRunMode     run_mode    = CLAY_RUN_NONINTERACTIVE;
 
   if (g_object_class_find_property (G_OBJECT_GET_CLASS (config), "run-mode") != NULL)
     g_object_get (config, "run-mode", &run_mode, NULL);
@@ -201,21 +201,21 @@ script_fu_run (GimpProcedure        *procedure,
 
   if (strcmp (name, "extension-script-fu") == 0)
     {
-      /* Simultaneously poll both reads of commands from gimp app, and GUI events.
+      /* Simultaneously poll both reads of commands from clay app, and GUI events.
        * extension-script-fu periodically has GUI: dialogs for sequential commands.
        */
 
       /*  Acknowledge that the extension is properly initialized  */
-      gimp_procedure_persistent_ready (procedure);
+      clay_procedure_persistent_ready (procedure);
 
-      /* Hang async read from gimp app. */
-      gimp_plug_in_persistent_enable (plug_in);
+      /* Hang async read from clay app. */
+      clay_plug_in_persistent_enable (plug_in);
 
       /* Process both async reads of commands and GUI events. */
       g_main_loop_run (g_main_loop_new (NULL, FALSE));
 
-      /* The loop does not return because no command or event calls gimp_quit.
-       * Gimp app does not orderly shutdown extension-script-fu.
+      /* The loop does not return because no command or event calls clay_quit.
+       * Clay app does not orderly shutdown extension-script-fu.
        * When orderly, need to free the GMainLoop.
        */
       g_assert_not_reached ();
@@ -238,22 +238,22 @@ script_fu_run (GimpProcedure        *procedure,
     }
 
   if (! return_vals)
-    return_vals = gimp_procedure_new_return_values (procedure,
-                                                    GIMP_PDB_SUCCESS,
+    return_vals = clay_procedure_new_return_values (procedure,
+                                                    CLAY_PDB_SUCCESS,
                                                     NULL);
 
   return return_vals;
 }
 
-static GimpValueArray *
-script_fu_batch_run (GimpProcedure        *procedure,
-                     GimpRunMode           run_mode,
+static ClayValueArray *
+script_fu_batch_run (ClayProcedure        *procedure,
+                     ClayRunMode           run_mode,
                      const gchar          *code,
-                     GimpProcedureConfig  *config,
+                     ClayProcedureConfig  *config,
                      gpointer              run_data)
 {
-  const gchar    *name        = gimp_procedure_get_name (procedure);
-  GimpValueArray *return_vals = NULL;
+  const gchar    *name        = clay_procedure_get_name (procedure);
+  ClayValueArray *return_vals = NULL;
 
   script_fu_run_init (procedure, run_mode);
 
@@ -271,19 +271,19 @@ script_fu_batch_run (GimpProcedure        *procedure,
     }
 
   if (! return_vals)
-    return_vals = gimp_procedure_new_return_values (procedure,
-                                                    GIMP_PDB_SUCCESS,
+    return_vals = clay_procedure_new_return_values (procedure,
+                                                    CLAY_PDB_SUCCESS,
                                                     NULL);
 
   return return_vals;
 }
 
 static void
-script_fu_run_init (GimpProcedure *procedure,
-                    GimpRunMode    run_mode)
+script_fu_run_init (ClayProcedure *procedure,
+                    ClayRunMode    run_mode)
 {
-  GimpPlugIn     *plug_in     = gimp_procedure_get_plug_in (procedure);
-  const gchar    *name        = gimp_procedure_get_name (procedure);
+  ClayPlugIn     *plug_in     = clay_procedure_get_plug_in (procedure);
+  const gchar    *name        = clay_procedure_get_name (procedure);
   GList          *path;
 
   path = script_fu_search_path ();
@@ -311,7 +311,7 @@ script_fu_run_init (GimpProcedure *procedure,
 }
 
 static void
-script_fu_extension_init (GimpPlugIn *plug_in)
+script_fu_extension_init (ClayPlugIn *plug_in)
 {
   /* Commented out until fixed or replaced.
    * script_fu_register_refresh_procedure (plug_in);

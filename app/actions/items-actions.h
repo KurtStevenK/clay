@@ -18,8 +18,8 @@
 #pragma once
 
 
-void   items_actions_setup  (GimpActionGroup *group,
+void   items_actions_setup  (ClayActionGroup *group,
                              const gchar     *prefix);
-void   items_actions_update (GimpActionGroup *group,
+void   items_actions_update (ClayActionGroup *group,
                              const gchar     *prefix,
                              GList           *items);

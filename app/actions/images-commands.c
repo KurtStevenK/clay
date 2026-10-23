@@ -20,21 +20,21 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpimageview.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/clayimageview.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
 
 #include "images-commands.h"
 
@@ -42,78 +42,78 @@
 /*  public functions */
 
 void
-images_raise_views_cmd_callback (GimpAction *action,
+images_raise_views_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpImage           *image;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayImage           *image;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  image = gimp_context_get_image (context);
+  image = clay_context_get_image (context);
 
-  if (image && gimp_container_have (container, GIMP_OBJECT (image)))
+  if (image && clay_container_have (container, CLAY_OBJECT (image)))
     {
       GList *list;
 
-      for (list = gimp_get_display_iter (image->gimp);
+      for (list = clay_get_display_iter (image->clay);
            list;
            list = g_list_next (list))
         {
-          GimpDisplay *display = list->data;
+          ClayDisplay *display = list->data;
 
-          if (gimp_display_get_image (display) == image)
-            gimp_display_shell_present (gimp_display_get_shell (display));
+          if (clay_display_get_image (display) == image)
+            clay_display_shell_present (clay_display_get_shell (display));
         }
     }
 }
 
 void
-images_new_view_cmd_callback (GimpAction *action,
+images_new_view_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpImage           *image;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayImage           *image;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  image = gimp_context_get_image (context);
+  image = clay_context_get_image (context);
 
-  if (image && gimp_container_have (container, GIMP_OBJECT (image)))
+  if (image && clay_container_have (container, CLAY_OBJECT (image)))
     {
-      gimp_create_display (image->gimp, image, gimp_unit_pixel (), 1.0,
-                           G_OBJECT (gimp_widget_get_monitor (GTK_WIDGET (editor))));
+      clay_create_display (image->clay, image, clay_unit_pixel (), 1.0,
+                           G_OBJECT (clay_widget_get_monitor (GTK_WIDGET (editor))));
     }
 }
 
 void
-images_delete_image_cmd_callback (GimpAction *action,
+images_delete_image_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
-  GimpContext         *context;
-  GimpImage           *image;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
+  ClayContext         *context;
+  ClayImage           *image;
 
-  container = gimp_container_view_get_container (editor->view);
-  context   = gimp_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
 
-  image = gimp_context_get_image (context);
+  image = clay_context_get_image (context);
 
-  if (image && gimp_container_have (container, GIMP_OBJECT (image)))
+  if (image && clay_container_have (container, CLAY_OBJECT (image)))
     {
-      if (gimp_image_get_display_count (image) == 0)
+      if (clay_image_get_display_count (image) == 0)
         {
-          gimp_container_remove (container, GIMP_OBJECT (image));
+          clay_container_remove (container, CLAY_OBJECT (image));
           g_object_unref (image);
         }
     }

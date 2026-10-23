@@ -1,0 +1,26 @@
+Most of the icons in the Legacy theme are from the original Clay icons.
+License is mostly unknown which means that unlike proven otherwise (e.g.
+when finding a commit message giving a specific license), they are
+assumed to be the default license of Clay, i.e. GPLv3+.
+
+Most vector versions were done by Denis Rangelov, based on the raster
+original versions. Licensing stays the same, with Denis added as
+co-author when relevant.
+
+clay-tool-pencil.svg and clay-tool-color-picker.svg are taken from the
+Inkscape Tango icon theme. Mc from the Inkscape project says that
+everything they ship is either GPLv2+ or CC by-sa.
+
+Some icons are modified from the Default icon theme, so licensing of the
+Default theme applies: clay-tool-bucket-fill, clay-tool-cage,
+clay-tool-handle-transform, clay-tool-paintbrush, clay-tool-smudge,
+clay-tool-text.
+
+The icon clay-tool-measure already existed as SVG before the full
+vectorization and metadata shows it as CC by-sa 2.0 by Ulisse Perusin.
+
+When attributing the artwork, "Clay team" is enough for icons which were fully
+created for Clay. For icons taken and modified from other teams, such as
+Inkscape, attribute them for instance to "Inkscape team" and "Clay team".
+
+Please link to https://www.gimp.org/ where available.

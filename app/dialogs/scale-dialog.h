@@ -18,14 +18,14 @@
 #pragma once
 
 
-GtkWidget * scale_dialog_new (GimpViewable          *viewable,
-                              GimpContext           *context,
+GtkWidget * scale_dialog_new (ClayViewable          *viewable,
+                              ClayContext           *context,
                               const gchar           *title,
                               const gchar           *role,
                               GtkWidget             *parent,
-                              GimpHelpFunc           help_func,
+                              ClayHelpFunc           help_func,
                               const gchar           *help_id,
-                              GimpUnit              *unit,
-                              GimpInterpolationType  interpolation,
-                              GimpScaleCallback      callback,
+                              ClayUnit              *unit,
+                              ClayInterpolationType  interpolation,
+                              ClayScaleCallback      callback,
                               gpointer               user_data);

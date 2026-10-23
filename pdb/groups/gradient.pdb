@@ -58,7 +58,7 @@ sub gradient_new {
     %invoke = (
         code => <<'CODE'
 {
-  gradient = (GimpGradient*) gimp_data_factory_data_new (gimp->gradient_factory,
+  gradient = (ClayGradient*) clay_data_factory_data_new (clay->gradient_factory,
                                                          context, name);
 
   if (!gradient)
@@ -91,8 +91,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gradient = GIMP_GRADIENT (gimp_pdb_get_resource (gimp, GIMP_TYPE_GRADIENT, name,
-                                                   GIMP_PDB_DATA_ACCESS_READ, error));
+  gradient = CLAY_GRADIENT (clay_pdb_get_resource (clay, CLAY_TYPE_GRADIENT, name,
+                                                   CLAY_PDB_DATA_ACCESS_READ, error));
 
   /* Ignore "not found" error, just return NULL. */
   g_clear_error (error);
@@ -123,7 +123,7 @@ sub gradient_get_number_of_segments {
 {
   if (gradient)
     {
-      for (GimpGradientSegment *seg = gradient->segments; seg; seg = seg->next)
+      for (ClayGradientSegment *seg = gradient->segments; seg; seg = seg->next)
         num_segments++;
     }
   else
@@ -164,7 +164,7 @@ HELP
 {
   if (gradient)
     {
-      GimpGradientSegment *seg   = NULL;
+      ClayGradientSegment *seg   = NULL;
       gdouble              pos   = 0.0;
       gdouble              delta = 1.0 / (num_samples - 1);
       GeglColor          **sample;
@@ -173,9 +173,9 @@ HELP
 
       while (num_samples--)
         {
-          seg = gimp_gradient_get_color_at (gradient, context, seg,
+          seg = clay_gradient_get_color_at (gradient, context, seg,
                                             pos, reverse,
-                                            GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                            CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                             sample);
 
           sample++,
@@ -221,17 +221,17 @@ HELP
 {
   if (gradient)
     {
-      GimpGradientSegment  *seg = NULL;
+      ClayGradientSegment  *seg = NULL;
       GeglColor           **sample;
 
       sample = color_samples = g_new0 (GeglColor *, num_samples + 1);
 
       while (num_samples--)
         {
-          seg = gimp_gradient_get_color_at (gradient, context,
+          seg = clay_gradient_get_color_at (gradient, context,
                                             seg, *positions,
                                             reverse,
-                                            GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                            CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                             sample);
 
           sample++;
@@ -269,12 +269,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg;
+  ClayGradientSegment *seg;
 
-  seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    color = g_object_ref (gimp_gradient_segment_get_left_color (gradient, seg));
+    color = g_object_ref (clay_gradient_segment_get_left_color (gradient, seg));
   else
     success = FALSE;
 }
@@ -305,12 +305,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg;
+  ClayGradientSegment *seg;
 
-  seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    color = g_object_ref (gimp_gradient_segment_get_right_color (gradient, seg));
+    color = g_object_ref (clay_gradient_segment_get_right_color (gradient, seg));
   else
     success = FALSE;
 }
@@ -338,12 +338,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        gimp_gradient_segment_set_left_color (gradient, seg, color);
+        clay_gradient_segment_set_left_color (gradient, seg, color);
       else
         success = FALSE;
       }
@@ -377,12 +377,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        gimp_gradient_segment_set_right_color (gradient, seg, color);
+        clay_gradient_segment_set_right_color (gradient, seg, color);
       else
         success = FALSE;
     }
@@ -418,10 +418,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    pos = gimp_gradient_segment_get_left_pos (gradient, seg);
+    pos = clay_gradient_segment_get_left_pos (gradient, seg);
   else
     success = FALSE;
 }
@@ -452,10 +452,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    pos = gimp_gradient_segment_get_right_pos (gradient, seg);
+    pos = clay_gradient_segment_get_right_pos (gradient, seg);
   else
     success = FALSE;
 }
@@ -486,10 +486,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    pos = gimp_gradient_segment_get_middle_pos (gradient, seg);
+    pos = clay_gradient_segment_get_middle_pos (gradient, seg);
   else
     success = FALSE;
 }
@@ -525,12 +525,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        final_pos = gimp_gradient_segment_set_left_pos (gradient, seg, pos);
+        final_pos = clay_gradient_segment_set_left_pos (gradient, seg, pos);
       else
         success = FALSE;
     }
@@ -572,12 +572,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        final_pos = gimp_gradient_segment_set_right_pos (gradient, seg, pos);
+        final_pos = clay_gradient_segment_set_right_pos (gradient, seg, pos);
       else
         success = FALSE;
     }
@@ -618,12 +618,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        final_pos = gimp_gradient_segment_set_middle_pos (gradient, seg, pos);
+        final_pos = clay_gradient_segment_set_middle_pos (gradient, seg, pos);
       else
         success = FALSE;
     }
@@ -652,7 +652,7 @@ HELP
     );
 
     @outargs = (
-        { name => 'blend_func', type => 'enum GimpGradientSegmentType',
+        { name => 'blend_func', type => 'enum ClayGradientSegmentType',
           void_ret => 1,
           desc => 'The blending function of the segment' }
     );
@@ -660,10 +660,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    blend_func = gimp_gradient_segment_get_blending_function (gradient, seg);
+    blend_func = clay_gradient_segment_get_blending_function (gradient, seg);
   else
     success = FALSE;
 }
@@ -687,7 +687,7 @@ HELP
     );
 
     @outargs = (
-        { name => 'coloring_type', type => 'enum GimpGradientSegmentColor',
+        { name => 'coloring_type', type => 'enum ClayGradientSegmentColor',
           void_ret => 1,
 	         desc => 'The coloring type of the segment' }
     );
@@ -695,10 +695,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+  ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
   if (seg)
-    coloring_type = gimp_gradient_segment_get_coloring_type (gradient, seg);
+    coloring_type = clay_gradient_segment_get_coloring_type (gradient, seg);
   else
     success = FALSE;
 }
@@ -720,23 +720,23 @@ HELP
         ${gradient_arg_spec},
         ${gradient_start_segment_arg_spec},
         ${gradient_end_segment_arg_spec},
-        { name => 'blending_function', type => 'enum GimpGradientSegmentType',
+        { name => 'blending_function', type => 'enum ClayGradientSegmentType',
           desc => 'The blending function' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_set_blending_function (gradient,
+        clay_gradient_segment_range_set_blending_function (gradient,
                                                            start_seg, end_seg,
                                                            blending_function);
       else
@@ -763,23 +763,23 @@ HELP
         ${gradient_arg_spec},
         ${gradient_start_segment_arg_spec},
         ${gradient_end_segment_arg_spec},
-        { name => 'coloring_type', type => 'enum GimpGradientSegmentColor',
+        { name => 'coloring_type', type => 'enum ClayGradientSegmentColor',
           desc => 'The coloring type' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_set_coloring_type (gradient,
+        clay_gradient_segment_range_set_coloring_type (gradient,
                                                        start_seg, end_seg,
                                                        coloring_type);
       else
@@ -813,16 +813,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_flip (gradient,
+        clay_gradient_segment_range_flip (gradient,
                                           start_seg, end_seg,
                                           NULL, NULL);
       else
@@ -858,16 +858,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_replicate (gradient,
+        clay_gradient_segment_range_replicate (gradient,
                                                start_seg, end_seg,
                                                replicate_times,
                                                NULL, NULL);
@@ -900,18 +900,18 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_split_midpoint (gradient, context,
+        clay_gradient_segment_range_split_midpoint (gradient, context,
                                                     start_seg, end_seg,
-                                                    GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                    CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                                     NULL, NULL);
       else
         success = FALSE;
@@ -944,19 +944,19 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_split_uniform (gradient, context,
+        clay_gradient_segment_range_split_uniform (gradient, context,
                                                    start_seg, end_seg,
                                                    split_parts,
-                                                   GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                   CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                                    NULL, NULL);
       else
         success = FALSE;
@@ -990,16 +990,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_delete (gradient,
+        clay_gradient_segment_range_delete (gradient,
                                             start_seg, end_seg,
                                             NULL, NULL);
       else
@@ -1037,16 +1037,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_redistribute_handles (gradient,
+        clay_gradient_segment_range_redistribute_handles (gradient,
                                                           start_seg, end_seg);
       else
         success = FALSE;
@@ -1081,16 +1081,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_blend (gradient,
+        clay_gradient_segment_range_blend (gradient,
                                            start_seg, end_seg,
                                            start_seg->left_color,
                                            end_seg->right_color,
@@ -1128,16 +1128,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        gimp_gradient_segment_range_blend (gradient,
+        clay_gradient_segment_range_blend (gradient,
                                            start_seg, end_seg,
                                            start_seg->left_color,
                                            end_seg->right_color,
@@ -1186,16 +1186,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (gradient)))
+  if (clay_data_is_writable (CLAY_DATA (gradient)))
     {
-      GimpGradientSegment *start_seg;
-      GimpGradientSegment *end_seg;
+      ClayGradientSegment *start_seg;
+      ClayGradientSegment *end_seg;
 
-      start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-      end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+      start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+      end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
       if (start_seg && end_seg)
-        final_delta = gimp_gradient_segment_range_move (gradient,
+        final_delta = clay_gradient_segment_range_move (gradient,
                                                         start_seg, end_seg,
                                                         delta,
                                                         control_compress);
@@ -1214,11 +1214,11 @@ CODE
 
 
 @headers = qw(<string.h>
-              "core/gimp.h"
-              "core/gimpcontext.h"
-              "core/gimpgradient.h"
-              "core/gimpdatafactory.h"
-              "gimppdb-utils.h");
+              "core/clay.h"
+              "core/claycontext.h"
+              "core/claygradient.h"
+              "core/claydatafactory.h"
+              "claypdb-utils.h");
 
 @procs = qw(gradient_new
             gradient_get_by_name
@@ -1247,7 +1247,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Gradient';
-$doc_title = 'gimpgradient';
+$doc_title = 'claygradient';
 $doc_short_desc = 'Installable object used by the gradient rendering tool.';
 $doc_long_desc = 'Installable object used by the gradient rendering tool.';
 

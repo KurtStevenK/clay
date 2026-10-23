@@ -24,7 +24,7 @@
 #include <windows.h>
 #endif
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "tinyscheme/scheme-private.h"
 
@@ -192,7 +192,7 @@ script_fu_script_new_from_metadata_regular (scheme  *sc,
   return script;
 }
 
- /* GimpResource
+ /* ClayResource
   *
   * Store the subclass type and the declared default name.
   *
@@ -388,21 +388,21 @@ script_fu_parse_default_spec (scheme   *sc,
 #endif
       break;
 
-    /* For GimpResource subclasses. */
+    /* For ClayResource subclasses. */
     case SF_FONT:
-      return script_fu_parse_default_spec_resource (sc, default_spec, arg, GIMP_TYPE_FONT);
+      return script_fu_parse_default_spec_resource (sc, default_spec, arg, CLAY_TYPE_FONT);
       break;
     case SF_PALETTE:
-      return script_fu_parse_default_spec_resource (sc, default_spec, arg, GIMP_TYPE_PALETTE);
+      return script_fu_parse_default_spec_resource (sc, default_spec, arg, CLAY_TYPE_PALETTE);
       break;
     case SF_PATTERN:
-      return script_fu_parse_default_spec_resource (sc, default_spec, arg, GIMP_TYPE_PATTERN);
+      return script_fu_parse_default_spec_resource (sc, default_spec, arg, CLAY_TYPE_PATTERN);
       break;
     case SF_BRUSH:
-      return script_fu_parse_default_spec_resource (sc, default_spec, arg, GIMP_TYPE_BRUSH);
+      return script_fu_parse_default_spec_resource (sc, default_spec, arg, CLAY_TYPE_BRUSH);
       break;
     case SF_GRADIENT:
-      return script_fu_parse_default_spec_resource (sc, default_spec, arg, GIMP_TYPE_GRADIENT);
+      return script_fu_parse_default_spec_resource (sc, default_spec, arg, CLAY_TYPE_GRADIENT);
       break;
 
     case SF_OPTION:
@@ -445,10 +445,10 @@ script_fu_parse_default_spec (scheme   *sc,
 
         val = sc->vptr->string_value (sc->vptr->pair_car (option_list));
 
-        if (g_str_has_prefix (val, "Gimp"))
+        if (g_str_has_prefix (val, "Clay"))
           type_name = g_strdup (val);
         else
-          type_name = g_strconcat ("Gimp", val, NULL);
+          type_name = g_strconcat ("Clay", val, NULL);
 
         enum_type = g_type_from_name (type_name);
         if (! G_TYPE_IS_ENUM (enum_type))

@@ -32,21 +32,21 @@
 
 
 ; setup
-(define testImage (gimp-image-new 21 22 RGB))
+(define testImage (clay-image-new 21 22 RGB))
 (define testLayer (testing:layer-new testImage))
 ; assert layer is not inserted in image
 
 
 ; paint ops fail until layer is added to image
-(assert-error `(gimp-airbrush ,testLayer 50.0 ; pressure
+(assert-error `(clay-airbrush ,testLayer 50.0 ; pressure
                         #(4.0 4.0))    ; float array of strokes
               (string-append
-                "Procedure execution of gimp-airbrush failed on invalid input arguments: "))
+                "Procedure execution of clay-airbrush failed on invalid input arguments: "))
                 ; "Item 'LayerNew#2' (10) cannot be used because it has not been added to an image"))
 
 
 ; adding layer to image succeeds
-(assert `(gimp-image-insert-layer
+(assert `(clay-image-insert-layer
             ,testImage
             ,testLayer
             0  ; parent
@@ -56,19 +56,19 @@
 
 (test! "airbrush")
 
-(assert `(gimp-airbrush
+(assert `(clay-airbrush
             ,testLayer
             50.0 ; pressure
             #(4.0 4.0)))    ; float array of strokes
 
 ; with two strokes
-(assert `(gimp-airbrush
+(assert `(clay-airbrush
             ,testLayer
             50.0 ; pressure
             #(4.0 4.0 8.0 8.0)))    ; float array of strokes
 
 ; with stroke out of bounds of image
-(assert `(gimp-airbrush
+(assert `(clay-airbrush
             ,testLayer
             50.0  ; pressure
             #(4.0 4.0 800.0 800.0)))    ; float array of strokes
@@ -80,7 +80,7 @@
 ; where source and target are same.
 ; stroke coords in the target.
 ; FIXME throws GLib CRITICAL
-(assert `(gimp-clone
+(assert `(clay-clone
             ,testLayer      ; affected i.e. target
             ,testLayer      ; source
             CLONE-IMAGE     ; clone type
@@ -94,13 +94,13 @@
 
 (test! "eraser")
 
-(assert `(gimp-eraser
+(assert `(clay-eraser
             ,testLayer  ; target
             #(4.0 4.0 800.0 800.0) ; float array of strokes
             BRUSH-HARD         ; hardness
             PAINT-CONSTANT))   ; PaintApplicationMode
 
-(assert `(gimp-eraser-default
+(assert `(clay-eraser-default
             ,testLayer  ; target
             #(0.0 0.0 800.0 800.0) ; float array of strokes
             ))
@@ -109,7 +109,7 @@
 
 (test! "heal")
 ; FIXME throws GLib CRITICAL "has no property named 'src-x'"
-(assert `(gimp-heal
+(assert `(clay-heal
             ,testLayer      ; affected i.e. target
             ,testLayer      ; source
             1.0 1.0         ; source coord x,y is not a vector
@@ -117,7 +117,7 @@
 
 
 (test! "convolve")
-(assert `(gimp-convolve
+(assert `(clay-convolve
             ,testLayer      ; affected i.e. target
             99.9999999999   ; pressure
             CONVOLVE-BLUR   ; type
@@ -125,7 +125,7 @@
 
 
 (test! "dodgeburn")
-(assert `(gimp-dodgeburn
+(assert `(clay-dodgeburn
             ,testLayer      ; affected i.e. target
             66.0            ; exposure
             DODGE-BURN-TYPE-DODGE ; type, BURN or DODGE
@@ -139,7 +139,7 @@
 
 
 (test! "smudge")
-(assert `(gimp-smudge
+(assert `(clay-smudge
             ,testLayer      ; affected i.e. target
             0.0             ; pressure
             #(4.0 4.0)))    ; float array of strokes
@@ -153,34 +153,34 @@
 
 ; In alphabetic order
 
-(test-paint-op-default gimp-airbrush-default)
-(test-paint-op-default gimp-convolve-default)
-(test-paint-op-default gimp-dodgeburn-default)
+(test-paint-op-default clay-airbrush-default)
+(test-paint-op-default clay-convolve-default)
+(test-paint-op-default clay-dodgeburn-default)
 ; FIXME fails "Set a source image first"
 ; The API has no way to set the source image
-;(test-paint-op-default gimp-clone-default)
-;(test-paint-op-default gimp-heal-default)
-(test-paint-op-default gimp-paintbrush-default)
-; !!! gimp-pencil is not named gimp-pencil-default
+;(test-paint-op-default clay-clone-default)
+;(test-paint-op-default clay-heal-default)
+(test-paint-op-default clay-paintbrush-default)
+; !!! clay-pencil is not named clay-pencil-default
 ; but has the same signature as other default paint ops.
-(test-paint-op-default gimp-pencil)
-(test-paint-op-default gimp-smudge-default)
+(test-paint-op-default clay-pencil)
+(test-paint-op-default clay-smudge-default)
 
 
 ; For any paint op,
 ; <2 control points is error
-(assert-error `(gimp-airbrush
+(assert-error `(clay-airbrush
                   ,testLayer
                   50.0 ; pressure
                   #(4.0))  ; float array of strokes
-                "Procedure execution of gimp-airbrush failed")
+                "Procedure execution of clay-airbrush failed")
 
 ; The binding requires a Scheme vector for C float array,
 ; not a list, here a literal i.e. quoted.
-(assert-error `(gimp-airbrush
+(assert-error `(clay-airbrush
                   ,testLayer
                   50.0 ; pressure
                   `(4.0 49.0))  ; strokes
-                "in script, expected type: vector for argument 3 to gimp-airbrush")
+                "in script, expected type: vector for argument 3 to clay-airbrush")
 
 (script-fu-use-v2)

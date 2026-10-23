@@ -6,6 +6,6 @@ extern gfloat  rotmat[16];
 
 void init_compute     (void);
 void compute_image    (void);
-void copy_from_config (GimpProcedureConfig  *config);
+void copy_from_config (ClayProcedureConfig  *config);
 
 #endif  /* __MAPOBJECT_APPLY_H__ */

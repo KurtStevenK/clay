@@ -20,11 +20,11 @@
 ############################################
 
 #### Usage ####
-printf "GIMP version to release: "; read ver
+printf "Clay version to release: "; read ver
 
 if [ -z "$ver" ]; then
   TAG="HEAD"
-  PREV_TAG=$(git ls-remote --tags --exit-code --refs  "https://gitlab.gnome.org/GNOME/gimp.git" |grep -o "GIMP_[0-9]*_[0-9]*_[0-9]*" | sort --version-sort | tail -1)
+  PREV_TAG=$(git ls-remote --tags --exit-code --refs  "https://github.com/KurtStevenK/clay" |grep -o "CLAY_[0-9]*_[0-9]*_[0-9]*" | sort --version-sort | tail -1)
   INTERMEDIATE_TAG=$PREV_TAG
 
   is_dev_release=1
@@ -36,11 +36,11 @@ else
   if [ $? -eq 0 ]; then
     micro=$(echo "$micro_rc" | cut -d'-' -f1)
     rc=$(echo "$micro_rc" | cut -d'-' -f2)
-    TAG=GIMP_${major}_${minor}_${micro}_$rc
+    TAG=CLAY_${major}_${minor}_${micro}_$rc
     rel_version="${major}.${minor}.${micro} ${rc}"
   else
     micro=$micro_rc
-    TAG=GIMP_${major}_${minor}_${micro}
+    TAG=CLAY_${major}_${minor}_${micro}
     rel_version="${major}.${minor}.${micro}"
   fi
 
@@ -60,16 +60,16 @@ else
   # The previous tag will be in the same branch. For instance 3.0.4 is
   # previous to 3.0.6 even if we may have released 3.1 versions
   # in-between.
-  PREV_TAG=$(git ls-remote --tags --exit-code --refs  "https://gitlab.gnome.org/GNOME/gimp.git" |grep -o "GIMP_[0-9]*_[0-9]*_[0-9]*\(_RC[0-9]*\)\?" | sort --version-sort | grep -B1 $TAG | head -1)
+  PREV_TAG=$(git ls-remote --tags --exit-code --refs  "https://github.com/KurtStevenK/clay" |grep -o "CLAY_[0-9]*_[0-9]*_[0-9]*\(_RC[0-9]*\)\?" | sort --version-sort | grep -B1 $TAG | head -1)
   # The intermediate tag is the actual version we released before.
-  INTERMEDIATE_TAG=$(git ls-remote --tags --sort=taggerdate --exit-code --refs  "https://gitlab.gnome.org/GNOME/gimp.git" |grep -o "GIMP_[0-9]*_[0-9]*_[0-9]*\(_RC[0-9]*\)\?" | grep -B1 $TAG | head -1)
+  INTERMEDIATE_TAG=$(git ls-remote --tags --sort=taggerdate --exit-code --refs  "https://github.com/KurtStevenK/clay" |grep -o "CLAY_[0-9]*_[0-9]*_[0-9]*\(_RC[0-9]*\)\?" | grep -B1 $TAG | head -1)
 fi
 
 #if [ $is_dev_release -eq 0 ]; then
-  #read -p "Previous stable GIMP version:" ver
+  #read -p "Previous stable Clay version:" ver
 #elif [ $micro -eq 0 ];
 #else
-  #read -p "Previous GIMP version:" ver
+  #read -p "Previous Clay version:" ver
 #fi
 
 prevmajor=$(echo "$PREV_TAG" | cut -d'_' -f2)
@@ -140,11 +140,11 @@ get_issues_mrs()
   echo $closed_issues $merged_mrs
 }
 
-set -- $(get_issues_mrs "https://gitlab.gnome.org/GNOME/gimp/")
+set -- $(get_issues_mrs "https://github.com/KurtStevenK/clay/")
 closed_issues=$1
 merged_mrs=$2
 
-set -- $(get_issues_mrs "https://gitlab.gnome.org/Teams/GIMP/Design/gimp-ux/")
+set -- $(get_issues_mrs "https://gitlab.gnome.org/Teams/Clay/Design/clay-ux/")
 ux_closed_issues=$1
 ux_merged_mrs=$2
 
@@ -153,7 +153,7 @@ if [ -n "$ux_closed_issues" ] || [ "$ux_closed_issues" -eq "$ux_closed_issues" ]
 else
   echo "Failed to read Gitlab webpages."
   echo "It may be the anti-bot Anubis blocking us."
-  echo "Try loading manually: https://gitlab.gnome.org/GNOME/gimp/-/milestones/"
+  echo "Try loading manually: https://github.com/KurtStevenK/clay/-/milestones/"
   exit 1
 fi
 
@@ -195,7 +195,7 @@ count_data_contributors()
   folders=$1
   text=$2
 
-  cd gimp-data
+  cd clay-data
   contributors=`git --no-pager shortlog -sn --since="$prev_date" --until="$cur_date" -- $folders`
   if [ -n "$contributors" ]; then
     contributors=`echo "$contributors" | cut -f2`
@@ -250,7 +250,7 @@ echo
 echo "-------------------------------------------"
 echo
 
-echo "Since [GIMP $prev_version](/release/$prev_uri/), in the main GIMP repository:"
+echo "Since [Clay $prev_version](/release/$prev_uri/), in the main Clay repository:"
 echo
 echo "* $closed_issues reports were closed as FIXED."
 echo "* $merged_mrs merge requests were merged."
@@ -268,7 +268,7 @@ echo "* $commits_n commits were pushed."
 #commits_rate=$(( $commits_n / $days_n ))
 
 #echo "Start date: $prev_date - End date: $cur_date"
-#echo "Between $PREV_TAG and $TAG, $contribs_n people contributed $commits_n commits to GIMP."
+#echo "Between $PREV_TAG and $TAG, $contribs_n people contributed $commits_n commits to Clay."
 #echo "This is an average of $commits_rate commits a day."
 #echo
 #echo "Statistics on all files:" `git diff --shortstat $PREV_TAG..$TAG 2>/dev/null`
@@ -290,19 +290,19 @@ echo "* $i18n_n translations were updated: $i18n_comma."
 #echo "Statistics on C files:" `git diff --shortstat $PREV_TAG..$TAG  -- "*.[ch]" 2>/dev/null`
 
 echo
-echo "$contribs_n people contributed changes or fixes to GIMP $rel_version codebase (order
+echo "$contribs_n people contributed changes or fixes to Clay $rel_version codebase (order
 is determined by number of commits; some people are in several groups):"
 echo
-count_contributors 'app/ "libgimp*" pdb tools/pdbgen/' "%d developers to core code: %s"
+count_contributors 'app/ "libclay*" pdb tools/pdbgen/' "%d developers to core code: %s"
 count_contributors 'plug-ins/ modules/' "%d developers to plug-ins or modules: %s"
 count_contributors 'po*/*.po' "%d translators: %s"
 count_contributors 'themes/*/*.css themes/*/*png' "%d theme designers: %s"
 # XXX For some reason using '*/meson.build' doesn't work out through the
 # function. So I list all files explicitly.
-meson_builds=`find . -name meson.build -not -path gimp-data`
+meson_builds=`find . -name meson.build -not -path clay-data`
 count_contributors "meson_options.txt $meson_builds .gitlab-ci.yml build" "%d build, packaging or CI contributors: %s"
 count_contributors 'data/ etc/ desktop/ menus/ docs/ devel-docs/ NEWS INSTALL' "%d contributors on other types of resources: %s"
-count_repo_contributors "gimp-data" main "The gimp-data submodule had %d commits by %d contributors: %s" "" "" $int_date
+count_repo_contributors "clay-data" main "The clay-data submodule had %d commits by %d contributors: %s" "" "" $int_date
 count_data_contributors 'images' "%d image creators: %s"
 count_data_contributors 'icons/*.svg icons/*.png' "%d icon designers: %s"
 count_data_contributors 'cursors' "%d cursor designers: %s"
@@ -319,7 +319,7 @@ if [ "$prevmajor" -ne "$major" ] || [ "$prevminor" -ne "$minor" ] || [ $((minor%
 fi
 
 echo
-echo "Contributions on other repositories in the GIMPverse (order is determined by"
+echo "Contributions on other repositories in the CLAYverse (order is determined by"
 echo "number of commits):"
 echo
 echo "* Our UX tracker had $ux_closed_issues reports closed as FIXED."
@@ -341,14 +341,14 @@ if [ "$gegl_ver" != "$prev_gegl_ver" ]; then
 fi
 
 count_repo_contributors "../ctx.graphics" dev "[ctx](https://ctx.graphics/) had %d commits since $int_version release by %d contributors: %s"
-count_repo_contributors "../gimp-test-images" main "The \`gimp-test-images\` (unit testing repository) repository had %d commits by %d contributors: %s"
+count_repo_contributors "../clay-test-images" main "The \`clay-test-images\` (unit testing repository) repository had %d commits by %d contributors: %s"
 # TODO:
 # * flatpak often has bot commits. These should be filtered out.
 # * detect a beta vs. stable release and tweak branch accordingly.
-count_repo_contributors "../org.gimp.GIMP" master "The flatpak release had %d commits by %d contributors: %s"
-count_repo_contributors "../gimp-web" testing "Our main website (what you are reading right now) had %d commits by %d contributors: %s"
-count_repo_contributors "../gimp-web-devel" testing "Our [developer website](https://developer.gimp.org/) had %d commits by %d contributors: %s"
-count_repo_contributors "../gimp-help" master "Our [3.0 documentation](https://docs.gimp.org/) had %d commits by %d contributors: %s"
+count_repo_contributors "../org.clay.Clay" master "The flatpak release had %d commits by %d contributors: %s"
+count_repo_contributors "../clay-web" testing "Our main website (what you are reading right now) had %d commits by %d contributors: %s"
+count_repo_contributors "../clay-web-devel" testing "Our [developer website](https://developer.gimp.org/) had %d commits by %d contributors: %s"
+count_repo_contributors "../clay-help" master "Our [3.0 documentation](https://docs.gimp.org/) had %d commits by %d contributors: %s"
 
 echo
 echo "Let's not forget to thank all the people who help us triaging in Gitlab, report"
@@ -357,7 +357,7 @@ echo "Our community is deeply thankful as well to the internet warriors who mana
 echo "various [discussion channels](https://www.gimp.org/discuss.html) or social"
 echo "network accounts such as Ville Pätsi, Liam Quin, Michael Schumacher and Sevenix!"
 echo
-echo "*Note: considering the number of parts in GIMP and around, and how we"
+echo "*Note: considering the number of parts in Clay and around, and how we"
 echo "get statistics through \`git\` scripting, errors may slip inside these"
 echo "stats. Feel free to tell us if we missed or mis-categorized some"
 echo "contributors or contributions.*"

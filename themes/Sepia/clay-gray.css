@@ -1,0 +1,34 @@
+/* Sepia theme, dim scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(243,231,204);
+@define-color bg-color                   rgb(70,54,31);
+@define-color border-color               rgb(94,79,55);
+@define-color dimmed-fg-color            rgb(200,187,161);
+@define-color disabled-fg-color          rgb(165,151,126);
+@define-color disabled-button-color      rgb(125,111,86);
+@define-color hover-color                rgb(94,79,55);
+@define-color widget-bg-color            rgb(80,65,41);
+@define-color selected-color             rgb(105,89,66);
+@define-color extreme-bg-color           rgb(49,38,22);
+@define-color extreme-selected-color     rgb(94,79,55);
+@define-color strong-border-color        rgb(131,116,92);
+@define-color stronger-border-color      rgb(131,116,92);
+@define-color edge-border-color          rgb(131,116,92);
+@define-color scrollbar-slider-color     rgb(131,116,92);
+@define-color scrollbar-trough-color     rgb(49,38,22);
+@define-color ruler-color                rgba(94,79,55,0.3);
+@define-color accent-color               rgb(217,160,102);
+@define-color accent-hover-color         rgb(225,179,133);
+@define-color on-accent-color            rgb(35,27,16);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Georgia", "Palatino", "Times New Roman", serif; }

@@ -25,30 +25,30 @@
 
 #include "core/core-types.h"
 
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 /*  for the DBus service names  */
-#include "gui/gimpdbusservice.h"
+#include "gui/claydbusservice.h"
 #endif
 
 #include "unique.h"
 
 #if !defined(G_OS_WIN32) && !defined(PLATFORM_OSX)
-static gboolean  gimp_unique_dbus_open  (const gchar **filenames,
+static gboolean  clay_unique_dbus_open  (const gchar **filenames,
                                          gboolean      as_new);
-static gboolean  gimp_unique_dbus_batch_run (const gchar  *batch_interpreter,
+static gboolean  clay_unique_dbus_batch_run (const gchar  *batch_interpreter,
                                              const gchar **batch_commands);
 #elif defined(G_OS_WIN32)
-static gboolean  gimp_unique_win32_open (const gchar **filenames,
+static gboolean  clay_unique_win32_open (const gchar **filenames,
                                          gboolean      as_new);
 #endif
 
 
 gboolean
-gimp_unique_open (const gchar **filenames,
+clay_unique_open (const gchar **filenames,
                   gboolean      as_new)
 {
 #ifdef G_OS_WIN32
-  return gimp_unique_win32_open (filenames, as_new);
+  return clay_unique_win32_open (filenames, as_new);
 #elif defined (PLATFORM_OSX)
   /* Opening files through "Open with" from other software is likely handled
    * instead by gui_unique_quartz_init() by gtkosx signal handling.
@@ -59,12 +59,12 @@ gimp_unique_open (const gchar **filenames,
    */
   return FALSE;
 #else
-  return gimp_unique_dbus_open (filenames, as_new);
+  return clay_unique_dbus_open (filenames, as_new);
 #endif
 }
 
 gboolean
-gimp_unique_batch_run (const gchar  *batch_interpreter,
+clay_unique_batch_run (const gchar  *batch_interpreter,
                        const gchar **batch_commands)
 {
 #ifdef G_OS_WIN32
@@ -77,17 +77,17 @@ gimp_unique_batch_run (const gchar  *batch_interpreter,
    */
   return FALSE;
 #else
-  return gimp_unique_dbus_batch_run (batch_interpreter,
+  return clay_unique_dbus_batch_run (batch_interpreter,
                                      batch_commands);
 #endif
 }
 
 #ifdef G_OS_WIN32
 
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 /* prevent race on Windows so we can open multiple files. see: #364 */
 static gboolean
-gimp_unique_win32_send (HWND            window_handle,
+clay_unique_win32_send (HWND            window_handle,
                         COPYDATASTRUCT *copydata)
 {
   gint retry;
@@ -112,16 +112,16 @@ gimp_unique_win32_send (HWND            window_handle,
 #endif
 
 static gboolean
-gimp_unique_win32_open (const gchar **filenames,
+clay_unique_win32_open (const gchar **filenames,
                         gboolean      as_new)
 {
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 
 /*  for the proxy window names  */
 #include "gui/gui-unique.h"
 
-  HWND  window_handle = FindWindowW (GIMP_UNIQUE_WIN32_WINDOW_CLASS,
-                                     GIMP_UNIQUE_WIN32_WINDOW_NAME);
+  HWND  window_handle = FindWindowW (CLAY_UNIQUE_WIN32_WINDOW_CLASS,
+                                     CLAY_UNIQUE_WIN32_WINDOW_NAME);
 
   if (window_handle)
     {
@@ -146,7 +146,7 @@ gimp_unique_win32_open (const gchar **filenames,
                   copydata.cbData = strlen (uri) + 1;  /* size in bytes   */
                   copydata.dwData = (long) as_new;
 
-                  if (! gimp_unique_win32_send (window_handle, &copydata))
+                  if (! clay_unique_win32_send (window_handle, &copydata))
                     success = FALSE;
 
                   g_free (uri);
@@ -163,7 +163,7 @@ gimp_unique_win32_open (const gchar **filenames,
         }
       else
         {
-          if (! gimp_unique_win32_send (window_handle, &copydata))
+          if (! clay_unique_win32_send (window_handle, &copydata))
             success = FALSE;
         }
 
@@ -178,10 +178,10 @@ gimp_unique_win32_open (const gchar **filenames,
 #elif !defined(PLATFORM_OSX)
 
 static gboolean
-gimp_unique_dbus_open (const gchar **filenames,
+clay_unique_dbus_open (const gchar **filenames,
                        gboolean      as_new)
 {
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 
   GDBusConnection *connection;
   GError          *error = NULL;
@@ -210,9 +210,9 @@ gimp_unique_dbus_open (const gchar **filenames,
                   gchar    *uri = g_file_get_uri (file);
 
                   result = g_dbus_connection_call_sync (connection,
-                                                        GIMP_DBUS_SERVICE_NAME,
-                                                        GIMP_DBUS_SERVICE_PATH,
-                                                        GIMP_DBUS_INTERFACE_NAME,
+                                                        CLAY_DBUS_SERVICE_NAME,
+                                                        CLAY_DBUS_SERVICE_PATH,
+                                                        CLAY_DBUS_INTERFACE_NAME,
                                                         method,
                                                         g_variant_new ("(s)",
                                                                        uri),
@@ -244,9 +244,9 @@ gimp_unique_dbus_open (const gchar **filenames,
           GVariant *result;
 
           result = g_dbus_connection_call_sync (connection,
-                                                GIMP_DBUS_SERVICE_NAME,
-                                                GIMP_DBUS_SERVICE_PATH,
-                                                GIMP_DBUS_INTERFACE_NAME,
+                                                CLAY_DBUS_SERVICE_NAME,
+                                                CLAY_DBUS_SERVICE_PATH,
+                                                CLAY_DBUS_INTERFACE_NAME,
                                                 "Activate",
                                                 NULL,
                                                 NULL,
@@ -275,10 +275,10 @@ gimp_unique_dbus_open (const gchar **filenames,
 
 
 static gboolean
-gimp_unique_dbus_batch_run (const gchar  *batch_interpreter,
+clay_unique_dbus_batch_run (const gchar  *batch_interpreter,
                             const gchar **batch_commands)
 {
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 
   GDBusConnection *connection;
   GError          *error = NULL;
@@ -300,9 +300,9 @@ gimp_unique_dbus_batch_run (const gchar  *batch_interpreter,
           interpreter = batch_interpreter ? batch_interpreter : "";
 
           result = g_dbus_connection_call_sync (connection,
-                                                GIMP_DBUS_SERVICE_NAME,
-                                                GIMP_DBUS_SERVICE_PATH,
-                                                GIMP_DBUS_INTERFACE_NAME,
+                                                CLAY_DBUS_SERVICE_NAME,
+                                                CLAY_DBUS_SERVICE_PATH,
+                                                CLAY_DBUS_INTERFACE_NAME,
                                                 method,
                                                 g_variant_new ("(ss)",
                                                                interpreter,

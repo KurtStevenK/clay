@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * file-webp - WebP file format plug-in for the GIMP
+ * file-webp - WebP file format plug-in for the Clay
  * Copyright (C) 2015  Nathan Osman
  * Copyright (C) 2016  Ben Touchette
  *
@@ -23,9 +23,9 @@
 #define __WEBP_LOAD_H__
 
 
-GimpImage * load_image (GFile                  *file,
+ClayImage * load_image (GFile                  *file,
                         gboolean                interactive,
-                        GimpMetadataLoadFlags  *flags,
+                        ClayMetadataLoadFlags  *flags,
                         GError                **error);
 
 

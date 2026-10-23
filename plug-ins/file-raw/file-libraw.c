@@ -20,10 +20,10 @@
 #include <glib/gstdio.h>
 #include <libraw.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "file-raw-formats.h"
 #include "file-raw-utils.h"
@@ -36,12 +36,12 @@ typedef struct _FileLibRawClass FileLibRawClass;
 
 struct _FileLibRaw
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _FileLibRawClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -50,48 +50,48 @@ struct _FileLibRawClass
 
 GType                   file_libraw_get_type         (void);
 
-static GList          * file_libraw_init_procedures  (GimpPlugIn            *plug_in);
-static GimpProcedure  * file_libraw_create_procedure (GimpPlugIn            *plug_in,
+static GList          * file_libraw_init_procedures  (ClayPlugIn            *plug_in);
+static ClayProcedure  * file_libraw_create_procedure (ClayPlugIn            *plug_in,
                                                       const gchar           *name);
 
-static GimpValueArray * file_libraw_load             (GimpProcedure         *procedure,
-                                                      GimpRunMode            run_mode,
+static ClayValueArray * file_libraw_load             (ClayProcedure         *procedure,
+                                                      ClayRunMode            run_mode,
                                                       GFile                 *file,
-                                                      GimpMetadata          *metadata,
-                                                      GimpMetadataLoadFlags *flags,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayMetadata          *metadata,
+                                                      ClayMetadataLoadFlags *flags,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
-static GimpValueArray * file_libraw_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * file_libraw_load_thumb       (ClayProcedure         *procedure,
                                                       GFile                 *file,
                                                       gint                   size,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
 
-static GimpImage      * load_image                   (GFile                 *file,
+static ClayImage      * load_image                   (GFile                 *file,
                                                       libraw_data_t         *raw_info,
-                                                      GimpRunMode            run_mode,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayRunMode            run_mode,
+                                                      ClayProcedureConfig   *config,
                                                       GError               **error);
-static GimpImage      * load_thumbnail_image         (GFile                 *file,
+static ClayImage      * load_thumbnail_image         (GFile                 *file,
                                                       gint                   thumb_size,
                                                       GError               **error);
 
 
-static gboolean         load_dialog                  (GimpProcedure         *procedure,
+static gboolean         load_dialog                  (ClayProcedure         *procedure,
                                                       GObject               *config,
                                                       libraw_data_t         *raw_info);
 
 
-G_DEFINE_TYPE (FileLibRaw, file_libraw, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (FileLibRaw, file_libraw, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (FILELIBRAW_TYPE)
+CLAY_MAIN (FILELIBRAW_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 file_libraw_class_init (FileLibRawClass *klass)
 {
-  GimpPlugInClass *plug_in_class  = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class  = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->init_procedures  = file_libraw_init_procedures;
   plug_in_class->create_procedure = file_libraw_create_procedure;
@@ -104,7 +104,7 @@ file_libraw_init (FileLibRaw *file_libraw)
 }
 
 static GList *
-file_libraw_init_procedures (GimpPlugIn *plug_in)
+file_libraw_init_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -123,23 +123,23 @@ file_libraw_init_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-file_libraw_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+file_libraw_create_procedure (ClayPlugIn  *plug_in,
                               const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 file_libraw_load_thumb,
                                                 NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load thumbnail from a raw image"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alx Sa",
                                       "Alx Sa",
                                       "2026");
@@ -168,19 +168,19 @@ file_libraw_create_procedure (GimpPlugIn  *plug_in,
           load_help  = g_strdup_printf (format->load_help_format,
                                         "libraw");
 
-          procedure = gimp_load_procedure_new (plug_in, name,
-                                               GIMP_PDB_PROC_TYPE_PLUGIN,
+          procedure = clay_load_procedure_new (plug_in, name,
+                                               CLAY_PDB_PROC_TYPE_PLUGIN,
                                                file_libraw_load,
                                                (gpointer) format, NULL);
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             load_blurb, load_help, name);
-          gimp_procedure_set_attribution (procedure,
+          clay_procedure_set_attribution (procedure,
                                           "Alx Sa",
                                           "Alx Sa",
                                           "2026");
 
-          gimp_procedure_add_boolean_argument (procedure, "enable-interpolation",
+          clay_procedure_add_boolean_argument (procedure, "enable-interpolation",
                                                _("Enable interpolation"),
                                                _("Enable denoising and demosaicing steps"),
                                                TRUE,
@@ -191,20 +191,20 @@ file_libraw_create_procedure (GimpPlugIn  *plug_in,
            * enum values in the C API.
            */
 
-          gimp_procedure_add_choice_argument (procedure, "noise-reduction",
+          clay_procedure_add_choice_argument (procedure, "noise-reduction",
                                               _("Noise reduction"),
                                               _("Controls FBDD (Fake Before Demosaicing Denoising) noise reduction before demosaic"),
-                                              gimp_choice_new_with_values ("disabled",   0, _("Disabled"),             NULL,
+                                              clay_choice_new_with_values ("disabled",   0, _("Disabled"),             NULL,
                                                                            "light-fbdd", 1, _("Light FBDD reduction"), NULL,
                                                                            "full-fbdd",  2, _("Full FBDD reduction"),  NULL,
                                                                            NULL),
                                               "disabled", G_PARAM_READWRITE);
 
-          gimp_procedure_add_choice_argument (procedure, "demosaicing",
+          clay_procedure_add_choice_argument (procedure, "demosaicing",
                                               _("Demosaicing"),
                                               _("Interpolation method to reconstruct a matrix of colored pixels"
                                                 " from raw sensor data"),
-                                              gimp_choice_new_with_values ("linear",       0,  _("Linear"),       NULL,
+                                              clay_choice_new_with_values ("linear",       0,  _("Linear"),       NULL,
                                                                            "vng",          1,  _("VNG"),          NULL,
                                                                            "ppg",          2,  _("PPG"),          NULL,
                                                                            "ahd",          3,  _("AHD"),          NULL,
@@ -215,28 +215,28 @@ file_libraw_create_procedure (GimpPlugIn  *plug_in,
                                               "ahd", G_PARAM_READWRITE);
 
           /* Settings only for DCB demosaicing. */
-          gimp_procedure_add_boolean_argument (procedure, "dcb-enhance",
+          clay_procedure_add_boolean_argument (procedure, "dcb-enhance",
                                               _("DCB color enhance"),
                                               _("Turns on DCB color enhance mode"),
                                                TRUE, G_PARAM_READWRITE);
-          gimp_procedure_add_int_argument (procedure, "dcb-iterations",
+          clay_procedure_add_int_argument (procedure, "dcb-iterations",
                                            _("DCB iterations"),
                                            _("Number of DCB correction passes"),
                                            /* XXX unsure what would be an acceptable max iteration number! */
                                            0, 10, 0, G_PARAM_READWRITE);
 
-          gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                                format->file_type);
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               format->mime_type);
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               format->extensions);
-          gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                           format->magic);
 
-          gimp_load_procedure_set_handles_raw (GIMP_LOAD_PROCEDURE (procedure),
+          clay_load_procedure_set_handles_raw (CLAY_LOAD_PROCEDURE (procedure),
                                                TRUE);
-          gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+          clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                     LOAD_THUMB_PROC);
 
           g_free (load_proc);
@@ -250,50 +250,50 @@ file_libraw_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-file_libraw_load (GimpProcedure          *procedure,
-                  GimpRunMode             run_mode,
+static ClayValueArray *
+file_libraw_load (ClayProcedure          *procedure,
+                  ClayRunMode             run_mode,
                   GFile                  *file,
-                  GimpMetadata           *metadata,
-                  GimpMetadataLoadFlags  *flags,
-                  GimpProcedureConfig    *config,
+                  ClayMetadata           *metadata,
+                  ClayMetadataLoadFlags  *flags,
+                  ClayProcedureConfig    *config,
                   gpointer                run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpImage         *image;
+  ClayValueArray    *return_vals;
+  ClayImage         *image;
   libraw_data_t     *raw_info;
   GError            *error  = NULL;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
 
   raw_info = libraw_init (LIBRAW_OPTIONS_NO_DATAERR_CALLBACK);
   if (raw_info == NULL)
     {
       g_set_error (&error, G_FILE_ERROR, 0,
                    _("Error initializing LibRaw."));
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
   else if (libraw_open_file (raw_info, g_file_peek_path (file)) != LIBRAW_SUCCESS)
     {
       g_set_error (&error, G_FILE_ERROR, 0,
                    _("Error reading data. Image may be corrupt."));
-      status = GIMP_PDB_CALLING_ERROR;
+      status = CLAY_PDB_CALLING_ERROR;
     }
 
-  if (status == GIMP_PDB_SUCCESS && run_mode == GIMP_RUN_INTERACTIVE)
+  if (status == CLAY_PDB_SUCCESS && run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
       if (! load_dialog (procedure, G_OBJECT (config), raw_info))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS &&
+  if (status == CLAY_PDB_SUCCESS &&
       (image = load_image (file, raw_info,
                            run_mode, config, &error)) == NULL)
-    status = GIMP_PDB_EXECUTION_ERROR;
+    status = CLAY_PDB_EXECUTION_ERROR;
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, error);
-  if (status == GIMP_PDB_SUCCESS)
-    GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  return_vals = clay_procedure_new_return_values (procedure, status, error);
+  if (status == CLAY_PDB_SUCCESS)
+    CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   if (raw_info != NULL)
     libraw_close (raw_info);
@@ -301,47 +301,47 @@ file_libraw_load (GimpProcedure          *procedure,
   return return_vals;
 }
 
-static GimpValueArray *
-file_libraw_load_thumb (GimpProcedure        *procedure,
+static ClayValueArray *
+file_libraw_load_thumb (ClayProcedure        *procedure,
                         GFile                *file,
                         gint                  size,
-                        GimpProcedureConfig  *config,
+                        ClayProcedureConfig  *config,
                         gpointer              run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   image = load_thumbnail_image (file, size, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, 0);
-  GIMP_VALUES_SET_INT   (return_vals, 3, 0);
-  GIMP_VALUES_SET_ENUM  (return_vals, 4, GIMP_RGB_IMAGE);
-  GIMP_VALUES_SET_INT   (return_vals, 5, 1);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, 0);
+  CLAY_VALUES_SET_INT   (return_vals, 3, 0);
+  CLAY_VALUES_SET_ENUM  (return_vals, 4, CLAY_RGB_IMAGE);
+  CLAY_VALUES_SET_INT   (return_vals, 5, 1);
 
-  gimp_value_array_truncate (return_vals, 6);
+  clay_value_array_truncate (return_vals, 6);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile                *file,
             libraw_data_t        *raw_info,
-            GimpRunMode           run_mode,
-            GimpProcedureConfig  *config,
+            ClayRunMode           run_mode,
+            ClayProcedureConfig  *config,
             GError              **error)
 {
-  GimpImage                *image                 = NULL;
+  ClayImage                *image                 = NULL;
   libraw_processed_image_t *image_data;
   gint                      raw_error             = 0;
   gint                      demosaicing           = 3;
@@ -367,10 +367,10 @@ load_image (GFile                *file,
   /* Just disable the full interpolation step altogether. */
   raw_info->params.no_interpolation = enable_interpolation ? 0 : 1;
 
-  denoising = gimp_procedure_config_get_choice_id (config, "noise-reduction");
+  denoising = clay_procedure_config_get_choice_id (config, "noise-reduction");
   libraw_set_fbdd_noiserd (raw_info, denoising);
 
-  demosaicing = gimp_procedure_config_get_choice_id (config, "demosaicing");
+  demosaicing = clay_procedure_config_get_choice_id (config, "demosaicing");
   libraw_set_demosaic (raw_info, demosaicing);
 
   raw_info->params.dcb_iterations = dcb_iterations;
@@ -394,27 +394,27 @@ load_image (GFile                *file,
     {
       if (image_data->type == LIBRAW_IMAGE_BITMAP)
         {
-          GimpImageBaseType  image_type = GIMP_RGB;
-          GimpImageType      layer_type = GIMP_RGB_IMAGE;
-          GimpPrecision      precision;
-          GimpLayer         *layer;
-          GimpColorProfile  *profile = NULL;
+          ClayImageBaseType  image_type = CLAY_RGB;
+          ClayImageType      layer_type = CLAY_RGB_IMAGE;
+          ClayPrecision      precision;
+          ClayLayer         *layer;
+          ClayColorProfile  *profile = NULL;
           GeglBuffer        *buffer;
 
           switch (image_data->colors)
             {
             case 1:
             case 2:
-              image_type = GIMP_GRAY;
-              layer_type = (image_data->colors == 1) ? GIMP_GRAY_IMAGE :
-                                                       GIMP_GRAYA_IMAGE;
+              image_type = CLAY_GRAY;
+              layer_type = (image_data->colors == 1) ? CLAY_GRAY_IMAGE :
+                                                       CLAY_GRAYA_IMAGE;
               break;
 
             case 3:
             case 4:
-              image_type = GIMP_RGB;
-              layer_type = (image_data->colors == 3) ? GIMP_RGB_IMAGE :
-                                                       GIMP_RGBA_IMAGE;
+              image_type = CLAY_RGB;
+              layer_type = (image_data->colors == 3) ? CLAY_RGB_IMAGE :
+                                                       CLAY_RGBA_IMAGE;
               break;
 
             default:
@@ -428,11 +428,11 @@ load_image (GFile                *file,
 
           if (image_data->bits == 8)
             {
-              precision = GIMP_PRECISION_U8_NON_LINEAR;
+              precision = CLAY_PRECISION_U8_NON_LINEAR;
             }
           else if (image_data->bits == 16)
             {
-              precision = GIMP_PRECISION_U16_NON_LINEAR;
+              precision = CLAY_PRECISION_U16_NON_LINEAR;
             }
           else
             {
@@ -447,27 +447,27 @@ load_image (GFile                *file,
           if (raw_info->color.profile != NULL)
             {
               profile =
-                gimp_color_profile_new_from_icc_profile (raw_info->color.profile,
+                clay_color_profile_new_from_icc_profile (raw_info->color.profile,
                                                          raw_info->color.profile_length,
                                                          NULL);
             }
 
-          image = gimp_image_new_with_precision (image_data->width,
+          image = clay_image_new_with_precision (image_data->width,
                                                  image_data->height, image_type,
                                                  precision);
 
           if (profile)
             {
-              gimp_image_set_color_profile (image, profile);
+              clay_image_set_color_profile (image, profile);
               g_object_unref (profile);
             }
 
-          layer = gimp_layer_new (image, _("Background"), image_data->width,
+          layer = clay_layer_new (image, _("Background"), image_data->width,
                                   image_data->height, layer_type, 100,
-                                  gimp_image_get_default_new_layer_mode (image));
-          gimp_image_insert_layer (image, layer, NULL, 0);
+                                  clay_image_get_default_new_layer_mode (image));
+          clay_image_insert_layer (image, layer, NULL, 0);
 
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
           gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, image_data->width,
                                                    image_data->height),
                            0, NULL, image_data->data, GEGL_AUTO_ROWSTRIDE);
@@ -482,7 +482,7 @@ load_image (GFile                *file,
   return image;
 }
 
-static GimpImage *
+static ClayImage *
 load_thumbnail_image (GFile   *file,
                       gint     thumb_size,
                       GError **error)
@@ -491,7 +491,7 @@ load_thumbnail_image (GFile   *file,
   libraw_processed_image_t *thumbnail;
   guint                     flags     = LIBRAW_OPTIONS_NO_DATAERR_CALLBACK;
   gint                      raw_error = 0;
-  GimpImage                *image     = NULL;
+  ClayImage                *image     = NULL;
 
   raw_info = libraw_init (flags);
 
@@ -531,10 +531,10 @@ load_thumbnail_image (GFile   *file,
         {
           GFile          *temp_file      = NULL;
           FILE           *fp;
-          GimpValueArray *return_vals    = NULL;
-          GimpProcedure  *procedure;
+          ClayValueArray *return_vals    = NULL;
+          ClayProcedure  *procedure;
 
-          temp_file = gimp_temp_file ("jpeg");
+          temp_file = clay_temp_file ("jpeg");
           fp        = g_fopen (g_file_peek_path (temp_file), "wb");
 
           if (! fp)
@@ -549,36 +549,36 @@ load_thumbnail_image (GFile   *file,
           fwrite (thumbnail->data, sizeof (guchar), thumbnail->data_size, fp);
           fclose (fp);
 
-          procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+          procedure   = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                    "file-jpeg-load");
-          return_vals = gimp_procedure_run (procedure,
-                                            "run-mode", GIMP_RUN_NONINTERACTIVE,
+          return_vals = clay_procedure_run (procedure,
+                                            "run-mode", CLAY_RUN_NONINTERACTIVE,
                                             "file",     temp_file,
                                             NULL);
 
          if (return_vals)
            image =
-             g_value_get_object (gimp_value_array_index (return_vals, 1));
+             g_value_get_object (clay_value_array_index (return_vals, 1));
 
           g_file_delete (temp_file, NULL, NULL);
           g_object_unref (temp_file);
-          g_clear_pointer (&return_vals, gimp_value_array_unref);
+          g_clear_pointer (&return_vals, clay_value_array_unref);
         }
       else if (thumbnail->type == LIBRAW_IMAGE_BITMAP)
         {
-          GimpLayer  *layer;
+          ClayLayer  *layer;
           GeglBuffer *buffer;
 
-          image = gimp_image_new_with_precision (thumbnail->width,
-                                                 thumbnail->height, GIMP_RGB,
-                                                 GIMP_PRECISION_U8_NON_LINEAR);
+          image = clay_image_new_with_precision (thumbnail->width,
+                                                 thumbnail->height, CLAY_RGB,
+                                                 CLAY_PRECISION_U8_NON_LINEAR);
 
-          layer = gimp_layer_new (image, _("Background"), thumbnail->width,
-                                  thumbnail->height, GIMP_RGB_IMAGE, 100,
-                                  gimp_image_get_default_new_layer_mode (image));
-          gimp_image_insert_layer (image, layer, NULL, 0);
+          layer = clay_layer_new (image, _("Background"), thumbnail->width,
+                                  thumbnail->height, CLAY_RGB_IMAGE, 100,
+                                  clay_image_get_default_new_layer_mode (image));
+          clay_image_insert_layer (image, layer, NULL, 0);
 
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
           gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, thumbnail->width,
                                                    thumbnail->height), 0,
                            NULL, thumbnail->data, GEGL_AUTO_ROWSTRIDE);
@@ -596,29 +596,29 @@ load_thumbnail_image (GFile   *file,
 }
 
 static gboolean
-load_dialog (GimpProcedure *procedure,
+load_dialog (ClayProcedure *procedure,
              GObject       *config,
              libraw_data_t *raw_info)
 {
   GtkWidget      *dialog;
   gchar          *title;
-  GimpValueArray *values;
+  ClayValueArray *values;
   GValue          value = G_VALUE_INIT;
   gboolean        run;
 
   /* TRANSLATORS: the "%s" will be the name of a RAW format, e.g. "Raw Canon". */
   title = g_strdup_printf (_("Develop: %s"),
-                           gimp_file_procedure_get_format_name (GIMP_FILE_PROCEDURE (procedure)));
-  dialog = gimp_procedure_dialog_new (procedure, GIMP_PROCEDURE_CONFIG (config), title);
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog), "noise-reduction",
+                           clay_file_procedure_get_format_name (CLAY_FILE_PROCEDURE (procedure)));
+  dialog = clay_procedure_dialog_new (procedure, CLAY_PROCEDURE_CONFIG (config), title);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog), "noise-reduction",
                                     GTK_TYPE_COMBO_BOX);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "interpolation-step",
                                   "noise-reduction", "demosaicing",
                                   "dcb-enhance", "dcb-iterations", NULL);
-  gimp_procedure_dialog_fill_expander (GIMP_PROCEDURE_DIALOG (dialog), "interpolation-expander",
+  clay_procedure_dialog_fill_expander (CLAY_PROCEDURE_DIALOG (dialog), "interpolation-expander",
                                        "enable-interpolation", FALSE, "interpolation-step");
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "interpolation-expander", NULL);
 
   /* The whole logic under comes from reading LibRaw::dcraw_process()
@@ -629,7 +629,7 @@ load_dialog (GimpProcedure *procedure,
    */
   if (raw_info->idata.filters == 0)
     {
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "interpolation-expander", FALSE, NULL, NULL, FALSE);
     }
   else if (raw_info->idata.filters <= 1000 || raw_info->idata.colors != 3)
@@ -640,31 +640,31 @@ load_dialog (GimpProcedure *procedure,
        * 16*16 integer matrix. So let's accept that in some edge case,
        * this setting will be available while not doing anything.
        */
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "noise-reduction", FALSE, NULL, NULL, FALSE);
       if (raw_info->idata.filters <= 1000)
         {
           GParamSpec *pspec;
-          GimpChoice *choice;
+          ClayChoice *choice;
 
           pspec  = g_object_class_find_property (G_OBJECT_GET_CLASS (config), "demosaicing");
-          choice = gimp_param_spec_choice_get_choice (pspec);
-          gimp_choice_set_sensitive (choice, "ppg", FALSE);
+          choice = clay_param_spec_choice_get_choice (pspec);
+          clay_choice_set_sensitive (choice, "ppg", FALSE);
         }
     }
 
-  values = gimp_value_array_new (1);
+  values = clay_value_array_new (1);
   g_value_init (&value, G_TYPE_STRING);
   g_value_set_string (&value, "dcb");
-  gimp_value_array_append (values, &value);
+  clay_value_array_append (values, &value);
   g_value_unset (&value);
-  gimp_procedure_dialog_set_sensitive_if_in (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive_if_in (CLAY_PROCEDURE_DIALOG (dialog),
                                              "dcb-enhance", NULL, "demosaicing", values, TRUE);
-  gimp_procedure_dialog_set_sensitive_if_in (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive_if_in (CLAY_PROCEDURE_DIALOG (dialog),
                                              "dcb-iterations", NULL, "demosaicing",
-                                             gimp_value_array_ref (values), TRUE);
+                                             clay_value_array_ref (values), TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
   g_free (title);

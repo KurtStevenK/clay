@@ -41,32 +41,32 @@
         (shadow-opacity (max shadow-opacity 0))
         (rel-length (abs rel-length))
         (alpha (* (/ alpha 180) *pi*))
-        (type (car (gimp-drawable-type-with-alpha drawable)))
-        (image-width (car (gimp-image-get-width image)))
-        (image-height (car (gimp-image-get-height image)))
+        (type (car (clay-drawable-type-with-alpha drawable)))
+        (image-width (car (clay-image-get-width image)))
+        (image-height (car (clay-image-get-height image)))
         (from-selection 0)
         (active-selection 0)
         (shadow-layer 0)
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
     (if (> rel-distance 24) (set! rel-distance 999999))
     (if (= rel-distance rel-length) (set! rel-distance (+ rel-distance 0.01)))
 
-    (gimp-image-undo-group-start image)
+    (clay-image-undo-group-start image)
 
-    (gimp-layer-add-alpha drawable)
-    (if (= (car (gimp-selection-is-empty image)) TRUE)
+    (clay-layer-add-alpha drawable)
+    (if (= (car (clay-selection-is-empty image)) TRUE)
         (begin
-          (gimp-image-select-item image CHANNEL-OP-REPLACE drawable)
+          (clay-image-select-item image CHANNEL-OP-REPLACE drawable)
           (set! from-selection FALSE))
         (begin
           (set! from-selection TRUE)
-          (set! active-selection (car (gimp-selection-save image)))))
+          (set! active-selection (car (clay-selection-save image)))))
 
-    (let* ((selection-bounds (gimp-selection-bounds image))
+    (let* ((selection-bounds (clay-selection-bounds image))
            (select-offset-x (cadr selection-bounds))
            (select-offset-y (caddr selection-bounds))
            (select-width (- (cadr (cddr selection-bounds)) select-offset-x))
@@ -95,7 +95,7 @@
            (shadow-offset-y (- (min y0 y2) shadow-blur)))
 
 
-      (set! shadow-layer (car (gimp-layer-new image
+      (set! shadow-layer (car (clay-layer-new image
                                               "Perspective Shadow"
                                               select-width
                                               select-height
@@ -104,12 +104,12 @@
                                               LAYER-MODE-NORMAL)))
 
 
-      (gimp-image-insert-layer image shadow-layer 0 -1)
-      (gimp-layer-set-offsets shadow-layer select-offset-x select-offset-y)
-      (gimp-drawable-fill shadow-layer FILL-TRANSPARENT)
-      (gimp-context-set-background shadow-color)
-      (gimp-drawable-edit-fill shadow-layer FILL-BACKGROUND)
-      (gimp-selection-none image)
+      (clay-image-insert-layer image shadow-layer 0 -1)
+      (clay-layer-set-offsets shadow-layer select-offset-x select-offset-y)
+      (clay-drawable-fill shadow-layer FILL-TRANSPARENT)
+      (clay-context-set-background shadow-color)
+      (clay-drawable-edit-fill shadow-layer FILL-BACKGROUND)
+      (clay-selection-none image)
 
       (if (= allow-resize TRUE)
           (let* ((new-image-width image-width)
@@ -144,17 +144,17 @@
 
             (if (> (+ shadow-height shadow-offset-y) new-image-height)
                 (set! new-image-height (+ shadow-height shadow-offset-y)))
-            (gimp-image-resize image
+            (clay-image-resize image
                                new-image-width
                                new-image-height
                                image-offset-x
                                image-offset-y)))
 
-      (gimp-context-set-transform-direction TRANSFORM-FORWARD)
-      (gimp-context-set-interpolation interpolation)
-      (gimp-context-set-transform-resize TRANSFORM-RESIZE-ADJUST)
+      (clay-context-set-transform-direction TRANSFORM-FORWARD)
+      (clay-context-set-interpolation interpolation)
+      (clay-context-set-transform-resize TRANSFORM-RESIZE-ADJUST)
 
-      (gimp-item-transform-perspective shadow-layer
+      (clay-item-transform-perspective shadow-layer
                         x0 y0
                         x1 y1
                         x2 y2
@@ -162,33 +162,33 @@
 
       (if (>= shadow-blur 1.0)
           (begin
-            (gimp-layer-set-lock-alpha shadow-layer FALSE)
-            (gimp-layer-resize shadow-layer
+            (clay-layer-set-lock-alpha shadow-layer FALSE)
+            (clay-layer-resize shadow-layer
                                shadow-width
                                shadow-height
                                shadow-blur
                                shadow-blur)
-            (gimp-drawable-merge-new-filter shadow-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
+            (clay-drawable-merge-new-filter shadow-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
                                             "std-dev-x" (* 0.32 shadow-blur)
                                             "std-dev-y" (* 0.32 shadow-blur)
                                             "filter" "auto"))))
 
     (if (= from-selection TRUE)
         (begin
-          (gimp-image-select-item image CHANNEL-OP-REPLACE active-selection)
-          (gimp-drawable-edit-clear shadow-layer)
-          (gimp-image-remove-channel image active-selection)))
+          (clay-image-select-item image CHANNEL-OP-REPLACE active-selection)
+          (clay-drawable-edit-clear shadow-layer)
+          (clay-image-remove-channel image active-selection)))
 
     (if (and
-          (= (car (gimp-layer-is-floating-sel drawable)) 0)
+          (= (car (clay-layer-is-floating-sel drawable)) 0)
           (= from-selection FALSE))
-      (gimp-image-raise-item image drawable))
+      (clay-image-raise-item image drawable))
 
-    (gimp-image-set-selected-layers image (vector drawable))
-    (gimp-image-undo-group-end image)
-    (gimp-displays-flush)
+    (clay-image-set-selected-layers image (vector drawable))
+    (clay-image-undo-group-end image)
+    (clay-displays-flush)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

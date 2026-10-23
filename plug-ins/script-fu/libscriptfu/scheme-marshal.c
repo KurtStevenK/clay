@@ -16,7 +16,7 @@
  */
 
 #include "config.h"
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 #include "tinyscheme/scheme-private.h"
 #include "scheme-marshal.h"
 #include "script-fu-errors.h"
@@ -37,15 +37,15 @@ static pointer get_item_from_ID_in_script (scheme    *sc,
  * For each marshalling function:
  *   - a returned "pointer" is a scheme pointer to a foreign error or NULL.
  *   - marshal into a GValue holding a designated type,
- *     usually a GIMP type but also GLib types, e.g. GFile.
+ *     usually a Clay type but also GLib types, e.g. GFile.
  *     The GValue's held type is already set, but value is uninitialized.
  *
- * When marshalling into a GimpObjectArray:
+ * When marshalling into a ClayObjectArray:
  * Setting a GValue's value does not check the contained type.
- * But validation of a GimpObjectArray does check the contained type.
- * We call gimp_item_get_by_id
- * GIMP_TYPE_ITEM is a superclass of most common uses.
- * And then set the actual subclass type on the GimpObjectArray.
+ * But validation of a ClayObjectArray does check the contained type.
+ * We call clay_item_get_by_id
+ * CLAY_TYPE_ITEM is a superclass of most common uses.
+ * And then set the actual subclass type on the ClayObjectArray.
  */
 
 
@@ -53,8 +53,8 @@ static pointer get_item_from_ID_in_script (scheme    *sc,
 
 /* Marshal single object ID from script into a single GObject.
  *
- * Requires ID's of instances of GimpItem, not for image, display, etc. also having ID.
- * The GValue may hold a more specific type, e.g. GimpDrawable.
+ * Requires ID's of instances of ClayItem, not for image, display, etc. also having ID.
+ * The GValue may hold a more specific type, e.g. ClayDrawable.
  */
 pointer
 marshal_ID_to_item (scheme   *sc,
@@ -75,8 +75,8 @@ marshal_ID_to_item (scheme   *sc,
   return NULL;  /* no error */
 }
 
-/* Marshal a vector of ID into GimpObjectArray of same length.
- * Requires ID's of instances of GimpItem
+/* Marshal a vector of ID into ClayObjectArray of same length.
+ * Requires ID's of instances of ClayItem
  */
 pointer
 marshal_vector_to_item_array (scheme   *sc,
@@ -91,7 +91,7 @@ marshal_vector_to_item_array (scheme   *sc,
 
   guint num_elements = sc->vptr->vector_length (vector);
   g_debug ("vector has %d elements", num_elements);
-  /* empty vector will produce empty GimpObjectArray */
+  /* empty vector will produce empty ClayObjectArray */
 
   object_array = g_new0 (GObject *, num_elements + 1);
   if (strvalue)
@@ -128,7 +128,7 @@ marshal_vector_to_item_array (scheme   *sc,
 
   /* Shallow copy.
    * This sets the contained type on the array.
-   * If the array is empty, contained type is GIMP_TYPE_ITEM.
+   * If the array is empty, contained type is CLAY_TYPE_ITEM.
    * !!! Seems like validation checks the contained type of empty arrays,
    * and fails if we default to G_TYPE_INVALID but passes if ITEM.
    */
@@ -189,11 +189,11 @@ marshal_path_string_to_gfile (scheme     *sc,
 }
 
 
-/* Marshal a GimpObjectArray into a Scheme list of ID's.
+/* Marshal a ClayObjectArray into a Scheme list of ID's.
  *
  * Before v3.0, PDB procedure's return type was say INT32ARRAY,
  * preceded by a type INT32 designating array length.
- * Now return type is GimpObjectArray preceded by length.
+ * Now return type is ClayObjectArray preceded by length.
  *
  * Returns a vector, since most arrays in Scriptfu are returned as vectors.
  * An alternate implementation would be return list.
@@ -212,7 +212,7 @@ marshal_returned_object_array_to_vector (scheme *sc,
   pointer   vector;
 
   object_array = g_value_get_boxed (value);
-  n = gimp_core_object_array_get_length (object_array);
+  n = clay_core_object_array_get_length (object_array);
 
   vector = sc->vptr->mk_vector (sc, n);
 
@@ -243,7 +243,7 @@ marshal_returned_object_array_to_vector (scheme *sc,
   * When ID is valid, sets handle and returns no error.
   * Otherwise (ID is not -1 and not valid ID of a object) returns error.
   *
-  * Require ID is of a GIMP object, some subclass of GimpItem.
+  * Require ID is of a Clay object, some subclass of ClayItem.
   */
 static pointer
 get_item_from_ID_in_script (scheme   *sc,
@@ -258,7 +258,7 @@ get_item_from_ID_in_script (scheme   *sc,
     }
   else
     {
-      *object_handle = (GObject *) gimp_item_get_by_id (id);
+      *object_handle = (GObject *) clay_item_get_by_id (id);
       if (! *object_handle)
           return script_error (sc, "Invalid ID of Clay item", a);
     }
@@ -471,9 +471,9 @@ marshal_color_to_component_list (scheme    *sc,
  */
 pointer
 marshal_color_array_to_vector (scheme         *sc,
-                               GimpColorArray  array)
+                               ClayColorArray  array)
 {
-  guint   array_length = gimp_color_array_get_length (array);
+  guint   array_length = clay_color_array_get_length (array);
   pointer result       = sc->vptr->mk_vector (sc, array_length);
 
   for (guint j = 0; j < array_length; j++)

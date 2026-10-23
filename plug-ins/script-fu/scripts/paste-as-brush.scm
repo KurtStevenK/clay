@@ -21,16 +21,16 @@
 (define (script-fu-paste-as-brush name filename spacing)
 
   (script-fu-use-v3)
-  (let* ((brush-image (gimp-edit-paste-as-new-image))
+  (let* ((brush-image (clay-edit-paste-as-new-image))
          (brush-draw 0)
          (type 0)
          (path 0))
 
-    (if (gimp-image-id-is-valid brush-image)
+    (if (clay-image-id-is-valid brush-image)
       (begin
-        (set! brush-draw (vector-ref (gimp-image-get-selected-drawables brush-image) 0))
-        (set! type (gimp-drawable-type brush-draw))
-        (set! path (string-append gimp-directory
+        (set! brush-draw (vector-ref (clay-image-get-selected-drawables brush-image) 0))
+        (set! type (clay-drawable-type brush-draw))
+        (set! path (string-append clay-directory
                                   "/brushes/"
                                   filename
                                   (number->string brush-image)
@@ -38,10 +38,10 @@
 
         (if (= type GRAYA-IMAGE)
             (begin
-                (gimp-context-push)
-                (gimp-context-set-background '(255 255 255))
-                (set! brush-draw (gimp-image-flatten brush-image))
-                (gimp-context-pop)
+                (clay-context-push)
+                (clay-context-set-background '(255 255 255))
+                (set! brush-draw (clay-image-flatten brush-image))
+                (clay-context-pop)
             )
         )
 
@@ -51,12 +51,12 @@
                          -1   ; NULL ExportOptions
                          spacing name)
 
-        (gimp-image-delete brush-image)
+        (clay-image-delete brush-image)
 
-        (gimp-brushes-refresh)
-        (gimp-context-set-brush (gimp-brush-get-by-name name))
+        (clay-brushes-refresh)
+        (clay-context-set-brush (clay-brush-get-by-name name))
       )
-      (gimp-message _"There is no image data in the clipboard to paste.")
+      (clay-message _"There is no image data in the clipboard to paste.")
     )
   )
 )

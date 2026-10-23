@@ -1,0 +1,37 @@
+/* Clay colour scheme "Gruvbox": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(235,219,178);
+@define-color bg-color                   rgb(40,40,40);
+@define-color border-color               rgb(67,65,59);
+@define-color dimmed-fg-color            rgb(186,174,144);
+@define-color disabled-fg-color          rgb(147,138,116);
+@define-color disabled-button-color      rgb(102,97,84);
+@define-color hover-color                rgb(67,65,59);
+@define-color widget-bg-color            rgb(52,51,48);
+@define-color selected-color             rgb(79,76,68);
+@define-color extreme-bg-color           rgb(28,28,28);
+@define-color extreme-selected-color     rgb(67,65,59);
+@define-color strong-border-color        rgb(108,103,88);
+@define-color stronger-border-color      rgb(108,103,88);
+@define-color edge-border-color          rgb(108,103,88);
+@define-color scrollbar-slider-color     rgb(108,103,88);
+@define-color scrollbar-trough-color     rgb(28,28,28);
+@define-color ruler-color                rgba(67,65,59,0.3);
+@define-color accent-color               rgb(250,189,47);
+@define-color accent-hover-color         rgb(251,202,89);
+@define-color on-accent-color            rgb(40,40,40);
+@define-color destructive-color          rgb(251,73,52);
+@define-color good-color                 rgb(184,187,38);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+/* icon colours */
+@define-color lane-rust     rgb(254,128,25);
+@define-color lane-maroon   rgb(211,134,155);
+@define-color lane-mustard  rgb(250,189,47);
+@define-color lane-purple   rgb(211,134,155);
+@define-color lane-blue     rgb(131,165,152);
+@define-color lane-green    rgb(184,187,38);

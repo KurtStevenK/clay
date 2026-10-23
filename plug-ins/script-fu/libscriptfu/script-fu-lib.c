@@ -18,7 +18,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "script-fu-lib.h"
 
@@ -57,10 +57,10 @@ script_fu_report_progress (void)
 /*
  * Return whether extension-script-fu has an open dialog.
  * extension-script-fu is a single process.
- * It cannot have concurrent dialogs open in the GIMP app.
+ * It cannot have concurrent dialogs open in the Clay app.
  *
  * Other plugins implementing PLUGIN type PDB procedures
- * in their own process (e.g. gimp-scheme-interpreter) do not need this.
+ * in their own process (e.g. clay-scheme-interpreter) do not need this.
  */
 gboolean
 script_fu_extension_is_busy (void)
@@ -74,7 +74,7 @@ script_fu_extension_is_busy (void)
  * owned by the PDB proc of type PLUGIN for the given plugin.
  */
 void
-script_fu_find_and_register_scripts ( GimpPlugIn     *plugin,
+script_fu_find_and_register_scripts ( ClayPlugIn     *plugin,
                                       GList          *paths)
 {
   script_fu_find_scripts (plugin, paths);
@@ -98,7 +98,7 @@ script_fu_find_and_register_scripts ( GimpPlugIn     *plugin,
 void
 script_fu_init_embedded_interpreter (GList       *paths,
                                      gboolean     allow_register,
-                                     GimpRunMode  run_mode,
+                                     ClayRunMode  run_mode,
                                      gboolean     report_progress)
 {
   g_debug ("script_fu_init_embedded_interpreter");
@@ -123,7 +123,7 @@ script_fu_init_embedded_interpreter (GList       *paths,
  * Requires interpreter initialized.
  */
 void
-script_fu_load_scripts_into_tree (GimpPlugIn *plugin,
+script_fu_load_scripts_into_tree (ClayPlugIn *plugin,
                                   GList      *paths)
 {
   script_fu_scripts_load_into_tree (plugin, paths);
@@ -173,7 +173,7 @@ script_fu_interpret_string (const gchar *text)
 }
 
 void
-script_fu_set_run_mode (GimpRunMode run_mode)
+script_fu_set_run_mode (ClayRunMode run_mode)
 {
   ts_set_run_mode (run_mode);
 }
@@ -242,7 +242,7 @@ script_fu_register_post_command_callback (void (*func) (void))
  *
  * List has two elements, in this order:
  *    directory for user scripts
- *    directory for system-wide scripts, distributed with GIMP
+ *    directory for system-wide scripts, distributed with Clay
  * The dirs usually contain: plugins, init scripts, and utility scripts.
  *
  * The returned type is GList of GFile.
@@ -254,12 +254,12 @@ script_fu_search_path (void)
   gchar *path_str;
   GList *path = NULL;
 
-  path_str = gimp_gimprc_query ("script-fu-path");
+  path_str = clay_clayrc_query ("script-fu-path");
   if (path_str)
     {
       GError *error = NULL;
 
-      path = gimp_config_path_expand_to_files (path_str, &error);
+      path = clay_config_path_expand_to_files (path_str, &error);
       g_free (path_str);
 
       if (! path)
@@ -296,7 +296,7 @@ script_fu_get_init_subdirectory (GFile *dir)
   return result_path;
 }
 
-/* The directory containing init scripts installed with GIMP.
+/* The directory containing init scripts installed with Clay.
  * Caller must free the result string.
  */
 gchar *
@@ -359,8 +359,8 @@ script_fu_is_init_directory (GFile *dir)
  * Does not register into the PDB.
  * Requires scripts already loaded i.e. SFScript exist.
  */
-GimpProcedure *
-script_fu_create_PDB_proc_plugin (GimpPlugIn  *plug_in,
+ClayProcedure *
+script_fu_create_PDB_proc_plugin (ClayPlugIn  *plug_in,
                                   const gchar *name)
 {
   /* Delegate to factory. */
@@ -368,7 +368,7 @@ script_fu_create_PDB_proc_plugin (GimpPlugIn  *plug_in,
 }
 
 GList *
-script_fu_find_scripts_list_proc_names (GimpPlugIn *plug_in,
+script_fu_find_scripts_list_proc_names (ClayPlugIn *plug_in,
                                         GList      *paths)
 {
   /* Delegate to factory. */

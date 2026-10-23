@@ -29,7 +29,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_data_factory_data_refresh (gimp->gradient_factory, context);
+  clay_data_factory_data_refresh (clay->gradient_factory, context);
 }
 CODE
     );
@@ -41,7 +41,7 @@ sub gradients_get_list {
     $help = <<'HELP';
 This procedure returns a list of the gradients that are currently loaded.
 
-Each gradient returned can be used as input to [func@Gimp.context_set_gradient].
+Each gradient returned can be used as input to [func@Clay.context_set_gradient].
 HELP
 
     &federico_pdb_misc('1997');
@@ -57,10 +57,10 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpcontainer-filter.h") ],
+        headers => [ qw("core/claycontainer-filter.h") ],
 	code => <<'CODE'
 {
-  gradient_list = (GimpGradient **) gimp_container_get_filtered_array (gimp_data_factory_get_container (gimp->gradient_factory),
+  gradient_list = (ClayGradient **) clay_container_get_filtered_array (clay_data_factory_get_container (clay->gradient_factory),
                                                                        filter);
 }
 CODE
@@ -69,11 +69,11 @@ CODE
 
 
 @headers = qw(<string.h>
-              "core/gimp.h"
-              "core/gimpcontext.h"
-              "core/gimpdatafactory.h"
-              "core/gimpgradient.h"
-              "gimppdb-utils.h");
+              "core/clay.h"
+              "core/claycontext.h"
+              "core/claydatafactory.h"
+              "core/claygradient.h"
+              "claypdb-utils.h");
 
 @procs = qw(gradients_refresh
             gradients_get_list);
@@ -81,7 +81,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Gradients';
-$doc_title = 'gimpgradients';
+$doc_title = 'claygradients';
 $doc_short_desc = 'Operations related to gradients.';
 $doc_long_desc = 'Operations related to gradients.';
 

@@ -32,7 +32,7 @@ from the current drawable only.;
 The output is in "weighted pixels" - meaning
 all fully transparent pixels are not counted.
 
-Check the gimp-histogram call
+Check the clay-histogram call
 """
 
 import csv
@@ -40,8 +40,8 @@ import math
 import sys
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -91,22 +91,22 @@ def histogram_export(procedure, img, layers, gio_file,
     layer = layers[0]
     if sample_average:
         new_img = img.duplicate()
-        layer = new_img.merge_visible_layers(Gimp.MergeType.CLIP_TO_IMAGE)
+        layer = new_img.merge_visible_layers(Clay.MergeType.CLIP_TO_IMAGE)
 
     channels_txt = ["Value"]
-    channels_gimp = [Gimp.HistogramChannel.VALUE]
+    channels_clay = [Clay.HistogramChannel.VALUE]
     if layer.is_rgb():
         channels_txt += ["Red", "Green", "Blue", "Luminance"]
-        channels_gimp += [Gimp.HistogramChannel.RED, Gimp.HistogramChannel.GREEN, Gimp.HistogramChannel.BLUE,
-                          Gimp.HistogramChannel.LUMINANCE]
+        channels_clay += [Clay.HistogramChannel.RED, Clay.HistogramChannel.GREEN, Clay.HistogramChannel.BLUE,
+                          Clay.HistogramChannel.LUMINANCE]
     if layer.has_alpha():
         channels_txt += ["Alpha"]
-        channels_gimp += [Gimp.HistogramChannel.ALPHA]
+        channels_clay += [Clay.HistogramChannel.ALPHA]
 
     try:
         with open(gio_file.get_path(), "wt", newline="") as hfile:
             writer = csv.writer(hfile)
-            histo_proc = Gimp.get_pdb().lookup_procedure('gimp-drawable-histogram')
+            histo_proc = Clay.get_pdb().lookup_procedure('clay-drawable-histogram')
             histo_config = histo_proc.create_config()
             histo_config.set_property('drawable', layer)
 
@@ -125,7 +125,7 @@ def histogram_export(procedure, img, layers, gio_file,
                 histo_config.set_property('start-range', float(start_range))
                 histo_config.set_property('end-range', float(min(start_range + bucket_size, 1.0)))
                 row = [start_range]
-                for channel in channels_gimp:
+                for channel in channels_clay:
                     histo_config.set_property('channel', channel)
                     result = histo_proc.run(histo_config)
 
@@ -145,37 +145,37 @@ def histogram_export(procedure, img, layers, gio_file,
                 new_percent = math.floor(fraction * 100)
                 if new_percent != progress_bar_int_percent:
                     progress_bar_int_percent = new_percent
-                Gimp.progress_update(fraction)
+                Clay.progress_update(fraction)
     except IsADirectoryError:
-        return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.EXECUTION_ERROR,
                                            GLib.Error(_("File is either a directory or file name is empty.")))
     except FileNotFoundError:
-        return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.EXECUTION_ERROR,
                                            GLib.Error(_("Directory not found.")))
     except PermissionError:
-        return procedure.new_return_values(Gimp.PDBStatusType.EXECUTION_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.EXECUTION_ERROR,
                                            GLib.Error("You do not have permissions to write that file."))
 
     if sample_average:
         new_img.delete()
 
-    return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+    return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
 
 def run(procedure, run_mode, image, layers, config, data):
-    if run_mode == Gimp.RunMode.INTERACTIVE:
-        gi.require_version('GimpUi', '3.0')
-        from gi.repository import GimpUi
+    if run_mode == Clay.RunMode.INTERACTIVE:
+        gi.require_version('ClayUi', '3.0')
+        from gi.repository import ClayUi
 
-        GimpUi.init("python-fu-histogram-export")
+        ClayUi.init("python-fu-histogram-export")
 
-        dialog = GimpUi.ProcedureDialog.new(procedure, config, _("Histogram Export..."))
+        dialog = ClayUi.ProcedureDialog.new(procedure, config, _("Histogram Export..."))
 
-        radio_frame = dialog.get_widget("output-format", GimpUi.IntRadioFrame)
+        radio_frame = dialog.get_widget("output-format", ClayUi.IntRadioFrame)
 
         dialog.fill(None)
 
         if not dialog.run():
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL,
+            return procedure.new_return_values(Clay.PDBStatusType.CANCEL,
                                                GLib.Error())
 
     gio_file       = config.get_property('file')
@@ -185,7 +185,7 @@ def run(procedure, run_mode, image, layers, config, data):
 
     if gio_file is None:
         error = 'No file given'
-        return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR,
+        return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR,
                                            GLib.Error(error))
 
     result = histogram_export(procedure, image, layers, gio_file,
@@ -194,10 +194,10 @@ def run(procedure, run_mode, image, layers, config, data):
     return result
 
 
-class HistogramExport(Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class HistogramExport(Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return ['python-fu-histogram-export']
@@ -205,8 +205,8 @@ class HistogramExport(Gimp.PlugIn):
     def do_create_procedure(self, name):
         procedure = None
         if name == 'python-fu-histogram-export':
-            procedure = Gimp.ImageProcedure.new(self, name,
-                                                Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.ImageProcedure.new(self, name,
+                                                Clay.PDBProcType.PLUGIN,
                                                 run, None)
 
             procedure.set_image_types("*")
@@ -223,13 +223,13 @@ class HistogramExport(Gimp.PlugIn):
             # TODO: GFile props still don't have labels + only load existing files
             # (here we likely want to create a new file).
             procedure.add_file_argument ("file", _("Histogram file"),
-                                         _("Histogram export file"), Gimp.FileChooserAction.SAVE,
+                                         _("Histogram export file"), Clay.FileChooserAction.SAVE,
                                          False, None, GObject.ParamFlags.READWRITE)
             procedure.add_double_argument ("bucket-size", _("_Bucket size"), _("Bucket size"),
                                            0.001, 1.0, 0.01, GObject.ParamFlags.READWRITE)
             procedure.add_boolean_argument ("sample-average", _("Sample _average"), _("Sample average"),
                                             False, GObject.ParamFlags.READWRITE)
-            choice = Gimp.Choice.new()
+            choice = Clay.Choice.new()
             choice.add("pixel-count", 0, _("Pixel count"), "")
             choice.add("normalized", 1, _("Normalized"), "")
             choice.add("percent", 2, _("Percent"), "")
@@ -239,4 +239,4 @@ class HistogramExport(Gimp.PlugIn):
         return procedure
 
 
-Gimp.main(HistogramExport.__gtype__, sys.argv)
+Clay.main(HistogramExport.__gtype__, sys.argv)

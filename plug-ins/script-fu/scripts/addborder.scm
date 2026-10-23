@@ -106,8 +106,8 @@
 
   (let* (
          (first-layer (vector-ref adraws 0))
-         (imagewidth (car (gimp-image-get-width aimg)))
-         (imageheight (car (gimp-image-get-height aimg)))
+         (imagewidth (car (clay-image-get-width aimg)))
+         (imageheight (car (clay-image-get-height aimg)))
          (innerwidth 0)
          (innerheight 0)
          (outerwidth 0)
@@ -125,55 +125,55 @@
                (set! innerwidth (- imagewidth (* 2 xsize)))
                (set! innerheight (- imageheight (* 2 ysize)))))
 
-         (let* ((layer (car (gimp-layer-new aimg _"Border Layer"
+         (let* ((layer (car (clay-layer-new aimg _"Border Layer"
                                             outerwidth outerheight
-                                            (car (gimp-drawable-type-with-alpha first-layer))
+                                            (car (clay-drawable-type-with-alpha first-layer))
                                             100 LAYER-MODE-NORMAL))))
 
-           (gimp-context-push)
-           (gimp-context-set-opacity (get-opacity color))
-           (gimp-context-set-antialias FALSE)
-           (gimp-context-set-feather FALSE)
+           (clay-context-push)
+           (clay-context-set-opacity (get-opacity color))
+           (clay-context-set-antialias FALSE)
+           (clay-context-set-feather FALSE)
 
-           (gimp-image-undo-group-start aimg)
+           (clay-image-undo-group-start aimg)
 
            (if (= allow-resize TRUE)
-               (gimp-image-resize aimg
+               (clay-image-resize aimg
                                   outerwidth
                                   outerheight
                                   xsize
                                   ysize))
 
-           (gimp-image-insert-layer aimg layer 0 0)
-           (gimp-drawable-fill layer FILL-TRANSPARENT)
+           (clay-image-insert-layer aimg layer 0 0)
+           (clay-drawable-fill layer FILL-TRANSPARENT)
 
-           (gimp-context-set-background (adjcolor color dvalue))
-           (gimp-image-select-polygon aimg
+           (clay-context-set-background (adjcolor color dvalue))
+           (clay-image-select-polygon aimg
                                       CHANNEL-OP-REPLACE
                                       (gen_top_array xsize ysize innerwidth innerheight outerwidth outerheight))
-           (gimp-drawable-edit-fill layer FILL-BACKGROUND)
-           (gimp-context-set-background (adjcolor color (/ dvalue 2)))
-           (gimp-image-select-polygon aimg
+           (clay-drawable-edit-fill layer FILL-BACKGROUND)
+           (clay-context-set-background (adjcolor color (/ dvalue 2)))
+           (clay-image-select-polygon aimg
                                       CHANNEL-OP-REPLACE
                                       (gen_left_array xsize ysize innerwidth innerheight outerwidth outerheight))
-           (gimp-drawable-edit-fill layer FILL-BACKGROUND)
-           (gimp-context-set-background (adjcolor color (- 0 (/ dvalue 2))))
-           (gimp-image-select-polygon aimg
+           (clay-drawable-edit-fill layer FILL-BACKGROUND)
+           (clay-context-set-background (adjcolor color (- 0 (/ dvalue 2))))
+           (clay-image-select-polygon aimg
                                       CHANNEL-OP-REPLACE
                                       (gen_right_array xsize ysize innerwidth innerheight outerwidth outerheight))
 
-           (gimp-drawable-edit-fill layer FILL-BACKGROUND)
-           (gimp-context-set-background (adjcolor color (- 0 dvalue)))
-           (gimp-image-select-polygon aimg
+           (clay-drawable-edit-fill layer FILL-BACKGROUND)
+           (clay-context-set-background (adjcolor color (- 0 dvalue)))
+           (clay-image-select-polygon aimg
                                       CHANNEL-OP-REPLACE
                                       (gen_bottom_array xsize ysize innerwidth innerheight outerwidth outerheight))
 
-           (gimp-drawable-edit-fill layer FILL-BACKGROUND)
-           (gimp-selection-none aimg)
-           (gimp-image-undo-group-end aimg)
-           (gimp-displays-flush)
+           (clay-drawable-edit-fill layer FILL-BACKGROUND)
+           (clay-selection-none aimg)
+           (clay-image-undo-group-end aimg)
+           (clay-displays-flush)
 
-           (gimp-context-pop)
+           (clay-context-pop)
            )
     )
 )

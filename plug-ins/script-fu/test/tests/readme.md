@@ -2,20 +2,20 @@
 
 ## Quick start
 
-0. Rebuild GIMP.
+0. Rebuild Clay.
 The build must be a non-stable build (nightly/development version.)
-1. View the Gimp Error Console dockable
+1. View the Clay Error Console dockable
 2. Open the SF Console
 3. Enter '(testing:load-test "tinyscheme.scm")'
 
 Expect to finally see a report of testing in the SF Console.
 Also expect to see "Passed" messages, as progress indicators,
-in the Gimp Error Console.
+in the Clay Error Console.
 You may also see much extraneous data in the SF Console,
 since as a REPL, it prints the value yielded by each expression.
 
 Some extreme test cases may take about a minute.
-If you see a "Gimp is not responding" dialog, choose Wait.
+If you see a "Clay is not responding" dialog, choose Wait.
 
 "tinyscheme.scm" tests the embedded interpreter.
 You can also try "pdb.scm" to test the PDB.
@@ -31,15 +31,15 @@ The filesystem of the repo organizes and names the tests.
 The name of a file or directory indicates what is tested.
 The tests don't know their own names.
 
-A test script is usually many tests of one GIMP or ScriptFu object or function.
+A test script is usually many tests of one Clay or ScriptFu object or function.
 There may be many test script files for the same object.
 
 Tests and test groups can be organized in directories in the source repo.
-A directory of tests can be named for the GIMP object under test.
+A directory of tests can be named for the Clay object under test.
 
 The leaf files and directories
 are coded into larger test files.
-The larger test files simply load all the files for a GIMP object.
+The larger test files simply load all the files for a Clay object.
 Loading a file executes the tests and alters testing state.
 
 The test files when installed are flattened into one directory.
@@ -47,18 +47,18 @@ Thus a test file that loads many tests loads them from the same top directory.
 
 ### Major test groups
 
-1.  PDB: Tests ScriptFu binding to the GIMP PDB.
+1.  PDB: Tests ScriptFu binding to the Clay PDB.
 2.  tinyscheme: Tests the embedded TinyScheme interpreter.
 3.  other: Special test programs, often contributed with a new feature of ScriptFu.
 
 ## Testing State
 
-The process of testing produces a state in the testing framework and in Gimp.
+The process of testing produces a state in the testing framework and in Clay.
 
 ### Testing framework state
 
 The test framework state is the count of tests and info about failed tests.
-It accumulates over a session of Gimp
+It accumulates over a session of Clay
 (more precisely, over a session of ScriptFu Console
 or over a session of any plugin that loads the testing framework.)
 
@@ -67,23 +67,23 @@ The tests themselves do not usually reset the test state using '(testing:reset)'
 You can get a boolean of the total testing framework state
 using the predicate (testing:all-passed?) .
 
-### Gimp State
+### Clay State
 
-Gimp state includes open images, installed resources, the selection, etc.
-Testing has side effects on Gimp state.
+Clay state includes open images, installed resources, the selection, etc.
+Testing has side effects on Clay state.
 
-To ensure tests succeed, you should test a new install of Gimp.
+To ensure tests succeed, you should test a new install of Clay.
 If you don't mind a few failed tests,
 you can test later than a new install.
 
-Tests may require that GIMP be newly started:
+Tests may require that Clay be newly started:
 
-1. PDB tests may hardcode certain constant ID's and rely on GIMP
+1. PDB tests may hardcode certain constant ID's and rely on Clay
 to consistently number ID's.
 
-Tests may require that GIMP be newly installed:
+Tests may require that Clay be newly installed:
 
-1.  PDB tests may depend on the initial set of Gimp resources in ~/.config/GIMP
+1.  PDB tests may depend on the initial set of Clay resources in ~/.config/Clay
 
 ## Building for testing
 
@@ -152,7 +152,7 @@ Tests are separate scripts.
 
 Tests are declarative, short, and readable.
 They may be ordered or have ordered expressions,
-especially when they test side effects on the Gimp state.
+especially when they test side effects on the Clay state.
 
 ### Tests can be order independent and repeated
 
@@ -160,23 +160,23 @@ Often, you can run tests in any order and repeat tests, up to a point.
 Then test objects that have accumulated
 might start to interfere with certain tests.
 
-Tests generally should not hardcode GIMP ID's that GIMP assigns.
+Tests generally should not hardcode Clay ID's that Clay assigns.
 
 In general, run a large test, such as pdb.scm or tinyscheme.scm.
 But you can also run a small test such as layer-new.scm.
 Just be aware that if you run tests in an order of your choice,
 and if you repeat tests in the same session,
 you might start to see more errors than on the first run of a test
-after a fresh start of Gimp.
+after a fresh start of Clay.
 
 ### Some tests require a clean install
 
 Tests of resources may try to create a resource (e.g. brush)
 that a prior run of the test already created
-and that was saved by Gimp as a setting.
+and that was saved by Clay as a setting.
 
-For such tests, you may need to test only after a fresh install of Gimp
-(when the set of resources is the set that Gimp installs.)
+For such tests, you may need to test only after a fresh install of Clay
+(when the set of resources is the set that Clay installs.)
 
 ### The test framework does not name or number tests
 
@@ -186,8 +186,8 @@ You identify a test by the code it executes and its order in a file.
 
 ### Progress
 
-The test framework logs progress to the GIMP Error Console
-using gimp-message.
+The test framework logs progress to the Clay Error Console
+using clay-message.
 
 The test framework displays failures, but not successes, as they occur.
 Display is usually to the SF Console.
@@ -201,7 +201,7 @@ It does not alter the testing scripts,
 so you can load test scripts by name from a git repo
 without dirtying the repo.
 
-Test scripts may test Gimp features that write the file system.
+Test scripts may test Clay features that write the file system.
 
 ### Known to fail tests
 
@@ -283,7 +283,7 @@ We intend the tests are independent of locale
 
 There is no test that changes the locale
 as part of the test process.
-(There is no API such as gimp-set-locale.)
+(There is no API such as clay-set-locale.)
 
 To test that ScriptFu properly internationalizes,
 you must change the locale and retest.
@@ -295,12 +295,12 @@ You can get an approximate list of the internal PDB procedures tested:
 
 ```
 >cd test/tests/PDB
->find . -name "*.scm" -exec grep -o "gimp-[a-z\-]*" {} \; | sort | uniq
+>find . -name "*.scm" -exec grep -o "clay-[a-z\-]*" {} \; | sort | uniq
 ```
 
 That is, for all files with suffix .scm in the PDB directory,
-grep for calls to the GIMP PDB which are like "gimp-", sort them, and get the unique names.
+grep for calls to the Clay PDB which are like "clay-", sort them, and get the unique names.
 
-We strive to not use the gimp- prefix on names in comments,
+We strive to not use the clay- prefix on names in comments,
 exactly so this will find only actual calls.
 

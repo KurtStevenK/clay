@@ -26,7 +26,7 @@ foreach raw_plugin : file_raw_exes
   if platform_windows
     plugin_rc = custom_target(
       plugin_name + '-rc',
-      input: gimp_plugins_rc,
+      input: clay_plugins_rc,
       output: plugin_name + '.rc',
       command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@']
     )
@@ -45,17 +45,17 @@ foreach raw_plugin : file_raw_exes
 
   plugin_exe = executable(plugin_name,
                           plugin_sources,
-                          dependencies: [ plugin_deps, libgimpui_dep ],
+                          dependencies: [ plugin_deps, libclayui_dep ],
                           win_subsystem: 'windows',
                           install: true,
-                          install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                          install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
   # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
   plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)
 endforeach
 
@@ -63,5 +63,5 @@ install_data([
     'file-darktable-export-on-exit.lua',
     'file-darktable-get-size.lua',
   ],
-  install_dir: prefix / gimpdatadir / 'file-raw',
+  install_dir: prefix / claydatadir / 'file-raw',
 )

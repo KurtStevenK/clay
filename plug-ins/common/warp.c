@@ -1,4 +1,4 @@
-/* Warp  --- image filter plug-in for GIMP
+/* Warp  --- image filter plug-in for Clay
  * Copyright (C) 1997 John P. Beale
  * Much of the 'warp' is from the Displace plug-in: 1996 Stephen Robert Norris
  * Much of the 'displace' code taken in turn  from the pinch plug-in
@@ -19,7 +19,7 @@
  *
  * You can contact me (the warp author) at beale@best.com
  * Please send me any patches or enhancements to this code.
- * You can contact the original GIMP authors at gimp@xcf.berkeley.edu
+ * You can contact the original Clay authors at clay@xcf.berkeley.edu
  *
  * --------------------------------------------------------------------
  * Warp Program structure: after running the user interface and setting the
@@ -60,22 +60,22 @@
  *               exactly what I did to fix it :-/  Also, added 'color' option
  *               for border pixels to use the current selected foreground color.
  *
- * Version 0.3   10/20/97  Initial release for Gimp 0.99.xx
+ * Version 0.3   10/20/97  Initial release for Clay 0.99.xx
  */
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /* Some useful macros */
 
 #define PLUG_IN_PROC    "plug-in-warp"
 #define PLUG_IN_BINARY  "warp"
-#define PLUG_IN_ROLE    "gimp-warp"
+#define PLUG_IN_ROLE    "clay-warp"
 #define ENTRY_WIDTH     75
 #define MIN_ARGS         6  /* minimum number of arguments required */
 
@@ -93,12 +93,12 @@ typedef struct _WarpClass WarpClass;
 
 struct _Warp
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _WarpClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -107,23 +107,23 @@ struct _WarpClass
 
 GType                   warp_get_type         (void);
 
-static GList          * warp_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * warp_create_procedure (GimpPlugIn           *plug_in,
+static GList          * warp_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * warp_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * warp_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * warp_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
-static void             blur16                (GimpDrawable   *drawable);
+static void             blur16                (ClayDrawable   *drawable);
 
-static void             diff                  (GimpDrawable         *drawable,
-                                               GimpProcedureConfig  *config,
-                                               GimpDrawable        **xl,
-                                               GimpDrawable        **yl);
+static void             diff                  (ClayDrawable         *drawable,
+                                               ClayProcedureConfig  *config,
+                                               ClayDrawable        **xl,
+                                               ClayDrawable        **yl);
 
 static void             diff_prepare_row      (GeglBuffer     *buffer,
                                                const Babl     *format,
@@ -132,21 +132,21 @@ static void             diff_prepare_row      (GeglBuffer     *buffer,
                                                gint            y,
                                                gint            w);
 
-static void             warp_one              (GimpDrawable        *draw,
-                                               GimpDrawable        *newid,
-                                               GimpDrawable        *map_x,
-                                               GimpDrawable        *map_y,
-                                               GimpDrawable        *mag_draw,
+static void             warp_one              (ClayDrawable        *draw,
+                                               ClayDrawable        *newid,
+                                               ClayDrawable        *map_x,
+                                               ClayDrawable        *map_y,
+                                               ClayDrawable        *mag_draw,
                                                gboolean             first_time,
                                                gint                 step,
-                                               GimpProcedureConfig *config);
+                                               ClayProcedureConfig *config);
 
-static void             warp                  (GimpDrawable        *drawable,
-                                               GimpProcedureConfig *config);
+static void             warp                  (ClayDrawable        *drawable,
+                                               ClayProcedureConfig *config);
 
-static gboolean         warp_dialog           (GimpDrawable        *drawable,
-                                               GimpProcedure       *procedure,
-                                               GimpProcedureConfig *config);
+static gboolean         warp_dialog           (ClayDrawable        *drawable,
+                                               ClayProcedure       *procedure,
+                                               ClayProcedureConfig *config);
 static void             warp_pixel            (GeglBuffer          *buffer,
                                                const Babl          *format,
                                                gint                 width,
@@ -158,28 +158,28 @@ static void             warp_pixel            (GeglBuffer          *buffer,
                                                gint                 x,
                                                gint                 y,
                                                guchar              *pixel,
-                                               GimpProcedureConfig *config);
+                                               ClayProcedureConfig *config);
 
 static gdouble       warp_map_mag_give_value  (guchar         *pt,
                                                gint            alpha,
                                                gint            bytes);
 
 
-G_DEFINE_TYPE (Warp, warp, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Warp, warp, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (WARP_TYPE)
+CLAY_MAIN (WARP_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static gint         progress = 0;              /* progress indicator bar      */
-static GimpRunMode  run_mode;                  /* interactive, non-, etc.     */
+static ClayRunMode  run_mode;                  /* interactive, non-, etc.     */
 static guchar       color_pixel[4] = {0, 0, 0, 255};  /* current fg color     */
 
 
 static void
 warp_class_init (WarpClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = warp_query_procedures;
   plug_in_class->create_procedure = warp_create_procedure;
@@ -192,31 +192,31 @@ warp_init (Warp *warp)
 }
 
 static GList *
-warp_query_procedures (GimpPlugIn *plug_in)
+warp_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-warp_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+warp_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             warp_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Warp..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Map");
+      clay_procedure_set_menu_label (procedure, _("_Warp..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Map");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Twist or smear image in many "
                                           "different ways"),
                                         _("Smears an image along vector paths "
@@ -225,45 +225,45 @@ warp_create_procedure (GimpPlugIn  *plug_in,
                                           "can look like brushstrokes of acrylic "
                                           "or watercolor paint, in some cases."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "John P. Beale",
                                       "John P. Beale",
                                       "1997");
 
-      gimp_procedure_add_double_argument (procedure, "amount",
+      clay_procedure_add_double_argument (procedure, "amount",
                                           _("Step si_ze"),
                                           _("Pixel displacement multiplier"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, 10.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "warp-map",
+      clay_procedure_add_drawable_argument (procedure, "warp-map",
                                             _("Dis_placement Map"),
                                             _("Displacement control map"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "iter",
+      clay_procedure_add_int_argument (procedure, "iter",
                                        _("I_terations"),
                                        _("Iteration count"),
                                        1, 100, 5,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "dither",
+      clay_procedure_add_double_argument (procedure, "dither",
                                           _("_Dither size"),
                                           _("Random dither amount"),
                                           0, 100, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "angle",
+      clay_procedure_add_double_argument (procedure, "angle",
                                           _("Rotatio_n angle"),
                                           _("Angle of gradient vector rotation"),
                                           0, 360, 90.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "wrap-type",
+      clay_procedure_add_choice_argument (procedure, "wrap-type",
                                           _("On ed_ges"),
                                           _("Wrap type"),
-                                          gimp_choice_new_with_values ("wrap",  WRAP,  _("Wrap"),             NULL,
+                                          clay_choice_new_with_values ("wrap",  WRAP,  _("Wrap"),             NULL,
                                                                        "smear", SMEAR, _("Smear"),            NULL,
                                                                        "black", BLACK, _("Black"),            NULL,
                                                                        "color", COLOR, _("Foreground Color"), NULL,
@@ -271,49 +271,49 @@ warp_create_procedure (GimpPlugIn  *plug_in,
                                           "wrap",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "mag-map",
+      clay_procedure_add_drawable_argument (procedure, "mag-map",
                                             _("_Magnitude Map"),
                                             _("Magnitude control map"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "mag-use",
+      clay_procedure_add_boolean_argument (procedure, "mag-use",
                                            _("_Use magnitude map"),
                                            _("Use magnitude map"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "substeps",
+      clay_procedure_add_int_argument (procedure, "substeps",
                                        _("Su_bsteps"),
                                        _("Substeps between image updates"),
                                        1, 100, 1,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "grad-map",
+      clay_procedure_add_drawable_argument (procedure, "grad-map",
                                             _("Gradient Ma_p"),
                                             _("Gradient control map"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "grad-scale",
+      clay_procedure_add_double_argument (procedure, "grad-scale",
                                           _("Gradient s_cale"),
                                           _("Scaling factor for gradient map (0=don't use)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_drawable_argument (procedure, "vector-map",
+      clay_procedure_add_drawable_argument (procedure, "vector-map",
                                             _("_Vector Map"),
                                             _("Fixed vector control map"),
                                             TRUE,
                                             G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "vector-scale",
+      clay_procedure_add_double_argument (procedure, "vector-scale",
                                           _("Vector magn_itude"),
                                           _("Scaling factor for fixed vector map (0=don't use)"),
                                           -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "vector-angle",
+      clay_procedure_add_double_argument (procedure, "vector-angle",
                                           _("Ang_le"),
                                           _("Angle for fixed vector map"),
                                           0, 360, 0.0,
@@ -323,29 +323,29 @@ warp_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-warp_run (GimpProcedure        *procedure,
-          GimpRunMode           _run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+warp_run (ClayProcedure        *procedure,
+          ClayRunMode           _run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   GeglColor    *color;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -354,14 +354,14 @@ warp_run (GimpProcedure        *procedure,
     }
 
   /* get currently selected foreground pixel color */
-  color = gimp_context_get_foreground ();
+  color = clay_context_get_foreground ();
   gegl_color_get_pixel (color, babl_format ("R'G'B' u8"), color_pixel);
   g_object_unref (color);
 
   run_mode = _run_mode;
 
   /* Initialize maps for GUI */
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     g_object_set (config,
                   "warp-map",   drawable,
                   "mag-map",    drawable,
@@ -369,42 +369,42 @@ warp_run (GimpProcedure        *procedure,
                   "vector-map", drawable,
                   NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE &&
+  if (run_mode == CLAY_RUN_INTERACTIVE &&
       ! warp_dialog (drawable, procedure, config))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
   warp (drawable, config);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gboolean
-warp_dialog (GimpDrawable        *drawable,
-             GimpProcedure       *procedure,
-             GimpProcedureConfig *config)
+warp_dialog (ClayDrawable        *drawable,
+             ClayProcedure       *procedure,
+             ClayProcedureConfig *config)
 {
   GtkWidget    *dialog;
   GtkWidget    *hbox;
   gboolean      run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Warp"));
 
   /* Basic Options */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "basic-options-left",
                                   "amount", "iter", "wrap-type",
                                   NULL);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "basic-options-hbox",
                                          "basic-options-left",
                                          "warp-map",
@@ -414,26 +414,26 @@ warp_dialog (GimpDrawable        *drawable,
   gtk_box_set_spacing (GTK_BOX (hbox), 12);
   gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "basic-options-label", _("Basic Options"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "basic-options-frame",
                                     "basic-options-label", FALSE,
                                     "basic-options-hbox");
 
   /* Advanced Options */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "advanced-options-left",
                                   "dither", "angle", "substeps",
                                   NULL);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "advanced-options-right",
                                   "mag-map", "mag-use",
                                   NULL);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "advanced-options-hbox",
                                          "advanced-options-left",
                                          "advanced-options-right",
@@ -443,23 +443,23 @@ warp_dialog (GimpDrawable        *drawable,
   gtk_box_set_spacing (GTK_BOX (hbox), 12);
   gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "advanced-options-label",
                                    _("Advanced Options"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "advanced-options-frame",
                                     "advanced-options-label", FALSE,
                                     "advanced-options-hbox");
 
   /* More Advanced Options */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "more-advanced-options-left",
                                   "grad-scale", "vector-scale",
                                   "vector-angle",
                                   NULL);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "more-advanced-options-hbox",
                                          "more-advanced-options-left",
                                          "grad-map", "vector-map",
@@ -469,17 +469,17 @@ warp_dialog (GimpDrawable        *drawable,
   gtk_box_set_spacing (GTK_BOX (hbox), 12);
   gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "more-advanced-options-label",
                                    _("More Advanced Options"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "more-advanced-options-frame",
                                     "more-advanced-options-label", FALSE,
                                     "more-advanced-options-hbox");
 
   /* Show dialog */
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "basic-options-frame",
                               "advanced-options-frame",
                               "more-advanced-options-frame",
@@ -487,7 +487,7 @@ warp_dialog (GimpDrawable        *drawable,
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -497,18 +497,18 @@ warp_dialog (GimpDrawable        *drawable,
 /* ---------------------------------------------------------------------- */
 
 static const Babl *
-get_u8_format (GimpDrawable *drawable)
+get_u8_format (ClayDrawable *drawable)
 {
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         return babl_format ("R'G'B'A u8");
       else
         return babl_format ("R'G'B' u8");
     }
   else
     {
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         return babl_format ("Y'A u8");
       else
         return babl_format ("Y' u8");
@@ -516,7 +516,7 @@ get_u8_format (GimpDrawable *drawable)
 }
 
 static void
-blur16 (GimpDrawable *drawable)
+blur16 (ClayDrawable *drawable)
 {
   /*  blur a 2-or-more byte-per-pixel drawable,
    *  1st 2 bytes interpreted as a 16-bit height field.
@@ -541,15 +541,15 @@ blur16 (GimpDrawable *drawable)
 
   /* --------------------------------------- */
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &x1, &y1, &width, &height))
     return;
 
   x2 = x1 + width;
   y2 = y1 + height;
 
-  width  = gimp_drawable_get_width  (drawable);     /* size of input drawable*/
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width  (drawable);     /* size of input drawable*/
+  height = clay_drawable_get_height (drawable);
 
   format = get_u8_format (drawable);
 
@@ -567,8 +567,8 @@ blur16 (GimpDrawable *drawable)
   dest     = g_new (guchar, (x2 - x1) * src_bytes);
 
   /* initialize the pixel regions (read from source, write into dest)  */
-  src_buffer   = gimp_drawable_get_buffer (drawable);
-  dest_buffer  = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer   = clay_drawable_get_buffer (drawable);
+  dest_buffer  = clay_drawable_get_shadow_buffer (drawable);
 
   pr = prev_row + src_bytes;   /* row arrays are prepared for indexing to -1 (!) */
   cr = cur_row  + src_bytes;
@@ -617,16 +617,16 @@ blur16 (GimpDrawable *drawable)
       nr = tmp;
 
       if ((row % 8) == 0)
-        gimp_progress_update ((double) row / (double) (y2 - y1));
+        clay_progress_update ((double) row / (double) (y2 - y1));
     }
 
   g_object_unref (src_buffer);
   g_object_unref (dest_buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, x1, y1, (x2 - x1), (y2 - y1));
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, x1, y1, (x2 - x1), (y2 - y1));
 
   g_free (prev_row);  /* row buffers allocated at top of fn. */
   g_free (cur_row);
@@ -670,18 +670,18 @@ diff_prepare_row (GeglBuffer *buffer,
 /* -------------------------------------------------------------------------- */
 
 static void
-diff (GimpDrawable         *drawable,
-      GimpProcedureConfig  *config,
-      GimpDrawable        **xl,
-      GimpDrawable        **yl)
+diff (ClayDrawable         *drawable,
+      ClayProcedureConfig  *config,
+      ClayDrawable        **xl,
+      ClayDrawable        **yl)
 {
-  GimpDrawable *draw_xd;
-  GimpDrawable *draw_yd; /* vector disp. drawables */
-  GimpImage    *image;              /* image holding X and Y diff. arrays */
-  GimpImage    *new_image;          /* image holding X and Y diff. layers */
+  ClayDrawable *draw_xd;
+  ClayDrawable *draw_yd; /* vector disp. drawables */
+  ClayImage    *image;              /* image holding X and Y diff. arrays */
+  ClayImage    *new_image;          /* image holding X and Y diff. layers */
   GList        *selected_layers;    /* currently selected layers          */
-  GimpLayer    *xlayer;
-  GimpLayer    *ylayer;  /* individual X and Y layer ID numbers */
+  ClayLayer    *xlayer;
+  ClayLayer    *ylayer;  /* individual X and Y layer ID numbers */
   GeglBuffer   *src_buffer;
   GeglBuffer   *destx_buffer;
   const Babl   *destx_format;
@@ -726,16 +726,16 @@ diff (GimpDrawable         *drawable,
   gdouble r, theta, dtheta;         /* rectangular<-> spherical coordinate transform for vector rotation */
   gdouble scale_vec_x, scale_vec_y; /* fixed vector X,Y component scaling factors */
 
-  GimpDrawable *mag_map;
-  GimpDrawable *grad_map;
-  GimpDrawable *vector_map;
+  ClayDrawable *mag_map;
+  ClayDrawable *grad_map;
+  ClayDrawable *vector_map;
   gdouble       angle;
   gdouble       grad_scale;
   gdouble       vector_scale;
   gdouble       vector_angle;
   gboolean      use_mag;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   g_object_get (config,
                 "angle",        &angle,
@@ -761,7 +761,7 @@ diff (GimpDrawable         *drawable,
    *  need to be done for correct operation. (It simply makes it go
    *  faster, since fewer pixels need to be operated on).
    */
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &x1, &y1, &width, &height))
     return;
 
@@ -777,8 +777,8 @@ diff (GimpDrawable         *drawable,
   /* Get the size of the input image. (This will/must be the same
    *  as the size of the output image.
    */
-  width  = gimp_drawable_get_width  (drawable);
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width  (drawable);
+  height = clay_drawable_get_height (drawable);
 
   src_format = get_u8_format (drawable);
   src_bytes  = babl_format_get_bytes_per_pixel (src_format);
@@ -788,32 +788,32 @@ diff (GimpDrawable         *drawable,
         16-bit pixel value. This is either clever, or a kluge,
         depending on your point of view.  */
 
-  image           = gimp_item_get_image (GIMP_ITEM (drawable));
-  selected_layers = gimp_image_list_selected_layers (image);
+  image           = clay_item_get_image (CLAY_ITEM (drawable));
+  selected_layers = clay_image_list_selected_layers (image);
 
   /* create new image for X,Y diff */
-  new_image = gimp_image_new (width, height, GIMP_RGB);
+  new_image = clay_image_new (width, height, CLAY_RGB);
 
-  xlayer = gimp_layer_new (new_image, "Warp_X_Vectors",
+  xlayer = clay_layer_new (new_image, "Warp_X_Vectors",
                            width, height,
-                           GIMP_RGB_IMAGE,
+                           CLAY_RGB_IMAGE,
                            100.0,
-                           gimp_image_get_default_new_layer_mode (new_image));
+                           clay_image_get_default_new_layer_mode (new_image));
 
-  ylayer = gimp_layer_new (new_image, "Warp_Y_Vectors",
+  ylayer = clay_layer_new (new_image, "Warp_Y_Vectors",
                            width, height,
-                           GIMP_RGB_IMAGE,
+                           CLAY_RGB_IMAGE,
                            100.0,
-                           gimp_image_get_default_new_layer_mode (new_image));
+                           clay_image_get_default_new_layer_mode (new_image));
 
-  draw_yd = GIMP_DRAWABLE (ylayer);
-  draw_xd = GIMP_DRAWABLE (xlayer);
+  draw_yd = CLAY_DRAWABLE (ylayer);
+  draw_xd = CLAY_DRAWABLE (xlayer);
 
-  gimp_image_insert_layer (new_image, xlayer, NULL, 1);
-  gimp_image_insert_layer (new_image, ylayer, NULL, 1);
-  gimp_drawable_fill (GIMP_DRAWABLE (xlayer), GIMP_FILL_BACKGROUND);
-  gimp_drawable_fill (GIMP_DRAWABLE (ylayer), GIMP_FILL_BACKGROUND);
-  gimp_image_take_selected_layers (image, selected_layers);
+  clay_image_insert_layer (new_image, xlayer, NULL, 1);
+  clay_image_insert_layer (new_image, ylayer, NULL, 1);
+  clay_drawable_fill (CLAY_DRAWABLE (xlayer), CLAY_FILL_BACKGROUND);
+  clay_drawable_fill (CLAY_DRAWABLE (ylayer), CLAY_FILL_BACKGROUND);
+  clay_image_take_selected_layers (image, selected_layers);
 
   dest_format = get_u8_format (draw_xd);
   dest_bytes  = babl_format_get_bytes_per_pixel (dest_format);
@@ -839,14 +839,14 @@ diff (GimpDrawable         *drawable,
   /*  initialize the source and destination pixel regions  */
 
   /* 'curl' vector-rotation input */
-  src_buffer = gimp_drawable_get_buffer (drawable);
+  src_buffer = clay_drawable_get_buffer (drawable);
 
   /* destination: X diff output */
-  destx_buffer = gimp_drawable_get_buffer (draw_xd);
+  destx_buffer = clay_drawable_get_buffer (draw_xd);
   destx_format = get_u8_format (draw_xd);
 
   /* Y diff output */
-  desty_buffer = gimp_drawable_get_buffer (draw_yd);
+  desty_buffer = clay_drawable_get_buffer (draw_yd);
   desty_format = get_u8_format (draw_yd);
 
   pr = prev_row + src_bytes;
@@ -869,7 +869,7 @@ diff (GimpDrawable         *drawable,
       vbytes  = babl_format_get_bytes_per_pixel (vformat);
 
       /* fixed-vector scale-map */
-      vec_buffer = gimp_drawable_get_buffer (vector_map);
+      vec_buffer = clay_drawable_get_buffer (vector_map);
 
       crv = cur_row_v + vbytes;
       diff_prepare_row (vec_buffer, vformat, crv, x1, y1, (x2 - x1));
@@ -881,7 +881,7 @@ diff (GimpDrawable         *drawable,
       gbytes  = babl_format_get_bytes_per_pixel (gformat);
 
       /* fixed-vector scale-map */
-      grad_buffer = gimp_drawable_get_buffer (grad_map);
+      grad_buffer = clay_drawable_get_buffer (grad_map);
 
       prg = prev_row_g + gbytes;
       crg = cur_row_g + gbytes;
@@ -896,7 +896,7 @@ diff (GimpDrawable         *drawable,
       mbytes  = babl_format_get_bytes_per_pixel (mformat);
 
       /* fixed-vector scale-map */
-      mag_buffer = gimp_drawable_get_buffer (mag_map);
+      mag_buffer = clay_drawable_get_buffer (mag_map);
 
       crm = cur_row_m + mbytes;
       diff_prepare_row (mag_buffer, mformat, crm, x1, y1, (x2 - x1));
@@ -1038,11 +1038,11 @@ diff (GimpDrawable         *drawable,
         }
 
       if ((row % 8) == 0)
-        gimp_progress_update ((gdouble) row / (gdouble) (y2 - y1));
+        clay_progress_update ((gdouble) row / (gdouble) (y2 - y1));
 
     } /* for (row..) */
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_object_unref (src_buffer);
   g_object_unref (destx_buffer);
@@ -1052,15 +1052,15 @@ diff (GimpDrawable         *drawable,
   g_clear_object (&grad_map);
   g_clear_object (&vector_map);
 
-  gimp_drawable_update (draw_xd, x1, y1, (x2 - x1), (y2 - y1));
-  gimp_drawable_update (draw_yd, x1, y1, (x2 - x1), (y2 - y1));
+  clay_drawable_update (draw_xd, x1, y1, (x2 - x1), (y2 - y1));
+  clay_drawable_update (draw_yd, x1, y1, (x2 - x1), (y2 - y1));
 
-  gimp_displays_flush ();  /* make sure layer is visible */
+  clay_displays_flush ();  /* make sure layer is visible */
 
-  gimp_progress_init (_("Smoothing X gradient"));
+  clay_progress_init (_("Smoothing X gradient"));
   blur16 (draw_xd);
 
-  gimp_progress_init (_("Smoothing Y gradient"));
+  clay_progress_init (_("Smoothing Y gradient"));
   blur16 (draw_yd);
 
   g_free (prev_row);  /* row buffers allocated at top of fn. */
@@ -1075,8 +1075,8 @@ diff (GimpDrawable         *drawable,
   g_free (destx);
   g_free (desty);
 
-  *xl = GIMP_DRAWABLE (xlayer);  /* pass back the X and Y layer ID numbers */
-  *yl = GIMP_DRAWABLE (ylayer);
+  *xl = CLAY_DRAWABLE (xlayer);  /* pass back the X and Y layer ID numbers */
+  *yl = CLAY_DRAWABLE (ylayer);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1084,29 +1084,29 @@ diff (GimpDrawable         *drawable,
 /* -------------------------------------------------------------------------- */
 
 static void
-warp (GimpDrawable        *orig_draw,
-      GimpProcedureConfig *config)
+warp (ClayDrawable        *orig_draw,
+      ClayProcedureConfig *config)
 {
-  GimpDrawable *disp_map;    /* Displacement map, ie, control array */
-  GimpDrawable *mag_draw;    /* Magnitude multiplier factor map */
-  GimpDrawable *map_x = NULL;
-  GimpDrawable *map_y = NULL;
+  ClayDrawable *disp_map;    /* Displacement map, ie, control array */
+  ClayDrawable *mag_draw;    /* Magnitude multiplier factor map */
+  ClayDrawable *map_x = NULL;
+  ClayDrawable *map_y = NULL;
   gboolean      first_time = TRUE;
   gint          iter_count;
   gint          width;
   gint          height;
   gint          x1, y1, x2, y2;
-  GimpImage    *image;
+  ClayImage    *image;
 
   /* index var. over all "warp" Displacement iterations */
   gint          warp_iter;
 
   /* calculate new X,Y Displacement image maps */
 
-  gimp_progress_init (_("Finding XY gradient"));
+  clay_progress_init (_("Finding XY gradient"));
 
   /* Get selection area */
-  if (! gimp_drawable_mask_intersect (orig_draw,
+  if (! clay_drawable_mask_intersect (orig_draw,
                                       &x1, &y1, &width, &height))
     return;
 
@@ -1119,33 +1119,33 @@ warp (GimpDrawable        *orig_draw,
   x2 = x1 + width;
   y2 = y1 + height;
 
-  width  = gimp_drawable_get_width  (orig_draw);
-  height = gimp_drawable_get_height (orig_draw);
+  width  = clay_drawable_get_width  (orig_draw);
+  height = clay_drawable_get_height (orig_draw);
 
   /* generate x,y differential images (arrays) */
   diff (disp_map, config, &map_x, &map_y);
 
   for (warp_iter = 0; warp_iter < iter_count; warp_iter++)
     {
-      gimp_progress_init_printf (_("Flow step %d"), warp_iter+1);
+      clay_progress_init_printf (_("Flow step %d"), warp_iter+1);
       progress = 0;
 
       warp_one (orig_draw, orig_draw,
                 map_x, map_y, mag_draw,
                 first_time, warp_iter, config);
 
-      gimp_drawable_update (orig_draw,
+      clay_drawable_update (orig_draw,
                             x1, y1, (x2 - x1), (y2 - y1));
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
 
       first_time = FALSE;
     }
 
-  image = gimp_item_get_image (GIMP_ITEM (map_x));
+  image = clay_item_get_image (CLAY_ITEM (map_x));
 
-  gimp_image_delete (image);
+  clay_image_delete (image);
   g_clear_object (&disp_map);
   g_clear_object (&mag_draw);
 }
@@ -1153,14 +1153,14 @@ warp (GimpDrawable        *orig_draw,
 /* -------------------------------------------------------------------------- */
 
 static void
-warp_one (GimpDrawable        *draw,
-          GimpDrawable        *new,
-          GimpDrawable        *map_x,
-          GimpDrawable        *map_y,
-          GimpDrawable        *mag_draw,
+warp_one (ClayDrawable        *draw,
+          ClayDrawable        *new,
+          ClayDrawable        *map_x,
+          ClayDrawable        *map_y,
+          ClayDrawable        *mag_draw,
           gboolean             first_time,
           gint                 step,
-          GimpProcedureConfig *config)
+          ClayProcedureConfig *config)
 {
   GeglBuffer *src_buffer;
   GeglBuffer *dest_buffer;
@@ -1219,7 +1219,7 @@ warp_one (GimpDrawable        *draw,
 
   /* Get selection area */
 
-  if (! gimp_drawable_mask_intersect (draw,
+  if (! clay_drawable_mask_intersect (draw,
                                       &x1, &y1, &width, &height))
     return;
 
@@ -1233,8 +1233,8 @@ warp_one (GimpDrawable        *draw,
   x2 = x1 + width;
   y2 = y1 + height;
 
-  width  = gimp_drawable_get_width  (draw);
-  height = gimp_drawable_get_height (draw);
+  width  = clay_drawable_get_width  (draw);
+  height = clay_drawable_get_height (draw);
 
 
   max_progress = (x2 - x1) * (y2 - y1);
@@ -1242,7 +1242,7 @@ warp_one (GimpDrawable        *draw,
 
   /*  --------- Register the (many) pixel regions ----------  */
 
-  src_buffer = gimp_drawable_get_buffer (draw);
+  src_buffer = clay_drawable_get_buffer (draw);
 
   src_format = get_u8_format (draw);
 
@@ -1252,7 +1252,7 @@ warp_one (GimpDrawable        *draw,
                                    GEGL_ACCESS_READ, GEGL_ABYSS_NONE, 5);
 
 
-  dest_buffer = gimp_drawable_get_shadow_buffer (new);
+  dest_buffer = clay_drawable_get_shadow_buffer (new);
 
   dest_format = get_u8_format (new);
   dest_bytes  = babl_format_get_bytes_per_pixel (dest_format);
@@ -1263,7 +1263,7 @@ warp_one (GimpDrawable        *draw,
                             GEGL_ACCESS_WRITE, GEGL_ABYSS_NONE);
 
 
-  map_x_buffer = gimp_drawable_get_buffer (map_x);
+  map_x_buffer = clay_drawable_get_buffer (map_x);
 
   map_x_format = get_u8_format (map_x);
   map_x_bytes  = babl_format_get_bytes_per_pixel (map_x_format);
@@ -1274,7 +1274,7 @@ warp_one (GimpDrawable        *draw,
                             GEGL_ACCESS_READ, GEGL_ABYSS_NONE);
 
 
-  map_y_buffer = gimp_drawable_get_buffer (map_y);
+  map_y_buffer = clay_drawable_get_buffer (map_y);
 
   map_y_format = get_u8_format (map_y);
   map_y_bytes  = babl_format_get_bytes_per_pixel (map_y_format);
@@ -1287,12 +1287,12 @@ warp_one (GimpDrawable        *draw,
 
   if (use_mag)
     {
-      mag_buffer = gimp_drawable_get_buffer (mag_draw);
+      mag_buffer = clay_drawable_get_buffer (mag_draw);
 
       mag_format = get_u8_format (mag_draw);
       mag_bytes  = babl_format_get_bytes_per_pixel (mag_format);
 
-      mag_alpha = gimp_drawable_has_alpha (mag_draw);
+      mag_alpha = clay_drawable_has_alpha (mag_draw);
 
       gegl_buffer_iterator_add (iter, mag_buffer,
                                 GEGL_RECTANGLE (x1, y1, (x2 - x1), (y2 - y1)),
@@ -1392,7 +1392,7 @@ warp_one (GimpDrawable        *draw,
                       ivalues[2] = 256 * pixel[2][0] + pixel[2][1];
                       ivalues[3] = 256 * pixel[3][0] + pixel[3][1];
 
-                      xval = gimp_bilinear_32 (needx, needy, ivalues);
+                      xval = clay_bilinear_32 (needx, needy, ivalues);
 
                       /* get 4 neighboring DY values from DiffY drawable for linear interpolation */
                       warp_pixel (map_y_buffer, map_y_format,
@@ -1421,7 +1421,7 @@ warp_one (GimpDrawable        *draw,
                       ivalues[2] = 256 * pixel[2][0] + pixel[2][1];
                       ivalues[3] = 256 * pixel[3][0] + pixel[3][1];
 
-                      yval = gimp_bilinear_32 (needx, needy, ivalues);
+                      yval = clay_bilinear_32 (needx, needy, ivalues);
 
                       /* move displacement vector to this new value */
                       dx += dscalefac * (xval - 32768);
@@ -1484,7 +1484,7 @@ warp_one (GimpDrawable        *draw,
                   values[2] = pixel[2][k];
                   values[3] = pixel[3][k];
 
-                  val = gimp_bilinear_8 (needx, needy, values);
+                  val = clay_bilinear_8 (needx, needy, values);
 
                   *dest++ = val;
                 }
@@ -1499,7 +1499,7 @@ warp_one (GimpDrawable        *draw,
         }
 
       progress += (roi.width * roi.height);
-      gimp_progress_update ((double) progress / (double) max_progress);
+      clay_progress_update ((double) progress / (double) max_progress);
     }
 
   g_object_unref (src_buffer);
@@ -1510,9 +1510,9 @@ warp_one (GimpDrawable        *draw,
   if (use_mag == TRUE)
     g_object_unref (mag_buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
-  gimp_drawable_merge_shadow (draw, first_time);
+  clay_drawable_merge_shadow (draw, first_time);
 
   g_rand_free (gr);
 }
@@ -1553,13 +1553,13 @@ warp_pixel (GeglBuffer          *buffer,
             gint                 x,
             gint                 y,
             guchar              *pixel,
-            GimpProcedureConfig *config)
+            ClayProcedureConfig *config)
 {
   static guchar  empty_pixel[4] = { 0, 0, 0, 0 };
   guchar        *data;
   gint           wrap_type;
 
-  wrap_type = gimp_procedure_config_get_choice_id (config, "wrap-type");
+  wrap_type = clay_procedure_config_get_choice_id (config, "wrap-type");
 
   /* Tile the image. */
   if (wrap_type == WRAP)

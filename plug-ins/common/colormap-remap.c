@@ -31,51 +31,51 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /* Magic numbers */
 
 #define PLUG_IN_PROC_REMAP  "plug-in-colormap-remap"
 #define PLUG_IN_PROC_SWAP   "plug-in-colormap-swap"
 #define PLUG_IN_BINARY      "colormap-remap"
-#define PLUG_IN_ROLE        "gimp-colormap-remap"
+#define PLUG_IN_ROLE        "clay-colormap-remap"
 
 typedef struct _Remap Remap;
 typedef struct _RemapClass RemapClass;
 
 struct _Remap
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _RemapClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 #define REMAP_TYPE  (remap_get_type ())
 #define REMAP (obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), REMAP_TYPE, Remap))
 
 GType                   remap_get_type         (void);
-static GList          * remap_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * remap_create_procedure (GimpPlugIn           *plug_in,
+static GList          * remap_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * remap_create_procedure (ClayPlugIn           *plug_in,
                                                 const gchar          *name);
 
-static GimpValueArray * remap_run              (GimpProcedure        *procedure,
-                                                GimpRunMode           run_mode,
-                                                GimpImage            *image,
-                                                GimpDrawable        **drawables,
-                                                GimpProcedureConfig  *config,
+static ClayValueArray * remap_run              (ClayProcedure        *procedure,
+                                                ClayRunMode           run_mode,
+                                                ClayImage            *image,
+                                                ClayDrawable        **drawables,
+                                                ClayProcedureConfig  *config,
                                                 gpointer              run_data);
 
-static gboolean         remap_dialog           (GimpProcedure        *procedure,
+static gboolean         remap_dialog           (ClayProcedure        *procedure,
                                                 GObject              *config,
-                                                GimpImage            *image);
+                                                ClayImage            *image);
 
-static gboolean         read_image_palette     (GimpImage            *image,
+static gboolean         read_image_palette     (ClayImage            *image,
                                                 gint                 *ncolors_out);
 
 static GtkWidget *      create_icon_view       (gint                  col_count,
@@ -101,19 +101,19 @@ static void             remap_sort_index       (GtkButton       *action,
 static void             remap_reverse_order    (GtkButton       *action,
                                                 gpointer         user_data);
 
-static gboolean         real_remap             (GimpImage       *image);
+static gboolean         real_remap             (ClayImage       *image);
 
-static gboolean         check_index_map        (GimpImage *image);
+static gboolean         check_index_map        (ClayImage *image);
 
 static void             populate_index_map_from_store (void);
 
-static void             store_last_vals (GimpProcedureConfig *config);
-static void             read_last_vals  (GimpProcedureConfig *config);
+static void             store_last_vals (ClayProcedureConfig *config);
+static void             read_last_vals  (ClayProcedureConfig *config);
 
 
-G_DEFINE_TYPE (Remap, remap, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Remap, remap, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (REMAP_TYPE)
+CLAY_MAIN (REMAP_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -136,7 +136,7 @@ static guchar        index_map_old_new[256]; /* store remapped indices */
 static void
 remap_class_init (RemapClass *klass)
 {
-  GimpPlugInClass *plug_in_class  = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class  = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = remap_query_procedures;
   plug_in_class->create_procedure = remap_create_procedure;
@@ -149,7 +149,7 @@ remap_init (Remap *remap)
 }
 
 static GList *
-remap_query_procedures (GimpPlugIn *plug_in)
+remap_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -159,62 +159,62 @@ remap_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-remap_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+remap_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (strcmp (name, PLUG_IN_PROC_REMAP) == 0)
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             remap_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "INDEXED*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("R_earrange Colormap..."));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_COLORMAP);
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Map/[Colormap]");
-      gimp_procedure_add_menu_path (procedure, "<Colormap>/Colormap Menu");
+      clay_procedure_set_menu_label (procedure, _("R_earrange Colormap..."));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_COLORMAP);
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Map/[Colormap]");
+      clay_procedure_add_menu_path (procedure, "<Colormap>/Colormap Menu");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Rearrange the colormap"),
                                         _("This procedure takes an indexed "
                                           "image and lets you alter the "
                                           "positions of colors in the colormap "
                                           "without visually changing the image."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Mukund Sivaraman <muks@mukund.org>",
                                       "Mukund Sivaraman <muks@mukund.org>",
                                       "June 2006");
 
-      gimp_procedure_add_bytes_argument (procedure, "map",
+      clay_procedure_add_bytes_argument (procedure, "map",
                                          _("Map"),
                                          _("Remap array for the colormap"),
                                          G_PARAM_READWRITE);
     }
   else if (strcmp (name, PLUG_IN_PROC_SWAP) == 0)
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             remap_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "INDEXED*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("_Swap Colors"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_COLORMAP);
+      clay_procedure_set_menu_label (procedure, _("_Swap Colors"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_COLORMAP);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Swap two colors in the colormap"),
                                         _("This procedure takes an indexed "
                                           "image and lets you swap the "
@@ -222,18 +222,18 @@ remap_create_procedure (GimpPlugIn  *plug_in,
                                           "colormap without visually changing "
                                           "the image."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Mukund Sivaraman <muks@mukund.org>",
                                       "Mukund Sivaraman <muks@mukund.org>",
                                       "June 2006");
 
-      gimp_procedure_add_int_argument (procedure, "index1",
+      clay_procedure_add_int_argument (procedure, "index1",
                                        _("Index 1"),
                                        _("First index in the colormap"),
                                        0, 255, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "index2",
+      clay_procedure_add_int_argument (procedure, "index2",
                                        _("Index 2"),
                                        _("Second (other) index in the colormap"),
                                        0, 255, 0,
@@ -243,12 +243,12 @@ remap_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-remap_run (GimpProcedure        *procedure,
-           GimpRunMode           run_mode,
-           GimpImage            *image,
-           GimpDrawable        **drawables,
-           GimpProcedureConfig  *config,
+static ClayValueArray *
+remap_run (ClayProcedure        *procedure,
+           ClayRunMode           run_mode,
+           ClayImage            *image,
+           ClayDrawable        **drawables,
+           ClayProcedureConfig  *config,
            gpointer              run_data)
 {
   gint i;
@@ -260,30 +260,30 @@ remap_run (GimpProcedure        *procedure,
       index_map_old_new[i] = i;
     }
 
-  if (gimp_image_get_base_type (image) != GIMP_INDEXED)
+  if (clay_image_get_base_type (image) != CLAY_INDEXED)
     {
       GError *error;
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with indexed images."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
-  if (strcmp (gimp_procedure_get_name (procedure), PLUG_IN_PROC_SWAP) == 0)
+  if (strcmp (clay_procedure_get_name (procedure), PLUG_IN_PROC_SWAP) == 0)
     {
       gint          index1;
       gint          index2;
       gint          temp;
-      GimpPalette  *palette;
+      ClayPalette  *palette;
       gint          ncolors;
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
         {
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CALLING_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CALLING_ERROR,
                                                    NULL);
         }
 
@@ -292,14 +292,14 @@ remap_run (GimpProcedure        *procedure,
                     "index2", &index2,
                     NULL);
 
-      palette = gimp_image_get_palette       (image);
-      ncolors = gimp_palette_get_color_count (palette);
+      palette = clay_image_get_palette       (image);
+      ncolors = clay_palette_get_color_count (palette);
 
       if (index1 >= ncolors || index2 >= ncolors
           || index1 < 0 || index2 < 0)
         {
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CALLING_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CALLING_ERROR,
                                                    NULL);
         }
 
@@ -308,48 +308,48 @@ remap_run (GimpProcedure        *procedure,
       index_map_old_new[index2] = temp;
 
       real_remap (image);
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_SUCCESS,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_SUCCESS,
                                                NULL);
     }
 
-  if (run_mode == GIMP_RUN_NONINTERACTIVE ||
-      run_mode == GIMP_RUN_WITH_LAST_VALS)
+  if (run_mode == CLAY_RUN_NONINTERACTIVE ||
+      run_mode == CLAY_RUN_WITH_LAST_VALS)
     {
       read_last_vals (config);
       if (! check_index_map (image))
         {
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CALLING_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CALLING_ERROR,
                                                    NULL);
         }
       real_remap (image);
-      gimp_displays_flush ();
-      return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+      clay_displays_flush ();
+      return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE &&
+  if (run_mode == CLAY_RUN_INTERACTIVE &&
       remap_dialog (procedure, G_OBJECT (config), image))
     {
       populate_index_map_from_store ();
       real_remap (image);
       store_last_vals (config);
-      gimp_displays_flush ();
-      return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+      clay_displays_flush ();
+      return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL, NULL);
 }
 
 static gboolean
-check_index_map (GimpImage *image)
+check_index_map (ClayImage *image)
 {
   gint         i;
   gint         ncolors;
-  GimpPalette *palette;
+  ClayPalette *palette;
 
-  palette = gimp_image_get_palette       (image);
-  ncolors = gimp_palette_get_color_count (palette);
+  palette = clay_image_get_palette       (image);
+  ncolors = clay_palette_get_color_count (palette);
 
   for (i = 0; i < ncolors; ++i)
     {
@@ -363,7 +363,7 @@ check_index_map (GimpImage *image)
 
 
 static void
-read_last_vals (GimpProcedureConfig *config)
+read_last_vals (ClayProcedureConfig *config)
 {
   const guchar *last_vals;
 
@@ -385,7 +385,7 @@ read_last_vals (GimpProcedureConfig *config)
 }
 
 static void
-store_last_vals (GimpProcedureConfig *config)
+store_last_vals (ClayProcedureConfig *config)
 {
   GBytes *bytes;
   bytes = g_bytes_new (&index_map_old_new, sizeof (guchar) * 256);
@@ -395,21 +395,21 @@ store_last_vals (GimpProcedureConfig *config)
 
 
 static gboolean
-read_image_palette (GimpImage *image,
+read_image_palette (ClayImage *image,
                     gint      *ncolors_out)
 {
   GtkTreeIter   iter;
   gint          index;
   gint          ncolors;
-  GimpPalette  *palette;
+  ClayPalette  *palette;
   GeglColor   **colors;
 
-  palette = gimp_image_get_palette       (image);
-  ncolors = gimp_palette_get_color_count (palette);
+  palette = clay_image_get_palette       (image);
+  ncolors = clay_palette_get_color_count (palette);
 
   g_return_val_if_fail ((ncolors > 0) && (ncolors <= 256), FALSE);
 
-  colors = gimp_palette_get_colors (palette);
+  colors = clay_palette_get_colors (palette);
   for (index = 0; index < ncolors; ++index)
     {
       GeglColor *c   = colors[index];
@@ -431,7 +431,7 @@ read_image_palette (GimpImage *image,
                           -1);
       g_free (text);
     }
-  gimp_color_array_free (colors);
+  clay_color_array_free (colors);
 
   if (ncolors_out != NULL)
     {
@@ -474,7 +474,7 @@ create_icon_view (gint  col_count,
 
   gtk_widget_set_can_focus (iv, TRUE);
 
-  renderer = gimp_cell_renderer_color_new ();
+  renderer = clay_cell_renderer_color_new ();
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (iv), renderer, TRUE);
   gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (iv), renderer,
                                   "color", COLOR_RGB,
@@ -515,7 +515,7 @@ create_scrolled_window (GtkWidget *dialog,
   /* last parameter is intentionally set to 'dummy'
    * so we can create scrolled window before the container contents.
    * The window contents will be inserted at the later step */
-  sw = gimp_procedure_dialog_fill_scrolled_window (GIMP_PROCEDURE_DIALOG (dialog), "sw",
+  sw = clay_procedure_dialog_fill_scrolled_window (CLAY_PROCEDURE_DIALOG (dialog), "sw",
                                                    "intentional-dummy");
 
   gtk_widget_set_size_request (sw, item_width * col_count, -1);
@@ -575,9 +575,9 @@ remap_reverse_order (GtkButton *button,
 
 
 static gboolean
-remap_dialog (GimpProcedure *procedure,
+remap_dialog (ClayProcedure *procedure,
               GObject       *config,
-              GimpImage     *image)
+              ClayImage     *image)
 {
   GtkWidget *dialog;
   GtkWidget *button;
@@ -592,18 +592,18 @@ remap_dialog (GimpProcedure *procedure,
   gint       item_height;
   gint       col_count = 16;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Rearrange Colors"));
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   store = gtk_list_store_new (NUM_COLS,
                               G_TYPE_INT, G_TYPE_STRING, GEGL_TYPE_COLOR,
@@ -621,7 +621,7 @@ remap_dialog (GimpProcedure *procedure,
   gtk_container_add (GTK_CONTAINER (w), icons);
 
   /* "dummy" is intentional. so we can "fill the box" and then actually fill it with our controls */
-  box2 = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog), "buttonbox",
+  box2 = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog), "buttonbox",
                                          "intentional-dummy", NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (box2),
                                   GTK_ORIENTATION_HORIZONTAL);
@@ -658,19 +658,19 @@ remap_dialog (GimpProcedure *procedure,
                     G_CALLBACK (remap_sort_index),
                     NULL);
 
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog), "vbox",
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog), "vbox",
                                         "sw", "buttonbox", NULL);
 
-  hintbox = gimp_hint_box_new (_("Drag and drop colors to rearrange the colormap.\n"
+  hintbox = clay_hint_box_new (_("Drag and drop colors to rearrange the colormap.\n"
                                  "The numbers shown are the original indices."));
   gtk_box_pack_start (GTK_BOX (box), hintbox, FALSE, FALSE, 0);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                "vbox", NULL);
 
   gtk_widget_show_all (dialog);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
   return run;
@@ -698,41 +698,41 @@ populate_index_map_from_store (void)
 }
 
 static gboolean
-real_remap (GimpImage *image)
+real_remap (ClayImage *image)
 {
   guchar        pixmap[256]; /* map new-pixel index to old. pixmap[new-index] = old-index */
   gint          i;
   gint          ncolors;
-  GimpPalette  *palette;
+  ClayPalette  *palette;
   GeglColor   **colors;
   GList        *layers;
   GList        *list;
   glong         total_pixels = 0;
   glong         processed    = 0;
 
-  palette = gimp_image_get_palette       (image);
-  ncolors = gimp_palette_get_color_count (palette);
-  colors  = gimp_palette_get_colors      (palette);
+  palette = clay_image_get_palette       (image);
+  ncolors = clay_palette_get_color_count (palette);
+  colors  = clay_palette_get_colors      (palette);
 
-  gimp_image_undo_group_start (image);
+  clay_image_undo_group_start (image);
   for (i = 0; i < ncolors; ++i)
     {
       gint new_index    = index_map_old_new[i];
       pixmap[new_index] = i;
-      gimp_palette_set_entry_color (palette, i, colors[new_index]);
+      clay_palette_set_entry_color (palette, i, colors[new_index]);
     }
-  gimp_color_array_free (colors);
+  clay_color_array_free (colors);
 
-  gimp_progress_init (_("Rearranging the colormap"));
-  layers = gimp_image_list_layers (image);
+  clay_progress_init (_("Rearranging the colormap"));
+  layers = clay_image_list_layers (image);
 
   /**  There is no needs to process the layers recursively, because
    *  indexed images cannot have layer groups.
    */
   for (list = layers; list; list = list->next)
     {
-      total_pixels += gimp_drawable_get_width (list->data) *
-                      gimp_drawable_get_height (list->data);
+      total_pixels += clay_drawable_get_width (list->data) *
+                      clay_drawable_get_height (list->data);
     }
 
   for (list = layers; list; list = list->next)
@@ -746,8 +746,8 @@ real_remap (GimpImage *image)
       gint                width, height, bpp;
       gint                update = 0;
 
-      buffer = gimp_drawable_get_buffer        (list->data);
-      shadow = gimp_drawable_get_shadow_buffer (list->data);
+      buffer = clay_drawable_get_buffer        (list->data);
+      shadow = clay_drawable_get_shadow_buffer (list->data);
 
       width  = gegl_buffer_get_width  (buffer);
       height = gegl_buffer_get_height (buffer);
@@ -801,7 +801,7 @@ real_remap (GimpImage *image)
 
           if (update == 0)
             {
-              gimp_progress_update ((gdouble) processed / total_pixels);
+              clay_progress_update ((gdouble) processed / total_pixels);
             }
 
           update++;
@@ -810,12 +810,12 @@ real_remap (GimpImage *image)
       g_object_unref (buffer);
       g_object_unref (shadow);
 
-      gimp_drawable_merge_shadow (list->data, TRUE);
-      gimp_drawable_update (list->data, 0, 0, width, height);
+      clay_drawable_merge_shadow (list->data, TRUE);
+      clay_drawable_update (list->data, 0, 0, width, height);
     }
 
-  gimp_image_undo_group_end (image);
+  clay_image_undo_group_end (image);
   g_list_free (layers);
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
   return TRUE;
 }

@@ -1,0 +1,63 @@
+# Clay sessionrc
+# 
+# This file takes session-specific info (that is info, you want to keep
+# between two Clay sessions).  You are not supposed to edit it manually, but
+# of course you can do.  The sessionrc will be entirely rewritten every time
+# you quit Clay.  If this file isn't found, defaults are used.
+
+(session-info "toplevel"
+    (factory-entry "clay-file-open-dialog")
+    (position 390 140)
+    (size 900 815))
+(session-info "toplevel"
+    (factory-entry "clay-image-new-dialog")
+    (position 100 100))
+(session-info "toplevel"
+    (factory-entry "clay-empty-image-window")
+    (position 140 30)
+    (size 1285 750))
+(session-info "toplevel"
+    (factory-entry "clay-single-image-window")
+    (position 140 30)
+    (size 1050 770)
+    (open-on-exit)
+    (aux-info
+        (left-docks-width "80")
+        (right-docks-width "400")
+        (maximized "no"))
+    (clay-toolbox
+        (side left))
+    (clay-dock
+        (side right)
+        (book
+            (current-page 0)
+            (dockable "clay-layer-list"
+                (tab-style icon)
+                (preview-size 32)))
+        (book
+            (position 380)
+            (current-page 0)
+            (dockable "clay-brush-grid"
+                (tab-style preview))))
+    (clay-dock
+        (side right)
+        (position 200)
+        (book
+            (current-page 0)
+            (dockable "clay-tool-options"
+                (tab-style icon))))
+    (clay-dock
+        (side right)
+        (position 550)
+        (book
+            (current-page 1)
+            (dockable "clay-pattern-grid"
+                (tab-style preview))
+            (dockable "clay-gradient-list"
+                (tab-style preview)))))
+
+(hide-docks no)
+(single-window-mode yes)
+(last-tip-shown 0)
+
+# end of sessionrc

@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -26,8 +26,8 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "imap_grid.h"
 #include "imap_main.h"
@@ -35,7 +35,7 @@
 #include "imap_preview.h"
 #include "imap_ui_grid.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 typedef enum {GRID_HIDDEN, GRID_LINES, GRID_CROSSES} GridType_t;
 
@@ -70,7 +70,7 @@ static GridType_t grid_type = GRID_LINES;
 static void
 grid_settings_ok_cb (gpointer data)
 {
-   GimpImap     *imap  = GIMP_IMAP (data);
+   ClayImap     *imap  = CLAY_IMAP (data);
    GridDialog_t *param = (GridDialog_t*) imap->grid_data;
    gboolean      new_snap;
 
@@ -146,8 +146,8 @@ width_changed_cb(GtkWidget *widget, gpointer data)
    GridDialog_t *dialog = (GridDialog_t*) data;
 
    grid_assign_value(widget, data, &grid_width);
-   if (gimp_chain_button_get_active(
-          GIMP_CHAIN_BUTTON(dialog->chain_width_height))) {
+   if (clay_chain_button_get_active(
+          CLAY_CHAIN_BUTTON(dialog->chain_width_height))) {
       gint value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->height), value);
    }
@@ -159,8 +159,8 @@ height_changed_cb(GtkWidget *widget, gpointer data)
    GridDialog_t *dialog = (GridDialog_t*) data;
 
    grid_assign_value(widget, data, &grid_height);
-   if (gimp_chain_button_get_active(
-          GIMP_CHAIN_BUTTON(dialog->chain_width_height))) {
+   if (clay_chain_button_get_active(
+          CLAY_CHAIN_BUTTON(dialog->chain_width_height))) {
       gint value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->width), value);
    }
@@ -172,8 +172,8 @@ left_changed_cb(GtkWidget *widget, gpointer data)
    GridDialog_t *dialog = (GridDialog_t*) data;
 
    grid_assign_value(widget, data, &grid_left);
-   if (gimp_chain_button_get_active(
-          GIMP_CHAIN_BUTTON(dialog->chain_left_top))) {
+   if (clay_chain_button_get_active(
+          CLAY_CHAIN_BUTTON(dialog->chain_left_top))) {
       gint value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->top), value);
    }
@@ -185,8 +185,8 @@ top_changed_cb (GtkWidget *widget, gpointer data)
    GridDialog_t *dialog = (GridDialog_t*) data;
 
    grid_assign_value(widget, data, &grid_top);
-   if (gimp_chain_button_get_active(
-          GIMP_CHAIN_BUTTON(dialog->chain_left_top))) {
+   if (clay_chain_button_get_active(
+          CLAY_CHAIN_BUTTON(dialog->chain_left_top))) {
       gint value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(dialog->left), value);
    }
@@ -195,7 +195,7 @@ top_changed_cb (GtkWidget *widget, gpointer data)
 static GridDialog_t*
 create_grid_settings_dialog (gpointer user_data)
 {
-   GimpImap        *imap = GIMP_IMAP (user_data);
+   ClayImap        *imap = CLAY_IMAP (user_data);
    GridDialog_t    *data = g_new (GridDialog_t, 1);
    DefaultDialog_t *dialog;
    GtkWidget       *main_grid, *grid, *label;
@@ -216,7 +216,7 @@ create_grid_settings_dialog (gpointer user_data)
    gtk_grid_attach (GTK_GRID (main_grid), data->snap, 0, 0, 1, 1);
    gtk_widget_set_visible(data->snap, TRUE);
 
-   data->type_frame = frame = gimp_frame_new(_("Grid Visibility and Type"));
+   data->type_frame = frame = clay_frame_new(_("Grid Visibility and Type"));
    gtk_widget_set_visible(frame, TRUE);
    gtk_grid_attach (GTK_GRID (main_grid), frame, 0, 1, 2, 1);
    hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
@@ -248,7 +248,7 @@ create_grid_settings_dialog (gpointer user_data)
    gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
    gtk_widget_set_visible(button, TRUE);
 
-   data->granularity_frame = frame = gimp_frame_new(_("Grid Granularity"));
+   data->granularity_frame = frame = clay_frame_new(_("Grid Granularity"));
    gtk_grid_attach (GTK_GRID (main_grid), frame, 0, 2, 1, 1);
    grid = gtk_grid_new ();
    gtk_grid_set_row_spacing (GTK_GRID (grid), 6);
@@ -267,7 +267,7 @@ create_grid_settings_dialog (gpointer user_data)
                     G_CALLBACK (height_changed_cb), (gpointer) data);
    create_label_in_grid (grid, 1, 3, _("pixels"));
 
-   chain_button = gimp_chain_button_new(GIMP_CHAIN_RIGHT);
+   chain_button = clay_chain_button_new(CLAY_CHAIN_RIGHT);
    data->chain_width_height = chain_button;
    gtk_grid_attach (GTK_GRID (grid), chain_button, 2, 0, 1, 2);
    gtk_widget_set_visible(chain_button, TRUE);
@@ -275,7 +275,7 @@ create_grid_settings_dialog (gpointer user_data)
    gtk_widget_set_visible(grid, TRUE);
    gtk_widget_set_visible(frame, TRUE);
 
-   data->offset_frame = frame = gimp_frame_new(_("Grid Offset"));
+   data->offset_frame = frame = clay_frame_new(_("Grid Offset"));
    gtk_grid_attach (GTK_GRID (main_grid), frame, 1, 2, 1, 1);
    grid = gtk_grid_new ();
    gtk_grid_set_row_spacing (GTK_GRID (grid), 6);
@@ -292,7 +292,7 @@ create_grid_settings_dialog (gpointer user_data)
    g_signal_connect(data->top, "value-changed",
                     G_CALLBACK (top_changed_cb), (gpointer) data);
 
-   chain_button = gimp_chain_button_new(GIMP_CHAIN_RIGHT);
+   chain_button = clay_chain_button_new(CLAY_CHAIN_RIGHT);
    data->chain_left_top = chain_button;
    gtk_grid_attach (GTK_GRID (grid), chain_button, 1, 0, 1, 2);
    gtk_widget_set_visible(chain_button, TRUE);
@@ -397,7 +397,7 @@ toggle_grid (GSimpleAction  *action,
   preview_redraw();
 
   g_simple_action_set_state (action, new_state);
-  grid_toggle = GTK_TOGGLE_TOOL_BUTTON (GIMP_IMAP (user_data)->grid_toggle);
+  grid_toggle = GTK_TOGGLE_TOOL_BUTTON (CLAY_IMAP (user_data)->grid_toggle);
 
   gtk_toggle_tool_button_set_active (grid_toggle, grid_snap);
 }

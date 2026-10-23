@@ -20,27 +20,27 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpimage.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "path-import-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _PathImportDialog PathImportDialog;
 
 struct _PathImportDialog
 {
-  GimpImage              *image;
+  ClayImage              *image;
   gboolean                merge_paths;
   gboolean                scale_paths;
-  GimpPathImportCallback  callback;
+  ClayPathImportCallback  callback;
   gpointer                user_data;
 };
 
@@ -59,12 +59,12 @@ static void   path_import_dialog_response (GtkWidget        *dialog,
 /*  public function  */
 
 GtkWidget *
-path_import_dialog_new (GimpImage              *image,
+path_import_dialog_new (ClayImage              *image,
                         GtkWidget              *parent,
                         GFile                  *import_folder,
                         gboolean                merge_paths,
                         gboolean                scale_paths,
-                        GimpPathImportCallback  callback,
+                        ClayPathImportCallback  callback,
                         gpointer                user_data)
 {
   PathImportDialog *private;
@@ -73,7 +73,7 @@ path_import_dialog_new (GimpImage              *image,
   GtkWidget        *button;
   GtkFileFilter    *filter;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (import_folder == NULL || G_IS_FILE (import_folder),
                         NULL);
@@ -96,12 +96,12 @@ path_import_dialog_new (GimpImage              *image,
                                         NULL);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
 
-  gtk_window_set_role (GTK_WINDOW (dialog), "gimp-paths-import");
+  gtk_window_set_role (GTK_WINDOW (dialog), "clay-paths-import");
   gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_MOUSE);
   gtk_window_set_screen (GTK_WINDOW (dialog),
                          gtk_widget_get_screen (parent));
@@ -154,7 +154,7 @@ path_import_dialog_new (GimpImage              *image,
   gtk_widget_set_visible (button, TRUE);
 
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->merge_paths);
 
   button = gtk_check_button_new_with_mnemonic (_("_Scale imported paths "
@@ -165,7 +165,7 @@ path_import_dialog_new (GimpImage              *image,
   gtk_widget_set_visible (button, TRUE);
 
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->scale_paths);
 
   return dialog;
@@ -179,7 +179,7 @@ static void
 path_import_dialog_realize (GtkWidget        *dialog,
                             PathImportDialog *data)
 {
-  gimp_window_set_title_bar_theme (data->image->gimp, dialog);
+  clay_window_set_title_bar_theme (data->image->clay, dialog);
 }
 #endif
 

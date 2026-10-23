@@ -34,17 +34,17 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 #undef GDK_DISABLE_DEPRECATED
-#include <libgimp/gimpui.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
-#include "libgimpwidgets/gimpwidgets-private.h"
+#include "libclay/stdplugins-intl.h"
+#include "libclaywidgets/claywidgets-private.h"
 
 
 #define PLUG_IN_PROC   "plug-in-animationplay"
 #define PLUG_IN_BINARY "animation-play"
-#define PLUG_IN_ROLE   "gimp-animation-play"
+#define PLUG_IN_ROLE   "clay-animation-play"
 #define DITHERTYPE     GDK_RGB_DITHER_NORMAL
 
 
@@ -68,9 +68,9 @@ typedef struct
   gint x, y;
 } CursorOffset;
 
-struct _GimpPlay
+struct _ClayPlay
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 
   GtkApplication *app;
 
@@ -83,30 +83,30 @@ struct _GimpPlay
 };
 
 
-#define GIMP_TYPE_PLAY (gimp_play_get_type ())
-G_DECLARE_FINAL_TYPE (GimpPlay, gimp_play, GIMP, PLAY, GimpPlugIn)
+#define CLAY_TYPE_PLAY (clay_play_get_type ())
+G_DECLARE_FINAL_TYPE (ClayPlay, clay_play, CLAY, PLAY, ClayPlugIn)
 
 
 GType                   play_get_type         (void);
 
-static void             gimp_play_finalize    (GObject              *object);
+static void             clay_play_finalize    (GObject              *object);
 
-static GList          * play_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * play_create_procedure (GimpPlugIn           *plug_in,
+static GList          * play_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * play_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * play_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * play_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
-static void        initialize                (GimpPlay        *play);
+static void        initialize                (ClayPlay        *play);
 static void        on_app_activate           (GApplication    *gapp,
                                               gpointer         user_data);
 
-static GtkWidget * build_dialog              (GimpPlay        *play,
+static GtkWidget * build_dialog              (ClayPlay        *play,
                                               gchar           *imagename);
 static void        refresh_dialog            (gchar           *imagename);
 
@@ -123,7 +123,7 @@ static gboolean    key_press_callback        (GtkWidget       *widget,
                                               GdkEventKey     *event);
 
 static void        window_destroy            (GtkWidget       *widget,
-                                              GimpPlay        *play);
+                                              ClayPlay        *play);
 static void        step_back_action          (GSimpleAction   *action,
                                               GVariant        *parameter,
                                               gpointer         user_data);
@@ -180,7 +180,7 @@ static gboolean    repaint_da                (GtkWidget       *darea,
                                               cairo_t         *cr,
                                               gpointer         data);
 
-static void        init_frames               (GimpPlay        *play);
+static void        init_frames               (ClayPlay        *play);
 static void        render_frame              (gint32           whichframe);
 static void        show_frame                (void);
 static void        update_combobox           (void);
@@ -209,9 +209,9 @@ static void        add_tool_separator        (GtkWidget       *toolbar,
                                               gboolean         expand);
 
 
-G_DEFINE_TYPE (GimpPlay, gimp_play, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayPlay, clay_play, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_TYPE_PLAY)
+CLAY_MAIN (CLAY_TYPE_PLAY)
 DEFINE_STD_SET_I18N
 
 
@@ -225,7 +225,7 @@ static GtkWidget         *fpscombo                  = NULL;
 static GtkWidget         *zoomcombo                 = NULL;
 static GtkWidget         *frame_disposal_combo      = NULL;
 
-static GimpImage         *image                     = NULL;
+static ClayImage         *image                     = NULL;
 static guint              width                     = -1;
 static guint              height                    = -1;
 static GList             *layers                    = NULL;
@@ -241,7 +241,7 @@ static guint              shape_drawing_area_width  = -1;
 static guint              shape_drawing_area_height = -1;
 
 static gint32             total_frames              = 0;
-static GimpLayer        **frames                    = NULL;
+static ClayLayer        **frames                    = NULL;
 static guint32           *frame_durations           = NULL;
 static guint              frame_number              = 0;
 
@@ -279,15 +279,15 @@ static AnimationSettings settings =
   100 /* ms */
 };
 
-static GimpImage *frames_image = NULL;
+static ClayImage *frames_image = NULL;
 
 static void
-gimp_play_class_init (GimpPlayClass *klass)
+clay_play_class_init (ClayPlayClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
   GObjectClass    *object_class  = G_OBJECT_CLASS (klass);
 
-  object_class->finalize          = gimp_play_finalize;
+  object_class->finalize          = clay_play_finalize;
 
   plug_in_class->query_procedures = play_query_procedures;
   plug_in_class->create_procedure = play_create_procedure;
@@ -295,92 +295,92 @@ gimp_play_class_init (GimpPlayClass *klass)
 }
 
 static void
-gimp_play_init (GimpPlay *play)
+clay_play_init (ClayPlay *play)
 {
 }
 
 static void
-gimp_play_finalize (GObject *object)
+clay_play_finalize (GObject *object)
 {
-  GimpPlay *play = GIMP_PLAY (object);
+  ClayPlay *play = CLAY_PLAY (object);
 
-  G_OBJECT_CLASS (gimp_play_parent_class)->finalize (object);
+  G_OBJECT_CLASS (clay_play_parent_class)->finalize (object);
 
   g_clear_object (&play->menu);
 }
 
 static GList *
-play_query_procedures (GimpPlugIn *plug_in)
+play_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-play_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+play_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             play_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("_Playback..."));
-      gimp_procedure_set_icon_name (procedure, "media-playback-start");
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Animation/");
+      clay_procedure_set_menu_label (procedure, _("_Playback..."));
+      clay_procedure_set_icon_name (procedure, "media-playback-start");
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Animation/");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Preview a Clay layer-based "
                                           "animation"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Adam D. Moss <adam@gimp.org>",
                                       "Adam D. Moss <adam@gimp.org>",
                                       "1997, 1998...");
 
-      gimp_procedure_add_bytes_aux_argument (procedure, "settings-data",
+      clay_procedure_add_bytes_aux_argument (procedure, "settings-data",
                                              "Settings data",
                                              "TODO: eventually we must implement proper args for every settings",
-                                             GIMP_PARAM_READWRITE);
+                                             CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-play_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *_image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+play_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *_image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
   GBytes   *settings_bytes = NULL;
   GMenu    *section;
-  GimpPlay *play;
+  ClayPlay *play;
 
-  if (run_mode != GIMP_RUN_INTERACTIVE)
+  if (run_mode != CLAY_RUN_INTERACTIVE)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works in interactive mode."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
 
-  play = GIMP_PLAY (gimp_procedure_get_plug_in (procedure));
+  play = CLAY_PLAY (clay_procedure_get_plug_in (procedure));
 #if GLIB_CHECK_VERSION(2,74,0)
   play->app = gtk_application_new (NULL, G_APPLICATION_DEFAULT_FLAGS);
 #else
@@ -415,7 +415,7 @@ play_run (GimpProcedure        *procedure,
 
   image = _image;
 
-  /* Temporary code replacing legacy gimp_[gs]et_data() using an AUX argument.
+  /* Temporary code replacing legacy clay_[gs]et_data() using an AUX argument.
    * This doesn't actually fix the "Reset to initial values|factory defaults"
    * features, but at least makes per-run value storage work.
    * TODO: eventually we want proper separate arguments as a complete fix.
@@ -435,19 +435,19 @@ play_run (GimpProcedure        *procedure,
   g_object_set (config, "settings-data", settings_bytes, NULL);
   g_bytes_unref (settings_bytes);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  gimp_image_delete (frames_image);
+  clay_image_delete (frames_image);
   gegl_exit ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gboolean
 popup_menu (GtkWidget      *widget,
             GdkEventButton *event,
-            GimpPlay       *play)
+            ClayPlay       *play)
 {
   GtkWidget  *menu;
 
@@ -462,7 +462,7 @@ popup_menu (GtkWidget      *widget,
 static gboolean
 button_press (GtkWidget      *widget,
               GdkEventButton *event,
-              GimpPlay       *play)
+              ClayPlay       *play)
 {
   if (gdk_event_triggers_context_menu ((GdkEvent *) event))
     return popup_menu (widget, event, play);
@@ -570,7 +570,7 @@ sda_size_callback (GtkWidget     *widget,
 static gboolean
 shape_pressed (GtkWidget      *widget,
                GdkEventButton *event,
-               GimpPlay       *play)
+               ClayPlay       *play)
 {
   if (button_press (widget, event, play))
     return TRUE;
@@ -646,12 +646,12 @@ repaint_da (GtkWidget *darea,
             gpointer   data)
 {
   cairo_pattern_t *check;
-  GeglColor       *color1 = (GeglColor *) gimp_check_custom_color1 ();
-  GeglColor       *color2 = (GeglColor *) gimp_check_custom_color2 ();
+  GeglColor       *color1 = (GeglColor *) clay_check_custom_color1 ();
+  GeglColor       *color2 = (GeglColor *) clay_check_custom_color2 ();
 
-  gimp_checks_get_colors (gimp_check_type (), &color1, &color2);
+  clay_checks_get_colors (clay_check_type (), &color1, &color2);
 
-  check = gimp_cairo_checkerboard_create (cr, 32, color1, color2);
+  check = clay_cairo_checkerboard_create (cr, 32, color1, color2);
 
   cairo_set_source (cr, check);
   cairo_paint (cr);
@@ -699,7 +699,7 @@ refresh_dialog (gchar *imagename)
   g_free (name);
 
   /* Update GUI size. */
-  monitor = gimp_widget_get_monitor (window);
+  monitor = clay_widget_get_monitor (window);
   gdk_monitor_get_workarea (monitor, &workarea);
   gtk_window_get_size (GTK_WINDOW (window), &window_width, &window_height);
 
@@ -731,17 +731,17 @@ refresh_dialog (gchar *imagename)
 
 #if defined (G_OS_WIN32) || defined (PLATFORM_OSX)
       gtk_widget_realize (window);
-      gimp_widget_set_title_bar_theme (window);
+      clay_widget_set_title_bar_theme (window);
 #endif
 
       gtk_widget_set_visible (window, TRUE);
 
-      gimp_window_set_transient (GTK_WINDOW (window));
+      clay_window_set_transient (GTK_WINDOW (window));
     }
 }
 
 static GtkWidget *
-build_dialog (GimpPlay *play,
+build_dialog (ClayPlay *play,
               gchar    *imagename)
 {
   GtkWidget     *toolbar;
@@ -758,7 +758,7 @@ build_dialog (GimpPlay *play,
   gint           index;
   gchar         *text;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   window = gtk_application_window_new (play->app);
   gtk_window_set_role (GTK_WINDOW (window), "animation-playback");
@@ -777,7 +777,7 @@ build_dialog (GimpPlay *play,
                                    ACTIONS, G_N_ELEMENTS (ACTIONS),
                                    play);
 
-  gimp_help_connect (window, NULL, gimp_standard_help_func, PLUG_IN_PROC, NULL, NULL);
+  clay_help_connect (window, NULL, clay_standard_help_func, PLUG_IN_PROC, NULL, NULL);
 
   main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (window), main_vbox);
@@ -834,7 +834,7 @@ build_dialog (GimpPlay *play,
                     G_CALLBACK (fpscombo_changed),
                     NULL);
 
-  gimp_help_set_help_data (fpscombo, _("Default framerate"), NULL);
+  clay_help_set_help_data (fpscombo, _("Default framerate"), NULL);
 
   /* Speed Combo */
   speedcombo = gtk_combo_box_text_new ();
@@ -854,7 +854,7 @@ build_dialog (GimpPlay *play,
                     G_CALLBACK (speedcombo_changed),
                     NULL);
 
-  gimp_help_set_help_data (speedcombo, _("Playback speed"), NULL);
+  clay_help_set_help_data (speedcombo, _("Playback speed"), NULL);
 
   action = g_action_map_lookup_action (G_ACTION_MAP (window), "speed-reset");
   g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
@@ -884,15 +884,15 @@ build_dialog (GimpPlay *play,
                     G_CALLBACK (zoomcombo_changed),
                     NULL);
 
-  gimp_help_set_help_data (zoomcombo, _("Zoom"), NULL);
+  clay_help_set_help_data (zoomcombo, _("Zoom"), NULL);
 
   /* Other settings */
 
   toolbar = gtk_toolbar_new ();
   add_tool_separator (toolbar, TRUE);
-  add_tool_button (toolbar, "win.refresh", GIMP_ICON_VIEW_REFRESH,
+  add_tool_button (toolbar, "win.refresh", CLAY_ICON_VIEW_REFRESH,
                    _("Reload"), _("Reload the image"));
-  add_tool_button (toolbar, "win.detach", GIMP_ICON_DETACH,
+  add_tool_button (toolbar, "win.detach", CLAY_ICON_DETACH,
                    _("Detach"), _("Detach the animation from the dialog"
                                   " window"));
   add_tool_button (toolbar, "win.help", "help-browser",
@@ -986,7 +986,7 @@ build_dialog (GimpPlay *play,
 
 #ifdef G_OS_WIN32
   gtk_widget_realize (window);
-  gimp_widget_set_title_bar_theme (window);
+  clay_widget_set_title_bar_theme (window);
 #endif
 
   gtk_widget_set_visible (window, TRUE);
@@ -1042,13 +1042,13 @@ build_dialog (GimpPlay *play,
 }
 
 static void
-init_frames (GimpPlay *play)
+init_frames (ClayPlay *play)
 {
   /* Frames are associated to an unused image. */
   gint           i;
-  GimpLayer     *new_frame;
-  GimpLayer     *previous_frame;
-  GimpLayer     *new_layer;
+  ClayLayer     *new_frame;
+  ClayLayer     *previous_frame;
+  ClayLayer     *new_layer;
   gboolean       animated;
   gint           duration = 0;
   DisposeType    disposal = settings.default_frame_disposal;
@@ -1061,15 +1061,15 @@ init_frames (GimpPlay *play)
   /* Cleanup before re-generation. */
   if (frames)
     {
-      gimp_image_delete (frames_image);
+      clay_image_delete (frames_image);
       g_free (frames);
       g_free (frame_durations);
     }
-  frames = g_try_malloc0_n (total_frames, sizeof (GimpLayer *));
+  frames = g_try_malloc0_n (total_frames, sizeof (ClayLayer *));
   frame_durations = g_try_malloc0_n (total_frames, sizeof (guint32));
   if (! frames || ! frame_durations)
     {
-      gimp_message (_("Memory could not be allocated to the frame container."));
+      clay_message (_("Memory could not be allocated to the frame container."));
       gtk_widget_destroy (GTK_WIDGET (window));
       return;
     }
@@ -1078,16 +1078,16 @@ init_frames (GimpPlay *play)
    * somehow render terrible colors. Layers from other types will be
    * automatically converted.
    */
-  frames_image = gimp_image_new (width, height, GIMP_RGB);
+  frames_image = clay_image_new (width, height, CLAY_RGB);
 
   /* Save processing time and memory by not saving history and merged frames. */
-  gimp_image_undo_disable (frames_image);
+  clay_image_undo_disable (frames_image);
 
   for (iter = layers, i = 0;
        iter;
        iter = g_list_next (iter), i++)
     {
-      layer_name = gimp_item_get_name (iter->data);
+      layer_name = clay_item_get_name (iter->data);
       if (layer_name)
         {
           duration = parse_ms_tag (layer_name);
@@ -1097,17 +1097,17 @@ init_frames (GimpPlay *play)
 
       if (i > 0 && disposal != DISPOSE_REPLACE)
         {
-          previous_frame = gimp_layer_copy (frames[i - 1]);
-          gimp_image_insert_layer (frames_image, previous_frame, NULL, -1);
-          gimp_item_set_visible (GIMP_ITEM (previous_frame), TRUE);
+          previous_frame = clay_layer_copy (frames[i - 1]);
+          clay_image_insert_layer (frames_image, previous_frame, NULL, -1);
+          clay_item_set_visible (CLAY_ITEM (previous_frame), TRUE);
         }
-      new_layer = gimp_layer_new_from_drawable (iter->data, frames_image);
-      gimp_image_insert_layer (frames_image, new_layer, NULL, -1);
-      gimp_item_set_visible (GIMP_ITEM (new_layer), TRUE);
-      new_frame = gimp_image_merge_visible_layers (frames_image,
-                                                   GIMP_CLIP_TO_IMAGE);
+      new_layer = clay_layer_new_from_drawable (iter->data, frames_image);
+      clay_image_insert_layer (frames_image, new_layer, NULL, -1);
+      clay_item_set_visible (CLAY_ITEM (new_layer), TRUE);
+      new_frame = clay_image_merge_visible_layers (frames_image,
+                                                   CLAY_CLIP_TO_IMAGE);
       frames[i] = new_frame;
-      gimp_item_set_visible (GIMP_ITEM (new_frame), FALSE);
+      clay_item_set_visible (CLAY_ITEM (new_frame), FALSE);
 
       if (duration <= 0)
         duration = settings.default_frame_duration;
@@ -1132,29 +1132,29 @@ init_frames (GimpPlay *play)
 }
 
 static void
-initialize (GimpPlay *play)
+initialize (ClayPlay *play)
 {
   /* Freeing existing data after a refresh. */
   g_list_free (layers);
 
   /* Catch the case when the user has closed the image in the meantime. */
-  if (! gimp_image_is_valid (image))
+  if (! clay_image_is_valid (image))
     {
-      gimp_message (_("Invalid image. Did you close it?"));
+      clay_message (_("Invalid image. Did you close it?"));
       if (window)
         gtk_widget_destroy (GTK_WIDGET (window));
       return;
     }
 
-  width  = gimp_image_get_width (image);
-  height = gimp_image_get_height (image);
+  width  = clay_image_get_width (image);
+  height = clay_image_get_height (image);
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   layers = g_list_reverse (layers);
 
   if (!window)
-    build_dialog (play, gimp_image_get_name (image));
-  refresh_dialog (gimp_image_get_name (image));
+    build_dialog (play, clay_image_get_name (image));
+  refresh_dialog (clay_image_get_name (image));
 
   init_frames (play);
   render_frame (frame_number);
@@ -1165,7 +1165,7 @@ static void
 on_app_activate (GApplication *gapp,
                  gpointer      user_data)
 {
-  GimpPlay       *play = GIMP_PLAY (user_data);
+  ClayPlay       *play = CLAY_PLAY (user_data);
   GtkApplication *app  = GTK_APPLICATION (gapp);
 
   initialize (play);
@@ -1215,7 +1215,7 @@ render_frame (gint32 whichframe)
       drawing_scale   = scale;
     }
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (frames[whichframe]));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (frames[whichframe]));
 
   if (*drawing_surface)
     cairo_surface_destroy (*drawing_surface);
@@ -1304,7 +1304,7 @@ key_press_callback (GtkWidget   *widget,
 
 static void
 window_destroy (GtkWidget *widget,
-                GimpPlay  *play)
+                ClayPlay  *play)
 {
   if (playing)
     remove_timer ();
@@ -1446,7 +1446,7 @@ play_change_state (GSimpleAction *action,
   playing = g_variant_get_boolean (new_state);
   g_simple_action_set_state (action, new_state);
 
-  play_button = GTK_TOOL_BUTTON (GIMP_PLAY (user_data)->play_button);
+  play_button = GTK_TOOL_BUTTON (CLAY_PLAY (user_data)->play_button);
   tool_icon   = gtk_tool_button_get_icon_widget (play_button);
   if (playing)
     {
@@ -1545,7 +1545,7 @@ refresh_action (GSimpleAction *action,
                 GVariant      *parameter,
                 gpointer       user_data)
 {
-  initialize (GIMP_PLAY (user_data));
+  initialize (CLAY_PLAY (user_data));
 }
 
 static void
@@ -1561,7 +1561,7 @@ help_action (GSimpleAction *action,
              GVariant      *parameter,
              gpointer       user_data)
 {
-  gimp_standard_help_func (PLUG_IN_PROC, window);
+  clay_standard_help_func (PLUG_IN_PROC, window);
 }
 
 static void
@@ -1640,7 +1640,7 @@ framecombo_changed (GtkWidget *combo,
 {
   settings.default_frame_disposal =
     gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
-  init_frames (GIMP_PLAY (data));
+  init_frames (CLAY_PLAY (data));
   render_frame (frame_number);
 }
 

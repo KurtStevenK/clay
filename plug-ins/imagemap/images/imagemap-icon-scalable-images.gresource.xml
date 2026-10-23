@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/org/gimp/imagemap/icons">
+  <gresource prefix="/org/clay/imagemap/icons">
     <file>imagemap-circle.svg</file>
     <file>imagemap-coord.svg</file>
     <file>imagemap-dimension.svg</file>

@@ -41,84 +41,84 @@ HELP
 	  desc => 'The image to which to add the layer' },
 	{ name => 'name', type => 'string',
 	  desc => 'The layer name', none_ok => 1 },
-	{ name => 'width', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'width', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'The layer width' },
-	{ name => 'height', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'height', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'The layer height' },
-	{ name => 'type', type => 'enum GimpImageType',
+	{ name => 'type', type => 'enum ClayImageType',
 	  desc => 'The layer type' },
 	{ name => 'opacity', type => '0 <= double <= 100',
 	  desc => 'The layer opacity' },
-	{ name => 'mode', type => 'enum GimpLayerMode',
-          default => 'GIMP_LAYER_MODE_NORMAL',
+	{ name => 'mode', type => 'enum ClayLayerMode',
+          default => 'CLAY_LAYER_MODE_NORMAL',
 	  desc => 'The layer combination mode' }
     );
 
     @outargs = (
 	{ name => 'layer', type => 'layer',
-	  desc => 'The newly created layer. The object belongs to libgimp and you should not free it.' }
+	  desc => 'The newly created layer. The object belongs to libclay and you should not free it.' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpImageBaseType  base_type = GIMP_RGB;
+  ClayImageBaseType  base_type = CLAY_RGB;
   gboolean           has_alpha = FALSE;
   const Babl        *format;
 
-  if (mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-    mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+  if (mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+    mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
   switch (type)
     {
-    case GIMP_RGB_IMAGE:
-      base_type = GIMP_RGB;
+    case CLAY_RGB_IMAGE:
+      base_type = CLAY_RGB;
       has_alpha = FALSE;
       break;
 
-    case GIMP_RGBA_IMAGE:
-      base_type = GIMP_RGB;
+    case CLAY_RGBA_IMAGE:
+      base_type = CLAY_RGB;
       has_alpha = TRUE;
       break;
 
-    case GIMP_GRAY_IMAGE:
-      base_type = GIMP_GRAY;
+    case CLAY_GRAY_IMAGE:
+      base_type = CLAY_GRAY;
       has_alpha = FALSE;
       break;
 
-    case GIMP_GRAYA_IMAGE:
-      base_type = GIMP_GRAY;
+    case CLAY_GRAYA_IMAGE:
+      base_type = CLAY_GRAY;
       has_alpha = TRUE;
       break;
 
-    case GIMP_INDEXED_IMAGE:
-      base_type = GIMP_INDEXED;
+    case CLAY_INDEXED_IMAGE:
+      base_type = CLAY_INDEXED;
       has_alpha = FALSE;
       break;
 
-    case GIMP_INDEXEDA_IMAGE:
-      base_type = GIMP_INDEXED;
+    case CLAY_INDEXEDA_IMAGE:
+      base_type = CLAY_INDEXED;
       has_alpha = TRUE;
       break;
     }
 
-  if (base_type == GIMP_GRAY)
+  if (base_type == CLAY_GRAY)
     {
-      /* do not use gimp_image_get_layer_format() because it might
+      /* do not use clay_image_get_layer_format() because it might
        * be the floating selection of a channel or mask, we will
        * fix the format in image-add-layer and floating-sel-attach
        */
-      format = gimp_image_get_format (image, base_type,
-                                      gimp_image_get_precision (image),
+      format = clay_image_get_format (image, base_type,
+                                      clay_image_get_precision (image),
                                       has_alpha,
                                       NULL /* will fix later */);
     }
   else
     {
-      format = gimp_image_get_layer_format (image, has_alpha);
+      format = clay_image_get_layer_format (image, has_alpha);
     }
 
-  layer = gimp_layer_new (image, width, height,
+  layer = clay_layer_new (image, width, height,
                           format, name, opacity / 100.0, mode);
 
   if (! layer)
@@ -164,20 +164,20 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPickable     *pickable = GIMP_PICKABLE (image);
-  GimpColorProfile *profile;
+  ClayPickable     *pickable = CLAY_PICKABLE (image);
+  ClayColorProfile *profile;
 
-  gimp_pickable_flush (pickable);
+  clay_pickable_flush (pickable);
 
-  profile = gimp_color_managed_get_color_profile (GIMP_COLOR_MANAGED (image));
+  profile = clay_color_managed_get_color_profile (CLAY_COLOR_MANAGED (image));
 
-  layer = gimp_layer_new_from_gegl_buffer (gimp_pickable_get_buffer (pickable),
+  layer = clay_layer_new_from_gegl_buffer (clay_pickable_get_buffer (pickable),
                                            dest_image,
-                                           gimp_image_get_layer_format (dest_image,
+                                           clay_image_get_layer_format (dest_image,
                                                                         TRUE),
                                            name,
-                                           GIMP_OPACITY_OPAQUE,
-                                           gimp_image_get_default_new_layer_mode (dest_image),
+                                           CLAY_OPACITY_OPAQUE,
+                                           clay_image_get_default_new_layer_mode (dest_image),
                                            profile);
 }
 CODE
@@ -220,18 +220,18 @@ HELP
 	code => <<'CODE'
 {
   GType     new_type;
-  GimpItem *new_item;
+  ClayItem *new_item;
 
-  if (GIMP_IS_LAYER (drawable))
+  if (CLAY_IS_LAYER (drawable))
     new_type = G_TYPE_FROM_INSTANCE (drawable);
   else
-    new_type = GIMP_TYPE_LAYER;
+    new_type = CLAY_TYPE_LAYER;
 
-  new_item = gimp_item_convert (GIMP_ITEM (drawable), dest_image, new_type);
+  new_item = clay_item_convert (CLAY_ITEM (drawable), dest_image, new_type);
 
   if (new_item)
     {
-      layer_copy = GIMP_LAYER (new_item);
+      layer_copy = CLAY_LAYER (new_item);
     }
   else
     {
@@ -269,13 +269,13 @@ HELP
 
     @outargs = (
 	{ name => 'layer_copy', type => 'layer',
-	  desc => 'The newly copied layer. The object belongs to libgimp and you should not free it.' }
+	  desc => 'The newly copied layer. The object belongs to libclay and you should not free it.' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  layer_copy = GIMP_LAYER (gimp_item_duplicate (GIMP_ITEM (layer),
+  layer_copy = CLAY_LAYER (clay_item_duplicate (CLAY_ITEM (layer),
                                                 G_TYPE_FROM_INSTANCE (layer)));
   if (! layer_copy)
     success = FALSE;
@@ -309,10 +309,10 @@ the layer fully visible, but which may be more useful than a white mask);
 
 
 The layer mask still needs to be added to the layer. This can be done
-with a call to gimp_layer_add_mask().
+with a call to clay_layer_add_mask().
 
 
-gimp_layer_create_mask() will fail if there are no active channels on
+clay_layer_create_mask() will fail if there are no active channels on
 the image, when called with 'ADD-CHANNEL-MASK'. It will return a black
 mask when called with 'ADD-ALPHA-MASK' or 'ADD-ALPHA-TRANSFER-MASK' on
 a layer with no alpha channels, or with 'ADD-SELECTION-MASK' when there
@@ -324,7 +324,7 @@ HELP
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer to which to add the mask' },
- 	{ name => 'mask_type', type => 'enum GimpAddMaskType',
+ 	{ name => 'mask_type', type => 'enum ClayAddMaskType',
 	  desc => 'The type of mask' }
     );
 
@@ -336,13 +336,13 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpChannel *channel = NULL;
+  ClayChannel *channel = NULL;
 
-  if (mask_type == GIMP_ADD_MASK_CHANNEL)
+  if (mask_type == CLAY_ADD_MASK_CHANNEL)
     {
       GList *channels;
 
-      channels = gimp_image_get_selected_channels (gimp_item_get_image (GIMP_ITEM (layer)));
+      channels = clay_image_get_selected_channels (clay_item_get_image (CLAY_ITEM (layer)));
 
       if (! channels)
         success = FALSE;
@@ -352,7 +352,7 @@ HELP
 
   if (success)
     {
-      mask = gimp_layer_create_mask (layer, mask_type, channel);
+      mask = clay_layer_create_mask (layer, mask_type, channel);
 
       if (! mask)
         success = FALSE;
@@ -369,7 +369,7 @@ sub layer_add_mask {
 This procedure adds a layer mask to the specified layer. Layer masks serve as
 an additional alpha channel for a layer. This procedure will fail if a number
 of prerequisites aren't met. The layer cannot already have a layer mask. The
-specified mask must exist and have the same dimensions as the layer. The layer must have been created for use with the specified image and the mask must have been created with the procedure 'gimp-layer-create-mask'.
+specified mask must exist and have the same dimensions as the layer. The layer must have been created for use with the specified image and the mask must have been created with the procedure 'clay-layer-create-mask'.
 HELP
 
     &std_pdb_misc;
@@ -384,10 +384,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_floating (GIMP_ITEM (mask),
-                                 gimp_item_get_image (GIMP_ITEM (layer)),
+  if (clay_pdb_item_is_floating (CLAY_ITEM (mask),
+                                 clay_item_get_image (CLAY_ITEM (layer)),
                                  error))
-    success = (gimp_layer_add_mask (layer, mask, TRUE, TRUE, error) == mask);
+    success = (clay_layer_add_mask (layer, mask, TRUE, TRUE, error) == mask);
   else
     success = FALSE;
 }
@@ -408,23 +408,23 @@ HELP
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer from which to remove mask' },
-	{ name => 'mode', type => 'enum GimpMaskApplyMode',
+	{ name => 'mode', type => 'enum ClayMaskApplyMode',
 	  desc => 'Removal mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPDBItemModify modify = 0;
+  ClayPDBItemModify modify = 0;
 
-  if (mode == GIMP_MASK_APPLY)
-    modify |= GIMP_PDB_ITEM_CONTENT;
+  if (mode == CLAY_MASK_APPLY)
+    modify |= CLAY_PDB_ITEM_CONTENT;
 
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (layer), NULL, modify, error) &&
-      gimp_layer_get_mask (layer) &&
-      (mode == GIMP_MASK_DISCARD ||
-       gimp_pdb_item_is_not_group (GIMP_ITEM (layer), error)))
-    gimp_layer_apply_mask (layer, mode, TRUE);
+  if (clay_pdb_item_is_attached (CLAY_ITEM (layer), NULL, modify, error) &&
+      clay_layer_get_mask (layer) &&
+      (mode == CLAY_MASK_DISCARD ||
+       clay_pdb_item_is_not_group (CLAY_ITEM (layer), error)))
+    clay_layer_apply_mask (layer, mode, TRUE);
   else
     success = FALSE;
 }
@@ -441,7 +441,7 @@ equal to the supplied parameters. The 'local-origin' parameter
 specifies whether to scale from the center of the layer, or from the
 image origin. This operation only works if the layer has been added to
 an image. The interpolation method used can be set with
-gimp_context_set_interpolation().
+clay_context_set_interpolation().
 HELP
 
     &std_pdb_misc;
@@ -449,9 +449,9 @@ HELP
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer' },
-	{ name => 'new_width', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'new_width', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'New layer width' },
-	{ name => 'new_height', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'new_height', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'New layer height' },
 	{ name => 'local_origin', type => 'boolean',
 	  desc => 'Use a local origin (as opposed to the image origin)' }
@@ -460,21 +460,21 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (layer), NULL,
-                                 GIMP_PDB_ITEM_CONTENT | GIMP_PDB_ITEM_POSITION,
+  if (clay_pdb_item_is_attached (CLAY_ITEM (layer), NULL,
+                                 CLAY_PDB_ITEM_CONTENT | CLAY_PDB_ITEM_POSITION,
                                  error))
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
       if (progress)
-        gimp_progress_start (progress, FALSE, _("Scaling"));
+        clay_progress_start (progress, FALSE, _("Scaling"));
 
-      gimp_item_scale_by_origin (GIMP_ITEM (layer), new_width, new_height,
+      clay_item_scale_by_origin (CLAY_ITEM (layer), new_width, new_height,
                                  pdb_context->interpolation, progress,
                                  local_origin);
 
       if (progress)
-        gimp_progress_end (progress);
+        clay_progress_end (progress);
     }
   else
     {
@@ -500,9 +500,9 @@ HELP
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer' },
-	{ name => 'new_width', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'new_width', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'New layer width' },
-	{ name => 'new_height', type => '1 <= int32 <= GIMP_MAX_IMAGE_SIZE',
+	{ name => 'new_height', type => '1 <= int32 <= CLAY_MAX_IMAGE_SIZE',
 	  desc => 'New layer height' },
 	{ name => 'offx', type => 'int32',
 	  desc => 'x offset between upper left corner of old and
@@ -515,10 +515,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (layer), NULL,
-                                 GIMP_PDB_ITEM_CONTENT | GIMP_PDB_ITEM_POSITION,
+  if (clay_pdb_item_is_attached (CLAY_ITEM (layer), NULL,
+                                 CLAY_PDB_ITEM_CONTENT | CLAY_PDB_ITEM_POSITION,
                                  error))
-    gimp_item_resize (GIMP_ITEM (layer), context, GIMP_FILL_TRANSPARENT,
+    clay_item_resize (CLAY_ITEM (layer), context, CLAY_FILL_TRANSPARENT,
                       new_width, new_height, offx, offy);
   else
     success = FALSE;
@@ -545,10 +545,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (layer), NULL,
-                                 GIMP_PDB_ITEM_CONTENT | GIMP_PDB_ITEM_POSITION,
+  if (clay_pdb_item_is_attached (CLAY_ITEM (layer), NULL,
+                                 CLAY_PDB_ITEM_CONTENT | CLAY_PDB_ITEM_POSITION,
                                  error))
-    gimp_layer_resize_to_image (layer, context, GIMP_FILL_TRANSPARENT);
+    clay_layer_resize_to_image (layer, context, CLAY_FILL_TRANSPARENT);
   else
     success = FALSE;
 }
@@ -579,11 +579,11 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (layer),
-                                   GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (layer), error))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (layer),
+                                   CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (layer), error))
     {
-      gimp_layer_add_alpha (layer);
+      clay_layer_add_alpha (layer);
     }
   else
    success = FALSE;
@@ -614,11 +614,11 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (layer),
-                                   GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (layer), error))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (layer),
+                                   CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (layer), error))
     {
-      gimp_layer_remove_alpha (layer, context);
+      clay_layer_remove_alpha (layer, context);
     }
   else
    success = FALSE;
@@ -650,17 +650,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_modifiable (GIMP_ITEM (layer),
-                                   GIMP_PDB_ITEM_POSITION, error))
+  if (clay_pdb_item_is_modifiable (CLAY_ITEM (layer),
+                                   CLAY_PDB_ITEM_POSITION, error))
     {
       gint offset_x;
       gint offset_y;
 
-      gimp_item_get_offset (GIMP_ITEM (layer), &offset_x, &offset_y);
+      clay_item_get_offset (CLAY_ITEM (layer), &offset_x, &offset_y);
       offx -= offset_x;
       offy -= offset_y;
 
-      gimp_item_translate (GIMP_ITEM (layer), offx, offy, TRUE);
+      clay_item_translate (CLAY_ITEM (layer), offx, offy, TRUE);
     }
   else
     success = FALSE;
@@ -692,7 +692,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  mask = gimp_layer_get_mask (layer);
+  mask = clay_layer_get_mask (layer);
 }
 CODE
     );
@@ -723,7 +723,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  layer = gimp_layer_mask_get_layer (mask);
+  layer = clay_layer_mask_get_layer (mask);
 }
 CODE
     );
@@ -753,7 +753,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  is_floating_sel = gimp_layer_is_floating_sel (layer);
+  is_floating_sel = clay_layer_is_floating_sel (layer);
 }
 CODE
     );
@@ -781,7 +781,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  lock_alpha = gimp_layer_get_lock_alpha (layer);
+  lock_alpha = clay_layer_get_lock_alpha (layer);
 }
 CODE
     );
@@ -806,8 +806,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_layer_can_lock_alpha (layer))
-    gimp_layer_set_lock_alpha (layer, lock_alpha, TRUE);
+  if (clay_layer_can_lock_alpha (layer))
+    clay_layer_set_lock_alpha (layer, lock_alpha, TRUE);
   else
     success = FALSE;
 }
@@ -840,7 +840,7 @@ HELP
 	code => <<'CODE'
 {
   if (layer->mask)
-    apply_mask = gimp_layer_get_apply_mask (layer);
+    apply_mask = clay_layer_get_apply_mask (layer);
   else
     apply_mask = FALSE;
 }
@@ -871,7 +871,7 @@ HELP
 	code => <<'CODE'
 {
   if (layer->mask)
-    gimp_layer_set_apply_mask (layer, apply_mask, TRUE);
+    clay_layer_set_apply_mask (layer, apply_mask, TRUE);
   else
     success = FALSE;
 }
@@ -905,7 +905,7 @@ HELP
 	code => <<'CODE'
 {
   if (layer->mask)
-    show_mask = gimp_layer_get_show_mask (layer);
+    show_mask = clay_layer_get_show_mask (layer);
   else
     show_mask = FALSE;
 }
@@ -936,7 +936,7 @@ HELP
 	code => <<'CODE'
 {
   if (layer->mask)
-    gimp_layer_set_show_mask (layer, show_mask, TRUE);
+    clay_layer_set_show_mask (layer, show_mask, TRUE);
   else
     success = FALSE;
 }
@@ -969,7 +969,7 @@ HELP
 	code => <<'CODE'
 {
   if (layer->mask)
-    edit_mask = gimp_layer_get_edit_mask (layer);
+    edit_mask = clay_layer_get_edit_mask (layer);
   else
     edit_mask = FALSE;
 }
@@ -1000,7 +1000,7 @@ HELP
 	code => <<'CODE'
 {
   if (layer->mask)
-    gimp_layer_set_edit_mask (layer, edit_mask);
+    clay_layer_set_edit_mask (layer, edit_mask);
   else
     success = FALSE;
 }
@@ -1027,7 +1027,7 @@ sub layer_get_opacity {
     %invoke = (
 	code => <<'CODE'
 {
-  opacity = gimp_layer_get_opacity (layer) * 100.0;
+  opacity = clay_layer_get_opacity (layer) * 100.0;
 }
 CODE
     );
@@ -1049,7 +1049,7 @@ sub layer_set_opacity {
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_layer_set_opacity (layer, opacity / 100.0, TRUE);
+  clay_layer_set_opacity (layer, opacity / 100.0, TRUE);
 }
 CODE
     );
@@ -1067,15 +1067,15 @@ sub layer_get_mode {
     );
 
     @outargs = (
-	{ name => 'mode', type => 'enum GimpLayerMode',
-          default => 'GIMP_LAYER_MODE_NORMAL',
+	{ name => 'mode', type => 'enum ClayLayerMode',
+          default => 'CLAY_LAYER_MODE_NORMAL',
 	  desc => 'The layer combination mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  mode = gimp_layer_get_mode (layer);
+  mode = clay_layer_get_mode (layer);
 }
 CODE
     );
@@ -1090,30 +1090,30 @@ sub layer_set_mode {
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer' },
-	{ name => 'mode', type => 'enum GimpLayerMode',
-          default => 'GIMP_LAYER_MODE_NORMAL',
+	{ name => 'mode', type => 'enum ClayLayerMode',
+          default => 'CLAY_LAYER_MODE_NORMAL',
 	  desc => 'The new layer combination mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  if (mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-    mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+  if (mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+    mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
-  if (gimp_viewable_get_children (GIMP_VIEWABLE (layer)) == NULL)
+  if (clay_viewable_get_children (CLAY_VIEWABLE (layer)) == NULL)
     {
-      if (! (gimp_layer_mode_get_context (mode) & GIMP_LAYER_MODE_CONTEXT_LAYER))
+      if (! (clay_layer_mode_get_context (mode) & CLAY_LAYER_MODE_CONTEXT_LAYER))
         success = FALSE;
     }
   else
     {
-      if (! (gimp_layer_mode_get_context (mode) & GIMP_LAYER_MODE_CONTEXT_GROUP))
+      if (! (clay_layer_mode_get_context (mode) & CLAY_LAYER_MODE_CONTEXT_GROUP))
         success = FALSE;
     }
 
   if (success)
-    gimp_layer_set_mode (layer, mode, TRUE);
+    clay_layer_set_mode (layer, mode, TRUE);
 }
 CODE
     );
@@ -1131,14 +1131,14 @@ sub layer_get_blend_space {
     );
 
     @outargs = (
-	{ name => 'blend_space', type => 'enum GimpLayerColorSpace',
+	{ name => 'blend_space', type => 'enum ClayLayerColorSpace',
 	  desc => 'The layer blend space' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  blend_space = gimp_layer_get_blend_space (layer);
+  blend_space = clay_layer_get_blend_space (layer);
 }
 CODE
     );
@@ -1153,14 +1153,14 @@ sub layer_set_blend_space {
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer' },
-	{ name => 'blend_space', type => 'enum GimpLayerColorSpace',
+	{ name => 'blend_space', type => 'enum ClayLayerColorSpace',
 	  desc => 'The new layer blend space' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_layer_set_blend_space (layer, blend_space, TRUE);
+  clay_layer_set_blend_space (layer, blend_space, TRUE);
 }
 CODE
     );
@@ -1178,14 +1178,14 @@ sub layer_get_composite_space {
     );
 
     @outargs = (
-	{ name => 'composite_space', type => 'enum GimpLayerColorSpace',
+	{ name => 'composite_space', type => 'enum ClayLayerColorSpace',
 	  desc => 'The layer composite space' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  composite_space = gimp_layer_get_composite_space (layer);
+  composite_space = clay_layer_get_composite_space (layer);
 }
 CODE
     );
@@ -1200,14 +1200,14 @@ sub layer_set_composite_space {
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer' },
-	{ name => 'composite_space', type => 'enum GimpLayerColorSpace',
+	{ name => 'composite_space', type => 'enum ClayLayerColorSpace',
 	  desc => 'The new layer composite space' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_layer_set_composite_space (layer, composite_space, TRUE);
+  clay_layer_set_composite_space (layer, composite_space, TRUE);
 }
 CODE
     );
@@ -1225,14 +1225,14 @@ sub layer_get_composite_mode {
     );
 
     @outargs = (
-	{ name => 'composite_mode', type => 'enum GimpLayerCompositeMode',
+	{ name => 'composite_mode', type => 'enum ClayLayerCompositeMode',
 	  desc => 'The layer composite mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  composite_mode = gimp_layer_get_composite_mode (layer);
+  composite_mode = clay_layer_get_composite_mode (layer);
 }
 CODE
     );
@@ -1247,35 +1247,35 @@ sub layer_set_composite_mode {
     @inargs = (
 	{ name => 'layer', type => 'layer',
 	  desc => 'The layer' },
-	{ name => 'composite_mode', type => 'enum GimpLayerCompositeMode',
+	{ name => 'composite_mode', type => 'enum ClayLayerCompositeMode',
 	  desc => 'The new layer composite mode' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_layer_set_composite_mode (layer, composite_mode, TRUE);
+  clay_layer_set_composite_mode (layer, composite_mode, TRUE);
 }
 CODE
     );
 }
 
 @headers = qw(<cairo.h>
-              "libgimpbase/gimpbase.h"
-              "libgimpcolor/gimpcolor.h"
-              "core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdrawable.h"
-              "core/gimpimage-color-profile.h"
-              "core/gimpimage-undo.h"
-              "core/gimplayer-new.h"
-              "core/gimplist.h"
-              "core/gimppickable.h"
-              "core/gimpprogress.h"
-              "operations/layer-modes/gimp-layer-modes.h"
-              "gimppdbcontext.h"
-              "gimppdb-utils.h"
-              "gimp-intl.h");
+              "libclaybase/claybase.h"
+              "libclaycolor/claycolor.h"
+              "core/clay.h"
+              "core/claycontainer.h"
+              "core/claydrawable.h"
+              "core/clayimage-color-profile.h"
+              "core/clayimage-undo.h"
+              "core/claylayer-new.h"
+              "core/claylist.h"
+              "core/claypickable.h"
+              "core/clayprogress.h"
+              "operations/layer-modes/clay-layer-modes.h"
+              "claypdbcontext.h"
+              "claypdb-utils.h"
+              "clay-intl.h");
 
 @procs = qw(layer_new
             layer_new_from_visible
@@ -1304,7 +1304,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Layer';
-$doc_title = 'gimplayer';
+$doc_title = 'claylayer';
 $doc_short_desc = 'Operations on a single layer.';
 $doc_long_desc = 'Operations on a single layer.';
 

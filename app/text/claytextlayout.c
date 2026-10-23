@@ -1,0 +1,1097 @@
+/* xyz.kainzmayer.ClayDesign
+ * Copyright (C) 1995 Spencer Kimball and Peter Mattis
+ *
+ * ClayText
+ * Copyright (C) 2002-2003  Sven Neumann <sven@gimp.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "config.h"
+
+#include <string.h>
+
+#include <gegl.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <pango/pangocairo.h>
+#include <pango/pangofc-fontmap.h>
+#include <fontconfig/fontconfig.h>
+
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclaymath/claymath.h"
+
+#include "text-types.h"
+
+#include "gegl/clay-babl.h"
+
+#include "core/clayerror.h"
+#include "core/clayimage.h"
+
+#include "clayfont.h"
+
+#include "claytext.h"
+#include "claytextlayout.h"
+
+#include "clay-intl.h"
+
+struct _ClayTextLayout
+{
+  GObject         object;
+
+  ClayText       *text;
+  gdouble         xres;
+  gdouble         yres;
+  PangoLayout    *layout;
+  PangoRectangle  extents;
+  const Babl     *layout_space;
+  ClayTRCType     layout_trc;
+};
+
+
+static void           clay_text_layout_finalize   (GObject        *object);
+
+static void           clay_text_layout_position   (ClayTextLayout *layout);
+static void           clay_text_layout_transform_extents
+                                                  (ClayTextLayout *layout);
+static void           clay_text_layout_set_markup (ClayTextLayout *layout,
+                                                   GError        **error);
+
+static PangoContext * clay_text_get_pango_context (ClayText       *text,
+                                                   gdouble         xres,
+                                                   gdouble         yres);
+
+
+G_DEFINE_TYPE (ClayTextLayout, clay_text_layout, G_TYPE_OBJECT)
+
+#define parent_class clay_text_layout_parent_class
+
+
+static void
+clay_text_layout_class_init (ClayTextLayoutClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->finalize = clay_text_layout_finalize;
+}
+
+static void
+clay_text_layout_init (ClayTextLayout *layout)
+{
+  layout->text   = NULL;
+  layout->layout = NULL;
+}
+
+static void
+clay_text_layout_finalize (GObject *object)
+{
+  ClayTextLayout *layout = CLAY_TEXT_LAYOUT (object);
+
+  if (layout->text)
+    {
+      g_object_unref (layout->text);
+      layout->text = NULL;
+    }
+  if (layout->layout)
+    {
+      g_object_unref (layout->layout);
+      layout->layout = NULL;
+    }
+
+  G_OBJECT_CLASS (parent_class)->finalize (object);
+}
+
+
+ClayTextLayout *
+clay_text_layout_new (ClayText     *text,
+                      ClayImage    *target_image,
+                      gdouble       xres,
+                      gdouble       yres,
+                      GError      **error)
+{
+  ClayTextLayout       *layout;
+  const Babl           *target_space;
+  PangoContext         *context;
+  PangoFontDescription *font_desc;
+  PangoAlignment        alignment = PANGO_ALIGN_LEFT;
+  gint                  size;
+
+  g_return_val_if_fail (CLAY_IS_TEXT (text), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (target_image), NULL);
+
+  font_desc = pango_font_description_from_string (clay_font_get_lookup_name (text->font));
+  g_return_val_if_fail (font_desc != NULL, NULL);
+
+  size = pango_units_from_double (clay_units_to_points (text->font_size,
+                                                        text->unit,
+                                                        yres));
+
+  pango_font_description_set_size (font_desc, MAX (1, size));
+
+  context = clay_text_get_pango_context (text, xres, yres);
+
+  layout = g_object_new (CLAY_TYPE_TEXT_LAYOUT, NULL);
+
+  layout->text   = g_object_ref (text);
+  layout->layout = pango_layout_new (context);
+  layout->xres   = xres;
+  layout->yres   = yres;
+
+  pango_layout_set_wrap (layout->layout, PANGO_WRAP_WORD_CHAR);
+
+  pango_layout_set_font_description (layout->layout, font_desc);
+  pango_font_description_free (font_desc);
+
+  target_space = clay_image_get_layer_space (target_image);
+  if (babl_space_is_rgb (target_space) || babl_space_is_gray (target_space))
+    layout->layout_space = target_space;
+  else
+    layout->layout_space = NULL;
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 17, 2)
+  layout->layout_trc = clay_babl_trc (clay_image_get_precision (target_image));
+#else
+  /* With older Cairo, we just use cairo-ARGB32 with no linear or perceptual
+   * option.
+   */
+  layout->layout_trc = CLAY_TRC_NON_LINEAR;
+#endif
+
+  clay_text_layout_set_markup (layout, error);
+
+  switch (text->justify)
+    {
+    case CLAY_TEXT_JUSTIFY_LEFT:
+      alignment = PANGO_ALIGN_LEFT;
+      break;
+    case CLAY_TEXT_JUSTIFY_RIGHT:
+      alignment = PANGO_ALIGN_RIGHT;
+      break;
+    case CLAY_TEXT_JUSTIFY_CENTER:
+      alignment = PANGO_ALIGN_CENTER;
+      break;
+    case CLAY_TEXT_JUSTIFY_FILL:
+      alignment = PANGO_ALIGN_LEFT;
+      pango_layout_set_justify (layout->layout, TRUE);
+      break;
+    }
+
+  pango_layout_set_alignment (layout->layout, alignment);
+
+  switch (text->box_mode)
+    {
+    case CLAY_TEXT_BOX_DYNAMIC:
+      break;
+    case CLAY_TEXT_BOX_FIXED:
+      if (! PANGO_GRAVITY_IS_VERTICAL (pango_context_get_base_gravity (context)))
+        /*  clay_text_layout_render() scales the horizontal axis by
+         *  xres / yres, so a line laid out to the box width would be
+         *  drawn that much wider than the box and clipped (issue #1028).
+         *  Wrap to the pre-scaling width so it lands on the box.
+         */
+        pango_layout_set_width (layout->layout,
+                                pango_units_from_double
+                                (clay_units_to_pixels (text->box_width,
+                                                       text->box_unit,
+                                                       xres) *
+                                 yres / xres));
+      else
+        pango_layout_set_width (layout->layout,
+                                pango_units_from_double
+                                (clay_units_to_pixels (text->box_height,
+                                                       text->box_unit,
+                                                       yres)));
+      break;
+    }
+
+  pango_layout_set_indent (layout->layout,
+                           pango_units_from_double
+                           (clay_units_to_pixels (text->indent,
+                                                  text->unit,
+                                                  xres)));
+  pango_layout_set_spacing (layout->layout,
+                            pango_units_from_double
+                            (clay_units_to_pixels (text->line_spacing,
+                                                   text->unit,
+                                                   yres)));
+
+  clay_text_layout_position (layout);
+
+  switch (text->box_mode)
+    {
+    case CLAY_TEXT_BOX_DYNAMIC:
+      break;
+    case CLAY_TEXT_BOX_FIXED:
+      layout->extents.width  = ceil (clay_units_to_pixels (text->box_width,
+                                                           text->box_unit,
+                                                           xres));
+      layout->extents.height = ceil (clay_units_to_pixels (text->box_height,
+                                                           text->box_unit,
+                                                           yres));
+
+/* #define VERBOSE */
+
+#ifdef VERBOSE
+      g_printerr ("extents set to %d x %d\n",
+                  layout->extents.width, layout->extents.height);
+#endif
+      break;
+    }
+
+  clay_text_layout_transform_extents (layout);
+
+  g_object_unref (context);
+
+  return layout;
+}
+
+const ClayTRCType
+clay_text_layout_get_trc (ClayTextLayout *layout)
+{
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), CLAY_TRC_NON_LINEAR);
+
+  return layout->layout_trc;
+}
+
+const Babl *
+clay_text_layout_get_format (ClayTextLayout *layout,
+                             const gchar    *babl_type)
+{
+  const Babl *format;
+  gchar      *format_name;
+
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), NULL);
+
+  if (! babl_space_is_gray (layout->layout_space))
+    {
+      switch (layout->layout_trc)
+        {
+        case CLAY_TRC_LINEAR:
+          format_name = g_strdup_printf ("RGB %s", babl_type);
+          break;
+        case CLAY_TRC_NON_LINEAR:
+          format_name = g_strdup_printf ("R'G'B' %s", babl_type);
+          break;
+        case CLAY_TRC_PERCEPTUAL:
+          format_name = g_strdup_printf ("R~G~B~ %s", babl_type);
+          break;
+        default:
+          g_return_val_if_reached (NULL);
+        }
+    }
+  else
+    {
+      switch (layout->layout_trc)
+        {
+        case CLAY_TRC_LINEAR:
+          format_name = g_strdup_printf ("Y %s", babl_type);
+          break;
+        case CLAY_TRC_NON_LINEAR:
+          format_name = g_strdup_printf ("Y' %s", babl_type);
+          break;
+        case CLAY_TRC_PERCEPTUAL:
+          format_name = g_strdup_printf ("Y~ %s", babl_type);
+          break;
+        default:
+          g_return_val_if_reached (NULL);
+        }
+    }
+
+  format = babl_format_with_space (format_name, layout->layout_space);
+  g_free (format_name);
+
+  return format;
+}
+
+const Babl *
+clay_text_layout_get_space (ClayTextLayout *layout)
+{
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), NULL);
+
+  return layout->layout_space;
+}
+
+gboolean
+clay_text_layout_get_size (ClayTextLayout *layout,
+                           gint           *width,
+                           gint           *height)
+{
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), FALSE);
+
+  if (width)
+    *width = layout->extents.width;
+
+  if (height)
+    *height = layout->extents.height;
+
+  return (layout->extents.width > 0 && layout->extents.height > 0);
+}
+
+void
+clay_text_layout_get_offsets (ClayTextLayout *layout,
+                              gint           *x,
+                              gint           *y)
+{
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+
+  if (x)
+    *x = layout->extents.x;
+
+  if (y)
+    *y = layout->extents.y;
+}
+
+void
+clay_text_layout_get_resolution (ClayTextLayout *layout,
+                                 gdouble        *xres,
+                                 gdouble        *yres)
+{
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+
+  if (xres)
+    *xres = layout->xres;
+
+  if (yres)
+    *yres = layout->yres;
+}
+
+ClayText *
+clay_text_layout_get_text (ClayTextLayout *layout)
+{
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), NULL);
+
+  return layout->text;
+}
+
+PangoLayout *
+clay_text_layout_get_pango_layout (ClayTextLayout *layout)
+{
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), NULL);
+
+  return layout->layout;
+}
+
+void
+clay_text_layout_get_transform (ClayTextLayout *layout,
+                                cairo_matrix_t *matrix)
+{
+  ClayText *text;
+  gdouble   xres = 0;
+  gdouble   yres = 0;
+  gdouble   norm;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+  g_return_if_fail (matrix != NULL);
+
+  text = clay_text_layout_get_text (layout);
+
+  clay_text_layout_get_resolution (layout, &xres, &yres);
+
+  norm = 1.0 / yres * xres;
+
+  matrix->xx = text->transformation.coeff[0][0] * norm;
+  matrix->xy = text->transformation.coeff[0][1] * 1.0;
+  matrix->yx = text->transformation.coeff[1][0] * norm;
+  matrix->yy = text->transformation.coeff[1][1] * 1.0;
+  matrix->x0 = 0;
+  matrix->y0 = 0;
+}
+
+/**
+ * clay_text_layout_is_transformed:
+ * @layout: a #ClayTextLayout
+ *
+ * Returns: %TRUE if the layout carries anything other than the identity
+ *          transformation, i.e. if layout-space rectangles do not map to
+ *          axis-aligned rectangles in layer space.
+ *
+ * Callers use this to keep the untransformed case on its original code path
+ * rather than paying for, and risking a behaviour change in, the general one.
+ */
+gboolean
+clay_text_layout_is_transformed (ClayTextLayout *layout)
+{
+  ClayMatrix2 *t;
+
+  g_return_val_if_fail (CLAY_IS_TEXT_LAYOUT (layout), FALSE);
+
+  t = &layout->text->transformation;
+
+  return (t->coeff[0][0] != 1.0 || t->coeff[0][1] != 0.0 ||
+          t->coeff[1][0] != 0.0 || t->coeff[1][1] != 1.0);
+}
+
+/**
+ * clay_text_layout_transform_quad:
+ * @layout:  a #ClayTextLayout
+ * @rect:    a rectangle in layout space, in pixels
+ * @corners: (out caller-allocates) (array fixed-size=4): the transformed corners
+ *
+ * Maps the four corners of @rect through the layout's transformation, in
+ * clockwise order starting at the top-left of the untransformed rectangle.
+ *
+ * Unlike clay_text_layout_transform_rect(), this does not collapse the result
+ * to an axis-aligned rectangle, so it stays correct under rotation and shear.
+ * As with that function the layout's offsets are *not* applied; callers add
+ * them, because they also have to add the layer's own item offset.
+ */
+void
+clay_text_layout_transform_quad (ClayTextLayout       *layout,
+                                 const PangoRectangle *rect,
+                                 ClayVector2          *corners)
+{
+  cairo_matrix_t matrix;
+  gint           i;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+  g_return_if_fail (rect != NULL);
+  g_return_if_fail (corners != NULL);
+
+  corners[0].x = rect->x;
+  corners[0].y = rect->y;
+  corners[1].x = rect->x + rect->width;
+  corners[1].y = rect->y;
+  corners[2].x = rect->x + rect->width;
+  corners[2].y = rect->y + rect->height;
+  corners[3].x = rect->x;
+  corners[3].y = rect->y + rect->height;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  for (i = 0; i < 4; i++)
+    cairo_matrix_transform_point (&matrix, &corners[i].x, &corners[i].y);
+}
+
+void
+clay_text_layout_transform_rect (ClayTextLayout *layout,
+                                 PangoRectangle *rect)
+{
+  cairo_matrix_t matrix;
+  gdouble        x, y;
+  gdouble        width, height;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+  g_return_if_fail (rect != NULL);
+
+  x      = rect->x;
+  y      = rect->y;
+  width  = rect->width;
+  height = rect->height;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  cairo_matrix_transform_point (&matrix, &x, &y);
+  cairo_matrix_transform_distance (&matrix, &width, &height);
+
+  rect->x      = ROUND (x);
+  rect->y      = ROUND (y);
+  rect->width  = ROUND (width);
+  rect->height = ROUND (height);
+}
+
+void
+clay_text_layout_transform_point (ClayTextLayout *layout,
+                                  gdouble        *x,
+                                  gdouble        *y)
+{
+  cairo_matrix_t matrix;
+  gdouble        _x = 0.0;
+  gdouble        _y = 0.0;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+
+  if (x) _x = *x;
+  if (y) _y = *y;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  cairo_matrix_transform_point (&matrix, &_x, &_y);
+
+  if (x) *x = _x;
+  if (y) *y = _y;
+}
+
+void
+clay_text_layout_transform_distance (ClayTextLayout *layout,
+                                     gdouble        *x,
+                                     gdouble        *y)
+{
+  cairo_matrix_t matrix;
+  gdouble        _x = 0.0;
+  gdouble        _y = 0.0;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+
+  if (x) _x = *x;
+  if (y) _y = *y;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  cairo_matrix_transform_distance (&matrix, &_x, &_y);
+
+  if (x) *x = _x;
+  if (y) *y = _y;
+}
+
+void
+clay_text_layout_untransform_rect (ClayTextLayout *layout,
+                                   PangoRectangle *rect)
+{
+  cairo_matrix_t matrix;
+  gdouble        x, y;
+  gdouble        width, height;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+  g_return_if_fail (rect != NULL);
+
+  x      = rect->x;
+  y      = rect->y;
+  width  = rect->width;
+  height = rect->height;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  if (cairo_matrix_invert (&matrix) == CAIRO_STATUS_SUCCESS)
+    {
+      cairo_matrix_transform_point (&matrix, &x, &y);
+      cairo_matrix_transform_distance (&matrix, &width, &height);
+
+      rect->x      = ROUND (x);
+      rect->y      = ROUND (y);
+      rect->width  = ROUND (width);
+      rect->height = ROUND (height);
+    }
+}
+
+void
+clay_text_layout_untransform_point (ClayTextLayout *layout,
+                                    gdouble        *x,
+                                    gdouble        *y)
+{
+  cairo_matrix_t matrix;
+  gdouble        _x = 0.0;
+  gdouble        _y = 0.0;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+
+  if (x) _x = *x;
+  if (y) _y = *y;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  if (cairo_matrix_invert (&matrix) == CAIRO_STATUS_SUCCESS)
+    {
+      cairo_matrix_transform_point (&matrix, &_x, &_y);
+
+      if (x) *x = _x;
+      if (y) *y = _y;
+    }
+}
+
+void
+clay_text_layout_untransform_distance (ClayTextLayout *layout,
+                                       gdouble        *x,
+                                       gdouble        *y)
+{
+  cairo_matrix_t matrix;
+  gdouble        _x = 0.0;
+  gdouble        _y = 0.0;
+
+  g_return_if_fail (CLAY_IS_TEXT_LAYOUT (layout));
+
+  if (x) _x = *x;
+  if (y) _y = *y;
+
+  clay_text_layout_get_transform (layout, &matrix);
+
+  if (cairo_matrix_invert (&matrix) == CAIRO_STATUS_SUCCESS)
+    {
+      cairo_matrix_transform_distance (&matrix, &_x, &_y);
+
+      if (x) *x = _x;
+      if (y) *y = _y;
+    }
+}
+
+static gboolean
+clay_text_layout_split_markup (const gchar  *markup,
+                               gchar       **open_tag,
+                               gchar       **content,
+                               gchar       **close_tag)
+{
+  const gchar *p_open;
+  gchar       *p_close;
+
+  p_open = strstr (markup, "<markup>");
+  if (! p_open)
+    return FALSE;
+
+  *open_tag = g_strndup (markup, p_open - markup + strlen ("<markup>"));
+
+  p_close = g_strrstr (markup, "</markup>");
+  if (! p_close)
+    {
+      g_free (*open_tag);
+      return FALSE;
+    }
+
+  *close_tag = g_strdup (p_close);
+
+  if (p_open + strlen ("<markup>") < p_close)
+    {
+      *content = g_strndup (p_open + strlen ("<markup>"),
+                            p_close - p_open - strlen ("<markup>"));
+    }
+  else
+    {
+      *content = g_strdup ("");
+    }
+
+  return TRUE;
+}
+
+static gchar *
+clay_text_layout_apply_tags (ClayTextLayout *layout,
+                             const gchar    *markup)
+{
+  const Babl *format;
+  ClayText   *text  = layout->text;
+  gchar      *result;
+  guchar      color[3];
+
+  /* Unfortunately Pango markup are very limited, color-wise. Colors are
+   * written in hexadecimal, so they are u8 as maximum precision, and
+   * unbounded colors are not accessible.
+   * At the very least, what we do is to write color values in the target
+   * space in the PangoLayout, so that we don't end up stuck to sRGB text
+   * colors even in images with wider gamut spaces.
+   *
+   * Moreover this is limited to RGB and Grayscale spaces. Therefore, images
+   * with other backends will be limited to the sRGB gamut, for as long as Pango
+   * do not evolve (or unless we changed our rendering backend).
+   */
+  format = clay_text_layout_get_format (layout, "u8");
+  gegl_color_get_pixel (text->color, format, color);
+  if (! babl_space_is_gray (babl_format_get_space (format)))
+    result = g_strdup_printf ("<span color=\"#%02x%02x%02x\">%s</span>",
+                              color[0], color[1], color[2], markup);
+  else
+    result = g_strdup_printf ("<span color=\"#%02x%02x%02x\">%s</span>",
+                              color[0], color[0], color[0], markup);
+
+  /* Updating font 'locl' (if supported) with 'lang' feature tag */
+  if (text->language)
+    {
+      gchar *tmp = g_strdup_printf ("<span lang=\"%s\">%s</span>",
+                                    text->language,
+                                    result);
+      g_free (result);
+      result = tmp;
+    }
+
+  if (fabs (text->letter_spacing) > 0.1)
+    {
+      gchar *tmp = g_strdup_printf ("<span letter_spacing=\"%d\">%s</span>",
+                                    (gint) (text->letter_spacing * PANGO_SCALE),
+                                    result);
+      g_free (result);
+      result = tmp;
+    }
+
+  return result;
+}
+
+static void
+clay_text_layout_set_markup (ClayTextLayout  *layout,
+                             GError         **error)
+{
+  ClayText *text      = layout->text;
+  gchar    *open_tag  = NULL;
+  gchar    *content   = NULL;
+  gchar    *close_tag = NULL;
+  gchar    *tagged;
+  gchar    *markup;
+
+  if (text->markup)
+    {
+      if (! clay_text_layout_split_markup (text->markup,
+                                           &open_tag, &content, &close_tag))
+        {
+          open_tag  = g_strdup ("<markup>");
+          content   = g_strdup ("");
+          close_tag = g_strdup ("</markup>");
+        }
+    }
+  else
+    {
+      open_tag  = g_strdup ("<markup>");
+      close_tag = g_strdup ("</markup>");
+
+      if (text->text)
+        content = g_markup_escape_text (text->text, -1);
+      else
+        content = g_strdup ("");
+    }
+
+  tagged = clay_text_layout_apply_tags (layout, content);
+
+  g_free (content);
+
+  markup = g_strconcat (open_tag, tagged, close_tag, NULL);
+
+  g_free (open_tag);
+  g_free (tagged);
+  g_free (close_tag);
+
+  if (pango_parse_markup (markup, -1, 0, NULL, NULL, NULL, error) == FALSE)
+    {
+      if (error && *error                       &&
+          (*error)->domain == G_MARKUP_ERROR    &&
+          (*error)->code == G_MARKUP_ERROR_INVALID_CONTENT)
+        {
+          /* Errors from pango lib are not accurate enough.
+           * Other possible error codes are: G_MARKUP_ERROR_UNKNOWN_ELEMENT
+           * and G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE, which likely indicate a bug
+           * in Clay code or a pango library version issue.
+           * G_MARKUP_ERROR_INVALID_CONTENT on the other hand likely indicates
+           * size/color/style/weight/variant/etc. value issue. Font size is the
+           * only free text in Clay GUI so we assume that must be it.
+           * Also we output a custom message because pango's error->message is
+           * too technical (telling of <span> tags, not using user's font size
+           * unit, and such). */
+          g_error_free (*error);
+          *error = NULL;
+          g_set_error_literal (error, CLAY_ERROR, CLAY_FAILED,
+                               _("The new text layout cannot be generated. "
+                                 "Most likely the font size is too big."));
+        }
+    }
+  else
+    {
+      pango_layout_set_markup (layout->layout, markup, -1);
+    }
+
+  g_free (markup);
+}
+
+static void
+clay_text_layout_position (ClayTextLayout *layout)
+{
+  PangoRectangle  ink;
+  PangoRectangle  logical;
+  PangoContext   *context;
+  gint            x1, y1;
+  gint            x2, y2;
+  gint            border;
+
+  layout->extents.x      = 0;
+  layout->extents.y      = 0;
+  layout->extents.width  = 0;
+  layout->extents.height = 0;
+
+  pango_layout_get_pixel_extents (layout->layout, &ink, &logical);
+
+  ink.width = ceil ((gdouble) ink.width * layout->xres / layout->yres);
+  logical.width = ceil ((gdouble) logical.width * layout->xres / layout->yres);
+  context = pango_layout_get_context (layout->layout);
+
+#ifdef VERBOSE
+  g_printerr ("ink rect: %d x %d @ %d, %d\n",
+              ink.width, ink.height, ink.x, ink.y);
+  g_printerr ("logical rect: %d x %d @ %d, %d\n",
+              logical.width, logical.height, logical.x, logical.y);
+#endif
+
+  if (ink.width < 1 || ink.height < 1)
+    {
+      layout->extents.width  = 1;
+      layout->extents.height = logical.height;
+      return;
+    }
+
+  x1 = MIN (ink.x, logical.x);
+  y1 = MIN (ink.y, logical.y);
+  x2 = MAX (ink.x + ink.width,  logical.x + logical.width);
+  y2 = MAX (ink.y + ink.height, logical.y + logical.height);
+
+  layout->extents.x      = - x1;
+  layout->extents.y      = - y1;
+  layout->extents.width  = x2 - x1;
+  layout->extents.height = y2 - y1;
+
+  /* If the width of the layout is > 0, then the text-box is FIXED and
+   * the layout position should be offset if the alignment is centered
+   * or right-aligned, also adjust for RTL text direction.
+   */
+  if (pango_layout_get_width (layout->layout) > 0)
+    {
+      PangoAlignment    align    = pango_layout_get_alignment (layout->layout);
+      ClayTextDirection base_dir = layout->text->base_dir;
+      gint              width;
+
+      width = layout->extents.width;
+
+      if ((base_dir == CLAY_TEXT_DIRECTION_LTR && align == PANGO_ALIGN_RIGHT) ||
+          (base_dir == CLAY_TEXT_DIRECTION_RTL && align == PANGO_ALIGN_RIGHT) ||
+          (base_dir == CLAY_TEXT_DIRECTION_TTB_RTL && align == PANGO_ALIGN_RIGHT) ||
+          (base_dir == CLAY_TEXT_DIRECTION_TTB_RTL_UPRIGHT && align == PANGO_ALIGN_RIGHT) ||
+          (base_dir == CLAY_TEXT_DIRECTION_TTB_LTR && align == PANGO_ALIGN_LEFT) ||
+          (base_dir == CLAY_TEXT_DIRECTION_TTB_LTR_UPRIGHT && align == PANGO_ALIGN_LEFT))
+        {
+          layout->extents.x +=
+            PANGO_PIXELS (pango_layout_get_width (layout->layout)) - width;
+        }
+      else if (align == PANGO_ALIGN_CENTER)
+        {
+          layout->extents.x +=
+            (PANGO_PIXELS (pango_layout_get_width (layout->layout)) - width) / 2;
+       }
+    }
+
+  border = (layout->text->border > 0) ? layout->text->border : 0;
+
+  if (layout->text->outline != CLAY_TEXT_OUTLINE_NONE &&
+      layout->text->outline_direction != CLAY_TEXT_OUTLINE_DIRECTION_INNER)
+    border += layout->text->outline_width;
+
+  if (border > 0)
+    {
+      switch (layout->text->base_dir)
+        {
+        case CLAY_TEXT_DIRECTION_TTB_RTL:
+        case CLAY_TEXT_DIRECTION_TTB_RTL_UPRIGHT:
+          layout->extents.x += border;
+          layout->extents.y -= border;
+          break;
+
+        case CLAY_TEXT_DIRECTION_TTB_LTR:
+        case CLAY_TEXT_DIRECTION_TTB_LTR_UPRIGHT:
+          layout->extents.x -= border;
+          layout->extents.y += border;
+          break;
+
+        default:
+          layout->extents.x += border;
+          layout->extents.y += border;
+        }
+
+      layout->extents.width  += 2 * border;
+      layout->extents.height += 2 * border;
+    }
+
+  if (PANGO_GRAVITY_IS_VERTICAL (pango_context_get_base_gravity (context)))
+    {
+      gint temp;
+
+      temp = layout->extents.y;
+      layout->extents.y = layout->extents.x;
+      layout->extents.x = temp;
+
+      temp = layout->extents.height;
+      layout->extents.height = layout->extents.width;
+      layout->extents.width = temp;
+    }
+
+#ifdef VERBOSE
+  g_printerr ("layout extents: %d x %d @ %d, %d\n",
+              layout->extents.width, layout->extents.height,
+              layout->extents.x, layout->extents.y);
+#endif
+}
+
+#define EXTENTS_EPSILON 1e-6
+
+/*  Grow the extents to the axis-aligned bounding box of the transformed
+ *  layout, and shift the offsets so the transformed content still starts
+ *  at (0, 0) of the layer.
+ *
+ *  This must run after clay_text_layout_position() and after the
+ *  CLAY_TEXT_BOX_FIXED override, i.e. on the final untransformed box.
+ *
+ *  Note that the matrix used here is text->transformation *without* the
+ *  xres/yres normalization that clay_text_layout_get_transform() folds in.
+ *  clay_text_layout_position() already scaled the widths by that factor,
+ *  so the extents are in the space the pure matrix acts on; applying the
+ *  normalization a second time here would squash the box.
+ */
+static void
+clay_text_layout_transform_extents (ClayTextLayout *layout)
+{
+  cairo_matrix_t matrix;
+  gdouble        cx[4], cy[4];
+  gdouble        x1, y1, x2, y2;
+  gint           i;
+
+  cairo_matrix_init (&matrix,
+                     layout->text->transformation.coeff[0][0],
+                     layout->text->transformation.coeff[1][0],
+                     layout->text->transformation.coeff[0][1],
+                     layout->text->transformation.coeff[1][1],
+                     0.0, 0.0);
+
+  /*  the layout box in the space the matrix acts on: the render path
+   *  translates by extents.x/y before applying the matrix, so the box
+   *  starts at the negated offsets.
+   */
+  cx[0] = - layout->extents.x;
+  cy[0] = - layout->extents.y;
+  cx[1] = cx[0] + layout->extents.width;
+  cy[1] = cy[0];
+  cx[2] = cx[1];
+  cy[2] = cy[0] + layout->extents.height;
+  cx[3] = cx[0];
+  cy[3] = cy[2];
+
+  for (i = 0; i < 4; i++)
+    cairo_matrix_transform_point (&matrix, &cx[i], &cy[i]);
+
+  x1 = x2 = cx[0];
+  y1 = y2 = cy[0];
+
+  for (i = 1; i < 4; i++)
+    {
+      x1 = MIN (x1, cx[i]);
+      x2 = MAX (x2, cx[i]);
+      y1 = MIN (y1, cy[i]);
+      y2 = MAX (y2, cy[i]);
+    }
+
+  /*  Snap before rounding outwards.  A right-angle rotation matrix carries
+   *  a ~1e-17 residue in the cosine, which turns an exact edge at 0 into a
+   *  hair over it and would make ceil() add a stray pixel per axis.
+   */
+  x1 = floor (x1 + EXTENTS_EPSILON);
+  y1 = floor (y1 + EXTENTS_EPSILON);
+  x2 = ceil  (x2 - EXTENTS_EPSILON);
+  y2 = ceil  (y2 - EXTENTS_EPSILON);
+
+  layout->extents.x      = - x1;
+  layout->extents.y      = - y1;
+  layout->extents.width  = MAX (1, x2 - x1);
+  layout->extents.height = MAX (1, y2 - y1);
+
+#ifdef VERBOSE
+  g_printerr ("transformed extents: %d x %d @ %d, %d\n",
+              layout->extents.width, layout->extents.height,
+              layout->extents.x, layout->extents.y);
+#endif
+}
+
+static cairo_font_options_t *
+clay_text_get_font_options (ClayText *text)
+{
+  cairo_font_options_t *options = cairo_font_options_create ();
+
+  cairo_font_options_set_antialias (options, (text->antialias ?
+                                              CAIRO_ANTIALIAS_GRAY :
+                                              CAIRO_ANTIALIAS_NONE));
+
+  switch (text->hint_style)
+    {
+    case CLAY_TEXT_HINT_STYLE_NONE:
+      cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_NONE);
+      break;
+
+    case CLAY_TEXT_HINT_STYLE_SLIGHT:
+      cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_SLIGHT);
+      break;
+
+    case CLAY_TEXT_HINT_STYLE_MEDIUM:
+      cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_MEDIUM);
+      break;
+
+    case CLAY_TEXT_HINT_STYLE_FULL:
+      cairo_font_options_set_hint_style (options, CAIRO_HINT_STYLE_FULL);
+      break;
+    }
+
+  return options;
+}
+
+static PangoContext *
+clay_text_get_pango_context (ClayText *text,
+                             gdouble   xres,
+                             gdouble   yres)
+{
+  static PangoFontMap  *fontmap = NULL;
+  PangoContext         *context;
+  cairo_font_options_t *options;
+
+  if (! fontmap)
+    {
+      fontmap = pango_cairo_font_map_new_for_font_type (CAIRO_FONT_TYPE_FT);
+      if (! fontmap)
+        g_error ("You are using a Pango that has been built against a cairo "
+                 "that lacks the Freetype font backend");
+    }
+
+  /* In case a font becomes missing mid-session and is chosen (or is already in use)
+   * pango substitutes EVERY font for the default font, to avoid this
+   * the FcConfig has to be set everytime a pango fontmap is created
+   * Use case: User clicks "Rescan fonts" button
+   */
+  pango_fc_font_map_set_config (PANGO_FC_FONT_MAP (fontmap), FcConfigGetCurrent ());
+  pango_cairo_font_map_set_resolution (PANGO_CAIRO_FONT_MAP (fontmap), yres);
+
+  context = pango_font_map_create_context (fontmap);
+
+  options = clay_text_get_font_options (text);
+  pango_cairo_context_set_font_options (context, options);
+  cairo_font_options_destroy (options);
+
+  if (text->language)
+    pango_context_set_language (context,
+                                pango_language_from_string (text->language));
+
+  switch (text->base_dir)
+    {
+    case CLAY_TEXT_DIRECTION_LTR:
+      pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
+      pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_NATURAL);
+      pango_context_set_base_gravity (context, PANGO_GRAVITY_SOUTH);
+      break;
+
+    case CLAY_TEXT_DIRECTION_RTL:
+      pango_context_set_base_dir (context, PANGO_DIRECTION_RTL);
+      pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_NATURAL);
+      pango_context_set_base_gravity (context, PANGO_GRAVITY_SOUTH);
+      break;
+
+    case CLAY_TEXT_DIRECTION_TTB_RTL:
+      pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
+      pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_LINE);
+      pango_context_set_base_gravity (context, PANGO_GRAVITY_EAST);
+      break;
+
+    case CLAY_TEXT_DIRECTION_TTB_RTL_UPRIGHT:
+      pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
+      pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_STRONG);
+      pango_context_set_base_gravity (context, PANGO_GRAVITY_EAST);
+      break;
+
+    case CLAY_TEXT_DIRECTION_TTB_LTR:
+      pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
+      pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_LINE);
+      pango_context_set_base_gravity (context, PANGO_GRAVITY_WEST);
+      break;
+
+    case CLAY_TEXT_DIRECTION_TTB_LTR_UPRIGHT:
+      pango_context_set_base_dir (context, PANGO_DIRECTION_LTR);
+      pango_context_set_gravity_hint (context, PANGO_GRAVITY_HINT_STRONG);
+      pango_context_set_base_gravity (context, PANGO_GRAVITY_WEST);
+      break;
+    }
+
+  return context;
+}

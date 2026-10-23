@@ -40,17 +40,17 @@
          (remaining-frames num-frames)
          (phase 0)
          (phaseshift (/ 360 num-frames))
-         (image (car (gimp-image-duplicate img)))
-         (source-layer (vector-ref (car (gimp-image-get-selected-layers image)) 0)))
+         (image (car (clay-image-duplicate img)))
+         (source-layer (vector-ref (car (clay-image-get-selected-layers image)) 0)))
 
-  (gimp-image-undo-disable image)
+  (clay-image-undo-disable image)
 
   (if (= invert TRUE)
       (set! phaseshift (- 0 phaseshift)))
 
   (while (> remaining-frames 1)
     (let* (
-          (waves-layer (car (gimp-layer-copy source-layer)))
+          (waves-layer (car (clay-layer-copy source-layer)))
           (layer-name (string-append "Frame "
                                      (number->string
                                        (- (+ num-frames 2)
@@ -58,14 +58,14 @@
                                        )
                                      " (replace)"))
           (phi phase)
-          (width (car (gimp-drawable-get-width waves-layer)))
-          (height (car (gimp-drawable-get-height waves-layer)))
+          (width (car (clay-drawable-get-width waves-layer)))
+          (height (car (clay-drawable-get-height waves-layer)))
           (aspect (/ width height))
           )
-    (gimp-layer-add-alpha waves-layer)
-    (gimp-layer-set-lock-alpha waves-layer FALSE)
-    (gimp-image-insert-layer image waves-layer 0 -1)
-    (gimp-item-set-name waves-layer layer-name)
+    (clay-layer-add-alpha waves-layer)
+    (clay-layer-set-lock-alpha waves-layer FALSE)
+    (clay-image-insert-layer image waves-layer 0 -1)
+    (clay-item-set-name waves-layer layer-name)
 
     (while (< phi 0)
       (set! phi (+ phi 360.0))
@@ -75,7 +75,7 @@
       (set! aspect 0.1))
     (if (> aspect 10.0)
       (set! aspect 10.0))
-    (gimp-drawable-merge-new-filter waves-layer "gegl:waves" 0 LAYER-MODE-REPLACE 1.0 "amplitude" amplitude "phi" phi
+    (clay-drawable-merge-new-filter waves-layer "gegl:waves" 0 LAYER-MODE-REPLACE 1.0 "amplitude" amplitude "phi" phi
                                                                                       "period" (* wavelength 2.0)
                                                                                       "clamp" TRUE "aspect" aspect)
 
@@ -84,12 +84,12 @@
     )
   )
 
-  (gimp-item-set-name source-layer "Frame 1")
+  (clay-item-set-name source-layer "Frame 1")
 
   (let* (
         (phi phase)
-        (width (car (gimp-drawable-get-width source-layer)))
-        (height (car (gimp-drawable-get-height source-layer)))
+        (width (car (clay-drawable-get-width source-layer)))
+        (height (car (clay-drawable-get-height source-layer)))
         (aspect (/ width height))
         )
 
@@ -102,13 +102,13 @@
       (set! aspect 0.1))
     (if (> aspect 10.0)
       (set! aspect 10.0))
-    (gimp-drawable-merge-new-filter source-layer "gegl:waves" 0 LAYER-MODE-REPLACE 1.0 "amplitude" amplitude "phi" phi
+    (clay-drawable-merge-new-filter source-layer "gegl:waves" 0 LAYER-MODE-REPLACE 1.0 "amplitude" amplitude "phi" phi
                                                                                        "period" (* wavelength 2.0)
                                                                                        "clamp" TRUE "aspect" aspect)
   )
 
-  (gimp-image-undo-enable image)
-  (gimp-display-new image)
+  (clay-image-undo-enable image)
+  (clay-display-new image)
   )
 )
 

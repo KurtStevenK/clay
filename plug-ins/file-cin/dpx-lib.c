@@ -31,12 +31,12 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "dpx-lib.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define DPX_FILE_MAGIC 0x53445058
 
@@ -100,17 +100,17 @@ static gboolean       read_16bpc_line   (GeglBuffer *buffer,
                                          GError    **error);
 
 
-GimpImage *
+ClayImage *
 dpx_open (GFile   *file,
           GError **error)
 {
   DpxMainHeader        header;
   FILE                *fp;
-  GimpImage           *image  = NULL;
-  GimpImageBaseType    image_type;
-  GimpImageType        layer_type;
-  GimpPrecision        precision;
-  GimpLayer           *layer;
+  ClayImage           *image  = NULL;
+  ClayImageBaseType    image_type;
+  ClayImageType        layer_type;
+  ClayPrecision        precision;
+  ClayLayer           *layer;
   GeglBuffer          *dpx_buffer;
   gboolean             is_network_order = TRUE;
   guint                width;
@@ -129,7 +129,7 @@ dpx_open (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -178,10 +178,10 @@ dpx_open (GFile   *file,
     }
   bpp = header.imageInfo.channel[0].bits_per_pixel;
 
-  if (width > GIMP_MAX_IMAGE_SIZE  ||
-      height > GIMP_MAX_IMAGE_SIZE)
+  if (width > CLAY_MAX_IMAGE_SIZE  ||
+      height > CLAY_MAX_IMAGE_SIZE)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       fclose (fp);
@@ -209,27 +209,27 @@ dpx_open (GFile   *file,
   switch (depth)
     {
     case 1:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAY_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAY_IMAGE;
       break;
 
     case 2:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAYA_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAYA_IMAGE;
       break;
 
     case 3:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGB_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGB_IMAGE;
       break;
 
     case 4:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGBA_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGBA_IMAGE;
       break;
 
     default:
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image with %d channels not yet supported."),
                    depth);
       fclose (fp);
@@ -239,27 +239,27 @@ dpx_open (GFile   *file,
   switch (bpp)
     {
     case 8:
-      precision     = GIMP_PRECISION_U8_NON_LINEAR;
+      precision     = CLAY_PRECISION_U8_NON_LINEAR;
       buffer_length = ceil ((width * depth) / 4.0);
       break;
 
     case 10:
-      precision     = GIMP_PRECISION_U16_NON_LINEAR;
+      precision     = CLAY_PRECISION_U16_NON_LINEAR;
       buffer_length = ceil (((width * depth) + 2) / 3.0);
       break;
 
     case 12:
-      precision     = GIMP_PRECISION_U16_NON_LINEAR;
+      precision     = CLAY_PRECISION_U16_NON_LINEAR;
       buffer_length = ceil ((width * depth) / 2.0);
       break;
 
     case 16:
-      precision     = GIMP_PRECISION_U16_NON_LINEAR;
+      precision     = CLAY_PRECISION_U16_NON_LINEAR;
       buffer_length = ceil ((width * depth) / 2.0);
       break;
 
     default:
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image with %d bpc not yet supported."),
                    bpp);
       fclose (fp);
@@ -276,7 +276,7 @@ dpx_open (GFile   *file,
 
   if (! buffer || (! pixels && ! pixels_8))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Memory could not be allocated."));
       g_free (buffer);
       g_free (pixels);
@@ -290,7 +290,7 @@ dpx_open (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read image data from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       g_free (buffer);
       g_free (pixels);
@@ -298,13 +298,13 @@ dpx_open (GFile   *file,
       return NULL;
     }
 
-  image = gimp_image_new_with_precision (width, height, image_type, precision);
-  layer = gimp_layer_new (image, NULL, width, height,
+  image = clay_image_new_with_precision (width, height, image_type, precision);
+  layer = clay_layer_new (image, NULL, width, height,
                           layer_type, 100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  dpx_buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  dpx_buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   if (packing == 0 &&
       (bpp == 10   ||
@@ -316,7 +316,7 @@ dpx_open (GFile   *file,
         {
            g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                         _("Could not read image data from '%s'"),
-                        gimp_file_get_utf8_name (file));
+                        clay_file_get_utf8_name (file));
            fclose (fp);
            g_free (buffer);
            g_free (pixels);
@@ -329,7 +329,7 @@ dpx_open (GFile   *file,
         {
            g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                         _("Could not read image data from '%s'"),
-                        gimp_file_get_utf8_name (file));
+                        clay_file_get_utf8_name (file));
            fclose (fp);
            g_free (buffer);
            g_free (pixels);
@@ -349,7 +349,7 @@ dpx_open (GFile   *file,
             {
               g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                            _("Could not read image data from '%s'"),
-                           gimp_file_get_utf8_name (file));
+                           clay_file_get_utf8_name (file));
               fclose (fp);
               g_object_unref (dpx_buffer);
               g_free (buffer);

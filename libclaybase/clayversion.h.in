@@ -1,0 +1,68 @@
+#ifndef __CLAY_VERSION_H__
+#define __CLAY_VERSION_H__
+
+/* clayversion.h.in -> clayversion.h
+ * This file is configured by Meson. Please modify meson.build files.
+ */
+#if !defined (__CLAY_BASE_H_INSIDE__) && !defined (CLAY_BASE_COMPILATION)
+#error "Only <libclaybase/claybase.h> can be included directly."
+#endif
+
+G_BEGIN_DECLS
+
+
+/**
+ * SECTION: clayversion
+ * @title: clayversion
+ * @short_description: Macros and constants useful for determining
+ *                     Clay's version number and capabilities.
+ *
+ * Macros and constants useful for determining Clay's version number and
+ * capabilities.
+ **/
+
+/**
+ * CLAY_MAJOR_VERSION:
+ *
+ * The major Clay version number.
+ **/
+#define CLAY_MAJOR_VERSION                              (@CLAY_MAJOR_VERSION@)
+
+/**
+ * CLAY_MINOR_VERSION:
+ *
+ * The minor Clay version number.
+ **/
+#define CLAY_MINOR_VERSION                              (@CLAY_MINOR_VERSION@)
+
+/**
+ * CLAY_MICRO_VERSION:
+ *
+ * The micro Clay version number.
+ **/
+#define CLAY_MICRO_VERSION                              (@CLAY_MICRO_VERSION@)
+
+/**
+ * CLAY_VERSION:
+ *
+ * The Clay version as a string.
+ **/
+#define CLAY_VERSION                                    "@CLAY_VERSION@"
+
+/**
+ * CLAY_API_VERSION:
+ *
+ * Since: 2.2
+ **/
+#define CLAY_API_VERSION                                "@CLAY_API_VERSION@"
+
+#define CLAY_CHECK_VERSION(major, minor, micro) \
+    (CLAY_MAJOR_VERSION > (major) || \
+     (CLAY_MAJOR_VERSION == (major) && CLAY_MINOR_VERSION > (minor)) || \
+     (CLAY_MAJOR_VERSION == (major) && CLAY_MINOR_VERSION == (minor) && \
+      CLAY_MICRO_VERSION >= (micro)))
+
+
+G_END_DECLS
+
+#endif /* __CLAY_VERSION_H__ */

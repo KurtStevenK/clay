@@ -21,7 +21,7 @@
 #pragma once
 
 
-GSList   * plug_in_rc_parse (Gimp    *gimp,
+GSList   * plug_in_rc_parse (Clay    *clay,
                              GFile   *file,
                              GError **error);
 gboolean   plug_in_rc_write (GSList  *plug_in_defs,

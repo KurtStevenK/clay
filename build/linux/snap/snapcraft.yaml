@@ -1,5 +1,5 @@
-name: gimp-experimental
-adopt-info: gimp
+name: clay-experimental
+adopt-info: clay
 grade: devel #see parts:babl_or_gegl:override-pull
 base: core24
 compression: lzo
@@ -14,11 +14,11 @@ platforms:
     build-for: [amd64]
 
 apps:
-  gimp:
-    common-id: org.gimp.GIMP
-    command: usr/bin/gimp
+  clay:
+    common-id: org.clay.Clay
+    command: usr/bin/clay
     command-chain: [command-chain/enable-plugins]
-    desktop: usr/share/applications/gimp.desktop
+    desktop: usr/share/applications/clay.desktop
     environment:
       HOME: $SNAP_REAL_HOME
       #Internet connection, Matting Leving support on FG select and NPU hardware support
@@ -32,7 +32,7 @@ apps:
       #Acessibility support
       GTK_MODULES: ""
     slots:
-      - dbus-gimp
+      - dbus-clay
     plugs:
       - cups
       - home
@@ -41,13 +41,13 @@ apps:
       - alsa
       - intel-npu
       - npu-libs
-      - gimp-plugins
-      - gimp-config
+      - clay-plugins
+      - clay-config
     extensions: [gnome]
 
 layout:
   #Needed at runtime because etc is usually not on /usr prefix
-  /etc/gimp:
+  /etc/clay:
     bind: $SNAP/etc/clay
   #Needed by 3P plug-ins. See: #16038
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1:
@@ -59,10 +59,10 @@ layout:
     bind: $SNAP/gnome-platform/usr/share/alsa
 
 slots:
-  dbus-gimp:
+  dbus-clay:
     interface: dbus
     bus: session
-    name: org.gimp.GIMP.UI
+    name: org.clay.Clay.UI
 
 plugs:
   intel-npu:
@@ -72,14 +72,14 @@ plugs:
     interface: content
     content: npu-libs-2404
     target: $SNAP/npu-libs
-  gimp-plugins:
+  clay-plugins:
     interface: content
-    content: gimp-plugins-3
-    target: $SNAP/gimp-plugins
-  gimp-config:
+    content: clay-plugins-3
+    target: $SNAP/clay-plugins
+  clay-config:
     interface: personal-files
     write:
-      - $HOME/.config/GIMP
+      - $HOME/.config/Clay
 
 parts:
   buildenv:
@@ -94,7 +94,7 @@ parts:
       #Needed to generate splash image because babl and gegl are moved by snapcraft a lot
       - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
       - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
-      #FIXME: GNOME SDK is not setting these runtime vars required by glib-networking and pango tests on gimp build
+      #FIXME: GNOME SDK is not setting these runtime vars required by glib-networking and pango tests on clay build
       - GIO_MODULE_DIR: ${SNAPCRAFT_GNOME_SDK:-/snap/gnome-46-2404-sdk/current/}usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
       - LIBTHAI_DICTDIR: ${SNAPCRAFT_GNOME_SDK:-/snap/gnome-46-2404-sdk/current/}usr/share/libthai
 
@@ -102,11 +102,11 @@ parts:
     source: https://gitlab.gnome.org/GNOME/babl.git
     source-depth: 1
     override-pull: |
-      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" = 'gimp' ]; then
-        printf '\033[31m(ERROR)\033[0m non-tagged source can not be deployed to gimp snap. Please, change grade value to stable\n'
+      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" = 'clay' ]; then
+        printf '\033[31m(ERROR)\033[0m non-tagged source can not be deployed to clay snap. Please, change grade value to stable\n'
         exit 1
       fi
-      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" != 'gimp' ]; then
+      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" != 'clay' ]; then
         craftctl default
       else
         repo="https://gitlab.gnome.org/GNOME/$CRAFT_PART_NAME.git"
@@ -129,11 +129,11 @@ parts:
     source: https://gitlab.gnome.org/GNOME/gegl.git
     source-depth: 1
     override-pull: |
-      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" = 'gimp' ]; then
-        printf '\033[31m(ERROR)\033[0m non-tagged source can not be deployed to gimp snap. Please, change grade value to stable\n'
+      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" = 'clay' ]; then
+        printf '\033[31m(ERROR)\033[0m non-tagged source can not be deployed to clay snap. Please, change grade value to stable\n'
         exit 1
       fi
-      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" != 'gimp' ]; then
+      if [ "$SNAPCRAFT_PROJECT_GRADE" != 'stable' ] && [ "$SNAPCRAFT_PROJECT_NAME" != 'clay' ]; then
         craftctl default
       else
         repo="https://gitlab.gnome.org/GNOME/$CRAFT_PART_NAME.git"
@@ -158,7 +158,7 @@ parts:
       - libmaxflow0
       - libumfpack6
 
-  gimp:
+  clay:
     after:
       - babl
       - gegl
@@ -166,8 +166,8 @@ parts:
     source-type: local
     override-pull: |
       craftctl default
-      if ! git describe --tags --exact-match >/dev/null 2>&1 && [ "$SNAPCRAFT_PROJECT_NAME" = 'gimp' ]; then
-        printf '\033[31m(ERROR)\033[0m non-tagged source can not be deployed to gimp snap. Please, checkout gimp repo to a tagged commit\n'
+      if ! git describe --tags --exact-match >/dev/null 2>&1 && [ "$SNAPCRAFT_PROJECT_NAME" = 'clay' ]; then
+        printf '\033[31m(ERROR)\033[0m non-tagged source can not be deployed to clay snap. Please, checkout clay repo to a tagged commit\n'
         exit 1
       fi
       craftctl set version="$(awk -F"'" '/version:/ {print $2; exit}' $CRAFT_PART_SRC/meson.build)"
@@ -182,7 +182,7 @@ parts:
       - -Dgi-docgen=disabled
       - -Dcheck-update=no
       - -Denable-default-bin=enabled
-      - -Dbuild-id=org.gimp.GIMP.snapcraft.experimental
+      - -Dbuild-id=org.clay.Clay.snapcraft.experimental
     build-packages:
       - bison
       - flex
@@ -220,15 +220,15 @@ parts:
       - poppler-data
       - xdg-utils
     override-stage: |
-      # update gimp's plugin search path so it will pick up plugins mounted over snapd's content interface
-      current_path=$(grep "# (plug-in-path" ${CRAFT_PART_INSTALL}/etc/clay/3.0/gimprc | cut -d '"' -f2)
-      echo "(plug-in-path \"${current_path}:/snap/${SNAPCRAFT_PROJECT_NAME}/current/gimp-plugins\")" >> ${CRAFT_PART_INSTALL}/etc/clay/3.0/gimprc
+      # update clay's plugin search path so it will pick up plugins mounted over snapd's content interface
+      current_path=$(grep "# (plug-in-path" ${CRAFT_PART_INSTALL}/etc/clay/3.0/clayrc | cut -d '"' -f2)
+      echo "(plug-in-path \"${current_path}:/snap/${SNAPCRAFT_PROJECT_NAME}/current/clay-plugins\")" >> ${CRAFT_PART_INSTALL}/etc/clay/3.0/clayrc
       craftctl default
     parse-info:
-      - usr/share/metainfo/org.gimp.GIMP.appdata.xml
+      - usr/share/metainfo/org.clay.Clay.appdata.xml
     override-prime: |
-      # get gimp icon for proper desktop integration
-      cp $CRAFT_STAGE/usr/share/icons/hicolor/scalable/apps/gimp.svg $CRAFT_PRIME/gimp
+      # get clay icon for proper desktop integration
+      cp $CRAFT_STAGE/usr/share/icons/hicolor/scalable/apps/clay.svg $CRAFT_PRIME/clay
       craftctl default
       #https://salsa.debian.org/multimedia-team/mypaint-brushes/-/merge_requests/2
       for myb in $(find "$CRAFT_PRIME/usr/share/mypaint-data/2.0/brushes/Dieterle" -iname "*.myb"); do
@@ -245,17 +245,17 @@ parts:
       # Set LD_LIBRARY_PATH for third-party plugins.
       #
       # Each third-party plugin snap may provide a
-      # add-ld-library-path file so GIMP can find the
+      # add-ld-library-path file so Clay can find the
       # plugin .so. The file should provide a path
-      # relative to ${SNAP}/gimp-plugins, which is the
-      # mount point for the GIMP snap generic content
+      # relative to ${SNAP}/clay-plugins, which is the
+      # mount point for the Clay snap generic content
       # interface plug.
       #
 
-      for path_file in "${SNAP}"/gimp-plugins/*.conf/add-ld-library-path; do
+      for path_file in "${SNAP}"/clay-plugins/*.conf/add-ld-library-path; do
         if [ -f "${path_file}" ]; then
           while IFS= read -r path || [ -n "${path}" ]; do
-            LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SNAP}/gimp-plugins/${path}"
+            LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SNAP}/clay-plugins/${path}"
           done < "${path_file}"
         fi
       done

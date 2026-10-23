@@ -29,17 +29,17 @@
                         height
                         dest-x
                         dest-y)
-  (gimp-image-select-rectangle img CHANNEL-OP-REPLACE x1 y1 width height)
-  (gimp-edit-copy (vector drawable))
+  (clay-image-select-rectangle img CHANNEL-OP-REPLACE x1 y1 width height)
+  (clay-edit-copy (vector drawable))
   (let* (
-         (pasted (car (gimp-edit-paste drawable FALSE)))
+         (pasted (car (clay-edit-paste drawable FALSE)))
          (num-pasted (vector-length pasted))
          (floating-sel (vector-ref pasted (- num-pasted 1)))
         )
-   (gimp-layer-set-offsets floating-sel dest-x dest-y)
-   (gimp-floating-sel-anchor floating-sel)
+   (clay-layer-set-offsets floating-sel dest-x dest-y)
+   (clay-floating-sel-anchor floating-sel)
   )
-  (gimp-selection-none img))
+  (clay-selection-none img))
 
 ; Creates a single weaving tile
 
@@ -49,30 +49,30 @@
                            shadow-depth)
   (let* ((tile-size (+ (* 2 ribbon-width) (* 2 ribbon-spacing)))
          (darkness (* 255 (/ (- 100 shadow-darkness) 100)))
-         (img (car (gimp-image-new tile-size tile-size RGB)))
-         (drawable (car (gimp-layer-new img "Weave tile" tile-size tile-size RGB-IMAGE
+         (img (car (clay-image-new tile-size tile-size RGB)))
+         (drawable (car (clay-layer-new img "Weave tile" tile-size tile-size RGB-IMAGE
                                         100 LAYER-MODE-NORMAL))))
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
-    (gimp-context-set-background '(0 0 0))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
 
     ; Create main horizontal ribbon
 
-    (gimp-context-set-foreground '(255 255 255))
-    (gimp-context-set-background (list darkness darkness darkness))
+    (clay-context-set-foreground '(255 255 255))
+    (clay-context-set-background (list darkness darkness darkness))
 
-    (gimp-image-select-rectangle img
+    (clay-image-select-rectangle img
                                  CHANNEL-OP-REPLACE
                                  0
                                  ribbon-spacing
                                  (+ (* 2 ribbon-spacing) ribbon-width)
                                  ribbon-width)
 
-    (gimp-context-set-gradient-fg-bg-rgb)
-    (gimp-drawable-edit-gradient-fill drawable
+    (clay-context-set-gradient-fg-bg-rgb)
+    (clay-drawable-edit-gradient-fill drawable
 				      GRADIENT-BILINEAR (- 100 shadow-depth)
 				      FALSE 1 0
 				      TRUE
@@ -81,14 +81,14 @@
 
     ; Create main vertical ribbon
 
-    (gimp-image-select-rectangle img
+    (clay-image-select-rectangle img
                                  CHANNEL-OP-REPLACE
                                  (+ (* 2 ribbon-spacing) ribbon-width)
                                  0
                                  ribbon-width
                                  (+ (* 2 ribbon-spacing) ribbon-width))
 
-    (gimp-drawable-edit-gradient-fill drawable
+    (clay-drawable-edit-gradient-fill drawable
 				      GRADIENT-BILINEAR (- 100 shadow-depth)
 				      FALSE 1 0
 				      TRUE
@@ -137,7 +137,7 @@
 
     ; Done
 
-    (gimp-image-undo-enable img)
+    (clay-image-undo-enable img)
     (list img drawable)))
 
 ; Creates a complete weaving mask
@@ -153,7 +153,7 @@
          (tile-img (car tile))
          (tile-layer (cadr tile))
           (weaving (plug-in-tile #:run-mode RUN-NONINTERACTIVE #:image tile-img #:drawables (vector tile-layer) #:new-width width #:new-height height #:new-image TRUE)))
-    (gimp-image-delete tile-img)
+    (clay-image-delete tile-img)
     weaving))
 
 ; Creates a single tile for masking
@@ -173,24 +173,24 @@
                           r3-width
                           r3-height)
   (let* ((tile-size (+ (* 2 ribbon-width) (* 2 ribbon-spacing)))
-         (img (car (gimp-image-new tile-size tile-size RGB)))
-         (drawable (car (gimp-layer-new img "Mask" tile-size tile-size RGB-IMAGE
+         (img (car (clay-image-new tile-size tile-size RGB)))
+         (drawable (car (clay-layer-new img "Mask" tile-size tile-size RGB-IMAGE
                                         100 LAYER-MODE-NORMAL))))
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
-    (gimp-context-set-background '(0 0 0))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
 
-    (gimp-image-select-rectangle img CHANNEL-OP-REPLACE r1-x1 r1-y1 r1-width r1-height)
-    (gimp-image-select-rectangle img CHANNEL-OP-ADD r2-x1 r2-y1 r2-width r2-height)
-    (gimp-image-select-rectangle img CHANNEL-OP-ADD r3-x1 r3-y1 r3-width r3-height)
+    (clay-image-select-rectangle img CHANNEL-OP-REPLACE r1-x1 r1-y1 r1-width r1-height)
+    (clay-image-select-rectangle img CHANNEL-OP-ADD r2-x1 r2-y1 r2-width r2-height)
+    (clay-image-select-rectangle img CHANNEL-OP-ADD r3-x1 r3-y1 r3-width r3-height)
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
-    (gimp-selection-none img)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-selection-none img)
 
-    (gimp-image-undo-enable img)
+    (clay-image-undo-enable img)
 
     (list img drawable)))
 
@@ -224,7 +224,7 @@
                              #:new-width  final-width
                              #:new-height final-height
                              #:new-image  TRUE)))
-    (gimp-image-delete tile-img)
+    (clay-image-delete tile-img)
     mask))
 
 ; Creates the mask for horizontal ribbons
@@ -281,21 +281,21 @@
                               length
                               density
                               orientation)
-  (let* ((drawable (car (gimp-layer-new img "Threads" width height RGBA-IMAGE
+  (let* ((drawable (car (clay-layer-new img "Threads" width height RGBA-IMAGE
                                         100 LAYER-MODE-NORMAL)))
          (dense (/ density 100.0)))
-    (gimp-image-insert-layer img drawable 0 -1)
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
-    (gimp-drawable-merge-new-filter drawable "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
+    (clay-image-insert-layer img drawable 0 -1)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-drawable-merge-new-filter drawable "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
                                     "independent" FALSE "red" dense "alpha" dense
                                     "correlated" FALSE "seed" (msrg-rand) "linear" TRUE)
-    (gimp-drawable-merge-new-filter drawable "gegl:stretch-contrast" 0 LAYER-MODE-REPLACE 1.0 "keep-colors" FALSE)
+    (clay-drawable-merge-new-filter drawable "gegl:stretch-contrast" 0 LAYER-MODE-REPLACE 1.0 "keep-colors" FALSE)
     (cond ((eq? orientation 'horizontal)
-           (gimp-drawable-merge-new-filter drawable "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 length) "std-dev-y" 0.0 "filter" "auto"))
+           (clay-drawable-merge-new-filter drawable "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 length) "std-dev-y" 0.0 "filter" "auto"))
           ((eq? orientation 'vertical)
-           (gimp-drawable-merge-new-filter drawable "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 0.0 "std-dev-y" (* 0.32 length) "filter" "auto")))
-    (gimp-drawable-merge-new-filter drawable "gegl:stretch-contrast" 0 LAYER-MODE-REPLACE 1.0 "keep-colors" FALSE)
+           (clay-drawable-merge-new-filter drawable "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 0.0 "std-dev-y" (* 0.32 length) "filter" "auto")))
+    (clay-drawable-merge-new-filter drawable "gegl:stretch-contrast" 0 LAYER-MODE-REPLACE 1.0 "keep-colors" FALSE)
     drawable))
 
 (define (create-complete-weave width
@@ -314,11 +314,11 @@
 
          (h-layer (create-threads-layer w-img width height thread-length
                                         thread-density 'horizontal))
-         (h-mask (car (gimp-layer-create-mask h-layer ADD-MASK-WHITE)))
+         (h-mask (car (clay-layer-create-mask h-layer ADD-MASK-WHITE)))
 
          (v-layer (create-threads-layer w-img width height thread-length
                                         thread-density 'vertical))
-         (v-mask (car (gimp-layer-create-mask v-layer ADD-MASK-WHITE)))
+         (v-mask (car (clay-layer-create-mask v-layer ADD-MASK-WHITE)))
 
          (hmask (create-horizontal-mask ribbon-width ribbon-spacing
                                         width height))
@@ -329,39 +329,39 @@
          (vm-img (car vmask))
          (vm-layer (cadr vmask)))
 
-    (gimp-layer-add-mask h-layer h-mask)
-    (gimp-selection-all hm-img)
-    (gimp-edit-copy (vector hm-layer))
-    (gimp-image-delete hm-img)
+    (clay-layer-add-mask h-layer h-mask)
+    (clay-selection-all hm-img)
+    (clay-edit-copy (vector hm-layer))
+    (clay-image-delete hm-img)
     (let* (
-           (pasted (car (gimp-edit-paste h-mask FALSE)))
+           (pasted (car (clay-edit-paste h-mask FALSE)))
            (num-pasted (vector-length pasted))
            (floating-sel (vector-ref pasted (- num-pasted 1)))
           )
-     (gimp-floating-sel-anchor floating-sel)
+     (clay-floating-sel-anchor floating-sel)
     )
-    (gimp-layer-set-opacity h-layer thread-intensity)
-    (gimp-layer-set-mode h-layer LAYER-MODE-MULTIPLY)
+    (clay-layer-set-opacity h-layer thread-intensity)
+    (clay-layer-set-mode h-layer LAYER-MODE-MULTIPLY)
 
-    (gimp-layer-add-mask v-layer v-mask)
-    (gimp-selection-all vm-img)
-    (gimp-edit-copy (vector vm-layer))
-    (gimp-image-delete vm-img)
+    (clay-layer-add-mask v-layer v-mask)
+    (clay-selection-all vm-img)
+    (clay-edit-copy (vector vm-layer))
+    (clay-image-delete vm-img)
     (let* (
-           (pasted (car (gimp-edit-paste v-mask FALSE)))
+           (pasted (car (clay-edit-paste v-mask FALSE)))
            (num-pasted (vector-length pasted))
            (floating-sel (vector-ref pasted (- num-pasted 1)))
           )
-     (gimp-floating-sel-anchor floating-sel)
+     (clay-floating-sel-anchor floating-sel)
     )
-    (gimp-layer-set-opacity v-layer thread-intensity)
-    (gimp-layer-set-mode v-layer LAYER-MODE-MULTIPLY)
+    (clay-layer-set-opacity v-layer thread-intensity)
+    (clay-layer-set-mode v-layer LAYER-MODE-MULTIPLY)
 
     ; Uncomment this if you want to keep the weaving mask image
-    ; (gimp-display-new (car (gimp-image-duplicate w-img)))
+    ; (clay-display-new (car (clay-image-duplicate w-img)))
 
     (list w-img
-          (car (gimp-image-flatten w-img)))))
+          (car (clay-image-flatten w-img)))))
 
 ; The main weave function
 
@@ -374,15 +374,15 @@
                          thread-length
                          thread-density
                          thread-intensity)
-  (gimp-context-push)
-  (gimp-image-undo-group-start img)
+  (clay-context-push)
+  (clay-image-undo-group-start img)
 
   (let* (
         (drawable (vector-ref drawables 0))
-        (d-img (car (gimp-item-get-image drawable)))
-        (d-width (car (gimp-drawable-get-width drawable)))
-        (d-height (car (gimp-drawable-get-height drawable)))
-        (d-offsets (gimp-drawable-get-offsets drawable))
+        (d-img (car (clay-item-get-image drawable)))
+        (d-width (car (clay-drawable-get-width drawable)))
+        (d-height (car (clay-drawable-get-height drawable)))
+        (d-offsets (clay-drawable-get-offsets drawable))
 
         (weaving (create-complete-weave d-width
                                         d-height
@@ -397,28 +397,28 @@
         (w-layer (cadr weaving))
         )
 
-    (gimp-context-set-paint-mode LAYER-MODE-NORMAL)
-    (gimp-context-set-opacity 100.0)
-    (gimp-context-set-feather FALSE)
+    (clay-context-set-paint-mode LAYER-MODE-NORMAL)
+    (clay-context-set-opacity 100.0)
+    (clay-context-set-feather FALSE)
 
-    (gimp-selection-all w-img)
-    (gimp-edit-copy (vector w-layer))
-    (gimp-image-delete w-img)
+    (clay-selection-all w-img)
+    (clay-edit-copy (vector w-layer))
+    (clay-image-delete w-img)
     (let* (
-           (pasted (car (gimp-edit-paste drawable FALSE)))
+           (pasted (car (clay-edit-paste drawable FALSE)))
            (num-pasted (vector-length pasted))
            (floating-sel (vector-ref pasted (- num-pasted 1)))
           )
-          (gimp-layer-set-offsets floating-sel
+          (clay-layer-set-offsets floating-sel
                                   (car d-offsets)
                                   (cadr d-offsets))
-          (gimp-layer-set-mode floating-sel LAYER-MODE-MULTIPLY)
-          (gimp-floating-sel-to-layer floating-sel)
+          (clay-layer-set-mode floating-sel LAYER-MODE-MULTIPLY)
+          (clay-floating-sel-to-layer floating-sel)
     )
   )
-  (gimp-context-pop)
-  (gimp-image-undo-group-end img)
-  (gimp-displays-flush)
+  (clay-context-pop)
+  (clay-image-undo-group-end img)
+  (clay-displays-flush)
 )
 
 (script-fu-register-filter "script-fu-weave"

@@ -12,52 +12,52 @@
 ; Wilber has one layer
 
 ; car is vector, first element is a drawable
-(define testDrawable (vector-ref (gimp-image-get-layers testImage) 0))
+(define testDrawable (vector-ref (clay-image-get-layers testImage) 0))
 
 
 (test! "drawable operations")
 
 ; tests in alphabetic order
 
-(assert `(gimp-drawable-brightness-contrast ,testDrawable 0.1 -0.1))
+(assert `(clay-drawable-brightness-contrast ,testDrawable 0.1 -0.1))
 
-(assert `(gimp-drawable-color-balance ,testDrawable TRANSFER-MIDTONES 1 0.1 0.1 0.1))
+(assert `(clay-drawable-color-balance ,testDrawable TRANSFER-MIDTONES 1 0.1 0.1 0.1))
 
-(assert `(gimp-drawable-colorize-hsl ,testDrawable 360 50 -50))
+(assert `(clay-drawable-colorize-hsl ,testDrawable 360 50 -50))
 
 ; requires vector of size 256 of floats
-(assert `(gimp-drawable-curves-explicit ,testDrawable HISTOGRAM-RED
+(assert `(clay-drawable-curves-explicit ,testDrawable HISTOGRAM-RED
       (make-vector 256 1.0)))
 
 ; two pairs of float control points of a spline, four floats in total
-(assert `(gimp-drawable-curves-spline ,testDrawable HISTOGRAM-RED #(0 0 25.0 25.0) ))
+(assert `(clay-drawable-curves-spline ,testDrawable HISTOGRAM-RED #(0 0 25.0 25.0) ))
 
-(assert `(gimp-drawable-desaturate ,testDrawable DESATURATE-LUMA))
+(assert `(clay-drawable-desaturate ,testDrawable DESATURATE-LUMA))
 
-(assert `(gimp-drawable-equalize ,testDrawable 1)) ; boolean mask-only
+(assert `(clay-drawable-equalize ,testDrawable 1)) ; boolean mask-only
 
-(assert `(gimp-drawable-extract-component ,testDrawable SELECT-CRITERION-HSV-SATURATION #t #t))
+(assert `(clay-drawable-extract-component ,testDrawable SELECT-CRITERION-HSV-SATURATION #t #t))
 
-(assert `(gimp-drawable-fill ,testDrawable FILL-CIELAB-MIDDLE-GRAY))
+(assert `(clay-drawable-fill ,testDrawable FILL-CIELAB-MIDDLE-GRAY))
 
-(assert `(gimp-drawable-foreground-extract ,testDrawable FOREGROUND-EXTRACT-MATTING ,testDrawable))
+(assert `(clay-drawable-foreground-extract ,testDrawable FOREGROUND-EXTRACT-MATTING ,testDrawable))
 
-(assert `(gimp-drawable-hue-saturation ,testDrawable HUE-RANGE-MAGENTA 0 1 2 3))
+(assert `(clay-drawable-hue-saturation ,testDrawable HUE-RANGE-MAGENTA 0 1 2 3))
 
-(assert `(gimp-drawable-invert ,testDrawable 1)) ; boolean invert in linear space
+(assert `(clay-drawable-invert ,testDrawable 1)) ; boolean invert in linear space
 
-(assert `(gimp-drawable-levels
+(assert `(clay-drawable-levels
             ,testDrawable
             HISTOGRAM-LUMINANCE
             0.5 0.5 1 ; boolean clamp input
             8 0.5 0.5 1 ; boolean clamp output
             ))
 
-(assert `(gimp-drawable-levels-stretch ,testDrawable))
+(assert `(clay-drawable-levels-stretch ,testDrawable))
 
-(assert `(gimp-drawable-posterize ,testDrawable 2))
+(assert `(clay-drawable-posterize ,testDrawable 2))
 
-(assert `(gimp-drawable-shadows-highlights
+(assert `(clay-drawable-shadows-highlights
              ,testDrawable
              -50 50
              -10
@@ -65,13 +65,13 @@
              50
              0 100))
 
-(assert `(gimp-drawable-threshold
+(assert `(clay-drawable-threshold
             ,testDrawable
             HISTOGRAM-ALPHA
             0.1 1))
 
-(assert `(gimp-drawable-desaturate ,testDrawable DESATURATE-LUMA))
-(assert `(gimp-drawable-desaturate ,testDrawable DESATURATE-LUMA))
+(assert `(clay-drawable-desaturate ,testDrawable DESATURATE-LUMA))
+(assert `(clay-drawable-desaturate ,testDrawable DESATURATE-LUMA))
 
 (testing:show testImage)
 

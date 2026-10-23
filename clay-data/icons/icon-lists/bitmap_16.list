@@ -1,0 +1,198 @@
+dialog-error
+dialog-information
+dialog-question
+dialog-warning
+document-new
+document-open
+document-open-recent
+document-print
+document-revert
+document-save
+document-save-as
+edit-clear
+edit-copy
+edit-cut
+edit-delete
+edit-paste
+edit-redo
+edit-undo
+folder
+folder-new
+go-bottom
+go-down
+go-first
+go-home
+go-last
+go-next
+go-previous
+go-top
+go-up
+help-about
+list-add
+list-remove
+media-playback-pause
+media-playback-start
+media-record
+media-seek-backward
+media-skip-backward
+media-skip-forward
+object-flip-horizontal
+object-flip-vertical
+object-rotate-left
+object-rotate-right
+preferences-system
+process-stop
+system-run
+view-fullscreen
+view-refresh
+window-new
+zoom-fit-best
+zoom-in
+zoom-original
+zoom-out
+
+gtk-cancel
+gtk-edit
+gtk-no
+gtk-ok
+# Used for many action icons (CLAY_ICON_PALETTE)
+gtk-select-color
+gtk-select-font
+gtk-yes
+
+clay-anchor
+clay-cap-butt
+clay-cap-round
+clay-cap-square
+clay-center
+clay-channel-alpha
+clay-channel-blue
+clay-channel-gray
+clay-channel-green
+clay-channel-indexed
+clay-channel-red
+clay-channel
+clay-channels
+clay-char-picker
+clay-clipboard
+clay-close-all
+clay-color-pick-from-screen
+clay-color-space-linear
+clay-color-space-non-linear
+clay-color-space-perceptual
+clay-colormap
+clay-convert-grayscale
+clay-convert-indexed
+clay-convert-rgb
+clay-cursor
+clay-curve-free
+clay-curve-point-corner
+clay-curve-point-smooth
+clay-curve-smooth
+clay-dashboard
+clay-device-status
+# Used as view-display-filters action (usually 16px).
+clay-display-filter
+clay-duplicate
+clay-dynamics
+clay-effects
+clay-file-manager
+clay-floating-selection
+clay-gegl
+clay-gradient-bilinear
+clay-gradient-conical-asymmetric
+clay-gradient-conical-symmetric
+clay-gradient-linear
+clay-gradient-radial
+clay-gradient-shapeburst-angular
+clay-gradient-shapeburst-dimpled
+clay-gradient-shapeburst-spherical
+clay-gradient-spiral-anticlockwise
+clay-gradient-spiral-clockwise
+clay-gradient-square
+clay-grid
+clay-group-layer
+clay-histogram-linear
+clay-histogram-logarithmic
+clay-histogram
+clay-image
+clay-image-open
+clay-image-reload
+clay-images
+clay-input-device
+clay-invert
+clay-join-bevel
+clay-join-miter
+clay-join-round
+clay-landscape
+clay-layer-mask
+clay-layer-to-imagesize
+clay-layer
+clay-layers
+# CLAY_ICON_LINKED used in:
+# - claypaintoptions-gui.c as GTK_ICON_SIZE_MENU button (16px).
+# - claylayertreeview.c as button-icon-size (in our system theme
+#   ClayEditor-button-icon-size is set to "menu", i.e. 16px) button.
+# - various action icons.
+clay-linked
+clay-list
+clay-marker
+clay-merge-down
+clay-move-to-screen
+clay-navigation
+clay-paste-as-new
+clay-paste-into
+clay-path-stroke
+clay-path
+clay-paths
+clay-pattern
+clay-plugin
+clay-portrait
+clay-reset
+clay-reshow-filter
+clay-resize
+clay-rotate-180
+clay-sample-point
+clay-scale
+clay-selection-add
+clay-selection-all
+clay-selection-border
+clay-selection-grow
+clay-selection-intersect
+clay-selection-none
+clay-selection-replace
+clay-selection-shrink
+clay-selection-stroke
+clay-selection-subtract
+clay-selection-to-channel
+clay-selection-to-path
+clay-selection
+clay-shape-circle
+clay-shape-diamond
+clay-shape-square
+clay-shred
+clay-symmetry
+clay-template
+clay-text-layer
+clay-tools
+clay-transform-3d-camera
+clay-transform-3d-move
+clay-transform-3d-rotate
+clay-transparency
+clay-undo-history
+clay-user-manual
+# CLAY_ICON_VISIBLE used in:
+# - clayitemtreeview.c as button-icon-size (in our system theme
+#   ClayEditor-button-icon-size is set to "menu", i.e. 16px) image and
+#   ClayCellRendererToggle (16px).
+# - claytooleditor.c and claycomponenteditor.c as ClayCellRendererToggle (16px).
+# - claycolordisplayeditor.c as menu size image (16px).
+# - various action icons.
+# - item-options-dialog.c as GTK_ICON_SIZE_BUTTON check button (16px).
+clay-visible
+# - GTK_ICON_SIZE_BUTTON (16px) in file-open-location-dialog.c
+# - file-open-location action (menu, action search, etc. Usually 16px)
+# - GTK_ICON_SIZE_BUTTON in web-page plug-in.
+# - GTK_ICON_SIZE_MENU in imagemap plug-in.
+clay-web
+clay-wilber

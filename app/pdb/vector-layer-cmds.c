@@ -27,55 +27,55 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpdashpattern.h"
-#include "core/gimpimage.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppattern.h"
-#include "core/gimprasterizable.h"
-#include "core/gimpstrokeoptions.h"
-#include "path/gimppath.h"
-#include "path/gimpvectorlayer.h"
-#include "path/gimpvectorlayeroptions.h"
+#include "core/claycontext.h"
+#include "core/claydashpattern.h"
+#include "core/clayimage.h"
+#include "core/clayparamspecs.h"
+#include "core/claypattern.h"
+#include "core/clayrasterizable.h"
+#include "core/claystrokeoptions.h"
+#include "path/claypath.h"
+#include "path/clayvectorlayer.h"
+#include "path/clayvectorlayeroptions.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-vector_layer_new_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_new_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
-  GimpPath *path;
-  GimpVectorLayer *layer = NULL;
+  ClayValueArray *return_vals;
+  ClayImage *image;
+  ClayPath *path;
+  ClayVectorLayer *layer = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  path = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  path = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
       if (path == NULL)
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Failed to create vector layer"));
 
           success = FALSE;
@@ -83,11 +83,11 @@ vector_layer_new_invoker (GimpProcedure         *procedure,
 
       if (success)
         {
-          layer = GIMP_VECTOR_LAYER (gimp_vector_layer_new (image, path, context));
+          layer = CLAY_VECTOR_LAYER (clay_vector_layer_new (image, path, context));
 
           if (! layer)
             {
-              g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+              g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                            _("Failed to create vector layer"));
 
               success = FALSE;
@@ -95,57 +95,57 @@ vector_layer_new_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), layer);
+    g_value_set_object (clay_value_array_index (return_vals, 1), layer);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_refresh_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_refresh_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_vector_layer_refresh (layer);
+      clay_vector_layer_refresh (layer);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_get_enable_fill_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_enable_fill_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gboolean enable_fill = FALSE;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -155,35 +155,35 @@ vector_layer_get_enable_fill_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), enable_fill);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), enable_fill);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_enable_stroke_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_enable_stroke_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gboolean enable_stroke = FALSE;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -193,502 +193,502 @@ vector_layer_get_enable_stroke_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), enable_stroke);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), enable_stroke);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_fill_color_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_fill_color_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   GeglColor *color = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
         {
-          GimpCustomStyle style = gimp_fill_options_get_custom_style (options->fill_options);
+          ClayCustomStyle style = clay_fill_options_get_custom_style (options->fill_options);
 
-          if (style == GIMP_CUSTOM_STYLE_SOLID_COLOR ||
-              ! gimp_context_get_pattern (GIMP_CONTEXT (options->fill_options)))
+          if (style == CLAY_CUSTOM_STYLE_SOLID_COLOR ||
+              ! clay_context_get_pattern (CLAY_CONTEXT (options->fill_options)))
             color =
-              gegl_color_duplicate (gimp_context_get_foreground (GIMP_CONTEXT (options->fill_options)));
+              gegl_color_duplicate (clay_context_get_foreground (CLAY_CONTEXT (options->fill_options)));
           else
             success = FALSE;
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), color);
+    g_value_take_object (clay_value_array_index (return_vals, 1), color);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_fill_pattern_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_fill_pattern_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
-  GimpPattern *pattern = NULL;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
+  ClayPattern *pattern = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
         {
-          GimpCustomStyle style = gimp_fill_options_get_custom_style (options->fill_options);
+          ClayCustomStyle style = clay_fill_options_get_custom_style (options->fill_options);
 
-          if (style == GIMP_CUSTOM_STYLE_PATTERN)
-            pattern = gimp_context_get_pattern (GIMP_CONTEXT (options->fill_options));
+          if (style == CLAY_CUSTOM_STYLE_PATTERN)
+            pattern = clay_context_get_pattern (CLAY_CONTEXT (options->fill_options));
 
           if (pattern == NULL)
             success = FALSE;
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), pattern);
+    g_value_set_object (clay_value_array_index (return_vals, 1), pattern);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_path_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_path_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
-  GimpPath *path = NULL;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
+  ClayPath *path = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      path = gimp_vector_layer_get_path (layer);
+      path = clay_vector_layer_get_path (layer);
 
       if (! path)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), path);
+    g_value_set_object (clay_value_array_index (return_vals, 1), path);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_cap_style_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_cap_style_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gint cap_style = 0;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        cap_style = gimp_stroke_options_get_cap_style (options->stroke_options);
+        cap_style = clay_stroke_options_get_cap_style (options->stroke_options);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), cap_style);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), cap_style);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_color_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_color_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   GeglColor *color = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
         {
-          GimpCustomStyle style = gimp_fill_options_get_custom_style (GIMP_FILL_OPTIONS (options->stroke_options));
+          ClayCustomStyle style = clay_fill_options_get_custom_style (CLAY_FILL_OPTIONS (options->stroke_options));
 
-          if (style == GIMP_CUSTOM_STYLE_SOLID_COLOR ||
-              ! gimp_context_get_pattern (GIMP_CONTEXT (options->stroke_options)))
-            color = gegl_color_duplicate (gimp_context_get_foreground (GIMP_CONTEXT (options->stroke_options)));
+          if (style == CLAY_CUSTOM_STYLE_SOLID_COLOR ||
+              ! clay_context_get_pattern (CLAY_CONTEXT (options->stroke_options)))
+            color = gegl_color_duplicate (clay_context_get_foreground (CLAY_CONTEXT (options->stroke_options)));
           else
             success = FALSE;
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), color);
+    g_value_take_object (clay_value_array_index (return_vals, 1), color);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_pattern_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_pattern_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
-  GimpPattern *pattern = NULL;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
+  ClayPattern *pattern = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
         {
-          GimpCustomStyle style = gimp_fill_options_get_custom_style (GIMP_FILL_OPTIONS (options->stroke_options));
+          ClayCustomStyle style = clay_fill_options_get_custom_style (CLAY_FILL_OPTIONS (options->stroke_options));
 
-          if (style == GIMP_CUSTOM_STYLE_PATTERN)
-            pattern = gimp_context_get_pattern (GIMP_CONTEXT (options->stroke_options));
+          if (style == CLAY_CUSTOM_STYLE_PATTERN)
+            pattern = clay_context_get_pattern (CLAY_CONTEXT (options->stroke_options));
 
           if (pattern == NULL)
             success = FALSE;
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), pattern);
+    g_value_set_object (clay_value_array_index (return_vals, 1), pattern);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_dash_offset_invoker (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_dash_offset_invoker (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gdouble dash_offset = 0.0;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        dash_offset = gimp_stroke_options_get_dash_offset (options->stroke_options);
+        dash_offset = clay_stroke_options_get_dash_offset (options->stroke_options);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), dash_offset);
+    g_value_set_double (clay_value_array_index (return_vals, 1), dash_offset);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_dash_pattern_invoker (GimpProcedure         *procedure,
-                                              Gimp                  *gimp,
-                                              GimpContext           *context,
-                                              GimpProgress          *progress,
-                                              const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_dash_pattern_invoker (ClayProcedure         *procedure,
+                                              Clay                  *clay,
+                                              ClayContext           *context,
+                                              ClayProgress          *progress,
+                                              const ClayValueArray  *args,
                                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gsize num_dashes = 0;
   gdouble *dashes = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
         {
           GArray *pattern =
-            gimp_stroke_options_get_dash_info (options->stroke_options);
+            clay_stroke_options_get_dash_info (options->stroke_options);
 
-          dashes = gimp_dash_pattern_to_double_array (pattern, &num_dashes);
+          dashes = clay_dash_pattern_to_double_array (pattern, &num_dashes);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    gimp_value_take_double_array (gimp_value_array_index (return_vals, 1), dashes, num_dashes);
+    clay_value_take_double_array (clay_value_array_index (return_vals, 1), dashes, num_dashes);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_join_style_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_join_style_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gint join_style = 0;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        join_style = gimp_stroke_options_get_join_style (options->stroke_options);
+        join_style = clay_stroke_options_get_join_style (options->stroke_options);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), join_style);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), join_style);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_miter_limit_invoker (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_miter_limit_invoker (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gdouble miter = 0.0;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        miter = gimp_stroke_options_get_miter_limit (options->stroke_options);
+        miter = clay_stroke_options_get_miter_limit (options->stroke_options);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), miter);
+    g_value_set_double (clay_value_array_index (return_vals, 1), miter);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_width_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_width_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
   gdouble width = 0.0;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        width = gimp_stroke_options_get_width (options->stroke_options);
+        width = clay_stroke_options_get_width (options->stroke_options);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), width);
+    g_value_set_double (clay_value_array_index (return_vals, 1), width);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_get_stroke_width_unit_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_get_stroke_width_unit_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpVectorLayer *layer;
-  GimpUnit *unit = NULL;
+  ClayValueArray *return_vals;
+  ClayVectorLayer *layer;
+  ClayUnit *unit = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        unit = gimp_stroke_options_get_unit (options->stroke_options);
+        unit = clay_stroke_options_get_unit (options->stroke_options);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), unit);
+    g_value_set_object (clay_value_array_index (return_vals, 1), unit);
 
   return return_vals;
 }
 
-static GimpValueArray *
-vector_layer_set_enable_fill_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_enable_fill_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gboolean enable_fill;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  enable_fill = g_value_get_boolean (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  enable_fill = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -698,30 +698,30 @@ vector_layer_set_enable_fill_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_enable_stroke_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_enable_stroke_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gboolean enable_stroke;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  enable_stroke = g_value_get_boolean (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  enable_stroke = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -733,62 +733,62 @@ vector_layer_set_enable_stroke_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_fill_color_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_fill_color_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   GeglColor *color;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  color = g_value_get_object (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  color = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        gimp_context_set_foreground (GIMP_CONTEXT (options->fill_options),
+        clay_context_set_foreground (CLAY_CONTEXT (options->fill_options),
                                      color);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_cap_style_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_cap_style_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gint cap_style;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  cap_style = g_value_get_enum (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  cap_style = g_value_get_enum (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -798,62 +798,62 @@ vector_layer_set_stroke_cap_style_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_color_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_color_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   GeglColor *color;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  color = g_value_get_object (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  color = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
       if (success)
-        gimp_context_set_foreground (GIMP_CONTEXT (options->stroke_options),
+        clay_context_set_foreground (CLAY_CONTEXT (options->stroke_options),
                                      color);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_dash_offset_invoker (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_dash_offset_invoker (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gdouble dash_offset;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  dash_offset = g_value_get_double (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  dash_offset = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -863,32 +863,32 @@ vector_layer_set_stroke_dash_offset_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_dash_pattern_invoker (GimpProcedure         *procedure,
-                                              Gimp                  *gimp,
-                                              GimpContext           *context,
-                                              GimpProgress          *progress,
-                                              const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_dash_pattern_invoker (ClayProcedure         *procedure,
+                                              Clay                  *clay,
+                                              ClayContext           *context,
+                                              ClayProgress          *progress,
+                                              const ClayValueArray  *args,
                                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gsize num_dashes;
   const gdouble *dashes;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  dashes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_dashes);
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  dashes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_dashes);
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
       GArray                 *pattern = NULL;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -896,42 +896,42 @@ vector_layer_set_stroke_dash_pattern_invoker (GimpProcedure         *procedure,
         {
           if (num_dashes > 0)
             {
-              pattern = gimp_dash_pattern_from_double_array (num_dashes, dashes);
+              pattern = clay_dash_pattern_from_double_array (num_dashes, dashes);
 
               if (! pattern)
                 success = FALSE;
             }
 
           if (success)
-            gimp_stroke_options_take_dash_pattern (options->stroke_options,
-                                                   GIMP_DASH_CUSTOM, pattern);
+            clay_stroke_options_take_dash_pattern (options->stroke_options,
+                                                   CLAY_DASH_CUSTOM, pattern);
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_join_style_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_join_style_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gint join_style;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  join_style = g_value_get_enum (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  join_style = g_value_get_enum (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -941,30 +941,30 @@ vector_layer_set_stroke_join_style_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_miter_limit_invoker (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_miter_limit_invoker (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gdouble miter;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  miter = g_value_get_double (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  miter = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -974,30 +974,30 @@ vector_layer_set_stroke_miter_limit_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_width_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_width_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
+  ClayVectorLayer *layer;
   gdouble width;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  width = g_value_get_double (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  width = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -1007,30 +1007,30 @@ vector_layer_set_stroke_width_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-vector_layer_set_stroke_width_unit_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+vector_layer_set_stroke_width_unit_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpVectorLayer *layer;
-  GimpUnit *unit;
+  ClayVectorLayer *layer;
+  ClayUnit *unit;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  unit = g_value_get_object (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  unit = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpVectorLayerOptions *options;
+      ClayVectorLayerOptions *options;
 
-      options = gimp_vector_layer_get_options (layer);
+      options = clay_vector_layer_get_options (layer);
       if (! options)
         success = FALSE;
 
@@ -1040,821 +1040,821 @@ vector_layer_set_stroke_width_unit_invoker (GimpProcedure         *procedure,
                       NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_vector_layer_procs (GimpPDB *pdb)
+register_vector_layer_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-vector-layer-new
+   * clay-vector-layer-new
    */
-  procedure = gimp_procedure_new (vector_layer_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new vector layer.",
                                   "This procedure creates a new vector layer displaying the specified @path. By default, the fill and stroke properties will be defined by the context.\n"
                                   "\n"
                                   "The new layer still needs to be added to the image as this is not automatic. Add the new layer with the [method@Image.insert_layer] method.\n"
                                   "\n"
-                                  "The arguments are kept as simple as necessary for the basic case. All vector attributes, however, can be modified with the appropriate `gimp_vector_layer_set_*()` procedures.",
+                                  "The arguments are kept as simple as necessary for the basic case. All vector attributes, however, can be modified with the appropriate `clay_vector_layer_set_*()` procedures.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path to create the layer from",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_vector_layer ("layer",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_vector_layer ("layer",
                                                                  "layer",
-                                                                 "The new vector layer. The object belongs to libgimp and you should not free it.",
+                                                                 "The new vector layer. The object belongs to libclay and you should not free it.",
                                                                  FALSE,
-                                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-refresh
+   * clay-vector-layer-refresh
    */
-  procedure = gimp_procedure_new (vector_layer_refresh_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-refresh");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_refresh_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-refresh");
+  clay_procedure_set_static_help (procedure,
                                   "Rerender the vector layer",
                                   "This procedure causes the vector layer to refresh itself after changes.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-enable-fill
+   * clay-vector-layer-get-enable-fill
    */
-  procedure = gimp_procedure_new (vector_layer_get_enable_fill_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-enable-fill");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_enable_fill_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-enable-fill");
+  clay_procedure_set_static_help (procedure,
                                   "Check if fill is enabled in the vector layer.",
                                   "This procedure checks if fill is enabled in the specified vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("enable-fill",
                                                          "enable fill",
                                                          "If the fill is enabled on the vector layer",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-enable-stroke
+   * clay-vector-layer-get-enable-stroke
    */
-  procedure = gimp_procedure_new (vector_layer_get_enable_stroke_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-enable-stroke");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_enable_stroke_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-enable-stroke");
+  clay_procedure_set_static_help (procedure,
                                   "Check if stroke is enabled in the vector layer.",
                                   "This procedure checks if stroke is enabled in the specified vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("enable-stroke",
                                                          "enable stroke",
                                                          "If the stroke is enabled on the vector layer",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-fill-color
+   * clay-vector-layer-get-fill-color
    */
-  procedure = gimp_procedure_new (vector_layer_get_fill_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-fill-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_fill_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-fill-color");
+  clay_procedure_set_static_help (procedure,
                                   "Get the color of the fill in a vector layer.",
                                   "This procedure returns the color of the fill in a vector layer.\n"
                                   "\n"
-                                  "Note that there won't be both a fill color and pattern, so either this procedure or [method@Gimp.VectorLayer.get_fill_pattern] will return %NULL at any given time.",
+                                  "Note that there won't be both a fill color and pattern, so either this procedure or [method@Clay.VectorLayer.get_fill_pattern] will return %NULL at any given time.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("color",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("color",
                                                           "color",
                                                           "The color of the fill.",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-fill-pattern
+   * clay-vector-layer-get-fill-pattern
    */
-  procedure = gimp_procedure_new (vector_layer_get_fill_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-fill-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_fill_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-fill-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Get the pattern of the fill in a vector layer.",
                                   "This procedure returns the pattern of the fill in a vector layer.\n"
                                   "\n"
-                                  "Note that there won't be both a fill color and pattern, so either this procedure or [method@Gimp.VectorLayer.get_fill_color] will return %NULL at any given time.",
+                                  "Note that there won't be both a fill color and pattern, so either this procedure or [method@Clay.VectorLayer.get_fill_color] will return %NULL at any given time.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_pattern ("pattern",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_pattern ("pattern",
                                                             "pattern",
                                                             "The pattern of the fill.",
                                                             FALSE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-path
+   * clay-vector-layer-get-path
    */
-  procedure = gimp_procedure_new (vector_layer_get_path_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-path");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_path_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-path");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the path from the vector layer if one is associated with it.",
                                   "This procedure returns the path from the vector layer if one is associated with it.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_path ("path",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_path ("path",
                                                          "path",
                                                          "The path associated with the vector layer",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-cap-style
+   * clay-vector-layer-get-stroke-cap-style
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_cap_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-cap-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_cap_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-cap-style");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke cap style of a vector layer.",
                                   "This procedure returns the stroke cap style in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("cap-style",
                                                       "cap style",
                                                       "The stroke cap style.",
-                                                      GIMP_TYPE_CAP_STYLE,
-                                                      GIMP_CAP_BUTT,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_CAP_STYLE,
+                                                      CLAY_CAP_BUTT,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-color
+   * clay-vector-layer-get-stroke-color
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-color");
+  clay_procedure_set_static_help (procedure,
                                   "Get the color of the stroke in a vector layer.",
                                   "This procedure returns the color of the stroke in a vector layer.\n"
                                   "\n"
-                                  "Note that there won't be both a stroke color and pattern, so either this procedure or [method@Gimp.VectorLayer.get_stroke_pattern] will return %NULL at any given time.",
+                                  "Note that there won't be both a stroke color and pattern, so either this procedure or [method@Clay.VectorLayer.get_stroke_pattern] will return %NULL at any given time.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("color",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("color",
                                                           "color",
                                                           "The color of the stroke.",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-pattern
+   * clay-vector-layer-get-stroke-pattern
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Get the pattern of the stroke in a vector layer.",
                                   "This procedure returns the pattern of the fill in a vector layer.\n"
                                   "\n"
-                                  "Note that there won't be both a stroke color and pattern, so either this procedure or [method@Gimp.VectorLayer.get_stroke_color] will return %NULL at any given time.",
+                                  "Note that there won't be both a stroke color and pattern, so either this procedure or [method@Clay.VectorLayer.get_stroke_color] will return %NULL at any given time.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_pattern ("pattern",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_pattern ("pattern",
                                                             "pattern",
                                                             "The pattern of the fill.",
                                                             FALSE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-dash-offset
+   * clay-vector-layer-get-stroke-dash-offset
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_dash_offset_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-dash-offset");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_dash_offset_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-dash-offset");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke dash offset of a vector layer.",
                                   "This procedure returns the stroke dash offset in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("dash-offset",
                                                         "dash offset",
                                                         "The stroke dash offset.",
                                                         0, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-dash-pattern
+   * clay-vector-layer-get-stroke-dash-pattern
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_dash_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-dash-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_dash_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-dash-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke dash pattern of a vector layer.",
                                   "This procedure returns the stroke dash pattern in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_double_array ("dashes",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_double_array ("dashes",
                                                                  "dashes",
                                                                  "The stroke dash pattern array.",
-                                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-join-style
+   * clay-vector-layer-get-stroke-join-style
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_join_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-join-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_join_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-join-style");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke join style of a vector layer.",
                                   "This procedure returns the stroke join style in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("join-style",
                                                       "join style",
                                                       "The stroke join style.",
-                                                      GIMP_TYPE_JOIN_STYLE,
-                                                      GIMP_JOIN_MITER,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_JOIN_STYLE,
+                                                      CLAY_JOIN_MITER,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-miter-limit
+   * clay-vector-layer-get-stroke-miter-limit
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_miter_limit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-miter-limit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_miter_limit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-miter-limit");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke miter limit of a vector layer.",
                                   "This procedure returns the stroke miter limit in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("miter",
                                                         "miter",
                                                         "The stroke miter limit.",
                                                         0, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-width
+   * clay-vector-layer-get-stroke-width
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_width_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-width");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_width_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-width");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke width of a vector layer.",
                                   "This procedure returns the stroke width in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("width",
                                                         "width",
                                                         "The stroke width.",
                                                         0, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-get-stroke-width-unit
+   * clay-vector-layer-get-stroke-width-unit
    */
-  procedure = gimp_procedure_new (vector_layer_get_stroke_width_unit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-get-stroke-width-unit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_get_stroke_width_unit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-get-stroke-width-unit");
+  clay_procedure_set_static_help (procedure,
                                   "Get the stroke width unit of a vector layer.",
                                   "This procedure returns the stroke width unit in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_unit ("unit",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_unit ("unit",
                                                          "unit",
                                                          "The stroke width unit.",
                                                          FALSE,
                                                          FALSE,
-                                                         gimp_unit_inch (),
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         clay_unit_inch (),
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-enable-fill
+   * clay-vector-layer-set-enable-fill
    */
-  procedure = gimp_procedure_new (vector_layer_set_enable_fill_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-enable-fill");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_enable_fill_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-enable-fill");
+  clay_procedure_set_static_help (procedure,
                                   "Set whether the fill is enabled on the vector layer.",
                                   "This procedure sets the fill's visibility in the vector layer 'layer'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("enable-fill",
                                                      "enable fill",
                                                      "Whether to enable the fill on the vector layer",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-enable-stroke
+   * clay-vector-layer-set-enable-stroke
    */
-  procedure = gimp_procedure_new (vector_layer_set_enable_stroke_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-enable-stroke");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_enable_stroke_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-enable-stroke");
+  clay_procedure_set_static_help (procedure,
                                   "Set whether the stroke is enabled on the vector layer.",
                                   "This procedure sets the stroke's visibility in the vector layer 'layer'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("enable-stroke",
                                                      "enable stroke",
                                                      "Whether to enable the stroke on the vector layer",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-fill-color
+   * clay-vector-layer-set-fill-color
    */
-  procedure = gimp_procedure_new (vector_layer_set_fill_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-fill-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_fill_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-fill-color");
+  clay_procedure_set_static_help (procedure,
                                   "Set the color of the fill in the vector layer.",
                                   "This procedure sets the fill color in the vector layer 'layer'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The color to use for the fill",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-cap-style
+   * clay-vector-layer-set-stroke-cap-style
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_cap_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-cap-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_cap_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-cap-style");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke cap style of a vector layer.",
                                   "This procedure sets the stroke cap style in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("cap-style",
                                                   "cap style",
                                                   "The stroke cap style.",
-                                                  GIMP_TYPE_CAP_STYLE,
-                                                  GIMP_CAP_BUTT,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_CAP_STYLE,
+                                                  CLAY_CAP_BUTT,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-color
+   * clay-vector-layer-set-stroke-color
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-color");
+  clay_procedure_set_static_help (procedure,
                                   "Set the color of the stroke in the vector layer.",
                                   "This procedure sets the stroke color in the vector layer 'layer'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The color to use for the stroke",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-dash-offset
+   * clay-vector-layer-set-stroke-dash-offset
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_dash_offset_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-dash-offset");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_dash_offset_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-dash-offset");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke dash offset of a vector layer.",
                                   "This procedure sets the stroke dash offset in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("dash-offset",
                                                     "dash offset",
                                                     "The stroke dash offset.",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-dash-pattern
+   * clay-vector-layer-set-stroke-dash-pattern
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_dash_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-dash-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_dash_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-dash-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke dash pattern of a vector layer.",
                                   "This procedure sets the stroke dash pattern in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("dashes",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("dashes",
                                                              "dashes",
                                                              "The line dash pattern setting",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-join-style
+   * clay-vector-layer-set-stroke-join-style
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_join_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-join-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_join_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-join-style");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke join style of a vector layer.",
                                   "This procedure sets the stroke join style in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("join-style",
                                                   "join style",
                                                   "The stroke join style.",
-                                                  GIMP_TYPE_JOIN_STYLE,
-                                                  GIMP_JOIN_MITER,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_JOIN_STYLE,
+                                                  CLAY_JOIN_MITER,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-miter-limit
+   * clay-vector-layer-set-stroke-miter-limit
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_miter_limit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-miter-limit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_miter_limit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-miter-limit");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke miter limit of a vector layer.",
                                   "This procedure sets the stroke miter limit in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("miter",
                                                     "miter",
                                                     "The stroke miter limit.",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-width
+   * clay-vector-layer-set-stroke-width
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_width_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-width");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_width_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-width");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke width of a vector layer.",
                                   "This procedure sets the stroke width in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("width",
                                                     "width",
                                                     "The stroke width.",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-vector-layer-set-stroke-width-unit
+   * clay-vector-layer-set-stroke-width-unit
    */
-  procedure = gimp_procedure_new (vector_layer_set_stroke_width_unit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-vector-layer-set-stroke-width-unit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (vector_layer_set_stroke_width_unit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-vector-layer-set-stroke-width-unit");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke width unit of a vector layer.",
                                   "This procedure sets the stroke width unit in a vector layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_vector_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_vector_layer ("layer",
                                                              "layer",
                                                              "The vector layer.",
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_unit ("unit",
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_unit ("unit",
                                                      "unit",
                                                      "The stroke width unit.",
                                                      TRUE,
                                                      FALSE,
-                                                     gimp_unit_inch (),
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     clay_unit_inch (),
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

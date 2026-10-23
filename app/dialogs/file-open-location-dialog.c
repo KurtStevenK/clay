@@ -23,31 +23,31 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayprogress.h"
 
 #include "file/file-open.h"
 #include "file/file-utils.h"
 
-#include "widgets/gimpcontainerentry.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpprogressbox.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claycontainerentry.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayprogressbox.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "file-open-location-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 static void      file_open_location_response   (GtkDialog          *dialog,
                                                 gint                response_id,
-                                                Gimp               *gimp);
+                                                Clay               *clay);
 
 static gboolean  file_open_location_completion (GtkEntryCompletion *completion,
                                                 const gchar        *key,
@@ -58,9 +58,9 @@ static gboolean  file_open_location_completion (GtkEntryCompletion *completion,
 /*  public functions  */
 
 GtkWidget *
-file_open_location_dialog_new (Gimp *gimp)
+file_open_location_dialog_new (Clay *clay)
 {
-  GimpContext        *context;
+  ClayContext        *context;
   GtkWidget          *dialog;
   GtkWidget          *hbox;
   GtkWidget          *vbox;
@@ -69,13 +69,13 @@ file_open_location_dialog_new (Gimp *gimp)
   GtkWidget          *entry;
   GtkEntryCompletion *completion;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
-  dialog = gimp_dialog_new (_("Open Location"),
-                            "gimp-file-open-location",
+  dialog = clay_dialog_new (_("Open Location"),
+                            "clay-file-open-location",
                             NULL, 0,
-                            gimp_standard_help_func,
-                            GIMP_HELP_FILE_OPEN_LOCATION,
+                            clay_standard_help_func,
+                            CLAY_HELP_FILE_OPEN_LOCATION,
 
                             _("_Cancel"), GTK_RESPONSE_CANCEL,
                             _("_Open"),   GTK_RESPONSE_OK,
@@ -84,14 +84,14 @@ file_open_location_dialog_new (Gimp *gimp)
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG(dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG(dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
 
   g_signal_connect (dialog, "response",
                     G_CALLBACK (file_open_location_response),
-                    gimp);
+                    clay);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 12);
@@ -103,7 +103,7 @@ file_open_location_dialog_new (Gimp *gimp)
   gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  image = gtk_image_new_from_icon_name (GIMP_ICON_WEB, GTK_ICON_SIZE_BUTTON);
+  image = gtk_image_new_from_icon_name (CLAY_ICON_WEB, GTK_ICON_SIZE_BUTTON);
   gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
   gtk_widget_set_visible (image, TRUE);
 
@@ -119,9 +119,9 @@ file_open_location_dialog_new (Gimp *gimp)
   /* we don't want the context to affect the entry, so create
    * a scratch one instead of using e.g. the user context
    */
-  context = gimp_context_new (gimp, "file-open-location-dialog", NULL);
-  entry = gimp_container_entry_new (gimp->documents, context,
-                                    GIMP_VIEW_SIZE_SMALL, 0);
+  context = clay_context_new (clay, "file-open-location-dialog", NULL);
+  entry = clay_container_entry_new (clay->documents, context,
+                                    CLAY_VIEW_SIZE_SMALL, 0);
   g_object_unref (context);
 
   completion = gtk_entry_get_completion (GTK_ENTRY (entry));
@@ -145,7 +145,7 @@ file_open_location_dialog_new (Gimp *gimp)
 static void
 file_open_location_response (GtkDialog *dialog,
                              gint       response_id,
-                             Gimp      *gimp)
+                             Clay      *clay)
 {
   GtkWidget   *entry;
   GtkWidget   *box;
@@ -155,8 +155,8 @@ file_open_location_response (GtkDialog *dialog,
 
   if (response_id != GTK_RESPONSE_OK)
     {
-      if (box && GIMP_PROGRESS_BOX (box)->active)
-        gimp_progress_cancel (GIMP_PROGRESS (box));
+      if (box && CLAY_PROGRESS_BOX (box)->active)
+        clay_progress_cancel (CLAY_PROGRESS (box));
       else
         gtk_widget_destroy (GTK_WIDGET (dialog));
 
@@ -168,10 +168,10 @@ file_open_location_response (GtkDialog *dialog,
 
   if (text && strlen (text))
     {
-      GimpImage         *image;
+      ClayImage         *image;
       gchar             *filename;
       GFile             *file;
-      GimpPDBStatusType  status;
+      ClayPDBStatusType  status;
       GError            *error = NULL;
 
       filename = g_filename_from_uri (text, NULL, NULL);
@@ -183,12 +183,12 @@ file_open_location_response (GtkDialog *dialog,
         }
       else
         {
-          file = file_utils_filename_to_file (gimp, text, &error);
+          file = file_utils_filename_to_file (clay, text, &error);
         }
 
       if (!box)
         {
-          box = gimp_progress_box_new ();
+          box = clay_progress_box_new ();
           gtk_container_set_border_width (GTK_CONTAINER (box), 12);
           gtk_box_pack_end (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                             box, FALSE, FALSE, 0);
@@ -203,21 +203,21 @@ file_open_location_response (GtkDialog *dialog,
           gtk_editable_set_editable (GTK_EDITABLE (entry), FALSE);
           gtk_dialog_set_response_sensitive (dialog, GTK_RESPONSE_OK, FALSE);
 
-          image = file_open_with_proc_and_display (gimp,
-                                                   gimp_get_user_context (gimp),
-                                                   GIMP_PROGRESS (box),
+          image = file_open_with_proc_and_display (clay,
+                                                   clay_get_user_context (clay),
+                                                   CLAY_PROGRESS (box),
                                                    file, FALSE, FALSE, NULL,
-                                                   G_OBJECT (gimp_widget_get_monitor (entry)),
+                                                   G_OBJECT (clay_widget_get_monitor (entry)),
                                                    &status, &error);
 
           gtk_dialog_set_response_sensitive (dialog, GTK_RESPONSE_OK, TRUE);
           gtk_editable_set_editable (GTK_EDITABLE (entry), TRUE);
 
-          if (image == NULL && status != GIMP_PDB_CANCEL)
+          if (image == NULL && status != CLAY_PDB_CANCEL)
             {
-              gimp_message (gimp, G_OBJECT (box), GIMP_MESSAGE_ERROR,
+              clay_message (clay, G_OBJECT (box), CLAY_MESSAGE_ERROR,
                             _("Opening '%s' failed:\n\n%s"),
-                            gimp_file_get_utf8_name (file), error->message);
+                            clay_file_get_utf8_name (file), error->message);
               g_clear_error (&error);
             }
 
@@ -231,7 +231,7 @@ file_open_location_response (GtkDialog *dialog,
         }
       else
         {
-          gimp_message (gimp, G_OBJECT (box), GIMP_MESSAGE_ERROR,
+          clay_message (clay, G_OBJECT (box), CLAY_MESSAGE_ERROR,
                         _("Opening '%s' failed:\n\n%s"),
                         text,
                         /* error should never be NULL, also issue #3093 */

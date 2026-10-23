@@ -33,37 +33,37 @@
 ; setup
 
 (define testImage (testing:load-test-image-basic-v3))
-(define testLayer (vector-ref (gimp-image-get-layers testImage) 0))
-(define testFilter (gimp-drawable-filter-new
+(define testLayer (vector-ref (clay-image-get-layers testImage) 0))
+(define testFilter (clay-drawable-filter-new
                       testLayer
                       "gegl:ripple"
                       ""    ; user given "effect name", not used
                     ))
-(define testFilter2 (gimp-drawable-filter-new
+(define testFilter2 (clay-drawable-filter-new
                       testLayer
                       "gegl:spherize"
                       "" ))
-(define testFilter3 (gimp-drawable-filter-new
+(define testFilter3 (clay-drawable-filter-new
                       testLayer
                       "gegl:engrave"
                       "" ))
 ; filter on channel
-(define testChannel (gimp-channel-new
+(define testChannel (clay-channel-new
             testImage      ; image
             "Test Channel" ; name
             23 24          ; width, height
             50.0           ; opacity
             "red" ))      ; compositing color
-(assert `(gimp-image-insert-channel
+(assert `(clay-image-insert-channel
             ,testImage
             ,testChannel
             0            ; parent, moot since channel groups not supported
             0))          ; position in stack
-(define testFilter4 (gimp-drawable-filter-new
+(define testFilter4 (clay-drawable-filter-new
                       testChannel
                       "gegl:ripple"
                       "" ))
-(define testFilter5 (gimp-drawable-filter-new
+(define testFilter5 (clay-drawable-filter-new
                       testChannel
                       "gegl:shift"
                       "" ))
@@ -71,9 +71,9 @@
 
 (test! "configure filter variadically")
 ; This is not a PDB procedure, but a ScriptFu procedure.
-; It only changes the config for libgimp copy;
+; It only changes the config for libclay copy;
 ; the config is not sent to core until merge or append.
-(gimp-drawable-filter-configure testFilter
+(clay-drawable-filter-configure testFilter
       LAYER-MODE-REPLACE   ; blend mode
       1.0                  ; opacity
       "amplitude"   1000.0 ; key/value pair specific to filter
@@ -89,16 +89,16 @@
 (test! "configure filter improperly")
 
 ; blend mode and opacity are required args
-(assert-error `(gimp-drawable-filter-configure ,testFilter)
+(assert-error `(clay-drawable-filter-configure ,testFilter)
                "Drawable Filter marshaller was called with missing arguments.")
 ; keys must be paired with value
 ; key is valid, but missing the value
-(assert-error `(gimp-drawable-filter-configure ,testFilter
+(assert-error `(clay-drawable-filter-configure ,testFilter
                   LAYER-MODE-REPLACE 1.0
                   "amplitude")
                "Drawable Filter marshaller was called with an even number of arguments.")
 ; keys must be as defined by the filter
-(assert-error `(gimp-drawable-filter-configure ,testFilter
+(assert-error `(clay-drawable-filter-configure ,testFilter
                   LAYER-MODE-REPLACE 1.0
                   "foo"  1.0)
                "Invalid argument name: foo")
@@ -114,18 +114,18 @@
 
 (test! "merge filter")
 
-(gimp-drawable-merge-filter testLayer testFilter)
+(clay-drawable-merge-filter testLayer testFilter)
 ; Merging makes the effect permanent and
 ; the filter no longer appears as a settable effect on the layer.
 
 ; The filter no longer exists.
 ; The id is not valid
-(assert `(not (gimp-drawable-filter-id-is-valid ,testFilter)))
+(assert `(not (clay-drawable-filter-id-is-valid ,testFilter)))
 
 ; But the filter can be configured????  This is non-sensical.
-; Maybe libgimp's copy of the filter still exists but core's copy does not.
-; FIXME: libgimp should not configure a filter that doesn't exist in core?
-(gimp-drawable-filter-configure testFilter
+; Maybe libclay's copy of the filter still exists but core's copy does not.
+; FIXME: libclay should not configure a filter that doesn't exist in core?
+(clay-drawable-filter-configure testFilter
       LAYER-MODE-REPLACE   ; blend mode
       1.0)
 
@@ -139,14 +139,14 @@
 
 ; FIXME seems to fail with assertion value_array != NULL
 ; if not configured
-(gimp-drawable-filter-configure testFilter2
+(clay-drawable-filter-configure testFilter2
       LAYER-MODE-REPLACE   ; blend mode
       1.0)
 
-(gimp-drawable-append-filter testLayer testFilter2)
+(clay-drawable-append-filter testLayer testFilter2)
 
 ; the filter continues to exist
-(assert `(gimp-drawable-filter-id-is-valid ,testFilter2))
+(assert `(clay-drawable-filter-id-is-valid ,testFilter2))
 
 
 
@@ -154,17 +154,17 @@
 (test! "append unconfigured filter")
 
 ; a DrawableFilter has sane defaults for all settings: configure is optional.
-(gimp-drawable-append-filter testLayer testFilter3)
+(clay-drawable-append-filter testLayer testFilter3)
 
 ; the filter continues to exist
-(assert `(gimp-drawable-filter-id-is-valid ,testFilter3))
+(assert `(clay-drawable-filter-id-is-valid ,testFilter3))
 
 
 
 
 (test! "append same filter twice")
 ; FIXME: this throws no errors but doesn't seem to have any effect
-;(gimp-drawable-append-filter testLayer testFilter2)
+;(clay-drawable-append-filter testLayer testFilter2)
 
 
 
@@ -177,7 +177,7 @@
 
 (test! "update filter")
 ; update is a PDB procedure
-; gimp-drawable-filter-update
+; clay-drawable-filter-update
 ; Annotations say "It should not be used."
 ; so we don't test it.
 
@@ -185,19 +185,19 @@
 
 
 (test! "merge filter on channel")
-(gimp-drawable-merge-filter testChannel testFilter4)
+(clay-drawable-merge-filter testChannel testFilter4)
 ; TODO use a filter that we can see the result is correct???
 
 (test! "cannot append NDE filter on channel")
 ; FIXME this does not throw error but does nothing?
 ; use filter5 since filter4 no longer exists
-(gimp-drawable-append-filter testChannel testFilter5)
+(clay-drawable-append-filter testChannel testFilter5)
 
 
 
 (test! "optional display result images")
-;(gimp-display-new testImage)
-;(gimp-displays-flush)
+;(clay-display-new testImage)
+;(clay-displays-flush)
 
 ; The result should be one image, with ripple applied destructively,
 ; and with the background layer having two NDE effects: spherize and engrave NDE.

@@ -2,7 +2,7 @@
 
 # Not for translators: translation data is mocked up
 
-# scripts interpreted by gimp-script-fu-interpreter
+# scripts interpreted by clay-script-fu-interpreter
 scripts_independent = [
   { 'name': 'test-i18n' },
   { 'name': 'test-i18n-more' },
@@ -13,7 +13,7 @@ foreach plugin : scripts_independent
   srcs = plugin.get('srcs', name + '.scm')
 
   install_data(srcs,
-               install_dir: gimpplugindir / 'plug-ins' / name,
+               install_dir: clayplugindir / 'plug-ins' / name,
                install_mode: 'rwxr-xr-x')
 endforeach
 
@@ -21,7 +21,7 @@ endforeach
 # Install test translations for a suite of PDB procedures
 # under two i18n domain names: "script-fu-test" and "scriptfu-test-more"
 
-# See "Internationalizing" at the gimp developer website
+# See "Internationalizing" at the clay developer website
 # Two plugin files define three PDB procedures
 # that share the same translations data.
 # "Suite" means: sharing the same translations data files.
@@ -32,7 +32,7 @@ endforeach
 # test-i18n.scm defines two PDB procedures
 i18n.gettext ('scriptfu-test',
               preset: 'glib',
-              install_dir: gimpplugindir / 'plug-ins' / 'test-i18n' / 'locale'
+              install_dir: clayplugindir / 'plug-ins' / 'test-i18n' / 'locale'
              )
 
 # test-i18n-more.scm defines one PDB procedure
@@ -40,5 +40,5 @@ i18n.gettext ('scriptfu-test',
 # and give it a different domain name, "scriptfu-test-more !!!
 i18n.gettext ('scriptfu-test-more',
               preset: 'glib',
-              install_dir: gimpplugindir / 'plug-ins' / 'test-i18n-more' / 'locale'
+              install_dir: clayplugindir / 'plug-ins' / 'test-i18n-more' / 'locale'
              )

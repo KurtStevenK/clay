@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -27,7 +27,7 @@
 
 #define PREVIEW_SIZE     400
 
-GtkWidget *make_preview            (GimpGfig     *gfig);
+GtkWidget *make_preview            (ClayGfig     *gfig);
 
 void       gfig_pos_enable         (GtkWidget    *widget,
                                     gpointer      data);

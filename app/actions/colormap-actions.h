@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   colormap_actions_setup  (GimpActionGroup *group);
-void   colormap_actions_update (GimpActionGroup *group,
+void   colormap_actions_setup  (ClayActionGroup *group);
+void   colormap_actions_update (ClayActionGroup *group,
                                 gpointer         data);

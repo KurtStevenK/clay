@@ -31,7 +31,7 @@ should not need a PDB procedure to open a given URI in your browser.
 Instead use the GLib function `g_app_info_launch_default_for_uri()`, or
 again the GTK function `gtk_show_uri_on_window()`.
 
-In Script-Fu, you may use `(gimp-show-uri)`.
+In Script-Fu, you may use `(clay-show-uri)`.
 HELP
 
     $deprecated = 'NONE';
@@ -53,11 +53,11 @@ CODE
     );
 }
 
-sub gimp_online_main_web_site {
+sub clay_online_main_web_site {
     $blurb = 'Main Web Site';
 
     $help = <<'HELP';
-Bookmark to the GIMP web site
+Bookmark to the Clay web site
 HELP
 
     &std_pdb_misc;
@@ -67,7 +67,7 @@ HELP
     $deprecated_since = '3.2';
 
     @inargs = (
-	{ name => 'run_mode', type => 'enum GimpRunMode', dead => 1,
+	{ name => 'run_mode', type => 'enum ClayRunMode', dead => 1,
 	  desc => 'The run mode' }
     );
     %invoke = (
@@ -79,11 +79,11 @@ CODE
     );
 }
 
-sub gimp_online_docs_web_site {
+sub clay_online_docs_web_site {
     $blurb = 'User Manual Web Site';
 
     $help = <<'HELP';
-Bookmark to the GIMP Documentation web site
+Bookmark to the Clay Documentation web site
 HELP
 
     &std_pdb_misc;
@@ -93,7 +93,7 @@ HELP
     $deprecated_since = '3.2';
 
     @inargs = (
-	{ name => 'run_mode', type => 'enum GimpRunMode', dead => 1,
+	{ name => 'run_mode', type => 'enum ClayRunMode', dead => 1,
 	  desc => 'The run mode' }
     );
     %invoke = (
@@ -105,11 +105,11 @@ CODE
     );
 }
 
-sub gimp_online_bugs_features {
+sub clay_online_bugs_features {
     $blurb = 'Bug Tracker';
 
     $help = <<'HELP';
-Bookmark to the bug tracker of GIMP
+Bookmark to the bug tracker of Clay
 HELP
 
     &std_pdb_misc;
@@ -119,23 +119,23 @@ HELP
     $deprecated_since = '3.2';
 
     @inargs = (
-	{ name => 'run_mode', type => 'enum GimpRunMode', dead => 1,
+	{ name => 'run_mode', type => 'enum ClayRunMode', dead => 1,
 	  desc => 'The run mode' }
     );
     %invoke = (
 	code => <<'CODE'
 {
-  success = g_app_info_launch_default_for_uri ("https://gitlab.gnome.org/GNOME/gimp/issues", NULL, error);
+  success = g_app_info_launch_default_for_uri ("https://github.com/KurtStevenK/clay/issues", NULL, error);
 }
 CODE
     );
 }
 
-sub gimp_online_developer_web_site {
+sub clay_online_developer_web_site {
     $blurb = 'Bug Tracker';
 
     $help = <<'HELP';
-Bookmark to the bug tracker of GIMP
+Bookmark to the bug tracker of Clay
 HELP
 
     &std_pdb_misc;
@@ -145,7 +145,7 @@ HELP
     $deprecated_since = '3.2';
 
     @inargs = (
-	{ name => 'run_mode', type => 'enum GimpRunMode', dead => 1,
+	{ name => 'run_mode', type => 'enum ClayRunMode', dead => 1,
 	  desc => 'The run mode' }
     );
     %invoke = (
@@ -157,11 +157,11 @@ CODE
     );
 }
 
-sub gimp_online_roadmap {
+sub clay_online_roadmap {
     $blurb = 'Roadmaps';
 
     $help = <<'HELP';
-Bookmark to the roadmaps of GIMP
+Bookmark to the roadmaps of Clay
 HELP
 
     &std_pdb_misc;
@@ -171,7 +171,7 @@ HELP
     $deprecated_since = '3.2';
 
     @inargs = (
-	{ name => 'run_mode', type => 'enum GimpRunMode', dead => 1,
+	{ name => 'run_mode', type => 'enum ClayRunMode', dead => 1,
 	  desc => 'The run mode' }
     );
     %invoke = (
@@ -185,17 +185,17 @@ CODE
 
 
 @procs = qw(plug_in_web_browser
-            gimp_online_main_web_site
-            gimp_online_docs_web_site
-            gimp_online_bugs_features
-            gimp_online_developer_web_site
-            gimp_online_roadmap);
+            clay_online_main_web_site
+            clay_online_docs_web_site
+            clay_online_bugs_features
+            clay_online_developer_web_site
+            clay_online_roadmap);
 
 %exports = (app => [@procs], lib => []);
 
 $desc = 'Plug-in Compat';
-$doc_title = 'gimpplugincompat';
+$doc_title = 'clayplugincompat';
 $doc_short_desc = 'Compatibility for removed plug-ins.';
-$doc_long_desc = 'Functions that perform the operation of removed scripts or plug-ins, replaced by GIMP, GLib or GTK internal functions.';
+$doc_long_desc = 'Functions that perform the operation of removed scripts or plug-ins, replaced by Clay, GLib or GTK internal functions.';
 
 1;

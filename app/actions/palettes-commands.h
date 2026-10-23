@@ -18,9 +18,9 @@
 #pragma once
 
 
-void   palettes_import_cmd_callback (GimpAction *action,
+void   palettes_import_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data);
-void   palettes_merge_cmd_callback  (GimpAction *action,
+void   palettes_merge_cmd_callback  (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data);

@@ -17,7 +17,7 @@
  */
 
 /*
- *   GUMP - Gimp Useless Mail Plugin
+ *   GUMP - Clay Useless Mail Plugin
  *          (or Gump Useless Mail Plugin if you prefer)
  *
  *   by Adrian Likins <adrian@gimp.org>
@@ -47,13 +47,13 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #ifdef G_OS_WIN32
-#include "libgimpbase/gimpwin32-io.h"
+#include "libclaybase/claywin32-io.h"
 #endif
 
 
@@ -61,7 +61,7 @@
 
 #define PLUG_IN_PROC   "plug-in-mail-image"
 #define PLUG_IN_BINARY "mail"
-#define PLUG_IN_ROLE   "gimp-mail"
+#define PLUG_IN_ROLE   "clay-mail"
 
 
 typedef struct _Mail      Mail;
@@ -69,12 +69,12 @@ typedef struct _MailClass MailClass;
 
 struct _Mail
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _MailClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -83,23 +83,23 @@ struct _MailClass
 
 GType                   mail_get_type         (void);
 
-static GList          * mail_init_procedures  (GimpPlugIn           *plug_in);
-static GimpProcedure  * mail_create_procedure (GimpPlugIn           *plug_in,
+static GList          * mail_init_procedures  (ClayPlugIn           *plug_in);
+static ClayProcedure  * mail_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * mail_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * mail_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
-static GimpPDBStatusType  send_image          (GObject              *config,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
+static ClayPDBStatusType  send_image          (GObject              *config,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
                                                gint32                run_mode);
 
-static gboolean           send_dialog             (GimpProcedure    *procedure,
+static gboolean           send_dialog             (ClayProcedure    *procedure,
                                                    GObject          *config);
 static gboolean           valid_file              (GFile            *file);
 static gchar            * find_extension          (const gchar      *filename);
@@ -116,9 +116,9 @@ static FILE             * sendmail_pipe           (gchar           **cmd,
 #endif
 
 
-G_DEFINE_TYPE (Mail, mail, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Mail, mail, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (MAIL_TYPE)
+CLAY_MAIN (MAIL_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -130,7 +130,7 @@ static gchar *mesg_body = NULL;
 static void
 mail_class_init (MailClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->init_procedures  = mail_init_procedures;
   plug_in_class->create_procedure = mail_create_procedure;
@@ -143,7 +143,7 @@ mail_init (Mail *mail)
 }
 
 static GList *
-mail_init_procedures (GimpPlugIn *plug_in)
+mail_init_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
   gchar *email_bin = NULL;
@@ -186,29 +186,29 @@ mail_init_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-mail_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+mail_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             mail_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("Send by E_mail..."));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_EDIT);
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/[Send]");
+      clay_procedure_set_menu_label (procedure, _("Send by E_mail..."));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_EDIT);
+      clay_procedure_add_menu_path (procedure, "<Image>/File/[Send]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Send the image by email"),
 #ifdef SENDMAIL
                                         _("Sendmail is used to send emails "
@@ -219,38 +219,38 @@ mail_create_procedure (GimpPlugIn  *plug_in,
                                           "properly configured."),
 #endif
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Adrian Likins, Reagan Blundell",
                                       "Adrian Likins, Reagan Blundell, "
                                       "Daniel Risacher, "
                                       "Spencer Kimball and Peter Mattis",
                                       "1995-1997");
 
-      gimp_procedure_add_string_argument (procedure, "filename",
+      clay_procedure_add_string_argument (procedure, "filename",
                                           _("File_name"),
                                           _("The name of the file to save the image in"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "to-address",
+      clay_procedure_add_string_argument (procedure, "to-address",
                                           _("_To"),
                                           _("The email address to send to"),
                                           "",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "from-address",
+      clay_procedure_add_string_argument (procedure, "from-address",
                                           _("_From"),
                                           _("The email address for the From: field"),
                                           "",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "subject",
+      clay_procedure_add_string_argument (procedure, "subject",
                                           _("Su_bject"),
                                           _("The subject"),
                                           "",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "comment",
+      clay_procedure_add_string_argument (procedure, "comment",
                                           _("Co_mment"),
                                           _("The comment"),
                                           NULL,
@@ -260,19 +260,19 @@ mail_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-mail_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+mail_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpPDBStatusType status = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType status = CLAY_PDB_SUCCESS;
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gchar *filename = g_file_get_path (gimp_image_get_file (image));
+      gchar *filename = g_file_get_path (clay_image_get_file (image));
 
       if (filename)
         {
@@ -289,21 +289,21 @@ mail_run (GimpProcedure        *procedure,
         }
 
       if (! send_dialog (procedure, G_OBJECT (config)))
-        return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL, NULL);
+        return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL, NULL);
     }
 
   status = send_image (G_OBJECT (config), image, drawables, run_mode);
 
-  return gimp_procedure_new_return_values (procedure, status, NULL);
+  return clay_procedure_new_return_values (procedure, status, NULL);
 }
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 send_image (GObject       *config,
-            GimpImage     *image,
-            GimpDrawable **drawables,
+            ClayImage     *image,
+            ClayDrawable **drawables,
             gint32         run_mode)
 {
-  GimpPDBStatusType  status  = GIMP_PDB_SUCCESS;
+  ClayPDBStatusType  status  = CLAY_PDB_SUCCESS;
   gchar             *ext;
   GFile             *tmpfile;
   gchar             *tmpname;
@@ -358,13 +358,13 @@ send_image (GObject       *config,
   ext = find_extension (filename);
 
   if (ext == NULL)
-    return GIMP_PDB_CALLING_ERROR;
+    return CLAY_PDB_CALLING_ERROR;
 
   /* get a temp name with the right extension and save into it. */
-  tmpfile = gimp_temp_file (ext + 1);
+  tmpfile = clay_temp_file (ext + 1);
   tmpname = g_file_get_path (tmpfile);
 
-  if (! (gimp_file_save (run_mode, image, tmpfile, NULL) &&
+  if (! (clay_file_save (run_mode, image, tmpfile, NULL) &&
          valid_file (tmpfile)))
     {
       goto error;
@@ -379,18 +379,18 @@ send_image (GObject       *config,
    * be removed since the caller could leave the email window opened for
    * hours. Yet we still want to clean sometimes and not have temporary
    * images piling up.
-   * So I use a known directory that we control under $GIMP_DIRECTORY/tmp/,
+   * So I use a known directory that we control under $CLAY_DIRECTORY/tmp/,
    * and clean it out each time the plugin runs. This means that *if* you
    * are in the above case (your email client requires the file to stay
    * alive), you cannot run twice the plugin at the same time.
    */
-  tmp_dir = gimp_directory_file ("tmp", PLUG_IN_PROC, NULL);
+  tmp_dir = clay_directory_file ("tmp", PLUG_IN_PROC, NULL);
 
-  if (g_mkdir_with_parents (gimp_file_get_utf8_name (tmp_dir),
+  if (g_mkdir_with_parents (clay_file_get_utf8_name (tmp_dir),
                             S_IRUSR | S_IWUSR | S_IXUSR) == -1)
     {
       g_message ("Temporary directory %s could not be created.",
-                 gimp_file_get_utf8_name (tmp_dir));
+                 clay_file_get_utf8_name (tmp_dir));
       g_error_free (error);
       goto error;
     }
@@ -419,7 +419,7 @@ send_image (GObject       *config,
       g_object_unref (enumerator);
     }
 
-  filepath = g_build_filename (gimp_file_get_utf8_name (tmp_dir), filename,
+  filepath = g_build_filename (clay_file_get_utf8_name (tmp_dir), filename,
                                NULL);
   if (g_rename (tmpname, filepath) == -1)
     {
@@ -588,7 +588,7 @@ send_image (GObject       *config,
   mailpipe = sendmail_pipe (mailcmd, &mailpid);
 
   if (mailpipe == NULL)
-    return GIMP_PDB_EXECUTION_ERROR;
+    return CLAY_PDB_EXECUTION_ERROR;
 
   sendmail_create_headers (mailpipe, config);
 
@@ -611,7 +611,7 @@ error:
 #ifdef SENDMAIL
   kill (mailpid, SIGINT);
 #endif
-  status = GIMP_PDB_EXECUTION_ERROR;
+  status = CLAY_PDB_EXECUTION_ERROR;
 
 cleanup:
   /* close out the sendmail process */
@@ -647,7 +647,7 @@ cleanup:
 
 
 static gboolean
-send_dialog (GimpProcedure *procedure,
+send_dialog (ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget     *dlg;
@@ -663,10 +663,10 @@ send_dialog (GimpProcedure *procedure,
   gchar         *gump_from;
   gboolean       run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  /* check gimprc for a preferred "From:" address */
-  gump_from = gimp_gimprc_query ("gump-from");
+  /* check clayrc for a preferred "From:" address */
+  gump_from = clay_clayrc_query ("gump-from");
 
   if (gump_from)
     {
@@ -676,8 +676,8 @@ send_dialog (GimpProcedure *procedure,
       g_free (gump_from);
     }
 
-  dlg = gimp_procedure_dialog_new (procedure,
-                                   GIMP_PROCEDURE_CONFIG (config),
+  dlg = clay_procedure_dialog_new (procedure,
+                                   CLAY_PROCEDURE_CONFIG (config),
                                    _("Send by Email"));
   /* Change "Ok" button to "Send" */
   button = gtk_dialog_get_widget_for_response (GTK_DIALOG (dlg),
@@ -685,12 +685,12 @@ send_dialog (GimpProcedure *procedure,
   gtk_button_set_label (GTK_BUTTON (button), _("Send"));
 
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dlg),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dlg),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
 
-  gimp_window_set_transient (GTK_WINDOW (dlg));
+  clay_window_set_transient (GTK_WINDOW (dlg));
 
   main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
@@ -707,13 +707,13 @@ send_dialog (GimpProcedure *procedure,
   gtk_grid_set_column_spacing (GTK_GRID (grid), 6);
 
   /* Filename entry */
-  entry = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
-                                            "filename", GIMP_TYPE_LABEL_ENTRY);
-  real_entry = gimp_label_entry_get_entry (GIMP_LABEL_ENTRY (entry));
+  entry = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
+                                            "filename", CLAY_TYPE_LABEL_ENTRY);
+  real_entry = clay_label_entry_get_entry (CLAY_LABEL_ENTRY (entry));
   gtk_widget_set_size_request (real_entry, 200, -1);
   gtk_entry_set_activates_default (GTK_ENTRY (real_entry), TRUE);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg),
                               "filename",
                               NULL);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry),
@@ -721,52 +721,52 @@ send_dialog (GimpProcedure *procedure,
 
 #ifdef SENDMAIL
   /* To entry */
-  entry = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
+  entry = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
                                             "to-address",
-                                            GIMP_TYPE_LABEL_ENTRY);
-  real_entry = gimp_label_entry_get_entry (GIMP_LABEL_ENTRY (entry));
+                                            CLAY_TYPE_LABEL_ENTRY);
+  real_entry = clay_label_entry_get_entry (CLAY_LABEL_ENTRY (entry));
   gtk_widget_set_size_request (real_entry, 200, -1);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry), BUFFER_SIZE - 1);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg),
                               "to-address",
                               NULL);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry),
                             BUFFER_SIZE - 1);
 
   /* From entry */
-  entry = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
+  entry = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
                                             "from-address",
-                                            GIMP_TYPE_LABEL_ENTRY);
-  real_entry = gimp_label_entry_get_entry (GIMP_LABEL_ENTRY (entry));
+                                            CLAY_TYPE_LABEL_ENTRY);
+  real_entry = clay_label_entry_get_entry (CLAY_LABEL_ENTRY (entry));
   gtk_widget_set_size_request (real_entry, 200, -1);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry), BUFFER_SIZE - 1);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg),
                               "from-address",
                               NULL);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry),
                             BUFFER_SIZE - 1);
 
   /* Subject entry */
-  entry = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
+  entry = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
                                             "subject",
-                                            GIMP_TYPE_LABEL_ENTRY);
-  real_entry = gimp_label_entry_get_entry (GIMP_LABEL_ENTRY (entry));
+                                            CLAY_TYPE_LABEL_ENTRY);
+  real_entry = clay_label_entry_get_entry (CLAY_LABEL_ENTRY (entry));
   gtk_widget_set_size_request (real_entry, 200, -1);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry), BUFFER_SIZE - 1);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg),
                               "subject",
                               NULL);
   gtk_entry_set_max_length (GTK_ENTRY (real_entry),
                             BUFFER_SIZE - 1);
 
   /* Body  */
-  text_view = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dlg),
+  text_view = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dlg),
                                                 "comment",
                                                 GTK_TYPE_TEXT_VIEW);
   gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (text_view), GTK_WRAP_WORD);
 
   scrolled_window =
-    gimp_procedure_dialog_fill_scrolled_window (GIMP_PROCEDURE_DIALOG (dlg),
+    clay_procedure_dialog_fill_scrolled_window (CLAY_PROCEDURE_DIALOG (dlg),
                                                 "comment-scrolled",
                                                 "comment");
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled_window),
@@ -775,7 +775,7 @@ send_dialog (GimpProcedure *procedure,
                                   GTK_POLICY_AUTOMATIC,
                                   GTK_POLICY_AUTOMATIC);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg),
                               "comment-scrolled",
                               NULL);
 #endif
@@ -784,7 +784,7 @@ send_dialog (GimpProcedure *procedure,
 
   gtk_widget_grab_focus (real_entry);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dlg));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dlg));
 
   gtk_widget_destroy (dlg);
 
@@ -908,7 +908,7 @@ sendmail_create_headers (FILE    *mailpipe,
 
   /* create all the mail header stuff. Feel free to add your own */
   /* It is advisable to leave the X-Mailer header though, as     */
-  /* there is a possibility of a Gimp mail scanner/reader in the  */
+  /* there is a possibility of a Clay mail scanner/reader in the  */
   /* future. It will probably need that header.                 */
 
   fprintf (mailpipe, "To: %s \n", receipt);
@@ -916,7 +916,7 @@ sendmail_create_headers (FILE    *mailpipe,
   if (from != NULL && strlen (from) > 0)
     fprintf (mailpipe, "From: %s \n", from);
 
-  fprintf (mailpipe, "X-Mailer: Clay Useless Mail plug-in %s\n", GIMP_VERSION);
+  fprintf (mailpipe, "X-Mailer: Clay Useless Mail plug-in %s\n", CLAY_VERSION);
 
   fprintf (mailpipe, "MIME-Version: 1.0\n");
   fprintf (mailpipe, "Content-type: multipart/mixed; "

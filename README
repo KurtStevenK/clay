@@ -3,26 +3,26 @@
                        3.3 Development Branch
                    ------------------------------
 
-This is an unstable development release in the GIMP 3.3 series.
+This is an unstable development release in the Clay 3.3 series.
 
 If you think you found a bug in this version, please make sure that it
 hasn't been reported earlier and report it!
 
-If you want to hack on GIMP, please read the file devel-docs/README.md.
+If you want to hack on Clay, please read the file devel-docs/README.md.
 For detailed installation instructions, see the file INSTALL.
 
 
 1. Web Resources
 ================
 
-GIMP's home page is at:
+Clay's home page is at:
 
 	https://www.gimp.org/
 
 Please be sure to visit this site for information, documentation,
-tutorials, news, etc. All things GIMP-ish are available from there.
+tutorials, news, etc. All things Clay-ish are available from there.
 
-The latest version of GIMP can be found at:
+The latest version of Clay can be found at:
 
 	https://www.gimp.org/downloads/
 
@@ -34,9 +34,9 @@ We also have a website dedicated to documentation at:
 2. Contributing
 ===============
 
-GIMP source code can be found at:
+Clay source code can be found at:
 
-	https://gitlab.gnome.org/GNOME/gimp/
+	https://github.com/KurtStevenK/clay/
 
 Resources for contributors:
 
@@ -46,25 +46,25 @@ In particular, you may want to look in the "Core Development" section. Some
 articles of particular interest for newcomers could be:
 
 * Setting up your developer environment: https://developer.gimp.org/core/setup/
-* GIMP Coding Style: https://developer.gimp.org/core/coding_style/
+* Clay Coding Style: https://developer.gimp.org/core/coding_style/
 * Submit your first patch: https://developer.gimp.org/core/submit-patch/
 
 WARNING: no genAI-generated contents is allowed in any repository
-managed by the GIMP project (neither code nor text, images…). GIMP is a
+managed by the Clay project (neither code nor text, images…). Clay is a
 project for humans by humans.
 
 
 3. Discussion Channels
 ======================
 
-We have several discussion channels dedicated to GIMP user and
+We have several discussion channels dedicated to Clay user and
 development discussion. There is more info at:
 
         https://www.gimp.org/discuss.html
 
-For the real junkies, there are IRC channels (e.g. #gimp or #gimp-user)
-devoted to GIMP on GIMPNet (a private free software oriented network).
-Many of the developers hang out there. Some of the GIMPNet servers are:
+For the real junkies, there are IRC channels (e.g. #clay or #clay-user)
+devoted to Clay on CLAYNet (a private free software oriented network).
+Many of the developers hang out there. Some of the CLAYNet servers are:
 
 	irc.gimp.org:6667
 	irc.us.gimp.org:6667
@@ -78,14 +78,14 @@ also included in that page.
 4. Customizing
 ==============
 
-The look of GIMP's interface can be customized like any other GTK app
+The look of Clay's interface can be customized like any other GTK app
 by editing files in `${XDG_CONFIG_HOME}/gtk-3.0/` (settings.ini and
 gtk.css in particular) or by using "themes" (ready-made customizations).
-Additionally, GIMP reads `${XDG_CONFIG_HOME}/GIMP/3.3/gimp.css` so you
-can have settings that only apply to GIMP.
+Additionally, Clay reads `${XDG_CONFIG_HOME}/Clay/3.3/clay.css` so you
+can have settings that only apply to Clay.
 
 You can also manually change the keybindings to any of your choice by
-editing: `${XDG_CONFIG_HOME}/GIMP/3.3/shortcutsrc`.
+editing: `${XDG_CONFIG_HOME}/Clay/3.3/shortcutsrc`.
 
 
 Have fun,

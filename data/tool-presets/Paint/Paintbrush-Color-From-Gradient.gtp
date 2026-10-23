@@ -1,9 +1,9 @@
-# GIMP tool preset file
+# Clay tool preset file
 
-(icon-name "gimp-tool-paintbrush")
+(icon-name "clay-tool-paintbrush")
 (name "Paintbrush (Color From Gradient)")
-(tool-options "GimpPaintOptions"
-    (tool "gimp-paintbrush-tool")
+(tool-options "ClayPaintOptions"
+    (tool "clay-paintbrush-tool")
     (foreground (color-rgb 0.572549 0.363737 0.363737))
     (brush "2. Hardness 050")
     (dynamics "Color From Gradient")
@@ -21,4 +21,4 @@
 (use-palette no)
 (use-font no)
 
-# end of GIMP tool preset file
+# end of Clay tool preset file

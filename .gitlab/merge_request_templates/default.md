@@ -4,7 +4,7 @@ Contribution checklist:
 - [ ] I declare this MR have no AI-generated content (neither code nor text, images…),
   only human created works
 
-- [ ] I followed the GIMP coding style, which is mostly the GNU coding style
+- [ ] I followed the Clay coding style, which is mostly the GNU coding style
   with some specificities: see [Coding Style](https://developer.gimp.org/core/coding_style/).
 
 - [ ] I checked the following option when making the merge request:

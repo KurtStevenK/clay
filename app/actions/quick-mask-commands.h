@@ -18,12 +18,12 @@
 #pragma once
 
 
-void   quick_mask_toggle_cmd_callback    (GimpAction *action,
+void   quick_mask_toggle_cmd_callback    (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data);
-void   quick_mask_invert_cmd_callback    (GimpAction *action,
+void   quick_mask_invert_cmd_callback    (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data);
-void   quick_mask_configure_cmd_callback (GimpAction *action,
+void   quick_mask_configure_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data);

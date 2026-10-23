@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -22,8 +22,8 @@
 
 #include "config.h"
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "imap_about.h"
 #include "imap_circle.h"
@@ -39,14 +39,14 @@
 #include "imap_settings.h"
 #include "imap_source.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 void
 menu_set_zoom_sensitivity (gpointer data,
                            gint     factor)
 {
   GAction  *action;
-  GimpImap *imap = GIMP_IMAP (data);
+  ClayImap *imap = CLAY_IMAP (data);
 
   action = g_action_map_lookup_action (G_ACTION_MAP (imap->app), "zoom-in");
   g_simple_action_set_enabled (G_SIMPLE_ACTION (action), factor < 8);
@@ -66,7 +66,7 @@ void
 menu_shapes_selected (gint     count,
                       gpointer data)
 {
-  GimpImap *imap     = GIMP_IMAP (data);
+  ClayImap *imap     = CLAY_IMAP (data);
   gboolean sensitive = (count > 0);
   GAction  *action;
 
@@ -87,10 +87,10 @@ command_list_changed (Command_t *command,
                       gpointer   data)
 {
   GAction  *action;
-  GimpImap *imap;
+  ClayImap *imap;
   gchar    *label;
 
-  imap = GIMP_IMAP (data);
+  imap = CLAY_IMAP (data);
   action = g_action_map_lookup_action (G_ACTION_MAP (imap->app), "undo");
   g_simple_action_set_enabled (G_SIMPLE_ACTION (action), command != NULL);
 
@@ -114,7 +114,7 @@ static void
 paste_buffer_added (Object_t *obj, gpointer data)
 {
   GAction  *action;
-  GimpImap *imap = GIMP_IMAP (data);
+  ClayImap *imap = CLAY_IMAP (data);
 
   action = g_action_map_lookup_action (G_ACTION_MAP (imap->app), "paste");
   g_simple_action_set_enabled (G_SIMPLE_ACTION (action), TRUE);
@@ -124,14 +124,14 @@ static void
 paste_buffer_removed (Object_t *obj, gpointer data)
 {
   GAction  *action;
-  GimpImap *imap = GIMP_IMAP (data);
+  ClayImap *imap = CLAY_IMAP (data);
 
   action = g_action_map_lookup_action (G_ACTION_MAP (imap->app), "paste");
   g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
 }
 
 Menu_t*
-make_menu (GimpImap *imap)
+make_menu (ClayImap *imap)
 {
   GAction *action;
 
@@ -158,7 +158,7 @@ do_main_popup_menu (GdkEventButton *event,
 {
   GtkWidget  *menu;
   GMenuModel *model;
-  GimpImap   *imap = GIMP_IMAP (data);
+  ClayImap   *imap = CLAY_IMAP (data);
 
   model = G_MENU_MODEL (gtk_builder_get_object (imap->builder, "imap-main-popup"));
   menu = gtk_menu_new_from_model (model);
@@ -168,17 +168,17 @@ do_main_popup_menu (GdkEventButton *event,
 }
 
 GtkWidget*
-make_selection_toolbar (GimpImap *imap)
+make_selection_toolbar (ClayImap *imap)
 {
   GtkWidget *toolbar = gtk_toolbar_new ();
 
-  add_tool_button (toolbar, "app.move-up", GIMP_ICON_GO_UP,
+  add_tool_button (toolbar, "app.move-up", CLAY_ICON_GO_UP,
                    _("Move Up"), _("Move Up"));
-  add_tool_button (toolbar, "app.move-down", GIMP_ICON_GO_DOWN,
+  add_tool_button (toolbar, "app.move-down", CLAY_ICON_GO_DOWN,
                    _("Move Down"), _("Move Down"));
-  add_tool_button (toolbar, "app.edit-area-info", GIMP_ICON_EDIT,
+  add_tool_button (toolbar, "app.edit-area-info", CLAY_ICON_EDIT,
                    _("Edit Area Info..."), _("Edit selected area info"));
-  add_tool_button (toolbar, "app.clear", GIMP_ICON_EDIT_DELETE,
+  add_tool_button (toolbar, "app.clear", CLAY_ICON_EDIT_DELETE,
                    _("Delete"), _("Delete"));
 
   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);

@@ -29,43 +29,78 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "gui-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "display/gimpimagewindow.h"
+#include "display/clayimagewindow.h"
 
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "icon-themes.h"
 #include "themes.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static void   themes_apply_theme                   (Gimp                  *gimp,
-                                                    GimpGuiConfig         *config);
+static void   themes_apply_theme                   (Clay                  *clay,
+                                                    ClayGuiConfig         *config);
+/* Extra colour schemes: a palette shared by every theme, laid over the
+ * theme's own light or dark variant (installed in theme-schemes/).
+ */
+typedef struct
+{
+  ClayThemeScheme  scheme;
+  const gchar     *palette;
+  gboolean         dark;
+} ThemesPalette;
+
+static const ThemesPalette themes_palettes[] =
+{
+  { CLAY_THEME_BROWN,     "brown",      TRUE  },
+  { CLAY_THEME_PARCHMENT, "parchment",  FALSE },
+  { CLAY_THEME_CAPPUCCINO, "cappuccino", FALSE },
+  { CLAY_THEME_ESPRESSO,  "espresso",   TRUE  },
+  { CLAY_THEME_MIDNIGHT,  "midnight",   TRUE  },
+  { CLAY_THEME_FOREST,    "forest",     TRUE  },
+  { CLAY_THEME_ROSE,      "rose",       FALSE },
+  { CLAY_THEME_SUNSET,    "sunset",     FALSE },
+  { CLAY_THEME_VIOLET,    "violet",     TRUE  },
+  { CLAY_THEME_NEON,      "neon",       TRUE  },
+  { CLAY_THEME_MATRIX,    "matrix",     TRUE  },
+  { CLAY_THEME_UBUNTU,    "ubuntu",     TRUE  },
+  { CLAY_THEME_DRACULA,   "dracula",    TRUE  },
+  { CLAY_THEME_NORD,      "nord",       TRUE  },
+  { CLAY_THEME_SOLARIZED, "solarized",  FALSE },
+  { CLAY_THEME_GRUVBOX,   "gruvbox",    TRUE  },
+  { CLAY_THEME_OCEAN,     "ocean",      TRUE  },
+  { CLAY_THEME_SAKURA,    "sakura",     FALSE },
+  { CLAY_THEME_AMBER,     "amber",      TRUE  },
+  { CLAY_THEME_SEPIA,     "sepia",      FALSE },
+};
+
+static const ThemesPalette * themes_get_palette (ClayThemeScheme      scheme);
 static void   themes_list_themes_foreach           (gpointer               key,
                                                     gpointer               value,
                                                     gpointer               data);
 static gint   themes_name_compare                  (const void            *p1,
                                                     const void            *p2);
-static void   themes_theme_paths_notify            (GimpExtensionManager  *manager,
+static void   themes_theme_paths_notify            (ClayExtensionManager  *manager,
                                                     GParamSpec            *pspec,
-                                                    Gimp                  *gimp);
+                                                    Clay                  *clay);
 #if defined(G_OS_UNIX) && ! defined(__APPLE__)
 static void   themes_theme_settings_portal_changed (GDBusProxy            *proxy,
                                                     const gchar           *sender_name,
                                                     const gchar           *signal_name,
                                                     GVariant              *parameters,
-                                                    Gimp                  *gimp);
+                                                    Clay                  *clay);
 #endif
 
 
@@ -81,22 +116,22 @@ static GDBusProxy       *themes_settings_portal = NULL;
 /*  public functions  */
 
 void
-themes_init (Gimp *gimp)
+themes_init (Clay *clay)
 {
-  GimpGuiConfig *config;
+  ClayGuiConfig *config;
 #if defined(G_OS_UNIX) && ! defined(__APPLE__)
   GError        *error = NULL;
 #endif
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  config = GIMP_GUI_CONFIG (gimp->config);
+  config = CLAY_GUI_CONFIG (clay->config);
 
   /* Check for theme extensions. */
-  themes_theme_paths_notify (gimp->extension_manager, NULL, gimp);
-  g_signal_connect (gimp->extension_manager, "notify::theme-paths",
+  themes_theme_paths_notify (clay->extension_manager, NULL, clay);
+  g_signal_connect (clay->extension_manager, "notify::theme-paths",
                     G_CALLBACK (themes_theme_paths_notify),
-                    gimp);
+                    clay);
 
   themes_style_provider = GTK_STYLE_PROVIDER (gtk_css_provider_new ());
 
@@ -126,49 +161,49 @@ themes_init (Gimp *gimp)
       g_signal_connect (themes_settings_portal,
                         "g-signal::SettingChanged",
                         G_CALLBACK (themes_theme_settings_portal_changed),
-                        gimp);
+                        clay);
     }
 #endif
 
   g_signal_connect (config, "notify::theme",
                     G_CALLBACK (themes_theme_change_notify),
-                    gimp);
+                    clay);
   g_signal_connect_after (config, "notify::icon-theme",
                           G_CALLBACK (themes_theme_change_notify),
-                          gimp);
+                          clay);
   g_signal_connect (config, "notify::theme-color-scheme",
                     G_CALLBACK (themes_theme_change_notify),
-                    gimp);
+                    clay);
   g_signal_connect (config, "notify::prefer-symbolic-icons",
                     G_CALLBACK (themes_theme_change_notify),
-                    gimp);
+                    clay);
   g_signal_connect (config, "notify::override-theme-icon-size",
                     G_CALLBACK (themes_theme_change_notify),
-                    gimp);
+                    clay);
   g_signal_connect (config, "notify::custom-icon-size",
                     G_CALLBACK (themes_theme_change_notify),
-                    gimp);
+                    clay);
   g_signal_connect (config, "notify::font-relative-size",
                     G_CALLBACK (themes_theme_change_notify),
-                    gimp);
+                    clay);
 
-  themes_theme_change_notify (config, NULL, gimp);
+  themes_theme_change_notify (config, NULL, clay);
 
 #if defined(G_OS_WIN32) || (defined(PLATFORM_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)
-  themes_set_title_bar (gimp);
+  themes_set_title_bar (clay);
 #endif
 }
 
 void
-themes_exit (Gimp *gimp)
+themes_exit (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   if (themes_hash)
     {
-      g_signal_handlers_disconnect_by_func (gimp->config,
+      g_signal_handlers_disconnect_by_func (clay->config,
                                             themes_theme_change_notify,
-                                            gimp);
+                                            clay);
 
       g_hash_table_destroy (themes_hash);
       themes_hash = NULL;
@@ -182,12 +217,12 @@ themes_exit (Gimp *gimp)
 }
 
 gboolean
-themes_theme_is_system (Gimp        *gimp,
+themes_theme_is_system (Clay        *clay,
                         const gchar *theme_name)
 {
   gboolean is_system = FALSE;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (theme_name != NULL, FALSE);
 
   if (g_strcmp0 (theme_name, "System") == 0)
@@ -196,9 +231,9 @@ themes_theme_is_system (Gimp        *gimp,
       GFile *parent_dir;
       GFile *system_dir;
 
-      theme_dir  = themes_get_theme_dir (gimp, theme_name);
+      theme_dir  = themes_get_theme_dir (clay, theme_name);
       parent_dir = g_file_get_parent (theme_dir);
-      system_dir = gimp_file_new_for_config_path ("${gimp_data_dir}/themes", NULL);
+      system_dir = clay_file_new_for_config_path ("${clay_data_dir}/themes", NULL);
 
       is_system = g_file_equal (system_dir, parent_dir);
 
@@ -210,23 +245,23 @@ themes_theme_is_system (Gimp        *gimp,
 }
 
 gboolean
-themes_theme_is_default (Gimp        *gimp,
+themes_theme_is_default (Clay        *clay,
                          const gchar *theme_name)
 {
   gboolean is_default = FALSE;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (theme_name != NULL, FALSE);
 
-  if (g_strcmp0 (theme_name, GIMP_CONFIG_DEFAULT_THEME) == 0)
+  if (g_strcmp0 (theme_name, CLAY_CONFIG_DEFAULT_THEME) == 0)
     {
       GFile *theme_dir;
       GFile *parent_dir;
       GFile *system_dir;
 
-      theme_dir  = themes_get_theme_dir (gimp, theme_name);
+      theme_dir  = themes_get_theme_dir (clay, theme_name);
       parent_dir = g_file_get_parent (theme_dir);
-      system_dir = gimp_file_new_for_config_path ("${gimp_data_dir}/themes", NULL);
+      system_dir = clay_file_new_for_config_path ("${clay_data_dir}/themes", NULL);
 
       is_default = g_file_equal (system_dir, parent_dir);
 
@@ -238,11 +273,11 @@ themes_theme_is_default (Gimp        *gimp,
 }
 
 gchar **
-themes_list_themes (Gimp *gimp,
+themes_list_themes (Clay *clay,
                     gint *n_themes)
 {
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (n_themes != NULL, NULL);
 
   *n_themes = g_hash_table_size (themes_hash);
@@ -267,33 +302,33 @@ themes_list_themes (Gimp *gimp,
 }
 
 GFile *
-themes_get_theme_dir (Gimp        *gimp,
+themes_get_theme_dir (Clay        *clay,
                       const gchar *theme_name)
 {
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
   if (! theme_name)
-    theme_name = GIMP_CONFIG_DEFAULT_THEME;
+    theme_name = CLAY_CONFIG_DEFAULT_THEME;
 
   return g_hash_table_lookup (themes_hash, theme_name);
 }
 
 GFile *
-themes_get_theme_file (Gimp        *gimp,
+themes_get_theme_file (Clay        *clay,
                        const gchar *first_component,
                        ...)
 {
-  GimpGuiConfig *gui_config;
+  ClayGuiConfig *gui_config;
   GFile         *file;
   const gchar   *component;
   va_list        args;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (first_component != NULL, NULL);
 
-  gui_config = GIMP_GUI_CONFIG (gimp->config);
+  gui_config = CLAY_GUI_CONFIG (clay->config);
 
-  file      = g_object_ref (themes_get_theme_dir (gimp, gui_config->theme));
+  file      = g_object_ref (themes_get_theme_dir (clay, gui_config->theme));
   component = first_component;
 
   va_start (args, first_component);
@@ -312,7 +347,7 @@ themes_get_theme_file (Gimp        *gimp,
     {
       g_object_unref (file);
 
-      file      = g_object_ref (themes_get_theme_dir (gimp, NULL));
+      file      = g_object_ref (themes_get_theme_dir (clay, NULL));
       component = first_component;
 
       va_start (args, first_component);
@@ -332,31 +367,31 @@ themes_get_theme_file (Gimp        *gimp,
 }
 
 void
-themes_theme_change_notify (GimpGuiConfig *config,
+themes_theme_change_notify (ClayGuiConfig *config,
                             GParamSpec    *pspec,
-                            Gimp          *gimp)
+                            Clay          *clay)
 {
   GFile  *theme_css;
   GError *error = NULL;
 
   g_object_set (gtk_settings_get_for_screen (gdk_screen_get_default ()),
                 "gtk-application-prefer-dark-theme",
-                config->theme_scheme != GIMP_THEME_LIGHT,
+                config->theme_scheme != CLAY_THEME_LIGHT,
                 NULL);
 
-  themes_apply_theme (gimp, config);
+  themes_apply_theme (clay, config);
 
-  theme_css = gimp_directory_file ("theme.css", NULL);
+  theme_css = clay_directory_file ("theme.css", NULL);
 
-  if (gimp->be_verbose)
+  if (clay->be_verbose)
     g_print ("Parsing '%s'\n",
-             gimp_file_get_utf8_name (theme_css));
+             clay_file_get_utf8_name (theme_css));
 
   if (! gtk_css_provider_load_from_file (GTK_CSS_PROVIDER (themes_style_provider),
                                          theme_css, &error))
     {
       g_printerr ("%s: error parsing %s: %s\n", G_STRFUNC,
-                  gimp_file_get_utf8_name (theme_css), error->message);
+                  clay_file_get_utf8_name (theme_css), error->message);
       g_clear_error (&error);
     }
 
@@ -365,7 +400,7 @@ themes_theme_change_notify (GimpGuiConfig *config,
   gtk_style_context_reset_widgets (gdk_screen_get_default ());
 
 #if defined(G_OS_WIN32) || (defined(PLATFORM_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)
-  themes_set_title_bar (gimp);
+  themes_set_title_bar (clay);
 #endif
 }
 
@@ -373,20 +408,21 @@ themes_theme_change_notify (GimpGuiConfig *config,
 /*  private functions  */
 
 static void
-themes_apply_theme (Gimp          *gimp,
-                    GimpGuiConfig *config)
+themes_apply_theme (Clay          *clay,
+                    ClayGuiConfig *config)
 {
   GFile           *theme_css;
   GOutputStream   *output;
   GError          *error = NULL;
   gboolean         prefer_dark_theme;
-  GimpThemeScheme  color_scheme;
+  ClayThemeScheme  color_scheme;
+  const ThemesPalette *palette;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
-  g_return_if_fail (GIMP_IS_GUI_CONFIG (config));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+  g_return_if_fail (CLAY_IS_GUI_CONFIG (config));
 
 #if defined(G_OS_UNIX) && ! defined(__APPLE__)
-  if (themes_settings_portal && config->theme_scheme == GIMP_THEME_SYSTEM)
+  if (themes_settings_portal && config->theme_scheme == CLAY_THEME_SYSTEM)
     {
       GVariant *tuple_variant;
       GVariant *variant;
@@ -445,60 +481,67 @@ themes_apply_theme (Gimp          *gimp,
            * mean prefer-light. This should be fixed if/when the main
            * desktops actually implement all 3 options some day.
            */
-          color_scheme = prefer_dark_theme ? GIMP_THEME_DARK : GIMP_THEME_LIGHT;
+          color_scheme = prefer_dark_theme ? CLAY_THEME_DARK : CLAY_THEME_LIGHT;
         }
       else
         {
           g_printerr ("%s\n", error->message);
           g_clear_error (&error);
 
-          color_scheme = (config->theme_scheme == GIMP_THEME_SYSTEM) ? GIMP_THEME_DARK : config->theme_scheme;
-          prefer_dark_theme = (color_scheme == GIMP_THEME_DARK ||
-                               color_scheme == GIMP_THEME_GRAY);
+          color_scheme = (config->theme_scheme == CLAY_THEME_SYSTEM) ? CLAY_THEME_DARK : config->theme_scheme;
+          prefer_dark_theme = (color_scheme == CLAY_THEME_DARK ||
+                               color_scheme == CLAY_THEME_GRAY);
         }
     }
   else
 #elif defined(G_OS_WIN32)
-  if (config->theme_scheme == GIMP_THEME_SYSTEM)
+  if (config->theme_scheme == CLAY_THEME_SYSTEM)
     {
-      prefer_dark_theme = gimp_is_win32_system_theme_dark ();
-      color_scheme = prefer_dark_theme ? GIMP_THEME_DARK : GIMP_THEME_LIGHT;
+      prefer_dark_theme = clay_is_win32_system_theme_dark ();
+      color_scheme = prefer_dark_theme ? CLAY_THEME_DARK : CLAY_THEME_LIGHT;
     }
   else
 #elif defined(__APPLE__)
-  if (config->theme_scheme == GIMP_THEME_SYSTEM)
+  if (config->theme_scheme == CLAY_THEME_SYSTEM)
     {
       prefer_dark_theme = themes_macos_is_dark_mode_active ();
-      color_scheme = prefer_dark_theme ? GIMP_THEME_DARK : GIMP_THEME_LIGHT;
+      color_scheme = prefer_dark_theme ? CLAY_THEME_DARK : CLAY_THEME_LIGHT;
     }
   else
 #endif
     {
-      color_scheme = (config->theme_scheme == GIMP_THEME_SYSTEM) ? GIMP_THEME_DARK : config->theme_scheme;
-      prefer_dark_theme = (color_scheme == GIMP_THEME_DARK ||
-                           color_scheme == GIMP_THEME_GRAY);
+      color_scheme = (config->theme_scheme == CLAY_THEME_SYSTEM) ? CLAY_THEME_DARK : config->theme_scheme;
+      prefer_dark_theme = (color_scheme == CLAY_THEME_DARK ||
+                           color_scheme == CLAY_THEME_GRAY);
+    }
+
+  palette = themes_get_palette (color_scheme);
+  if (palette)
+    {
+      prefer_dark_theme = palette->dark;
+      color_scheme      = palette->dark ? CLAY_THEME_DARK : CLAY_THEME_LIGHT;
     }
 
   g_object_set (gtk_settings_get_for_screen (gdk_screen_get_default ()),
                 "gtk-application-prefer-dark-theme", prefer_dark_theme,
                 NULL);
 
-  theme_css = gimp_directory_file ("theme.css", NULL);
+  theme_css = clay_directory_file ("theme.css", NULL);
 
-  if (gimp->be_verbose)
-    g_print ("Writing '%s'\n", gimp_file_get_utf8_name (theme_css));
+  if (clay->be_verbose)
+    g_print ("Writing '%s'\n", clay_file_get_utf8_name (theme_css));
 
   output = G_OUTPUT_STREAM (g_file_replace (theme_css,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
                                             NULL, &error));
   if (! output)
     {
-      gimp_message_literal (gimp, NULL, GIMP_MESSAGE_ERROR, error->message);
+      clay_message_literal (clay, NULL, CLAY_MESSAGE_ERROR, error->message);
       g_clear_error (&error);
     }
   else
     {
-      GFile  *theme_dir = themes_get_theme_dir (gimp, config->theme);
+      GFile  *theme_dir = themes_get_theme_dir (clay, config->theme);
       GFile  *css_user;
       GSList *css_files = NULL;
       GSList *iter;
@@ -511,25 +554,25 @@ themes_apply_theme (Gimp          *gimp,
           GFile *gray;
           GFile *dark;
 
-          fallback = g_file_get_child (theme_dir, "gimp.css");
+          fallback = g_file_get_child (theme_dir, "clay.css");
           if (! g_file_query_exists (fallback, NULL))
             g_clear_object (&fallback);
 
-          light = g_file_get_child (theme_dir, "gimp-light.css");
+          light = g_file_get_child (theme_dir, "clay-light.css");
           if (! g_file_query_exists (light, NULL))
             g_clear_object (&light);
 
-          gray  = g_file_get_child (theme_dir, "gimp-gray.css");
+          gray  = g_file_get_child (theme_dir, "clay-gray.css");
           if (! g_file_query_exists (gray, NULL))
             g_clear_object (&gray);
 
-          dark  = g_file_get_child (theme_dir, "gimp-dark.css");
+          dark  = g_file_get_child (theme_dir, "clay-dark.css");
           if (! g_file_query_exists (dark, NULL))
             g_clear_object (&dark);
 
           switch (color_scheme)
             {
-            case GIMP_THEME_LIGHT:
+            case CLAY_THEME_LIGHT:
               if (light != NULL)
                 file = g_object_ref (light);
               else if (fallback != NULL)
@@ -539,7 +582,7 @@ themes_apply_theme (Gimp          *gimp,
               else if (dark != NULL)
                 file = g_object_ref (dark);
               break;
-            case GIMP_THEME_GRAY:
+            case CLAY_THEME_GRAY:
               if (gray != NULL)
                 file = g_object_ref (gray);
               else if (fallback != NULL)
@@ -549,7 +592,7 @@ themes_apply_theme (Gimp          *gimp,
               else if (light != NULL)
                 file = g_object_ref (light);
               break;
-            case GIMP_THEME_DARK:
+            case CLAY_THEME_DARK:
               if (dark != NULL)
                 file = g_object_ref (dark);
               else if (fallback != NULL)
@@ -559,18 +602,30 @@ themes_apply_theme (Gimp          *gimp,
               else if (light != NULL)
                 file = g_object_ref (light);
               break;
-            case GIMP_THEME_SYSTEM:
+            case CLAY_THEME_SYSTEM:
+            default:
               g_return_if_reached ();
             }
 
           if (file != NULL)
             css_files = g_slist_prepend (css_files, file);
-          else
+
+          if (file != NULL && palette != NULL)
             {
-              gimp_message (gimp, NULL, GIMP_MESSAGE_ERROR,
+              gchar *name = g_strconcat (palette->palette, ".css", NULL);
+
+              css_files = g_slist_prepend (css_files,
+                                           clay_data_directory_file ("theme-schemes",
+                                                                     name, NULL));
+              g_free (name);
+            }
+
+          if (file == NULL)
+            {
+              clay_message (clay, NULL, CLAY_MESSAGE_ERROR,
                             _("Invalid theme: directory '%s' contains neither "
-                              "gimp-dark.css, gimp-gray.css, gimp-light.css nor gimp.css."),
-                            gimp_file_get_utf8_name (theme_dir));
+                              "clay-dark.css, clay-gray.css, clay-light.css nor clay.css."),
+                            clay_file_get_utf8_name (theme_dir));
             }
 
           g_clear_object (&fallback);
@@ -582,30 +637,31 @@ themes_apply_theme (Gimp          *gimp,
         {
           gchar *tmp;
 
-          tmp = g_build_filename (gimp_data_directory (),
-                                  "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp.css",
+          tmp = g_build_filename (clay_data_directory (),
+                                  "themes", CLAY_CONFIG_DEFAULT_THEME, "clay.css",
                                   NULL);
           css_files = g_slist_prepend (css_files, g_file_new_for_path (tmp));
           g_free (tmp);
 
           switch (color_scheme)
             {
-            case GIMP_THEME_LIGHT:
-              tmp = g_build_filename (gimp_data_directory (),
-                                      "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp-light.css",
+            case CLAY_THEME_LIGHT:
+              tmp = g_build_filename (clay_data_directory (),
+                                      "themes", CLAY_CONFIG_DEFAULT_THEME, "clay-light.css",
                                       NULL);
               break;
-            case GIMP_THEME_GRAY:
-              tmp = g_build_filename (gimp_data_directory (),
-                                      "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp-gray.css",
+            case CLAY_THEME_GRAY:
+              tmp = g_build_filename (clay_data_directory (),
+                                      "themes", CLAY_CONFIG_DEFAULT_THEME, "clay-gray.css",
                                       NULL);
               break;
-            case GIMP_THEME_DARK:
-              tmp = g_build_filename (gimp_data_directory (),
-                                      "themes", GIMP_CONFIG_DEFAULT_THEME, "gimp-dark.css",
+            case CLAY_THEME_DARK:
+              tmp = g_build_filename (clay_data_directory (),
+                                      "themes", CLAY_CONFIG_DEFAULT_THEME, "clay-dark.css",
                                       NULL);
               break;
-            case GIMP_THEME_SYSTEM:
+            case CLAY_THEME_SYSTEM:
+            default:
               g_return_if_reached ();
             }
 
@@ -613,10 +669,17 @@ themes_apply_theme (Gimp          *gimp,
           g_free (tmp);
         }
 
-      css_files = g_slist_prepend (
-        css_files, gimp_sysconf_directory_file ("gimp.css", NULL));
+      /* An icon theme may ship a clay.css, e.g. for animated icon colours */
+      if (icon_themes_get_theme_dir (clay, config->icon_theme))
+        css_files = g_slist_prepend (
+          css_files,
+          g_file_get_child (icon_themes_get_theme_dir (clay, config->icon_theme),
+                            "clay.css"));
 
-      css_user  = gimp_directory_file ("gimp.css", NULL);
+      css_files = g_slist_prepend (
+        css_files, clay_sysconf_directory_file ("clay.css", NULL));
+
+      css_user  = clay_directory_file ("clay.css", NULL);
       css_files = g_slist_prepend (
         css_files, css_user);
 
@@ -628,10 +691,10 @@ themes_apply_theme (Gimp          *gimp,
         " *\n"
         " * This file is written on Clay startup and on every theme change.\n"
         " * It is NOT supposed to be edited manually. Edit your personal\n"
-        " * gimp.css file instead (%s).\n"
+        " * clay.css file instead (%s).\n"
         " */\n"
         "\n",
-        gimp_file_get_utf8_name (css_user));
+        clay_file_get_utf8_name (css_user));
 
       for (iter = css_files; ! error && iter; iter = g_slist_next (iter))
         {
@@ -660,7 +723,7 @@ themes_apply_theme (Gimp          *gimp,
             "* { -gtk-icon-style: %s; }\n"
             "\n"
             "%s",
-            icon_themes_current_prefer_symbolic (gimp) ? "symbolic" : "regular",
+            icon_themes_current_prefer_symbolic (clay) ? "symbolic" : "regular",
             prefer_dark_theme ? "/* prefer-dark-theme */\n" : "");
 
         }
@@ -764,7 +827,7 @@ themes_apply_theme (Gimp          *gimp,
 
           switch (config->custom_icon_size)
             {
-            case GIMP_ICON_SIZE_SMALL:
+            case CLAY_ICON_SIZE_SMALL:
               tool_icon_size   = "small-toolbar";
               tab_icon_size    = "small-toolbar";
               button_icon_size = "small-toolbar";
@@ -772,7 +835,7 @@ themes_apply_theme (Gimp          *gimp,
               tab_padding      = 0;
               sep_padding      = 1;
               break;
-            case GIMP_ICON_SIZE_MEDIUM:
+            case CLAY_ICON_SIZE_MEDIUM:
               tool_icon_size   = "large-toolbar";
               tab_icon_size    = "small-toolbar";
               button_icon_size = "small-toolbar";
@@ -780,7 +843,7 @@ themes_apply_theme (Gimp          *gimp,
               tab_padding      = 1;
               sep_padding      = 1;
               break;
-            case GIMP_ICON_SIZE_LARGE:
+            case CLAY_ICON_SIZE_LARGE:
               tool_icon_size   = "dnd";
               tab_icon_size    = "large-toolbar";
               button_icon_size = "large-toolbar";
@@ -788,7 +851,7 @@ themes_apply_theme (Gimp          *gimp,
               tab_padding      = 5;
               sep_padding      = 2;
               break;
-            case GIMP_ICON_SIZE_HUGE:
+            case CLAY_ICON_SIZE_HUGE:
               tool_icon_size   = "dialog";
               tab_icon_size    = "dnd";
               button_icon_size = "dnd";
@@ -801,23 +864,23 @@ themes_apply_theme (Gimp          *gimp,
           g_output_stream_printf (
             output, NULL, NULL, &error,
             "\n"
-            "* { -GimpToolPalette-tool-icon-size: %s; }"
+            "* { -ClayToolPalette-tool-icon-size: %s; }"
             "\n"
-            "* { -GimpDock-tool-icon-size: %s; }"
+            "* { -ClayDock-tool-icon-size: %s; }"
             "\n"
-            "* { -GimpViewableDialog-tool-icon-size: %s; }"
+            "* { -ClayViewableDialog-tool-icon-size: %s; }"
             "\n"
-            "* { -GimpDockbook-tab-icon-size: %s; }"
+            "* { -ClayDockbook-tab-icon-size: %s; }"
             "\n"
-            "* { -GimpColorNotebook-tab-icon-size: %s; }"
+            "* { -ClayColorNotebook-tab-icon-size: %s; }"
             "\n"
-            "* { -GimpPrefsBox-tab-icon-size: %s; }"
+            "* { -ClayPrefsBox-tab-icon-size: %s; }"
             "\n"
-            "* { -GimpEditor-button-icon-size: %s; }"
+            "* { -ClayEditor-button-icon-size: %s; }"
             "\n"
-            "* { -GimpDisplayShell-button-icon-size: %s; }"
+            "* { -ClayDisplayShell-button-icon-size: %s; }"
             "\n"
-            "* { -GimpFgBgEditor-tool-icon-size: %s; }"
+            "* { -ClayFgBgEditor-tool-icon-size: %s; }"
             "\n"
             "toolpalette button { padding: %dpx; }"
             "\n"
@@ -856,9 +919,9 @@ themes_apply_theme (Gimp          *gimp,
         {
           GCancellable *cancellable = g_cancellable_new ();
 
-          gimp_message (gimp, NULL, GIMP_MESSAGE_ERROR,
+          clay_message (clay, NULL, CLAY_MESSAGE_ERROR,
                         _("Error writing '%s': %s"),
-                        gimp_file_get_utf8_name (theme_css), error->message);
+                        clay_file_get_utf8_name (theme_css), error->message);
           g_clear_error (&error);
 
           /* Cancel the overwrite initiated by g_file_replace(). */
@@ -868,9 +931,9 @@ themes_apply_theme (Gimp          *gimp,
         }
       else if (! g_output_stream_close (output, NULL, &error))
         {
-          gimp_message (gimp, NULL, GIMP_MESSAGE_ERROR,
+          clay_message (clay, NULL, CLAY_MESSAGE_ERROR,
                         _("Error closing '%s': %s"),
-                        gimp_file_get_utf8_name (theme_css), error->message);
+                        clay_file_get_utf8_name (theme_css), error->message);
           g_clear_error (&error);
         }
 
@@ -879,6 +942,18 @@ themes_apply_theme (Gimp          *gimp,
     }
 
   g_object_unref (theme_css);
+}
+
+static const ThemesPalette *
+themes_get_palette (ClayThemeScheme scheme)
+{
+  gint i;
+
+  for (i = 0; i < G_N_ELEMENTS (themes_palettes); i++)
+    if (themes_palettes[i].scheme == scheme)
+      return &themes_palettes[i];
+
+  return NULL;
 }
 
 static void
@@ -901,13 +976,13 @@ themes_name_compare (const void *p1,
 }
 
 static void
-themes_theme_paths_notify (GimpExtensionManager *manager,
+themes_theme_paths_notify (ClayExtensionManager *manager,
                            GParamSpec           *pspec,
-                           Gimp                 *gimp)
+                           Clay                 *clay)
 {
-  GimpGuiConfig *config;
+  ClayGuiConfig *config;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   if (themes_hash)
     g_hash_table_remove_all (themes_hash);
@@ -917,17 +992,17 @@ themes_theme_paths_notify (GimpExtensionManager *manager,
                                          g_free,
                                          g_object_unref);
 
-  config = GIMP_GUI_CONFIG (gimp->config);
+  config = CLAY_GUI_CONFIG (clay->config);
   if (config->theme_path)
     {
       GList *path;
       GList *list;
 
-      g_object_get (gimp->extension_manager,
+      g_object_get (clay->extension_manager,
                     "theme-paths", &path,
                     NULL);
       path = g_list_copy_deep (path, (GCopyFunc) g_object_ref, NULL);
-      path = g_list_concat (path, gimp_config_path_expand_to_files (config->theme_path, NULL));
+      path = g_list_concat (path, clay_config_path_expand_to_files (config->theme_path, NULL));
 
       for (list = path; list; list = g_list_next (list))
         {
@@ -957,7 +1032,7 @@ themes_theme_paths_notify (GimpExtensionManager *manager,
                       gchar       *basename;
 
                       file = g_file_enumerator_get_child (enumerator, info);
-                      name = gimp_file_get_utf8_name (file);
+                      name = clay_file_get_utf8_name (file);
 
                       basename = g_path_get_basename (name);
 
@@ -970,7 +1045,7 @@ themes_theme_paths_notify (GimpExtensionManager *manager,
                         }
                       else
                         {
-                          if (gimp->be_verbose)
+                          if (clay->be_verbose)
                             g_print ("Adding theme '%s' (%s)\n",
                                      basename, name);
 
@@ -995,7 +1070,7 @@ themes_theme_settings_portal_changed (GDBusProxy  *proxy,
                                       const gchar *sender_name,
                                       const gchar *signal_name,
                                       GVariant    *parameters,
-                                      Gimp        *gimp)
+                                      Clay        *clay)
 {
   const char *namespace;
   const char *name;
@@ -1009,7 +1084,7 @@ themes_theme_settings_portal_changed (GDBusProxy  *proxy,
   if (g_strcmp0 (namespace, "org.freedesktop.appearance") == 0 &&
       g_strcmp0 (name, "color-scheme") == 0)
     {
-      themes_theme_change_notify (GIMP_GUI_CONFIG (gimp->config), NULL, gimp);
+      themes_theme_change_notify (CLAY_GUI_CONFIG (clay->config), NULL, clay);
     }
 
   g_variant_unref (value);
@@ -1018,16 +1093,16 @@ themes_theme_settings_portal_changed (GDBusProxy  *proxy,
 
 #if defined(G_OS_WIN32) || (defined(PLATFORM_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)
 void
-themes_set_title_bar (Gimp *gimp)
+themes_set_title_bar (Clay *clay)
 {
-  GList *windows = gimp_get_image_windows (gimp);
+  GList *windows = clay_get_image_windows (clay);
   GList *iter;
 
   for (iter = windows; iter; iter = g_list_next (iter))
     {
       GtkWidget *window = GTK_WIDGET (windows->data);
 
-      gimp_window_set_title_bar_theme (gimp, window);
+      clay_window_set_title_bar_theme (clay, window);
     }
 
   if (windows)

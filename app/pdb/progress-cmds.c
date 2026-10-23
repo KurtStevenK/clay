@@ -25,526 +25,526 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpparamspecs.h"
-#include "plug-in/gimpplugin-progress.h"
-#include "plug-in/gimpplugin.h"
-#include "plug-in/gimppluginmanager.h"
+#include "core/clay.h"
+#include "core/clayparamspecs.h"
+#include "plug-in/clayplugin-progress.h"
+#include "plug-in/clayplugin.h"
+#include "plug-in/claypluginmanager.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-progress_init_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+progress_init_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
   const gchar *message;
-  GimpDisplay *gdisplay;
+  ClayDisplay *gdisplay;
 
-  message = g_value_get_string (gimp_value_array_index (args, 0));
-  gdisplay = g_value_get_object (gimp_value_array_index (args, 1));
+  message = g_value_get_string (clay_value_array_index (args, 0));
+  gdisplay = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in && plug_in->open)
         {
-          if (! gimp->no_interface)
-            gimp_plug_in_progress_start (plug_in, message, gdisplay);
+          if (! clay->no_interface)
+            clay_plug_in_progress_start (plug_in, message, gdisplay);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                        _("The plug-in is closing."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_update_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+progress_update_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
   gdouble percentage;
 
-  percentage = g_value_get_double (gimp_value_array_index (args, 0));
+  percentage = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in && plug_in->open)
         {
-          if (! gimp->no_interface)
-            gimp_plug_in_progress_set_value (plug_in, percentage);
+          if (! clay->no_interface)
+            clay_plug_in_progress_set_value (plug_in, percentage);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                        _("The plug-in is closing."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_pulse_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+progress_pulse_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-        gimp_plug_in_progress_pulse (plug_in);
+      if (! clay->no_interface)
+        clay_plug_in_progress_pulse (plug_in);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_set_text_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+progress_set_text_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
   const gchar *message;
 
-  message = g_value_get_string (gimp_value_array_index (args, 0));
+  message = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in && plug_in->open)
         {
-          if (! gimp->no_interface)
-            gimp_plug_in_progress_set_text (plug_in, message);
+          if (! clay->no_interface)
+            clay_plug_in_progress_set_text (plug_in, message);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                        _("The plug-in is closing."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_end_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+progress_end_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      GimpPlugInProcFrame *proc_frame = gimp_plug_in_get_proc_frame (plug_in);
+      ClayPlugInProcFrame *proc_frame = clay_plug_in_get_proc_frame (plug_in);
 
-      gimp_plug_in_progress_end (plug_in, proc_frame);
+      clay_plug_in_progress_end (plug_in, proc_frame);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_get_window_handle_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+progress_get_window_handle_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   GBytes *handle = NULL;
 
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-        handle = gimp_plug_in_progress_get_window_handle (plug_in);
+      if (! clay->no_interface)
+        handle = clay_plug_in_progress_get_window_handle (plug_in);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), handle);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), handle);
 
   return return_vals;
 }
 
-static GimpValueArray *
-progress_install_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+progress_install_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
   const gchar *progress_callback;
 
-  progress_callback = g_value_get_string (gimp_value_array_index (args, 0));
+  progress_callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in && plug_in->open)
         {
-          success = gimp_plug_in_progress_install (plug_in, progress_callback);
+          success = clay_plug_in_progress_install (plug_in, progress_callback);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                        _("The plug-in is closing."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_uninstall_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+progress_uninstall_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
   const gchar *progress_callback;
 
-  progress_callback = g_value_get_string (gimp_value_array_index (args, 0));
+  progress_callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in && plug_in->open)
         {
-          success = gimp_plug_in_progress_uninstall (plug_in, progress_callback);
+          success = clay_plug_in_progress_uninstall (plug_in, progress_callback);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                        _("The plug-in is closing."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-progress_cancel_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+progress_cancel_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
   const gchar *progress_callback;
 
-  progress_callback = g_value_get_string (gimp_value_array_index (args, 0));
+  progress_callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+      ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
       if (plug_in && plug_in->open)
         {
-          success = gimp_plug_in_progress_cancel (plug_in, progress_callback);
+          success = clay_plug_in_progress_cancel (plug_in, progress_callback);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                        _("The plug-in is closing."));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_progress_procs (GimpPDB *pdb)
+register_progress_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-progress-init
+   * clay-progress-init
    */
-  procedure = gimp_procedure_new (progress_init_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-init");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_init_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-init");
+  clay_procedure_set_static_help (procedure,
                                   "Initializes the progress bar for the current plug-in.",
                                   "Initializes the progress bar for the current plug-in. It is only valid to call this procedure from a plug-in.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("message",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("message",
                                                        "message",
                                                        "Message to use in the progress dialog",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_display ("gdisplay",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_display ("gdisplay",
                                                         "gdisplay",
-                                                        "GimpDisplay to update progressbar in, or %NULL for a separate window",
+                                                        "ClayDisplay to update progressbar in, or %NULL for a separate window",
                                                         TRUE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-update
+   * clay-progress-update
    */
-  procedure = gimp_procedure_new (progress_update_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-update");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_update_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-update");
+  clay_procedure_set_static_help (procedure,
                                   "Updates the progress bar for the current plug-in.",
                                   "Updates the progress bar for the current plug-in. It is only valid to call this procedure from a plug-in.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("percentage",
                                                     "percentage",
                                                     "Percentage of progress completed which must be between 0.0 and 1.0",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-pulse
+   * clay-progress-pulse
    */
-  procedure = gimp_procedure_new (progress_pulse_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-pulse");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_pulse_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-pulse");
+  clay_procedure_set_static_help (procedure,
                                   "Pulses the progress bar for the current plug-in.",
-                                  "Updates the progress bar for the current plug-in. It is only valid to call this procedure from a plug-in. Use this function instead of 'gimp-progress-update' if you cannot tell how much progress has been made. This usually causes the the progress bar to enter \"activity mode\", where a block bounces back and forth.",
+                                  "Updates the progress bar for the current plug-in. It is only valid to call this procedure from a plug-in. Use this function instead of 'clay-progress-update' if you cannot tell how much progress has been made. This usually causes the the progress bar to enter \"activity mode\", where a block bounces back and forth.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2005");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-set-text
+   * clay-progress-set-text
    */
-  procedure = gimp_procedure_new (progress_set_text_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-set-text");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_set_text_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-set-text");
+  clay_procedure_set_static_help (procedure,
                                   "Changes the text in the progress bar for the current plug-in.",
-                                  "This function changes the text in the progress bar for the current plug-in. Unlike 'gimp-progress-init' it does not change the displayed value.",
+                                  "This function changes the text in the progress bar for the current plug-in. Unlike 'clay-progress-init' it does not change the displayed value.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("message",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("message",
                                                        "message",
                                                        "Message to use in the progress dialog",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-end
+   * clay-progress-end
    */
-  procedure = gimp_procedure_new (progress_end_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-end");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_end_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-end");
+  clay_procedure_set_static_help (procedure,
                                   "Ends the progress bar for the current plug-in.",
                                   "Ends the progress display for the current plug-in. Most plug-ins don't need to call this, they just exit when the work is done. It is only valid to call this procedure from a plug-in.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2007");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-get-window-handle
+   * clay-progress-get-window-handle
    */
-  procedure = gimp_procedure_new (progress_get_window_handle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-get-window-handle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_get_window_handle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-get-window-handle");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the native handle of the toplevel window this plug-in's progress is or would be displayed in.",
                                   "This function returns the native handle allowing to identify the toplevel window this plug-in's progress is displayed in. It should still work even if the progress bar has not been initialized yet, unless the plug-in wasn't called from a GUI.\n"
                                   "This handle can be of various types (integer, string, etc.) depending on the platform you are running on which is why it returns a GBytes. There are usually no reasons to call this directly.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("handle",
                                                        "handle",
                                                        "The progress bar's toplevel window's handle",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-install
+   * clay-progress-install
    */
-  procedure = gimp_procedure_new (progress_install_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-install");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_install_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-install");
+  clay_procedure_set_static_help (procedure,
                                   "Installs a progress callback for the current plug-in.",
                                   "This function installs a temporary PDB procedure which will handle all progress calls made by this plug-in and any procedure it calls. Calling this function multiple times simply replaces the old progress callbacks.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("progress-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("progress-callback",
                                                        "progress callback",
                                                        "The callback PDB proc to call",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-uninstall
+   * clay-progress-uninstall
    */
-  procedure = gimp_procedure_new (progress_uninstall_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-uninstall");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_uninstall_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-uninstall");
+  clay_procedure_set_static_help (procedure,
                                   "Uninstalls the progress callback for the current plug-in.",
-                                  "This function uninstalls any progress callback installed with 'gimp-progress-install' before.",
+                                  "This function uninstalls any progress callback installed with 'clay-progress-install' before.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("progress-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("progress-callback",
                                                        "progress callback",
                                                        "The name of the callback registered for this progress",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-progress-cancel
+   * clay-progress-cancel
    */
-  procedure = gimp_procedure_new (progress_cancel_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-progress-cancel");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (progress_cancel_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-progress-cancel");
+  clay_procedure_set_static_help (procedure,
                                   "Cancels a running progress.",
                                   "This function cancels the currently running progress.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("progress-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("progress-callback",
                                                        "progress callback",
                                                        "The name of the callback registered for this progress",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

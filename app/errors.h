@@ -17,19 +17,19 @@
 
 #pragma once
 
-#ifndef GIMP_APP_GLUE_COMPILATION
+#ifndef CLAY_APP_GLUE_COMPILATION
 #error You must not #include "errors.h" from an app/ subdir
 #endif
 
 
-void         errors_init      (Gimp               *gimp,
+void         errors_init      (Clay               *clay,
                                const gchar        *full_prog_name,
                                gboolean            use_debug_handler,
-                               GimpStackTraceMode  stack_trace_mode,
+                               ClayStackTraceMode  stack_trace_mode,
                                const gchar        *backtrace_file);
 void         errors_exit      (void);
 
-GHashTable * errors_recovered (Gimp               *gimp);
+GHashTable * errors_recovered (Clay               *clay);
 
-void         gimp_fatal_error (const gchar        *message) G_GNUC_NORETURN;
-void         gimp_terminate   (const gchar        *message) G_GNUC_NORETURN;
+void         clay_fatal_error (const gchar        *message) G_GNUC_NORETURN;
+void         clay_terminate   (const gchar        *message) G_GNUC_NORETURN;

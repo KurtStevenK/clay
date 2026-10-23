@@ -20,12 +20,12 @@
 
 (define (script-fu-paste-as-pattern name filename)
   (script-fu-use-v3)
-  (let* ((pattern-image (gimp-edit-paste-as-new-image))
+  (let* ((pattern-image (clay-edit-paste-as-new-image))
          (path 0))
 
-    (if (gimp-image-id-is-valid pattern-image)
+    (if (clay-image-id-is-valid pattern-image)
       (begin
-        (set! path (string-append gimp-directory
+        (set! path (string-append clay-directory
                              "/patterns/"
                              filename
                              (number->string pattern-image)
@@ -37,12 +37,12 @@
                        -1  ; NULL ExportOptions
                        name)
 
-        (gimp-image-delete pattern-image)
+        (clay-image-delete pattern-image)
 
-        (gimp-patterns-refresh)
-        (gimp-context-set-pattern (gimp-pattern-get-by-name name))
+        (clay-patterns-refresh)
+        (clay-context-set-pattern (clay-pattern-get-by-name name))
       )
-      (gimp-message _"There is no image data in the clipboard to paste.")
+      (clay-message _"There is no image data in the clipboard to paste.")
     )
   )
 )

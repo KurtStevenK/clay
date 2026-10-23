@@ -21,9 +21,9 @@
 void               gui_libs_init (GOptionContext *context);
 void               gui_abort     (const gchar    *abort_message);
 
-GimpInitStatusFunc gui_init      (Gimp           *gimp,
+ClayInitStatusFunc gui_init      (Clay           *clay,
                                   gboolean        no_splash,
-                                  GimpApp        *app,
+                                  ClayApp        *app,
                                   const gchar    *test_base_dir,
                                   const gchar    *system_lang_l10n);
 

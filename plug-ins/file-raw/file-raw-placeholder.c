@@ -22,9 +22,9 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "file-raw-formats.h"
 
@@ -34,12 +34,12 @@ typedef struct _PlaceholderClass PlaceholderClass;
 
 struct _Placeholder
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PlaceholderClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -48,29 +48,29 @@ struct _PlaceholderClass
 
 GType                   placeholder_get_type         (void);
 
-static GList          * placeholder_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * placeholder_create_procedure (GimpPlugIn            *plug_in,
+static GList          * placeholder_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * placeholder_create_procedure (ClayPlugIn            *plug_in,
                                                       const gchar           *name);
 
-static GimpValueArray * placeholder_load             (GimpProcedure         *procedure,
-                                                      GimpRunMode            run_mode,
+static ClayValueArray * placeholder_load             (ClayProcedure         *procedure,
+                                                      ClayRunMode            run_mode,
                                                       GFile                 *file,
-                                                      GimpMetadata          *metadata,
-                                                      GimpMetadataLoadFlags *flags,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayMetadata          *metadata,
+                                                      ClayMetadataLoadFlags *flags,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
 
 
-G_DEFINE_TYPE (Placeholder, placeholder, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Placeholder, placeholder, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PLACEHOLDER_TYPE)
+CLAY_MAIN (PLACEHOLDER_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 placeholder_class_init (PlaceholderClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = placeholder_query_procedures;
   plug_in_class->create_procedure = placeholder_create_procedure;
@@ -83,7 +83,7 @@ placeholder_init (Placeholder *placeholder)
 }
 
 static GList *
-placeholder_query_procedures (GimpPlugIn *plug_in)
+placeholder_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
   gint   i;
@@ -102,11 +102,11 @@ placeholder_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-placeholder_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+placeholder_create_procedure (ClayPlugIn  *plug_in,
                               const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
   gint           i;
 
   for (i = 0; i < G_N_ELEMENTS (file_formats); i++)
@@ -128,26 +128,26 @@ placeholder_create_procedure (GimpPlugIn  *plug_in,
       load_blurb = g_strdup_printf (format->load_blurb_format, "placeholder");
       load_help  = g_strdup_printf (format->load_help_format,  "placeholder");
 
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            placeholder_load,
                                            (gpointer) format, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         load_blurb, load_help, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Tobias Ellinghaus",
                                       "Tobias Ellinghaus",
                                       "2016");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           format->mime_type);
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           format->extensions);
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       format->magic);
 
-      gimp_load_procedure_set_handles_raw (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_handles_raw (CLAY_LOAD_PROCEDURE (procedure),
                                            TRUE);
 
       g_free (load_proc);
@@ -160,13 +160,13 @@ placeholder_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-placeholder_load (GimpProcedure         *procedure,
-                  GimpRunMode            run_mode,
+static ClayValueArray *
+placeholder_load (ClayProcedure         *procedure,
+                  ClayRunMode            run_mode,
                   GFile                 *file,
-                  GimpMetadata          *metadata,
-                  GimpMetadataLoadFlags *flags,
-                  GimpProcedureConfig   *config,
+                  ClayMetadata          *metadata,
+                  ClayMetadataLoadFlags *flags,
+                  ClayProcedureConfig   *config,
                   gpointer               run_data)
 {
   const FileFormat *format = run_data;
@@ -184,7 +184,7 @@ placeholder_load (GimpProcedure         *procedure,
                  "load RAW files."),
                gettext (format->file_type));
 
-  return gimp_procedure_new_return_values (procedure,
-                                           GIMP_PDB_EXECUTION_ERROR,
+  return clay_procedure_new_return_values (procedure,
+                                           CLAY_PDB_EXECUTION_ERROR,
                                            error);
 }

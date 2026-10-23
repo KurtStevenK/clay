@@ -18,4 +18,4 @@
 #pragma once
 
 
-GtkWidget * input_devices_dialog_new (Gimp *gimp);
+GtkWidget * input_devices_dialog_new (Clay *clay);

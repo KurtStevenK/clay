@@ -20,21 +20,21 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimp-utils.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clay-utils.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "print-size-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -45,13 +45,13 @@ typedef struct _PrintSizeDialog PrintSizeDialog;
 
 struct _PrintSizeDialog
 {
-  GimpImage              *image;
-  GimpSizeEntry          *size_entry;
-  GimpSizeEntry          *resolution_entry;
-  GimpChainButton        *chain;
+  ClayImage              *image;
+  ClaySizeEntry          *size_entry;
+  ClaySizeEntry          *resolution_entry;
+  ClayChainButton        *chain;
   gdouble                 xres;
   gdouble                 yres;
-  GimpResolutionCallback  callback;
+  ClayResolutionCallback  callback;
   gpointer                user_data;
 };
 
@@ -79,14 +79,14 @@ static void   print_size_dialog_set_resolution     (PrintSizeDialog *private,
 /*  public functions  */
 
 GtkWidget *
-print_size_dialog_new (GimpImage              *image,
-                       GimpContext            *context,
+print_size_dialog_new (ClayImage              *image,
+                       ClayContext            *context,
                        const gchar            *title,
                        const gchar            *role,
                        GtkWidget              *parent,
-                       GimpHelpFunc            help_func,
+                       ClayHelpFunc            help_func,
                        const gchar            *help_id,
-                       GimpResolutionCallback  callback,
+                       ClayResolutionCallback  callback,
                        gpointer                user_data)
 {
   PrintSizeDialog *private;
@@ -101,8 +101,8 @@ print_size_dialog_new (GimpImage              *image,
   GtkWidget       *chain;
   GtkAdjustment   *adj;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (callback != NULL, NULL);
 
   private = g_slice_new0 (PrintSizeDialog);
@@ -111,11 +111,11 @@ print_size_dialog_new (GimpImage              *image,
   private->callback  = callback;
   private->user_data = user_data;
 
-  gimp_image_get_resolution (image, &private->xres, &private->yres);
+  clay_image_get_resolution (image, &private->xres, &private->yres);
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                      title, role,
-                                     GIMP_ICON_DOCUMENT_PRINT_RESOLUTION, title,
+                                     CLAY_ICON_DOCUMENT_PRINT_RESOLUTION, title,
                                      parent,
                                      help_func, help_id,
 
@@ -125,7 +125,7 @@ print_size_dialog_new (GimpImage              *image,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
@@ -140,7 +140,7 @@ print_size_dialog_new (GimpImage              *image,
                     G_CALLBACK (print_size_dialog_response),
                     private);
 
-  frame = gimp_frame_new (_("Print Size"));
+  frame = clay_frame_new (_("Print Size"));
   gtk_container_set_border_width (GTK_CONTAINER (frame), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       frame, FALSE, FALSE, 0);
@@ -154,19 +154,19 @@ print_size_dialog_new (GimpImage              *image,
   /*  the print size entry  */
 
   adj = gtk_adjustment_new (1, 1, 1, 1, 10, 0);
-  width = gimp_spin_button_new (adj, 1.0, 2);
+  width = clay_spin_button_new (adj, 1.0, 2);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (width), TRUE);
   gtk_entry_set_width_chars (GTK_ENTRY (width), SB_WIDTH);
 
   adj = gtk_adjustment_new (1, 1, 1, 1, 10, 0);
-  height = gimp_spin_button_new (adj, 1.0, 2);
+  height = clay_spin_button_new (adj, 1.0, 2);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (height), TRUE);
   gtk_entry_set_width_chars (GTK_ENTRY (height), SB_WIDTH);
 
-  entry = gimp_size_entry_new (0, gimp_get_default_unit (), "%n",
+  entry = clay_size_entry_new (0, clay_get_default_unit (), "%n",
                                FALSE, FALSE, FALSE, SB_WIDTH,
-                               GIMP_SIZE_ENTRY_UPDATE_SIZE);
-  private->size_entry = GIMP_SIZE_ENTRY (entry);
+                               CLAY_SIZE_ENTRY_UPDATE_SIZE);
+  private->size_entry = CLAY_SIZE_ENTRY (entry);
 
   label = gtk_label_new_with_mnemonic (_("_Width:"));
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
@@ -187,40 +187,40 @@ print_size_dialog_new (GimpImage              *image,
   gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, FALSE, 0);
   gtk_widget_set_visible (entry, TRUE);
 
-  gimp_size_entry_add_field (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_add_field (CLAY_SIZE_ENTRY (entry),
                              GTK_SPIN_BUTTON (height), NULL);
   gtk_grid_attach (GTK_GRID (entry), height, 0, 1, 1, 1);
   gtk_widget_set_visible (height, TRUE);
 
-  gimp_size_entry_add_field (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_add_field (CLAY_SIZE_ENTRY (entry),
                              GTK_SPIN_BUTTON (width), NULL);
   gtk_grid_attach (GTK_GRID (entry), width, 0, 0, 1, 1);
   gtk_widget_set_visible (width, TRUE);
 
-  gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (entry), 0,
+  clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (entry), 0,
                                   private->xres, FALSE);
-  gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (entry), 1,
+  clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (entry), 1,
                                   private->yres, FALSE);
 
-  gimp_size_entry_set_refval_boundaries
-    (GIMP_SIZE_ENTRY (entry), 0, GIMP_MIN_IMAGE_SIZE, GIMP_MAX_IMAGE_SIZE);
-  gimp_size_entry_set_refval_boundaries
-    (GIMP_SIZE_ENTRY (entry), 1, GIMP_MIN_IMAGE_SIZE, GIMP_MAX_IMAGE_SIZE);
+  clay_size_entry_set_refval_boundaries
+    (CLAY_SIZE_ENTRY (entry), 0, CLAY_MIN_IMAGE_SIZE, CLAY_MAX_IMAGE_SIZE);
+  clay_size_entry_set_refval_boundaries
+    (CLAY_SIZE_ENTRY (entry), 1, CLAY_MIN_IMAGE_SIZE, CLAY_MAX_IMAGE_SIZE);
 
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (entry), 0,
-                              gimp_image_get_width  (image));
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (entry), 1,
-                              gimp_image_get_height (image));
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (entry), 0,
+                              clay_image_get_width  (image));
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (entry), 1,
+                              clay_image_get_height (image));
 
   /*  the resolution entry  */
 
   adj = gtk_adjustment_new (1, 1, 1, 1, 10, 0);
-  width = gimp_spin_button_new (adj, 1.0, 2);
+  width = clay_spin_button_new (adj, 1.0, 2);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (width), TRUE);
   gtk_entry_set_width_chars (GTK_ENTRY (width), SB_WIDTH);
 
   adj = gtk_adjustment_new (1, 1, 1, 1, 10, 0);
-  height = gimp_spin_button_new (adj, 1.0, 2);
+  height = clay_spin_button_new (adj, 1.0, 2);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (height), TRUE);
   gtk_entry_set_width_chars (GTK_ENTRY (height), SB_WIDTH);
 
@@ -240,45 +240,45 @@ print_size_dialog_new (GimpImage              *image,
   gtk_grid_attach (GTK_GRID (grid), hbox, 1, 2, 1, 2);
   gtk_widget_set_visible (hbox, TRUE);
 
-  entry = gimp_size_entry_new (0, gimp_image_get_unit (image), _("pixels/%a"),
+  entry = clay_size_entry_new (0, clay_image_get_unit (image), _("pixels/%a"),
                                FALSE, FALSE, FALSE, SB_WIDTH,
-                               GIMP_SIZE_ENTRY_UPDATE_RESOLUTION);
-  private->resolution_entry = GIMP_SIZE_ENTRY (entry);
+                               CLAY_SIZE_ENTRY_UPDATE_RESOLUTION);
+  private->resolution_entry = CLAY_SIZE_ENTRY (entry);
 
   gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, FALSE, 0);
   gtk_widget_set_visible (entry, TRUE);
 
-  gimp_size_entry_add_field (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_add_field (CLAY_SIZE_ENTRY (entry),
                              GTK_SPIN_BUTTON (height), NULL);
   gtk_grid_attach (GTK_GRID (entry), height, 0, 1, 1, 1);
   gtk_widget_set_visible (height, TRUE);
 
-  gimp_size_entry_add_field (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_add_field (CLAY_SIZE_ENTRY (entry),
                              GTK_SPIN_BUTTON (width), NULL);
   gtk_grid_attach (GTK_GRID (entry), width, 0, 0, 1, 1);
   gtk_widget_set_visible (width, TRUE);
 
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (entry), 0,
-                                         GIMP_MIN_RESOLUTION,
-                                         GIMP_MAX_RESOLUTION);
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (entry), 1,
-                                         GIMP_MIN_RESOLUTION,
-                                         GIMP_MAX_RESOLUTION);
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (entry), 0,
+                                         CLAY_MIN_RESOLUTION,
+                                         CLAY_MAX_RESOLUTION);
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (entry), 1,
+                                         CLAY_MIN_RESOLUTION,
+                                         CLAY_MAX_RESOLUTION);
 
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (entry), 0, private->xres);
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (entry), 1, private->yres);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (entry), 0, private->xres);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (entry), 1, private->yres);
 
-  chain = gimp_chain_button_new (GIMP_CHAIN_RIGHT);
-  if (ABS (private->xres - private->yres) < GIMP_MIN_RESOLUTION)
-    gimp_chain_button_set_active (GIMP_CHAIN_BUTTON (chain), TRUE);
+  chain = clay_chain_button_new (CLAY_CHAIN_RIGHT);
+  if (ABS (private->xres - private->yres) < CLAY_MIN_RESOLUTION)
+    clay_chain_button_set_active (CLAY_CHAIN_BUTTON (chain), TRUE);
   gtk_grid_attach (GTK_GRID (entry), chain, 1, 0, 1, 2);
   gtk_widget_set_visible (chain, TRUE);
 
-  private->chain = GIMP_CHAIN_BUTTON (chain);
+  private->chain = CLAY_CHAIN_BUTTON (chain);
 
   /* Set focus to size entry for immediate editing */
-  gimp_size_entry_set_activates_default (private->size_entry, TRUE);
-  gimp_size_entry_grab_focus (private->size_entry);
+  clay_size_entry_set_activates_default (private->size_entry, TRUE);
+  clay_size_entry_grab_focus (private->size_entry);
 
   g_signal_connect (private->size_entry, "value-changed",
                     G_CALLBACK (print_size_dialog_size_changed),
@@ -304,7 +304,7 @@ print_size_dialog_response (GtkWidget       *dialog,
                             gint             response_id,
                             PrintSizeDialog *private)
 {
-  GimpSizeEntry *entry = private->resolution_entry;
+  ClaySizeEntry *entry = private->resolution_entry;
 
   switch (response_id)
     {
@@ -315,9 +315,9 @@ print_size_dialog_response (GtkWidget       *dialog,
     case GTK_RESPONSE_OK:
       private->callback (dialog,
                          private->image,
-                         gimp_size_entry_get_refval (entry, 0),
-                         gimp_size_entry_get_refval (entry, 1),
-                         gimp_size_entry_get_unit (entry),
+                         clay_size_entry_get_refval (entry, 0),
+                         clay_size_entry_get_refval (entry, 1),
+                         clay_size_entry_get_unit (entry),
                          private->user_data);
       break;
 
@@ -332,10 +332,10 @@ print_size_dialog_reset (PrintSizeDialog *private)
 {
   gdouble  xres, yres;
 
-  gimp_size_entry_set_unit (private->resolution_entry,
-                            gimp_get_default_unit ());
+  clay_size_entry_set_unit (private->resolution_entry,
+                            clay_get_default_unit ());
 
-  gimp_image_get_resolution (private->image, &xres, &yres);
+  clay_image_get_resolution (private->image, &xres, &yres);
   print_size_dialog_set_resolution (private, xres, yres);
 }
 
@@ -343,37 +343,37 @@ static void
 print_size_dialog_size_changed (GtkWidget       *widget,
                                 PrintSizeDialog *private)
 {
-  GimpImage *image = private->image;
+  ClayImage *image = private->image;
   gdouble    width;
   gdouble    height;
   gdouble    xres;
   gdouble    yres;
   gdouble    scale;
 
-  scale = gimp_unit_get_factor (gimp_size_entry_get_unit (private->size_entry));
+  scale = clay_unit_get_factor (clay_size_entry_get_unit (private->size_entry));
 
-  width  = gimp_size_entry_get_value (private->size_entry, 0);
-  height = gimp_size_entry_get_value (private->size_entry, 1);
+  width  = clay_size_entry_get_value (private->size_entry, 0);
+  height = clay_size_entry_get_value (private->size_entry, 1);
 
-  xres = scale * gimp_image_get_width  (image) / MAX (0.001, width);
-  yres = scale * gimp_image_get_height (image) / MAX (0.001, height);
+  xres = scale * clay_image_get_width  (image) / MAX (0.001, width);
+  yres = scale * clay_image_get_height (image) / MAX (0.001, height);
 
-  xres = CLAMP (xres, GIMP_MIN_RESOLUTION, GIMP_MAX_RESOLUTION);
-  yres = CLAMP (yres, GIMP_MIN_RESOLUTION, GIMP_MAX_RESOLUTION);
+  xres = CLAMP (xres, CLAY_MIN_RESOLUTION, CLAY_MAX_RESOLUTION);
+  yres = CLAMP (yres, CLAY_MIN_RESOLUTION, CLAY_MAX_RESOLUTION);
 
   print_size_dialog_set_resolution (private, xres, yres);
   print_size_dialog_set_size (private,
-                              gimp_image_get_width  (image),
-                              gimp_image_get_height (image));
+                              clay_image_get_width  (image),
+                              clay_image_get_height (image));
 }
 
 static void
 print_size_dialog_resolution_changed (GtkWidget       *widget,
                                       PrintSizeDialog *private)
 {
-  GimpSizeEntry *entry = private->resolution_entry;
-  gdouble        xres  = gimp_size_entry_get_refval (entry, 0);
-  gdouble        yres  = gimp_size_entry_get_refval (entry, 1);
+  ClaySizeEntry *entry = private->resolution_entry;
+  gdouble        xres  = clay_size_entry_get_refval (entry, 0);
+  gdouble        yres  = clay_size_entry_get_refval (entry, 1);
 
   print_size_dialog_set_resolution (private, xres, yres);
 }
@@ -387,8 +387,8 @@ print_size_dialog_set_size (PrintSizeDialog *private,
                                    print_size_dialog_size_changed,
                                    private);
 
-  gimp_size_entry_set_refval (private->size_entry, 0, width);
-  gimp_size_entry_set_refval (private->size_entry, 1, height);
+  clay_size_entry_set_refval (private->size_entry, 0, width);
+  clay_size_entry_set_refval (private->size_entry, 1, height);
 
   g_signal_handlers_unblock_by_func (private->size_entry,
                                      print_size_dialog_size_changed,
@@ -400,7 +400,7 @@ print_size_dialog_set_resolution (PrintSizeDialog *private,
                                   gdouble          xres,
                                   gdouble          yres)
 {
-  if (private->chain && gimp_chain_button_get_active (private->chain))
+  if (private->chain && clay_chain_button_get_active (private->chain))
     {
       if (xres != private->xres)
         yres = xres;
@@ -415,8 +415,8 @@ print_size_dialog_set_resolution (PrintSizeDialog *private,
                                    print_size_dialog_resolution_changed,
                                    private);
 
-  gimp_size_entry_set_refval (private->resolution_entry, 0, xres);
-  gimp_size_entry_set_refval (private->resolution_entry, 1, yres);
+  clay_size_entry_set_refval (private->resolution_entry, 0, xres);
+  clay_size_entry_set_refval (private->resolution_entry, 1, yres);
 
   g_signal_handlers_unblock_by_func (private->resolution_entry,
                                      print_size_dialog_resolution_changed,
@@ -426,8 +426,8 @@ print_size_dialog_set_resolution (PrintSizeDialog *private,
                                    print_size_dialog_size_changed,
                                    private);
 
-  gimp_size_entry_set_resolution (private->size_entry, 0, xres, TRUE);
-  gimp_size_entry_set_resolution (private->size_entry, 1, yres, TRUE);
+  clay_size_entry_set_resolution (private->size_entry, 0, xres, TRUE);
+  clay_size_entry_set_resolution (private->size_entry, 1, yres, TRUE);
 
   g_signal_handlers_unblock_by_func (private->size_entry,
                                      print_size_dialog_size_changed,

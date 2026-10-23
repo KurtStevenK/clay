@@ -20,13 +20,13 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymath/claymath.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 
 #define DEFAULT_GAMMA 1.0
@@ -44,14 +44,14 @@ typedef struct _CdisplayGammaClass CdisplayGammaClass;
 
 struct _CdisplayGamma
 {
-  GimpColorDisplay  parent_instance;
+  ClayColorDisplay  parent_instance;
 
   gdouble           gamma;
 };
 
 struct _CdisplayGammaClass
 {
-  GimpColorDisplayClass  parent_instance;
+  ClayColorDisplayClass  parent_instance;
 };
 
 
@@ -73,16 +73,16 @@ static void        cdisplay_gamma_get_property    (GObject            *object,
                                                    GValue             *value,
                                                    GParamSpec         *pspec);
 
-static void        cdisplay_gamma_convert_buffer  (GimpColorDisplay   *display,
+static void        cdisplay_gamma_convert_buffer  (ClayColorDisplay   *display,
                                                    GeglBuffer         *buffer,
                                                    GeglRectangle      *area);
 static void        cdisplay_gamma_set_gamma       (CdisplayGamma      *gamma,
                                                    gdouble             value);
 
 
-static const GimpModuleInfo cdisplay_gamma_info =
+static const ClayModuleInfo cdisplay_gamma_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   N_("Gamma color display filter"),
   "Manish Singh <yosh@gimp.org>",
   "v0.2",
@@ -92,17 +92,17 @@ static const GimpModuleInfo cdisplay_gamma_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (CdisplayGamma, cdisplay_gamma,
-                       GIMP_TYPE_COLOR_DISPLAY)
+                       CLAY_TYPE_COLOR_DISPLAY)
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &cdisplay_gamma_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
   cdisplay_gamma_register_type (module);
 
@@ -113,12 +113,12 @@ static void
 cdisplay_gamma_class_init (CdisplayGammaClass *klass)
 {
   GObjectClass          *object_class  = G_OBJECT_CLASS (klass);
-  GimpColorDisplayClass *display_class = GIMP_COLOR_DISPLAY_CLASS (klass);
+  ClayColorDisplayClass *display_class = CLAY_COLOR_DISPLAY_CLASS (klass);
 
   object_class->get_property     = cdisplay_gamma_get_property;
   object_class->set_property     = cdisplay_gamma_set_property;
 
-  GIMP_CONFIG_PROP_DOUBLE (object_class, PROP_GAMMA,
+  CLAY_CONFIG_PROP_DOUBLE (object_class, PROP_GAMMA,
                            "gamma",
                            _("Gamma"),
                            NULL,
@@ -126,8 +126,8 @@ cdisplay_gamma_class_init (CdisplayGammaClass *klass)
                            0);
 
   display_class->name            = _("Gamma");
-  display_class->help_id         = "gimp-colordisplay-gamma";
-  display_class->icon_name       = GIMP_ICON_DISPLAY_FILTER_GAMMA;
+  display_class->help_id         = "clay-colordisplay-gamma";
+  display_class->icon_name       = CLAY_ICON_DISPLAY_FILTER_GAMMA;
 
   display_class->convert_buffer  = cdisplay_gamma_convert_buffer;
 }
@@ -181,7 +181,7 @@ cdisplay_gamma_set_property (GObject      *object,
 }
 
 static void
-cdisplay_gamma_convert_buffer (GimpColorDisplay *display,
+cdisplay_gamma_convert_buffer (ClayColorDisplay *display,
                                GeglBuffer       *buffer,
                                GeglRectangle    *area)
 {
@@ -223,6 +223,6 @@ cdisplay_gamma_set_gamma (CdisplayGamma *gamma,
       gamma->gamma = value;
 
       g_object_notify (G_OBJECT (gamma), "gamma");
-      gimp_color_display_changed (GIMP_COLOR_DISPLAY (gamma));
+      clay_color_display_changed (CLAY_COLOR_DISPLAY (gamma));
     }
 }

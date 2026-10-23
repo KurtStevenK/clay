@@ -22,26 +22,26 @@
 #include <AvailabilityMacros.h>
 #endif
 
-void     themes_init                 (Gimp          *gimp);
-void     themes_exit                 (Gimp          *gimp);
+void     themes_init                 (Clay          *clay);
+void     themes_exit                 (Clay          *clay);
 
-gboolean themes_theme_is_system      (Gimp          *gimp,
+gboolean themes_theme_is_system      (Clay          *clay,
                                       const gchar   *theme_name);
-gboolean themes_theme_is_default     (Gimp          *gimp,
+gboolean themes_theme_is_default     (Clay          *clay,
                                       const gchar   *theme_name);
 
-gchar ** themes_list_themes          (Gimp          *gimp,
+gchar ** themes_list_themes          (Clay          *clay,
                                       gint          *n_themes);
-GFile  * themes_get_theme_dir        (Gimp          *gimp,
+GFile  * themes_get_theme_dir        (Clay          *clay,
                                       const gchar   *theme_name);
-GFile  * themes_get_theme_file       (Gimp          *gimp,
+GFile  * themes_get_theme_file       (Clay          *clay,
                                       const gchar   *first_component,
                                       ...) G_GNUC_NULL_TERMINATED;
 
-void     themes_theme_change_notify  (GimpGuiConfig *config,
+void     themes_theme_change_notify  (ClayGuiConfig *config,
                                       GParamSpec    *pspec,
-                                      Gimp          *gimp);
+                                      Clay          *clay);
 
 #if defined(G_OS_WIN32) || (defined(PLATFORM_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)
-void     themes_set_title_bar        (Gimp          *gimp);
+void     themes_set_title_bar        (Clay          *clay);
 #endif

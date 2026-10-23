@@ -7,8 +7,8 @@
                                      direction
                                      position)
   (let* (
-        (width (car (gimp-image-get-width image)))
-      	(height (car (gimp-image-get-height image)))
+        (width (car (clay-image-get-width image)))
+      	(height (car (clay-image-get-height image)))
         )
 
     (if (= direction 0)
@@ -18,11 +18,11 @@
 
     (if (= direction 0)
 	      ;; convert position to pixel
-	      (if (<= position height) (gimp-image-add-hguide image position))
-	      (if (<= position width) (gimp-image-add-vguide image position))
+	      (if (<= position height) (clay-image-add-hguide image position))
+	      (if (<= position width) (clay-image-add-vguide image position))
     )
 
-    (gimp-displays-flush)
+    (clay-displays-flush)
   )
 )
 

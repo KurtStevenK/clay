@@ -1,0 +1,34 @@
+/* macOS theme, light scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(38,38,38);
+@define-color bg-color                   rgb(236,236,236);
+@define-color border-color               rgb(208,208,208);
+@define-color dimmed-fg-color            rgb(88,88,88);
+@define-color disabled-fg-color          rgb(127,127,127);
+@define-color disabled-button-color      rgb(173,173,173);
+@define-color hover-color                rgb(212,212,212);
+@define-color widget-bg-color            rgb(226,226,226);
+@define-color selected-color             rgb(200,200,200);
+@define-color extreme-bg-color           rgb(246,246,246);
+@define-color extreme-selected-color     rgb(208,208,208);
+@define-color strong-border-color        rgb(167,167,167);
+@define-color stronger-border-color      rgb(167,167,167);
+@define-color edge-border-color          rgb(167,167,167);
+@define-color scrollbar-slider-color     rgb(167,167,167);
+@define-color scrollbar-trough-color     rgb(236,236,236);
+@define-color ruler-color                rgba(208,208,208,0.3);
+@define-color accent-color               rgb(0,122,255);
+@define-color accent-hover-color         rgb(46,146,255);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(255,59,48);
+@define-color good-color                 rgb(52,199,89);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

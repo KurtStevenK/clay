@@ -18,9 +18,9 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC "plug-in-zealouscrop"
@@ -35,12 +35,12 @@ typedef struct _CropClass CropClass;
 
 struct _Crop
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _CropClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 #define CROP_TYPE  (crop_get_type ())
@@ -48,35 +48,35 @@ struct _CropClass
 
 GType                   crop_get_type         (void);
 
-static GList          * crop_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * crop_create_procedure (GimpPlugIn           *plug_in,
+static GList          * crop_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * crop_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * crop_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * crop_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
 static inline gboolean  colors_equal          (const gfloat         *col1,
                                                const gfloat         *col2,
                                                gint                  components,
                                                gboolean              has_alpha);
-static void             do_zcrop              (GimpDrawable         *drawable,
-                                               GimpImage            *image);
+static void             do_zcrop              (ClayDrawable         *drawable,
+                                               ClayImage            *image);
 
 
-G_DEFINE_TYPE (Crop, crop, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Crop, crop, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (CROP_TYPE)
+CLAY_MAIN (CROP_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 crop_class_init (CropClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = crop_query_procedures;
   plug_in_class->create_procedure = crop_create_procedure;
@@ -89,36 +89,36 @@ crop_init (Crop *crop)
 }
 
 static GList *
-crop_query_procedures (GimpPlugIn *plug_in)
+crop_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-crop_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+crop_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             crop_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Zealous Crop"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Image/[Crop]");
+      clay_procedure_set_menu_label (procedure, _("_Zealous Crop"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Image/[Crop]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Autocrop unused space from "
                                           "edges and middle"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Adam D. Moss",
                                       "Adam D. Moss",
                                       "1997");
@@ -127,30 +127,30 @@ crop_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-crop_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+crop_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  gimp_progress_init (_("Zealous cropping"));
+  clay_progress_init (_("Zealous cropping"));
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -160,10 +160,10 @@ crop_run (GimpProcedure        *procedure,
 
   do_zcrop (drawable, image);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static inline gboolean
@@ -193,8 +193,8 @@ colors_equal (const gfloat   *col1,
 }
 
 static void
-do_zcrop (GimpDrawable *drawable,
-          GimpImage    *image)
+do_zcrop (ClayDrawable *drawable,
+          ClayImage    *image)
 {
   GeglBuffer   *drawable_buffer;
   GeglBuffer   *shadow_buffer;
@@ -206,15 +206,15 @@ do_zcrop (GimpDrawable *drawable,
   gint8        *killrows;
   gint8        *killcols;
   gint32        livingrows, livingcols, destrow, destcol;
-  GimpChannel  *selection_copy;
+  ClayChannel  *selection_copy;
   gboolean      has_alpha;
 
-  drawable_buffer = gimp_drawable_get_buffer (drawable);
-  shadow_buffer   = gimp_drawable_get_shadow_buffer (drawable);
+  drawable_buffer = clay_drawable_get_buffer (drawable);
+  shadow_buffer   = clay_drawable_get_shadow_buffer (drawable);
 
   width  = gegl_buffer_get_width (drawable_buffer);
   height = gegl_buffer_get_height (drawable_buffer);
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   if (has_alpha)
     format = babl_format ("R'G'B'A float");
@@ -250,7 +250,7 @@ do_zcrop (GimpDrawable *drawable,
         }
     }
 
-  gimp_progress_update (0.25);
+  clay_progress_update (0.25);
 
   /* search which columns to remove */
 
@@ -274,7 +274,7 @@ do_zcrop (GimpDrawable *drawable,
         }
     }
 
-  gimp_progress_update (0.5);
+  clay_progress_update (0.5);
 
   if ((livingcols == 0 || livingrows == 0) ||
       (livingcols == width && livingrows == height))
@@ -307,7 +307,7 @@ do_zcrop (GimpDrawable *drawable,
         }
     }
 
-  gimp_progress_update (0.75);
+  clay_progress_update (0.75);
 
   /* restitute living columns */
 
@@ -326,24 +326,24 @@ do_zcrop (GimpDrawable *drawable,
         }
     }
 
-  gimp_progress_update (1.00);
+  clay_progress_update (1.00);
 
-  gimp_image_undo_group_start (image);
+  clay_image_undo_group_start (image);
 
-  selection_copy = GIMP_CHANNEL (gimp_selection_save (image));
-  gimp_selection_none (image);
+  selection_copy = CLAY_CHANNEL (clay_selection_save (image));
+  clay_selection_none (image);
 
   gegl_buffer_flush (shadow_buffer);
-  gimp_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_merge_shadow (drawable, TRUE);
   gegl_buffer_flush (drawable_buffer);
 
-  gimp_image_select_item (image, GIMP_CHANNEL_OP_REPLACE,
-                          GIMP_ITEM (selection_copy));
-  gimp_image_remove_channel (image, selection_copy);
+  clay_image_select_item (image, CLAY_CHANNEL_OP_REPLACE,
+                          CLAY_ITEM (selection_copy));
+  clay_image_remove_channel (image, selection_copy);
 
-  gimp_image_crop (image, livingcols, livingrows, 0, 0);
+  clay_image_crop (image, livingcols, livingrows, 0, 0);
 
-  gimp_image_undo_group_end (image);
+  clay_image_undo_group_end (image);
 
   g_object_unref (shadow_buffer);
   g_object_unref (drawable_buffer);

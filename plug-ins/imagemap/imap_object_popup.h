@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -35,7 +35,7 @@ typedef struct {
 void object_handle_popup (ObjectPopup_t  *popup,
                           Object_t       *obj,
                           GdkEventButton *event,
-                          GimpImap       *imap);
+                          ClayImap       *imap);
 void object_do_popup     (Object_t       *obj,
                           GdkEventButton *event,
                           gpointer        data);

@@ -18,5 +18,5 @@
 #pragma once
 
 
-void   tool_options_menu_setup (GimpUIManager *manager,
+void   tool_options_menu_setup (ClayUIManager *manager,
                                 const gchar   *ui_path);

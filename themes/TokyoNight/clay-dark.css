@@ -1,0 +1,34 @@
+/* TokyoNight theme, dark scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(192,202,245);
+@define-color bg-color                   rgb(26,27,38);
+@define-color border-color               rgb(49,52,67);
+@define-color dimmed-fg-color            rgb(150,158,193);
+@define-color disabled-fg-color          rgb(117,123,152);
+@define-color disabled-button-color      rgb(79,83,104);
+@define-color hover-color                rgb(49,52,67);
+@define-color widget-bg-color            rgb(36,38,50);
+@define-color selected-color             rgb(59,62,79);
+@define-color extreme-bg-color           rgb(18,19,27);
+@define-color extreme-selected-color     rgb(49,52,67);
+@define-color strong-border-color        rgb(84,88,110);
+@define-color stronger-border-color      rgb(84,88,110);
+@define-color edge-border-color          rgb(84,88,110);
+@define-color scrollbar-slider-color     rgb(84,88,110);
+@define-color scrollbar-trough-color     rgb(18,19,27);
+@define-color ruler-color                rgba(49,52,67,0.3);
+@define-color accent-color               rgb(122,162,247);
+@define-color accent-hover-color         rgb(149,181,249);
+@define-color on-accent-color            rgb(13,14,19);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Menlo", "Monaco", "Courier New", monospace; }

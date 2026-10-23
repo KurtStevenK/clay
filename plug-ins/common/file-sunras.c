@@ -26,7 +26,7 @@
 
 /* Event history:
  * V 1.00, PK, 25-Jul-96: First try
- * V 1.90, PK, 15-Mar-97: Upgrade to work with GIMP V0.99
+ * V 1.90, PK, 15-Mar-97: Upgrade to work with Clay V0.99
  * V 1.91, PK, 05-Apr-97: Return all arguments, even in case of an error
  * V 1.92, PK, 18-May-97: Ignore EOF-error on reading image data
  * V 1.93, PK, 05-Oct-97: Parse rc file
@@ -43,16 +43,16 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-sunras-load"
 #define EXPORT_PROC    "file-sunras-export"
 #define PLUG_IN_BINARY "file-sunras"
-#define PLUG_IN_ROLE   "gimp-file-sunras"
+#define PLUG_IN_ROLE   "clay-file-sunras"
 
 
 typedef int WRITE_FUN(void*,size_t,size_t,FILE*);
@@ -92,12 +92,12 @@ typedef struct _SunrasClass SunrasClass;
 
 struct _Sunras
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _SunrasClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -106,57 +106,57 @@ struct _SunrasClass
 
 GType                   sunras_get_type         (void);
 
-static GList          * sunras_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * sunras_create_procedure (GimpPlugIn            *plug_in,
+static GList          * sunras_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * sunras_create_procedure (ClayPlugIn            *plug_in,
                                                  const gchar           *name);
 
-static GimpValueArray * sunras_load             (GimpProcedure         *procedure,
-                                                 GimpRunMode            run_mode,
+static ClayValueArray * sunras_load             (ClayProcedure         *procedure,
+                                                 ClayRunMode            run_mode,
                                                  GFile                 *file,
-                                                 GimpMetadata          *metadata,
-                                                 GimpMetadataLoadFlags *flags,
-                                                 GimpProcedureConfig   *config,
+                                                 ClayMetadata          *metadata,
+                                                 ClayMetadataLoadFlags *flags,
+                                                 ClayProcedureConfig   *config,
                                                  gpointer               run_data);
-static GimpValueArray * sunras_export           (GimpProcedure         *procedure,
-                                                 GimpRunMode            run_mode,
-                                                 GimpImage             *image,
+static ClayValueArray * sunras_export           (ClayProcedure         *procedure,
+                                                 ClayRunMode            run_mode,
+                                                 ClayImage             *image,
                                                  GFile                 *file,
-                                                 GimpExportOptions     *options,
-                                                 GimpMetadata          *metadata,
-                                                 GimpProcedureConfig   *config,
+                                                 ClayExportOptions     *options,
+                                                 ClayMetadata          *metadata,
+                                                 ClayProcedureConfig   *config,
                                                  gpointer               run_data);
 
-static GimpImage      * load_image              (GFile                 *file,
+static ClayImage      * load_image              (GFile                 *file,
                                                  GError               **error);
 static gboolean         export_image            (GFile                 *file,
-                                                 GimpImage             *image,
-                                                 GimpDrawable          *drawable,
+                                                 ClayImage             *image,
+                                                 ClayDrawable          *drawable,
                                                  GObject               *config,
                                                  GError               **error);
 
-static void             set_color_table         (GimpImage             *image,
+static void             set_color_table         (ClayImage             *image,
                                                  L_SUNFILEHEADER       *sunhdr,
                                                  const guchar          *suncolmap);
-static GimpImage      * create_new_image        (GFile                 *file,
+static ClayImage      * create_new_image        (GFile                 *file,
                                                  guint                  width,
                                                  guint                  height,
-                                                 GimpImageBaseType      type,
-                                                 GimpLayer            **layer,
+                                                 ClayImageBaseType      type,
+                                                 ClayLayer            **layer,
                                                  GeglBuffer           **buffer);
 
-static GimpImage      * load_sun_d1             (GFile                 *file,
+static ClayImage      * load_sun_d1             (GFile                 *file,
                                                  FILE                  *ifp,
                                                  L_SUNFILEHEADER       *sunhdr,
                                                  guchar                *suncolmap);
-static GimpImage      * load_sun_d8             (GFile                 *file,
+static ClayImage      * load_sun_d8             (GFile                 *file,
                                                  FILE                  *ifp,
                                                  L_SUNFILEHEADER       *sunhdr,
                                                  guchar                *suncolmap);
-static GimpImage      * load_sun_d24            (GFile                 *file,
+static ClayImage      * load_sun_d24            (GFile                 *file,
                                                  FILE                  *ifp,
                                                  L_SUNFILEHEADER       *sunhdr,
                                                  guchar                *suncolmap);
-static GimpImage      * load_sun_d32            (GFile                 *file,
+static ClayImage      * load_sun_d32            (GFile                 *file,
                                                  FILE                  *ifp,
                                                  L_SUNFILEHEADER       *sunhdr,
                                                  guchar                *suncolmap);
@@ -205,17 +205,17 @@ static void             write_sun_cols          (FILE                  *ofp,
                                                  guchar                *colormap);
 
 static gint             save_index              (FILE                  *ofp,
-                                                 GimpImage             *image,
-                                                 GimpDrawable          *drawable,
+                                                 ClayImage             *image,
+                                                 ClayDrawable          *drawable,
                                                  gboolean               grey,
                                                  gint                   rle);
 static gint             save_rgb                (FILE                  *ofp,
-                                                 GimpImage             *image,
-                                                 GimpDrawable          *drawable,
+                                                 ClayImage             *image,
+                                                 ClayDrawable          *drawable,
                                                  gint                   rle);
 
-static gboolean         save_dialog             (GimpImage             *image,
-                                                 GimpProcedure         *procedure,
+static gboolean         save_dialog             (ClayImage             *image,
+                                                 ClayProcedure         *procedure,
                                                  GObject               *config);
 
 /* Portability kludge */
@@ -225,9 +225,9 @@ static int              my_fwrite               (void                  *ptr,
                                                  FILE                  *stream);
 
 
-G_DEFINE_TYPE (Sunras, sunras, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Sunras, sunras, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SUNRAS_TYPE)
+CLAY_MAIN (SUNRAS_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -238,7 +238,7 @@ static RLEBUF rlebuf;
 static void
 sunras_class_init (SunrasClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = sunras_query_procedures;
   plug_in_class->create_procedure = sunras_create_procedure;
@@ -251,7 +251,7 @@ sunras_init (Sunras *sunras)
 }
 
 static GList *
-sunras_query_procedures (GimpPlugIn *plug_in)
+sunras_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -261,74 +261,74 @@ sunras_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-sunras_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+sunras_create_procedure (ClayPlugIn  *plug_in,
                          const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            sunras_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("SUN Rasterfile image"));
+      clay_procedure_set_menu_label (procedure, _("SUN Rasterfile image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file of the SunRaster file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Peter Kirchgessner",
                                       "Peter Kirchgessner",
                                       "1996");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-sun-raster");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "im1,im8,im24,im32,rs,ras,sun");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,long,0x59a66a95");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, sunras_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
 
-      gimp_procedure_set_menu_label (procedure, _("SUN Rasterfile image"));
+      clay_procedure_set_menu_label (procedure, _("SUN Rasterfile image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Export file in the SunRaster file "
                                           "format"),
                                         _("SUNRAS exporting handles all image "
                                           "types except those with alpha "
                                           "channels."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Peter Kirchgessner",
                                       "Peter Kirchgessner",
                                       "1996");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("SUNRAS"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-sun-raster");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "im1,im8,im24,im32,rs,ras,sun");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB  |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB  |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "rle",
+      clay_procedure_add_choice_argument (procedure, "rle",
                                           _("_Data Formatting"),
                                           _("Use standard or Run-Length Encoded output"),
-                                           gimp_choice_new_with_values ("standard", 0, _("Standard"),           NULL,
+                                           clay_choice_new_with_values ("standard", 0, _("Standard"),           NULL,
                                                                         "rle",      1, _("Run-Length Encoding"), NULL,
                                                                         NULL),
                                           "rle",
@@ -338,17 +338,17 @@ sunras_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-sunras_load (GimpProcedure         *procedure,
-             GimpRunMode            run_mode,
+static ClayValueArray *
+sunras_load (ClayProcedure         *procedure,
+             ClayRunMode            run_mode,
              GFile                 *file,
-             GimpMetadata          *metadata,
-             GimpMetadataLoadFlags *flags,
-             GimpProcedureConfig   *config,
+             ClayMetadata          *metadata,
+             ClayMetadataLoadFlags *flags,
+             ClayProcedureConfig   *config,
              gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -356,75 +356,75 @@ sunras_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-sunras_export (GimpProcedure        *procedure,
-               GimpRunMode           run_mode,
-               GimpImage            *image,
+static ClayValueArray *
+sunras_export (ClayProcedure        *procedure,
+               ClayRunMode           run_mode,
+               ClayImage            *image,
                GFile                *file,
-               GimpExportOptions    *options,
-               GimpMetadata         *metadata,
-               GimpProcedureConfig  *config,
+               ClayExportOptions    *options,
+               ClayMetadata         *metadata,
+               ClayProcedureConfig  *config,
                gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data, G_OBJECT (config),
                           &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
-  GimpImage       *image;
+  ClayImage       *image;
   FILE            *ifp;
   L_SUNFILEHEADER  sunhdr;
   guchar          *suncolmap = NULL;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   ifp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -432,7 +432,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -443,7 +443,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not open '%s' as SUN-raster-file"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
     }
@@ -484,7 +484,7 @@ load_image (GFile   *file,
       if (sunhdr.l_ras_magic != RAS_MAGIC)
         {
           g_message (_("Could not read color entries from '%s'"),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
           fclose (ifp);
           g_free (suncolmap);
           return NULL;
@@ -500,15 +500,15 @@ load_image (GFile   *file,
   if (sunhdr.l_ras_width <= 0)
     {
       g_message (_("'%s':\nNo image width specified"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
     }
 
-  if (sunhdr.l_ras_width > GIMP_MAX_IMAGE_SIZE)
+  if (sunhdr.l_ras_width > CLAY_MAX_IMAGE_SIZE)
     {
       g_message (_("'%s':\nImage width is larger than Clay can handle"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
     }
@@ -516,15 +516,15 @@ load_image (GFile   *file,
   if (sunhdr.l_ras_height <= 0)
     {
       g_message (_("'%s':\nNo image height specified"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
     }
 
-  if (sunhdr.l_ras_height > GIMP_MAX_IMAGE_SIZE)
+  if (sunhdr.l_ras_height > CLAY_MAX_IMAGE_SIZE)
     {
       g_message (_("'%s':\nImage height is larger than Clay can handle"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (ifp);
       return NULL;
     }
@@ -551,7 +551,7 @@ load_image (GFile   *file,
       image = NULL;
       break;
     }
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   fclose (ifp);
 
@@ -568,23 +568,23 @@ load_image (GFile   *file,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GObject       *config,
               GError       **error)
 {
   FILE          *ofp;
-  GimpImageType  drawable_type;
+  ClayImageType  drawable_type;
   gint           rle;
   gboolean       retval;
 
-  drawable_type = gimp_drawable_type (drawable);
+  drawable_type = clay_drawable_type (drawable);
 
-  rle = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  rle = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                              "rle");
 
   /*  Make sure we're not exporting an image with an alpha channel  */
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("SUNRAS export cannot handle images with alpha channels"));
@@ -593,9 +593,9 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_GRAY_IMAGE:
-    case GIMP_RGB_IMAGE:
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_GRAY_IMAGE:
+    case CLAY_RGB_IMAGE:
       break;
     default:
       g_message (_("Can't operate on unknown image types"));
@@ -603,8 +603,8 @@ export_image (GFile         *file,
       break;
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /* Open the output file. */
   ofp = g_fopen (g_file_peek_path (file), "wb");
@@ -613,19 +613,19 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
-  if (drawable_type == GIMP_INDEXED_IMAGE)
+  if (drawable_type == CLAY_INDEXED_IMAGE)
     {
       retval = save_index (ofp, image, drawable, FALSE, rle);
     }
-  else if (drawable_type == GIMP_GRAY_IMAGE)
+  else if (drawable_type == CLAY_GRAY_IMAGE)
     {
       retval = save_index (ofp, image, drawable, TRUE, rle);
     }
-  else if (drawable_type == GIMP_RGB_IMAGE)
+  else if (drawable_type == CLAY_RGB_IMAGE)
     {
       retval = save_rgb (ofp, image, drawable, rle);
     }
@@ -995,10 +995,10 @@ write_sun_cols (FILE            *ofp,
 }
 
 
-/* Set a GIMP colortable using the sun colormap */
+/* Set a Clay colortable using the sun colormap */
 
 static void
-set_color_table (GimpImage       *image,
+set_color_table (ClayImage       *image,
                  L_SUNFILEHEADER *sunhdr,
                  const guchar    *suncolmap)
 {
@@ -1023,54 +1023,54 @@ set_color_table (GimpImage       *image,
             ColorMap[j*3], ColorMap[j*3+1], ColorMap[j*3+2]);
 #endif
 
-  gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), ColorMap, ncols * 3);
+  clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), ColorMap, ncols * 3);
 }
 
 
 /* Create an image. Sets layer, drawable and rgn. Returns image */
-static GimpImage *
+static ClayImage *
 create_new_image (GFile              *file,
                   guint               width,
                   guint               height,
-                  GimpImageBaseType   type,
-                  GimpLayer         **layer,
+                  ClayImageBaseType   type,
+                  ClayLayer         **layer,
                   GeglBuffer        **buffer)
 {
-  GimpImage     *image;
-  GimpImageType  gdtype;
+  ClayImage     *image;
+  ClayImageType  gdtype;
 
   switch (type)
     {
-    case GIMP_RGB:
-      gdtype = GIMP_RGB_IMAGE;
+    case CLAY_RGB:
+      gdtype = CLAY_RGB_IMAGE;
       break;
-    case GIMP_GRAY:
-      gdtype = GIMP_GRAY_IMAGE;
+    case CLAY_GRAY:
+      gdtype = CLAY_GRAY_IMAGE;
       break;
-    case GIMP_INDEXED:
-      gdtype = GIMP_INDEXED_IMAGE;
+    case CLAY_INDEXED:
+      gdtype = CLAY_INDEXED_IMAGE;
       break;
     default:
       g_warning ("Unsupported image type");
       return NULL;
     }
 
-  image = gimp_image_new (width, height, type);
+  image = clay_image_new (width, height, type);
 
-  *layer = gimp_layer_new (image, _("Background"), width, height,
+  *layer = clay_layer_new (image, _("Background"), width, height,
                            gdtype,
                            100,
-                           gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, *layer, NULL, 0);
+                           clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, *layer, NULL, 0);
 
-  *buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (*layer));
+  *buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (*layer));
 
   return image;
 }
 
 
 /* Load SUN-raster-file with depth 1 */
-static GimpImage *
+static ClayImage *
 load_sun_d1 (GFile           *file,
              FILE            *ifp,
              L_SUNFILEHEADER *sunhdr,
@@ -1080,8 +1080,8 @@ load_sun_d1 (GFile           *file,
   int               width, height, linepad, scan_lines, tile_height;
   int               i, j;
   guchar           *dest, *data;
-  GimpImage        *image;
-  GimpLayer        *layer;
+  ClayImage        *image;
+  ClayLayer        *layer;
   GeglBuffer       *buffer;
   guchar            bit2byte[256 * 8];
   L_SUNFILEHEADER   sun_bwhdr;
@@ -1092,10 +1092,10 @@ load_sun_d1 (GFile           *file,
   width = sunhdr->l_ras_width;
   height = sunhdr->l_ras_height;
 
-  image = create_new_image (file, width, height, GIMP_INDEXED,
+  image = create_new_image (file, width, height, CLAY_INDEXED,
                             &layer, &buffer);
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   data = g_malloc (tile_height * width);
 
   if (suncolmap != NULL)   /* Set up the specified color map */
@@ -1152,7 +1152,7 @@ load_sun_d1 (GFile           *file,
       scan_lines++;
 
       if ((i % 20) == 0)
-        gimp_progress_update ((double)(i+1) / (double)height);
+        clay_progress_update ((double)(i+1) / (double)height);
 
       if ((scan_lines == tile_height) || ((i+1) == height))
         {
@@ -1177,7 +1177,7 @@ load_sun_d1 (GFile           *file,
 
 /* Load SUN-raster-file with depth 8 */
 
-static GimpImage *
+static ClayImage *
 load_sun_d8 (GFile           *file,
              FILE            *ifp,
              L_SUNFILEHEADER *sunhdr,
@@ -1188,8 +1188,8 @@ load_sun_d8 (GFile           *file,
   gint        ncols;
   int         scan_lines, tile_height;
   guchar     *dest, *data;
-  GimpImage  *image;
-  GimpLayer  *layer;
+  ClayImage  *image;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   int         err = 0;
   gboolean    rle = (sunhdr->l_ras_type == RAS_TYPE_RLE);
@@ -1217,10 +1217,10 @@ load_sun_d8 (GFile           *file,
     }
 
   image = create_new_image (file, width, height,
-                            grayscale ? GIMP_GRAY : GIMP_INDEXED,
+                            grayscale ? CLAY_GRAY : CLAY_INDEXED,
                             &layer, &buffer);
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   data = g_malloc (tile_height * width);
 
   if (!grayscale)
@@ -1247,7 +1247,7 @@ load_sun_d8 (GFile           *file,
       scan_lines++;
 
       if ((i % 20) == 0)
-        gimp_progress_update ((double)(i+1) / (double)height);
+        clay_progress_update ((double)(i+1) / (double)height);
 
       if ((scan_lines == tile_height) || ((i+1) == height))
         {
@@ -1271,7 +1271,7 @@ load_sun_d8 (GFile           *file,
 
 
 /* Load SUN-raster-file with depth 24 */
-static GimpImage *
+static ClayImage *
 load_sun_d24 (GFile            *file,
               FILE             *ifp,
               L_SUNFILEHEADER  *sunhdr,
@@ -1281,8 +1281,8 @@ load_sun_d24 (GFile            *file,
   guchar     *data;
   int         width, height, linepad, tile_height, scan_lines;
   int         i, j;
-  GimpImage  *image;
-  GimpLayer  *layer;
+  ClayImage  *image;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   int         err = 0;
   gboolean    rle = (sunhdr->l_ras_type == RAS_TYPE_RLE);
@@ -1290,10 +1290,10 @@ load_sun_d24 (GFile            *file,
   width  = sunhdr->l_ras_width;
   height = sunhdr->l_ras_height;
 
-  image = create_new_image (file, width, height, GIMP_RGB,
+  image = create_new_image (file, width, height, CLAY_RGB,
                             &layer, &buffer);
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   data = g_malloc (tile_height * width * 3);
 
   linepad = ((sunhdr->l_ras_width*3) % 2);
@@ -1313,7 +1313,7 @@ load_sun_d24 (GFile            *file,
       if (linepad)
         err |= ((rle ? rle_getc (ifp) : getc (ifp)) < 0);
 
-      if (sunhdr->l_ras_type == 3) /* RGB-format ? That is what GIMP wants */
+      if (sunhdr->l_ras_type == 3) /* RGB-format ? That is what Clay wants */
         {
           dest += width * 3;
         }
@@ -1331,7 +1331,7 @@ load_sun_d24 (GFile            *file,
       scan_lines++;
 
       if ((i % 20) == 0)
-        gimp_progress_update ((double)(i + 1) / (double)height);
+        clay_progress_update ((double)(i + 1) / (double)height);
 
       if ((scan_lines == tile_height) || ((i + 1) == height))
         {
@@ -1356,7 +1356,7 @@ load_sun_d24 (GFile            *file,
 
 /* Load SUN-raster-file with depth 32 */
 
-static GimpImage *
+static ClayImage *
 load_sun_d32 (GFile           *file,
               FILE            *ifp,
               L_SUNFILEHEADER *sunhdr,
@@ -1366,8 +1366,8 @@ load_sun_d32 (GFile           *file,
   guchar     *data;
   int         width, height, tile_height, scan_lines;
   int         i, j;
-  GimpImage  *image;
-  GimpLayer  *layer;
+  ClayImage  *image;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   int         err = 0;
   int         cerr;
@@ -1380,10 +1380,10 @@ load_sun_d32 (GFile           *file,
 
   cerr = 0;
 
-  image = create_new_image (file, width, height, GIMP_RGB,
+  image = create_new_image (file, width, height, CLAY_RGB,
                             &layer, &buffer);
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   data = g_malloc (tile_height * width * 3);
 
   if (rle)
@@ -1431,7 +1431,7 @@ load_sun_d32 (GFile           *file,
       scan_lines++;
 
       if ((i % 20) == 0)
-        gimp_progress_update ((double)(i + 1) / (double)height);
+        clay_progress_update ((double)(i + 1) / (double)height);
 
       if ((scan_lines == tile_height) || ((i + 1) == height))
         {
@@ -1456,8 +1456,8 @@ load_sun_d32 (GFile           *file,
 
 static gboolean
 save_index (FILE         *ofp,
-            GimpImage    *image,
-            GimpDrawable *drawable,
+            ClayImage    *image,
+            ClayDrawable *drawable,
             gboolean      grey,
             gint          rle)
 {
@@ -1476,12 +1476,12 @@ save_index (FILE         *ofp,
   const Babl     *format;
   WRITE_FUN      *write_fun;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
 
   if (grey)
     format = babl_format ("Y' u8");
@@ -1506,7 +1506,7 @@ save_index (FILE         *ofp,
     }
   else
     {
-      cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &ncols, NULL);
+      cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &ncols, NULL);
 
       for (j = 0; j < ncols; j++)
         {
@@ -1591,7 +1591,7 @@ save_index (FILE         *ofp,
           src += width;
 
           if ((i % 20) == 0)
-            gimp_progress_update ((double) i / (double) height);
+            clay_progress_update ((double) i / (double) height);
         }
     }
   else   /* Color or grey-image */
@@ -1607,7 +1607,7 @@ save_index (FILE         *ofp,
           src += width;
 
           if ((i % 20) == 0)
-            gimp_progress_update ((double) i / (double) height);
+            clay_progress_update ((double) i / (double) height);
         }
     }
 
@@ -1635,8 +1635,8 @@ save_index (FILE         *ofp,
 
 static gboolean
 save_rgb (FILE         *ofp,
-          GimpImage    *image,
-          GimpDrawable *drawable,
+          ClayImage    *image,
+          ClayDrawable *drawable,
           gint          rle)
 {
   int              height, width, tile_height, linepad;
@@ -1646,12 +1646,12 @@ save_rgb (FILE         *ofp,
   GeglBuffer      *buffer;
   const Babl      *format;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
 
   format = babl_format ("R'G'B' u8");
 
@@ -1707,7 +1707,7 @@ save_rgb (FILE         *ofp,
             putc (0, ofp);
 
           if ((i % 20) == 0)
-            gimp_progress_update ((double) i / (double) height);
+            clay_progress_update ((double) i / (double) height);
         }
     }
   else  /* Write runlength encoded */
@@ -1732,7 +1732,7 @@ save_rgb (FILE         *ofp,
             rle_putc (0, ofp);
 
           if ((i % 20) == 0)
-            gimp_progress_update ((double) i / (double) height);
+            clay_progress_update ((double) i / (double) height);
         }
 
       rle_endwrite (ofp);
@@ -1757,26 +1757,26 @@ save_rgb (FILE         *ofp,
 /*  Save interface functions  */
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget *dialog;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "rle", GIMP_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "rle", CLAY_TYPE_INT_RADIO_FRAME);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

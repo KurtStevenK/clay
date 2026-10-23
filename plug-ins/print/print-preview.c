@@ -17,8 +17,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "print-preview.h"
 
@@ -44,7 +44,7 @@ struct _PrintPreview
   gboolean         dragging;
   gboolean         inside;
 
-  GimpDrawable    *drawable;
+  ClayDrawable    *drawable;
 
   gdouble          image_offset_x;
   gdouble          image_offset_y;
@@ -111,7 +111,7 @@ static void      print_preview_get_page_margins     (PrintPreview     *preview,
                                                      gdouble          *right_margin,
                                                      gdouble          *top_margin,
                                                      gdouble          *bottom_margin);
-static cairo_surface_t * print_preview_get_thumbnail (GimpDrawable    *drawable,
+static cairo_surface_t * print_preview_get_thumbnail (ClayDrawable    *drawable,
                                                       gint             width,
                                                       gint             height);
 
@@ -509,7 +509,7 @@ print_preview_draw (GtkWidget *widget,
     }
 
   if (preview->thumbnail == NULL &&
-      gimp_item_is_valid (GIMP_ITEM (preview->drawable)))
+      clay_item_is_valid (CLAY_ITEM (preview->drawable)))
     {
       preview->thumbnail =
         print_preview_get_thumbnail (preview->drawable,
@@ -549,7 +549,7 @@ print_preview_draw (GtkWidget *widget,
  **/
 GtkWidget *
 print_preview_new (GtkPageSetup *page,
-                   GimpDrawable *drawable)
+                   ClayDrawable *drawable)
 {
   PrintPreview *preview;
 
@@ -584,8 +584,8 @@ print_preview_set_image_dpi (PrintPreview *preview,
   g_return_if_fail (PRINT_IS_PREVIEW (preview));
   g_return_if_fail (xres > 0.0 && yres > 0.0);
 
-  width  = gimp_drawable_get_width  (preview->drawable) * 72.0 / xres;
-  height = gimp_drawable_get_height (preview->drawable) * 72.0 / yres;
+  width  = clay_drawable_get_width  (preview->drawable) * 72.0 / xres;
+  height = clay_drawable_get_height (preview->drawable) * 72.0 / yres;
 
   if (width != preview->image_width || height != preview->image_height)
     {
@@ -807,10 +807,10 @@ print_preview_get_page_margins (PrintPreview *preview,
 }
 
 
-/*  This thumbnail code should eventually end up in libgimpui.  */
+/*  This thumbnail code should eventually end up in libclayui.  */
 
 static cairo_surface_t *
-print_preview_get_thumbnail (GimpDrawable *drawable,
+print_preview_get_thumbnail (ClayDrawable *drawable,
                              gint          width,
                              gint          height)
 {
@@ -827,30 +827,30 @@ print_preview_get_thumbnail (GimpDrawable *drawable,
   g_return_val_if_fail (width  > 0 && width  <= 1024, NULL);
   g_return_val_if_fail (height > 0 && height <= 1024, NULL);
 
-  data = gimp_drawable_get_thumbnail_data (drawable,
+  data = clay_drawable_get_thumbnail_data (drawable,
                                            width, height,
                                            &width, &height, &bpp);
 
   /* For now, convert preview of higher bit depth to 8BPC */
   if (bpp > 4)
     {
-      GimpImage *temp_image;
+      ClayImage *temp_image;
       GList     *layers = NULL;
 
       g_bytes_unref (data);
 
       temp_image =
-        gimp_image_duplicate (gimp_item_get_image (GIMP_ITEM (drawable)));
-      gimp_image_convert_precision (temp_image, GIMP_PRECISION_U8_NON_LINEAR);
-      gimp_image_merge_visible_layers (temp_image, GIMP_CLIP_TO_IMAGE);
+        clay_image_duplicate (clay_item_get_image (CLAY_ITEM (drawable)));
+      clay_image_convert_precision (temp_image, CLAY_PRECISION_U8_NON_LINEAR);
+      clay_image_merge_visible_layers (temp_image, CLAY_CLIP_TO_IMAGE);
 
-      layers = gimp_image_list_layers (temp_image);
-      data   = gimp_drawable_get_thumbnail_data (GIMP_DRAWABLE (layers->data),
+      layers = clay_image_list_layers (temp_image);
+      data   = clay_drawable_get_thumbnail_data (CLAY_DRAWABLE (layers->data),
                                                  width, height,
                                                  &width, &height, &bpp);
 
       g_list_free (layers);
-      gimp_image_delete (temp_image);
+      clay_image_delete (temp_image);
     }
 
   switch (bpp)
@@ -889,7 +889,7 @@ print_preview_get_thumbnail (GimpDrawable *drawable,
         case 1:
           while (w--)
             {
-              GIMP_CAIRO_RGB24_SET_PIXEL (d, s[0], s[0], s[0]);
+              CLAY_CAIRO_RGB24_SET_PIXEL (d, s[0], s[0], s[0]);
               s += 1;
               d += 4;
             }
@@ -898,7 +898,7 @@ print_preview_get_thumbnail (GimpDrawable *drawable,
         case 2:
           while (w--)
             {
-              GIMP_CAIRO_ARGB32_SET_PIXEL (d, s[0], s[0], s[0], s[1]);
+              CLAY_CAIRO_ARGB32_SET_PIXEL (d, s[0], s[0], s[0], s[1]);
               s += 2;
               d += 4;
             }
@@ -907,7 +907,7 @@ print_preview_get_thumbnail (GimpDrawable *drawable,
         case 3:
           while (w--)
             {
-              GIMP_CAIRO_RGB24_SET_PIXEL (d, s[0], s[1], s[2]);
+              CLAY_CAIRO_RGB24_SET_PIXEL (d, s[0], s[1], s[2]);
               s += 3;
               d += 4;
             }
@@ -916,7 +916,7 @@ print_preview_get_thumbnail (GimpDrawable *drawable,
         case 4:
           while (w--)
             {
-              GIMP_CAIRO_ARGB32_SET_PIXEL (d, s[0], s[1], s[2], s[3]);
+              CLAY_CAIRO_ARGB32_SET_PIXEL (d, s[0], s[1], s[2], s[3]);
               s += 4;
               d += 4;
             }

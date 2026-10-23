@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -24,8 +24,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "gfig.h"
 #include "gfig-dobject.h"
@@ -33,7 +33,7 @@
 #include "gfig-dialog.h"
 #include "gfig-poly.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static gint poly_num_sides = 3; /* Default to three sided object */
 
@@ -250,17 +250,17 @@ d_paint_poly (GfigObject *obj)
 
   if (gfig_context_get_current_style ()->fill_type != FILL_NONE)
     {
-      gimp_context_push ();
-      gimp_context_set_antialias (selopt.antia);
-      gimp_context_set_feather (selopt.feather);
-      gimp_context_set_feather_radius (selopt.feather_radius, selopt.feather_radius);
-      gimp_image_select_polygon (gfig_context->image,
+      clay_context_push ();
+      clay_context_set_antialias (selopt.antia);
+      clay_context_set_feather (selopt.feather);
+      clay_context_set_feather_radius (selopt.feather_radius, selopt.feather_radius);
+      clay_image_select_polygon (gfig_context->image,
                                  selopt.type,
                                  i, line_pnts);
-      gimp_context_pop ();
+      clay_context_pop ();
 
       paint_layer_fill (min_max[0], min_max[1], min_max[2], min_max[3]);
-      gimp_selection_none (gfig_context->image);
+      clay_selection_none (gfig_context->image);
     }
 
   if (obj->style.paint_type == PAINT_BRUSH_TYPE)
@@ -525,7 +525,7 @@ d_poly_start (GdkPoint *pnt,
 }
 
 void
-d_poly_end (GimpGfig *gfig,
+d_poly_end (ClayGfig *gfig,
             GdkPoint *pnt,
             gboolean  shift_down)
 {

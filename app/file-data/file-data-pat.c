@@ -20,77 +20,77 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "core/core-types.h"
 
-#include "gegl/gimp-babl.h"
+#include "gegl/clay-babl.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-new.h"
-#include "core/gimpimage-resize.h"
-#include "core/gimplayer-new.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppattern.h"
-#include "core/gimppattern-load.h"
-#include "core/gimppickable.h"
-#include "core/gimptempbuf.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
+#include "core/clayimage-new.h"
+#include "core/clayimage-resize.h"
+#include "core/claylayer-new.h"
+#include "core/clayparamspecs.h"
+#include "core/claypattern.h"
+#include "core/claypattern-load.h"
+#include "core/claypickable.h"
+#include "core/claytempbuf.h"
 
-#include "pdb/gimpprocedure.h"
+#include "pdb/clayprocedure.h"
 
 #include "file-data-pat.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static GimpImage   * file_pat_pattern_to_image (Gimp          *gimp,
-                                                GimpPattern   *pattern);
-static GimpPattern * file_pat_image_to_pattern (GimpImage     *image,
-                                                GimpContext   *context,
+static ClayImage   * file_pat_pattern_to_image (Clay          *clay,
+                                                ClayPattern   *pattern);
+static ClayPattern * file_pat_image_to_pattern (ClayImage     *image,
+                                                ClayContext   *context,
                                                 gint           n_drawables,
-                                                GimpDrawable **drawables,
+                                                ClayDrawable **drawables,
                                                 const gchar   *name);
 
 
 /*  public functions  */
 
-GimpValueArray *
-file_pat_load_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+ClayValueArray *
+file_pat_load_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image = NULL;
+  ClayValueArray *return_vals;
+  ClayImage      *image = NULL;
   GFile          *file;
   GInputStream   *input;
   GError         *my_error = NULL;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   input = G_INPUT_STREAM (g_file_read (file, NULL, &my_error));
 
   if (input)
     {
-      GList *list = gimp_pattern_load (context, file, input, error);
+      GList *list = clay_pattern_load (context, file, input, error);
 
       if (list)
         {
-          GimpPattern *pattern = list->data;
+          ClayPattern *pattern = list->data;
 
           g_list_free (list);
 
-          image = file_pat_pattern_to_image (gimp, pattern);
+          image = file_pat_pattern_to_image (clay, pattern);
           g_object_unref (pattern);
         }
 
@@ -100,57 +100,57 @@ file_pat_load_invoker (GimpProcedure         *procedure,
     {
       g_propagate_prefixed_error (error, my_error,
                                   _("Could not open '%s' for reading: "),
-                                  gimp_file_get_utf8_name (file));
+                                  clay_file_get_utf8_name (file));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, image != NULL,
+  return_vals = clay_procedure_get_return_values (procedure, image != NULL,
                                                   error ? *error : NULL);
 
   if (image)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), image);
+    g_value_set_object (clay_value_array_index (return_vals, 1), image);
 
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }
 
-GimpValueArray *
-file_pat_save_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+ClayValueArray *
+file_pat_save_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  GimpValueArray  *return_vals;
-  GimpImage       *image;
-  GimpPattern     *pattern;
+  ClayValueArray  *return_vals;
+  ClayImage       *image;
+  ClayPattern     *pattern;
   const gchar     *name;
   GFile           *file;
-  GimpDrawable   **drawables;
+  ClayDrawable   **drawables;
   gint             n_drawables;
   gboolean         success;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  image       = g_value_get_object (gimp_value_array_index (args, 1));
-  drawables   = (GimpDrawable **) g_value_get_boxed (gimp_value_array_index (args, 2));
-  n_drawables = gimp_core_object_array_get_length ((GObject **) drawables);
-  file        = g_value_get_object (gimp_value_array_index (args, 3));
-  name        = g_value_get_string (gimp_value_array_index (args, 4));
+  image       = g_value_get_object (clay_value_array_index (args, 1));
+  drawables   = (ClayDrawable **) g_value_get_boxed (clay_value_array_index (args, 2));
+  n_drawables = clay_core_object_array_get_length ((GObject **) drawables);
+  file        = g_value_get_object (clay_value_array_index (args, 3));
+  name        = g_value_get_string (clay_value_array_index (args, 4));
 
   pattern = file_pat_image_to_pattern (image, context, n_drawables, drawables, name);
 
-  gimp_data_set_file (GIMP_DATA (pattern), file, TRUE, TRUE);
+  clay_data_set_file (CLAY_DATA (pattern), file, TRUE, TRUE);
 
-  success = gimp_data_save (GIMP_DATA (pattern), error);
+  success = clay_data_save (CLAY_DATA (pattern), error);
 
   g_object_unref (pattern);
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }
@@ -158,44 +158,44 @@ file_pat_save_invoker (GimpProcedure         *procedure,
 
 /*  private functions  */
 
-static GimpImage *
-file_pat_pattern_to_image (Gimp        *gimp,
-                           GimpPattern *pattern)
+static ClayImage *
+file_pat_pattern_to_image (Clay        *clay,
+                           ClayPattern *pattern)
 {
-  GimpImage         *image;
-  GimpLayer         *layer;
+  ClayImage         *image;
+  ClayLayer         *layer;
   const Babl        *format;
-  GimpImageBaseType  base_type;
+  ClayImageBaseType  base_type;
   gboolean           alpha;
   gint               width;
   gint               height;
-  GimpTempBuf       *mask   = gimp_pattern_get_mask (pattern);
+  ClayTempBuf       *mask   = clay_pattern_get_mask (pattern);
   GeglBuffer        *buffer;
   GString           *string;
-  GimpConfigWriter  *writer;
-  GimpParasite      *parasite;
+  ClayConfigWriter  *writer;
+  ClayParasite      *parasite;
 
-  format = gimp_temp_buf_get_format (mask);
+  format = clay_temp_buf_get_format (mask);
 
   switch (babl_format_get_bytes_per_pixel (format))
     {
     case 1:
-      base_type = GIMP_GRAY;
+      base_type = CLAY_GRAY;
       alpha     = FALSE;
       break;
 
     case 2:
-      base_type = GIMP_GRAY;
+      base_type = CLAY_GRAY;
       alpha     = TRUE;
       break;
 
     case 3:
-      base_type = GIMP_RGB;
+      base_type = CLAY_RGB;
       alpha     = FALSE;
       break;
 
     case 4:
-      base_type = GIMP_RGB;
+      base_type = CLAY_RGB;
       alpha     = TRUE;
       break;
 
@@ -203,54 +203,54 @@ file_pat_pattern_to_image (Gimp        *gimp,
       g_return_val_if_reached (NULL);
     }
 
-  width  = gimp_temp_buf_get_width  (mask);
-  height = gimp_temp_buf_get_height (mask);
+  width  = clay_temp_buf_get_width  (mask);
+  height = clay_temp_buf_get_height (mask);
 
-  image = gimp_image_new (gimp, width, height, base_type,
-                          GIMP_PRECISION_U8_NON_LINEAR);
+  image = clay_image_new (clay, width, height, base_type,
+                          CLAY_PRECISION_U8_NON_LINEAR);
 
   string = g_string_new (NULL);
-  writer = gimp_config_writer_new_from_string (string);
+  writer = clay_config_writer_new_from_string (string);
 
-  gimp_config_writer_open (writer, "description");
-  gimp_config_writer_string (writer, gimp_object_get_name (pattern));
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "description");
+  clay_config_writer_string (writer, clay_object_get_name (pattern));
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_finish (writer, NULL, NULL);
+  clay_config_writer_finish (writer, NULL, NULL);
 
-  parasite = gimp_parasite_new ("GimpProcedureConfigRun-file-pat-export-last",
-                                GIMP_PARASITE_PERSISTENT,
+  parasite = clay_parasite_new ("ClayProcedureConfigRun-file-pat-export-last",
+                                CLAY_PARASITE_PERSISTENT,
                                 string->len + 1, string->str);
-  gimp_image_parasite_attach (image, parasite, FALSE);
-  gimp_parasite_free (parasite);
+  clay_image_parasite_attach (image, parasite, FALSE);
+  clay_parasite_free (parasite);
 
   g_string_free (string, TRUE);
 
-  format = gimp_image_get_layer_format (image, alpha);
+  format = clay_image_get_layer_format (image, alpha);
 
-  layer = gimp_layer_new (image, width, height, format,
-                          gimp_object_get_name (pattern),
-                          1.0, GIMP_LAYER_MODE_NORMAL);
-  gimp_image_add_layer (image, layer, NULL, 0, FALSE);
+  layer = clay_layer_new (image, width, height, format,
+                          clay_object_get_name (pattern),
+                          1.0, CLAY_LAYER_MODE_NORMAL);
+  clay_image_add_layer (image, layer, NULL, 0, FALSE);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, width, height), 0,
                    NULL,
-                   gimp_temp_buf_get_data (mask), GEGL_AUTO_ROWSTRIDE);
+                   clay_temp_buf_get_data (mask), GEGL_AUTO_ROWSTRIDE);
 
   return image;
 }
 
-static GimpPattern *
-file_pat_image_to_pattern (GimpImage     *image,
-                           GimpContext   *context,
+static ClayPattern *
+file_pat_image_to_pattern (ClayImage     *image,
+                           ClayContext   *context,
                            gint           n_drawables,
-                           GimpDrawable **drawables,
+                           ClayDrawable **drawables,
                            const gchar   *name)
 {
-  GimpPattern *pattern;
-  GimpImage   *subimage = NULL;
+  ClayPattern *pattern;
+  ClayImage   *subimage = NULL;
   const Babl  *format;
   gint         width;
   gint         height;
@@ -265,40 +265,40 @@ file_pat_image_to_pattern (GimpImage     *image,
       for (gint i = 0; i < n_drawables; i++)
         drawable_list = g_list_prepend (drawable_list, drawables[i]);
 
-      subimage = gimp_image_new_from_drawables (image->gimp, drawable_list, FALSE, FALSE);
+      subimage = clay_image_new_from_drawables (image->clay, drawable_list, FALSE, FALSE);
       g_list_free (drawable_list);
-      gimp_container_remove (image->gimp->images, GIMP_OBJECT (subimage));
-      gimp_image_resize_to_layers (subimage, context,
+      clay_container_remove (image->clay->images, CLAY_OBJECT (subimage));
+      clay_image_resize_to_layers (subimage, context,
                                    NULL, NULL, NULL, NULL, NULL);
-      width  = gimp_image_get_width (subimage);
-      height = gimp_image_get_width (subimage);
+      width  = clay_image_get_width (subimage);
+      height = clay_image_get_width (subimage);
 
-      gimp_pickable_flush (GIMP_PICKABLE (subimage));
+      clay_pickable_flush (CLAY_PICKABLE (subimage));
     }
   else
     {
-      width  = gimp_item_get_width  (GIMP_ITEM (drawables[0]));
-      height = gimp_item_get_height (GIMP_ITEM (drawables[0]));
+      width  = clay_item_get_width  (CLAY_ITEM (drawables[0]));
+      height = clay_item_get_height (CLAY_ITEM (drawables[0]));
     }
 
-  format = gimp_babl_format (gimp_drawable_is_gray (drawables[0]) ?
-                             GIMP_GRAY : GIMP_RGB,
-                             GIMP_PRECISION_U8_NON_LINEAR,
-                             (subimage && gimp_image_has_alpha (subimage)) ||
-                             gimp_drawable_has_alpha (drawables[0]),
+  format = clay_babl_format (clay_drawable_is_gray (drawables[0]) ?
+                             CLAY_GRAY : CLAY_RGB,
+                             CLAY_PRECISION_U8_NON_LINEAR,
+                             (subimage && clay_image_has_alpha (subimage)) ||
+                             clay_drawable_has_alpha (drawables[0]),
                              NULL);
 
-  pattern = g_object_new (GIMP_TYPE_PATTERN,
+  pattern = g_object_new (CLAY_TYPE_PATTERN,
                           "name",      name,
-                          "mime-type", "image/x-gimp-pat",
+                          "mime-type", "image/x-clay-pat",
                           NULL);
 
-  pattern->mask = gimp_temp_buf_new (width, height, format);
+  pattern->mask = clay_temp_buf_new (width, height, format);
 
-  gegl_buffer_get (subimage != NULL ? gimp_pickable_get_buffer (GIMP_PICKABLE (subimage)) :
-                                      gimp_drawable_get_buffer (drawables[0]),
+  gegl_buffer_get (subimage != NULL ? clay_pickable_get_buffer (CLAY_PICKABLE (subimage)) :
+                                      clay_drawable_get_buffer (drawables[0]),
                    GEGL_RECTANGLE (0, 0, width, height), 1.0,
-                   format, gimp_temp_buf_get_data (pattern->mask),
+                   format, clay_temp_buf_get_data (pattern->mask),
                    GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
   g_clear_object (&subimage);

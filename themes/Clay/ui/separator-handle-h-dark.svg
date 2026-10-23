@@ -52,7 +52,7 @@
             <dc:title>Barbara Muraus, Jakub Steiner, Klaus Staedtler</dc:title>
           </cc:Agent>
         </dc:contributor>
-        <dc:description>Images originally created as the &quot;Art Libre&quot; icon set. Extended and adopted for GIMP</dc:description>
+        <dc:description>Images originally created as the &quot;Art Libre&quot; icon set. Extended and adopted for Clay</dc:description>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -102,7 +102,7 @@
      style="display:inline"
      id="stock">
     <g
-       id="gimp-shape-diamond"
+       id="clay-shape-diamond"
        style="display:inline"
        transform="translate(-156.1041,-353.19431)">
       <path

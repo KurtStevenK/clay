@@ -44,7 +44,7 @@ static const struct
  *
  * Another mechanism is to define a compatibility procedure in the PDB.
  *
- * Another mechanism is in Gimp core PDB, which also aliases.
+ * Another mechanism is in Clay core PDB, which also aliases.
  * When a procedure is aliased there, it does not need to be aliased here.
  * The mechanism here lets ScriptFu alias PDB procedures that core PDB does not
  * (when script maintenance lags core development.)
@@ -66,7 +66,7 @@ compat_procs[] =
   /* Intended to be empty, for major release. */
 
   /* Template:
-  { "gimp-brightness-contrast"               , "gimp-drawable-brightness-contrast"      },
+  { "clay-brightness-contrast"               , "clay-drawable-brightness-contrast"      },
   */
 };
 
@@ -83,7 +83,7 @@ define_deprecated_scheme_func (const char   *old_name,
   /* Creates a definition in Scheme of a function that calls a PDB procedure.
    *
    * The magic below that makes it deprecated:
-   * - the "--gimp-proc-db-call"
+   * - the "--clay-proc-db-call"
    * - defining under the old_name but calling the new_name
 
    * See scheme-wrapper.c, where this was copied from.
@@ -94,7 +94,7 @@ define_deprecated_scheme_func (const char   *old_name,
    * load_string is more typically called eval().
    */
   buff = g_strdup_printf (" (define (%s . args)"
-                          " (apply --gimp-proc-db-call \"%s\" args))",
+                          " (apply --clay-proc-db-call \"%s\" args))",
                           old_name, new_name);
 
   sc->vptr->load_string ((scheme *) sc, buff);

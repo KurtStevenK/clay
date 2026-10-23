@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "tinyscheme/scheme-private.h"
 
@@ -38,23 +38,23 @@
 static gboolean script_fu_script_param_init (SFScript             *script,
                                              GParamSpec          **pspecs,
                                              guint                 n_pspecs,
-                                             GimpProcedureConfig  *config,
+                                             ClayProcedureConfig  *config,
                                              SFArgType             type,
                                              gint                  n);
 static void     script_fu_script_set_proc_metadata (
-                                             GimpProcedure        *procedure,
+                                             ClayProcedure        *procedure,
                                              SFScript             *script);
 static void     script_fu_script_set_proc_args (
-                                             GimpProcedure        *procedure,
+                                             ClayProcedure        *procedure,
                                              SFScript             *script,
                                              guint                 first_conveyed_arg);
 static void     script_fu_script_set_drawable_sensitivity (
-                                             GimpProcedure        *procedure,
+                                             ClayProcedure        *procedure,
                                              SFScript             *script);
 
 static void     script_fu_command_append_drawables (
                                              GString              *s,
-                                             GimpDrawable        **drawables);
+                                             ClayDrawable        **drawables);
 /*
  *  Function definitions
  */
@@ -124,47 +124,47 @@ script_fu_script_free (SFScript *script)
  * and install it as owned by the scriptfu extension PDB proc.
  */
 void
-script_fu_script_install_proc (GimpPlugIn  *plug_in,
+script_fu_script_install_proc (ClayPlugIn  *plug_in,
                                SFScript    *script)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
-  g_return_if_fail (GIMP_IS_PLUG_IN (plug_in));
+  g_return_if_fail (CLAY_IS_PLUG_IN (plug_in));
   g_return_if_fail (script != NULL);
 
   procedure = script_fu_script_create_PDB_procedure (plug_in,
                                                      script,
-                                                     GIMP_PDB_PROC_TYPE_TEMPORARY);
+                                                     CLAY_PDB_PROC_TYPE_TEMPORARY);
 
-  gimp_plug_in_add_temp_procedure (plug_in, procedure);
+  clay_plug_in_add_temp_procedure (plug_in, procedure);
   g_object_unref (procedure);
 }
 
 
 /*
- * Create and return a GimpProcedure or its subclass GimpImageProcedure.
+ * Create and return a ClayProcedure or its subclass ClayImageProcedure.
  * Caller typically either:
  *    install it owned by self as TEMPORARY type procedure
- *    OR return it as the result of a create_procedure callback from GIMP (PLUGIN type procedure.)
+ *    OR return it as the result of a create_procedure callback from Clay (PLUGIN type procedure.)
  *
  * Caller must unref the procedure.
  *
- * Understands ScriptFu's internal run funcs for GimpProcedure and GimpImageProcedure
+ * Understands ScriptFu's internal run funcs for ClayProcedure and ClayImageProcedure
  */
-GimpProcedure *
-script_fu_script_create_PDB_procedure (GimpPlugIn     *plug_in,
+ClayProcedure *
+script_fu_script_create_PDB_procedure (ClayPlugIn     *plug_in,
                                        SFScript       *script,
-                                       GimpPDBProcType plug_in_type)
+                                       ClayPDBProcType plug_in_type)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
-  if (script->proc_class == GIMP_TYPE_IMAGE_PROCEDURE)
+  if (script->proc_class == CLAY_TYPE_IMAGE_PROCEDURE)
     {
       g_debug ("%s: %s, plugin type %i, image_proc", G_STRFUNC, script->name, plug_in_type);
 
-      procedure = gimp_image_procedure_new (plug_in, script->name,
+      procedure = clay_image_procedure_new (plug_in, script->name,
                                             plug_in_type,
-                                            (GimpRunImageFunc) script_fu_run_image_procedure,
+                                            (ClayRunImageFunc) script_fu_run_image_procedure,
                                             script, /* user_data, pointer in extension-script-fu process */
                                             NULL);
 
@@ -172,40 +172,40 @@ script_fu_script_create_PDB_procedure (GimpPlugIn     *plug_in,
 
       /* Script author does not declare image, drawable in script-fu-register-filter,
        * and we don't add to formal args in PDB.
-       * The convenience class GimpImageProcedure already has formal args:
+       * The convenience class ClayImageProcedure already has formal args:
        * run_mode, image, drawables.
        * "0" means not skip any arguments declared in the script.
        */
       script_fu_script_set_proc_args (procedure, script, 0);
 
-      /* The script declared arity, convey to GIMP. */
+      /* The script declared arity, convey to Clay. */
       script_fu_script_set_drawable_sensitivity (procedure, script);
     }
   else
     {
-      /* Script declares a GimpProcedure.
+      /* Script declares a ClayProcedure.
        * Dispatch on which scheme function the script registered with.
        *
        * v2 had only script-fu-register.
        * For compatibility, we still support it,
        */
-      g_assert (script->proc_class == GIMP_TYPE_PROCEDURE);
+      g_assert (script->proc_class == CLAY_TYPE_PROCEDURE);
 
       if (script_fu_script_get_is_old_style (script))
         {
           g_debug ("%s: %s, plugin type %i, old-style", G_STRFUNC, script->name, plug_in_type);
 
-          procedure = gimp_procedure_new (plug_in, script->name,
+          procedure = clay_procedure_new (plug_in, script->name,
                                           plug_in_type,
                                           script_fu_run_procedure, /* old-style */
                                           script, NULL);
 
           script_fu_script_set_proc_metadata (procedure, script);
 
-          gimp_procedure_add_enum_argument (procedure, "run-mode",
+          clay_procedure_add_enum_argument (procedure, "run-mode",
                                             "Run mode", "The run mode",
-                                            GIMP_TYPE_RUN_MODE,
-                                            GIMP_RUN_INTERACTIVE,
+                                            CLAY_TYPE_RUN_MODE,
+                                            CLAY_RUN_INTERACTIVE,
                                             G_PARAM_READWRITE);
 
           script_fu_script_set_proc_args (procedure, script, 0);
@@ -217,24 +217,24 @@ script_fu_script_create_PDB_procedure (GimpPlugIn     *plug_in,
         {
           g_debug ("%s: %s, plugin type %i, old-style", G_STRFUNC, script->name, plug_in_type);
 
-          procedure = gimp_procedure_new (plug_in, script->name,
+          procedure = clay_procedure_new (plug_in, script->name,
                                           plug_in_type,
                                           script_fu_run_regular_procedure,  /* new-style */
                                           script, NULL);
 
           script_fu_script_set_proc_metadata (procedure, script);
 
-          gimp_procedure_add_enum_argument (procedure, "run-mode",
+          clay_procedure_add_enum_argument (procedure, "run-mode",
                                             "Run mode", "The run mode",
-                                            GIMP_TYPE_RUN_MODE,
-                                            GIMP_RUN_INTERACTIVE,
+                                            CLAY_TYPE_RUN_MODE,
+                                            CLAY_RUN_INTERACTIVE,
                                             G_PARAM_READWRITE);
 
           script_fu_script_set_proc_args (procedure, script, 0);
 
           /* The script did not declare arity.
            * new-style regular procedure always arity SF_NO_DRAWABLE.
-           * This conveys to GIMP.
+           * This conveys to Clay.
            */
           script_fu_script_set_drawable_sensitivity (procedure, script);
         }
@@ -243,13 +243,13 @@ script_fu_script_create_PDB_procedure (GimpPlugIn     *plug_in,
 }
 
 void
-script_fu_script_uninstall_proc (GimpPlugIn *plug_in,
+script_fu_script_uninstall_proc (ClayPlugIn *plug_in,
                                  SFScript   *script)
 {
-  g_return_if_fail (GIMP_IS_PLUG_IN (plug_in));
+  g_return_if_fail (CLAY_IS_PLUG_IN (plug_in));
   g_return_if_fail (script != NULL);
 
-  gimp_plug_in_remove_temp_procedure (plug_in, script->name);
+  clay_plug_in_remove_temp_procedure (plug_in, script->name);
 }
 
 gchar *
@@ -261,7 +261,7 @@ script_fu_script_get_title (SFScript *script)
   g_return_val_if_fail (script != NULL, NULL);
 
   /* strip mnemonics from the menupath */
-  title = gimp_strip_uline (script->menu_label);
+  title = clay_strip_uline (script->menu_label);
 
   /* if this looks like a full menu path, use only the last part */
   if (title[0] == '<' && (tmp = strrchr (title, '/')) && tmp[1])
@@ -303,7 +303,7 @@ gint
 script_fu_script_collect_standard_args (SFScript             *script,
                                         GParamSpec          **pspecs,
                                         guint                 n_pspecs,
-                                        GimpProcedureConfig  *config)
+                                        ClayProcedureConfig  *config)
 {
   gint params_consumed = 0;
 
@@ -378,7 +378,7 @@ gchar *
 script_fu_script_get_command_from_params (SFScript             *script,
                                           GParamSpec          **pspecs,
                                           guint                 n_pspecs,
-                                          GimpProcedureConfig  *config)
+                                          ClayProcedureConfig  *config)
 {
   GString *s;
   gint     i;
@@ -415,7 +415,7 @@ script_fu_script_get_command_from_params (SFScript             *script,
  */
 static void
 script_fu_command_append_drawables (GString       *s,
-                                    GimpDrawable **drawables)
+                                    ClayDrawable **drawables)
 {
   /* Require non-empty array of drawables. */
   g_assert (drawables != NULL && drawables[0] != NULL);
@@ -426,7 +426,7 @@ script_fu_command_append_drawables (GString       *s,
   g_string_append (s, " #(" );
   for (guint i = 0; drawables[i] != NULL; i++)
     {
-      g_string_append_printf (s, " %d", gimp_item_get_id ((GimpItem*) drawables[i]));
+      g_string_append_printf (s, " %d", clay_item_get_id ((ClayItem*) drawables[i]));
     }
   g_string_append (s, ")" );
   /* Ensure string is like: " #( 1 2 3)" */
@@ -435,9 +435,9 @@ script_fu_command_append_drawables (GString       *s,
 
 gchar *
 script_fu_script_get_command_for_image_proc (SFScript            *script,
-                                             GimpImage            *image,
-                                             GimpDrawable        **drawables,
-                                             GimpProcedureConfig  *config)
+                                             ClayImage            *image,
+                                             ClayDrawable        **drawables,
+                                             ClayProcedureConfig  *config)
 {
   GParamSpec **pspecs;
   guint        n_pspecs;
@@ -445,15 +445,15 @@ script_fu_script_get_command_for_image_proc (SFScript            *script,
   gint         i;
 
   g_return_val_if_fail (script != NULL, NULL);
-  g_return_val_if_fail (GIMP_IS_PROCEDURE_CONFIG (config), NULL);
+  g_return_val_if_fail (CLAY_IS_PROCEDURE_CONFIG (config), NULL);
 
   s = g_string_new ("(");
   g_string_append (s, script->name);
 
   /* The command has no run mode. */
 
-  /* scripts use integer ID's for Gimp objects. */
-  g_string_append_printf (s, " %d", gimp_image_get_id (image));
+  /* scripts use integer ID's for Clay objects. */
+  g_string_append_printf (s, " %d", clay_image_get_id (image));
 
   /* Append text repr for a container of all drawable ID's.
    * Even if script->drawable_arity = SF_PROC_IMAGE_SINGLE_DRAWABLE
@@ -463,7 +463,7 @@ script_fu_script_get_command_for_image_proc (SFScript            *script,
   script_fu_command_append_drawables (s, drawables);
 
   /* config contains the "other" args
-   * Iterate over the GimpValueArray.
+   * Iterate over the ClayValueArray.
    * But script->args should be the same length, and types should match.
    */
   pspecs = g_object_class_list_properties (G_OBJECT_GET_CLASS (config), &n_pspecs);
@@ -495,7 +495,7 @@ script_fu_script_get_command_for_image_proc (SFScript            *script,
 
 gchar *
 script_fu_script_get_command_for_regular_proc (SFScript            *script,
-                                               GimpProcedureConfig *config)
+                                               ClayProcedureConfig *config)
 {
   GParamSpec **pspecs;
   guint        n_pspecs;
@@ -503,7 +503,7 @@ script_fu_script_get_command_for_regular_proc (SFScript            *script,
   gint         i;
 
   g_return_val_if_fail (script != NULL, NULL);
-  g_return_val_if_fail (GIMP_IS_PROCEDURE_CONFIG (config), NULL);
+  g_return_val_if_fail (CLAY_IS_PROCEDURE_CONFIG (config), NULL);
 
   s = g_string_new ("(");
   g_string_append (s, script->name);
@@ -511,7 +511,7 @@ script_fu_script_get_command_for_regular_proc (SFScript            *script,
   /* The command has no run mode. */
 
   /* config contains the "other" args
-   * Iterate over the GimpValueArray, starting at an offset.
+   * Iterate over the ClayValueArray, starting at an offset.
    * But script->args should be the same length, and types should match.
    */
   pspecs = g_object_class_list_properties (G_OBJECT_GET_CLASS (config), &n_pspecs);
@@ -540,7 +540,7 @@ script_fu_script_get_command_for_regular_proc (SFScript            *script,
  * which does not specify the arity for drawables,
  * is actually a script that takes one and only one drawable.
  * Such plugins are deprecated in v3: each plugin must take container of drawables
- * and declare its drawable arity via gimp_procedure_set_sensitivity_mask.
+ * and declare its drawable arity via clay_procedure_set_sensitivity_mask.
  */
 void
 script_fu_script_infer_drawable_arity (SFScript *script)
@@ -563,7 +563,7 @@ static gboolean
 script_fu_script_param_init (SFScript             *script,
                              GParamSpec          **pspecs,
                              guint                 n_pspecs,
-                             GimpProcedureConfig  *config,
+                             ClayProcedureConfig  *config,
                              SFArgType             type,
                              gint                  n)
 {
@@ -585,61 +585,61 @@ script_fu_script_param_init (SFScript             *script,
       switch (type)
         {
         case SF_IMAGE:
-          if (GIMP_VALUE_HOLDS_IMAGE (&value))
+          if (CLAY_VALUE_HOLDS_IMAGE (&value))
             {
-              GimpImage *image = g_value_get_object (&value);
+              ClayImage *image = g_value_get_object (&value);
 
-              arg->value.sfa_image = gimp_image_get_id (image);
+              arg->value.sfa_image = clay_image_get_id (image);
               result = TRUE;
             }
           break;
 
         case SF_DRAWABLE:
-          if (GIMP_VALUE_HOLDS_DRAWABLE (&value))
+          if (CLAY_VALUE_HOLDS_DRAWABLE (&value))
             {
-              GimpItem *item = g_value_get_object (&value);
+              ClayItem *item = g_value_get_object (&value);
 
-              arg->value.sfa_drawable = gimp_item_get_id (item);
+              arg->value.sfa_drawable = clay_item_get_id (item);
               result = TRUE;
             }
           break;
 
         case SF_LAYER:
-          if (GIMP_VALUE_HOLDS_LAYER (&value))
+          if (CLAY_VALUE_HOLDS_LAYER (&value))
             {
-              GimpItem *item = g_value_get_object (&value);
+              ClayItem *item = g_value_get_object (&value);
 
-              arg->value.sfa_layer = gimp_item_get_id (item);
+              arg->value.sfa_layer = clay_item_get_id (item);
               result = TRUE;
             }
           break;
 
         case SF_CHANNEL:
-          if (GIMP_VALUE_HOLDS_CHANNEL (&value))
+          if (CLAY_VALUE_HOLDS_CHANNEL (&value))
             {
-              GimpItem *item = g_value_get_object (&value);
+              ClayItem *item = g_value_get_object (&value);
 
-              arg->value.sfa_channel = gimp_item_get_id (item);
+              arg->value.sfa_channel = clay_item_get_id (item);
               result = TRUE;
             }
           break;
 
         case SF_VECTORS:
-          if (GIMP_VALUE_HOLDS_PATH (&value))
+          if (CLAY_VALUE_HOLDS_PATH (&value))
             {
-              GimpItem *item = g_value_get_object (&value);
+              ClayItem *item = g_value_get_object (&value);
 
-              arg->value.sfa_vectors = gimp_item_get_id (item);
+              arg->value.sfa_vectors = clay_item_get_id (item);
               result = TRUE;
             }
           break;
 
         case SF_DISPLAY:
-          if (GIMP_VALUE_HOLDS_DISPLAY (&value))
+          if (CLAY_VALUE_HOLDS_DISPLAY (&value))
             {
-              GimpDisplay *display = g_value_get_object (&value);
+              ClayDisplay *display = g_value_get_object (&value);
 
-              arg->value.sfa_display = gimp_display_get_id (display);
+              arg->value.sfa_display = clay_display_get_id (display);
               result = TRUE;
             }
           break;
@@ -658,7 +658,7 @@ script_fu_script_param_init (SFScript             *script,
 
 
 static void
-script_fu_script_set_proc_metadata (GimpProcedure *procedure,
+script_fu_script_set_proc_metadata (ClayProcedure *procedure,
                                     SFScript      *script)
 {
   const gchar *menu_label = NULL;
@@ -667,16 +667,16 @@ script_fu_script_set_proc_metadata (GimpProcedure *procedure,
   if (strncmp (script->menu_label, "<None>", 6) != 0)
     menu_label = script->menu_label;
 
-  gimp_procedure_set_image_types (procedure, script->image_types);
+  clay_procedure_set_image_types (procedure, script->image_types);
 
   if (menu_label && strlen (menu_label))
-    gimp_procedure_set_menu_label (procedure, menu_label);
+    clay_procedure_set_menu_label (procedure, menu_label);
 
-  gimp_procedure_set_documentation (procedure,
+  clay_procedure_set_documentation (procedure,
                                     script->blurb,
                                     NULL,
                                     script->name);
-  gimp_procedure_set_attribution (procedure,
+  clay_procedure_set_attribution (procedure,
                                   script->author,
                                   script->copyright,
                                   script->date);
@@ -684,7 +684,7 @@ script_fu_script_set_proc_metadata (GimpProcedure *procedure,
 
 /* Convey formal arguments from SFArg to the PDB. */
 static void
-script_fu_script_set_proc_args (GimpProcedure *procedure,
+script_fu_script_set_proc_args (ClayProcedure *procedure,
                                 SFScript      *script,
                                 guint          first_conveyed_arg)
 {
@@ -701,24 +701,24 @@ script_fu_script_set_proc_args (GimpProcedure *procedure,
 
 /* Convey drawable arity to the PDB.
  * !!! Unless set, sensitivity defaults to drawable arity 1.
- * See libgimp/gimpprocedure.c gimp_procedure_set_sensitivity_mask
+ * See libclay/clayprocedure.c clay_procedure_set_sensitivity_mask
  */
 static void
-script_fu_script_set_drawable_sensitivity (GimpProcedure *procedure, SFScript *script)
+script_fu_script_set_drawable_sensitivity (ClayProcedure *procedure, SFScript *script)
 {
   switch (script->drawable_arity)
     {
     case SF_TWO_OR_MORE_DRAWABLE:
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES);
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES);
       break;
     case SF_ONE_OR_MORE_DRAWABLE:
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES);
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES);
       break;
     case SF_ONE_DRAWABLE:
-      gimp_procedure_set_sensitivity_mask (procedure, GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_sensitivity_mask (procedure, CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
       break;
     case SF_NO_DRAWABLE:
       /* menu item always sensitive. */

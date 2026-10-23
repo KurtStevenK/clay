@@ -22,23 +22,23 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
 
 #include "actions.h"
 #include "window-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  public functions  */
 
 void
-window_close_cmd_callback (GimpAction *action,
+window_close_cmd_callback (ClayAction *action,
                            GVariant   *value,
                            gpointer    data)
 {
@@ -61,7 +61,7 @@ window_close_cmd_callback (GimpAction *action,
 }
 
 void
-window_open_display_cmd_callback (GimpAction *action,
+window_open_display_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
@@ -70,7 +70,7 @@ window_open_display_cmd_callback (GimpAction *action,
   GtkWidget *entry;
   return_if_no_widget (widget, data);
 
-  dialog = gimp_message_dialog_new (_("Open Display"), GIMP_ICON_WILBER_EEK,
+  dialog = clay_message_dialog_new (_("Open Display"), CLAY_ICON_WILBER_EEK,
                                     widget, GTK_DIALOG_MODAL,
                                     NULL, NULL,
 
@@ -79,21 +79,21 @@ window_open_display_cmd_callback (GimpAction *action,
 
                                     NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("Experimental multi-display stuff!\n"
                                      "Click OK and have fun crashing Clay..."));
 
-  gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                              _("Please enter the name of the new display:"));
 
   entry = gtk_entry_new ();
   gtk_entry_set_activates_default (GTK_ENTRY (entry), TRUE);
-  gtk_box_pack_start (GTK_BOX (GIMP_MESSAGE_DIALOG (dialog)->box), entry,
+  gtk_box_pack_start (GTK_BOX (CLAY_MESSAGE_DIALOG (dialog)->box), entry,
                       TRUE, TRUE, 0);
 
   gtk_widget_grab_focus (entry);
@@ -114,7 +114,7 @@ window_open_display_cmd_callback (GimpAction *action,
           display = gdk_display_open (screen_name);
 
           if (! display)
-            gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+            clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                        _("Can't open display '%s'. "
                                        "Please try another one:"),
                                        screen_name);
@@ -134,7 +134,7 @@ window_open_display_cmd_callback (GimpAction *action,
 }
 
 void
-window_move_to_screen_cmd_callback (GimpAction *action,
+window_move_to_screen_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {

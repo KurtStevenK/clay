@@ -14,8 +14,8 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -30,17 +30,17 @@ Offsets and returns the given palette when it is editable,
 otherwise copies the given palette and returns it.
 """
 
-class PaletteOffset (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class PaletteOffset (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ "python-fu-palette-offset" ]
 
     def do_create_procedure(self, name):
-        procedure = Gimp.Procedure.new(self, name,
-                                       Gimp.PDBProcType.PLUGIN,
+        procedure = Clay.Procedure.new(self, name,
+                                       Clay.PDBProcType.PLUGIN,
                                        self.run, None)
         if name == 'python-fu-palette-offset':
             procedure.set_menu_label(_("_Offset Palette..."))
@@ -51,8 +51,8 @@ class PaletteOffset (Gimp.PlugIn):
                                       "(c) Joao S. O. Bueno Calligaris",
                                       "2004, 2006")
             procedure.add_enum_argument ("run-mode", _("Run mode"),
-                                         _("The run mode"), Gimp.RunMode,
-                                         Gimp.RunMode.NONINTERACTIVE,
+                                         _("The run mode"), Clay.RunMode,
+                                         Clay.RunMode.NONINTERACTIVE,
                                          GObject.ParamFlags.READWRITE)
             procedure.add_palette_argument ("palette", _("_Palette"),
                                             _("Palette"), True,
@@ -75,29 +75,29 @@ class PaletteOffset (Gimp.PlugIn):
         amount  = config.get_property("amount")
 
         if palette is None:
-            palette = Gimp.context_get_palette()
+            palette = Clay.context_get_palette()
             config.set_property("palette", palette)
 
         if not palette.is_valid():
             error = f'Invalid palette ID: {palette.get_id()}'
-            return procedure.new_return_values(Gimp.PDBStatusType.CALLING_ERROR,
+            return procedure.new_return_values(Clay.PDBStatusType.CALLING_ERROR,
                                                GLib.Error(error))
 
-        if runmode == Gimp.RunMode.INTERACTIVE:
-            gi.require_version('GimpUi', '3.0')
-            from gi.repository import GimpUi
+        if runmode == Clay.RunMode.INTERACTIVE:
+            gi.require_version('ClayUi', '3.0')
+            from gi.repository import ClayUi
             gi.require_version('Gtk', '3.0')
             from gi.repository import Gtk
 
-            GimpUi.init ("palette-offset.py")
+            ClayUi.init ("palette-offset.py")
 
-            dialog = GimpUi.ProcedureDialog(procedure=procedure, config=config)
+            dialog = ClayUi.ProcedureDialog(procedure=procedure, config=config)
 
             config.set_property("palette", None)
             dialog.fill(["palette", "amount"])
             if not dialog.run():
                 dialog.destroy()
-                return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
+                return procedure.new_return_values(Clay.PDBStatusType.CANCEL, GLib.Error())
             else:
                 dialog.destroy()
 
@@ -123,10 +123,10 @@ class PaletteOffset (Gimp.PlugIn):
             palette.set_entry_name(target_index, tmp_entry_array[i][0])
             palette.set_entry_color(target_index, tmp_entry_array[i][1])
 
-        retval = procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
-        value = GObject.Value(Gimp.Palette, palette)
+        retval = procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
+        value = GObject.Value(Clay.Palette, palette)
         retval.remove(1)
         retval.insert(1, value)
         return retval
 
-Gimp.main(PaletteOffset.__gtype__, sys.argv)
+Clay.main(PaletteOffset.__gtype__, sys.argv)

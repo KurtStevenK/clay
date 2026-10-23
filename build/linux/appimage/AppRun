@@ -17,7 +17,7 @@ for lib in "${APPDIR}"/usr/lib*/*.so* "${APPDIR}"/usr/lib/*linux-gnu/*.so*; do
       #LD does not support spaces in LD_PRELOAD
       break
       ;;
-    *libbabl*|*libgegl*|*libgimp*)
+    *libbabl*|*libgegl*|*libclay*)
       export LD_PRELOAD="$LD_PRELOAD${LD_PRELOAD:+:}$lib"
       ;;
   esac
@@ -26,7 +26,7 @@ unset LD_LIBRARY_PATH
 export XDG_DATA_DIRS="${APPDIR}/usr/share/:$XDG_DATA_DIRS"
 
 
-## Other needed runtime paths (added by 3_dist-gimp-goappimage.sh)
+## Other needed runtime paths (added by 3_dist-clay-goappimage.sh)
 ### We need to run on APPDIR due to the bundled LD linux interpreter so
 ### relative file paths on CLI are converted to absolute (OWD). See: #13636
 export OWD="$PWD"

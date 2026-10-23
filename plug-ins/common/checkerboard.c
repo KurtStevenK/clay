@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Copyright (C) 1997 Brent Burton & the Edward Blevins
  *
@@ -20,15 +20,15 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC      "plug-in-checkerboard"
 #define PLUG_IN_BINARY    "checkerboard"
-#define PLUG_IN_ROLE      "gimp-checkerboard"
+#define PLUG_IN_ROLE      "clay-checkerboard"
 
 
 typedef struct _Checkerboard      Checkerboard;
@@ -36,12 +36,12 @@ typedef struct _CheckerboardClass CheckerboardClass;
 
 struct _Checkerboard
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _CheckerboardClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -50,41 +50,41 @@ struct _CheckerboardClass
 
 GType                   checkerboard_get_type         (void);
 
-static GList          * checkerboard_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * checkerboard_create_procedure (GimpPlugIn           *plug_in,
+static GList          * checkerboard_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * checkerboard_create_procedure (ClayPlugIn           *plug_in,
                                                        const gchar          *name);
 
-static GimpValueArray * checkerboard_run              (GimpProcedure        *procedure,
-                                                       GimpRunMode           run_mode,
-                                                       GimpImage            *image,
-                                                       GimpDrawable        **drawables,
-                                                       GimpProcedureConfig  *config,
+static ClayValueArray * checkerboard_run              (ClayProcedure        *procedure,
+                                                       ClayRunMode           run_mode,
+                                                       ClayImage            *image,
+                                                       ClayDrawable        **drawables,
+                                                       ClayProcedureConfig  *config,
                                                        gpointer              run_data);
 
 static void             do_checkerboard_pattern       (GObject       *config,
-                                                       GimpDrawable  *drawable,
-                                                       GimpPreview   *preview);
+                                                       ClayDrawable  *drawable,
+                                                       ClayPreview   *preview);
 static void             do_checkerboard_preview       (GtkWidget     *widget,
                                                        GObject       *config);
 static gint             inblock                       (gint           pos,
                                                        gint           size);
 
-static gboolean         checkerboard_dialog           (GimpProcedure *procedure,
+static gboolean         checkerboard_dialog           (ClayProcedure *procedure,
                                                        GObject       *config,
-                                                       GimpImage     *image,
-                                                       GimpDrawable  *drawable);
+                                                       ClayImage     *image,
+                                                       ClayDrawable  *drawable);
 
 
-G_DEFINE_TYPE (Checkerboard, checkerboard, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Checkerboard, checkerboard, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (CHECKERBOARD_TYPE)
+CLAY_MAIN (CHECKERBOARD_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 checkerboard_class_init (CheckerboardClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = checkerboard_query_procedures;
   plug_in_class->create_procedure = checkerboard_create_procedure;
@@ -97,84 +97,84 @@ checkerboard_init (Checkerboard *checkerboard)
 }
 
 static GList *
-checkerboard_query_procedures (GimpPlugIn *plug_in)
+checkerboard_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-checkerboard_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+checkerboard_create_procedure (ClayPlugIn  *plug_in,
                                const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             checkerboard_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("_Checkerboard (legacy)..."));
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Render/Pattern");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create a checkerboard pattern"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Brent Burton & the Edward Blevins",
                                       "Brent Burton & the Edward Blevins",
                                       "1997");
 
-      gimp_procedure_add_boolean_argument (procedure, "psychobilly",
+      clay_procedure_add_boolean_argument (procedure, "psychobilly",
                                            _("_Psychobilly"),
                                            _("Render a psychobilly checkerboard"),
                                            FALSE,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "check-size",
+      clay_procedure_add_int_argument (procedure, "check-size",
                                        _("_Size"),
                                        _("Size of the checks"),
-                                       1, GIMP_MAX_IMAGE_SIZE, 10,
+                                       1, CLAY_MAX_IMAGE_SIZE, 10,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_unit_aux_argument (procedure, "check-size-unit",
+      clay_procedure_add_unit_aux_argument (procedure, "check-size-unit",
                                             _("Check size unit of measure"),
                                             _("Check size unit of measure"),
-                                            TRUE, TRUE, gimp_unit_pixel (),
-                                            GIMP_PARAM_READWRITE);
+                                            TRUE, TRUE, clay_unit_pixel (),
+                                            CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-checkerboard_run (GimpProcedure        *procedure,
-                  GimpRunMode           run_mode,
-                  GimpImage            *image,
-                  GimpDrawable        **drawables,
-                  GimpProcedureConfig  *config,
+static ClayValueArray *
+checkerboard_run (ClayProcedure        *procedure,
+                  ClayRunMode           run_mode,
+                  ClayImage            *image,
+                  ClayDrawable        **drawables,
+                  ClayProcedureConfig  *config,
                   gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -182,28 +182,28 @@ checkerboard_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE &&
+  if (run_mode == CLAY_RUN_INTERACTIVE &&
       ! checkerboard_dialog (procedure, G_OBJECT (config), image, drawable))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
-  if (gimp_drawable_is_rgb  (drawable) ||
-      gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_rgb  (drawable) ||
+      clay_drawable_is_gray (drawable))
     {
       do_checkerboard_pattern (G_OBJECT (config), drawable, NULL);
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 typedef struct
@@ -250,8 +250,8 @@ checkerboard_func (gint      x,
 
 static void
 do_checkerboard_pattern (GObject      *config,
-                         GimpDrawable *drawable,
-                         GimpPreview  *preview)
+                         ClayDrawable *drawable,
+                         ClayPreview  *preview)
 {
   CheckerboardParam_t  param;
   GeglColor           *color;
@@ -270,16 +270,16 @@ do_checkerboard_pattern (GObject      *config,
                   "psychobilly", &mode,
                   NULL);
 
-  color = gimp_context_get_background ();
+  color = clay_context_get_background ();
   gegl_color_get_pixel (color, babl_format_with_space ("R'G'B'A u8", NULL), bg);
   gegl_color_get_pixel (color, babl_format_with_space ("Y' u8", NULL), bg_lum);
   g_object_unref (color);
-  color = gimp_context_get_foreground ();
+  color = clay_context_get_foreground ();
   gegl_color_get_pixel (color, babl_format_with_space ("R'G'B'A u8", NULL), fg);
   gegl_color_get_pixel (color, babl_format_with_space ("Y' u8", NULL), fg_lum);
   g_object_unref (color);
 
-  if (gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_gray (drawable))
     {
       param.bg[0] = bg_lum[0];
       param.bg[1] = bg[3];
@@ -287,7 +287,7 @@ do_checkerboard_pattern (GObject      *config,
       param.fg[0] = fg_lum[0];
       param.fg[1] = fg[3];
 
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format ("Y'A u8");
       else
         format = babl_format ("Y' u8");
@@ -300,7 +300,7 @@ do_checkerboard_pattern (GObject      *config,
           param.fg[i] = fg[i];
         }
 
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format ("R'G'B'A u8");
       else
         format = babl_format ("R'G'B' u8");
@@ -321,9 +321,9 @@ do_checkerboard_pattern (GObject      *config,
       gint    i;
       guchar *buffer;
 
-      gimp_preview_get_position (preview, &x1, &y1);
-      gimp_preview_get_size (preview, &width, &height);
-      bpp = gimp_drawable_get_bpp (drawable);
+      clay_preview_get_position (preview, &x1, &y1);
+      clay_preview_get_size (preview, &width, &height);
+      bpp = clay_drawable_get_bpp (drawable);
       buffer = g_new (guchar, width * height * bpp);
 
       for (i = 0; i < width * height; i++)
@@ -335,7 +335,7 @@ do_checkerboard_pattern (GObject      *config,
                              &param);
         }
 
-      gimp_preview_draw_buffer (preview, buffer, width * bpp);
+      clay_preview_draw_buffer (preview, buffer, width * bpp);
       g_free (buffer);
     }
   else
@@ -346,14 +346,14 @@ do_checkerboard_pattern (GObject      *config,
       gint                progress_total;
       gint                progress_done = 0;
 
-      if (! gimp_drawable_mask_intersect (drawable, &x, &y, &w, &h))
+      if (! clay_drawable_mask_intersect (drawable, &x, &y, &w, &h))
         return;
 
       progress_total = w * h;
 
-      gimp_progress_init (_("Checkerboard"));
+      clay_progress_init (_("Checkerboard"));
 
-      buffer = gimp_drawable_get_shadow_buffer (drawable);
+      buffer = clay_drawable_get_shadow_buffer (drawable);
 
       iter = gegl_buffer_iterator_new (buffer,
                                        GEGL_RECTANGLE (x, y, w, h), 0,
@@ -384,16 +384,16 @@ do_checkerboard_pattern (GObject      *config,
             }
 
           progress_done += roi.width * roi.height;
-          gimp_progress_update ((gdouble) progress_done /
+          clay_progress_update ((gdouble) progress_done /
                                 (gdouble) progress_total);
         }
 
       g_object_unref (buffer);
 
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
 
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, x, y, w, h);
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, x, y, w, h);
     }
 }
 
@@ -401,8 +401,8 @@ static void
 do_checkerboard_preview (GtkWidget *widget,
                          GObject   *config)
 {
-  GimpPreview  *preview  = GIMP_PREVIEW (widget);
-  GimpDrawable *drawable = g_object_get_data (config, "drawable");
+  ClayPreview  *preview  = CLAY_PREVIEW (widget);
+  ClayDrawable *drawable = g_object_get_data (config, "drawable");
 
   do_checkerboard_pattern (config, drawable, preview);
 }
@@ -463,10 +463,10 @@ inblock (gint pos,
 }
 
 static gboolean
-checkerboard_dialog (GimpProcedure *procedure,
+checkerboard_dialog (ClayProcedure *procedure,
                      GObject       *config,
-                     GimpImage     *image,
-                     GimpDrawable  *drawable)
+                     ClayImage     *image,
+                     ClayDrawable  *drawable)
 {
   GtkWidget *dialog;
   GtkWidget *preview;
@@ -477,42 +477,42 @@ checkerboard_dialog (GimpProcedure *procedure,
   gdouble    yres;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Checkerboard"));
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   /*  Get the image resolution and unit  */
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
-  width  = gimp_drawable_get_width (drawable);
-  height = gimp_drawable_get_height (drawable);
+  width  = clay_drawable_get_width (drawable);
+  height = clay_drawable_get_height (drawable);
   size   = MIN (width, height);
 
   size_entry =
-    gimp_procedure_dialog_get_size_entry (GIMP_PROCEDURE_DIALOG (dialog),
+    clay_procedure_dialog_get_size_entry (CLAY_PROCEDURE_DIALOG (dialog),
                                           "check-size", TRUE,
                                           "check-size-unit", "%a",
-                                          GIMP_SIZE_ENTRY_UPDATE_SIZE,
+                                          CLAY_SIZE_ENTRY_UPDATE_SIZE,
                                           xres);
   gtk_widget_set_margin_bottom (size_entry, 12);
 
   /*  set the size (in pixels) that will be treated as 0% and 100%  */
-  gimp_size_entry_set_size (GIMP_SIZE_ENTRY (size_entry), 0, 0.0, size);
+  clay_size_entry_set_size (CLAY_SIZE_ENTRY (size_entry), 0, 0.0, size);
 
   /*  set upper and lower limits (in pixels)  */
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (size_entry), 0,
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (size_entry), 0,
                                          1.0, size);
 
-  toggle = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  toggle = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                              "psychobilly",
                                              GTK_TYPE_CHECK_BUTTON);
   gtk_widget_set_margin_bottom (toggle, 12);
 
-  preview = gimp_procedure_dialog_get_drawable_preview (GIMP_PROCEDURE_DIALOG (dialog),
+  preview = clay_procedure_dialog_get_drawable_preview (CLAY_PROCEDURE_DIALOG (dialog),
                                                         "preview", drawable);
   g_object_set_data (config, "drawable", drawable);
 
@@ -521,16 +521,16 @@ checkerboard_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "preview", "check-size", "psychobilly",
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

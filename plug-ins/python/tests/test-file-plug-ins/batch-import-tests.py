@@ -20,11 +20,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Batch non-interactive GIMP file import plug-ins testing."""
+"""Batch non-interactive Clay file import plug-ins testing."""
 
-from gimpconfig import GimpConfig
-from gimplogger import GimpLogger
-from gimptestframework import GimpTestRunner
+from clayconfig import ClayConfig
+from claylogger import ClayLogger
+from claytestframework import ClayTestRunner
 
 
 #DEBUGGING=True
@@ -35,9 +35,9 @@ PRINT_VERBOSE = False
 
 LOG_APPEND = False
 
-test_cfg = GimpConfig()
+test_cfg = ClayConfig()
 
-log = GimpLogger(False, test_cfg.log_file, LOG_APPEND, PRINT_VERBOSE, DEBUGGING)
+log = ClayLogger(False, test_cfg.log_file, LOG_APPEND, PRINT_VERBOSE, DEBUGGING)
 
-runner = GimpTestRunner(log, "import", test_cfg)
+runner = ClayTestRunner(log, "import", test_cfg)
 runner.run_tests()

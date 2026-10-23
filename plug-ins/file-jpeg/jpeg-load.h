@@ -18,21 +18,21 @@
 #ifndef __JPEG_LOAD_H__
 #define __JPEG_LOAD_H__
 
-GimpImage * load_image           (GFile         *file,
-                                  GimpRunMode    runmode,
+ClayImage * load_image           (GFile         *file,
+                                  ClayRunMode    runmode,
                                   gboolean       preview,
                                   gboolean      *resolution_loaded,
                                   gboolean      *ps_metadata_loaded,
                                   GError       **error);
 
-GimpImage * load_thumbnail_image (GFile         *file,
+ClayImage * load_thumbnail_image (GFile         *file,
                                   gint          *width,
                                   gint          *height,
-                                  GimpImageType *type,
+                                  ClayImageType *type,
                                   GError       **error);
 
 gboolean    load_mpo_image       (GFile         *file,
-                                  GimpImage     *first_image,
+                                  ClayImage     *first_image,
                                   GError       **error);
 
 #endif /* __JPEG_LOAD_H__ */

@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -30,10 +30,10 @@
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include <libgimp/stdplugins-intl.h>
+#include <libclay/stdplugins-intl.h>
 
 #include "dds.h"
 #include "ddswrite.h"
@@ -45,13 +45,13 @@
 
 
 static gboolean      write_image        (FILE                *fp,
-                                         GimpImage           *image,
-                                         GimpDrawable        *drawable,
-                                         GimpProcedureConfig *config);
-static gboolean      save_dialog        (GimpImage           *image,
-                                         GimpDrawable        *drawable,
-                                         GimpProcedure       *procedure,
-                                         GimpProcedureConfig *config);
+                                         ClayImage           *image,
+                                         ClayDrawable        *drawable,
+                                         ClayProcedureConfig *config);
+static gboolean      save_dialog        (ClayImage           *image,
+                                         ClayDrawable        *drawable,
+                                         ClayProcedure       *procedure,
+                                         ClayProcedureConfig *config);
 
 static const gchar * check_comp_format  (guint32              format);
 
@@ -79,8 +79,8 @@ static const gchar *cubemap_face_names[4][6] =
   }
 };
 
-static GimpImage *global_image          = NULL;
-static GimpLayer *cubemap_faces[6];
+static ClayImage *global_image          = NULL;
+static ClayLayer *cubemap_faces[6];
 static gboolean   is_cubemap            = FALSE;
 static gboolean   is_volume             = FALSE;
 static gboolean   is_array              = FALSE;
@@ -129,7 +129,7 @@ check_mipmaps (gint savetype)
   gint           min_surfaces = 1;
   gint           max_surfaces = 1;
   gboolean       valid        = TRUE;
-  GimpImageType  type;
+  ClayImageType  type;
 
   /* not handling volume maps for the moment... */
   if (savetype == DDS_SAVE_VOLUMEMAP)
@@ -146,23 +146,23 @@ check_mipmaps (gint savetype)
       max_surfaces = G_MAXINT;
     }
 
-  layers = gimp_image_list_layers (global_image);
+  layers = clay_image_list_layers (global_image);
   num_layers = g_list_length (layers);
 
-  w = gimp_image_get_width (global_image);
-  h = gimp_image_get_height (global_image);
+  w = clay_image_get_width (global_image);
+  h = clay_image_get_height (global_image);
 
   num_mipmaps = get_num_mipmaps (w, h);
 
-  type = gimp_drawable_type (layers->data);
+  type = clay_drawable_type (layers->data);
 
   for (list = layers; list; list = g_list_next (list))
     {
-      if (type != gimp_drawable_type (list->data))
+      if (type != clay_drawable_type (list->data))
         return 0;
 
-      if ((gimp_drawable_get_width  (list->data) == w) &&
-          (gimp_drawable_get_height (list->data) == h))
+      if ((clay_drawable_get_width  (list->data) == w) &&
+          (clay_drawable_get_height (list->data) == h))
         ++num_surfaces;
     }
 
@@ -173,10 +173,10 @@ check_mipmaps (gint savetype)
 
   for (i = 0; valid && i < num_layers; i += num_mipmaps)
     {
-      GimpDrawable *drawable = g_list_nth_data (layers, i);
+      ClayDrawable *drawable = g_list_nth_data (layers, i);
 
-      if ((gimp_drawable_get_width  (drawable) != w) ||
-          (gimp_drawable_get_height (drawable) != h))
+      if ((clay_drawable_get_width  (drawable) != w) ||
+          (clay_drawable_get_height (drawable) != h))
         {
           valid = FALSE;
           break;
@@ -190,8 +190,8 @@ check_mipmaps (gint savetype)
           miph = h >> j;
           if (mipw < 1) mipw = 1;
           if (miph < 1) miph = 1;
-          if ((gimp_drawable_get_width  (drawable) != mipw) ||
-              (gimp_drawable_get_height (drawable) != miph))
+          if ((clay_drawable_get_width  (drawable) != mipw) ||
+              (clay_drawable_get_height (drawable) != miph))
             {
               valid = FALSE;
               break;
@@ -203,18 +203,18 @@ check_mipmaps (gint savetype)
 }
 
 static gboolean
-check_cubemap (GimpImage *image)
+check_cubemap (ClayImage *image)
 {
-  GimpLayer    **layers;
+  ClayLayer    **layers;
   gint           num_layers;
   gboolean       cubemap = TRUE;
   gint           i, j, k;
   gint           w, h;
   gchar         *layer_name;
-  GimpImageType  type;
+  ClayImageType  type;
 
-  layers     = gimp_image_get_layers (image);
-  num_layers = gimp_core_object_array_get_length ((GObject **) layers);
+  layers     = clay_image_get_layers (image);
+  num_layers = clay_core_object_array_get_length ((GObject **) layers);
 
   if (num_layers < 6)
     {
@@ -234,18 +234,18 @@ check_cubemap (GimpImage *image)
         cubemap_faces[i] = NULL;
 
       /* Find the mipmap level 0 layers */
-      w = gimp_image_get_width (image);
-      h = gimp_image_get_height (image);
+      w = clay_image_get_width (image);
+      h = clay_image_get_height (image);
 
       for (i = 0; i < num_layers; ++i)
         {
-          GimpDrawable *drawable = GIMP_DRAWABLE (layers[i]);
+          ClayDrawable *drawable = CLAY_DRAWABLE (layers[i]);
 
-          if ((gimp_drawable_get_width  (drawable) != w) ||
-              (gimp_drawable_get_height (drawable) != h))
+          if ((clay_drawable_get_width  (drawable) != w) ||
+              (clay_drawable_get_height (drawable) != h))
             continue;
 
-          layer_name = (gchar *) gimp_item_get_name (GIMP_ITEM (drawable));
+          layer_name = (gchar *) clay_item_get_name (CLAY_ITEM (drawable));
           for (j = 0; j < 6; ++j)
             {
               for (k = 0; k < 4; ++k)
@@ -254,7 +254,7 @@ check_cubemap (GimpImage *image)
                     {
                       if (cubemap_faces[j] == NULL)
                         {
-                          cubemap_faces[j] = GIMP_LAYER (drawable);
+                          cubemap_faces[j] = CLAY_LAYER (drawable);
                           break;
                         }
                     }
@@ -275,10 +275,10 @@ check_cubemap (GimpImage *image)
       /* Make sure all faces are of the same type */
       if (cubemap)
         {
-          type = gimp_drawable_type (GIMP_DRAWABLE (cubemap_faces[0]));
+          type = clay_drawable_type (CLAY_DRAWABLE (cubemap_faces[0]));
           for (i = 1; i < 6 && cubemap; ++i)
             {
-              if (gimp_drawable_type (GIMP_DRAWABLE (cubemap_faces[i])) != type)
+              if (clay_drawable_type (CLAY_DRAWABLE (cubemap_faces[i])) != type)
                 cubemap = FALSE;
             }
         }
@@ -292,7 +292,7 @@ check_cubemap (GimpImage *image)
 
       for (i = 0; i < num_layers; ++i)
         {
-          layer_name = (gchar *) gimp_item_get_name (GIMP_ITEM (layers[i]));
+          layer_name = (gchar *) clay_item_get_name (CLAY_ITEM (layers[i]));
 
           for (j = 0; j < 6; ++j)
             {
@@ -323,13 +323,13 @@ check_cubemap (GimpImage *image)
       /* Make sure all faces are of the same size */
       if (cubemap)
         {
-          w = gimp_drawable_get_width (GIMP_DRAWABLE (cubemap_faces[0]));
-          h = gimp_drawable_get_height (GIMP_DRAWABLE (cubemap_faces[0]));
+          w = clay_drawable_get_width (CLAY_DRAWABLE (cubemap_faces[0]));
+          h = clay_drawable_get_height (CLAY_DRAWABLE (cubemap_faces[0]));
 
           for (i = 1; i < 6 && cubemap; ++i)
             {
-              if ((gimp_drawable_get_width  (GIMP_DRAWABLE (cubemap_faces[i])) != w) ||
-                  (gimp_drawable_get_height (GIMP_DRAWABLE (cubemap_faces[i])) != h))
+              if ((clay_drawable_get_width  (CLAY_DRAWABLE (cubemap_faces[i])) != w) ||
+                  (clay_drawable_get_height (CLAY_DRAWABLE (cubemap_faces[i])) != h))
                 cubemap = FALSE;
             }
         }
@@ -337,10 +337,10 @@ check_cubemap (GimpImage *image)
       /* Make sure all faces are of the same type */
       if (cubemap)
         {
-          type = gimp_drawable_type (GIMP_DRAWABLE (cubemap_faces[0]));
+          type = clay_drawable_type (CLAY_DRAWABLE (cubemap_faces[0]));
           for (i = 1; i < 6 && cubemap; ++i)
             {
-              if (gimp_drawable_type (GIMP_DRAWABLE (cubemap_faces[i])) != type)
+              if (clay_drawable_type (CLAY_DRAWABLE (cubemap_faces[i])) != type)
                 cubemap = FALSE;
             }
         }
@@ -351,7 +351,7 @@ check_cubemap (GimpImage *image)
 }
 
 static gboolean
-check_volume (GimpImage *image)
+check_volume (ClayImage *image)
 {
   GList         *layers;
   GList         *list;
@@ -359,9 +359,9 @@ check_volume (GimpImage *image)
   gboolean       volume = FALSE;
   gint           i;
   gint           w, h;
-  GimpImageType  type;
+  ClayImageType  type;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   num_layers = g_list_length (layers);
 
   if (num_layers > 1)
@@ -369,28 +369,28 @@ check_volume (GimpImage *image)
       volume = TRUE;
 
       /* Make sure all layers are of the same size */
-      w = gimp_drawable_get_width  (layers->data);
-      h = gimp_drawable_get_height (layers->data);
+      w = clay_drawable_get_width  (layers->data);
+      h = clay_drawable_get_height (layers->data);
 
       for (i = 1, list = layers->next;
            i < num_layers && volume;
            ++i, list = g_list_next (list))
         {
-          if ((gimp_drawable_get_width  (list->data) != w) ||
-              (gimp_drawable_get_height (list->data) != h))
+          if ((clay_drawable_get_width  (list->data) != w) ||
+              (clay_drawable_get_height (list->data) != h))
             volume = FALSE;
         }
 
       if (volume)
         {
           /* Make sure all layers are of the same type */
-          type = gimp_drawable_type (layers->data);
+          type = clay_drawable_type (layers->data);
 
           for (i = 1, list = layers->next;
                i < num_layers && volume;
                ++i, list = g_list_next (list))
             {
-              if (gimp_drawable_type (list->data) != type)
+              if (clay_drawable_type (list->data) != type)
                 volume = FALSE;
             }
         }
@@ -400,19 +400,19 @@ check_volume (GimpImage *image)
 }
 
 static gboolean
-check_array (GimpImage *image)
+check_array (ClayImage *image)
 {
   GList         *layers;
   gint           num_layers;
   gboolean       array = FALSE;
   gint           i;
   gint           w, h;
-  GimpImageType  type;
+  ClayImageType  type;
 
   if (check_mipmaps (DDS_SAVE_ARRAY))
     return 1;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   num_layers = g_list_length (layers);
 
   if (num_layers > 1)
@@ -422,28 +422,28 @@ check_array (GimpImage *image)
       array = TRUE;
 
       /* Make sure all layers are of the same size */
-      w = gimp_drawable_get_width  (layers->data);
-      h = gimp_drawable_get_height (layers->data);
+      w = clay_drawable_get_width  (layers->data);
+      h = clay_drawable_get_height (layers->data);
 
       for (i = 1, list = g_list_next (layers);
            i < num_layers && array;
            ++i, list = g_list_next (list))
         {
-          if ((gimp_drawable_get_width  (list->data)  != w) ||
-              (gimp_drawable_get_height (list->data) != h))
+          if ((clay_drawable_get_width  (list->data)  != w) ||
+              (clay_drawable_get_height (list->data) != h))
             array = FALSE;
         }
 
       if (array)
         {
           /* Make sure all layers are of the same type */
-          type = gimp_drawable_type (layers->data);
+          type = clay_drawable_type (layers->data);
 
           for (i = 1, list = g_list_next (layers);
                i < num_layers;
                ++i, list = g_list_next (list))
             {
-              if (gimp_drawable_type (list->data) != type)
+              if (clay_drawable_type (list->data) != type)
                 {
                   array = FALSE;
                   break;
@@ -458,7 +458,7 @@ check_array (GimpImage *image)
 }
 
 static int
-get_array_size (GimpImage *image)
+get_array_size (ClayImage *image)
 {
   GList *layers;
   GList *list;
@@ -467,18 +467,18 @@ get_array_size (GimpImage *image)
   gint   w, h;
   gint   elements = 0;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   num_layers = g_list_length (layers);
 
-  w = gimp_image_get_width  (image);
-  h = gimp_image_get_height (image);
+  w = clay_image_get_width  (image);
+  h = clay_image_get_height (image);
 
   for (i = 0, list = layers;
        i < num_layers;
        ++i, list = g_list_next (list))
     {
-      if ((gimp_drawable_get_width  (list->data) == w) &&
-          (gimp_drawable_get_height (list->data) == h))
+      if ((clay_drawable_get_width  (list->data) == w) &&
+          (clay_drawable_get_height (list->data) == h))
         {
           elements++;
         }
@@ -489,24 +489,24 @@ get_array_size (GimpImage *image)
   return elements;
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 write_dds (GFile               *file,
-           GimpImage           *image,
-           GimpDrawable        *drawable,
+           ClayImage           *image,
+           ClayDrawable        *drawable,
            gboolean             interactive,
-           GimpProcedure       *procedure,
-           GimpProcedureConfig *config,
+           ClayProcedure       *procedure,
+           ClayProcedureConfig *config,
            gboolean             is_duplicate_image)
 {
   FILE         *fp;
-  GimpParasite *parasite = NULL;
+  ClayParasite *parasite = NULL;
   gint          rc       = 0;
   gint          compression;
   gint          mipmaps;
   gint          savetype;
 
-  savetype = gimp_procedure_config_get_choice_id (config, "save-type");
-  mipmaps  = gimp_procedure_config_get_choice_id (config, "mipmaps");
+  savetype = clay_procedure_config_get_choice_id (config, "save-type");
+  mipmaps  = clay_procedure_config_get_choice_id (config, "mipmaps");
 
   global_image = image;
 
@@ -517,7 +517,7 @@ write_dds (GFile               *file,
   is_array   = check_array   (image);
 
   /* Check for imported DDS original settings */
-  parasite = gimp_image_get_parasite (image, "dds-import-settings");
+  parasite = clay_image_get_parasite (image, "dds-import-settings");
   if (parasite)
     {
       gchar   *parasite_data;
@@ -530,7 +530,7 @@ write_dds (GFile               *file,
       guint    n_mipmaps   = 0;
       guint    n_params    = 0;
 
-      parasite_data = (gchar *) gimp_parasite_get_data (parasite,
+      parasite_data = (gchar *) clay_parasite_get_data (parasite,
                                                         &parasite_size);
       parasite_data = g_strndup (parasite_data, parasite_size);
 
@@ -554,11 +554,11 @@ write_dds (GFile               *file,
         }
       g_free (parasite_data);
 
-      gimp_image_detach_parasite (image, "dds-import-settings");
+      clay_image_detach_parasite (image, "dds-import-settings");
       g_free (parasite);
     }
 
-  compression = gimp_procedure_config_get_choice_id (config,
+  compression = clay_procedure_config_get_choice_id (config,
                                                      "compression-format");
 
   if (interactive)
@@ -572,32 +572,32 @@ write_dds (GFile               *file,
         }
 
       if (! save_dialog (image, drawable, procedure, config))
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
     }
   else
     {
       if ((savetype == DDS_SAVE_CUBEMAP) && (! is_cubemap))
         {
           g_message ("DDS: Cannot save image as cube map");
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((savetype == DDS_SAVE_VOLUMEMAP) && (! is_volume))
         {
           g_message ("DDS: Cannot save image as volume map");
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((savetype == DDS_SAVE_VOLUMEMAP) && (compression != DDS_COMPRESS_NONE))
         {
           g_message ("DDS: Cannot save volume map with compression");
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((mipmaps == DDS_MIPMAP_EXISTING) && (! is_mipmap_chain_valid))
         {
           g_message ("DDS: Cannot save with existing mipmaps as the mipmap chain is incomplete");
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
@@ -607,22 +607,22 @@ write_dds (GFile               *file,
   if (! fp)
     {
       g_message ("Error opening %s", g_file_peek_path (file));
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  gimp_progress_init_printf (_("Saving: %s"), gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Saving: %s"), clay_file_get_utf8_name (file));
 
   /* If destructive changes are going to happen to the image,
    * make sure we send a duplicate of it to write_image()
    */
   if (! is_duplicate_image)
     {
-      GimpImage     *duplicate_image = gimp_image_duplicate (image);
-      GimpDrawable **drawables;
+      ClayImage     *duplicate_image = clay_image_duplicate (image);
+      ClayDrawable **drawables;
 
-      drawables = gimp_image_get_selected_drawables (duplicate_image);
+      drawables = clay_image_get_selected_drawables (duplicate_image);
       rc = write_image (fp, duplicate_image, drawables[0], config);
-      gimp_image_delete (duplicate_image);
+      clay_image_delete (duplicate_image);
       g_free (drawables);
     }
   else
@@ -632,7 +632,7 @@ write_dds (GFile               *file,
 
   fclose (fp);
 
-  return rc ? GIMP_PDB_SUCCESS : GIMP_PDB_EXECUTION_ERROR;
+  return rc ? CLAY_PDB_SUCCESS : CLAY_PDB_EXECUTION_ERROR;
 }
 
 static void
@@ -796,8 +796,8 @@ get_mipmap_chain (guchar       *dst,
                   gint          w,
                   gint          h,
                   gint          bpp,
-                  GimpImage    *image,
-                  GimpDrawable *drawable)
+                  ClayImage    *image,
+                  ClayDrawable *drawable)
 {
   GList      *layers;
   GList      *list;
@@ -818,7 +818,7 @@ get_mipmap_chain (guchar       *dst,
   else
     format = babl_format ("R'G'B'A u8");
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   num_layers = g_list_length (layers);
 
   for (i = 0, list = layers;
@@ -839,7 +839,7 @@ get_mipmap_chain (guchar       *dst,
 
   while (get_next_mipmap_dimensions (&mipw, &miph, w, h))
     {
-      buffer = gimp_drawable_get_buffer (g_list_nth_data (layers, ++idx));
+      buffer = clay_drawable_get_buffer (g_list_nth_data (layers, ++idx));
 
       if ((gegl_buffer_get_width (buffer)  != mipw) ||
           (gegl_buffer_get_height (buffer) != miph))
@@ -864,9 +864,9 @@ get_mipmap_chain (guchar       *dst,
 
 static void
 write_layer (FILE                *fp,
-             GimpImage           *image,
-             GimpDrawable        *drawable,
-             GimpProcedureConfig *config,
+             ClayImage           *image,
+             ClayDrawable        *drawable,
+             ClayProcedureConfig *config,
              gint                 w,
              gint                 h,
              gint                 bpp,
@@ -875,8 +875,8 @@ write_layer (FILE                *fp,
 {
   GeglBuffer        *buffer;
   const Babl        *format;
-  GimpImageBaseType  basetype;
-  GimpImageType      type;
+  ClayImageBaseType  basetype;
+  ClayImageType      type;
   guchar            *src;
   guchar            *dst;
   guchar            *fmtdst;
@@ -897,19 +897,19 @@ write_layer (FILE                *fp,
   g_object_get (config,
                 "perceptual-metric",  &perceptual_metric,
                 NULL);
-  compression  = gimp_procedure_config_get_choice_id (config, "compression-format");
-  pixel_format = gimp_procedure_config_get_choice_id (config, "format");
-  mipmaps      = gimp_procedure_config_get_choice_id (config, "mipmaps");
+  compression  = clay_procedure_config_get_choice_id (config, "compression-format");
+  pixel_format = clay_procedure_config_get_choice_id (config, "format");
+  mipmaps      = clay_procedure_config_get_choice_id (config, "mipmaps");
 
-  basetype = gimp_image_get_base_type (image);
-  type = gimp_drawable_type (drawable);
+  basetype = clay_image_get_base_type (image);
+  type = clay_drawable_type (drawable);
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   src = g_malloc (w * h * bpp);
 
-  if (basetype == GIMP_INDEXED)
-    format = gimp_drawable_get_format (drawable);
+  if (basetype == CLAY_INDEXED)
+    format = clay_drawable_get_format (drawable);
   else if (bpp == 1)
     format = babl_format ("Y' u8");
   else if (bpp == 2)
@@ -922,11 +922,11 @@ write_layer (FILE                *fp,
   gegl_buffer_get (buffer, GEGL_RECTANGLE (0, 0, w, h), 1.0, format, src,
                    GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
-  if (basetype == GIMP_INDEXED)
+  if (basetype == CLAY_INDEXED)
     {
-      palette = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+      palette = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
 
-      if (type == GIMP_INDEXEDA_IMAGE)
+      if (type == CLAY_INDEXEDA_IMAGE)
         {
           tmp = g_malloc (w * h);
           for (i = 0; i < w * h; ++i)
@@ -1022,7 +1022,7 @@ write_layer (FILE                *fp,
       if (num_mipmaps > 1)
         {
           /* Pre-convert indexed images to RGB if not exporting as indexed */
-          if (pixel_format > DDS_FORMAT_DEFAULT && basetype == GIMP_INDEXED)
+          if (pixel_format > DDS_FORMAT_DEFAULT && basetype == CLAY_INDEXED)
             {
               fmtsize = get_mipmapped_size (w, h, 3, 0, num_mipmaps, DDS_COMPRESS_NONE);
               fmtdst = g_malloc (fmtsize);
@@ -1054,9 +1054,9 @@ write_layer (FILE                *fp,
                             "preserve-alpha-coverage", &preserve_alpha_coverage,
                             "alpha-test-threshold",    &alpha_test_threshold,
                             NULL);
-              mipmap_filter = gimp_procedure_config_get_choice_id (config,
+              mipmap_filter = clay_procedure_config_get_choice_id (config,
                                                                    "mipmap-filter");
-              mipmap_wrap   = gimp_procedure_config_get_choice_id (config,
+              mipmap_wrap   = clay_procedure_config_get_choice_id (config,
                                                                    "mipmap-wrap");
 
               generate_mipmaps (dst, src, w, h, bpp, palette != NULL,
@@ -1118,7 +1118,7 @@ write_layer (FILE                *fp,
 
       dst = g_malloc (size);
 
-      if (basetype == GIMP_INDEXED)
+      if (basetype == CLAY_INDEXED)
         {
           fmtsize = get_mipmapped_size (w, h, 3, 0, num_mipmaps,
                                         DDS_COMPRESS_NONE);
@@ -1152,9 +1152,9 @@ write_layer (FILE                *fp,
                             "preserve-alpha-coverage", &preserve_alpha_coverage,
                             "alpha-test-threshold",    &alpha_test_threshold,
                             NULL);
-              mipmap_filter = gimp_procedure_config_get_choice_id (config,
+              mipmap_filter = clay_procedure_config_get_choice_id (config,
                                                                    "mipmap-filter");
-              mipmap_wrap   = gimp_procedure_config_get_choice_id (config,
+              mipmap_wrap   = clay_procedure_config_get_choice_id (config,
                                                                    "mipmap-wrap");
 
               generate_mipmaps (fmtdst, src, w, h, bpp, 0, num_mipmaps,
@@ -1193,8 +1193,8 @@ write_layer (FILE                *fp,
 
 static void
 write_volume_mipmaps (FILE                *fp,
-                      GimpImage           *image,
-                      GimpProcedureConfig *config,
+                      ClayImage           *image,
+                      ClayProcedureConfig *config,
                       GList               *layers,
                       gint                 w,
                       gint                 h,
@@ -1215,7 +1215,7 @@ write_volume_mipmaps (FILE                *fp,
   guchar            *palette = 0;
   GeglBuffer        *buffer;
   const Babl        *format;
-  GimpImageBaseType  type;
+  ClayImageBaseType  type;
   gint               compression;
   gint               pixel_format;
   gint               mipmap_filter;
@@ -1229,14 +1229,14 @@ write_volume_mipmaps (FILE                *fp,
                 "srgb",               &srgb,
                 "gamma",              &gamma,
                 NULL);
-  compression = gimp_procedure_config_get_choice_id (config,
+  compression = clay_procedure_config_get_choice_id (config,
                                                      "compression-format");
-  pixel_format = gimp_procedure_config_get_choice_id (config, "format");
-  mipmap_filter = gimp_procedure_config_get_choice_id (config,
+  pixel_format = clay_procedure_config_get_choice_id (config, "format");
+  mipmap_filter = clay_procedure_config_get_choice_id (config,
                                                        "mipmap-filter");
-  mipmap_wrap = gimp_procedure_config_get_choice_id (config, "mipmap-wrap");
+  mipmap_wrap = clay_procedure_config_get_choice_id (config, "mipmap-wrap");
 
-  type = gimp_image_get_base_type (image);
+  type = clay_image_get_base_type (image);
 
   if (compression != DDS_COMPRESS_NONE)
     return;
@@ -1252,22 +1252,22 @@ write_volume_mipmaps (FILE                *fp,
   else
     format = babl_format ("R'G'B'A u8");
 
-  if (gimp_image_get_base_type (image) == GIMP_INDEXED)
-    palette = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+  if (clay_image_get_base_type (image) == CLAY_INDEXED)
+    palette = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
 
   offset = 0;
   for (i = 0, list = layers;
        i < d;
        ++i, list = g_list_next (list))
     {
-      buffer = gimp_drawable_get_buffer (list->data);
+      buffer = clay_drawable_get_buffer (list->data);
       gegl_buffer_get (buffer, GEGL_RECTANGLE (0, 0, w, h), 1.0, format,
                        src + offset, GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
       offset += (w * h * bpp);
       g_object_unref (buffer);
     }
 
-  if (gimp_drawable_type (layers->data) == GIMP_INDEXEDA_IMAGE)
+  if (clay_drawable_type (layers->data) == CLAY_INDEXEDA_IMAGE)
     {
       tmp = g_malloc (w * h * d);
       for (i = 0; i < w * h * d; ++i)
@@ -1282,7 +1282,7 @@ write_volume_mipmaps (FILE                *fp,
     swap_rb (src, w * h * d, bpp);
 
   /* Pre-convert indexed images to RGB if not exporting as indexed */
-  if (pixel_format > DDS_FORMAT_DEFAULT && type == GIMP_INDEXED)
+  if (pixel_format > DDS_FORMAT_DEFAULT && type == CLAY_INDEXED)
     {
       size = get_volume_mipmapped_size (w, h, d, 3, 0, num_mipmaps,
                                         DDS_COMPRESS_NONE);
@@ -1331,12 +1331,12 @@ write_volume_mipmaps (FILE                *fp,
 
 static gboolean
 write_image (FILE                *fp,
-             GimpImage           *image,
-             GimpDrawable        *drawable,
-             GimpProcedureConfig *config)
+             ClayImage           *image,
+             ClayDrawable        *drawable,
+             ClayProcedureConfig *config)
 {
-  GimpImageType      drawable_type;
-  GimpImageBaseType  basetype;
+  ClayImageType      drawable_type;
+  ClayImageBaseType  basetype;
   gint               i, w, h;
   gint               bpp        = 0;
   gint               fmtbpp     = 0;
@@ -1363,15 +1363,15 @@ write_image (FILE                *fp,
                 "transparent-index",  &transindex,
                 "flip-image",         &flip_export,
                 NULL);
-  savetype     = gimp_procedure_config_get_choice_id (config, "save-type");
-  compression  = gimp_procedure_config_get_choice_id (config, "compression-format");
-  pixel_format = gimp_procedure_config_get_choice_id (config, "format");
-  mipmaps      = gimp_procedure_config_get_choice_id (config, "mipmaps");
+  savetype     = clay_procedure_config_get_choice_id (config, "save-type");
+  compression  = clay_procedure_config_get_choice_id (config, "compression-format");
+  pixel_format = clay_procedure_config_get_choice_id (config, "format");
+  mipmaps      = clay_procedure_config_get_choice_id (config, "mipmaps");
 
   if (flip_export)
-    gimp_image_flip (image, GIMP_ORIENTATION_VERTICAL);
+    clay_image_flip (image, CLAY_ORIENTATION_VERTICAL);
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   num_layers = g_list_length (layers);
 
   if (mipmaps == DDS_MIPMAP_EXISTING)
@@ -1379,26 +1379,26 @@ write_image (FILE                *fp,
 
   if (savetype == DDS_SAVE_SELECTED_LAYER)
     {
-      w = gimp_drawable_get_width  (drawable);
-      h = gimp_drawable_get_height (drawable);
+      w = clay_drawable_get_width  (drawable);
+      h = clay_drawable_get_height (drawable);
     }
   else
     {
-      w = gimp_image_get_width  (image);
-      h = gimp_image_get_height (image);
+      w = clay_image_get_width  (image);
+      h = clay_image_get_height (image);
     }
 
-  basetype = gimp_image_get_base_type (image);
-  drawable_type = gimp_drawable_type (drawable);
+  basetype = clay_image_get_base_type (image);
+  drawable_type = clay_drawable_type (drawable);
 
   switch (drawable_type)
     {
-    case GIMP_RGB_IMAGE:      bpp = 3; break;
-    case GIMP_RGBA_IMAGE:     bpp = 4; break;
-    case GIMP_GRAY_IMAGE:     bpp = 1; break;
-    case GIMP_GRAYA_IMAGE:    bpp = 2; break;
-    case GIMP_INDEXED_IMAGE:  bpp = 1; break;
-    case GIMP_INDEXEDA_IMAGE: bpp = 2; break;
+    case CLAY_RGB_IMAGE:      bpp = 3; break;
+    case CLAY_RGBA_IMAGE:     bpp = 4; break;
+    case CLAY_GRAY_IMAGE:     bpp = 1; break;
+    case CLAY_GRAYA_IMAGE:    bpp = 2; break;
+    case CLAY_INDEXED_IMAGE:  bpp = 1; break;
+    case CLAY_INDEXEDA_IMAGE: bpp = 2; break;
     default:                  break;
     }
 
@@ -1422,7 +1422,7 @@ write_image (FILE                *fp,
     }
   else if (bpp == 1)
     {
-      if (basetype == GIMP_INDEXED)
+      if (basetype == CLAY_INDEXED)
         {
           fmtbpp = 1;
           has_alpha = FALSE;
@@ -1439,7 +1439,7 @@ write_image (FILE                *fp,
     }
   else if (bpp == 2)
     {
-      if (basetype == GIMP_INDEXED)
+      if (basetype == CLAY_INDEXED)
         {
           fmtbpp = 1;
           has_alpha = FALSE;
@@ -1549,7 +1549,7 @@ write_image (FILE                *fp,
         {
           if (bpp == 1 || bpp == 2)
             {
-              if (basetype == GIMP_INDEXED)
+              if (basetype == CLAY_INDEXED)
                 pflags |= DDPF_PALETTEINDEXED8;
               else
                 pflags |= DDPF_LUMINANCE;
@@ -1567,7 +1567,7 @@ write_image (FILE                *fp,
       PUTL32 (hdr + 20, w * fmtbpp);  /* Pitch */
       PUTL32 (hdr + 80, pflags);
 
-      /* Write extra FourCC info specific to GIMP DDS. When the image
+      /* Write extra FourCC info specific to Clay DDS. When the image
        * is read again we use this information to decode the pixels.
        */
       if (pixel_format == DDS_FORMAT_AEXP)
@@ -1648,7 +1648,7 @@ write_image (FILE                *fp,
       PUTL32 (hdr + 20, size);
 
       /*
-       * write extra fourcc info - this is special to GIMP DDS. When the image
+       * write extra fourcc info - this is special to Clay DDS. When the image
        * is read by the plugin, we can detect the added information to decode
        * the pixels
        */
@@ -1694,12 +1694,12 @@ write_image (FILE                *fp,
     fwrite (hdr10, DDS_HEADERSIZE_DX10, 1, fp);
 
   /* Write palette for indexed images */
-  if ((basetype == GIMP_INDEXED) &&
+  if ((basetype == CLAY_INDEXED) &&
       (pixel_format == DDS_FORMAT_DEFAULT) &&
       (compression == DDS_COMPRESS_NONE))
     {
       const guchar zero[4] = {0, 0, 0, 0};
-      cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+      cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
 
       for (i = 0; i < colors; ++i)
         {
@@ -1719,10 +1719,10 @@ write_image (FILE                *fp,
     {
       for (i = 0; i < 6; ++i)
         {
-          write_layer (fp, image, GIMP_DRAWABLE (cubemap_faces[i]), config,
+          write_layer (fp, image, CLAY_DRAWABLE (cubemap_faces[i]), config,
                        w, h, bpp, fmtbpp,
                        num_mipmaps);
-          gimp_progress_update ((float)(i + 1) / 6.0);
+          clay_progress_update ((float)(i + 1) / 6.0);
         }
     }
   else if (savetype == DDS_SAVE_VOLUMEMAP)  /* Write volume slices */
@@ -1733,7 +1733,7 @@ write_image (FILE                *fp,
         {
           write_layer (fp, image, list->data, config,
                        w, h, bpp, fmtbpp, 1);
-          gimp_progress_update ((float)i / (float)num_layers);
+          clay_progress_update ((float)i / (float)num_layers);
         }
 
       if (num_mipmaps > 1)
@@ -1746,49 +1746,49 @@ write_image (FILE                *fp,
            i < num_layers;
            ++i, list = g_list_next (list))
         {
-          if ((gimp_drawable_get_width  (list->data) == w) &&
-              (gimp_drawable_get_height (list->data) == h))
+          if ((clay_drawable_get_width  (list->data) == w) &&
+              (clay_drawable_get_height (list->data) == h))
             {
               write_layer (fp, image, list->data, config,
                            w, h, bpp, fmtbpp, num_mipmaps);
             }
 
-          gimp_progress_update ((float)i / (float)num_layers);
+          clay_progress_update ((float)i / (float)num_layers);
         }
     }
   else
     {
       if (savetype == DDS_SAVE_VISIBLE_LAYERS)
-        drawable = GIMP_DRAWABLE (gimp_image_merge_visible_layers (image,
-                                                                   GIMP_CLIP_TO_IMAGE));
+        drawable = CLAY_DRAWABLE (clay_image_merge_visible_layers (image,
+                                                                   CLAY_CLIP_TO_IMAGE));
       write_layer (fp, image, drawable, config,
                    w, h, bpp, fmtbpp, num_mipmaps);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return TRUE;
 }
 
 
 static void
-config_notify (GimpProcedureConfig *config,
+config_notify (ClayProcedureConfig *config,
                const GParamSpec    *pspec,
-               GimpProcedureDialog *dialog)
+               ClayProcedureDialog *dialog)
 {
   if (! strcmp (pspec->name, "compression-format"))
     {
       gint compression;
 
-      compression = gimp_procedure_config_get_choice_id (config,
+      compression = clay_procedure_config_get_choice_id (config,
                                                          "compression-format");
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "format",
                                            compression == DDS_COMPRESS_NONE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "perceptual-metric",
                                            compression != DDS_COMPRESS_NONE,
                                            NULL, NULL, FALSE);
@@ -1796,10 +1796,10 @@ config_notify (GimpProcedureConfig *config,
   else if (! strcmp (pspec->name, "save-type"))
     {
       GParamSpec *cspec;
-      GimpChoice *choice;
+      ClayChoice *choice;
       gint        savetype;
 
-      savetype = gimp_procedure_config_get_choice_id (config, "save-type");
+      savetype = clay_procedure_config_get_choice_id (config, "save-type");
 
       switch (savetype)
         {
@@ -1807,7 +1807,7 @@ config_notify (GimpProcedureConfig *config,
         case DDS_SAVE_VISIBLE_LAYERS:
         case DDS_SAVE_CUBEMAP:
         case DDS_SAVE_ARRAY:
-          gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                                "compression-format", TRUE,
                                                NULL, NULL, FALSE);
           break;
@@ -1816,15 +1816,15 @@ config_notify (GimpProcedureConfig *config,
           g_object_set (config,
                         "compression-format", "none",
                         NULL);
-          gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                                "compression-format", FALSE,
                                                NULL, NULL, FALSE);
           break;
         }
 
       cspec  = g_object_class_find_property (G_OBJECT_GET_CLASS (config), "mipmaps");
-      choice = gimp_param_spec_choice_get_choice (cspec);
-      gimp_choice_set_sensitive (choice, "existing", check_mipmaps (savetype));
+      choice = clay_param_spec_choice_get_choice (cspec);
+      clay_choice_set_sensitive (choice, "existing", check_mipmaps (savetype));
     }
   else if (! strcmp (pspec->name, "mipmaps"))
     {
@@ -1838,41 +1838,41 @@ config_notify (GimpProcedureConfig *config,
                     "srgb",                    &srgb,
                     "preserve-alpha-coverage", &preserve_alpha_coverage,
                     NULL);
-      mipmaps = gimp_procedure_config_get_choice_id (config, "mipmaps");
+      mipmaps = clay_procedure_config_get_choice_id (config, "mipmaps");
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "mipmap-filter",
                                            mipmaps == DDS_MIPMAP_GENERATE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "mipmap-wrap",
                                            mipmaps == DDS_MIPMAP_GENERATE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "gamma-correct",
                                            mipmaps == DDS_MIPMAP_GENERATE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "srgb",
                                            ((mipmaps == DDS_MIPMAP_GENERATE) &&
                                             gamma_correct),
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "gamma",
                                            ((mipmaps == DDS_MIPMAP_GENERATE) &&
                                             gamma_correct && ! srgb),
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "preserve-alpha-coverage",
                                            mipmaps == DDS_MIPMAP_GENERATE,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "alpha-test-threshold",
                                            ((mipmaps == DDS_MIPMAP_GENERATE) &&
                                             preserve_alpha_coverage),
@@ -1887,13 +1887,13 @@ config_notify (GimpProcedureConfig *config,
                     "transparent-color", &transparent_color,
                     NULL);
 
-      transparent_check = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+      transparent_check = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                             "transparent-color",
                                                             G_TYPE_NONE);
 
       if ((transparent_check != NULL) &&
           gtk_widget_get_sensitive (transparent_check))
-        gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+        clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                              "transparent-index",
                                              transparent_color,
                                              NULL, NULL, FALSE);
@@ -1908,11 +1908,11 @@ config_notify (GimpProcedureConfig *config,
                     "srgb",          &srgb,
                     NULL);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "srgb", gamma_correct,
                                            NULL, NULL, FALSE);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "gamma",
                                            (gamma_correct && ! srgb),
                                            NULL, NULL, FALSE);
@@ -1927,7 +1927,7 @@ config_notify (GimpProcedureConfig *config,
                     "srgb",          &srgb,
                     NULL);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "gamma",
                                            (gamma_correct && ! srgb),
                                            NULL, NULL, FALSE);
@@ -1940,7 +1940,7 @@ config_notify (GimpProcedureConfig *config,
                     "preserve-alpha-coverage", &preserve_alpha_coverage,
                     NULL);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "alpha-test-threshold",
                                            preserve_alpha_coverage,
                                            NULL, NULL, FALSE);
@@ -1949,112 +1949,112 @@ config_notify (GimpProcedureConfig *config,
 
 
 static gboolean
-save_dialog (GimpImage           *image,
-             GimpDrawable        *drawable,
-             GimpProcedure       *procedure,
-             GimpProcedureConfig *config)
+save_dialog (ClayImage           *image,
+             ClayDrawable        *drawable,
+             ClayProcedure       *procedure,
+             ClayProcedureConfig *config)
 {
   GtkWidget         *dialog;
   GParamSpec        *cspec;
-  GimpChoice        *choice;
-  GimpImageBaseType  base_type;
+  ClayChoice        *choice;
+  ClayImageBaseType  base_type;
   gboolean           run;
 
-  base_type = gimp_image_get_base_type (image);
+  base_type = clay_image_get_base_type (image);
 
   if (is_cubemap || is_volume || is_array)
     g_object_set (config,
                   "save-type", "layer",
                   NULL);
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                     "transparent-color",
                                     G_TYPE_NONE);
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "transparent-color",
-                                       base_type == GIMP_INDEXED,
+                                       base_type == CLAY_INDEXED,
                                        NULL, NULL, FALSE);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "transparency-frame",
                                     "transparent-color", FALSE,
                                     "transparent-index");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "mipmap-options-label",
                                    _("Mipmap Options"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "mipmap-options-box",
                                   "mipmap-filter", "mipmap-wrap",
                                   "gamma-correct", "srgb", "gamma",
                                   "preserve-alpha-coverage",
                                   "alpha-test-threshold", NULL);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "mipmap-options-frame",
                                     "mipmap-options-label", FALSE,
                                     "mipmap-options-box");
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                     "save-type", G_TYPE_NONE);
   cspec  = g_object_class_find_property (G_OBJECT_GET_CLASS (config), "save-type");
-  choice = gimp_param_spec_choice_get_choice (cspec);
-  gimp_choice_set_sensitive (choice, "cube",   is_cubemap);
-  gimp_choice_set_sensitive (choice, "volume", is_volume);
-  gimp_choice_set_sensitive (choice, "array",  is_array);
+  choice = clay_param_spec_choice_get_choice (cspec);
+  clay_choice_set_sensitive (choice, "cube",   is_cubemap);
+  clay_choice_set_sensitive (choice, "volume", is_volume);
+  clay_choice_set_sensitive (choice, "array",  is_array);
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                     "mipmaps", G_TYPE_NONE);
   cspec  = g_object_class_find_property (G_OBJECT_GET_CLASS (config), "mipmaps");
-  choice = gimp_param_spec_choice_get_choice (cspec);
-  gimp_choice_set_sensitive (choice, "existing",
+  choice = clay_param_spec_choice_get_choice (cspec);
+  clay_choice_set_sensitive (choice, "existing",
                              ! (is_volume || is_cubemap) && is_mipmap_chain_valid);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "compression-format", "perceptual-metric",
                               "format", "save-type", "flip-image",
                               "mipmaps", "transparency-frame",
                               "mipmap-options-frame", NULL);
 
-  config_notify (GIMP_PROCEDURE_CONFIG (config),
+  config_notify (CLAY_PROCEDURE_CONFIG (config),
                  g_object_class_find_property (G_OBJECT_GET_CLASS (config),
                                                "compression-format"),
-                 GIMP_PROCEDURE_DIALOG (dialog));
+                 CLAY_PROCEDURE_DIALOG (dialog));
 
-  config_notify (GIMP_PROCEDURE_CONFIG (config),
+  config_notify (CLAY_PROCEDURE_CONFIG (config),
                  g_object_class_find_property (G_OBJECT_GET_CLASS (config),
                                                "mipmaps"),
-                 GIMP_PROCEDURE_DIALOG (dialog));
+                 CLAY_PROCEDURE_DIALOG (dialog));
 
-  config_notify (GIMP_PROCEDURE_CONFIG (config),
+  config_notify (CLAY_PROCEDURE_CONFIG (config),
                  g_object_class_find_property (G_OBJECT_GET_CLASS (config),
                                                "save-type"),
-                 GIMP_PROCEDURE_DIALOG (dialog));
+                 CLAY_PROCEDURE_DIALOG (dialog));
 
-  config_notify (GIMP_PROCEDURE_CONFIG (config),
+  config_notify (CLAY_PROCEDURE_CONFIG (config),
                  g_object_class_find_property (G_OBJECT_GET_CLASS (config),
                                                "transparent-color"),
-                 GIMP_PROCEDURE_DIALOG (dialog));
+                 CLAY_PROCEDURE_DIALOG (dialog));
 
-  g_signal_connect (GIMP_PROCEDURE_CONFIG (config), "notify",
+  g_signal_connect (CLAY_PROCEDURE_CONFIG (config), "notify",
                     G_CALLBACK (config_notify),
-                    GIMP_PROCEDURE_DIALOG (dialog));
+                    CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
-  g_signal_handlers_disconnect_by_func (GIMP_PROCEDURE_CONFIG (config),
+  g_signal_handlers_disconnect_by_func (CLAY_PROCEDURE_CONFIG (config),
                                         config_notify,
-                                        GIMP_PROCEDURE_DIALOG (dialog));
+                                        CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

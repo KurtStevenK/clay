@@ -31,11 +31,11 @@ typedef enum
 } RGBMode;
 
 
-GimpPDBStatusType   export_image (GFile         *file,
-                                  GimpImage     *image,
-                                  GimpDrawable  *drawable,
-                                  GimpRunMode    run_mode,
-                                  GimpProcedure *procedure,
+ClayPDBStatusType   export_image (GFile         *file,
+                                  ClayImage     *image,
+                                  ClayDrawable  *drawable,
+                                  ClayRunMode    run_mode,
+                                  ClayProcedure *procedure,
                                   GObject       *config,
                                   GError       **error);
 

@@ -27,7 +27,7 @@
  * V 1.04, PK, 12-Oct-97: No progress bars for non-interactive mode
  * V 1.05, nn, 20-Dec-97: Initialize image_ID in run()
  * V 1.06, PK, 21-Nov-99: Internationalization
- *                        Fix bug with gimp_export_image()
+ *                        Fix bug with clay_export_image()
  *                        (moved it from load to save)
  * V 1.07, PK, 16-Aug-06: Fix problems with internationalization
  *                        (writing 255,0 instead of 255.0)
@@ -42,18 +42,18 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <fitsio.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-fits-load"
 #define EXPORT_PROC    "file-fits-export"
 #define PLUG_IN_BINARY "file-fits"
-#define PLUG_IN_ROLE   "gimp-file-fits"
+#define PLUG_IN_ROLE   "clay-file-fits"
 
 
 typedef struct _Fits      Fits;
@@ -61,12 +61,12 @@ typedef struct _FitsClass FitsClass;
 
 struct _Fits
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _FitsClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -84,64 +84,64 @@ typedef struct
   gint   datatype;
 } FitsHduData;
 
-static GList          * fits_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * fits_create_procedure (GimpPlugIn            *plug_in,
+static GList          * fits_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * fits_create_procedure (ClayPlugIn            *plug_in,
                                                const gchar           *name);
 
-static GimpValueArray * fits_load             (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
+static ClayValueArray * fits_load             (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
                                                GFile                 *file,
-                                               GimpMetadata          *metadata,
-                                               GimpMetadataLoadFlags *flags,
-                                               GimpProcedureConfig   *config,
+                                               ClayMetadata          *metadata,
+                                               ClayMetadataLoadFlags *flags,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
-static GimpValueArray * fits_export           (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
-                                               GimpImage             *image,
+static ClayValueArray * fits_export           (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
+                                               ClayImage             *image,
                                                GFile                 *file,
-                                               GimpExportOptions     *options,
-                                               GimpMetadata          *metadata,
-                                               GimpProcedureConfig   *config,
+                                               ClayExportOptions     *options,
+                                               ClayMetadata          *metadata,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
 
-static GimpImage      * load_image            (GFile                 *file,
+static ClayImage      * load_image            (GFile                 *file,
                                                GObject               *config,
-                                               GimpRunMode            run_mode,
+                                               ClayRunMode            run_mode,
                                                GError               **error);
 static gint             export_image          (GFile                 *file,
-                                               GimpImage             *image,
-                                               GimpDrawable          *drawable,
+                                               ClayImage             *image,
+                                               ClayDrawable          *drawable,
                                                GError               **error);
 
 static gint             export_fits           (GFile                 *file,
-                                               GimpImage             *image,
-                                               GimpDrawable          *drawable);
+                                               ClayImage             *image,
+                                               ClayDrawable          *drawable);
 
-static GimpImage      * create_new_image      (GFile                 *file,
+static ClayImage      * create_new_image      (GFile                 *file,
                                                guint                  pagenum,
                                                guint                  width,
                                                guint                  height,
-                                               GimpImageBaseType      itype,
-                                               GimpImageType          dtype,
-                                               GimpPrecision          iprecision,
-                                               GimpLayer            **layer,
+                                               ClayImageBaseType      itype,
+                                               ClayImageType          dtype,
+                                               ClayPrecision          iprecision,
+                                               ClayLayer            **layer,
                                                GeglBuffer           **buffer);
 
-static gboolean         load_dialog           (GimpProcedure         *procedure,
+static gboolean         load_dialog           (ClayProcedure         *procedure,
                                                GObject               *config);
 static void             show_fits_errors      (gint                   status);
 
 
-G_DEFINE_TYPE (Fits, fits, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Fits, fits, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (FITS_TYPE)
+CLAY_MAIN (FITS_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 fits_class_init (FitsClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = fits_query_procedures;
   plug_in_class->create_procedure = fits_create_procedure;
@@ -154,7 +154,7 @@ fits_init (Fits *fits)
 }
 
 static GList *
-fits_query_procedures (GimpPlugIn *plug_in)
+fits_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -164,43 +164,43 @@ fits_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-fits_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+fits_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            fits_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Flexible Image Transport System"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file of the FITS file format"),
                                         _("Load file of the FITS file format "
                                           "(Flexible Image Transport System)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Peter Kirchgessner",
                                       "Peter Kirchgessner (peter@kirchgessner.net), "
                                       "Alex Sa.",
                                       "1997 - 2023");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-fits");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "fit,fits");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,SIMPLE");
 
-      gimp_procedure_add_choice_aux_argument (procedure, "replace",
+      clay_procedure_add_choice_aux_argument (procedure, "replace",
                                               _("Re_placement for undefined pixels"),
                                               _("Replacement for undefined pixels"),
-                                              gimp_choice_new_with_values ("black",  0,   _("Black"), NULL,
+                                              clay_choice_new_with_values ("black",  0,   _("Black"), NULL,
                                                                            "white",  255, _("White"), NULL,
                                                                            NULL),
                                               "black",
@@ -208,132 +208,132 @@ fits_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, fits_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY, INDEXED");
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Flexible Image Transport System"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Export file in the FITS file format"),
                                         _("FITS exporting handles all image "
                                           "types except those with alpha channels."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Peter Kirchgessner",
                                       "Peter Kirchgessner (peter@kirchgessner.net), "
                                       "Alex Sa.",
                                       "1997 - 2023");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-fits");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "fit,fits");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB  |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB  |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-fits_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+fits_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! load_dialog (procedure, G_OBJECT (config)))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
     }
 
   image = load_image (file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-fits_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+fits_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpImage          *duplicate_image;
-  GimpDrawable      **flipped_drawables;
-  GimpPDBStatusType   status = GIMP_PDB_SUCCESS;
-  GimpExportReturn    export = GIMP_EXPORT_IGNORE;
+  ClayImage          *duplicate_image;
+  ClayDrawable      **flipped_drawables;
+  ClayPDBStatusType   status = CLAY_PDB_SUCCESS;
+  ClayExportReturn    export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError             *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
-    gimp_ui_init (PLUG_IN_BINARY);
+  if (run_mode == CLAY_RUN_INTERACTIVE)
+    clay_ui_init (PLUG_IN_BINARY);
 
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
 
-  drawables = gimp_image_list_layers (image);
+  drawables = clay_image_list_layers (image);
 
   /* Flip image vertical since FITS writes from bottom to top */
-  duplicate_image = gimp_image_duplicate (image);
-  gimp_image_flip (duplicate_image, GIMP_ORIENTATION_VERTICAL);
-  flipped_drawables = gimp_image_get_selected_drawables (duplicate_image);
+  duplicate_image = clay_image_duplicate (image);
+  clay_image_flip (duplicate_image, CLAY_ORIENTATION_VERTICAL);
+  flipped_drawables = clay_image_get_selected_drawables (duplicate_image);
 
   if (! export_image (file, image, flipped_drawables[0], &error))
-    status = GIMP_PDB_EXECUTION_ERROR;
+    status = CLAY_PDB_EXECUTION_ERROR;
 
-  gimp_image_delete (duplicate_image);
+  clay_image_delete (duplicate_image);
   g_free (flipped_drawables);
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage         *image       = NULL;
-  GimpLayer         *layer;
+  ClayImage         *image       = NULL;
+  ClayLayer         *layer;
   GeglBuffer        *buffer;
   FILE              *fp;
   fitsfile          *ifp;
@@ -345,9 +345,9 @@ load_image (GFile        *file,
   gint               row_length;
   int                status      = 0;
   glong              fpixel[3]   = {1, 1, 1};
-  GimpImageBaseType  itype       = GIMP_GRAY;
-  GimpImageType      dtype       = GIMP_GRAYA_IMAGE;
-  GimpPrecision      iprecision  = GIMP_PRECISION_U16_NON_LINEAR;
+  ClayImageBaseType  itype       = CLAY_GRAY;
+  ClayImageType      dtype       = CLAY_GRAYA_IMAGE;
+  ClayPrecision      iprecision  = CLAY_PRECISION_U16_NON_LINEAR;
   const Babl        *type        = NULL;
   const Babl        *format      = NULL;
   gdouble           *pixels;
@@ -358,7 +358,7 @@ load_image (GFile        *file,
   gint               replace;
   gdouble            replace_val = 0;
 
-  replace = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  replace = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                  "replace");
 
   fp = g_fopen (g_file_peek_path (file), "rb");
@@ -367,7 +367,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -420,27 +420,27 @@ load_image (GFile        *file,
       switch (hdu.bitpix)
       {
         case 8:
-          iprecision = GIMP_PRECISION_U8_LINEAR;
+          iprecision = CLAY_PRECISION_U8_LINEAR;
           if (replace)
             replace_val = 255;
           break;
         case 16:
-          iprecision = GIMP_PRECISION_U16_NON_LINEAR;
+          iprecision = CLAY_PRECISION_U16_NON_LINEAR;
           if (replace)
             replace_val = G_MAXSHORT;
           break;
         case 32:
-          iprecision = GIMP_PRECISION_U32_LINEAR;
+          iprecision = CLAY_PRECISION_U32_LINEAR;
           if (replace)
             replace_val = G_MAXINT;
           break;
         case -32:
-          iprecision = GIMP_PRECISION_FLOAT_LINEAR;
+          iprecision = CLAY_PRECISION_FLOAT_LINEAR;
           if (replace)
             replace_val = G_MAXFLOAT;
           break;
         case -64:
-          iprecision = GIMP_PRECISION_DOUBLE_LINEAR;
+          iprecision = CLAY_PRECISION_DOUBLE_LINEAR;
           if (replace)
             replace_val = G_MAXDOUBLE;
           break;
@@ -448,8 +448,8 @@ load_image (GFile        *file,
 
       if (hdu.naxis == 2)
         {
-          itype = GIMP_GRAY;
-          dtype = GIMP_GRAYA_IMAGE;
+          itype = CLAY_GRAY;
+          dtype = CLAY_GRAYA_IMAGE;
           format = babl_format_new (babl_model ("Y'"),
                                     type,
                                     babl_component ("Y'"),
@@ -465,8 +465,8 @@ load_image (GFile        *file,
             }
           channels = 3;
 
-          itype  = GIMP_RGB;
-          dtype  = GIMP_RGB_IMAGE;
+          itype  = CLAY_RGB;
+          dtype  = CLAY_RGB_IMAGE;
           format = babl_format_new (babl_model ("R'G'B'"),
                                     type,
                                     babl_component ("R'"),
@@ -477,13 +477,13 @@ load_image (GFile        *file,
 
       if (width  <= 0                  ||
           height <= 0                  ||
-          width  > GIMP_MAX_IMAGE_SIZE ||
-          height > GIMP_MAX_IMAGE_SIZE)
+          width  > CLAY_MAX_IMAGE_SIZE ||
+          height > CLAY_MAX_IMAGE_SIZE)
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("'%s' has a larger image size (%d x %d) "
                          "than Clay can handle."),
-                       gimp_file_get_utf8_name (file), width, height);
+                       clay_file_get_utf8_name (file), width, height);
           fits_close_file (ifp, &status);
           return image;
         }
@@ -495,7 +495,7 @@ load_image (GFile        *file,
           (hdu.naxis > 2 && ! g_size_checked_mul (&allocate, allocate, height)) ||
           ! (pixels = (gdouble *) g_try_malloc (allocate)))
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("There was not enough memory to complete the "
                          "operation."));
           fits_close_file (ifp, &status);
@@ -510,11 +510,11 @@ load_image (GFile        *file,
         }
       else
         {
-          layer = gimp_layer_new (image, _("FITS HDU"), width, height,
+          layer = clay_layer_new (image, _("FITS HDU"), width, height,
                                   dtype, 100,
-                                  gimp_image_get_default_new_layer_mode (image));
-          gimp_image_insert_layer (image, layer, NULL, 0);
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+                                  clay_image_get_default_new_layer_mode (image));
+          clay_image_insert_layer (image, layer, NULL, 0);
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
         }
 
       row_length = width * channels;
@@ -577,7 +577,7 @@ load_image (GFile        *file,
                   ! g_size_checked_mul (&allocate, allocate, height)        ||
                   ! (temp = (gdouble *) g_try_malloc (allocate)))
                 {
-                  g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+                  g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                                _("There was not enough memory to complete the "
                                  "operation."));
                   fits_close_file (ifp, &status);
@@ -616,8 +616,8 @@ load_image (GFile        *file,
           /* Per SiriL developers, FITS images should be loaded from the
            * bottom up. fits_read_img () loads them from top down, so we
            * should flip the layer. */
-          gimp_item_transform_flip_simple (GIMP_ITEM (layer),
-                                           GIMP_ORIENTATION_VERTICAL,
+          clay_item_transform_flip_simple (CLAY_ITEM (layer),
+                                           CLAY_ORIENTATION_VERTICAL,
                                            TRUE, -1.0);
         }
 
@@ -637,7 +637,7 @@ load_image (GFile        *file,
 
   /* As there might be different sized layers,
    * we need to resize the canvas afterwards */
-  gimp_image_resize_to_layers (image);
+  clay_image_resize_to_layers (image);
 
   fits_close_file (ifp, &status);
 
@@ -646,17 +646,17 @@ load_image (GFile        *file,
 
 static gint
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GError       **error)
 {
-  GimpImageType  drawable_type;
+  ClayImageType  drawable_type;
   gint           retval;
 
-  drawable_type = gimp_drawable_type (drawable);
+  drawable_type = clay_drawable_type (drawable);
 
   /*  Make sure we're not exporting an image with an alpha channel  */
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    "%s",
@@ -666,9 +666,9 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_INDEXED_IMAGE: case GIMP_INDEXEDA_IMAGE:
-    case GIMP_GRAY_IMAGE:    case GIMP_GRAYA_IMAGE:
-    case GIMP_RGB_IMAGE:     case GIMP_RGBA_IMAGE:
+    case CLAY_INDEXED_IMAGE: case CLAY_INDEXEDA_IMAGE:
+    case CLAY_GRAY_IMAGE:    case CLAY_GRAYA_IMAGE:
+    case CLAY_RGB_IMAGE:     case CLAY_RGBA_IMAGE:
       break;
     default:
       g_message (_("Cannot operate on unknown image types."));
@@ -676,8 +676,8 @@ export_image (GFile         *file,
       break;
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
 
 
@@ -687,28 +687,28 @@ export_image (GFile         *file,
 }
 
 /* Create an image. Sets layer_ID, drawable and rgn. Returns image_ID */
-static GimpImage *
+static ClayImage *
 create_new_image (GFile              *file,
                   guint               pagenum,
                   guint               width,
                   guint               height,
-                  GimpImageBaseType   itype,
-                  GimpImageType       dtype,
-                  GimpPrecision       iprecision,
-                  GimpLayer         **layer,
+                  ClayImageBaseType   itype,
+                  ClayImageType       dtype,
+                  ClayPrecision       iprecision,
+                  ClayLayer         **layer,
                   GeglBuffer        **buffer)
 {
-  GimpImage *image;
+  ClayImage *image;
 
-  image = gimp_image_new_with_precision (width, height, itype, iprecision);
+  image = clay_image_new_with_precision (width, height, itype, iprecision);
 
-  gimp_image_undo_disable (image);
-  *layer = gimp_layer_new (image, _("Background"), width, height,
+  clay_image_undo_disable (image);
+  *layer = clay_layer_new (image, _("Background"), width, height,
                            dtype, 100,
-                           gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, *layer, NULL, 0);
+                           clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, *layer, NULL, 0);
 
-  *buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (*layer));
+  *buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (*layer));
 
   return image;
 }
@@ -716,8 +716,8 @@ create_new_image (GFile              *file,
 /* Export direct colors (GRAY, GRAYA, RGB, RGBA) */
 static gint
 export_fits (GFile        *file,
-             GimpImage    *image,
-             GimpDrawable *drawable)
+             ClayImage    *image,
+             ClayDrawable *drawable)
 {
   fitsfile      *fptr;
   gint           status = 0;
@@ -732,7 +732,7 @@ export_fits (GFile        *file,
   const Babl    *format, *type;
   gsize          base_alloc;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
@@ -776,16 +776,16 @@ export_fits (GFile        *file,
       return FALSE;
     }
 
-  switch (gimp_drawable_type (drawable))
+  switch (clay_drawable_type (drawable))
     {
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       format = babl_format_new (babl_model ("Y'"),
                                 type,
                                 babl_component ("Y'"),
                                 NULL);
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       format = babl_format_new (babl_model ("Y'A"),
                                 type,
                                 babl_component ("Y'"),
@@ -793,8 +793,8 @@ export_fits (GFile        *file,
                                 NULL);
       break;
 
-    case GIMP_RGB_IMAGE:
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_RGB_IMAGE:
+    case CLAY_INDEXED_IMAGE:
       format = babl_format_new (babl_model ("R'G'B'"),
                                 type,
                                 babl_component ("R'"),
@@ -805,8 +805,8 @@ export_fits (GFile        *file,
       naxes[2] = 3;
       break;
 
-    case GIMP_RGBA_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_RGBA_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       format = babl_format_new (babl_model ("R'G'B'A"),
                                 type,
                                 babl_component ("R'"),
@@ -1061,7 +1061,7 @@ export_fits (GFile        *file,
                       "THIS FITS FILE WAS GENERATED BY Clay USING CFITSIO",
                       &status);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   if (fits_close_file (fptr, &status))
     {
@@ -1076,29 +1076,29 @@ export_fits (GFile        *file,
 /*  Load interface functions  */
 
 static gboolean
-load_dialog (GimpProcedure *procedure,
+load_dialog (ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget *dialog;
   GtkWidget *frame;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Open FITS File"));
 
-  frame = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "replace", GIMP_TYPE_INT_RADIO_FRAME);
+  frame = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "replace", CLAY_TYPE_INT_RADIO_FRAME);
   gtk_widget_set_margin_bottom (frame, 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

@@ -20,32 +20,32 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpitemstack.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayitemstack.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "image-merge-layers-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _ImageMergeLayersDialog ImageMergeLayersDialog;
 
 struct _ImageMergeLayersDialog
 {
-  GimpImage               *image;
-  GimpContext             *context;
-  GimpMergeType            merge_type;
+  ClayImage               *image;
+  ClayContext             *context;
+  ClayMergeType            merge_type;
   gboolean                 merge_active_group;
   gboolean                 discard_invisible;
-  GimpMergeLayersCallback  callback;
+  ClayMergeLayersCallback  callback;
   gpointer                 user_data;
 };
 
@@ -61,13 +61,13 @@ static void  image_merge_layers_dialog_response (GtkWidget              *dialog,
 /*  public functions  */
 
 GtkWidget *
-image_merge_layers_dialog_new (GimpImage               *image,
-                               GimpContext             *context,
+image_merge_layers_dialog_new (ClayImage               *image,
+                               ClayContext             *context,
                                GtkWidget               *parent,
-                               GimpMergeType            merge_type,
+                               ClayMergeType            merge_type,
                                gboolean                 merge_active_group,
                                gboolean                 discard_invisible,
-                               GimpMergeLayersCallback  callback,
+                               ClayMergeLayersCallback  callback,
                                gpointer                 user_data)
 {
   ImageMergeLayersDialog *private;
@@ -76,8 +76,8 @@ image_merge_layers_dialog_new (GimpImage               *image,
   GtkWidget              *frame;
   GtkWidget              *button;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
 
   private = g_slice_new0 (ImageMergeLayersDialog);
 
@@ -89,20 +89,20 @@ image_merge_layers_dialog_new (GimpImage               *image,
   private->callback           = callback;
   private->user_data          = user_data;
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
-                                     _("Merge Layers"), "gimp-image-merge-layers",
-                                     GIMP_ICON_LAYER_MERGE_DOWN,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
+                                     _("Merge Layers"), "clay-image-merge-layers",
+                                     CLAY_ICON_LAYER_MERGE_DOWN,
                                      _("Layers Merge Options"),
                                      parent,
-                                     gimp_standard_help_func,
-                                     GIMP_HELP_IMAGE_MERGE_LAYERS,
+                                     clay_standard_help_func,
+                                     CLAY_HELP_IMAGE_MERGE_LAYERS,
 
                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
                                      _("_Merge"),  GTK_RESPONSE_OK,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -123,14 +123,14 @@ image_merge_layers_dialog_new (GimpImage               *image,
   gtk_widget_set_visible (vbox, TRUE);
 
   frame =
-    gimp_enum_radio_frame_new_with_range (GIMP_TYPE_MERGE_TYPE,
-                                          GIMP_EXPAND_AS_NECESSARY,
-                                          GIMP_CLIP_TO_BOTTOM_LAYER,
+    clay_enum_radio_frame_new_with_range (CLAY_TYPE_MERGE_TYPE,
+                                          CLAY_EXPAND_AS_NECESSARY,
+                                          CLAY_CLIP_TO_BOTTOM_LAYER,
                                           gtk_label_new (_("Final, Merged Layer should be:")),
-                                          G_CALLBACK (gimp_radio_button_update),
+                                          G_CALLBACK (clay_radio_button_update),
                                           &private->merge_type, NULL,
                                           &button);
-  gimp_int_radio_group_set_active (GTK_RADIO_BUTTON (button),
+  clay_int_radio_group_set_active (GTK_RADIO_BUTTON (button),
                                    private->merge_type);
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
@@ -142,10 +142,10 @@ image_merge_layers_dialog_new (GimpImage               *image,
   gtk_widget_set_visible (button, TRUE);
 
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->merge_active_group);
 
-  if (gimp_item_stack_is_flat (GIMP_ITEM_STACK (gimp_image_get_layers (image))))
+  if (clay_item_stack_is_flat (CLAY_ITEM_STACK (clay_image_get_layers (image))))
     gtk_widget_set_sensitive (button, FALSE);
 
   button = gtk_check_button_new_with_mnemonic (_("_Discard invisible layers"));
@@ -155,7 +155,7 @@ image_merge_layers_dialog_new (GimpImage               *image,
   gtk_widget_set_visible (button, TRUE);
 
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->discard_invisible);
 
   return dialog;

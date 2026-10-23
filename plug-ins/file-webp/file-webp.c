@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * file-webp - WebP file format plug-in for the GIMP
+ * file-webp - WebP file format plug-in for the Clay
  * Copyright (C) 2015  Nathan Osman
  * Copyright (C) 2016  Ben Touchette
  *
@@ -23,8 +23,8 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <webp/encode.h>
 
@@ -33,7 +33,7 @@
 #include "file-webp-export.h"
 #include "file-webp.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 typedef struct _Webp      Webp;
@@ -41,12 +41,12 @@ typedef struct _WebpClass WebpClass;
 
 struct _Webp
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _WebpClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -55,42 +55,42 @@ struct _WebpClass
 
 GType                           webp_get_type         (void);
 
-static GList                  * webp_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure          * webp_create_procedure (GimpPlugIn            *plug_in,
+static GList                  * webp_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure          * webp_create_procedure (ClayPlugIn            *plug_in,
                                                        const gchar           *name);
 
-static GimpValueArray         * webp_load             (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
+static ClayValueArray         * webp_load             (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
                                                        GFile                 *file,
-                                                       GimpMetadata          *metadata,
-                                                       GimpMetadataLoadFlags *flags,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayMetadata          *metadata,
+                                                       ClayMetadataLoadFlags *flags,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
-static GimpValueArray         * webp_export           (GimpProcedure         *procedure,
-                                                       GimpRunMode            run_mode,
-                                                       GimpImage             *image,
+static ClayValueArray         * webp_export           (ClayProcedure         *procedure,
+                                                       ClayRunMode            run_mode,
+                                                       ClayImage             *image,
                                                        GFile                 *file,
-                                                       GimpExportOptions     *options,
-                                                       GimpMetadata          *metadata,
-                                                       GimpProcedureConfig   *config,
+                                                       ClayExportOptions     *options,
+                                                       ClayMetadata          *metadata,
+                                                       ClayProcedureConfig   *config,
                                                        gpointer               run_data);
 
-static GimpExportCapabilities   export_edit_options   (GimpProcedure        *procedure,
-                                                       GimpProcedureConfig  *config,
-                                                       GimpExportOptions    *options,
+static ClayExportCapabilities   export_edit_options   (ClayProcedure        *procedure,
+                                                       ClayProcedureConfig  *config,
+                                                       ClayExportOptions    *options,
                                                        gpointer              create_data);
 
 
-G_DEFINE_TYPE (Webp, webp, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Webp, webp, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (WEBP_TYPE)
+CLAY_MAIN (WEBP_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 webp_class_init (WebpClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = webp_query_procedures;
   plug_in_class->create_procedure = webp_create_procedure;
@@ -103,7 +103,7 @@ webp_init (Webp *webp)
 }
 
 static GList *
-webp_query_procedures (GimpPlugIn *plug_in)
+webp_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -113,70 +113,70 @@ webp_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-webp_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+webp_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            webp_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("WebP image"));
+      clay_procedure_set_menu_label (procedure, _("WebP image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads images in the WebP file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nathan Osman, Ben Touchette",
                                       "(C) 2015-2016 Nathan Osman, "
                                       "(C) 2016 Ben Touchette",
                                       "2015,2016");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/webp");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "webp");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "8,string,WEBP");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              TRUE, webp_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("WebP image"));
+      clay_procedure_set_menu_label (procedure, _("WebP image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in the WebP image format"),
                                         _("Exports files in the WebP image format"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nathan Osman, Ben Touchette",
                                       "(C) 2015-2016 Nathan Osman, "
                                       "(C) 2016 Ben Touchette",
                                       "2015,2016");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("WebP"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/webp");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "webp");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
                                               0, export_edit_options, NULL, NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "preset",
+      clay_procedure_add_choice_argument (procedure, "preset",
                                           _("Source _type"),
                                           _("WebP encoder preset"),
-                                          gimp_choice_new_with_values ("default", WEBP_PRESET_DEFAULT, _("Default"), NULL,
+                                          clay_choice_new_with_values ("default", WEBP_PRESET_DEFAULT, _("Default"), NULL,
                                                                        "picture", WEBP_PRESET_PICTURE, _("Picture"), NULL,
                                                                        "photo",   WEBP_PRESET_PHOTO,   _("Photo"),   NULL,
                                                                        "drawing", WEBP_PRESET_DRAWING, _("Drawing"), NULL,
@@ -186,25 +186,25 @@ webp_create_procedure (GimpPlugIn  *plug_in,
                                           "default",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "lossless",
+      clay_procedure_add_boolean_argument (procedure, "lossless",
                                            _("L_ossless"),
                                            _("Use lossless encoding"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "quality",
+      clay_procedure_add_double_argument (procedure, "quality",
                                           _("Image _quality"),
                                           _("Quality of the image"),
                                           0, 100, 90,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "alpha-quality",
+      clay_procedure_add_double_argument (procedure, "alpha-quality",
                                           _("Alpha q_uality"),
                                           _("Quality of the image's alpha channel"),
                                           0, 100, 100,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "use-sharp-yuv",
+      clay_procedure_add_boolean_argument (procedure, "use-sharp-yuv",
                                            _("Use Sharp YU_V"),
                                            /* TRANSLATORS: \xe2\x86\x92 is a Unicode
                                             * "Rightward Arrow" in UTF-8 encoding.
@@ -213,64 +213,64 @@ webp_create_procedure (GimpPlugIn  *plug_in,
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "animation-loop",
+      clay_procedure_add_boolean_argument (procedure, "animation-loop",
                                            _("Loop _forever"),
                                            _("Loop animation infinitely"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "minimize-size",
+      clay_procedure_add_boolean_argument (procedure, "minimize-size",
                                            _("_Minimize output size (slower)"),
                                            _("Minimize output file size"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "keyframe-distance",
+      clay_procedure_add_int_argument (procedure, "keyframe-distance",
                                        _("Max distance between _key-frames"),
                                        _("Maximum distance between keyframes"),
                                        0, G_MAXINT, 50,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "default-delay",
+      clay_procedure_add_int_argument (procedure, "default-delay",
                                        _("_Default delay between frames"),
                                        _("Default delay (in milliseconds) to use when timestamps"
                                          " for frames are not available or forced."),
                                        0, G_MAXINT, 200,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "force-delay",
+      clay_procedure_add_boolean_argument (procedure, "force-delay",
                                            _("Use default dela_y for all frames"),
                                            _("Force default delay on all frames"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "animation",
+      clay_procedure_add_boolean_argument (procedure, "animation",
                                            _("Export a_nimation"),
                                            _("Use layers for animation"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_export_procedure_set_support_exif      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_iptc      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_xmp       (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_profile   (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_thumbnail (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_exif      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_iptc      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_xmp       (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_profile   (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_thumbnail (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-webp_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+webp_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -278,31 +278,31 @@ webp_load (GimpProcedure         *procedure,
   image = load_image (file, FALSE, flags, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-webp_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+webp_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   gint               n_drawables;
   gboolean           animation;
@@ -310,13 +310,13 @@ webp_export (GimpProcedure        *procedure,
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
     }
 
@@ -324,10 +324,10 @@ webp_export (GimpProcedure        *procedure,
                 "animation", &animation,
                 NULL);
 
-  if (status == GIMP_PDB_SUCCESS)
-    export = gimp_export_options_get_image (options, &image);
+  if (status == CLAY_PDB_SUCCESS)
+    export = clay_export_options_get_image (options, &image);
 
-  drawables   = gimp_image_list_layers (image);
+  drawables   = clay_image_list_layers (image);
   n_drawables = g_list_length (drawables);
 
   if (animation)
@@ -335,7 +335,7 @@ webp_export (GimpProcedure        *procedure,
       if (! save_animation (file, image, n_drawables, drawables, G_OBJECT (config),
                             &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
   else
@@ -343,11 +343,11 @@ webp_export (GimpProcedure        *procedure,
       if (! save_layer (file, image, drawables->data, G_OBJECT (config),
                         &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (status == GIMP_PDB_SUCCESS && metadata)
+  if (status == CLAY_PDB_SUCCESS && metadata)
     {
       gboolean save_xmp;
 
@@ -359,36 +359,36 @@ webp_export (GimpProcedure        *procedure,
                     "include-iptc", save_xmp,
                     NULL);
 
-      gimp_metadata_set_bits_per_sample (metadata, 8);
+      clay_metadata_set_bits_per_sample (metadata, 8);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpExportCapabilities
-export_edit_options (GimpProcedure       *procedure,
-                     GimpProcedureConfig *config,
-                     GimpExportOptions   *options,
+static ClayExportCapabilities
+export_edit_options (ClayProcedure       *procedure,
+                     ClayProcedureConfig *config,
+                     ClayExportOptions   *options,
                      gpointer             create_data)
 {
-  GimpExportCapabilities capabilities;
+  ClayExportCapabilities capabilities;
   gboolean               animation;
 
   g_object_get (G_OBJECT (config),
                 "animation", &animation,
                 NULL);
 
-  capabilities = (GIMP_EXPORT_CAN_HANDLE_RGB     |
-                  GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                  GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                  GIMP_EXPORT_CAN_HANDLE_ALPHA);
+  capabilities = (CLAY_EXPORT_CAN_HANDLE_RGB     |
+                  CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                  CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                  CLAY_EXPORT_CAN_HANDLE_ALPHA);
 
   if (animation)
-    capabilities |= GIMP_EXPORT_CAN_HANDLE_LAYERS_AS_ANIMATION;
+    capabilities |= CLAY_EXPORT_CAN_HANDLE_LAYERS_AS_ANIMATION;
 
   return capabilities;
 }

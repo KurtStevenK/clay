@@ -23,65 +23,65 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "core/core-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdocumentlist.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
-#include "core/gimpimagefile.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claydocumentlist.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
+#include "core/clayimagefile.h"
+#include "core/clayparamspecs.h"
+#include "core/clayprogress.h"
 
-#include "pdb/gimppdb.h"
+#include "pdb/claypdb.h"
 
-#include "plug-in/gimppluginprocedure.h"
+#include "plug-in/claypluginprocedure.h"
 
 #include "file-remote.h"
 #include "file-save.h"
-#include "gimp-file.h"
+#include "clay-file.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  public functions  */
 
-GimpPDBStatusType
-file_save (Gimp                *gimp,
-           GimpImage           *image,
-           GimpProgress        *progress,
+ClayPDBStatusType
+file_save (Clay                *clay,
+           ClayImage           *image,
+           ClayProgress        *progress,
            GFile               *file,
-           GimpPlugInProcedure *file_proc,
-           GimpRunMode          run_mode,
+           ClayPlugInProcedure *file_proc,
+           ClayRunMode          run_mode,
            gboolean             change_saved_state,
            gboolean             export_backward,
            gboolean             export_forward,
            GError             **error)
 {
-  GimpValueArray    *return_vals;
+  ClayValueArray    *return_vals;
   GFile             *orig_file;
-  GimpPDBStatusType  status     = GIMP_PDB_EXECUTION_ERROR;
+  ClayPDBStatusType  status     = CLAY_PDB_EXECUTION_ERROR;
   GFile             *local_file = NULL;
   gboolean           mounted    = TRUE;
   GError            *my_error   = NULL;
-  GimpExportOptions *options    = NULL;
+  ClayExportOptions *options    = NULL;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), GIMP_PDB_CALLING_ERROR);
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), GIMP_PDB_CALLING_ERROR);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress),
-                        GIMP_PDB_CALLING_ERROR);
-  g_return_val_if_fail (G_IS_FILE (file), GIMP_PDB_CALLING_ERROR);
-  g_return_val_if_fail (GIMP_IS_PLUG_IN_PROCEDURE (file_proc),
-                        GIMP_PDB_CALLING_ERROR);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), CLAY_PDB_CALLING_ERROR);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), CLAY_PDB_CALLING_ERROR);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress),
+                        CLAY_PDB_CALLING_ERROR);
+  g_return_val_if_fail (G_IS_FILE (file), CLAY_PDB_CALLING_ERROR);
+  g_return_val_if_fail (CLAY_IS_PLUG_IN_PROCEDURE (file_proc),
+                        CLAY_PDB_CALLING_ERROR);
   g_return_val_if_fail ((export_backward && export_forward) == FALSE,
-                        GIMP_PDB_CALLING_ERROR);
+                        CLAY_PDB_CALLING_ERROR);
   g_return_val_if_fail (error == NULL || *error == NULL,
-                        GIMP_PDB_CALLING_ERROR);
+                        CLAY_PDB_CALLING_ERROR);
 
   orig_file = file;
 
@@ -89,12 +89,12 @@ file_save (Gimp                *gimp,
   g_object_ref (image);
   g_object_ref (orig_file);
 
-  gimp_image_saving (image);
+  clay_image_saving (image);
 
   /* XXX - In the future, we'll pass special generic export options this
    * way (e.g. crops, resize, filter run at export or others).
    */
-  options = g_object_new (GIMP_TYPE_EXPORT_OPTIONS, NULL);
+  options = g_object_new (CLAY_TYPE_EXPORT_OPTIONS, NULL);
 
   /* FIXME enable these tests for remote files again, needs testing */
   if (g_file_is_native (file) &&
@@ -137,7 +137,7 @@ file_save (Gimp                *gimp,
     }
 
   if (! g_file_is_native (file) &&
-      ! file_remote_mount_file (gimp, file, progress, &my_error))
+      ! file_remote_mount_file (clay, file, progress, &my_error))
     {
       if (my_error)
         {
@@ -150,7 +150,7 @@ file_save (Gimp                *gimp,
         }
       else
         {
-          status = GIMP_PDB_CANCEL;
+          status = CLAY_PDB_CANCEL;
 
           goto out;
         }
@@ -162,7 +162,7 @@ file_save (Gimp                *gimp,
 
       if (! my_path)
         {
-          local_file = file_remote_upload_image_prepare (gimp, file, progress,
+          local_file = file_remote_upload_image_prepare (clay, file, progress,
                                                          &my_error);
 
           if (! local_file)
@@ -170,7 +170,7 @@ file_save (Gimp                *gimp,
               if (my_error)
                 g_propagate_error (error, my_error);
               else
-                status = GIMP_PDB_CANCEL;
+                status = CLAY_PDB_CANCEL;
 
               goto out;
             }
@@ -182,34 +182,34 @@ file_save (Gimp                *gimp,
     }
 
   return_vals =
-    gimp_pdb_execute_procedure_by_name (image->gimp->pdb,
-                                        gimp_get_user_context (gimp),
+    clay_pdb_execute_procedure_by_name (image->clay->pdb,
+                                        clay_get_user_context (clay),
                                         progress, error,
-                                        gimp_object_get_name (file_proc),
-                                        GIMP_TYPE_RUN_MODE,       run_mode,
-                                        GIMP_TYPE_IMAGE,          image,
+                                        clay_object_get_name (file_proc),
+                                        CLAY_TYPE_RUN_MODE,       run_mode,
+                                        CLAY_TYPE_IMAGE,          image,
                                         G_TYPE_FILE,              file,
-                                        GIMP_TYPE_EXPORT_OPTIONS, options,
+                                        CLAY_TYPE_EXPORT_OPTIONS, options,
                                         G_TYPE_NONE);
-  status = g_value_get_enum (gimp_value_array_index (return_vals, 0));
+  status = g_value_get_enum (clay_value_array_index (return_vals, 0));
 
-  gimp_value_array_unref (return_vals);
+  clay_value_array_unref (return_vals);
 
   if (local_file)
     {
-      if (status == GIMP_PDB_SUCCESS)
+      if (status == CLAY_PDB_SUCCESS)
         {
           GError *my_error = NULL;
 
-          if (! file_remote_upload_image_finish (gimp, orig_file, local_file,
+          if (! file_remote_upload_image_finish (clay, orig_file, local_file,
                                                  progress, &my_error))
             {
-              status = GIMP_PDB_EXECUTION_ERROR;
+              status = CLAY_PDB_EXECUTION_ERROR;
 
               if (my_error)
                 g_propagate_error (error, my_error);
               else
-                status = GIMP_PDB_CANCEL;
+                status = CLAY_PDB_CANCEL;
             }
         }
 
@@ -217,23 +217,23 @@ file_save (Gimp                *gimp,
       g_object_unref (local_file);
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpDocumentList *documents;
-      GimpImagefile    *imagefile;
+      ClayDocumentList *documents;
+      ClayImagefile    *imagefile;
 
       if (change_saved_state)
         {
-          gimp_image_set_file (image, orig_file);
-          gimp_image_set_save_proc (image, file_proc);
+          clay_image_set_file (image, orig_file);
+          clay_image_set_save_proc (image, file_proc);
 
           /* Forget the import source when we save. We interpret a
            * save as that the user is not interested in being able
            * to quickly export back to the original any longer
            */
-          gimp_image_set_imported_file (image, NULL);
+          clay_image_set_imported_file (image, NULL);
 
-          gimp_image_clean_all (image);
+          clay_image_clean_all (image);
         }
       else if (export_backward)
         {
@@ -241,55 +241,55 @@ file_save (Gimp                *gimp,
            * change nothing about export/import flags, only set
            * the export state to clean
            */
-          gimp_image_export_clean_all (image);
+          clay_image_export_clean_all (image);
         }
       else if (export_forward)
         {
           /* Remember the last entered Export URI for the image. We
            * only need to do this explicitly when exporting. It
-           * happens implicitly when saving since the GimpObject name
-           * of a GimpImage is the last-save URI
+           * happens implicitly when saving since the ClayObject name
+           * of a ClayImage is the last-save URI
            */
-          gimp_image_set_exported_file (image, orig_file);
-          gimp_image_set_export_proc (image, file_proc);
+          clay_image_set_exported_file (image, orig_file);
+          clay_image_set_export_proc (image, file_proc);
 
           /* An image can not be considered both exported and imported
            * at the same time, so stop consider it as imported now
            * that we consider it exported.
            */
-          gimp_image_set_imported_file (image, NULL);
+          clay_image_set_imported_file (image, NULL);
 
-          gimp_image_export_clean_all (image);
+          clay_image_export_clean_all (image);
         }
 
       if (export_backward || export_forward)
-        gimp_image_exported (image, orig_file);
+        clay_image_exported (image, orig_file);
       else
-        gimp_image_saved (image, orig_file);
+        clay_image_saved (image, orig_file);
 
-      documents = GIMP_DOCUMENT_LIST (image->gimp->documents);
+      documents = CLAY_DOCUMENT_LIST (image->clay->documents);
 
-      imagefile = gimp_document_list_add_file (documents, orig_file,
+      imagefile = clay_document_list_add_file (documents, orig_file,
                                                g_slist_nth_data (file_proc->mime_types_list, 0));
 
       /* only save a thumbnail if we are saving as XCF, see bug #25272 */
-      if (GIMP_PROCEDURE (file_proc)->proc_type == GIMP_PDB_PROC_TYPE_INTERNAL)
-        gimp_imagefile_save_thumbnail (imagefile,
+      if (CLAY_PROCEDURE (file_proc)->proc_type == CLAY_PDB_PROC_TYPE_INTERNAL)
+        clay_imagefile_save_thumbnail (imagefile,
                                        g_slist_nth_data (file_proc->mime_types_list, 0),
                                        image,
                                        NULL);
     }
-  else if (status != GIMP_PDB_CANCEL)
+  else if (status != CLAY_PDB_CANCEL)
     {
       if (error && *error == NULL)
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("%s plug-in could not save image"),
-                       gimp_procedure_get_label (GIMP_PROCEDURE (file_proc)));
+                       clay_procedure_get_label (CLAY_PROCEDURE (file_proc)));
         }
     }
 
-  gimp_image_flush (image);
+  clay_image_flush (image);
 
  out:
   g_object_unref (orig_file);

@@ -1,7 +1,7 @@
-" GIMP coding style for vim "
+" Clay coding style for vim "
 
-" To enable these vim rules for GIMP only, add this command to your vimrc:
-" autocmd BufNewFile,BufRead /path/to/gimp/*.[ch] source /path/to/gimp/devel-docs/c.vim
+" To enable these vim rules for Clay only, add this command to your vimrc:
+" autocmd BufNewFile,BufRead /path/to/clay/*.[ch] source /path/to/clay/devel-docs/c.vim
 "
 " Do not use `set exrc` which is a security risk for your system since vim may
 " be tricked into running shell commands by .vimrc files hidden in malicious

@@ -1,0 +1,50 @@
+# Preferences Dialog icons
+#
+# All these icons are used as GTK_ICON_SIZE_BUTTON (16px) and GTK_ICON_SIZE_DIALOG (48px)
+# Cf. clay_prefs_box_add_page() and app/dialogs/preferences-dialog.c
+# Check with:
+# grep -rI clay-prefs-[a-z] app/dialogs/preferences-dialog.c |sed 's/ *"\([^"]*\)",/\1/' |sort |uniq
+clay-prefs-color-management
+# TODO: used twice. "Dialog Defaults" should likely have its own icon.
+clay-prefs-controllers
+clay-prefs-default-grid
+clay-prefs-display
+clay-prefs-folders
+clay-prefs-help-system
+clay-prefs-icon-theme
+clay-prefs-image-title
+clay-prefs-image-windows
+clay-prefs-image-windows-appearance
+clay-prefs-image-windows-snapping
+clay-prefs-import-export
+clay-prefs-input-devices
+clay-prefs-interface
+clay-prefs-new-image
+clay-prefs-playground
+clay-prefs-system-resources
+clay-prefs-theme
+clay-prefs-tool-options
+clay-prefs-toolbox
+clay-prefs-window-management
+
+# These icon names can't be grepped because they are built from partial
+# strings.
+# See "Folders / <paths>" code section of app/dialogs/preferences-dialog.c
+clay-prefs-folders-brushes
+clay-prefs-folders-dynamics
+clay-prefs-folders-environ
+clay-prefs-folders-fonts
+clay-prefs-folders-gradients
+clay-prefs-folders-icon-themes
+clay-prefs-folders-interp
+clay-prefs-folders-modules
+clay-prefs-folders-mypaint-brushes
+clay-prefs-folders-palettes
+clay-prefs-folders-patterns
+clay-prefs-folders-plug-ins
+clay-prefs-folders-scripts
+clay-prefs-folders-themes
+clay-prefs-folders-tool-presets
+
+# Used for debugging preferences page (temporarily? TODO?)
+clay-wilber-eek

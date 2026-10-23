@@ -1,9 +1,9 @@
-/* Page Curl 0.9 --- image filter plug-in for GIMP
+/* Page Curl 0.9 --- image filter plug-in for Clay
  * Copyright (C) 1996 Federico Mena Quintero
- * Ported to Gimp 1.0 1998 by Simon Budig <Simon.Budig@unix-ag.org>
+ * Ported to Clay 1.0 1998 by Simon Budig <Simon.Budig@unix-ag.org>
  *
  * You can contact me at quartic@polloux.fciencias.unam.mx
- * You can contact the original GIMP authors at gimp@xcf.berkeley.edu
+ * You can contact the original Clay authors at clay@xcf.berkeley.edu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 
 /*
  * Version History
- * 0.5: (1996) Version for Gimp 0.54 by Federico Mena Quintero
- * 0.6: (Feb '98) First Version for Gimp 0.99.x, very buggy.
+ * 0.5: (1996) Version for Clay 0.54 by Federico Mena Quintero
+ * 0.6: (Feb '98) First Version for Clay 0.99.x, very buggy.
  * 0.8: (Mar '98) First "stable" version
  * 0.9: (May '98)
  *      - Added support for Gradients. It is now possible to map
@@ -43,15 +43,15 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC    "plug-in-pagecurl"
 #define PLUG_IN_BINARY  "pagecurl"
-#define PLUG_IN_ROLE    "gimp-pagecurl"
+#define PLUG_IN_ROLE    "clay-pagecurl"
 #define PLUG_IN_VERSION "July 2004, 1.0"
 #define NGRADSAMPLES    256
 
@@ -97,12 +97,12 @@ typedef struct _PagecurlClass PagecurlClass;
 
 struct _Pagecurl
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _PagecurlClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -111,41 +111,41 @@ struct _PagecurlClass
 
 GType                   pagecurl_get_type         (void);
 
-static GList          * pagecurl_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * pagecurl_create_procedure (GimpPlugIn           *plug_in,
+static GList          * pagecurl_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * pagecurl_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * pagecurl_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * pagecurl_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
-static gboolean         dialog                    (GimpProcedure        *procedure,
-                                                   GimpProcedureConfig  *config);
+static gboolean         dialog                    (ClayProcedure        *procedure,
+                                                   ClayProcedureConfig  *config);
 
-static void             init_calculation          (GimpDrawable         *drawable,
-                                                   GimpProcedureConfig  *config);
-static GimpLayer      * do_curl_effect            (GimpDrawable         *drawable,
-                                                   GimpProcedureConfig  *config);
-static void             clear_curled_region       (GimpDrawable         *drawable,
-                                                   GimpProcedureConfig  *config);
-static GimpLayer      * page_curl                 (GimpDrawable         *drawable,
-                                                   GimpProcedureConfig  *config);
-static gdouble        * get_gradient_samples      (GimpDrawable         *drawable,
+static void             init_calculation          (ClayDrawable         *drawable,
+                                                   ClayProcedureConfig  *config);
+static ClayLayer      * do_curl_effect            (ClayDrawable         *drawable,
+                                                   ClayProcedureConfig  *config);
+static void             clear_curled_region       (ClayDrawable         *drawable,
+                                                   ClayProcedureConfig  *config);
+static ClayLayer      * page_curl                 (ClayDrawable         *drawable,
+                                                   ClayProcedureConfig  *config);
+static gdouble        * get_gradient_samples      (ClayDrawable         *drawable,
                                                    gboolean              reverse);
 
 
-G_DEFINE_TYPE (Pagecurl, pagecurl, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pagecurl, pagecurl, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PAGECURL_TYPE)
+CLAY_MAIN (PAGECURL_TYPE)
 DEFINE_STD_SET_I18N
 
 
 /* Image parameters */
 
-static GimpImage *image      = NULL;
+static ClayImage *image      = NULL;
 
 static gint   sel_x, sel_y;
 static gint   true_sel_width, true_sel_height;
@@ -154,13 +154,13 @@ static gint   drawable_position;
 
 /* Center and radius of circle */
 
-static GimpVector2 center;
+static ClayVector2 center;
 static double      radius;
 
 /* Useful points to keep around */
 
-static GimpVector2 left_tangent;
-static GimpVector2 right_tangent;
+static ClayVector2 left_tangent;
+static ClayVector2 right_tangent;
 
 /* Slopes --- these are *not* in the usual geometric sense! */
 
@@ -178,7 +178,7 @@ static gdouble bg_color[4];
 static void
 pagecurl_class_init (PagecurlClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pagecurl_query_procedures;
   plug_in_class->create_procedure = pagecurl_create_procedure;
@@ -191,52 +191,52 @@ pagecurl_init (Pagecurl *pagecurl)
 }
 
 static GList *
-pagecurl_query_procedures (GimpPlugIn *plug_in)
+pagecurl_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-pagecurl_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pagecurl_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             pagecurl_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Pagecurl..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Distorts");
+      clay_procedure_set_menu_label (procedure, _("_Pagecurl..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Distorts");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Curl up one of the image corners"),
                                         "This plug-in creates a pagecurl-effect.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Federico Mena Quintero and Simon Budig",
                                       "Federico Mena Quintero and Simon Budig",
                                       PLUG_IN_VERSION);
 
-      gimp_procedure_add_choice_argument (procedure, "colors",
+      clay_procedure_add_choice_argument (procedure, "colors",
                                           _("Colors"), NULL,
-                                          gimp_choice_new_with_values ("fg-bg",                     CURL_COLORS_FG_BG,            _("Foreground / background colors"), NULL,
+                                          clay_choice_new_with_values ("fg-bg",                     CURL_COLORS_FG_BG,            _("Foreground / background colors"), NULL,
                                                                        "current-gradient",          CURL_COLORS_GRADIENT,         _("Current gradient"),               NULL,
                                                                        "current-gradient-reversed", CURL_COLORS_GRADIENT_REVERSE, _("Current gradient (reversed)"),    NULL,
                                                                        NULL),
                                           "fg-bg",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "edge",
+      clay_procedure_add_choice_argument (procedure, "edge",
                                           _("Locatio_n"),
                                           _("Corner which is curled"),
-                                          gimp_choice_new_with_values ("upper-left",  CURL_EDGE_UPPER_LEFT,  _("Upper left"),  NULL,
+                                          clay_choice_new_with_values ("upper-left",  CURL_EDGE_UPPER_LEFT,  _("Upper left"),  NULL,
                                                                        "upper-right", CURL_EDGE_UPPER_RIGHT, _("Upper right"), NULL,
                                                                        "lower-left",  CURL_EDGE_LOWER_LEFT,  _("Lower left"),  NULL,
                                                                        "lower-right", CURL_EDGE_LOWER_RIGHT, _("Lower right"), NULL,
@@ -244,27 +244,27 @@ pagecurl_create_procedure (GimpPlugIn  *plug_in,
                                           "lower-right",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "orientation",
+      clay_procedure_add_choice_argument (procedure, "orientation",
                                           _("Or_ientation"), NULL,
-                                          gimp_choice_new_with_values ("vertical",   CURL_ORIENTATION_VERTICAL,   _("Vertical"),   NULL,
+                                          clay_choice_new_with_values ("vertical",   CURL_ORIENTATION_VERTICAL,   _("Vertical"),   NULL,
                                                                        "horizontal", CURL_ORIENTATION_HORIZONTAL, _("Horizontal"), NULL,
                                                                        NULL),
                                           "vertical",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "shade",
+      clay_procedure_add_boolean_argument (procedure, "shade",
                                            _("Sh_ade"),
                                            _("Shade the region under the curl"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "opacity",
+      clay_procedure_add_double_argument (procedure, "opacity",
                                           _("Opaci_ty"),
                                           _("Opacity"),
                                           0.0, 1.0, 0.0,
-                                          GIMP_PARAM_READWRITE);
+                                          CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_layer_return_value (procedure, "curl-layer",
+      clay_procedure_add_layer_return_value (procedure, "curl-layer",
                                          "Curl layer",
                                          "The new layer with the curl.",
                                          FALSE,
@@ -274,31 +274,31 @@ pagecurl_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-pagecurl_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *_image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+pagecurl_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *_image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpDrawable   *drawable;
-  GimpValueArray *return_vals = NULL;
+  ClayDrawable   *drawable;
+  ClayValueArray *return_vals = NULL;
 
   gegl_init (NULL, NULL);
 
   image = _image;
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -306,34 +306,34 @@ pagecurl_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (! gimp_drawable_mask_intersect (drawable, &sel_x, &sel_y,
+  if (! clay_drawable_mask_intersect (drawable, &sel_x, &sel_y,
                                       &true_sel_width, &true_sel_height))
     {
-      return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS,
+      return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS,
                                                NULL);
     }
 
-  if (! (gimp_drawable_is_rgb (drawable) ||
-         gimp_drawable_is_gray (drawable)))
+  if (! (clay_drawable_is_rgb (drawable) ||
+         clay_drawable_is_gray (drawable)))
     {
       /* Sorry - no indexed/noalpha images */
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! dialog (procedure, config))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! dialog (procedure, config))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
-  return_vals = gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_LAYER (return_vals, 1, page_curl (drawable, config));
+  CLAY_VALUES_SET_LAYER (return_vals, 1, page_curl (drawable, config));
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
   return return_vals;
 }
@@ -404,7 +404,7 @@ inside_circle (gdouble x,
 /********************************************************************/
 
 static void
-curl_pixbuf_update (GimpProcedureConfig *config,
+curl_pixbuf_update (ClayProcedureConfig *config,
                     const GParamSpec    *pspec,
                     GtkWidget           *curl_image)
 {
@@ -414,7 +414,7 @@ curl_pixbuf_update (GimpProcedureConfig *config,
   CurlEdge         edge;
   CurlOrientation  orientation;
 
-  edge = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "edge");
+  edge = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "edge");
   switch (edge)
     {
     case CURL_EDGE_LOWER_RIGHT: index = 0; break;
@@ -425,10 +425,10 @@ curl_pixbuf_update (GimpProcedureConfig *config,
       return;
     }
 
-  orientation = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "orientation");
+  orientation = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "orientation");
   index += orientation * 4;
 
-  resource = g_strdup_printf ("/org/gimp/pagecurl-icons/curl%c.png",
+  resource = g_strdup_printf ("/org/clay/pagecurl-icons/curl%c.png",
                               '0' + index);
   pixbuf = gdk_pixbuf_new_from_resource (resource, NULL);
   g_free (resource);
@@ -438,8 +438,8 @@ curl_pixbuf_update (GimpProcedureConfig *config,
 }
 
 static gboolean
-dialog (GimpProcedure       *procedure,
-        GimpProcedureConfig *config)
+dialog (ClayProcedure       *procedure,
+        ClayProcedureConfig *config)
 {
   /* Missing options: Color-dialogs? / own curl layer ? / transparency
      to original drawable / Warp-curl (unsupported yet) */
@@ -447,14 +447,14 @@ dialog (GimpProcedure       *procedure,
   GtkWidget *curl_image;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Pagecurl Effect"));
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "opacity", 100.0);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "opacity", 100.0);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "edge", "orientation", "shade", "colors", "opacity", NULL);
 
   curl_image = gtk_image_new ();
@@ -468,7 +468,7 @@ dialog (GimpProcedure       *procedure,
                     curl_image);
   curl_pixbuf_update (config, NULL, curl_image);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -476,25 +476,25 @@ dialog (GimpProcedure       *procedure,
 }
 
 static void
-init_calculation (GimpDrawable        *drawable,
-                  GimpProcedureConfig *config)
+init_calculation (ClayDrawable        *drawable,
+                  ClayProcedureConfig *config)
 {
   GeglColor       *color;
   gdouble          k;
   gdouble          alpha, beta;
   gdouble          angle;
-  GimpVector2      v1, v2;
+  ClayVector2      v1, v2;
   GList           *layers;
   CurlOrientation  orientation;
 
-  orientation = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "orientation");
+  orientation = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "orientation");
 
-  gimp_layer_add_alpha (GIMP_LAYER (drawable));
+  clay_layer_add_alpha (CLAY_LAYER (drawable));
 
   /* Image parameters */
 
   /* Determine Position of original Layer in the Layer stack. */
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   drawable_position = g_list_index (layers, drawable);
   g_list_free (layers);
 
@@ -516,25 +516,25 @@ init_calculation (GimpDrawable        *drawable,
   alpha = atan ((double) sel_height / sel_width);
   beta = alpha / 2.0;
   k = sel_width / ((G_PI + alpha) * sin (beta) + cos (beta));
-  gimp_vector2_set (&center, k * cos (beta), k * sin (beta));
+  clay_vector2_set (&center, k * cos (beta), k * sin (beta));
   radius = center.y;
 
   /* left_tangent  */
 
-  gimp_vector2_set (&left_tangent, radius * -sin (alpha), radius * cos (alpha));
-  gimp_vector2_add (&left_tangent, &left_tangent, &center);
+  clay_vector2_set (&left_tangent, radius * -sin (alpha), radius * cos (alpha));
+  clay_vector2_add (&left_tangent, &left_tangent, &center);
 
   /* right_tangent */
 
-  gimp_vector2_sub (&v1, &left_tangent, &center);
-  gimp_vector2_set (&v2, sel_width - center.x, sel_height - center.y);
-  angle = -2.0 * acos (gimp_vector2_inner_product (&v1, &v2) /
-                       (gimp_vector2_length (&v1) *
-                        gimp_vector2_length (&v2)));
-  gimp_vector2_set (&right_tangent,
+  clay_vector2_sub (&v1, &left_tangent, &center);
+  clay_vector2_set (&v2, sel_width - center.x, sel_height - center.y);
+  angle = -2.0 * acos (clay_vector2_inner_product (&v1, &v2) /
+                       (clay_vector2_length (&v1) *
+                        clay_vector2_length (&v2)));
+  clay_vector2_set (&right_tangent,
                     v1.x * cos (angle) + v1.y * -sin (angle),
                     v1.x * sin (angle) + v1.y * cos (angle));
-  gimp_vector2_add (&right_tangent, &right_tangent, &center);
+  clay_vector2_add (&right_tangent, &right_tangent, &center);
 
   /* Slopes */
 
@@ -546,17 +546,17 @@ init_calculation (GimpDrawable        *drawable,
 
   /* Colors */
 
-  color = gimp_context_get_foreground ();
+  color = clay_context_get_foreground ();
   gegl_color_get_pixel (color, babl_format ("R'G'B'A double"), fg_color);
   g_object_unref (color);
-  color = gimp_context_get_background ();
+  color = clay_context_get_background ();
   gegl_color_get_pixel (color, babl_format ("R'G'B'A double"), bg_color);
   g_object_unref (color);
 }
 
-static GimpLayer *
-do_curl_effect (GimpDrawable        *drawable,
-                GimpProcedureConfig *config)
+static ClayLayer *
+do_curl_effect (ClayDrawable        *drawable,
+                ClayProcedureConfig *config)
 {
   gint                x = 0;
   gint                y = 0;
@@ -564,10 +564,10 @@ do_curl_effect (GimpDrawable        *drawable,
   gint                x1, y1;
   guint               progress, max_progress;
   gdouble             intensity, alpha;
-  GimpVector2         v, dl, dr;
+  ClayVector2         v, dl, dr;
   gdouble             dl_mag, dr_mag, angle, factor;
   GeglBuffer         *curl_buffer;
-  GimpLayer          *curl_layer;
+  ClayLayer          *curl_layer;
   gdouble            *grad_samples = NULL;
   gint                width, height, n_ch;
   GeglRectangle      *roi;
@@ -579,35 +579,35 @@ do_curl_effect (GimpDrawable        *drawable,
   gboolean            shade;
   gdouble             opacity;
 
-  orientation = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "orientation");
-  colors      = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "colors");
-  edge        = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "edge");
+  orientation = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "orientation");
+  colors      = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "colors");
+  edge        = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "edge");
 
   g_object_get (config,
                 "shade",   &shade,
                 "opacity", &opacity,
                 NULL);
 
-  color_image = gimp_drawable_is_rgb (drawable);
+  color_image = clay_drawable_is_rgb (drawable);
 
-  curl_layer = gimp_layer_new (image,
+  curl_layer = clay_layer_new (image,
                                _("Curl Layer"),
                                true_sel_width,
                                true_sel_height,
                                color_image ?
-                               GIMP_RGBA_IMAGE : GIMP_GRAYA_IMAGE,
+                               CLAY_RGBA_IMAGE : CLAY_GRAYA_IMAGE,
                                100,
-                               gimp_image_get_default_new_layer_mode (image));
+                               clay_image_get_default_new_layer_mode (image));
 
-  gimp_image_insert_layer (image, curl_layer,
-                           GIMP_LAYER (gimp_item_get_parent (GIMP_ITEM (drawable))),
+  clay_image_insert_layer (image, curl_layer,
+                           CLAY_LAYER (clay_item_get_parent (CLAY_ITEM (drawable))),
                            drawable_position);
-  gimp_drawable_fill (GIMP_DRAWABLE (curl_layer), GIMP_FILL_TRANSPARENT);
+  clay_drawable_fill (CLAY_DRAWABLE (curl_layer), CLAY_FILL_TRANSPARENT);
 
-  gimp_drawable_get_offsets (drawable, &x1, &y1);
-  gimp_layer_set_offsets (curl_layer, sel_x + x1, sel_y + y1);
+  clay_drawable_get_offsets (drawable, &x1, &y1);
+  clay_layer_set_offsets (curl_layer, sel_x + x1, sel_y + y1);
 
-  curl_buffer = gimp_drawable_get_shadow_buffer (GIMP_DRAWABLE (curl_layer));
+  curl_buffer = clay_drawable_get_shadow_buffer (CLAY_DRAWABLE (curl_layer));
 
   width  = gegl_buffer_get_width (curl_buffer);
   height = gegl_buffer_get_height (curl_buffer);
@@ -620,13 +620,13 @@ do_curl_effect (GimpDrawable        *drawable,
                                    GEGL_ACCESS_WRITE, GEGL_ABYSS_NONE, 1);
 
   /* Init shade_under */
-  gimp_vector2_set (&dl, -sel_width, -sel_height);
-  dl_mag = gimp_vector2_length (&dl);
-  gimp_vector2_set (&dr,
+  clay_vector2_set (&dl, -sel_width, -sel_height);
+  dl_mag = clay_vector2_length (&dl);
+  clay_vector2_set (&dr,
                     -(sel_width - right_tangent.x),
                     -(sel_height - right_tangent.y));
-  dr_mag = gimp_vector2_length (&dr);
-  alpha = acos (gimp_vector2_inner_product (&dl, &dr) / (dl_mag * dr_mag));
+  dr_mag = clay_vector2_length (&dr);
+  alpha = acos (clay_vector2_inner_product (&dl, &dr) / (dl_mag * dr_mag));
 
   /* Gradient Samples */
   switch (colors)
@@ -634,10 +634,10 @@ do_curl_effect (GimpDrawable        *drawable,
     case CURL_COLORS_FG_BG:
       break;
     case CURL_COLORS_GRADIENT:
-      grad_samples = get_gradient_samples (GIMP_DRAWABLE (curl_layer), FALSE);
+      grad_samples = get_gradient_samples (CLAY_DRAWABLE (curl_layer), FALSE);
       break;
     case CURL_COLORS_GRADIENT_REVERSE:
-      grad_samples = get_gradient_samples (GIMP_DRAWABLE (curl_layer), TRUE);
+      grad_samples = get_gradient_samples (CLAY_DRAWABLE (curl_layer), TRUE);
       break;
     }
 
@@ -690,8 +690,8 @@ do_curl_effect (GimpDrawable        *drawable,
                 {
                   v.x = -(sel_width - x);
                   v.y = -(sel_height - y);
-                  angle = acos (gimp_vector2_inner_product (&v, &dl) /
-                                (gimp_vector2_length (&v) * dl_mag));
+                  angle = acos (clay_vector2_inner_product (&v, &dl) /
+                                (clay_vector2_length (&v) * dl_mag));
 
                   if (inside_circle (x, y) || below_diagb (x, y))
                     {
@@ -741,13 +741,13 @@ do_curl_effect (GimpDrawable        *drawable,
             }
         }
       progress += roi->width * roi->height;
-      gimp_progress_update ((double) progress / (double) max_progress);
+      clay_progress_update ((double) progress / (double) max_progress);
     }
 
-  gimp_progress_update (0.5);
+  clay_progress_update (0.5);
   gegl_buffer_flush (curl_buffer);
-  gimp_drawable_merge_shadow (GIMP_DRAWABLE (curl_layer), FALSE);
-  gimp_drawable_update (GIMP_DRAWABLE (curl_layer), 0, 0, width, height);
+  clay_drawable_merge_shadow (CLAY_DRAWABLE (curl_layer), FALSE);
+  clay_drawable_update (CLAY_DRAWABLE (curl_layer), 0, 0, width, height);
 
   g_free (grad_samples);
 
@@ -757,8 +757,8 @@ do_curl_effect (GimpDrawable        *drawable,
 /************************************************/
 
 static void
-clear_curled_region (GimpDrawable        *drawable,
-                     GimpProcedureConfig *config)
+clear_curled_region (ClayDrawable        *drawable,
+                     ClayProcedureConfig *config)
 {
   gint                x = 0;
   gint                y = 0;
@@ -775,14 +775,14 @@ clear_curled_region (GimpDrawable        *drawable,
   CurlOrientation     orientation;
   CurlEdge            edge;
 
-  orientation = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "orientation");
-  edge        = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "edge");
+  orientation = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "orientation");
+  edge        = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "edge");
 
   max_progress = 2 * sel_width * sel_height;
   progress = max_progress / 2;
 
-  buf        = gimp_drawable_get_buffer (drawable);
-  shadow_buf = gimp_drawable_get_shadow_buffer (drawable);
+  buf        = clay_drawable_get_buffer (drawable);
+  shadow_buf = clay_drawable_get_shadow_buffer (drawable);
   width  = gegl_buffer_get_width (buf);
   height = gegl_buffer_get_height (buf);
 
@@ -846,26 +846,26 @@ clear_curled_region (GimpDrawable        *drawable,
         }
 
       progress += roi->width * roi->height;
-      gimp_progress_update ((double) progress / (double) max_progress);
+      clay_progress_update ((double) progress / (double) max_progress);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
   gegl_buffer_flush (shadow_buf);
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable,
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable,
                         sel_x, sel_y,
                         true_sel_width, true_sel_height);
 }
 
-static GimpLayer *
-page_curl (GimpDrawable        *drawable,
-           GimpProcedureConfig *config)
+static ClayLayer *
+page_curl (ClayDrawable        *drawable,
+           ClayProcedureConfig *config)
 {
-  GimpLayer *curl_layer;
+  ClayLayer *curl_layer;
 
-  gimp_image_undo_group_start (image);
+  clay_image_undo_group_start (image);
 
-  gimp_progress_init (_("Page Curl"));
+  clay_progress_init (_("Page Curl"));
 
   init_calculation (drawable, config);
 
@@ -873,34 +873,34 @@ page_curl (GimpDrawable        *drawable,
 
   clear_curled_region (drawable, config);
 
-  gimp_image_undo_group_end (image);
+  clay_image_undo_group_end (image);
 
   return curl_layer;
 }
 
 /*
   Returns NGRADSAMPLES samples of active gradient.
-  Each sample has (gimp_drawable_get_bpp (drawable)) bytes.
+  Each sample has (clay_drawable_get_bpp (drawable)) bytes.
   "ripped" from gradmap.c.
  */
 static gdouble *
-get_gradient_samples (GimpDrawable *drawable,
+get_gradient_samples (ClayDrawable *drawable,
                       gboolean      reverse)
 {
-  GimpGradient  *gradient;
+  ClayGradient  *gradient;
   GeglColor    **colors;
   const Babl    *format = babl_format ("R'G'B'A double");
   gdouble       *d_samples;
 
-  gradient = gimp_context_get_gradient ();
+  gradient = clay_context_get_gradient ();
 
-  colors = gimp_gradient_get_uniform_samples (gradient, NGRADSAMPLES, reverse);
+  colors = clay_gradient_get_uniform_samples (gradient, NGRADSAMPLES, reverse);
 
   d_samples = g_new0 (gdouble, NGRADSAMPLES * 4);
   for (gint i = 0; i < NGRADSAMPLES; i++)
     gegl_color_get_pixel (colors[i], format, &d_samples[i * 4]);
 
-  gimp_color_array_free (colors);
+  clay_color_array_free (colors);
 
   return d_samples;
 }

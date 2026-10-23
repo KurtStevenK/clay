@@ -19,7 +19,7 @@ sub drawables_popup {
     $help  = 'Opens a dialog letting a user choose an drawable.';
 
     &jehan_pdb_misc('2023');
-    $deprecated = 'gimp-items-popup';
+    $deprecated = 'clay-items-popup';
     $deprecated_since = '3.2';
 
     @inargs = (
@@ -28,7 +28,7 @@ sub drawables_popup {
       { name => 'popup_title', type => 'string',
         desc => 'Title of the drawable selection dialog' },
       { name => 'drawable_type', type => 'string', non_empty => 1,
-        desc => 'The name of the GIMP_TYPE_DRAWABLE subtype' },
+        desc => 'The name of the CLAY_TYPE_DRAWABLE subtype' },
       { name => 'initial_drawable', type => 'drawable', none_ok => 1, no_validate => 1,
         desc => 'The drawable to set as the initial choice' },
       { name => 'parent_window', type => 'bytes', none_ok => 1,
@@ -38,12 +38,12 @@ sub drawables_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+      ! clay_pdb_dialog_new (clay, context, progress,
                              g_type_from_name (drawable_type),
                              parent_window, popup_title, callback,
-                             GIMP_OBJECT (initial_drawable),
+                             CLAY_OBJECT (initial_drawable),
                              NULL))
     success = FALSE;
 }
@@ -56,7 +56,7 @@ sub drawables_close_popup {
     $help  = 'Closes an open drawable selection dialog.';
 
     &jehan_pdb_misc('2023');
-    $deprecated = 'gimp-items-close-popup';
+    $deprecated = 'clay-items-close-popup';
     $deprecated_since = '3.2';
 
     @inargs = (
@@ -67,9 +67,9 @@ sub drawables_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-      ! gimp_pdb_dialog_close (gimp, GIMP_TYPE_DRAWABLE, callback))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+      ! clay_pdb_dialog_close (clay, CLAY_TYPE_DRAWABLE, callback))
     success = FALSE;
 }
 CODE
@@ -81,7 +81,7 @@ sub drawables_set_popup {
     $help  = $blurb;
 
     &jehan_pdb_misc('2023');
-    $deprecated = 'gimp-items-set-popup';
+    $deprecated = 'clay-items-set-popup';
     $deprecated_since = '3.2';
 
     @inargs = (
@@ -94,17 +94,17 @@ sub drawables_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-      ! gimp_pdb_dialog_set (gimp, GIMP_TYPE_DRAWABLE, callback, GIMP_OBJECT (drawable), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+      ! clay_pdb_dialog_set (clay, CLAY_TYPE_DRAWABLE, callback, CLAY_OBJECT (drawable), NULL))
     success = FALSE;
 }
 CODE
     );
 }
 
-@headers = qw("core/gimp.h"
-              "core/gimpdatafactory.h");
+@headers = qw("core/clay.h"
+              "core/claydatafactory.h");
 
 @procs = qw(drawables_popup
             drawables_close_popup
@@ -113,7 +113,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Drawables UI';
-$doc_title = 'gimpdrawableselect';
+$doc_title = 'claydrawableselect';
 $doc_short_desc = 'Methods of a drawable chooser dialog';
 $doc_long_desc = 'Methods of a drawable chooser dialog';
 

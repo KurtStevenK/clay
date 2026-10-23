@@ -33,7 +33,7 @@
 #endif
 
 #define PLUG_IN_BINARY      "file-icns"
-#define PLUG_IN_ROLE        "gimp-file-icns"
+#define PLUG_IN_ROLE        "clay-file-icns"
 
 #define ICNS_MAXBUF          4096
 #define ICNS_TYPE_NUM        34

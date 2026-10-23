@@ -9,7 +9,7 @@
 ;
 ; The last half of this file are deprecated functions.
 ; You should not use them in new scripts.
-; GIMP maintainers may remove deprecated functions in the future.
+; Clay maintainers may remove deprecated functions in the future.
 
 
 ;The random number generator routines below have been slightly reformatted.
@@ -215,7 +215,7 @@
 ; The history of their inclusion in ScriptFu can not be easily ascertained.
 ; Some older ScriptFu scripts may use them.
 ; Generally speaking "useful but not in R5RS."
-; At some point GIMP maintainers may remove them.
+; At some point Clay maintainers may remove them.
 ; For example if replacements are found in an SRFI,
 ; and ScriptFu supports use of SRFI's.
 
@@ -331,7 +331,7 @@
   )
 )
 
-; Functions said to be deprecated in GIMP 2 and left still in GIMP 3.
+; Functions said to be deprecated in Clay 2 and left still in Clay 3.
 ; Infrequently used, but not a one-word substitution.
 
 ; symbol pi is not in TinyScheme
@@ -352,11 +352,11 @@
 )
 
 
-; Functions obsolete as of GIMP v3.0.
+; Functions obsolete as of Clay v3.0.
 ; Generally speaking, from the SIOD dialect of Scheme.
 ; The signatures (or the full definition) are left as comments,
 ; to aid in debugging old scripts.
-; You can recover the definitions from the GIMP repo, say the oldest GIMP 2 version.
+; You can recover the definitions from the Clay repo, say the oldest Clay 2 version.
 
 ;(define aset vector-set!)
 ;(define aref vector-ref)
@@ -385,4 +385,4 @@
 
 ;Items below this line are deprecated and should not be used in new scripts.
 
-; INTENDED TO BE EMPTY FOR GIMP 3.0
+; INTENDED TO BE EMPTY FOR Clay 3.0

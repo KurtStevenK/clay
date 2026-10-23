@@ -20,33 +20,33 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpthumb/gimpthumb.h"
+#include "libclaythumb/claythumb.h"
 
 #include "menus-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpviewable.h"
+#include "core/clay.h"
+#include "core/clayviewable.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactionimpl.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactionimpl.h"
+#include "widgets/clayuimanager.h"
 
 #include "file-menu.h"
 
 
 void
-file_menu_setup (GimpUIManager *manager,
+file_menu_setup (ClayUIManager *manager,
                  const gchar   *ui_path)
 {
   gint n_entries;
   gint i;
 
-  g_return_if_fail (GIMP_IS_UI_MANAGER (manager));
+  g_return_if_fail (CLAY_IS_UI_MANAGER (manager));
   g_return_if_fail (ui_path != NULL);
 
-  n_entries = GIMP_GUI_CONFIG (manager->gimp->config)->last_opened_size;
+  n_entries = CLAY_GUI_CONFIG (manager->clay->config)->last_opened_size;
 
   for (i = 0; i < n_entries; i++)
     {
@@ -54,7 +54,7 @@ file_menu_setup (GimpUIManager *manager,
 
       action_name = g_strdup_printf ("file-open-recent-%02d", i + 1);
 
-      gimp_ui_manager_add_ui (manager, "/File/Open Recent/[Files]",
+      clay_ui_manager_add_ui (manager, "/File/Open Recent/[Files]",
                               action_name, FALSE);
 
       g_free (action_name);

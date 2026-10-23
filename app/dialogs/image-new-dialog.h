@@ -18,8 +18,8 @@
 #pragma once
 
 
-GtkWidget * image_new_dialog_new (GimpContext  *context);
+GtkWidget * image_new_dialog_new (ClayContext  *context);
 
 void        image_new_dialog_set (GtkWidget    *dialog,
-                                  GimpImage    *image,
-                                  GimpTemplate *template);
+                                  ClayImage    *image,
+                                  ClayTemplate *template);

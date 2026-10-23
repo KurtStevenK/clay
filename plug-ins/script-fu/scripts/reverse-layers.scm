@@ -16,24 +16,24 @@
 
 (define (script-fu-reverse-layers img drawables)
   (let* (
-        (layer-array (car (gimp-image-get-layers img)))
+        (layer-array (car (clay-image-get-layers img)))
         (num-layers (vector-length layer-array))
         (i (- num-layers 1))
         )
 
-    (gimp-image-undo-group-start img)
+    (clay-image-undo-group-start img)
 
     (while (>= i 0)
            (let ((layer (vector-ref layer-array i)))
-             (if (= (car (gimp-layer-is-floating-sel layer)) FALSE)
-                 (gimp-image-lower-item-to-bottom img layer))
+             (if (= (car (clay-layer-is-floating-sel layer)) FALSE)
+                 (clay-image-lower-item-to-bottom img layer))
            )
 
            (set! i (- i 1))
     )
 
-    (gimp-image-undo-group-end img)
-    (gimp-displays-flush)
+    (clay-image-undo-group-end img)
+    (clay-displays-flush)
   )
 )
 

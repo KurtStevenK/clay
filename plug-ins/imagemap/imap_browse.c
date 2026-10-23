@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -22,12 +22,12 @@
 
 #include "config.h"
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "imap_browse.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static const GtkTargetEntry target_table[] =
@@ -131,7 +131,7 @@ browse_widget_new (const gchar *name)
    gtk_widget_set_visible (browse->file, TRUE);
 
    browse->button = button = gtk_button_new ();
-   icon = gtk_image_new_from_icon_name (GIMP_ICON_DOCUMENT_OPEN,
+   icon = gtk_image_new_from_icon_name (CLAY_ICON_DOCUMENT_OPEN,
                                         GTK_ICON_SIZE_BUTTON);
    gtk_container_add (GTK_CONTAINER (button), icon);
    gtk_widget_set_visible (icon, TRUE);

@@ -22,38 +22,38 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpthumb/gimpthumb.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaythumb/claythumb.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimagefile.h"
-#include "core/gimpimage.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimagefile.h"
+#include "core/clayimage.h"
 
 #include "file/file-open.h"
 
-#include "widgets/gimpclipboard.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpcontainerview-utils.h"
-#include "widgets/gimpdocumentview.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayclipboard.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claycontainerview-utils.h"
+#include "widgets/claydocumentview.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplay-foreach.h"
-#include "display/gimpdisplayshell.h"
+#include "display/claydisplay.h"
+#include "display/claydisplay-foreach.h"
+#include "display/claydisplayshell.h"
 
 #include "documents-commands.h"
 #include "file-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct
@@ -66,9 +66,9 @@ typedef struct
 /*  local function prototypes  */
 
 static void   documents_open_image    (GtkWidget     *editor,
-                                       GimpContext   *context,
-                                       GimpImagefile *imagefile);
-static void   documents_raise_display (GimpDisplay   *display,
+                                       ClayContext   *context,
+                                       ClayImagefile *imagefile);
+static void   documents_raise_display (ClayDisplay   *display,
                                        RaiseClosure  *closure);
 
 
@@ -76,39 +76,39 @@ static void   documents_raise_display (GimpDisplay   *display,
 /*  public functions */
 
 void
-documents_open_cmd_callback (GimpAction *action,
+documents_open_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpContainer       *container;
-  GimpImagefile       *imagefile;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayContainer       *container;
+  ClayImagefile       *imagefile;
   GList               *images = NULL;
   GList               *list;
 
-  context   = gimp_container_view_get_context (editor->view);
-  container = gimp_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
 
-  imagefile = gimp_context_get_imagefile (context);
+  imagefile = clay_context_get_imagefile (context);
 
-  if (gimp_container_view_get_selected (editor->view, &images) > 1)
+  if (clay_container_view_get_selected (editor->view, &images) > 1)
     {
       for (list = images; list; list = list->next)
         documents_open_image (GTK_WIDGET (editor), context,
-                              GIMP_IMAGEFILE (list->data));
+                              CLAY_IMAGEFILE (list->data));
 
       g_list_free (list);
     }
   else
     {
-      if (imagefile && gimp_container_have (container, GIMP_OBJECT (imagefile)))
+      if (imagefile && clay_container_have (container, CLAY_OBJECT (imagefile)))
         {
           documents_open_image (GTK_WIDGET (editor), context, imagefile);
         }
       else
         {
-          file_file_open_dialog (context->gimp, NULL, GTK_WIDGET (editor));
+          file_file_open_dialog (context->clay, NULL, GTK_WIDGET (editor));
         }
     }
   if (images)
@@ -116,28 +116,28 @@ documents_open_cmd_callback (GimpAction *action,
 }
 
 void
-documents_raise_or_open_cmd_callback (GimpAction *action,
+documents_raise_or_open_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpContainer       *container;
-  GimpImagefile       *imagefile;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayContainer       *container;
+  ClayImagefile       *imagefile;
 
-  context   = gimp_container_view_get_context (editor->view);
-  container = gimp_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
 
-  imagefile = gimp_context_get_imagefile (context);
+  imagefile = clay_context_get_imagefile (context);
 
-  if (imagefile && gimp_container_have (container, GIMP_OBJECT (imagefile)))
+  if (imagefile && clay_container_have (container, CLAY_OBJECT (imagefile)))
     {
       RaiseClosure closure;
 
-      closure.name  = gimp_object_get_name (imagefile);
+      closure.name  = clay_object_get_name (imagefile);
       closure.found = FALSE;
 
-      gimp_container_foreach (GIMP_CONTAINER (context->gimp->displays),
+      clay_container_foreach (CLAY_CONTAINER (context->clay->displays),
                               (GFunc) documents_raise_display,
                               &closure);
 
@@ -147,66 +147,66 @@ documents_raise_or_open_cmd_callback (GimpAction *action,
 }
 
 void
-documents_file_open_dialog_cmd_callback (GimpAction *action,
+documents_file_open_dialog_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpContainer       *container;
-  GimpImagefile       *imagefile;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayContainer       *container;
+  ClayImagefile       *imagefile;
 
-  context   = gimp_container_view_get_context (editor->view);
-  container = gimp_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
 
-  imagefile = gimp_context_get_imagefile (context);
+  imagefile = clay_context_get_imagefile (context);
 
-  if (imagefile && gimp_container_have (container, GIMP_OBJECT (imagefile)))
+  if (imagefile && clay_container_have (container, CLAY_OBJECT (imagefile)))
     {
-      file_file_open_dialog (context->gimp,
-                             gimp_imagefile_get_file (imagefile),
+      file_file_open_dialog (context->clay,
+                             clay_imagefile_get_file (imagefile),
                              GTK_WIDGET (editor));
     }
 }
 
 void
-documents_copy_location_cmd_callback (GimpAction *action,
+documents_copy_location_cmd_callback (ClayAction *action,
                                       GVariant   *value,
                                       gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpImagefile       *imagefile;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayImagefile       *imagefile;
 
-  context   = gimp_container_view_get_context (editor->view);
-  imagefile = gimp_context_get_imagefile (context);
+  context   = clay_container_view_get_context (editor->view);
+  imagefile = clay_context_get_imagefile (context);
 
   if (imagefile)
-    gimp_clipboard_set_text (context->gimp,
-                             gimp_object_get_name (imagefile));
+    clay_clipboard_set_text (context->clay,
+                             clay_object_get_name (imagefile));
 }
 
 void
-documents_show_in_file_manager_cmd_callback (GimpAction *action,
+documents_show_in_file_manager_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpImagefile       *imagefile;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayImagefile       *imagefile;
 
-  context   = gimp_container_view_get_context (editor->view);
-  imagefile = gimp_context_get_imagefile (context);
+  context   = clay_container_view_get_context (editor->view);
+  imagefile = clay_context_get_imagefile (context);
 
   if (imagefile)
     {
-      GFile  *file  = g_file_new_for_uri (gimp_object_get_name (imagefile));
+      GFile  *file  = g_file_new_for_uri (clay_object_get_name (imagefile));
       GError *error = NULL;
 
-      if (! gimp_file_show_in_file_manager (file, &error))
+      if (! clay_file_show_in_file_manager (file, &error))
         {
-          gimp_message (context->gimp, G_OBJECT (editor),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (context->clay, G_OBJECT (editor),
+                        CLAY_MESSAGE_ERROR,
                         _("Can't show file in file manager: %s"),
                         error->message);
           g_clear_error (&error);
@@ -217,26 +217,26 @@ documents_show_in_file_manager_cmd_callback (GimpAction *action,
 }
 
 void
-documents_remove_cmd_callback (GimpAction *action,
+documents_remove_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
   const gchar         *uri;
   GList               *images = NULL;
   GList               *list;
 
-  if (gimp_container_view_get_selected (editor->view, &images) > 0)
+  if (clay_container_view_get_selected (editor->view, &images) > 0)
     {
       for (list = images; list; list = list->next)
         {
-          uri = gimp_object_get_name (GIMP_IMAGEFILE (list->data));
+          uri = clay_object_get_name (CLAY_IMAGEFILE (list->data));
 
           gtk_recent_manager_remove_item (gtk_recent_manager_get_default (),
                                           uri, NULL);
-          gimp_container_view_set_1_selected (editor->view,
-                                              GIMP_VIEWABLE (list->data));
-          gimp_container_view_remove_active (editor->view);
+          clay_container_view_set_1_selected (editor->view,
+                                              CLAY_VIEWABLE (list->data));
+          clay_container_view_remove_active (editor->view);
         }
       g_list_free (list);
       g_list_free (images);
@@ -244,28 +244,28 @@ documents_remove_cmd_callback (GimpAction *action,
 }
 
 void
-documents_clear_cmd_callback (GimpAction *action,
+documents_clear_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpContainerEditor *editor  = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context = gimp_container_view_get_context (editor->view);
-  Gimp                *gimp    = context->gimp;
+  ClayContainerEditor *editor  = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context = clay_container_view_get_context (editor->view);
+  Clay                *clay    = context->clay;
   GtkWidget           *dialog;
 
-  dialog = gimp_message_dialog_new (_("Clear Document History"),
-                                    GIMP_ICON_SHRED,
+  dialog = clay_message_dialog_new (_("Clear Document History"),
+                                    CLAY_ICON_SHRED,
                                     GTK_WIDGET (editor),
                                     GTK_DIALOG_MODAL |
                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-                                    gimp_standard_help_func, NULL,
+                                    clay_standard_help_func, NULL,
 
                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
                                     _("Cl_ear"),  GTK_RESPONSE_OK,
 
                                     NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -275,15 +275,15 @@ documents_clear_cmd_callback (GimpAction *action,
                            G_CALLBACK (gtk_widget_destroy),
                            dialog, G_CONNECT_SWAPPED);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("Clear the Recent Documents list?"));
 
-  gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                              _("Clearing the document history will "
                                "permanently remove all images from "
                                "the recent documents list."));
 
-  if (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_OK)
+  if (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_OK)
     {
       GtkRecentManager *manager = gtk_recent_manager_get_default ();
       GList            *items;
@@ -308,38 +308,38 @@ documents_clear_cmd_callback (GimpAction *action,
 
       g_list_free (items);
 
-      gimp_container_clear (gimp->documents);
+      clay_container_clear (clay->documents);
     }
 
   gtk_widget_destroy (dialog);
 }
 
 void
-documents_recreate_preview_cmd_callback (GimpAction *action,
+documents_recreate_preview_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpContainer       *container;
-  GimpImagefile       *imagefile;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayContainer       *container;
+  ClayImagefile       *imagefile;
 
-  context   = gimp_container_view_get_context (editor->view);
-  container = gimp_container_view_get_container (editor->view);
+  context   = clay_container_view_get_context (editor->view);
+  container = clay_container_view_get_container (editor->view);
 
-  imagefile = gimp_context_get_imagefile (context);
+  imagefile = clay_context_get_imagefile (context);
 
-  if (imagefile && gimp_container_have (container, GIMP_OBJECT (imagefile)))
+  if (imagefile && clay_container_have (container, CLAY_OBJECT (imagefile)))
     {
       GError *error = NULL;
 
-      if (! gimp_imagefile_create_thumbnail (imagefile,
+      if (! clay_imagefile_create_thumbnail (imagefile,
                                              context, NULL,
-                                             context->gimp->config->thumbnail_size,
+                                             context->clay->config->thumbnail_size,
                                              FALSE, &error))
         {
-          gimp_message_literal (context->gimp,
-                                NULL , GIMP_MESSAGE_ERROR,
+          clay_message_literal (context->clay,
+                                NULL , CLAY_MESSAGE_ERROR,
                                 error->message);
           g_clear_error (&error);
         }
@@ -347,48 +347,48 @@ documents_recreate_preview_cmd_callback (GimpAction *action,
 }
 
 void
-documents_reload_previews_cmd_callback (GimpAction *action,
+documents_reload_previews_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
 
-  container = gimp_container_view_get_container (editor->view);
+  container = clay_container_view_get_container (editor->view);
 
-  gimp_container_foreach (container,
-                          (GFunc) gimp_imagefile_update,
+  clay_container_foreach (container,
+                          (GFunc) clay_imagefile_update,
                           editor->view);
 }
 
 static void
-documents_remove_dangling_foreach (GimpImagefile *imagefile,
-                                   GimpContainer *container)
+documents_remove_dangling_foreach (ClayImagefile *imagefile,
+                                   ClayContainer *container)
 {
-  GimpThumbnail *thumbnail = gimp_imagefile_get_thumbnail (imagefile);
+  ClayThumbnail *thumbnail = clay_imagefile_get_thumbnail (imagefile);
 
-  if (gimp_thumbnail_peek_image (thumbnail) == GIMP_THUMB_STATE_NOT_FOUND)
+  if (clay_thumbnail_peek_image (thumbnail) == CLAY_THUMB_STATE_NOT_FOUND)
     {
-      const gchar *uri = gimp_object_get_name (imagefile);
+      const gchar *uri = clay_object_get_name (imagefile);
 
       gtk_recent_manager_remove_item (gtk_recent_manager_get_default (), uri,
                                       NULL);
 
-      gimp_container_remove (container, GIMP_OBJECT (imagefile));
+      clay_container_remove (container, CLAY_OBJECT (imagefile));
     }
 }
 
 void
-documents_remove_dangling_cmd_callback (GimpAction *action,
+documents_remove_dangling_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContainer       *container;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContainer       *container;
 
-  container = gimp_container_view_get_container (editor->view);
+  container = clay_container_view_get_container (editor->view);
 
-  gimp_container_foreach (container,
+  clay_container_foreach (container,
                           (GFunc) documents_remove_dangling_foreach,
                           container);
 }
@@ -398,45 +398,45 @@ documents_remove_dangling_cmd_callback (GimpAction *action,
 
 static void
 documents_open_image (GtkWidget     *editor,
-                      GimpContext   *context,
-                      GimpImagefile *imagefile)
+                      ClayContext   *context,
+                      ClayImagefile *imagefile)
 {
   GFile              *file;
-  GimpImage          *image;
-  GimpPDBStatusType   status;
+  ClayImage          *image;
+  ClayPDBStatusType   status;
   GError             *error = NULL;
 
-  file = gimp_imagefile_get_file (imagefile);
+  file = clay_imagefile_get_file (imagefile);
 
-  image = file_open_with_display (context->gimp, context, NULL, file, FALSE,
-                                  G_OBJECT (gimp_widget_get_monitor (editor)),
+  image = file_open_with_display (context->clay, context, NULL, file, FALSE,
+                                  G_OBJECT (clay_widget_get_monitor (editor)),
                                   &status, &error);
 
-  if (! image && status != GIMP_PDB_CANCEL)
+  if (! image && status != CLAY_PDB_CANCEL)
     {
-      gimp_message (context->gimp, G_OBJECT (editor), GIMP_MESSAGE_ERROR,
+      clay_message (context->clay, G_OBJECT (editor), CLAY_MESSAGE_ERROR,
                     _("Opening '%s' failed:\n\n%s"),
-                    gimp_file_get_utf8_name (file), error->message);
+                    clay_file_get_utf8_name (file), error->message);
       g_clear_error (&error);
     }
 }
 
 static void
-documents_raise_display (GimpDisplay  *display,
+documents_raise_display (ClayDisplay  *display,
                          RaiseClosure *closure)
 {
-  GimpImage *image;
+  ClayImage *image;
   GFile     *file;
   gchar     *uri = NULL;
 
-  image = gimp_display_get_image (display);
+  image = clay_display_get_image (display);
 
   if (! image)
     return;
 
-  file = gimp_image_get_file (image);
+  file = clay_image_get_file (image);
   if (! file)
-    file = gimp_image_get_imported_file (image);
+    file = clay_image_get_imported_file (image);
 
   if (file)
     uri = g_file_get_uri (file);
@@ -444,7 +444,7 @@ documents_raise_display (GimpDisplay  *display,
   if (! g_strcmp0 (closure->name, uri))
     {
       closure->found = TRUE;
-      gimp_display_shell_present (gimp_display_get_shell (display));
+      clay_display_shell_present (clay_display_get_shell (display));
     }
 
   g_free (uri);

@@ -18,23 +18,23 @@
 /*
  * Testing
  *
- * Use a scriptfu server client such as https://github.com/vit1-irk/gimp-exec.
+ * Use a scriptfu server client such as https://github.com/vit1-irk/clay-exec.
  * OR servertest.py in the repo, >python2 servertest.py
  *
  * In a console, export G_MESSAGES_DEBUG=scriptfu (to see more logging from scriptfu)
  * (script-fu-server does not use g_logging but rolls its own.)
  *
- * In the console, start GIMP app e.g. ">gimp"
+ * In the console, start Clay app e.g. ">clay"
  * Choose menu item "Filters>Development>Script-Fu>Start Server..."
  * and choose the "Start Server" button in the dialog.
  * Expect in the console: "ScriptFu server: initialized and listening..."
  *
- * Using the client, send a file of Scheme language text e.g. "./gimp-exec test.scheme"
- * (where the text can be a GIMP PDB call like (gimp-message "hello")  )
+ * Using the client, send a file of Scheme language text e.g. "./clay-exec test.scheme"
+ * (where the text can be a Clay PDB call like (clay-message "hello")  )
  * Expect on the console, many log messages like  "ScriptFu server: <foo>"
  * Expect log like "(script-fu:223): scriptfu-DEBUG:.<fu>" from inner scriptfu
  * Expect log "ScriptFu server: post command callback"
- * Expect that the GIMP gui shows no progress, or other messages.
+ * Expect that the Clay gui shows no progress, or other messages.
  *
  * In the client send text "(script-fu-quit)"
  * Expect:
@@ -67,7 +67,7 @@
 
 typedef short sa_family_t; /* Not defined by winsock */
 
-#include <libgimpbase/gimpwin32-io.h>
+#include <libclaybase/claywin32-io.h>
 #else
 #include <sys/socket.h>
 #ifdef HAVE_SYS_SELECT_H
@@ -84,8 +84,8 @@ typedef short sa_family_t; /* Not defined by winsock */
 
 #include <glib/gstdio.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "libscriptfu/script-fu-lib.h"
 #include "libscriptfu/script-fu-intl.h"
@@ -178,7 +178,7 @@ typedef union
  *  Local Functions
  */
 
-static GimpPDBStatusType  server_start            (const gchar            *listen_ip,
+static ClayPDBStatusType  server_start            (const gchar            *listen_ip,
                                                    gint                    port,
                                                    const gchar            *logfile,
                                                    GError                **error);
@@ -270,12 +270,12 @@ script_fu_server_post_command (void)
     }
 }
 
-GimpValueArray *
-script_fu_server_run (GimpProcedure        *procedure,
-                      GimpProcedureConfig  *config)
+ClayValueArray *
+script_fu_server_run (ClayProcedure        *procedure,
+                      ClayProcedureConfig  *config)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpRunMode        run_mode;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayRunMode        run_mode;
   gchar             *ip;
   gint               port;
   gchar             *logfile;
@@ -296,7 +296,7 @@ script_fu_server_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       if (server_interface ())
         {
           /* Blocks, an event loop on IO. */
@@ -304,14 +304,14 @@ script_fu_server_run (GimpProcedure        *procedure,
         }
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       status = server_start (ip ? ip : "127.0.0.1", port, logfile, &error);
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
-      status = GIMP_PDB_CALLING_ERROR;
+    case CLAY_RUN_WITH_LAST_VALS:
+      status = CLAY_PDB_CALLING_ERROR;
       g_printerr ("Script-Fu server does not handle "
-                  "\"GIMP_RUN_WITH_LAST_VALS\"\n");
+                  "\"CLAY_RUN_WITH_LAST_VALS\"\n");
 
     default:
       break;
@@ -319,7 +319,7 @@ script_fu_server_run (GimpProcedure        *procedure,
   g_free (ip);
   g_free (logfile);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static void
@@ -491,23 +491,23 @@ server_progress_set_value (gdouble   percentage,
 static const gchar *
 server_progress_install (void)
 {
-  GimpProgressVtable vtable = { 0, };
+  ClayProgressVtable vtable = { 0, };
 
   vtable.start     = server_progress_start;
   vtable.end       = server_progress_end;
   vtable.set_text  = server_progress_set_text;
   vtable.set_value = server_progress_set_value;
 
-  return gimp_progress_install_vtable (&vtable, NULL, NULL);
+  return clay_progress_install_vtable (&vtable, NULL, NULL);
 }
 
 static void
 server_progress_uninstall (const gchar *progress)
 {
-  gimp_progress_uninstall (progress);
+  clay_progress_uninstall (progress);
 }
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 server_start (const gchar  *listen_ip,
               gint          port,
               const gchar  *logfile,
@@ -531,9 +531,9 @@ server_start (const gchar  *listen_ip,
 
   if (e != 0)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    "getaddrinfo: %s\n", gai_strerror (e));
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   for (ai_curr = ai, sockno = 0;
@@ -543,13 +543,13 @@ server_start (const gchar  *listen_ip,
       /* Create the socket and set it up to accept connections.          */
       /* This may fail if there's a server running on this port already. */
       if ((server_socks[sockno] = make_socket (ai_curr, error)) == -1)
-        return GIMP_PDB_EXECUTION_ERROR;
+        return CLAY_PDB_EXECUTION_ERROR;
 
       if (listen (server_socks[sockno], 5) < 0)
         {
           set_socket_api_error (error, "listen");
           freeaddrinfo (ai);
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
@@ -576,7 +576,7 @@ server_start (const gchar  *listen_ip,
   while (! script_fu_done)
     {
       if (! script_fu_server_listen (0, error))
-        return GIMP_PDB_EXECUTION_ERROR;
+        return CLAY_PDB_EXECUTION_ERROR;
 
       while (command_queue)
         {
@@ -604,7 +604,7 @@ server_start (const gchar  *listen_ip,
   freeaddrinfo (ai);
   server_quit ();
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 
@@ -621,7 +621,7 @@ server_start (const gchar  *listen_ip,
  *
  * Scheme scripts yield only the value of the final expression.
  * The yielded value is NOT written to stdout.
- * Scripts that are calls to Gimp PDB procedure never yield a useful value,
+ * Scripts that are calls to Clay PDB procedure never yield a useful value,
  * since they are functions returning void.
  * Most scripts are for their side effects,
  * and not for what they write to stdout.
@@ -680,7 +680,7 @@ execute_command (SFCommand  *cmd,
   if (response == NULL)
     {
       /* This should really never happen. */
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    "%s: NULL script response", G_STRFUNC);
       return FALSE;
     }
@@ -959,18 +959,18 @@ server_interface (void)
   GtkWidget *image;
   GtkWidget *label;
 
-  gimp_ui_init ("script-fu");
+  clay_ui_init ("script-fu");
 
-  dlg = gimp_dialog_new (_("Script-Fu Server Options"), "gimp-script-fu",
+  dlg = clay_dialog_new (_("Script-Fu Server Options"), "clay-script-fu",
                          NULL, 0,
-                         gimp_standard_help_func, "plug-in-script-fu-server",
+                         clay_standard_help_func, "plug-in-script-fu-server",
 
                          _("_Cancel"),       GTK_RESPONSE_CANCEL,
                          _("_Start Server"), GTK_RESPONSE_OK,
 
                          NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dlg),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dlg),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -998,20 +998,20 @@ server_interface (void)
   /* The server ip to listen to */
   sint.ip_entry = gtk_entry_new ();
   gtk_entry_set_text (GTK_ENTRY (sint.ip_entry), "127.0.0.1");
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 0,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 0,
                             _("Listen on IP:"), 0.0, 0.5,
                             sint.ip_entry, 1);
 
   /*  The server port  */
   sint.port_entry = gtk_entry_new ();
   gtk_entry_set_text (GTK_ENTRY (sint.port_entry), "10008");
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                             _("Server port:"), 0.0, 0.5,
                             sint.port_entry, 1);
 
   /*  The server logfile  */
   sint.log_entry = gtk_entry_new ();
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 2,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 2,
                             _("Server logfile:"), 0.0, 0.5,
                             sint.log_entry, 1);
 
@@ -1020,7 +1020,7 @@ server_interface (void)
   gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
   gtk_widget_set_visible (hbox, TRUE);
 
-  image = gtk_image_new_from_icon_name (GIMP_ICON_DIALOG_WARNING,
+  image = gtk_image_new_from_icon_name (CLAY_ICON_DIALOG_WARNING,
                                         GTK_ICON_SIZE_DIALOG);
   gtk_box_pack_start (GTK_BOX (hbox), image, TRUE, TRUE, 0);
   gtk_widget_set_visible (image, TRUE);
@@ -1030,7 +1030,7 @@ server_interface (void)
                            "attackers to remotely execute arbitrary code "
                            "on this machine."));
   gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
-  gimp_label_set_attributes (GTK_LABEL (label),
+  clay_label_set_attributes (GTK_LABEL (label),
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                              -1);
   gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
@@ -1236,10 +1236,10 @@ set_socket_api_error (GError      **error,
       break;
     }
 
-  g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+  g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                "%s failed: %s", api_name, emsg);
 #else
-  g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+  g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                "%s failed: %s", api_name, strerror (errno));
 #endif
 }

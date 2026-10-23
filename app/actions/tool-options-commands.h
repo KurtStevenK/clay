@@ -18,26 +18,26 @@
 #pragma once
 
 
-void   tool_options_save_new_preset_cmd_callback (GimpAction *action,
+void   tool_options_save_new_preset_cmd_callback (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);
 
-void   tool_options_save_preset_cmd_callback     (GimpAction *action,
+void   tool_options_save_preset_cmd_callback     (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);
-void   tool_options_restore_preset_cmd_callback  (GimpAction *action,
+void   tool_options_restore_preset_cmd_callback  (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);
-void   tool_options_edit_preset_cmd_callback     (GimpAction *action,
+void   tool_options_edit_preset_cmd_callback     (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);
-void   tool_options_delete_preset_cmd_callback   (GimpAction *action,
+void   tool_options_delete_preset_cmd_callback   (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);
 
-void   tool_options_reset_cmd_callback           (GimpAction *action,
+void   tool_options_reset_cmd_callback           (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);
-void   tool_options_reset_all_cmd_callback       (GimpAction *action,
+void   tool_options_reset_all_cmd_callback       (ClayAction *action,
                                                   GVariant   *value,
                                                   gpointer    data);

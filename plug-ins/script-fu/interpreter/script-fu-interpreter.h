@@ -19,14 +19,14 @@
 #define __SCRIPT_FU_INTERPRETER_H__
 
 GList         *script_fu_interpreter_list_defined_proc_names (
-                                            GimpPlugIn  *plug_in,
+                                            ClayPlugIn  *plug_in,
                                             const gchar *path_to_this_plugin);
-GimpProcedure *script_fu_interpreter_create_proc (
-                                            GimpPlugIn  *plug_in,
+ClayProcedure *script_fu_interpreter_create_proc (
+                                            ClayPlugIn  *plug_in,
                                             const gchar *proc_name,
                                             const gchar *path_to_script);
 void           script_fu_interpreter_get_i18n (
-                                            GimpPlugIn  *plug_in,
+                                            ClayPlugIn  *plug_in,
                                             const gchar *proc_name,
                                             const gchar *path_to_this_script,
                                             gchar **i18n_domain,

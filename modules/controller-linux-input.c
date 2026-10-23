@@ -34,16 +34,16 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#define GIMP_ENABLE_CONTROLLER_UNDER_CONSTRUCTION
-#include "libgimpwidgets/gimpcontroller.h"
+#define CLAY_ENABLE_CONTROLLER_UNDER_CONSTRUCTION
+#include "libclaywidgets/claycontroller.h"
 
-#include "gimpinputdevicestore.h"
+#include "clayinputdevicestore.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 
 typedef struct
@@ -130,9 +130,9 @@ typedef struct _ControllerLinuxInputClass ControllerLinuxInputClass;
 
 struct _ControllerLinuxInput
 {
-  GimpController        parent_instance;
+  ClayController        parent_instance;
 
-  GimpInputDeviceStore *store;
+  ClayInputDeviceStore *store;
   gchar                *device;
   GIOChannel           *io;
   guint                 io_id;
@@ -140,7 +140,7 @@ struct _ControllerLinuxInput
 
 struct _ControllerLinuxInputClass
 {
-  GimpControllerClass  parent_class;
+  ClayControllerClass  parent_class;
 };
 
 
@@ -157,10 +157,10 @@ static void   linux_input_get_property            (GObject        *object,
                                                    GValue         *value,
                                                    GParamSpec     *pspec);
 
-static gint          linux_input_get_n_events     (GimpController *controller);
-static const gchar * linux_input_get_event_name   (GimpController *controller,
+static gint          linux_input_get_n_events     (ClayController *controller);
+static const gchar * linux_input_get_event_name   (ClayController *controller,
                                                    gint            event_id);
-static const gchar * linux_input_get_event_blurb  (GimpController *controller,
+static const gchar * linux_input_get_event_blurb  (ClayController *controller,
                                                    gint            event_id);
 
 static void          linux_input_device_changed   (ControllerLinuxInput *controller,
@@ -172,9 +172,9 @@ static gboolean      linux_input_read_event       (GIOChannel           *io,
                                                    gpointer              data);
 
 
-static const GimpModuleInfo linux_input_info =
+static const ClayModuleInfo linux_input_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   N_("Linux input event controller"),
   "Sven Neumann <sven@gimp.org>, Michael Natterer <mitch@gimp.org>",
   "v0.2",
@@ -184,19 +184,19 @@ static const GimpModuleInfo linux_input_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (ControllerLinuxInput, controller_linux_input,
-                       GIMP_TYPE_CONTROLLER)
+                       CLAY_TYPE_CONTROLLER)
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &linux_input_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
-  gimp_input_device_store_register_types (module);
+  clay_input_device_store_register_types (module);
   controller_linux_input_register_type (module);
 
   return TRUE;
@@ -205,7 +205,7 @@ gimp_module_register (GTypeModule *module)
 static void
 controller_linux_input_class_init (ControllerLinuxInputClass *klass)
 {
-  GimpControllerClass *controller_class = GIMP_CONTROLLER_CLASS (klass);
+  ClayControllerClass *controller_class = CLAY_CONTROLLER_CLASS (klass);
   GObjectClass        *object_class     = G_OBJECT_CLASS (klass);
 
   object_class->dispose            = linux_input_dispose;
@@ -218,18 +218,18 @@ controller_linux_input_class_init (ControllerLinuxInputClass *klass)
                                                         _("Device:"),
                                                         _("The name of the device to read Linux Input events from."),
                                                         NULL,
-                                                        GIMP_CONFIG_PARAM_FLAGS));
+                                                        CLAY_CONFIG_PARAM_FLAGS));
 #ifdef HAVE_LIBGUDEV
   g_object_class_install_property (object_class, PROP_DEVICE_STORE,
                                    g_param_spec_object ("device-values",
                                                         NULL, NULL,
-                                                        GIMP_TYPE_INPUT_DEVICE_STORE,
+                                                        CLAY_TYPE_INPUT_DEVICE_STORE,
                                                         G_PARAM_READABLE));
 #endif
 
   controller_class->name            = _("Linux Input");
-  controller_class->help_id         = "gimp-controller-linux-input";
-  controller_class->icon_name       = GIMP_ICON_CONTROLLER_LINUX_INPUT;
+  controller_class->help_id         = "clay-controller-linux-input";
+  controller_class->icon_name       = CLAY_ICON_CONTROLLER_LINUX_INPUT;
 
   controller_class->get_n_events    = linux_input_get_n_events;
   controller_class->get_event_name  = linux_input_get_event_name;
@@ -244,7 +244,7 @@ controller_linux_input_class_finalize (ControllerLinuxInputClass *klass)
 static void
 controller_linux_input_init (ControllerLinuxInput *controller)
 {
-  controller->store = gimp_input_device_store_new ();
+  controller->store = clay_input_device_store_new ();
 
   if (controller->store)
     {
@@ -323,13 +323,13 @@ linux_input_get_property (GObject    *object,
 }
 
 static gint
-linux_input_get_n_events (GimpController *controller)
+linux_input_get_n_events (ClayController *controller)
 {
   return G_N_ELEMENTS (key_events) + G_N_ELEMENTS (rel_events);
 }
 
 static const gchar *
-linux_input_get_event_name (GimpController *controller,
+linux_input_get_event_name (ClayController *controller,
                             gint            event_id)
 {
   if (event_id < 0)
@@ -351,7 +351,7 @@ linux_input_get_event_name (GimpController *controller,
 }
 
 static const gchar *
-linux_input_get_event_blurb (GimpController *controller,
+linux_input_get_event_blurb (ClayController *controller,
                              gint            event_id)
 {
   if (event_id < 0)
@@ -515,7 +515,7 @@ linux_input_set_device (ControllerLinuxInput *controller,
   if (controller->device && strlen (controller->device))
     {
       if (controller->store)
-        filename = gimp_input_device_store_get_device_file (controller->store,
+        filename = clay_input_device_store_get_device_file (controller->store,
                                                             controller->device);
       else
         filename = g_strdup (controller->device);
@@ -576,7 +576,7 @@ linux_input_set_device (ControllerLinuxInput *controller,
     }
   else if (controller->store)
     {
-      GError *error = gimp_input_device_store_get_error (controller->store);
+      GError *error = clay_input_device_store_get_error (controller->store);
 
       if (error)
         {
@@ -643,8 +643,8 @@ linux_input_read_event (GIOChannel   *io,
 
   if (n_bytes == sizeof (struct input_event))
     {
-      GimpController      *controller = GIMP_CONTROLLER (data);
-      GimpControllerEvent  cevent     = { 0, };
+      ClayController      *controller = CLAY_CONTROLLER (data);
+      ClayControllerEvent  cevent     = { 0, };
       gint                 i;
 
       switch (ev.type)
@@ -655,11 +655,11 @@ linux_input_read_event (GIOChannel   *io,
           for (i = 0; i < G_N_ELEMENTS (key_events); i++)
             if (ev.code == key_events[i].code)
               {
-                cevent.any.type     = GIMP_CONTROLLER_EVENT_TRIGGER;
+                cevent.any.type     = CLAY_CONTROLLER_EVENT_TRIGGER;
                 cevent.any.source   = controller;
                 cevent.any.event_id = i;
 
-                gimp_controller_event (controller, &cevent);
+                clay_controller_event (controller, &cevent);
 
                 break;
               }
@@ -672,7 +672,7 @@ linux_input_read_event (GIOChannel   *io,
           for (i = 0; i < G_N_ELEMENTS (rel_events); i++)
             if (ev.code == rel_events[i].code)
               {
-                cevent.any.type     = GIMP_CONTROLLER_EVENT_VALUE;
+                cevent.any.type     = CLAY_CONTROLLER_EVENT_VALUE;
                 cevent.any.source   = controller;
                 cevent.any.event_id = G_N_ELEMENTS (key_events) + i;
 
@@ -689,7 +689,7 @@ linux_input_read_event (GIOChannel   *io,
                     g_value_set_double (&cevent.value.value, ev.value);
                   }
 
-                gimp_controller_event (controller, &cevent);
+                clay_controller_event (controller, &cevent);
 
                 g_value_unset (&cevent.value.value);
 

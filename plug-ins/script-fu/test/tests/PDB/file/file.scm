@@ -1,11 +1,11 @@
-; Test gimp-file-<foo> PDB procedures
+; Test clay-file-<foo> PDB procedures
 ;
-; gimp-file-load is tested elsewhere
-; (gimp-file-load RUN-NONINTERACTIVE (path-to-test-images "gimp-logo.png")))
+; clay-file-load is tested elsewhere
+; (clay-file-load RUN-NONINTERACTIVE (path-to-test-images "clay-logo.png")))
 
-; gimp-image-thumbnail is private to libgimp
+; clay-image-thumbnail is private to libclay
 
-; gimp-<foo>-export is tested elsewhere
+; clay-<foo>-export is tested elsewhere
 
 
 (script-fu-use-v3)
@@ -13,18 +13,18 @@
 
 ; setup
 
-; This also tests gimp-file-load
+; This also tests clay-file-load
 (define testImage (testing:load-test-image-basic-v3))
 
-(assert `(gimp-image-id-is-valid ,testImage))
+(assert `(clay-image-id-is-valid ,testImage))
 
 
 
 (test! "get temp file name")
 
-; this is a "file" method but name is not gimp-file- ?
+; this is a "file" method but name is not clay-file- ?
 
-(define tempFilename (gimp-temp-file "xyz"))
+(define tempFilename (clay-temp-file "xyz"))
 
 ; The named file does not exist.
 (assert `(not (file-exists? ,tempFilename)))
@@ -43,11 +43,11 @@
 
 ; We don't do this, because the framework doesn't handle quoted lists.
 ; FIXME This fails with illegal function, but works in the SF Console
-; (define (testThumbnail) (gimp-file-load-thumbnail (path-to-test-images "gimp-logo.png")))
+; (define (testThumbnail) (clay-file-load-thumbnail (path-to-test-images "clay-logo.png")))
 ; (assert `(list? ,testThumbnail))
 
 ; testThumbnail is list
-(assert `(list? (gimp-file-load-thumbnail (,path-to-test-images "gimp-logo.png"))))
+(assert `(list? (clay-file-load-thumbnail (,path-to-test-images "clay-logo.png"))))
 
 ; first element is width, 128
 ; third element is 50k vector of bytes, RGB data
@@ -60,13 +60,13 @@
 ; the image in the file becomes one layer in the image
 
 ; !!! This is rare: a PDB internal function that takes a run mode
-(define testLayer (gimp-file-load-layer
+(define testLayer (clay-file-load-layer
                      RUN-NONINTERACTIVE
                      testImage
-                     (path-to-test-images "gimp-logo.png")))
+                     (path-to-test-images "clay-logo.png")))
 
 ; testLayer is-a layer
-(assert `(gimp-item-id-is-layer ,testLayer))
+(assert `(clay-item-id-is-layer ,testLayer))
 
 ; it is not insert into any image yet
 
@@ -79,16 +79,16 @@
 
 ; Note testImage only has one layer.
 
-(define testLayers (gimp-file-load-layers
+(define testLayers (clay-file-load-layers
                      RUN-NONINTERACTIVE
                      testImage
-                     (path-to-test-images "gimp-logo.png")))
+                     (path-to-test-images "clay-logo.png")))
 
 ; testLayers is-a vector of one
 (assert `(vector? ,testLayers))
 
 ; the one layer in the vector is-a layer
-(assert `(gimp-item-id-is-layer
+(assert `(clay-item-id-is-layer
             (vector-ref ,testLayers 0)))
 
 ; it is not insert into any image yet
@@ -100,9 +100,9 @@
 ; FIXME this fails for unknown reasons
 
 ; This file already has a thumbnail.
-;;(assert `(gimp-file-create-thumbnail
+;;(assert `(clay-file-create-thumbnail
 ;;            ,testImage
-;;            (path-to-test-images "gimp-logo.png")))
+;;            (path-to-test-images "clay-logo.png")))
 
 
 
@@ -111,9 +111,9 @@
 ; Thumbnails don't exist for newly created files unless you create them
 
 
-(define testNewImage (gimp-image-new 21 22 RGB))
+(define testNewImage (clay-image-new 21 22 RGB))
 
-(assert `(gimp-file-save
+(assert `(clay-file-save
             RUN-NONINTERACTIVE
             ,testNewImage
             "/tmp/testSaveNewImage.xcf"
@@ -122,10 +122,10 @@
 ; The file does not have a thumbnail yet???
 
 ; FIXME shouldn't this call succeed instead of error?
-(assert-error `(gimp-file-create-thumbnail
+(assert-error `(clay-file-create-thumbnail
                   ,testNewImage
                   "/tmp/testSaveNewImage.xcf")
-              "Procedure execution of gimp-file-create-thumbnail failed")
+              "Procedure execution of clay-file-create-thumbnail failed")
 
 
 
@@ -134,7 +134,7 @@
 ; The image is not dirty, but saving under a different suffix
 ; does write the file.
 
-(assert `(gimp-file-save
+(assert `(clay-file-save
             RUN-NONINTERACTIVE
             ,testImage
             "/tmp/testSaveImage.xcf"
@@ -144,24 +144,24 @@
 (assert `(file-exists? "/tmp/testSaveImage.xcf"))
 
 
-; TODO test gimp-file-save on a non-dirty image
+; TODO test clay-file-save on a non-dirty image
 ; does or does not write the file?
 
 
 ; Is error to omit a suffix indicating image format
 (assert-error
-     `(gimp-file-save
+     `(clay-file-save
             RUN-NONINTERACTIVE
             ,testImage
             "/tmp/testSaveImage"
             -1 ) ; NULL export options
-      "Procedure execution of gimp-file-save failed: Unknown file type")
+      "Procedure execution of clay-file-save failed: Unknown file type")
 
 
 
 ; cleanup
 ; Delete image but not the created file.
-(gimp-image-delete testImage)
+(clay-image-delete testImage)
 
 
 

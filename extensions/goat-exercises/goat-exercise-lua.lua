@@ -25,8 +25,8 @@ local GLib    = lgi.GLib
 local GObject = lgi.GObject
 local Gio     = lgi.Gio
 local Gegl    = lgi.Gegl
-local Gimp    = lgi.Gimp
-local GimpUi  = lgi.GimpUi
+local Clay    = lgi.Clay
+local ClayUi  = lgi.ClayUi
 local Gtk     = lgi.Gtk
 local Gdk     = lgi.Gdk
 
@@ -43,11 +43,11 @@ end
 
 function run(procedure, run_mode, image, drawables, config, run_data)
   -- procedure:new_return_values() crashes LGI so we construct the
-  -- GimpValueArray manually.
-  local retval = Gimp.ValueArray(1)
+  -- ClayValueArray manually.
+  local retval = Clay.ValueArray(1)
 
   if table.getn(drawables) ~= 1 then
-    local calling_err = GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.CALLING_ERROR)
+    local calling_err = GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.CALLING_ERROR)
     local msg         = "Procedure '%s' only works with one drawable."
 
     msg = string.format(msg, procedure:get_name())
@@ -60,16 +60,16 @@ function run(procedure, run_mode, image, drawables, config, run_data)
   local drawable = drawables[1]
 
   -- Not sure why run_mode has become a string instead of testing
-  -- against Gimp.RunMode.INTERACTIVE.
+  -- against Clay.RunMode.INTERACTIVE.
   if run_mode == "INTERACTIVE" then
-    GimpUi.init("goat-exercise-lua");
+    ClayUi.init("goat-exercise-lua");
     local use_header_bar = Gtk.Settings.get_default().gtk_dialogs_use_header
-    local dialog = GimpUi.Dialog {
+    local dialog = ClayUi.Dialog {
       title          = _("Plug-In Example in Lua"),
       role           = "goat-exercise-Lua",
       use_header_bar = use_header_bar
     }
-    GimpUi.window_set_transient(dialog);
+    ClayUi.window_set_transient(dialog);
     dialog:add_button(_("_Cancel"), Gtk.ResponseType.CANCEL);
     dialog:add_button(_("_Source"), Gtk.ResponseType.APPLY);
     dialog:add_button(_("_OK"), Gtk.ResponseType.OK);
@@ -114,7 +114,7 @@ function run(procedure, run_mode, image, drawables, config, run_data)
 
     while (true) do
       local response = dialog:run()
-      local url = 'https://gitlab.gnome.org/GNOME/gimp/blob/master/extensions/goat-exercises/goat-exercise-lua.lua'
+      local url = 'https://github.com/KurtStevenK/clay/blob/master/extensions/goat-exercises/goat-exercise-lua.lua'
 
       if response == Gtk.ResponseType.OK then
         dialog:destroy()
@@ -123,7 +123,7 @@ function run(procedure, run_mode, image, drawables, config, run_data)
         Gio.app_info_launch_default_for_uri(url, nil);
       else -- CANCEL, CLOSE, DELETE_EVENT
         dialog:destroy()
-        local cancel = GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.CANCEL)
+        local cancel = GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.CANCEL)
         retval:append(cancel)
         return retval
       end
@@ -151,30 +151,30 @@ function run(procedure, run_mode, image, drawables, config, run_data)
 
     drawable:merge_shadow(true)
     drawable:update(x, y, width, height)
-    Gimp.displays_flush()
+    Clay.displays_flush()
   end
 
-  local success = GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.SUCCESS)
+  local success = GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.SUCCESS)
   retval:append(success)
   return retval
 end
 
-Goat:class('Exercise', Gimp.PlugIn)
+Goat:class('Exercise', Clay.PlugIn)
 
 function Goat.Exercise:do_query_procedures()
   return { 'plug-in-goat-exercise-lua' }
 end
 
 function Goat.Exercise:do_create_procedure(name)
-  local procedure = Gimp.ImageProcedure.new(self, name,
-                                            Gimp.PDBProcType.PLUGIN,
+  local procedure = Clay.ImageProcedure.new(self, name,
+                                            Clay.PDBProcType.PLUGIN,
                                             run, nil)
 
   procedure:set_image_types("*");
-  procedure:set_sensitivity_mask(Gimp.ProcedureSensitivityMask.DRAWABLE);
+  procedure:set_sensitivity_mask(Clay.ProcedureSensitivityMask.DRAWABLE);
 
   procedure:set_menu_label(_("Plug-In Example in _Lua"));
-  procedure:set_icon_name(GimpUi.ICON_GEGL);
+  procedure:set_icon_name(ClayUi.ICON_GEGL);
   procedure:add_menu_path('<Image>/Filters/Development/Plug-In Examples/');
 
   procedure:set_documentation(_("Plug-in example in Lua"),
@@ -187,10 +187,10 @@ end
 
 -- 'arg' is a Lua table. When automatically converted to an array, the
 -- value 0 is deleted (because Lua arrays start at 1!), which breaks
--- Gimp.main() call. So let's create our own array starting at 1.
+-- Clay.main() call. So let's create our own array starting at 1.
 argv = {}
 for k, v in pairs(arg) do
   argv[k+1] = v
 end
 
-Gimp.main(GObject.Type.name(Goat.Exercise), argv)
+Clay.main(GObject.Type.name(Goat.Exercise), argv)

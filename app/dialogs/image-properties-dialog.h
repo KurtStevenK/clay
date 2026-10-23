@@ -21,6 +21,6 @@
 #pragma once
 
 
-GtkWidget * image_properties_dialog_new (GimpImage   *image,
-                                         GimpContext *context,
+GtkWidget * image_properties_dialog_new (ClayImage   *image,
+                                         ClayContext *context,
                                          GtkWidget   *parent);

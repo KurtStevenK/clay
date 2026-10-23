@@ -30,7 +30,7 @@ HELP
 
     @inargs = (
         { name => 'run_mode',
-          type => 'enum GimpRunMode (no GIMP_RUN_WITH_LAST_VALS)',
+          type => 'enum ClayRunMode (no CLAY_RUN_WITH_LAST_VALS)',
           desc => 'The run mode' },
         { name => 'file', type => 'file',
           desc => 'The file to load' }
@@ -45,79 +45,79 @@ HELP
         no_marshalling => 1,
         code => <<'CODE'
 {
-  GimpValueArray      *new_args;
-  GimpValueArray      *return_vals;
-  GimpPlugInProcedure *file_proc;
-  GimpProcedure       *proc;
+  ClayValueArray      *new_args;
+  ClayValueArray      *return_vals;
+  ClayPlugInProcedure *file_proc;
+  ClayProcedure       *proc;
   GFile               *file;
   gint                 i;
 
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   if (! file)
-    return gimp_procedure_get_return_values (procedure, FALSE,
+    return clay_procedure_get_return_values (procedure, FALSE,
                                              error ? *error : NULL);
 
-  file_proc = gimp_plug_in_manager_file_procedure_find (gimp->plug_in_manager,
-                                                        GIMP_FILE_PROCEDURE_GROUP_OPEN,
+  file_proc = clay_plug_in_manager_file_procedure_find (clay->plug_in_manager,
+                                                        CLAY_FILE_PROCEDURE_GROUP_OPEN,
                                                         file, error);
 
   if (! file_proc)
-    return gimp_procedure_get_return_values (procedure, FALSE,
+    return clay_procedure_get_return_values (procedure, FALSE,
                                              error ? *error : NULL);
 
-  proc = GIMP_PROCEDURE (file_proc);
+  proc = CLAY_PROCEDURE (file_proc);
 
-  new_args = gimp_procedure_get_arguments (proc);
+  new_args = clay_procedure_get_arguments (proc);
 
-  g_value_transform (gimp_value_array_index (args, 0),
-		     gimp_value_array_index (new_args, 0));
-  g_value_transform (gimp_value_array_index (args, 1),
-		     gimp_value_array_index (new_args, 1));
+  g_value_transform (clay_value_array_index (args, 0),
+		     clay_value_array_index (new_args, 0));
+  g_value_transform (clay_value_array_index (args, 1),
+		     clay_value_array_index (new_args, 1));
 
   for (i = 2; i < proc->num_args; i++)
-    if (GIMP_IS_PARAM_SPEC_CHOICE (proc->args[i]))
+    if (CLAY_IS_PARAM_SPEC_CHOICE (proc->args[i]))
       {
         GParamSpecString *string_spec = G_PARAM_SPEC_STRING (proc->args[i]);
 
-        g_value_set_static_string (gimp_value_array_index (new_args, i),
+        g_value_set_static_string (clay_value_array_index (new_args, i),
                                    string_spec->default_value);
       }
     else if (G_IS_PARAM_SPEC_STRING (proc->args[i]))
       {
-        g_value_set_static_string (gimp_value_array_index (new_args, i), "");
+        g_value_set_static_string (clay_value_array_index (new_args, i), "");
       }
 
   return_vals =
-    gimp_pdb_execute_procedure_by_name_args (gimp->pdb,
+    clay_pdb_execute_procedure_by_name_args (clay->pdb,
                                              context, progress, error,
-                                             gimp_object_get_name (proc),
+                                             clay_object_get_name (proc),
                                              new_args);
 
-  gimp_value_array_unref (new_args);
+  clay_value_array_unref (new_args);
 
-  if (g_value_get_enum (gimp_value_array_index (return_vals, 0)) ==
-      GIMP_PDB_SUCCESS)
+  if (g_value_get_enum (clay_value_array_index (return_vals, 0)) ==
+      CLAY_PDB_SUCCESS)
     {
-      if (gimp_value_array_length (return_vals) > 1 &&
-          GIMP_VALUE_HOLDS_IMAGE (gimp_value_array_index (return_vals, 1)))
+      if (clay_value_array_length (return_vals) > 1 &&
+          CLAY_VALUE_HOLDS_IMAGE (clay_value_array_index (return_vals, 1)))
         {
-          GimpImage *image =
-            g_value_get_object (gimp_value_array_index (return_vals, 1));
+          ClayImage *image =
+            g_value_get_object (clay_value_array_index (return_vals, 1));
 
-          if (! gimp_image_get_load_proc (image))
+          if (! clay_image_get_load_proc (image))
             /* Leave the initial load procedure if it already exists as
              * it will give information about the source format. See
              * similar code in file_open_image().
              */
-            gimp_image_set_load_proc (image, file_proc);
+            clay_image_set_load_proc (image, file_proc);
 
-          if (! gimp_image_get_file (image))
-            gimp_image_set_imported_file (image, file);
+          if (! clay_image_get_file (image))
+            clay_image_set_imported_file (image, file);
 
-          gimp_image_clean_all (image);
-          gimp_image_undo_disable (image);
-          gimp_image_undo_enable (image);
+          clay_image_clean_all (image);
+          clay_image_undo_disable (image);
+          clay_image_undo_enable (image);
         }
     }
 
@@ -133,14 +133,14 @@ sub file_load_layer {
     $help = <<'HELP';
 This procedure behaves like the file-load procedure but opens the specified
 image as a layer for an existing image. The returned layer needs to be
-added to the existing image with gimp_image_insert_layer().
+added to the existing image with clay_image_insert_layer().
 HELP
 
     &neo_pdb_misc('2005', '2.4');
 
     @inargs = (
         { name => 'run_mode',
-          type => 'enum GimpRunMode (no GIMP_RUN_WITH_LAST_VALS)',
+          type => 'enum ClayRunMode (no CLAY_RUN_WITH_LAST_VALS)',
           desc => 'The run mode' },
         { name => 'image', type => 'image',
           desc => 'Destination image' },
@@ -157,9 +157,9 @@ HELP
         code => <<'CODE'
 {
   GList             *layers;
-  GimpPDBStatusType  status;
+  ClayPDBStatusType  status;
 
-  layers = file_open_layers (gimp, context, progress,
+  layers = file_open_layers (clay, context, progress,
                              image, FALSE, FALSE,
                              file, run_mode, NULL, &status, error);
 
@@ -181,14 +181,14 @@ sub file_load_layers {
     $help = <<'HELP';
 This procedure behaves like the file-load procedure but opens the specified
 image as layers for an existing image. The returned layers needs to be
-added to the existing image with gimp_image_insert_layer().
+added to the existing image with clay_image_insert_layer().
 HELP
 
     &mitch_pdb_misc('2006', '2.4');
 
     @inargs = (
         { name => 'run_mode',
-          type => 'enum GimpRunMode (no GIMP_RUN_WITH_LAST_VALS)',
+          type => 'enum ClayRunMode (no CLAY_RUN_WITH_LAST_VALS)',
           desc => 'The run mode' },
         { name => 'image', type => 'image',
           desc => 'Destination image' },
@@ -205,9 +205,9 @@ HELP
         code => <<'CODE'
 {
   GList             *layer_list;
-  GimpPDBStatusType  status;
+  ClayPDBStatusType  status;
 
-  layer_list = file_open_layers (gimp, context, progress,
+  layer_list = file_open_layers (clay, context, progress,
                                  image, FALSE, FALSE,
                                  file, run_mode, NULL, &status, error);
 
@@ -219,7 +219,7 @@ HELP
 
       num_layers = g_list_length (layer_list);
 
-      layers = g_new0 (GimpLayer *, num_layers + 1);
+      layers = g_new0 (ClayLayer *, num_layers + 1);
 
       for (i = 0, list = layer_list;
            i < num_layers;
@@ -254,7 +254,7 @@ HELP
     &josh_pdb_misc('1997');
 
     @inargs = (
-        { name => 'run_mode', type => 'enum GimpRunMode',
+        { name => 'run_mode', type => 'enum ClayRunMode',
           desc => 'The run mode' },
         { name => 'image', type => 'image',
           desc => 'Input image' },
@@ -269,88 +269,88 @@ HELP
         no_marshalling => 1,
         code => <<'CODE'
 {
-  GimpValueArray      *new_args;
-  GimpValueArray      *return_vals;
-  GimpPlugInProcedure *file_proc;
+  ClayValueArray      *new_args;
+  ClayValueArray      *return_vals;
+  ClayPlugInProcedure *file_proc;
   GFile               *file;
-  GimpProcedure       *proc;
+  ClayProcedure       *proc;
   gint                 custom_args_start = 3;
   gint                 i;
 
-  file = g_value_get_object (gimp_value_array_index (args, 2));
+  file = g_value_get_object (clay_value_array_index (args, 2));
 
-  file_proc = gimp_plug_in_manager_file_procedure_find (gimp->plug_in_manager,
-                                                        GIMP_FILE_PROCEDURE_GROUP_SAVE,
+  file_proc = clay_plug_in_manager_file_procedure_find (clay->plug_in_manager,
+                                                        CLAY_FILE_PROCEDURE_GROUP_SAVE,
                                                         file, NULL);
 
   if (! file_proc)
-    file_proc = gimp_plug_in_manager_file_procedure_find (gimp->plug_in_manager,
-                                                          GIMP_FILE_PROCEDURE_GROUP_EXPORT,
+    file_proc = clay_plug_in_manager_file_procedure_find (clay->plug_in_manager,
+                                                          CLAY_FILE_PROCEDURE_GROUP_EXPORT,
                                                           file, error);
 
   if (! file_proc)
-    return gimp_procedure_get_return_values (procedure, FALSE,
+    return clay_procedure_get_return_values (procedure, FALSE,
                                              error ? *error : NULL);
 
-  proc = GIMP_PROCEDURE (file_proc);
+  proc = CLAY_PROCEDURE (file_proc);
 
-  new_args = gimp_procedure_get_arguments (proc);
+  new_args = clay_procedure_get_arguments (proc);
 
-  g_value_transform (gimp_value_array_index (args, 0),
-                     gimp_value_array_index (new_args, 0));
-  g_value_transform (gimp_value_array_index (args, 1),
-                     gimp_value_array_index (new_args, 1));
-  g_value_transform (gimp_value_array_index (args, 2),
-                     gimp_value_array_index (new_args, 2));
+  g_value_transform (clay_value_array_index (args, 0),
+                     clay_value_array_index (new_args, 0));
+  g_value_transform (clay_value_array_index (args, 1),
+                     clay_value_array_index (new_args, 1));
+  g_value_transform (clay_value_array_index (args, 2),
+                     clay_value_array_index (new_args, 2));
   if (proc->num_args > 3)
     {
       custom_args_start++;
-      g_value_transform (gimp_value_array_index (args, 3),
-                         gimp_value_array_index (new_args, 3));
+      g_value_transform (clay_value_array_index (args, 3),
+                         clay_value_array_index (new_args, 3));
     }
 
   for (i = custom_args_start; i < proc->num_args; i++)
-    if (GIMP_IS_PARAM_SPEC_CHOICE (proc->args[i]))
+    if (CLAY_IS_PARAM_SPEC_CHOICE (proc->args[i]))
       {
         GParamSpecString *string_spec = G_PARAM_SPEC_STRING (proc->args[i]);
 
-        g_value_set_static_string (gimp_value_array_index (new_args, i),
+        g_value_set_static_string (clay_value_array_index (new_args, i),
                                    string_spec->default_value);
       }
     else if (G_IS_PARAM_SPEC_STRING (proc->args[i]))
       {
-        g_value_set_static_string (gimp_value_array_index (new_args, i), "");
+        g_value_set_static_string (clay_value_array_index (new_args, i), "");
       }
 
   return_vals =
-    gimp_pdb_execute_procedure_by_name_args (gimp->pdb,
+    clay_pdb_execute_procedure_by_name_args (clay->pdb,
                                              context, progress, error,
-                                             gimp_object_get_name (proc),
+                                             clay_object_get_name (proc),
                                              new_args);
 
-  if (g_value_get_enum (gimp_value_array_index (return_vals, 0)) ==
-      GIMP_PDB_SUCCESS)
+  if (g_value_get_enum (clay_value_array_index (return_vals, 0)) ==
+      CLAY_PDB_SUCCESS)
     {
-      GimpImage *image =
-        g_value_get_object (gimp_value_array_index (new_args, 1));
+      ClayImage *image =
+        g_value_get_object (clay_value_array_index (new_args, 1));
 
-      if (! strcmp (gimp_object_get_name (proc), "gimp-xcf-save"))
+      if (! strcmp (clay_object_get_name (proc), "clay-xcf-save"))
         {
-          gimp_image_set_file (image, file);
+          clay_image_set_file (image, file);
 
-          gimp_image_set_imported_file (image, NULL);
-          gimp_image_clean_all (image);
+          clay_image_set_imported_file (image, NULL);
+          clay_image_clean_all (image);
         }
       else
         {
-          gimp_image_set_exported_file (image, file);
-          gimp_image_set_export_proc (image, file_proc);
+          clay_image_set_exported_file (image, file);
+          clay_image_set_export_proc (image, file_proc);
 
-          gimp_image_set_imported_file (image, NULL);
-          gimp_image_export_clean_all (image);
+          clay_image_set_imported_file (image, NULL);
+          clay_image_export_clean_all (image);
         }
     }
-  gimp_value_array_unref (new_args);
+  clay_value_array_unref (new_args);
 
   return return_vals;
 }
@@ -366,7 +366,7 @@ This procedure tries to load a thumbnail that belongs to the given file.
 The returned data is an array of colordepth 3 (RGB), regardless of the
 image type. Width and height of the thumbnail are also returned. Don't
 use this function if you need a thumbnail of an already opened image,
-use gimp_image_thumbnail() instead.
+use clay_image_thumbnail() instead.
 HELP
 
     $author = $copyright = 'Adam D. Moss, Sven Neumann';
@@ -444,9 +444,9 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpimage-undo.h"
-              "plug-in/gimppluginmanager-file.h"
+@headers = qw("core/clay.h"
+              "core/clayimage-undo.h"
+              "plug-in/claypluginmanager-file.h"
               "file/file-open.h"
               "file/file-save.h"
               "file/file-utils.h");
@@ -461,7 +461,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs[0..3,5]]);
 
 $desc = 'File Operations';
-$doc_title = 'gimpfile';
+$doc_title = 'clayfile';
 $doc_short_desc = 'Image file operations (load, export, etc.)';
 $doc_long_desc = 'Image file operations (load, export, etc.)';
 

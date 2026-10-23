@@ -22,46 +22,46 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplay-foreach.h"
-#include "display/gimpdisplayshell.h"
+#include "display/claydisplay.h"
+#include "display/claydisplay-foreach.h"
+#include "display/claydisplayshell.h"
 
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpimagesaveview.h"
-#include "widgets/gimpmessagedialog.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/clayimagesaveview.h"
+#include "widgets/claymessagedialog.h"
 
 #include "quit-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _QuitDialog QuitDialog;
 
 struct _QuitDialog
 {
-  Gimp                  *gimp;
-  GimpContainer         *images;
-  GimpContext           *context;
+  Clay                  *clay;
+  ClayContainer         *images;
+  ClayContext           *context;
 
   gboolean               do_quit;
 
   GtkWidget             *dialog;
   GtkWidget             *ok_button;
-  GimpMessageBox        *box;
+  ClayMessageBox        *box;
   GtkWidget             *lost_label;
   GtkWidget             *hint_label;
 
@@ -70,7 +70,7 @@ struct _QuitDialog
 };
 
 
-static GtkWidget * quit_close_all_dialog_new               (Gimp              *gimp,
+static GtkWidget * quit_close_all_dialog_new               (Clay              *clay,
                                                             gboolean           do_quit);
 static void        quit_close_all_dialog_free              (QuitDialog        *private);
 static void        quit_close_all_dialog_response          (GtkWidget         *dialog,
@@ -82,10 +82,10 @@ static void        quit_close_all_dialog_accel_marshal     (GClosure          *c
                                                             const GValue      *param_values,
                                                             gpointer           invocation_hint,
                                                             gpointer           marshal_data);
-static void        quit_close_all_dialog_container_changed (GimpContainer     *images,
-                                                            GimpObject        *image,
+static void        quit_close_all_dialog_container_changed (ClayContainer     *images,
+                                                            ClayObject        *image,
                                                             QuitDialog        *private);
-static void        quit_close_all_dialog_images_selected   (GimpContainerView *view,
+static void        quit_close_all_dialog_images_selected   (ClayContainerView *view,
                                                             QuitDialog        *private);
 
 static gboolean    quit_close_all_idle                     (QuitDialog        *private);
@@ -94,22 +94,22 @@ static gboolean    quit_close_all_idle                     (QuitDialog        *p
 /*  public functions  */
 
 GtkWidget *
-quit_dialog_new (Gimp *gimp)
+quit_dialog_new (Clay *clay)
 {
-  return quit_close_all_dialog_new (gimp, TRUE);
+  return quit_close_all_dialog_new (clay, TRUE);
 }
 
 GtkWidget *
-close_all_dialog_new (Gimp *gimp)
+close_all_dialog_new (Clay *clay)
 {
-  return quit_close_all_dialog_new (gimp, FALSE);
+  return quit_close_all_dialog_new (clay, FALSE);
 }
 
 
 /*  private functions  */
 
 static GtkWidget *
-quit_close_all_dialog_new (Gimp     *gimp,
+quit_close_all_dialog_new (Clay     *clay,
                            gboolean  do_quit)
 {
   QuitDialog    *private;
@@ -126,25 +126,25 @@ quit_close_all_dialog_new (Gimp     *gimp,
   const gint     greatest_max_rows = 36;
   const gint     least_max_rows    = 6;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
   private = g_slice_new0 (QuitDialog);
 
-  private->gimp    = gimp;
+  private->clay    = clay;
   private->do_quit = do_quit;
-  private->images  = gimp_displays_get_dirty_images (gimp);
-  private->context = gimp_context_new (gimp, "close-all-dialog",
-                                       gimp_get_user_context (gimp));
+  private->images  = clay_displays_get_dirty_images (clay);
+  private->context = clay_context_new (clay, "close-all-dialog",
+                                       clay_get_user_context (clay));
 
   g_return_val_if_fail (private->images != NULL, NULL);
 
   private->dialog =
-    gimp_message_dialog_new (do_quit ? _("Quit Clay") : _("Close All Images"),
-                             GIMP_ICON_DIALOG_WARNING,
+    clay_message_dialog_new (do_quit ? _("Quit Clay") : _("Close All Images"),
+                             CLAY_ICON_DIALOG_WARNING,
                              NULL, 0,
-                             gimp_standard_help_func,
+                             clay_standard_help_func,
                              do_quit ?
-                             GIMP_HELP_FILE_QUIT : GIMP_HELP_FILE_CLOSE_ALL,
+                             CLAY_HELP_FILE_QUIT : CLAY_HELP_FILE_CLOSE_ALL,
 
                              _("_Cancel"), GTK_RESPONSE_CANCEL,
 
@@ -153,7 +153,7 @@ quit_close_all_dialog_new (Gimp     *gimp,
   private->ok_button = gtk_dialog_add_button (GTK_DIALOG (private->dialog),
                                               "", GTK_RESPONSE_OK);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (private->dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (private->dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
@@ -178,9 +178,9 @@ quit_close_all_dialog_new (Gimp     *gimp,
                            private->accel_key, private->accel_mods,
                            0, closure);
 
-  private->box = GIMP_MESSAGE_DIALOG (private->dialog)->box;
+  private->box = CLAY_MESSAGE_DIALOG (private->dialog)->box;
 
-  monitor      = gimp_widget_get_monitor (private->dialog);
+  monitor      = clay_widget_get_monitor (private->dialog);
   scale_factor = gdk_monitor_get_scale_factor (monitor);
   gdk_monitor_get_geometry (monitor, &geometry);
 
@@ -200,13 +200,13 @@ quit_close_all_dialog_new (Gimp     *gimp,
 
   max_rows = CLAMP (max_rows, least_max_rows, greatest_max_rows);
 
-  view_size = gimp->config->layer_preview_size;
-  rows      = CLAMP (gimp_container_get_n_children (private->images), 3, max_rows);
+  view_size = clay->config->layer_preview_size;
+  rows      = CLAMP (clay_container_get_n_children (private->images), 3, max_rows);
 
-  view = gimp_image_save_view_new (private->images,
+  view = clay_image_save_view_new (private->images,
                                    private->context,
                                    view_size, 0);
-  gimp_container_box_set_size_request (GIMP_CONTAINER_BOX (view),
+  clay_container_box_set_size_request (CLAY_CONTAINER_BOX (view),
                                        -1,
                                        rows * (view_size + 2));
   gtk_box_pack_start (GTK_BOX (private->box), view, TRUE, TRUE, 0);
@@ -262,7 +262,7 @@ quit_close_all_dialog_response (GtkWidget  *dialog,
                                 gint        response_id,
                                 QuitDialog *private)
 {
-  Gimp     *gimp    = private->gimp;
+  Clay     *clay    = private->clay;
   gboolean  do_quit = private->do_quit;
 
   gtk_widget_destroy (dialog);
@@ -270,9 +270,9 @@ quit_close_all_dialog_response (GtkWidget  *dialog,
   if (response_id == GTK_RESPONSE_OK)
     {
       if (do_quit)
-        gimp_exit (gimp, TRUE);
+        clay_exit (clay, TRUE);
       else
-        gimp_displays_close (gimp);
+        clay_displays_close (clay);
     }
 }
 
@@ -291,11 +291,11 @@ quit_close_all_dialog_accel_marshal (GClosure     *closure,
 }
 
 static void
-quit_close_all_dialog_container_changed (GimpContainer *images,
-                                         GimpObject    *image,
+quit_close_all_dialog_container_changed (ClayContainer *images,
+                                         ClayObject    *image,
                                          QuitDialog    *private)
 {
-  gint   num_images = gimp_container_get_n_children (images);
+  gint   num_images = clay_container_get_n_children (images);
   gchar *accel_string;
   gchar *hint;
   gchar *markup;
@@ -303,7 +303,7 @@ quit_close_all_dialog_container_changed (GimpContainer *images,
   accel_string = gtk_accelerator_get_label (private->accel_key,
                                             private->accel_mods);
 
-  gimp_message_box_set_primary_text (private->box,
+  clay_message_box_set_primary_text (private->box,
                                      /* TRANSLATORS: unless your language
                                         msgstr[0] applies to 1 only (as
                                         in English), replace "one" with %d. */
@@ -357,7 +357,7 @@ quit_close_all_dialog_container_changed (GimpContainer *images,
 
       gtk_widget_set_visible (private->lost_label, TRUE);
 
-      icon = gtk_image_new_from_icon_name (GIMP_ICON_EDIT_DELETE,
+      icon = gtk_image_new_from_icon_name (CLAY_ICON_EDIT_DELETE,
                                            GTK_ICON_SIZE_BUTTON);
       g_object_set (private->ok_button,
                     "label",     _("_Discard Changes"),
@@ -381,24 +381,24 @@ quit_close_all_dialog_container_changed (GimpContainer *images,
 }
 
 static void
-quit_close_all_dialog_images_selected (GimpContainerView *view,
+quit_close_all_dialog_images_selected (ClayContainerView *view,
                                        QuitDialog        *private)
 {
-  GimpViewable *image = gimp_container_view_get_1_selected (view);
+  ClayViewable *image = clay_container_view_get_1_selected (view);
 
   if (image)
     {
       GList *list;
 
-      for (list = gimp_get_display_iter (private->gimp);
+      for (list = clay_get_display_iter (private->clay);
            list;
            list = g_list_next (list))
         {
-          GimpDisplay *display = list->data;
+          ClayDisplay *display = list->data;
 
-          if (gimp_display_get_image (display) == GIMP_IMAGE (image))
+          if (clay_display_get_image (display) == CLAY_IMAGE (image))
             {
-              gimp_display_shell_present (gimp_display_get_shell (display));
+              clay_display_shell_present (clay_display_get_shell (display));
 
               /* We only want to update the active shell. Give back keyboard
                * focus to the quit dialog after this.

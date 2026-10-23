@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * file-webp - WebP file format plug-in for the GIMP
+ * file-webp - WebP file format plug-in for the Clay
  * Copyright (C) 2015  Nathan Osman
  * Copyright (C) 2016  Ben Touchette
  *
@@ -31,36 +31,36 @@
 
 #include <gegl.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "file-webp-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static void
-create_layer (GimpImage *image,
+create_layer (ClayImage *image,
               uint8_t   *layer_data,
               gint32     position,
               gchar     *name,
               gint       width,
               gint       height)
 {
-  GimpLayer     *layer;
+  ClayLayer     *layer;
   GeglBuffer    *buffer;
   GeglRectangle  extent;
 
-  layer = gimp_layer_new (image, name,
+  layer = clay_layer_new (image, name,
                           width, height,
-                          GIMP_RGBA_IMAGE,
+                          CLAY_RGBA_IMAGE,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
+                          clay_image_get_default_new_layer_mode (image));
 
-  gimp_image_insert_layer (image, layer, NULL, position);
+  clay_image_insert_layer (image, layer, NULL, position);
 
   /* Retrieve the buffer for the layer */
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   /* Copy the image data to the region */
   gegl_rectangle_set (&extent, 0, 0, width, height);
@@ -72,20 +72,20 @@ create_layer (GimpImage *image,
   g_object_unref (buffer);
 }
 
-GimpImage *
+ClayImage *
 load_image (GFile                  *file,
             gboolean                interactive,
-            GimpMetadataLoadFlags  *metadata_flags,
+            ClayMetadataLoadFlags  *metadata_flags,
             GError                **error)
 {
   uint8_t          *indata = NULL;
   gsize             indatalen;
   gint              width;
   gint              height;
-  GimpImage        *image;
+  ClayImage        *image;
   WebPMux          *mux;
   WebPData          wp_data;
-  GimpColorProfile *profile   = NULL;
+  ClayColorProfile *profile   = NULL;
   uint32_t          flags;
   gboolean          animation = FALSE;
   gboolean          icc       = FALSE;
@@ -104,7 +104,7 @@ load_image (GFile                  *file,
     {
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Invalid WebP file '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -129,17 +129,17 @@ load_image (GFile                  *file,
   /* TODO: check if an alpha channel is present */
 
   /* Create the new image and associated layer */
-  image = gimp_image_new (width, height, GIMP_RGB);
+  image = clay_image_new (width, height, CLAY_RGB);
 
   if (icc)
     {
       WebPData icc_profile;
 
       WebPMuxGetChunk (mux, "ICCP", &icc_profile);
-      profile = gimp_color_profile_new_from_icc_profile (icc_profile.bytes,
+      profile = clay_color_profile_new_from_icc_profile (icc_profile.bytes,
                                                          icc_profile.size, NULL);
       if (profile)
-        gimp_image_set_color_profile (image, profile);
+        clay_image_set_color_profile (image, profile);
     }
 
   if (! animation)
@@ -193,7 +193,7 @@ load_image (GFile                  *file,
         {
           g_set_error (error, G_FILE_ERROR, 0,
                        _("Failed to decode animated WebP file '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           goto error;
         }
 
@@ -201,7 +201,7 @@ load_image (GFile                  *file,
         {
           g_set_error (error, G_FILE_ERROR, 0,
                        _("Failed to decode animated WebP information from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           goto error;
         }
 
@@ -220,7 +220,7 @@ load_image (GFile                  *file,
             {
               g_set_error (error, G_FILE_ERROR, 0,
                            _("Failed to decode animated WebP frame from '%s'"),
-                           gimp_file_get_utf8_name (file));
+                           clay_file_get_utf8_name (file));
               goto error;
             }
 
@@ -243,7 +243,7 @@ load_image (GFile                  *file,
   g_free (indata);
 
   if (profile)
-    *metadata_flags &= ~GIMP_METADATA_LOAD_COLORSPACE;
+    *metadata_flags &= ~CLAY_METADATA_LOAD_COLORSPACE;
 
   WebPMuxDelete (mux);
 

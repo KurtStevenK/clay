@@ -29,16 +29,16 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-dicom-load"
 #define EXPORT_PROC    "file-dicom-export"
 #define PLUG_IN_BINARY "file-dicom"
-#define PLUG_IN_ROLE   "gimp-file-dicom"
+#define PLUG_IN_ROLE   "clay-file-dicom"
 
 
 /* A lot of Dicom images are wrongly encoded. By guessing the endian
@@ -67,12 +67,12 @@ typedef struct _DicomClass DicomClass;
 
 struct _Dicom
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _DicomClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -81,31 +81,31 @@ struct _DicomClass
 
 GType                   dicom_get_type         (void);
 
-static GList          * dicom_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * dicom_create_procedure (GimpPlugIn            *plug_in,
+static GList          * dicom_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * dicom_create_procedure (ClayPlugIn            *plug_in,
                                                 const gchar           *name);
 
-static GimpValueArray * dicom_load             (GimpProcedure         *procedure,
-                                                GimpRunMode            run_mode,
+static ClayValueArray * dicom_load             (ClayProcedure         *procedure,
+                                                ClayRunMode            run_mode,
                                                 GFile                 *file,
-                                                GimpMetadata          *metadata,
-                                                GimpMetadataLoadFlags *flags,
-                                                GimpProcedureConfig   *config,
+                                                ClayMetadata          *metadata,
+                                                ClayMetadataLoadFlags *flags,
+                                                ClayProcedureConfig   *config,
                                                 gpointer               run_data);
-static GimpValueArray * dicom_export           (GimpProcedure         *procedure,
-                                                GimpRunMode            run_mode,
-                                                GimpImage             *image,
+static ClayValueArray * dicom_export           (ClayProcedure         *procedure,
+                                                ClayRunMode            run_mode,
+                                                ClayImage             *image,
                                                 GFile                 *file,
-                                                GimpExportOptions     *options,
-                                                GimpMetadata          *metadata,
-                                                GimpProcedureConfig   *config,
+                                                ClayExportOptions     *options,
+                                                ClayMetadata          *metadata,
+                                                ClayProcedureConfig   *config,
                                                 gpointer               run_data);
 
-static GimpImage      * load_image             (GFile                 *file,
+static ClayImage      * load_image             (GFile                 *file,
                                                 GError               **error);
 static gboolean         export_image           (GFile                 *file,
-                                                GimpImage             *image,
-                                                GimpDrawable          *drawable,
+                                                ClayImage             *image,
+                                                ClayDrawable          *drawable,
                                                 GError               **error);
 static void             dicom_loader           (guint8                *pix_buf,
                                                 DicomInfo             *info,
@@ -128,16 +128,16 @@ static gboolean         write_group_to_file    (FILE                  *dicom,
                                                 GByteArray            *group_stream);
 
 
-G_DEFINE_TYPE (Dicom, dicom, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Dicom, dicom, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (DICOM_TYPE)
+CLAY_MAIN (DICOM_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 dicom_class_init (DicomClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = dicom_query_procedures;
   plug_in_class->create_procedure = dicom_create_procedure;
@@ -150,7 +150,7 @@ dicom_init (Dicom *dicom)
 }
 
 static GList *
-dicom_query_procedures (GimpPlugIn *plug_in)
+dicom_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -160,21 +160,21 @@ dicom_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-dicom_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+dicom_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            dicom_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("DICOM image"));
+      clay_procedure_set_menu_label (procedure, _("DICOM image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files of the dicom file format"),
                                         _("Load a file in the DICOM standard "
                                           "format. The standard is defined at "
@@ -183,31 +183,31 @@ dicom_create_procedure (GimpPlugIn  *plug_in,
                                           "images with uncompressed pixel "
                                           "sections."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dov Grobgeld",
                                       "Dov Grobgeld <dov@imagic.weizmann.ac.il>",
                                       "2003");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-dcm");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "dcm,dicom");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "128,string,DICM");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, dicom_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB, GRAY");
+      clay_procedure_set_image_types (procedure, "RGB, GRAY");
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Digital Imaging and Communications in "
                                        "Medicine image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Save file in the DICOM file format"),
                                         _("Save an image in the medical "
                                           "standard DICOM image formats. "
@@ -219,36 +219,36 @@ dicom_create_procedure (GimpPlugIn  *plug_in,
                                           "tags are filled with default dummy "
                                           "values."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dov Grobgeld",
                                       "Dov Grobgeld <dov@imagic.weizmann.ac.il>",
                                       "2003");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-dcm");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "dcm,dicom");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB   |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB   |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY,
                                               NULL, NULL, NULL);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-dicom_load (GimpProcedure         *procedure,
-            GimpRunMode            run_mode,
+static ClayValueArray *
+dicom_load (ClayProcedure         *procedure,
+            ClayRunMode            run_mode,
             GFile                 *file,
-            GimpMetadata          *metadata,
-            GimpMetadataLoadFlags *flags,
-            GimpProcedureConfig   *config,
+            ClayMetadata          *metadata,
+            ClayMetadataLoadFlags *flags,
+            ClayProcedureConfig   *config,
             gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -256,59 +256,59 @@ dicom_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-dicom_export (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
+static ClayValueArray *
+dicom_export (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
               GFile                *file,
-              GimpExportOptions    *options,
-              GimpMetadata         *metadata,
-              GimpProcedureConfig  *config,
+              ClayExportOptions    *options,
+              ClayMetadata         *metadata,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
 
-  drawables = gimp_image_list_layers (image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data,
                           &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 /**
  * add_parasites_to_image:
- * @data:      pointer to a GimpParasite to be attached to the image
+ * @data:      pointer to a ClayParasite to be attached to the image
  *             specified by @user_data.
  * @user_data: pointer to the image_ID to which parasite @data should
  *             be added.
@@ -319,19 +319,19 @@ static void
 add_parasites_to_image (gpointer data,
                         gpointer user_data)
 {
-  GimpParasite *parasite = data;
-  GimpImage    *image    = user_data;
+  ClayParasite *parasite = data;
+  ClayImage    *image    = user_data;
 
-  gimp_image_attach_parasite (image, parasite);
-  gimp_parasite_free (parasite);
+  clay_image_attach_parasite (image, parasite);
+  clay_parasite_free (parasite);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
-  GimpImage  *image = NULL;
-  GimpLayer  *layer;
+  ClayImage  *image = NULL;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   GSList     *elements          = NULL;
   FILE       *dicom;
@@ -350,8 +350,8 @@ load_image (GFile   *file,
   gboolean    implicit_encoding = FALSE;
   gboolean    big_endian        = FALSE;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   dicom = g_fopen (g_file_peek_path (file), "rb");
 
@@ -359,7 +359,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -374,7 +374,7 @@ load_image (GFile   *file,
     {
       g_message ("'%s' is a PAPYRUS DICOM file.\n"
                  "This plug-in does not support this type yet.",
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       g_free (dicominfo);
       fclose (dicom);
       return NULL;
@@ -385,7 +385,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("'%s' is not a DICOM file."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       g_free (dicominfo);
       fclose (dicom);
       return NULL;
@@ -505,9 +505,9 @@ load_image (GFile   *file,
 
       if (element_length >= (G_MAXUINT - 6))
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("'%s' has an incorrect value for field size. Possibly corrupt image."),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           g_free (dicominfo);
           fclose (dicom);
           return NULL;
@@ -566,7 +566,7 @@ load_image (GFile   *file,
               else
                 {
                   g_debug ("Transfer syntax %s is not supported by Clay.", (gchar *) value);
-                  g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+                  g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                               _("Transfer syntax %s is not supported by Clay."),
                               (gchar *) value);
                   g_free (dicominfo);
@@ -621,7 +621,7 @@ load_image (GFile   *file,
                 }
               if (! supported)
                 {
-                  g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+                  g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                                _("%s is not supported by Clay in combination "
                                  "with samples per pixel: %d"),
                                (gchar *) value, samples_per_pixel);
@@ -674,14 +674,14 @@ load_image (GFile   *file,
       else
         {
           /* save this element to a parasite for later writing */
-          GimpParasite *parasite;
+          ClayParasite *parasite;
           gchar         pname[255];
 
-          /* all elements are retrievable using gimp_get_parasite_list() */
+          /* all elements are retrievable using clay_get_parasite_list() */
           g_snprintf (pname, sizeof (pname),
                       "dcm/%04x-%04x-%s", group_word, element_word, value_rep);
-          if ((parasite = gimp_parasite_new (pname,
-                                             GIMP_PARASITE_PERSISTENT,
+          if ((parasite = clay_parasite_new (pname,
+                                             CLAY_PARASITE_PERSISTENT,
                                              element_length, value)))
             {
               /*
@@ -704,20 +704,20 @@ load_image (GFile   *file,
 
   if ((bpp != 8) && (bpp != 16))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("'%s' has a bpp of %d which Clay cannot handle."),
-                   gimp_file_get_utf8_name (file), bpp);
+                   clay_file_get_utf8_name (file), bpp);
       g_free (pix_buf);
       g_free (dicominfo);
       fclose (dicom);
       return NULL;
     }
 
-  if ((width > GIMP_MAX_IMAGE_SIZE) || (height > GIMP_MAX_IMAGE_SIZE))
+  if ((width > CLAY_MAX_IMAGE_SIZE) || (height > CLAY_MAX_IMAGE_SIZE))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("'%s' has a larger image size (%d x %d) than Clay can handle."),
-                   gimp_file_get_utf8_name (file), width, height);
+                   clay_file_get_utf8_name (file), width, height);
       g_free (pix_buf);
       g_free (dicominfo);
       fclose (dicom);
@@ -726,9 +726,9 @@ load_image (GFile   *file,
 
   if (samples_per_pixel > 3)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("'%s' has samples per pixel of %d which Clay cannot handle."),
-                   gimp_file_get_utf8_name (file), samples_per_pixel);
+                   clay_file_get_utf8_name (file), samples_per_pixel);
       g_free (pix_buf);
       g_free (dicominfo);
       fclose (dicom);
@@ -737,9 +737,9 @@ load_image (GFile   *file,
 
   if ((guint64) width * height * (bpp >> 3) * samples_per_pixel > pixbuf_size)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("'%s' has not enough pixel data. Possibly corrupt image."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       g_free (pix_buf);
       g_free (dicominfo);
       fclose (dicom);
@@ -758,19 +758,19 @@ load_image (GFile   *file,
 
   /* Create a new image of the proper size and associate the filename with it.
    */
-  image = gimp_image_new (dicominfo->width, dicominfo->height,
+  image = clay_image_new (dicominfo->width, dicominfo->height,
                           (dicominfo->samples_per_pixel >= 3 ?
-                           GIMP_RGB : GIMP_GRAY));
+                           CLAY_RGB : CLAY_GRAY));
 
-  layer = gimp_layer_new (image, _("Background"),
+  layer = clay_layer_new (image, _("Background"),
                           dicominfo->width, dicominfo->height,
                           (dicominfo->samples_per_pixel >= 3 ?
-                           GIMP_RGB_IMAGE : GIMP_GRAY_IMAGE),
+                           CLAY_RGB_IMAGE : CLAY_GRAY_IMAGE),
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
 #if GUESS_ENDIAN
   if (bpp == 16)
@@ -825,7 +825,7 @@ dicom_loader (guint8     *pix_buffer,
         buf16[pix_idx] = g_ntohs (GUINT16_SWAP_LE_BE  (buf16[pix_idx])) >> shift;
     }
 
-  data = g_malloc (gimp_tile_height () * width * samples_per_pixel);
+  data = g_malloc (clay_tile_height () * width * samples_per_pixel);
 
   for (row_idx = 0; row_idx < height; )
     {
@@ -836,7 +836,7 @@ dicom_loader (guint8     *pix_buffer,
       gint    i;
 
       start = row_idx;
-      end   = row_idx + gimp_tile_height ();
+      end   = row_idx + clay_tile_height ();
       end   = MIN (end, height);
 
       scanlines = end - start;
@@ -956,12 +956,12 @@ dicom_loader (guint8     *pix_buffer,
 
       row_idx += scanlines;
 
-      gimp_progress_update ((gdouble) row_idx / (gdouble) height);
+      clay_progress_update ((gdouble) row_idx / (gdouble) height);
     }
 
   g_free (data);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 
@@ -1236,13 +1236,13 @@ dicom_element_find_by_num (GSList  *head,
  * Returns: a GSList of all known dicom elements
 **/
 static GSList *
-dicom_get_elements_list (GimpImage *image)
+dicom_get_elements_list (ClayImage *image)
 {
   GSList        *elements = NULL;
-  GimpParasite  *parasite;
+  ClayParasite  *parasite;
   gchar        **parasites = NULL;
 
-  parasites = gimp_image_get_parasite_list (image);
+  parasites = clay_image_get_parasite_list (image);
 
   if (parasites)
     {
@@ -1255,7 +1255,7 @@ dicom_get_elements_list (GimpImage *image)
         {
           if (strncmp (parasites[i], "dcm", 3) == 0)
             {
-              parasite = gimp_image_get_parasite (image, parasites[i]);
+              parasite = clay_image_get_parasite (image, parasites[i]);
 
               if (parasite)
                 {
@@ -1321,7 +1321,7 @@ dicom_get_elements_list (GimpImage *image)
                       const guint8 *val;
                       guint32       len;
 
-                      val = (const guint8 *) gimp_parasite_get_data (parasite, &len);
+                      val = (const guint8 *) clay_parasite_get_data (parasite, &len);
 
                       /* and add the dicom element, asking to have
                          it's value copied for later garbage collection */
@@ -1331,7 +1331,7 @@ dicom_get_elements_list (GimpImage *image)
                                                          value_rep, len, val);
                     }
 
-                  gimp_parasite_free (parasite);
+                  clay_parasite_free (parasite);
                 }
             }
         }
@@ -1344,7 +1344,7 @@ dicom_get_elements_list (GimpImage *image)
 }
 
 /**
- * dicom_remove_gimp_specified_elements:
+ * dicom_remove_clay_specified_elements:
  * @elements:  GSList to remove elements from
  * @samples_per_pixel: samples per pixel of the image to be written.
  *                     if set to %3 the planar configuration for color images
@@ -1355,7 +1355,7 @@ dicom_get_elements_list (GimpImage *image)
  * Returns: the new head of @elements
 **/
 static GSList *
-dicom_remove_gimp_specified_elements (GSList *elements,
+dicom_remove_clay_specified_elements (GSList *elements,
                                       gint samples_per_pixel)
 {
   DICOMELEMENT remove[] = {
@@ -1512,12 +1512,12 @@ dicom_ensure_required_elements_present (GSList *elements,
  */
 static gboolean
 export_image (GFile        *file,
-              GimpImage    *image,
-              GimpDrawable *drawable,
+              ClayImage    *image,
+              ClayDrawable *drawable,
               GError      **error)
 {
   FILE          *dicom;
-  GimpImageType  drawable_type;
+  ClayImageType  drawable_type;
   GeglBuffer    *buffer;
   const Babl    *format;
   gint           width;
@@ -1536,10 +1536,10 @@ export_image (GFile        *file,
   guchar        *src      = NULL;
   gsize          src_size = 0;
 
-  drawable_type = gimp_drawable_type (drawable);
+  drawable_type = clay_drawable_type (drawable);
 
   /*  Make sure we're not saving an image with an alpha channel  */
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     {
       g_message (_("Cannot save images with alpha channel."));
       return FALSE;
@@ -1547,13 +1547,13 @@ export_image (GFile        *file,
 
   switch (drawable_type)
     {
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       format = babl_format ("Y' u8");
       samples_per_pixel = 1;
       photometric_interp = "MONOCHROME2";
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       format = babl_format ("R'G'B' u8");
       samples_per_pixel = 3;
       photometric_interp = "RGB";
@@ -1577,11 +1577,11 @@ export_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
@@ -1611,7 +1611,7 @@ export_image (GFile        *file,
   /*
    * Set value of custom elements
    */
-  elements = dicom_remove_gimp_specified_elements (elements,samples_per_pixel);
+  elements = dicom_remove_clay_specified_elements (elements,samples_per_pixel);
 
   /* Image presentation group */
   group = 0x0028;
@@ -1652,7 +1652,7 @@ export_image (GFile        *file,
       (src_size >= (G_MAXUINT - 6))                                 ||
       ! (src = g_try_new0 (guchar, src_size)))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       retval = FALSE;

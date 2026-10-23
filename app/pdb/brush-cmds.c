@@ -27,148 +27,148 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpbrush.h"
-#include "core/gimpbrushgenerated.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimptempbuf.h"
-#include "gegl/gimp-babl-compat.h"
+#include "core/clay.h"
+#include "core/claybrush.h"
+#include "core/claybrushgenerated.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
+#include "core/claytempbuf.h"
+#include "gegl/clay-babl-compat.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-brush_new_invoker (GimpProcedure         *procedure,
-                   Gimp                  *gimp,
-                   GimpContext           *context,
-                   GimpProgress          *progress,
-                   const GimpValueArray  *args,
+static ClayValueArray *
+brush_new_invoker (ClayProcedure         *procedure,
+                   Clay                  *clay,
+                   ClayContext           *context,
+                   ClayProgress          *progress,
+                   const ClayValueArray  *args,
                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpBrush *brush = NULL;
+  ClayBrush *brush = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      brush = (GimpBrush *) gimp_data_factory_data_new (gimp->brush_factory,
+      brush = (ClayBrush *) clay_data_factory_data_new (clay->brush_factory,
                                                         context, name);
 
       if (! brush)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), brush);
+    g_value_set_object (clay_value_array_index (return_vals, 1), brush);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_by_name_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_by_name_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpBrush *brush = NULL;
+  ClayBrush *brush = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      brush = GIMP_BRUSH (gimp_pdb_get_resource (gimp, GIMP_TYPE_BRUSH, name,
-                                                 GIMP_PDB_DATA_ACCESS_READ, error));
+      brush = CLAY_BRUSH (clay_pdb_get_resource (clay, CLAY_TYPE_BRUSH, name,
+                                                 CLAY_PDB_DATA_ACCESS_READ, error));
       /* Ignore "not found" error, just return NULL. */
       g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), brush);
+    g_value_set_object (clay_value_array_index (return_vals, 1), brush);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_is_generated_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+brush_is_generated_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gboolean generated = FALSE;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      generated = GIMP_IS_BRUSH_GENERATED (brush);
+      generated = CLAY_IS_BRUSH_GENERATED (brush);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), generated);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), generated);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_info_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_info_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint width = 0;
   gint height = 0;
   gint mask_bpp = 0;
   gint color_bpp = 0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpTempBuf *mask   = gimp_brush_get_mask (brush);
-      GimpTempBuf *pixmap = gimp_brush_get_pixmap (brush);
+      ClayTempBuf *mask   = clay_brush_get_mask (brush);
+      ClayTempBuf *pixmap = clay_brush_get_pixmap (brush);
       const Babl  *format = NULL;
 
       if (brush)
-        format = gimp_babl_compat_u8_mask_format (gimp_temp_buf_get_format (mask));
+        format = clay_babl_compat_u8_mask_format (clay_temp_buf_get_format (mask));
 
-      width    = gimp_brush_get_width  (brush);
-      height   = gimp_brush_get_height (brush);
+      width    = clay_brush_get_width  (brush);
+      height   = clay_brush_get_height (brush);
 
       if (format)
         mask_bpp = babl_format_get_bytes_per_pixel (format);
@@ -177,37 +177,37 @@ brush_get_info_invoker (GimpProcedure         *procedure,
 
       if (pixmap && format)
         {
-          format = gimp_babl_compat_u8_format (gimp_temp_buf_get_format (pixmap));
+          format = clay_babl_compat_u8_format (clay_temp_buf_get_format (pixmap));
 
           color_bpp = babl_format_get_bytes_per_pixel (format);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_int (gimp_value_array_index (return_vals, 1), width);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), height);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), mask_bpp);
-      g_value_set_int (gimp_value_array_index (return_vals, 4), color_bpp);
+      g_value_set_int (clay_value_array_index (return_vals, 1), width);
+      g_value_set_int (clay_value_array_index (return_vals, 2), height);
+      g_value_set_int (clay_value_array_index (return_vals, 3), mask_bpp);
+      g_value_set_int (clay_value_array_index (return_vals, 4), color_bpp);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_pixels_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_pixels_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint width = 0;
   gint height = 0;
   gint mask_bpp = 0;
@@ -215,175 +215,175 @@ brush_get_pixels_invoker (GimpProcedure         *procedure,
   gint color_bpp = 0;
   GBytes *color_bytes = NULL;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpTempBuf *mask   = gimp_brush_get_mask (brush);
-      GimpTempBuf *pixmap = gimp_brush_get_pixmap (brush);
+      ClayTempBuf *mask   = clay_brush_get_mask (brush);
+      ClayTempBuf *pixmap = clay_brush_get_pixmap (brush);
       const Babl  *format;
       gpointer     data;
       gsize        num_mask_bytes;
       gsize        num_color_bytes;
 
-      format = gimp_babl_compat_u8_mask_format (
-        gimp_temp_buf_get_format (mask));
-      data   = gimp_temp_buf_lock (mask, format, GEGL_ACCESS_READ);
+      format = clay_babl_compat_u8_mask_format (
+        clay_temp_buf_get_format (mask));
+      data   = clay_temp_buf_lock (mask, format, GEGL_ACCESS_READ);
 
-      width          = gimp_temp_buf_get_width  (mask);
-      height         = gimp_temp_buf_get_height (mask);
+      width          = clay_temp_buf_get_width  (mask);
+      height         = clay_temp_buf_get_height (mask);
       mask_bpp       = babl_format_get_bytes_per_pixel (format);
-      num_mask_bytes = (gsize) gimp_temp_buf_get_height (mask) *
-                       gimp_temp_buf_get_width  (mask) * mask_bpp;
+      num_mask_bytes = (gsize) clay_temp_buf_get_height (mask) *
+                       clay_temp_buf_get_width  (mask) * mask_bpp;
       mask_bytes     = g_bytes_new (data, num_mask_bytes);
 
-      gimp_temp_buf_unlock (mask, data);
+      clay_temp_buf_unlock (mask, data);
 
       if (pixmap)
         {
-          format = gimp_babl_compat_u8_format (
-            gimp_temp_buf_get_format (pixmap));
-          data   = gimp_temp_buf_lock (pixmap, format, GEGL_ACCESS_READ);
+          format = clay_babl_compat_u8_format (
+            clay_temp_buf_get_format (pixmap));
+          data   = clay_temp_buf_lock (pixmap, format, GEGL_ACCESS_READ);
 
           color_bpp       = babl_format_get_bytes_per_pixel (format);
-          num_color_bytes = (gsize) gimp_temp_buf_get_height (pixmap) *
-                            gimp_temp_buf_get_width  (pixmap) *
+          num_color_bytes = (gsize) clay_temp_buf_get_height (pixmap) *
+                            clay_temp_buf_get_width  (pixmap) *
                             color_bpp;
           color_bytes     = g_bytes_new (data, num_color_bytes);
 
-          gimp_temp_buf_unlock (pixmap, data);
+          clay_temp_buf_unlock (pixmap, data);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_int (gimp_value_array_index (return_vals, 1), width);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), height);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), mask_bpp);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 4), mask_bytes);
-      g_value_set_int (gimp_value_array_index (return_vals, 5), color_bpp);
-      g_value_take_boxed (gimp_value_array_index (return_vals, 6), color_bytes);
+      g_value_set_int (clay_value_array_index (return_vals, 1), width);
+      g_value_set_int (clay_value_array_index (return_vals, 2), height);
+      g_value_set_int (clay_value_array_index (return_vals, 3), mask_bpp);
+      g_value_take_boxed (clay_value_array_index (return_vals, 4), mask_bytes);
+      g_value_set_int (clay_value_array_index (return_vals, 5), color_bpp);
+      g_value_take_boxed (clay_value_array_index (return_vals, 6), color_bytes);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_spacing_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_spacing_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint spacing = 0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      spacing = gimp_brush_get_spacing (brush);
+      spacing = clay_brush_get_spacing (brush);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), spacing);
+    g_value_set_int (clay_value_array_index (return_vals, 1), spacing);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_spacing_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_spacing_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpBrush *brush;
+  ClayBrush *brush;
   gint spacing;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  spacing = g_value_get_int (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  spacing = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (brush)))
-        gimp_brush_set_spacing (brush, spacing);
+      if (clay_data_is_writable (CLAY_DATA (brush)))
+        clay_brush_set_spacing (brush, spacing);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-brush_get_shape_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_shape_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint shape = 0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush))
-        shape = GIMP_BRUSH_GENERATED (brush)->shape;
+      if (CLAY_IS_BRUSH_GENERATED (brush))
+        shape = CLAY_BRUSH_GENERATED (brush)->shape;
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), shape);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), shape);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_shape_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_shape_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint shape_in;
   gint shape_out = 0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  shape_in = g_value_get_enum (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  shape_in = g_value_get_enum (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush) &&
-          gimp_data_is_writable (GIMP_DATA (brush)))
+      if (CLAY_IS_BRUSH_GENERATED (brush) &&
+          clay_data_is_writable (CLAY_DATA (brush)))
         {
-          gimp_brush_generated_set_shape (GIMP_BRUSH_GENERATED (brush),
+          clay_brush_generated_set_shape (CLAY_BRUSH_GENERATED (brush),
                                           shape_in);
-          shape_out = GIMP_BRUSH_GENERATED (brush)->shape;
+          shape_out = CLAY_BRUSH_GENERATED (brush)->shape;
         }
       else
         {
@@ -391,72 +391,72 @@ brush_set_shape_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), shape_out);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), shape_out);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_radius_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_radius_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble radius = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush))
-        radius = GIMP_BRUSH_GENERATED (brush)->radius;
+      if (CLAY_IS_BRUSH_GENERATED (brush))
+        radius = CLAY_BRUSH_GENERATED (brush)->radius;
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), radius);
+    g_value_set_double (clay_value_array_index (return_vals, 1), radius);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_radius_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_radius_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble radius_in;
   gdouble radius_out = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  radius_in = g_value_get_double (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  radius_in = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush) &&
-          gimp_data_is_writable (GIMP_DATA (brush)))
+      if (CLAY_IS_BRUSH_GENERATED (brush) &&
+          clay_data_is_writable (CLAY_DATA (brush)))
         {
-          gimp_brush_generated_set_radius (GIMP_BRUSH_GENERATED (brush),
+          clay_brush_generated_set_radius (CLAY_BRUSH_GENERATED (brush),
                                            radius_in);
-          radius_out = GIMP_BRUSH_GENERATED (brush)->radius;
+          radius_out = CLAY_BRUSH_GENERATED (brush)->radius;
         }
       else
         {
@@ -464,72 +464,72 @@ brush_set_radius_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), radius_out);
+    g_value_set_double (clay_value_array_index (return_vals, 1), radius_out);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_spikes_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_spikes_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint spikes = 0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush))
-        spikes = GIMP_BRUSH_GENERATED (brush)->spikes;
+      if (CLAY_IS_BRUSH_GENERATED (brush))
+        spikes = CLAY_BRUSH_GENERATED (brush)->spikes;
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), spikes);
+    g_value_set_int (clay_value_array_index (return_vals, 1), spikes);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_spikes_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_spikes_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gint spikes_in;
   gint spikes_out = 0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  spikes_in = g_value_get_int (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  spikes_in = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush) &&
-          gimp_data_is_writable (GIMP_DATA (brush)))
+      if (CLAY_IS_BRUSH_GENERATED (brush) &&
+          clay_data_is_writable (CLAY_DATA (brush)))
         {
-          gimp_brush_generated_set_spikes (GIMP_BRUSH_GENERATED (brush),
+          clay_brush_generated_set_spikes (CLAY_BRUSH_GENERATED (brush),
                                            spikes_in);
-          spikes_out = GIMP_BRUSH_GENERATED (brush)->spikes;
+          spikes_out = CLAY_BRUSH_GENERATED (brush)->spikes;
         }
       else
         {
@@ -537,72 +537,72 @@ brush_set_spikes_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), spikes_out);
+    g_value_set_int (clay_value_array_index (return_vals, 1), spikes_out);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_hardness_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_hardness_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble hardness = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush))
-        hardness = GIMP_BRUSH_GENERATED (brush)->hardness;
+      if (CLAY_IS_BRUSH_GENERATED (brush))
+        hardness = CLAY_BRUSH_GENERATED (brush)->hardness;
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), hardness);
+    g_value_set_double (clay_value_array_index (return_vals, 1), hardness);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_hardness_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_hardness_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble hardness_in;
   gdouble hardness_out = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  hardness_in = g_value_get_double (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  hardness_in = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush) &&
-          gimp_data_is_writable (GIMP_DATA (brush)))
+      if (CLAY_IS_BRUSH_GENERATED (brush) &&
+          clay_data_is_writable (CLAY_DATA (brush)))
         {
-          gimp_brush_generated_set_hardness (GIMP_BRUSH_GENERATED (brush),
+          clay_brush_generated_set_hardness (CLAY_BRUSH_GENERATED (brush),
                                              hardness_in);
-          hardness_out = GIMP_BRUSH_GENERATED (brush)->hardness;
+          hardness_out = CLAY_BRUSH_GENERATED (brush)->hardness;
         }
       else
         {
@@ -610,72 +610,72 @@ brush_set_hardness_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), hardness_out);
+    g_value_set_double (clay_value_array_index (return_vals, 1), hardness_out);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_aspect_ratio_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_aspect_ratio_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble aspect_ratio = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush))
-        aspect_ratio = GIMP_BRUSH_GENERATED (brush)->aspect_ratio;
+      if (CLAY_IS_BRUSH_GENERATED (brush))
+        aspect_ratio = CLAY_BRUSH_GENERATED (brush)->aspect_ratio;
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), aspect_ratio);
+    g_value_set_double (clay_value_array_index (return_vals, 1), aspect_ratio);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_aspect_ratio_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_aspect_ratio_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble aspect_ratio_in;
   gdouble aspect_ratio_out = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  aspect_ratio_in = g_value_get_double (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  aspect_ratio_in = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush) &&
-          gimp_data_is_writable (GIMP_DATA (brush)))
+      if (CLAY_IS_BRUSH_GENERATED (brush) &&
+          clay_data_is_writable (CLAY_DATA (brush)))
         {
-          gimp_brush_generated_set_aspect_ratio (GIMP_BRUSH_GENERATED (brush),
+          clay_brush_generated_set_aspect_ratio (CLAY_BRUSH_GENERATED (brush),
                                                  aspect_ratio_in);
-          aspect_ratio_out = GIMP_BRUSH_GENERATED (brush)->aspect_ratio;
+          aspect_ratio_out = CLAY_BRUSH_GENERATED (brush)->aspect_ratio;
         }
       else
         {
@@ -683,72 +683,72 @@ brush_set_aspect_ratio_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), aspect_ratio_out);
+    g_value_set_double (clay_value_array_index (return_vals, 1), aspect_ratio_out);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_get_angle_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+brush_get_angle_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble angle = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush))
-        angle = GIMP_BRUSH_GENERATED (brush)->angle;
+      if (CLAY_IS_BRUSH_GENERATED (brush))
+        angle = CLAY_BRUSH_GENERATED (brush)->angle;
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), angle);
+    g_value_set_double (clay_value_array_index (return_vals, 1), angle);
 
   return return_vals;
 }
 
-static GimpValueArray *
-brush_set_angle_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+brush_set_angle_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpBrush *brush;
+  ClayValueArray *return_vals;
+  ClayBrush *brush;
   gdouble angle_in;
   gdouble angle_out = 0.0;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
-  angle_in = g_value_get_double (gimp_value_array_index (args, 1));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
+  angle_in = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (GIMP_IS_BRUSH_GENERATED (brush) &&
-          gimp_data_is_writable (GIMP_DATA (brush)))
+      if (CLAY_IS_BRUSH_GENERATED (brush) &&
+          clay_data_is_writable (CLAY_DATA (brush)))
         {
-          gimp_brush_generated_set_angle (GIMP_BRUSH_GENERATED (brush),
+          clay_brush_generated_set_angle (CLAY_BRUSH_GENERATED (brush),
                                           angle_in);
-          angle_out = GIMP_BRUSH_GENERATED (brush)->angle;
+          angle_out = CLAY_BRUSH_GENERATED (brush)->angle;
         }
       else
         {
@@ -756,695 +756,695 @@ brush_set_angle_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), angle_out);
+    g_value_set_double (clay_value_array_index (return_vals, 1), angle_out);
 
   return return_vals;
 }
 
 void
-register_brush_procs (GimpPDB *pdb)
+register_brush_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-brush-new
+   * clay-brush-new
    */
-  procedure = gimp_procedure_new (brush_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new generated brush having default parameters.",
                                   "Creates a new, parametric brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The requested name of the new brush",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_brush ("brush",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_brush ("brush",
                                                           "brush",
                                                           "The brush",
                                                           FALSE,
                                                           NULL,
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-by-name
+   * clay-brush-get-by-name
    */
-  procedure = gimp_procedure_new (brush_get_by_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-by-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_by_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-by-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the brush with the given name.",
                                   "Return an existing brush having the given name. Returns %NULL when no brush exists of that name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The name of the brush",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_brush ("brush",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_brush ("brush",
                                                           "brush",
                                                           "The brush",
                                                           TRUE,
                                                           NULL,
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-is-generated
+   * clay-brush-is-generated
    */
-  procedure = gimp_procedure_new (brush_is_generated_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-is-generated");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_is_generated_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-is-generated");
+  clay_procedure_set_static_help (procedure,
                                   "Whether the brush is generated (parametric versus raster).",
                                   "Returns TRUE when brush is parametric.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("generated",
                                                          "generated",
                                                          "TRUE if the brush is generated",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-info
+   * clay-brush-get-info
    */
-  procedure = gimp_procedure_new (brush_get_info_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-info");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_info_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-info");
+  clay_procedure_set_static_help (procedure,
                                   "Gets information about the brush.",
                                   "Gets information about the brush: brush extents (width and height), color depth and mask depth (bpp). The color bpp is zero when the brush is parametric versus raster.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("width",
                                                      "width",
                                                      "The brush width",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("height",
                                                      "height",
                                                      "The brush height",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("mask-bpp",
                                                      "mask bpp",
                                                      "The brush mask bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("color-bpp",
                                                      "color bpp",
                                                      "The brush color bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-pixels
+   * clay-brush-get-pixels
    */
-  procedure = gimp_procedure_new (brush_get_pixels_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-pixels");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_pixels_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-pixels");
+  clay_procedure_set_static_help (procedure,
                                   "Gets information about the brush.",
                                   "Gets information about the brush: the brush extents (width and height) and its pixels data. The color bpp is zero and pixels empty when the brush is parametric versus raster.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("width",
                                                      "width",
                                                      "The brush width",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("height",
                                                      "height",
                                                      "The brush height",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("mask-bpp",
                                                      "mask bpp",
                                                      "The brush mask bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("mask-bytes",
                                                        "mask bytes",
                                                        "The brush mask data",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("color-bpp",
                                                      "color bpp",
                                                      "The brush color bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("color-bytes",
                                                        "color bytes",
                                                        "The brush color data",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-spacing
+   * clay-brush-get-spacing
    */
-  procedure = gimp_procedure_new (brush_get_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the brush spacing, the stamping frequency.",
                                   "Returns the spacing setting for the brush. Spacing is an integer between 0 and 1000 which represents a percentage of the maximum of the width and height of the mask. Both parametric and raster brushes have a spacing.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("spacing",
                                                      "spacing",
                                                      "The brush spacing",
                                                      0, 1000, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-spacing
+   * clay-brush-set-spacing
    */
-  procedure = gimp_procedure_new (brush_set_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the brush spacing.",
                                   "Set the spacing for the brush. The spacing must be an integer between 0 and 1000. Both parametric and raster brushes have a spacing. Returns an error when the brush is not editable. Create a new or copied brush or to get an editable brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("spacing",
                                                  "spacing",
                                                  "The brush spacing",
                                                  0, 1000, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-shape
+   * clay-brush-get-shape
    */
-  procedure = gimp_procedure_new (brush_get_shape_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-shape");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_shape_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-shape");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the shape of a generated brush.",
-                                  "Gets the shape of a generated brush. Returns an error when called for a non-parametric brush. The choices for shape are Circle (GIMP_BRUSH_GENERATED_CIRCLE), Square (GIMP_BRUSH_GENERATED_SQUARE), and Diamond (GIMP_BRUSH_GENERATED_DIAMOND). Other shapes might be added in the future.",
+                                  "Gets the shape of a generated brush. Returns an error when called for a non-parametric brush. The choices for shape are Circle (CLAY_BRUSH_GENERATED_CIRCLE), Square (CLAY_BRUSH_GENERATED_SQUARE), and Diamond (CLAY_BRUSH_GENERATED_DIAMOND). Other shapes might be added in the future.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("shape",
                                                       "shape",
                                                       "The brush shape",
-                                                      GIMP_TYPE_BRUSH_GENERATED_SHAPE,
-                                                      GIMP_BRUSH_GENERATED_CIRCLE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_BRUSH_GENERATED_SHAPE,
+                                                      CLAY_BRUSH_GENERATED_CIRCLE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-shape
+   * clay-brush-set-shape
    */
-  procedure = gimp_procedure_new (brush_set_shape_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-shape");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_shape_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-shape");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the shape of a generated brush.",
-                                  "Sets the shape of a generated brush. Returns an error when brush is non-parametric or not editable. The choices for shape are Circle (GIMP_BRUSH_GENERATED_CIRCLE), Square (GIMP_BRUSH_GENERATED_SQUARE), and Diamond (GIMP_BRUSH_GENERATED_DIAMOND).",
+                                  "Sets the shape of a generated brush. Returns an error when brush is non-parametric or not editable. The choices for shape are Circle (CLAY_BRUSH_GENERATED_CIRCLE), Square (CLAY_BRUSH_GENERATED_SQUARE), and Diamond (CLAY_BRUSH_GENERATED_DIAMOND).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("shape-in",
                                                   "shape in",
                                                   "The brush shape",
-                                                  GIMP_TYPE_BRUSH_GENERATED_SHAPE,
-                                                  GIMP_BRUSH_GENERATED_CIRCLE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                  CLAY_TYPE_BRUSH_GENERATED_SHAPE,
+                                                  CLAY_BRUSH_GENERATED_CIRCLE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("shape-out",
                                                       "shape out",
                                                       "The brush shape actually assigned",
-                                                      GIMP_TYPE_BRUSH_GENERATED_SHAPE,
-                                                      GIMP_BRUSH_GENERATED_CIRCLE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_BRUSH_GENERATED_SHAPE,
+                                                      CLAY_BRUSH_GENERATED_CIRCLE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-radius
+   * clay-brush-get-radius
    */
-  procedure = gimp_procedure_new (brush_get_radius_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-radius");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_radius_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-radius");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the radius of a generated brush.",
                                   "Gets the radius of a generated brush. Returns an error when called for a non-parametric brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("radius",
                                                         "radius",
                                                         "The radius of the brush in pixels",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-radius
+   * clay-brush-set-radius
    */
-  procedure = gimp_procedure_new (brush_set_radius_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-radius");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_radius_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-radius");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the radius of a generated brush.",
                                   "Sets the radius for a generated brush. Clamps radius to [0.1, 4000.0]. Returns the clamped value. Returns an error when brush is non-parametric or not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("radius-in",
                                                     "radius in",
                                                     "The desired brush radius in pixel",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("radius-out",
                                                         "radius out",
                                                         "The brush radius actually assigned",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-spikes
+   * clay-brush-get-spikes
    */
-  procedure = gimp_procedure_new (brush_get_spikes_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-spikes");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_spikes_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-spikes");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the number of spikes for a generated brush.",
                                   "Gets the number of spikes for a generated brush. Returns an error when called for a non-parametric brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("spikes",
                                                      "spikes",
                                                      "The number of spikes on the brush.",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-spikes
+   * clay-brush-set-spikes
    */
-  procedure = gimp_procedure_new (brush_set_spikes_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-spikes");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_spikes_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-spikes");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the number of spikes for a generated brush.",
                                   "Sets the number of spikes for a generated brush. Clamps spikes to [2,20]. Returns the clamped value. Returns an error when brush is non-parametric or not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("spikes-in",
                                                  "spikes in",
                                                  "The desired number of spikes",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("spikes-out",
                                                      "spikes out",
                                                      "The number of spikes actually assigned",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-hardness
+   * clay-brush-get-hardness
    */
-  procedure = gimp_procedure_new (brush_get_hardness_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-hardness");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_hardness_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-hardness");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the hardness of a generated brush.",
                                   "Gets the hardness of a generated brush. The hardness of a brush is the amount its intensity fades at the outside edge, as a double between 0.0 and 1.0. Returns an error when called for a non-parametric brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("hardness",
                                                         "hardness",
                                                         "The hardness of the brush.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-hardness
+   * clay-brush-set-hardness
    */
-  procedure = gimp_procedure_new (brush_set_hardness_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-hardness");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_hardness_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-hardness");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the hardness of a generated brush.",
                                   "Sets the hardness for a generated brush. Clamps hardness to [0.0, 1.0]. Returns the clamped value. Returns an error when brush is non-parametric or not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("hardness-in",
                                                     "hardness in",
                                                     "The desired brush hardness",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("hardness-out",
                                                         "hardness out",
                                                         "The brush hardness actually assigned",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-aspect-ratio
+   * clay-brush-get-aspect-ratio
    */
-  procedure = gimp_procedure_new (brush_get_aspect_ratio_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-aspect-ratio");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_aspect_ratio_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-aspect-ratio");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the aspect ratio of a generated brush.",
                                   "Gets the aspect ratio of a generated brush. Returns an error when called for a non-parametric brush. The aspect ratio is a double between 0.0 and 1000.0.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("aspect-ratio",
                                                         "aspect ratio",
                                                         "The aspect ratio of the brush.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-aspect-ratio
+   * clay-brush-set-aspect-ratio
    */
-  procedure = gimp_procedure_new (brush_set_aspect_ratio_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-aspect-ratio");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_aspect_ratio_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-aspect-ratio");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the aspect ratio of a generated brush.",
                                   "Sets the aspect ratio for a generated brush. Clamps aspect ratio to [0.0, 1000.0]. Returns the clamped value. Returns an error when brush is non-parametric or not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("aspect-ratio-in",
                                                     "aspect ratio in",
                                                     "The desired brush aspect ratio",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("aspect-ratio-out",
                                                         "aspect ratio out",
                                                         "The brush aspect ratio actually assigned",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-get-angle
+   * clay-brush-get-angle
    */
-  procedure = gimp_procedure_new (brush_get_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-get-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_get_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-get-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the rotation angle of a generated brush.",
                                   "Gets the angle of rotation for a generated brush. Returns an error when called for a non-parametric brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("angle",
                                                         "angle",
                                                         "The rotation angle of the brush in degree.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brush-set-angle
+   * clay-brush-set-angle
    */
-  procedure = gimp_procedure_new (brush_set_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brush-set-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brush_set_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brush-set-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the rotation angle of a generated brush.",
                                   "Sets the rotation angle for a generated brush. Sets the angle modulo 180, in the range [-180.0, 180.0]. Returns the clamped value. Returns an error when brush is non-parametric or not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                          "Bill Skaggs",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("angle-in",
                                                     "angle in",
                                                     "The desired brush rotation angle in degrees",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("angle-out",
                                                         "angle out",
                                                         "The brush rotation angle actually assigned",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

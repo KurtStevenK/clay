@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#   Gimp-Python - allows the writing of Gimp plugins in Python.
+#   Clay-Python - allows the writing of Clay plugins in Python.
 #   Copyright (C) 2006  Manish Singh <yosh@gimp.org>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@ gi.require_version('Babl', '0.1')
 from gi.repository import Babl
 gi.require_version('Gegl', '0.4')
 from gi.repository import Gegl
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -32,7 +32,7 @@ import traceback
 
 
 def code_eval(procedure, run_mode, code, config, data):
-    retval = Gimp.PDBStatusType.SUCCESS
+    retval = Clay.PDBStatusType.SUCCESS
     gerror = GLib.Error()
 
     if code == '-':
@@ -41,22 +41,22 @@ def code_eval(procedure, run_mode, code, config, data):
     try:
       exec(code, globals())
     except Exception as error:
-      retval = Gimp.PDBStatusType.CALLING_ERROR
+      retval = Clay.PDBStatusType.CALLING_ERROR
       gerror = GLib.Error(traceback.format_exc())
 
     return procedure.new_return_values(retval, gerror)
 
-class PythonEval (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class PythonEval (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return ['python-fu-eval']
 
     def do_create_procedure(self, name):
-        procedure = Gimp.BatchProcedure.new(self, name, "Python 3",
-                                            Gimp.PDBProcType.PLUGIN,
+        procedure = Clay.BatchProcedure.new(self, name, "Python 3",
+                                            Clay.PDBProcType.PLUGIN,
                                             code_eval, None)
         procedure.set_documentation ("Evaluate Python code",
                                      "Evaluate python code under the python interpreter (primarily for batch mode)",
@@ -69,4 +69,4 @@ class PythonEval (Gimp.PlugIn):
         return procedure
 
 
-Gimp.main(PythonEval.__gtype__, sys.argv)
+Clay.main(PythonEval.__gtype__, sys.argv)

@@ -23,55 +23,55 @@ prettyname = 'Clay'
 full_name  = 'Clay Image Beautification Program'
 
 # General version
-gimp_version = meson.project_version()
+clay_version = meson.project_version()
 
-package_string= prettyname + ' ' + gimp_version
+package_string= prettyname + ' ' + clay_version
 
-gimp_app_version_arr = gimp_version.split('.')
-gimp_app_version_major = gimp_app_version_arr[0].to_int()
-gimp_app_version_minor = gimp_app_version_arr[1].to_int()
-gimp_app_micro_rc      = gimp_app_version_arr[2].split('-')
-gimp_app_version_micro = gimp_app_micro_rc[0].to_int()
-gimp_app_version_rc    = 0
-gimp_rc_git            = false
-if gimp_app_micro_rc.length() > 1
-  if not gimp_app_micro_rc[1].startswith('RC')
+clay_app_version_arr = clay_version.split('.')
+clay_app_version_major = clay_app_version_arr[0].to_int()
+clay_app_version_minor = clay_app_version_arr[1].to_int()
+clay_app_micro_rc      = clay_app_version_arr[2].split('-')
+clay_app_version_micro = clay_app_micro_rc[0].to_int()
+clay_app_version_rc    = 0
+clay_rc_git            = false
+if clay_app_micro_rc.length() > 1
+  if not clay_app_micro_rc[1].startswith('RC')
     error('Version format is: <major>.<minor>.<micro> with optional "-RC<num>" suffix and optional "+git".')
   endif
-  if gimp_app_micro_rc[1].endswith('+git')
-    gimp_app_version_rc = gimp_app_micro_rc[1].substring(2, -4).to_int()
-    gimp_rc_git = true
+  if clay_app_micro_rc[1].endswith('+git')
+    clay_app_version_rc = clay_app_micro_rc[1].substring(2, -4).to_int()
+    clay_rc_git = true
   else
-    gimp_app_version_rc = gimp_app_micro_rc[1].substring(2).to_int()
+    clay_app_version_rc = clay_app_micro_rc[1].substring(2).to_int()
   endif
 endif
 
 # Override for Release-candidates
-gimp_app_version = '@0@.@1@'.format(
-  gimp_app_version_major,
-  gimp_app_version_minor
+clay_app_version = '@0@.@1@'.format(
+  clay_app_version_major,
+  clay_app_version_minor
 )
 
 
 # API & pkg-config version
-api_version_major = gimp_app_version_major
+api_version_major = clay_app_version_major
 api_version_minor = 0
 
-if gimp_app_version_minor == 99
+if clay_app_version_minor == 99
   api_version_major += 1
 endif
 
-gimp_api_version = '@0@.@1@'.format(api_version_major, api_version_minor)
-gimp_api_name = 'gimp-' + gimp_api_version
+clay_api_version = '@0@.@1@'.format(api_version_major, api_version_minor)
+clay_api_name = 'clay-' + clay_api_version
 
 
 # Libtool versioning
-gimp_interface_age = 1
+clay_interface_age = 1
 
-gimp_binary_age = 100 * gimp_app_version_minor + gimp_app_version_micro
-lt_current      = gimp_binary_age - gimp_interface_age
-lt_revision     = gimp_interface_age
-lt_age          = gimp_binary_age - gimp_interface_age
+clay_binary_age = 100 * clay_app_version_minor + clay_app_version_micro
+lt_current      = clay_binary_age - clay_interface_age
+lt_revision     = clay_interface_age
+lt_age          = clay_binary_age - clay_interface_age
 
 # libtool's -version-info transforms "current:revision:age" into "(current - age).age.revision".
 # Let's compute this ourselves.
@@ -80,46 +80,46 @@ so_version = '@0@.@1@.@2@'.format(lt_current - lt_age, lt_age, lt_revision)
 darwin_versions = [lt_current + 1, '@0@.@1@'.format(lt_current + 1, lt_revision)]
 
 
-gimp_command  = 'clay-' + gimp_app_version
+clay_command  = 'clay-' + clay_app_version
 
-exec_ver  = '-' + gimp_app_version
+exec_ver  = '-' + clay_app_version
 
-gimpconsole_exe_name = 'clay-console' + exec_ver
-gimpmain_exe_name    = 'clay' + exec_ver
+clayconsole_exe_name = 'clay-console' + exec_ver
+claymain_exe_name    = 'clay' + exec_ver
 
 # A specific desktop name to fix window icon under Wayland
-gimp_desktop_name = 'xyz.kainzmayer.clay'
+clay_desktop_name = 'xyz.kainzmayer.clay'
 
-gettext_package= 'gimp@0@@1@'.format(api_version_major, api_version_minor)
+gettext_package= 'clay@0@@1@'.format(api_version_major, api_version_minor)
 conf.set_quoted('GETTEXT_PACKAGE', gettext_package)
 
-conf.set_quoted('GIMP_VERSION', gimp_version)
+conf.set_quoted('CLAY_VERSION', clay_version)
 
-# GIMP_UNSTABLE tells if we are on an unstable or stable development branch.
-stable = (gimp_app_version_minor % 2 == 0)
-conf.set('GIMP_UNSTABLE', stable ? false : 1)
+# CLAY_UNSTABLE tells if we are on an unstable or stable development branch.
+stable = (clay_app_version_minor % 2 == 0)
+conf.set('CLAY_UNSTABLE', stable ? false : 1)
 
-# GIMP_RELEASE tells if this is a release or in-between release (git) code.
-release = (gimp_app_version_micro % 2 == 0)
-conf.set('GIMP_RELEASE', release ? 1 : false)
+# CLAY_RELEASE tells if this is a release or in-between release (git) code.
+release = (clay_app_version_micro % 2 == 0)
+conf.set('CLAY_RELEASE', release ? 1 : false)
 
-# GIMP_RC_VERSION can only be set on release candidates.
-conf.set('GIMP_RC_VERSION', release and gimp_app_version_rc > 0 ? gimp_app_version_rc : false)
-# GIMP_IS_GIT can only be set during development of a RC.
-conf.set('GIMP_IS_RC_GIT', gimp_rc_git ? 1 : false)
+# CLAY_RC_VERSION can only be set on release candidates.
+conf.set('CLAY_RC_VERSION', release and clay_app_version_rc > 0 ? clay_app_version_rc : false)
+# CLAY_IS_GIT can only be set during development of a RC.
+conf.set('CLAY_IS_RC_GIT', clay_rc_git ? 1 : false)
 
 # Clay keeps its own single-instance lock on every release. Upstream uses
-# only the major version for stable releases, which is the same lock as GIMP 3.
-gimp_mutex_version = gimp_app_version
-conf.set_quoted('GIMP_MUTEX_VERSION', gimp_mutex_version)
+# only the major version for stable releases, which is the same lock as Clay 3.
+clay_mutex_version = clay_app_version
+conf.set_quoted('CLAY_MUTEX_VERSION', clay_mutex_version)
 
 versionconfig = configuration_data()
-versionconfig.set('GIMP_FULL_NAME',     full_name)
-versionconfig.set('GIMP_MAJOR_VERSION', gimp_app_version_major)
-versionconfig.set('GIMP_MINOR_VERSION', gimp_app_version_minor)
-versionconfig.set('GIMP_MICRO_VERSION', gimp_app_version_micro)
-versionconfig.set('GIMP_VERSION',       gimp_version)
-versionconfig.set('GIMP_API_VERSION',   gimp_api_version)
+versionconfig.set('CLAY_FULL_NAME',     full_name)
+versionconfig.set('CLAY_MAJOR_VERSION', clay_app_version_major)
+versionconfig.set('CLAY_MINOR_VERSION', clay_app_version_minor)
+versionconfig.set('CLAY_MICRO_VERSION', clay_app_version_micro)
+versionconfig.set('CLAY_VERSION',       clay_version)
+versionconfig.set('CLAY_API_VERSION',   clay_api_version)
 
 
 ################################################################################
@@ -211,13 +211,13 @@ if platform_osx
   endif
   osx_ldflags += ['-Wl,-framework,Foundation', '-Wl,-framework,AppKit', '-ObjC']
   add_project_link_arguments(osx_ldflags, language : ['objc', 'c'])
-  # libgimp_cflags += '-xobjective-c'
-  # libgimp_lflags += ['-framework', 'Cocoa']
+  # libclay_cflags += '-xobjective-c'
+  # libclay_lflags += ['-framework', 'Cocoa']
 endif
 
 if cc.get_id() == 'gcc' and cc.version() == '7.2.0'
   gcc_warning = '''
-    GCC 7.2.0 has a serious bug affecting GEGL/GIMP. We advise
+    GCC 7.2.0 has a serious bug affecting GEGL/Clay. We advise
     against using this version of the compiler (previous and
     further versions are fine).
     See https://bugzilla.gnome.org/show_bug.cgi?id=787222
@@ -233,7 +233,7 @@ endif
 #
 # -- Don't enable these flags project-wide, only files needing them
 # should be built with a given extension, which we do with meson simd
-# module. Otherwise GIMP would end up crashing when run on CPUs which
+# module. Otherwise Clay would end up crashing when run on CPUs which
 # don't support all the flags supported by the compiler.
 # See merge request !262 for more details.
 
@@ -530,7 +530,7 @@ libmypaint        = dependency('libmypaint',         version: '>='+libmypaint_mi
 mypaint_brushes   = dependency('mypaint-brushes-2.0')
 
 if relocatable_bundle
-  mypaint_brushes_dir = '${gimp_installation_dir}'\
+  mypaint_brushes_dir = '${clay_installation_dir}'\
                         /'share'/'mypaint-data'/'2.0'/'brushes'
 else
   mypaint_brushes_dir = mypaint_brushes.get_variable(pkgconfig: 'brushesdir')
@@ -542,9 +542,9 @@ pango_minver = '1.50.0'
 if platform_osx
   pango_macos_recommended_version = '1.55.0'
   pango_macos_warning='''
-        GIMP encounters major display breakage on some macOS installations
+        Clay encounters major display breakage on some macOS installations
         with pango < 1.55.0. We highly recommend pango >= 1.55.0.
-        See: https://gitlab.gnome.org/GNOME/gimp/-/issues/7589
+        See: https://github.com/KurtStevenK/clay/-/issues/7589
   '''
   pango = dependency('pango',
                      version: '>='+pango_macos_recommended_version,
@@ -640,7 +640,7 @@ if meson.is_cross_build() and not meson.can_run_host_binaries()
     glib_warning = '''
       Test for glib-networking cannot be performed while cross-compiling,
       unless you set an `exe_wrapper` binary in your toolchain file.
-      Make sure glib-networking is installed, otherwise GIMP will not be able
+      Make sure glib-networking is installed, otherwise Clay will not be able
       to display the remote help pages through the help browser, nor will it
       be able to open remote HTTPS (or other protocol using SSL/TLS) files.
       HTTPS is becoming the expected standard and should not be considered
@@ -672,7 +672,7 @@ else # not meson.is_cross_build() or meson.can_run_host_binaries()
         glib_warning = '''
       The cross-platform test for glib-networking failed, using the
       `exe_wrapper` set in your toolchain file.
-      Make sure glib-networking is installed, otherwise GIMP will not be able
+      Make sure glib-networking is installed, otherwise Clay will not be able
       to display the remote help pages through the help browser, nor will it
       be able to open remote HTTPS (or other protocol using SSL/TLS) files.
       HTTPS is becoming the expected standard and should not be considered
@@ -756,7 +756,7 @@ opt_execinfo = cc.find_library('execinfo', has_headers: ['execinfo.h'], required
 have_execinfo_h = opt_execinfo.found() or cc.has_header('execinfo.h')
 conf.set('HAVE_EXECINFO_H', have_execinfo_h ? 1 : false)
 
-# See app/core/gimpbacktrace-backend.h for supported platforms.
+# See app/core/claybacktrace-backend.h for supported platforms.
 dashboard_backtrace='no (unsupported platform)'
 if platform_osx
   dashboard_backtrace='yes'
@@ -1240,7 +1240,7 @@ endif
 have_lua = get_option('lua')
 have_lua_output = have_lua
 # At time of writing, lua-lgi works with Lua 5.1, 5.2, 5.3 and LuaJIT2, but we
-# support only Lua 5.1 API. See: https://gitlab.gnome.org/GNOME/gimp/-/issues/11876
+# support only Lua 5.1 API. See: https://github.com/KurtStevenK/clay/-/issues/11876
 if have_lua
   have_lua_lgi = false
 
@@ -1375,16 +1375,16 @@ endif
 
 # Build identifiers #
 
-conf.set_quoted('GIMP_BUILD_ID', get_option('build-id'))
-conf.set_quoted('GIMP_BUILD_PLATFORM', host_os)
+conf.set_quoted('CLAY_BUILD_ID', get_option('build-id'))
+conf.set_quoted('CLAY_BUILD_PLATFORM', host_os)
 if platform_linux
-  conf.set_quoted('GIMP_BUILD_PLATFORM_FAMILY', 'linux')
+  conf.set_quoted('CLAY_BUILD_PLATFORM_FAMILY', 'linux')
 elif platform_windows
-  conf.set_quoted('GIMP_BUILD_PLATFORM_FAMILY', 'windows')
+  conf.set_quoted('CLAY_BUILD_PLATFORM_FAMILY', 'windows')
 elif platform_osx
-  conf.set_quoted('GIMP_BUILD_PLATFORM_FAMILY', 'macos')
+  conf.set_quoted('CLAY_BUILD_PLATFORM_FAMILY', 'macos')
 else
-  conf.set_quoted('GIMP_BUILD_PLATFORM_FAMILY', 'other')
+  conf.set_quoted('CLAY_BUILD_PLATFORM_FAMILY', 'other')
 endif
 
 if get_option('check-update') == 'yes'
@@ -1434,14 +1434,14 @@ enable_console_bin = get_option('enable-console-bin')
 # Check for internal tools
 extract_vector_icon = find_program('tools'/'extract-vector-icon.sh')
 generate_news       = find_program('tools'/'generate-news')
-gimppath2svg        = find_program('tools'/'gimppath2svg.py')
+claypath2svg        = find_program('tools'/'claypath2svg.py')
 module_dependencies = find_program('tools'/'module-dependencies.py')
 meson_install_subdir= find_program('tools'/'meson_install_subdir.py')
 
-gimp_mkenums = find_program('tools' / 'gimp-mkenums')
+clay_mkenums = find_program('tools' / 'clay-mkenums')
 mkenums_wrap = find_program(meson.current_source_dir() / 'tools' / 'meson-mkenums.py')
 
-libgimp_mkenums_dtails = \
+libclay_mkenums_dtails = \
     '    { 0, NULL, NULL }\n'                                                      + \
     '  };\n'                                                                       + \
     '\n'                                                                           + \
@@ -1450,9 +1450,9 @@ libgimp_mkenums_dtails = \
     '  if (G_UNLIKELY (! type))\n'                                                 + \
     '    {\n'                                                                      + \
     '      type = g_@type@_register_static ("@EnumName@", values);\n'              + \
-    '      gimp_type_set_translation_domain (type, GETTEXT_PACKAGE "-libgimp");\n' + \
-    '      gimp_type_set_translation_context (type, "@enumnick@");\n'              + \
-    '      gimp_@type@_set_value_descriptions (type, descs);\n'                    + \
+    '      clay_type_set_translation_domain (type, GETTEXT_PACKAGE "-libclay");\n' + \
+    '      clay_type_set_translation_context (type, "@enumnick@");\n'              + \
+    '      clay_@type@_set_value_descriptions (type, descs);\n'                    + \
     '    }\n'                                                                      + \
     '\n'                                                                           + \
     '  return type;\n'                                                             + \
@@ -1658,46 +1658,46 @@ conf.set_quoted('CC_VERSION',     cc_version.strip())
 conf.set_quoted('PYTHON_VERSION', python.language_version())
 
 # Names
-conf.set_quoted('GIMP_PACKAGE',   meson.project_name())
+conf.set_quoted('CLAY_PACKAGE',   meson.project_name())
 conf.set_quoted('PACKAGE_NAME',   meson.project_name())
 conf.set_quoted('PACKAGE_STRING', package_string)
-conf.set_quoted('GIMP_COMMAND',   gimp_command)
-conf.set_quoted('GIMP_DESKTOP_NAME', gimp_desktop_name)
+conf.set_quoted('CLAY_COMMAND',   clay_command)
+conf.set_quoted('CLAY_DESKTOP_NAME', clay_desktop_name)
 
 # Versions
-conf.set_quoted('GIMP_APP_VERSION_STRING',gimp_app_version)
-conf.set_quoted('GIMP_APP_VERSION',       gimp_app_version)
-conf.set_quoted('GIMP_USER_VERSION',      gimp_app_version)
+conf.set_quoted('CLAY_APP_VERSION_STRING',clay_app_version)
+conf.set_quoted('CLAY_APP_VERSION',       clay_app_version)
+conf.set_quoted('CLAY_USER_VERSION',      clay_app_version)
 
-conf.set_quoted('GIMP_DATA_VERSION',      gimp_api_version)
-conf.set_quoted('GIMP_PLUGIN_VERSION',    gimp_api_version)
-conf.set_quoted('GIMP_SYSCONF_VERSION',   gimp_api_version)
-conf.set_quoted('GIMP_TOOL_VERSION',      gimp_app_version)
-conf.set_quoted('GIMP_PKGCONFIG_VERSION', gimp_api_version)
+conf.set_quoted('CLAY_DATA_VERSION',      clay_api_version)
+conf.set_quoted('CLAY_PLUGIN_VERSION',    clay_api_version)
+conf.set_quoted('CLAY_SYSCONF_VERSION',   clay_api_version)
+conf.set_quoted('CLAY_TOOL_VERSION',      clay_app_version)
+conf.set_quoted('CLAY_PKGCONFIG_VERSION', clay_api_version)
 
 # Directories
 
-# Possibly change default gimpdir from $XDG_CONFIG_HOME/GIMP/gimp_user_version
-gimpdir = get_option('gimpdir')
-if gimpdir == ''
-  # Clay settings stay out of the official GIMP profile directory.
-  gimpdir = 'Clay'
+# Possibly change default claydir from $XDG_CONFIG_HOME/Clay/clay_user_version
+claydir = get_option('claydir')
+if claydir == ''
+  # Clay settings stay out of the official Clay profile directory.
+  claydir = 'Clay'
 endif
 
-project_subdir = meson.project_name() / gimp_api_version
-gimpdatadir    = get_option('datadir')    / project_subdir
-gimpplugindir  = get_option('libdir')     / project_subdir
-gimpsysconfdir = get_option('sysconfdir') / project_subdir
-gimpmanpagedir = gimpdir
+project_subdir = meson.project_name() / clay_api_version
+claydatadir    = get_option('datadir')    / project_subdir
+clayplugindir  = get_option('libdir')     / project_subdir
+claysysconfdir = get_option('sysconfdir') / project_subdir
+claymanpagedir = claydir
 localedir      = get_option('datadir') / 'locale'
 
 conf.set_quoted('PREFIX',          prefix)
 conf.set_quoted('EXEC_PREFIX',     prefix)
-conf.set_quoted('GIMPDIR',         gimpdir)
-conf.set_quoted('GIMPSYSCONFDIR',  prefix / gimpsysconfdir)
-conf.set_quoted('GIMPDATADIR',     prefix / gimpdatadir)
-conf.set_quoted('GIMPPLUGINDIR',   prefix / gimpplugindir)
-conf.set_quoted('PLUGINDIR',       prefix / gimpplugindir)
+conf.set_quoted('CLAYDIR',         claydir)
+conf.set_quoted('CLAYSYSCONFDIR',  prefix / claysysconfdir)
+conf.set_quoted('CLAYDATADIR',     prefix / claydatadir)
+conf.set_quoted('CLAYPLUGINDIR',   prefix / clayplugindir)
+conf.set_quoted('PLUGINDIR',       prefix / clayplugindir)
 conf.set_quoted('LOCALEDIR',       prefix / localedir)
 conf.set_quoted('DESKTOP_DATADIR', prefix / get_option('datadir'))
 
@@ -1745,21 +1745,21 @@ if generate_version_h
     input : 'app/git-version.h.in',
     output: 'git-version.h.in.1',
     command: [ 'git', 'describe', '--always', ],
-    replace_string: '@GIMP_GIT_VERSION@',
+    replace_string: '@CLAY_GIT_VERSION@',
     fallback: 'unknown (unsupported)',
   )
   gitversion_h2 = vcs_tag(
     input : gitversion_h1,
     output: 'git-version.h.in.2',
     command: [ 'git', 'rev-parse', '--short', 'HEAD', ],
-    replace_string: '@GIMP_GIT_VERSION_ABBREV@',
+    replace_string: '@CLAY_GIT_VERSION_ABBREV@',
     fallback: 'unknown (unsupported)',
   )
   gitversion_h = vcs_tag(
     input : gitversion_h2,
     output: 'git-version.h',
     command: [ 'git', 'log', '-n1', '--date=format:%Y', '--pretty=%cd', ],
-    replace_string: '@GIMP_GIT_LAST_COMMIT_YEAR@',
+    replace_string: '@CLAY_GIT_LAST_COMMIT_YEAR@',
     fallback: 'unknown (unsupported)',
   )
 
@@ -1785,20 +1785,20 @@ else
 endif
 
 if is_git_repository
-  has_gimp_data = run_command(python, '-c',
-    'import sys,os; sys.exit(0 if os.path.exists("gimp-data/meson.build") else 1)',
+  has_clay_data = run_command(python, '-c',
+    'import sys,os; sys.exit(0 if os.path.exists("clay-data/meson.build") else 1)',
     check: false
   ).returncode() == 0
 
-  if not has_gimp_data
-    error('gimp-data submodule not present. Run: git submodule update --init')
+  if not has_clay_data
+    error('clay-data submodule not present. Run: git submodule update --init')
   endif
 
   if git.found()
-    git_submodule_check = run_command(meson.project_source_root() / 'tools/check-gimp-data.py',
+    git_submodule_check = run_command(meson.project_source_root() / 'tools/check-clay-data.py',
                                       check: false)
     if git_submodule_check.returncode() != 0
-      submodule_warning = 'gimp-data submodule seems outdated. Possibly run from the source repository: git submodule update'
+      submodule_warning = 'clay-data submodule seems outdated. Possibly run from the source repository: git submodule update'
       warning(submodule_warning)
       warnings += submodule_warning
     endif
@@ -1854,7 +1854,7 @@ custom_target('AUTHORS',
 )
 date = run_command(python, '-c', 'import datetime; print(datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"))', check: true)
 custom_target('authors.md',
-  input : [ 'authors4gimp-web.xsl', 'authors.xml', ],
+  input : [ 'authors4clay-web.xsl', 'authors.xml', ],
   output: 'authors.md',
   command: [
     xsltproc,
@@ -1894,13 +1894,13 @@ if platform_windows
 endif
 
 # Tools
-subdir('libgimpbase')
+subdir('libclaybase')
 subdir('tools')
 subdir('pdb')
 
 # Translations
 subdir('po')
-subdir('po-libgimp')
+subdir('po-libclay')
 subdir('po-plug-ins')
 subdir('po-python')
 subdir('po-script-fu')
@@ -1912,17 +1912,17 @@ subdir('etc')
 subdir('menus')
 subdir('themes')
 
-# gimp-data submodule part 1
-subdir('gimp-data')
+# clay-data submodule part 1
+subdir('clay-data')
 
 # Libraries (order here is important!)
-subdir('libgimpcolor')
-subdir('libgimpmath')
-subdir('libgimpconfig')
-subdir('libgimpmodule')
-subdir('libgimpthumb')
-subdir('libgimpwidgets')
-subdir('libgimp')
+subdir('libclaycolor')
+subdir('libclaymath')
+subdir('libclayconfig')
+subdir('libclaymodule')
+subdir('libclaythumb')
+subdir('libclaywidgets')
+subdir('libclay')
 
 # Executables, plugins
 subdir('extensions')
@@ -1935,12 +1935,12 @@ subdir('app-tools')
 subdir('desktop')
 
 ################################################################################
-# Make GIMP runnable without being installed for unit-testing or as a build
+# Make Clay runnable without being installed for unit-testing or as a build
 # tool.
 
-gimp_run_env=environment()
-gimp_run_env.set('GIMP_GLOBAL_BUILD_ROOT',  meson.global_build_root())
-gimp_run_env.set('GIMP_GLOBAL_SOURCE_ROOT', meson.global_source_root())
+clay_run_env=environment()
+clay_run_env.set('CLAY_GLOBAL_BUILD_ROOT',  meson.global_build_root())
+clay_run_env.set('CLAY_GLOBAL_SOURCE_ROOT', meson.global_source_root())
 if get_option('debug-self-in-build')
   if not platform_windows and not platform_osx
     db = find_program(['gdb', 'lldb'], required: true)
@@ -1962,103 +1962,103 @@ if get_option('debug-self-in-build')
       error('GDB does not support newer DWARF symbols on macOS. Please install LLDB')
     endif
   endif
-  gimp_run_env.set('GIMP_DEBUG_SELF_WRAPPER', db.full_path())
+  clay_run_env.set('CLAY_DEBUG_SELF_WRAPPER', db.full_path())
 endif
-gimp_run_env.set('GIMP_PYTHON_WITH_GI', python.full_path())
+clay_run_env.set('CLAY_PYTHON_WITH_GI', python.full_path())
 
 if meson.can_run_host_binaries() and have_gobject_introspection
   if enable_console_bin
-    gimp_real_exe = gimpconsole_exe
+    clay_real_exe = clayconsole_exe
   else
-    gimp_real_exe = gimpmain_exe
+    clay_real_exe = claymain_exe
   endif
-  gimp_exe_depends = [gimp_real_exe, libgimp_gir, libgimpui_gir] + plugin_custom_targets
-  gimp_run_env.set('GIMP_SELF_IN_BUILD', gimp_real_exe.full_path())
+  clay_exe_depends = [clay_real_exe, libclay_gir, libclayui_gir] + plugin_custom_targets
+  clay_run_env.set('CLAY_SELF_IN_BUILD', clay_real_exe.full_path())
 
   menu_paths=meson.global_build_root() / 'menus:' + meson.global_source_root() / 'menus'
-  gimp_run_env.set('GIMP_TESTING_MENUS_PATH', menu_paths)
+  clay_run_env.set('CLAY_TESTING_MENUS_PATH', menu_paths)
 
-  gimp_run_env.set('GIMP3_SYSCONFDIR', meson.global_source_root() / 'etc')
+  clay_run_env.set('CLAY3_SYSCONFDIR', meson.global_source_root() / 'etc')
 
-  gimp_run_env.set('GIMP_TESTING_PLUG_INS', 'python/python-eval/')
+  clay_run_env.set('CLAY_TESTING_PLUG_INS', 'python/python-eval/')
 
-  gimp_run_env.set('GIMP_TESTING_INTERPRETER_DIRS', meson.global_build_root() / 'plug-ins/python/')
-  gimp_run_env.append('GIMP_TESTING_INTERPRETER_DIRS', meson.global_build_root() / 'extensions/')
-  gimp_run_env.set('GIMP_TESTING_ENVIRON_DIRS', meson.global_build_root() / 'data/environ/')
+  clay_run_env.set('CLAY_TESTING_INTERPRETER_DIRS', meson.global_build_root() / 'plug-ins/python/')
+  clay_run_env.append('CLAY_TESTING_INTERPRETER_DIRS', meson.global_build_root() / 'extensions/')
+  clay_run_env.set('CLAY_TESTING_ENVIRON_DIRS', meson.global_build_root() / 'data/environ/')
 
   # Makes build errors output way less polluted, making easier to debug
-  gimp_run_env.set('GIMP3_LOCALEDIR', meson.global_build_root() / 'po-plug-ins')
+  clay_run_env.set('CLAY3_LOCALEDIR', meson.global_build_root() / 'po-plug-ins')
 
-  gimp_run_env.prepend('GI_TYPELIB_PATH', prefix / 'lib/girepository-1.0/')
+  clay_run_env.prepend('GI_TYPELIB_PATH', prefix / 'lib/girepository-1.0/')
   if platform_osx
-    gimp_run_env.prepend('GI_TYPELIB_PATH', meson.global_build_root() / 'libgimp/tmp')
+    clay_run_env.prepend('GI_TYPELIB_PATH', meson.global_build_root() / 'libclay/tmp')
   else
-    gimp_run_env.prepend('GI_TYPELIB_PATH', meson.global_build_root() / 'libgimp')
+    clay_run_env.prepend('GI_TYPELIB_PATH', meson.global_build_root() / 'libclay')
   endif
 
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimp')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpbase')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpcolor')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpconfig')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpmath')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpmodule')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpthumb')
-  gimp_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libgimpwidgets')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclay')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclaybase')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclaycolor')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclayconfig')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclaymath')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclaymodule')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclaythumb')
+  clay_run_env.prepend('LD_LIBRARY_PATH', meson.global_build_root() / 'libclaywidgets')
 
   if platform_windows
     # On Windows, DLL are found through PATH rather than LD_LIBRARY_PATH.
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimp')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpbase')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpcolor')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpconfig')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpmath')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpmodule')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpthumb')
-    gimp_run_env.prepend('PATH', meson.global_build_root() / 'libgimpwidgets')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclay')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclaybase')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclaycolor')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclayconfig')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclaymath')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclaymodule')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclaythumb')
+    clay_run_env.prepend('PATH', meson.global_build_root() / 'libclaywidgets')
   elif platform_osx
-    gimp_exe_depends += [patched_libgimp_gir, patched_libgimpui_gir]
+    clay_exe_depends += [patched_libclay_gir, patched_libclayui_gir]
 
-    gimp_run_env.set('GIMP_GI_DIR', gi.get_variable('libdir'))
+    clay_run_env.set('CLAY_GI_DIR', gi.get_variable('libdir'))
 
-    gimp_run_env.set('GIMP_TEMP_UPDATE_RPATH', gimp_real_exe.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimp.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpbase.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpcolor.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpconfig.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpmath.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpmodule.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpthumb.full_path())
-    gimp_run_env.prepend('GIMP_TEMP_UPDATE_RPATH', libgimpwidgets.full_path())
+    clay_run_env.set('CLAY_TEMP_UPDATE_RPATH', clay_real_exe.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclay.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclaybase.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclaycolor.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclayconfig.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclaymath.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclaymodule.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclaythumb.full_path())
+    clay_run_env.prepend('CLAY_TEMP_UPDATE_RPATH', libclaywidgets.full_path())
   endif
 else
-  # Cross-builds require an existing native GIMP installed, unless we
+  # Cross-builds require an existing native Clay installed, unless we
   # can run target binaries.
-  native_gimp_exe = find_program([gimpconsole_exe_name, gimpmain_exe_name],
+  native_clay_exe = find_program([clayconsole_exe_name, claymain_exe_name],
                                  native: true, required: false)
 
-  if not native_gimp_exe.found()
-    error('When cross-compiling, the build requires either an exe_wrapper or a native GIMP installed (@0@ or @1@).'.format(gimpconsole_exe_name, gimpmain_exe_name))
+  if not native_clay_exe.found()
+    error('When cross-compiling, the build requires either an exe_wrapper or a native Clay installed (@0@ or @1@).'.format(clayconsole_exe_name, claymain_exe_name))
   endif
 
-  gimp_run_env.set('GIMP_SELF_IN_BUILD', native_gimp_exe.full_path())
-  # This native GIMP is not the one we just (cross-)built: it can't load
-  # plug-ins requested through $GIMP_TESTING_PLUG_INS (see in-build-gimp.py),
+  clay_run_env.set('CLAY_SELF_IN_BUILD', native_clay_exe.full_path())
+  # This native Clay is not the one we just (cross-)built: it can't load
+  # plug-ins requested through $CLAY_TESTING_PLUG_INS (see in-build-clay.py),
   # so ignore that variable and let it use its own bundled plug-ins. See: #16758
-  gimp_run_env.set('GIMP_TESTING_PLUG_INS_IGNORE', '1')
-  gimp_exe_depends = []
+  clay_run_env.set('CLAY_TESTING_PLUG_INS_IGNORE', '1')
+  clay_exe_depends = []
 endif
 
-gimp_exe = find_program('tools'/'in-build-gimp.py')
+clay_exe = find_program('tools'/'in-build-clay.py')
 
 ################################################################################
 # Subdirs: part 2
 
-# gimp-data submodule part 2
-subdir('gimp-data/images/')
+# clay-data submodule part 2
+subdir('clay-data/images/')
 
 # Unit testing
 subdir('app/tests')
-subdir('libgimp/tests')
+subdir('libclay/tests')
 
 # Docs
 subdir('docs')
@@ -2070,11 +2070,11 @@ if get_option('windows-installer')
   subdir('build/windows/installer/lang')
 endif
 
-pkgconfig.generate(libgimp,
-  filebase: 'gimp-' + gimp_api_version,
+pkgconfig.generate(libclay,
+  filebase: 'clay-' + clay_api_version,
   name: prettyname,
-  description: 'GIMP Library',
-  version: gimp_version,
+  description: 'Clay Library',
+  version: clay_version,
   requires: [
     cairo,
     gdk_pixbuf,
@@ -2083,52 +2083,52 @@ pkgconfig.generate(libgimp,
     pango,
   ],
   libraries: [
-    libgimpbase,
-    libgimpcolor,
-    libgimpconfig,
-    libgimpmath,
+    libclaybase,
+    libclaycolor,
+    libclayconfig,
+    libclaymath,
   ],
   subdirs: [
-    gimp_api_name,
+    clay_api_name,
   ],
   variables: [
     'datarootdir='    +'${prefix}/'+ get_option('datadir'),
-    'gimpdatadir='    +'${prefix}/'+ gimpdatadir,
-    'gimplibdir='     +'${prefix}/'+ gimpplugindir,
-    'gimpsysconfdir=' + gimpsysconfdir,
-    'gimplocaledir='  +'${prefix}/'+ localedir,
+    'claydatadir='    +'${prefix}/'+ claydatadir,
+    'claylibdir='     +'${prefix}/'+ clayplugindir,
+    'claysysconfdir=' + claysysconfdir,
+    'claylocaledir='  +'${prefix}/'+ localedir,
   ],
 )
 
-pkgconfig.generate(libgimpthumb,
-  filebase: 'gimpthumb-' + gimp_api_version,
-  name: 'GIMP Thumb',
-  description: 'GIMP Thumbnail Library',
-  version: gimp_version,
+pkgconfig.generate(libclaythumb,
+  filebase: 'claythumb-' + clay_api_version,
+  name: 'Clay Thumb',
+  description: 'Clay Thumbnail Library',
+  version: clay_version,
   requires: [
-    libgimp,
+    libclay,
     gdk_pixbuf,
   ],
   subdirs: [
-    gimp_api_name,
+    clay_api_name,
   ],
 )
 
-pkgconfig.generate(libgimpui,
-  filebase: 'gimpui-' + gimp_api_version,
-  name: 'GIMP UI',
-  description: 'GIMP User Interface Library',
-  version: gimp_version,
+pkgconfig.generate(libclayui,
+  filebase: 'clayui-' + clay_api_version,
+  name: 'Clay UI',
+  description: 'Clay User Interface Library',
+  version: clay_version,
   requires: [
-    libgimp,
+    libclay,
     gtk3,
   ],
   libraries: [
-    libgimpwidgets,
-    libgimpmodule,
+    libclaywidgets,
+    libclaymodule,
   ],
   subdirs: [
-    gimp_api_name,
+    clay_api_name,
   ],
 )
 
@@ -2143,13 +2143,13 @@ endif
 
 # On Windows, install deps in a bundle before distributing
 if get_option('windows-installer') or get_option('ms-store')
-  install_win_bundling_script = find_program('build/windows/2_bundle-gimp-uni_base.py')
+  install_win_bundling_script = find_program('build/windows/2_bundle-clay-uni_base.py')
   meson.add_install_script(install_win_bundling_script)
 endif
 
 # On macOS, install deps in an .app bundle before distributing
 if get_option('dmg')
-  install_macos_debug_script = find_program('build/macos/2_bundle-gimp-uni_base.py')
+  install_macos_debug_script = find_program('build/macos/2_bundle-clay-uni_base.py')
   meson.add_install_script(install_macos_debug_script)
 endif
 
@@ -2157,14 +2157,14 @@ endif
 # Subdir installations
 
 foreach dir : [
-    { 'dir': 'libgimp',        'deps': libgimp},
-    { 'dir': 'libgimpbase',    'deps': libgimpbase},
-    { 'dir': 'libgimpcolor',   'deps': libgimpcolor},
-    { 'dir': 'libgimpconfig',  'deps': libgimpconfig},
-    { 'dir': 'libgimpmath',    'deps': libgimpmath},
-    { 'dir': 'libgimpmodule',  'deps': libgimpmodule},
-    { 'dir': 'libgimpthumb',   'deps': libgimpthumb},
-    { 'dir': 'libgimpwidgets', 'deps': libgimpwidgets},
+    { 'dir': 'libclay',        'deps': libclay},
+    { 'dir': 'libclaybase',    'deps': libclaybase},
+    { 'dir': 'libclaycolor',   'deps': libclaycolor},
+    { 'dir': 'libclayconfig',  'deps': libclayconfig},
+    { 'dir': 'libclaymath',    'deps': libclaymath},
+    { 'dir': 'libclaymodule',  'deps': libclaymodule},
+    { 'dir': 'libclaythumb',   'deps': libclaythumb},
+    { 'dir': 'libclaywidgets', 'deps': libclaywidgets},
     { 'dir': 'icons' },
     { 'dir': 'plug-ins', },
     { 'dir': 'extensions', },
@@ -2181,7 +2181,7 @@ endforeach
 
 final_message = [
 '''Extra Binaries:''',
-'''  gimp-console:        @0@'''.format(enable_console_bin),
+'''  clay-console:        @0@'''.format(enable_console_bin),
 '',
 '''Optional Features:''',
 '''  Check updates at startup:      @0@'''.format(check_update),
@@ -2240,7 +2240,7 @@ final_message = [
 '''  Test appdata         @0@'''.format(appstreamcli.found()),
 '',
 '''Documentation:''',
-'''  libgimp API Reference: @0@'''.format(gi_docgen.found() and have_gobject_introspection),
+'''  libclay API Reference: @0@'''.format(gi_docgen.found() and have_gobject_introspection),
 '',
 '''Bug report URL: @0@'''.format(bug_report_url),
 ]
@@ -2249,7 +2249,7 @@ message('\n'.join(final_message))
 
 if bug_report_url == project_url_issues
   message('''
-    NOTE: if you plan on packaging GIMP for distribution, it is recommended
+    NOTE: if you plan on packaging Clay for distribution, it is recommended
     to override the bug report URL with option:
       -Dbug-report-url=https://example.com/
     so that you can filter packaging bugs from core bugs before reporting upstream.

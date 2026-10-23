@@ -1,6 +1,6 @@
 /*
  * PSD Export Plugin version 1.0 (BETA)
- * This GIMP plug-in is designed to export Adobe Photoshop(tm) files (.PSD)
+ * This Clay plug-in is designed to export Adobe Photoshop(tm) files (.PSD)
  *
  * Monigotes
  *
@@ -70,16 +70,16 @@
 
 #include <glib/gstdio.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
-#include "libgimpmath/gimpmath.h"
+#include "libclaymath/claymath.h"
 
 #include "psd.h"
 #include "psd-util.h"
 #include "psd-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PSD_UNIT_INCH 1
@@ -98,7 +98,7 @@ typedef enum PsdLayerType
 
 typedef struct PsdLayer
 {
-  GimpLayer      *layer;
+  ClayLayer      *layer;
   PSD_Layer_Type  type;
 } PSD_Layer;
 
@@ -109,13 +109,13 @@ typedef struct PsdImageData
   gint32             image_height;
   gint32             image_width;
 
-  GimpImageBaseType  baseType;
+  ClayImageBaseType  baseType;
 
-  GimpLayer         *merged_layer;/* Merged image,
+  ClayLayer         *merged_layer;/* Merged image,
                                      to be used for the image data section */
 
   gint               nChannels;   /* Number of user channels in the image */
-  GList             *lChannels;   /* List of GimpChannel (User channels in the image) */
+  GList             *lChannels;   /* List of ClayChannel (User channels in the image) */
 
   gint               nLayers;     /* Number of layers in the image */
   GList             *lLayers;     /* List of PSD_Layer */
@@ -169,46 +169,46 @@ static PSD_Image_Data PSDImageData;
 /* Declare some local functions.
  */
 
-static const gchar * psd_lmode_layer            (GimpLayer      *layer,
+static const gchar * psd_lmode_layer            (ClayLayer      *layer,
                                                  gboolean        section_divider);
 
-static void          reshuffle_cmap_write       (guchar         *mapGimp);
+static void          reshuffle_cmap_write       (guchar         *mapClay);
 
 static gboolean      save_header                (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  PSDResourceOptions
                                                                 *options,
                                                  GError        **error);
 
 static gboolean      save_color_mode_data       (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  gboolean        export_duotone,
                                                  GError        **error);
 
 static gboolean      save_resources             (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  PSDResourceOptions
                                                                 *options,
                                                  GError        **error);
 
 static gboolean      save_paths                 (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  GError        **error);
 
 static gboolean      save_clipping_path         (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  const gchar    *path_name,
                                                  gfloat          path_flatness,
                                                  GError        **error);
 
 static gboolean      save_layer_and_mask        (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  PSDResourceOptions
                                                                 *options,
                                                  GError        **error);
 
 static gboolean      save_data                  (GOutputStream  *output,
-                                                 GimpImage      *image,
+                                                 ClayImage      *image,
                                                  PSDResourceOptions
                                                                 *options,
                                                  GError        **error);
@@ -262,8 +262,8 @@ static gboolean      write_datablock_luni       (GOutputStream  *output,
                                                  GError        **error);
 
 static gboolean      write_pixel_data           (GOutputStream  *output,
-                                                 GimpImage      *image,
-                                                 GimpDrawable   *drawable,
+                                                 ClayImage      *image,
+                                                 ClayDrawable   *drawable,
                                                  goffset        *ChanLenPosition,
                                                  goffset         rowlenOffset,
                                                  gboolean        write_mask,
@@ -271,44 +271,44 @@ static gboolean      write_pixel_data           (GOutputStream  *output,
                                                                 *options,
                                                  GError        **error);
 
-static GimpLayer   * create_merged_image        (GimpImage      *image,
+static ClayLayer   * create_merged_image        (ClayImage      *image,
                                                  PSDResourceOptions
                                                                 *options,
                                                  GError        **error);
 
-static gint          get_bpc                    (GimpImage      *image);
-static const Babl  * get_pixel_format           (GimpDrawable   *drawable,
+static gint          get_bpc                    (ClayImage      *image);
+static const Babl  * get_pixel_format           (ClayDrawable   *drawable,
                                                  gboolean        cmyk,
                                                  GError        **error);
 
-static const Babl  * get_channel_format         (GimpDrawable   *drawable);
-static const Babl  * get_mask_format            (GimpLayerMask  *mask);
+static const Babl  * get_channel_format         (ClayDrawable   *drawable);
+static const Babl  * get_mask_format            (ClayLayerMask  *mask);
 
-static GList       * image_get_all_layers       (GimpImage      *image,
+static GList       * image_get_all_layers       (ClayImage      *image,
                                                  gint           *n_layers);
 
-static void          update_clipping_path       (GimpIntComboBox
+static void          update_clipping_path       (ClayIntComboBox
                                                                 *combo,
                                                  gpointer        data);
 
 static const gchar *
-psd_lmode_layer (GimpLayer *layer,
+psd_lmode_layer (ClayLayer *layer,
                  gboolean   section_divider)
 {
   LayerModeInfo mode_info;
 
-  mode_info.mode            = gimp_layer_get_mode (layer);
-  mode_info.blend_space     = gimp_layer_get_blend_space (layer);
-  mode_info.composite_space = gimp_layer_get_composite_space (layer);
-  mode_info.composite_mode  = gimp_layer_get_composite_mode (layer);
+  mode_info.mode            = clay_layer_get_mode (layer);
+  mode_info.blend_space     = clay_layer_get_blend_space (layer);
+  mode_info.composite_space = clay_layer_get_composite_space (layer);
+  mode_info.composite_mode  = clay_layer_get_composite_mode (layer);
 
   /* pass-through groups use normal mode in their layer record; the
    * pass-through mode is specified in their section divider resource.
    */
-  if (mode_info.mode == GIMP_LAYER_MODE_PASS_THROUGH && ! section_divider)
-    mode_info.mode = GIMP_LAYER_MODE_NORMAL;
+  if (mode_info.mode == CLAY_LAYER_MODE_PASS_THROUGH && ! section_divider)
+    mode_info.mode = CLAY_LAYER_MODE_NORMAL;
 
-  return gimp_to_psd_blend_mode (&mode_info);
+  return clay_to_psd_blend_mode (&mode_info);
 }
 
 static gboolean
@@ -572,27 +572,27 @@ pack_pb_line (guchar *start,
 }
 
 static gint
-gimpBaseTypeToPsdMode (GimpImageBaseType gimpBaseType)
+clayBaseTypeToPsdMode (ClayImageBaseType clayBaseType)
 {
-  switch (gimpBaseType)
+  switch (clayBaseType)
     {
-    case GIMP_RGB:
+    case CLAY_RGB:
       return 3;                                         /* RGB */
-    case GIMP_GRAY:
+    case CLAY_GRAY:
       return 1;                                         /* Grayscale */
-    case GIMP_INDEXED:
+    case CLAY_INDEXED:
       return 2;                                         /* Indexed */
     default:
       g_message (_("Error: Can't convert Clay base imagetype to PSD mode"));
-      IFDBG(1) g_debug ("PSD Export: gimpBaseType value is %d, "
-                        "can't convert to PSD mode", gimpBaseType);
+      IFDBG(1) g_debug ("PSD Export: clayBaseType value is %d, "
+                        "can't convert to PSD mode", clayBaseType);
       g_return_val_if_reached (3);
       return 3;                            /* Return RGB by default */
     }
 }
 
 static gint
-nChansLayer (gint gimpBaseType,
+nChansLayer (gint clayBaseType,
              gint hasAlpha,
              gint hasMask)
 {
@@ -602,13 +602,13 @@ nChansLayer (gint gimpBaseType,
   incAlpha = (hasAlpha == 0) ? 0 : 1;
   incMask = (hasMask == 0) ? 0 : 1;
 
-  switch (gimpBaseType)
+  switch (clayBaseType)
     {
-    case GIMP_RGB:
+    case CLAY_RGB:
       return 3 + incAlpha + incMask;     /* R,G,B & Alpha & Mask (if any) */
-    case GIMP_GRAY:
+    case CLAY_GRAY:
       return 1 + incAlpha + incMask;     /* G & Alpha & Mask (if any) */
-    case GIMP_INDEXED:
+    case CLAY_INDEXED:
       return 1 + incAlpha + incMask;     /* I & Alpha & Mask (if any) */
     default:
       return 0;                          /* Return 0 channels by default */
@@ -616,7 +616,7 @@ nChansLayer (gint gimpBaseType,
 }
 
 static void
-reshuffle_cmap_write (guchar *mapGimp)
+reshuffle_cmap_write (guchar *mapClay)
 {
   guchar *mapPSD;
   gint    i;
@@ -625,14 +625,14 @@ reshuffle_cmap_write (guchar *mapGimp)
 
   for (i = 0; i < 256; i++)
     {
-      mapPSD[i] = mapGimp[i * 3];
-      mapPSD[i + 256] = mapGimp[i * 3 + 1];
-      mapPSD[i + 512] = mapGimp[i * 3 + 2];
+      mapPSD[i] = mapClay[i * 3];
+      mapPSD[i + 256] = mapClay[i * 3 + 1];
+      mapPSD[i + 512] = mapClay[i * 3 + 2];
     }
 
   for (i = 0; i < 768; i++)
     {
-      mapGimp[i] = mapPSD[i];
+      mapClay[i] = mapPSD[i];
     }
 
   g_free (mapPSD);
@@ -640,7 +640,7 @@ reshuffle_cmap_write (guchar *mapGimp)
 
 static gboolean
 save_header (GOutputStream       *output,
-             GimpImage           *image,
+             ClayImage           *image,
              PSDResourceOptions  *options,
              GError             **error)
 {
@@ -657,13 +657,13 @@ save_header (GOutputStream       *output,
   if (options->cmyk)
     {
       nChannels =
-        gimp_drawable_has_alpha (GIMP_DRAWABLE (PSDImageData.merged_layer)) ?
+        clay_drawable_has_alpha (CLAY_DRAWABLE (PSDImageData.merged_layer)) ?
         5 : 4;
     }
   else
     {
       nChannels = (PSDImageData.nChannels + nChansLayer (PSDImageData.baseType,
-        gimp_drawable_has_alpha (GIMP_DRAWABLE (PSDImageData.merged_layer)), 0));
+        clay_drawable_has_alpha (CLAY_DRAWABLE (PSDImageData.merged_layer)), 0));
     }
 
   XFWRITE_RETURN (output, "8BPS", 4, "signature", ;);
@@ -679,14 +679,14 @@ save_header (GOutputStream       *output,
   else if (options->duotone)
     WRITE_RETURN (gint16, output, PSD_DUOTONE, "mode", ;);
   else
-    WRITE_RETURN (gint16, output, gimpBaseTypeToPsdMode (PSDImageData.baseType), "mode", ;);
+    WRITE_RETURN (gint16, output, clayBaseTypeToPsdMode (PSDImageData.baseType), "mode", ;);
 
   return TRUE;
 }
 
 static gboolean
 save_color_mode_data (GOutputStream  *output,
-                      GimpImage      *image,
+                      ClayImage      *image,
                       gboolean        export_duotone,
                       GError        **error)
 {
@@ -694,11 +694,11 @@ save_color_mode_data (GOutputStream  *output,
   guchar       *cmap_modified;
   gint          i;
   gint32        nColors;
-  GimpParasite *parasite = NULL;
+  ClayParasite *parasite = NULL;
 
   IFDBG(1) g_debug ("Function: save_color_mode_data");
 
-  parasite = gimp_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
+  parasite = clay_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
   if (export_duotone && parasite)
     {
       const guchar *parasite_data;
@@ -706,24 +706,24 @@ save_color_mode_data (GOutputStream  *output,
 
       IFDBG(1) g_debug ("\tImage type: DUOTONE");
 
-      parasite_data = (const guchar *) gimp_parasite_get_data (parasite, &parasite_size);
+      parasite_data = (const guchar *) clay_parasite_get_data (parasite, &parasite_size);
 
       WRITE_RETURN (gint32, output, parasite_size, "color data length",
-                    gimp_parasite_free (parasite));
+                    clay_parasite_free (parasite));
       XFWRITE_RETURN (output, parasite_data, parasite_size, "colormap",
-                      gimp_parasite_free (parasite));
+                      clay_parasite_free (parasite));
 
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
       return TRUE;
     }
 
   switch (PSDImageData.baseType)
     {
-    case GIMP_INDEXED:
+    case CLAY_INDEXED:
       IFDBG(1) g_debug ("\tImage type: INDEXED");
 
-      cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &nColors, NULL);
-      IFDBG(1) g_debug ("\t\tLength of colormap returned by gimp_palette_get_colormap: %d", nColors);
+      cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &nColors, NULL);
+      IFDBG(1) g_debug ("\t\tLength of colormap returned by clay_palette_get_colormap: %d", nColors);
 
       if (nColors == 0)
         {
@@ -773,7 +773,7 @@ save_color_mode_data (GOutputStream  *output,
 
 static gboolean
 save_resources (GOutputStream       *output,
-                GimpImage           *image,
+                ClayImage           *image,
                 PSDResourceOptions  *options,
                 GError             **error)
 {
@@ -791,7 +791,7 @@ save_resources (GOutputStream       *output,
                                          * layer has alpha.
                                          */
 
-  /* Only relevant resources in GIMP are: 0x03EE, 0x03F0 & 0x0400 */
+  /* Only relevant resources in Clay are: 0x03EE, 0x03F0 & 0x0400 */
   /* For Adobe Photoshop version 4.0 these can also be considered:
      0x0408, 0x040A & 0x040B (1006, 1008, 1024, 1032, 1034, and 1035) */
 
@@ -801,7 +801,7 @@ save_resources (GOutputStream       *output,
 
   write_transparency_resource =
     (! options->tif &&
-     gimp_drawable_has_alpha (GIMP_DRAWABLE (PSDImageData.merged_layer)));
+     clay_drawable_has_alpha (CLAY_DRAWABLE (PSDImageData.merged_layer)));
 
   if (! options->tif)
     {
@@ -832,7 +832,7 @@ save_resources (GOutputStream       *output,
 
           for (iter = PSDImageData.lChannels; iter; iter = g_list_next (iter))
             {
-              gchar *chName = gimp_item_get_name (iter->data);
+              gchar *chName = clay_item_get_name (iter->data);
 
               WRITE_RETURN (string, output, chName, "channel name", g_free (chName));
               g_free (chName);
@@ -898,13 +898,13 @@ save_resources (GOutputStream       *output,
 
           for (iter = PSDImageData.lChannels; iter; iter = g_list_next (iter))
             {
-              GimpChannel *channel = iter->data;
+              ClayChannel *channel = iter->data;
               GeglColor   *color;
               gdouble      rgb[3];
               gdouble      opacity;
 
-              color   = gimp_channel_get_color (channel);
-              opacity = gimp_channel_get_opacity (channel);
+              color   = clay_channel_get_color (channel);
+              opacity = clay_channel_get_opacity (channel);
 
               gegl_color_get_pixel (color, babl_format ("R'G'B' double"), rgb);
 
@@ -936,13 +936,13 @@ save_resources (GOutputStream       *output,
     }
 
   /* --------------- Write Guides --------------- */
-  if (gimp_image_find_next_guide (image, 0))
+  if (clay_image_find_next_guide (image, 0))
     {
       gint n_guides = 0;
       gint guide_id = 0;
 
       /* Count the guides */
-      while ((guide_id = gimp_image_find_next_guide (image, guide_id)))
+      while ((guide_id = clay_image_find_next_guide (image, guide_id)))
         n_guides++;
 
       XFWRITE_RETURN (output, "8BIM", 4, "imageresources signature", ;);
@@ -957,13 +957,13 @@ save_resources (GOutputStream       *output,
       WRITE_RETURN (gint32, output, n_guides, "number of guides", ;);
 
       /* write the guides */
-      while ((guide_id = gimp_image_find_next_guide (image, guide_id)))
+      while ((guide_id = clay_image_find_next_guide (image, guide_id)))
         {
           gchar  orientation;
           gint32 position;
 
-          orientation = gimp_image_get_guide_orientation (image, guide_id);
-          position    = 32 * gimp_image_get_guide_position (image, guide_id);
+          orientation = clay_image_get_guide_orientation (image, guide_id);
+          position    = 32 * clay_image_get_guide_position (image, guide_id);
           orientation ^= 1; /* in the psd vert =0 , horiz = 1 */
           WRITE_RETURN (gint32, output, position, "Position of guide", ;);
           WRITE_RETURN (gchar, output, orientation, "Orientation of guide", ;);
@@ -983,7 +983,7 @@ save_resources (GOutputStream       *output,
 
   if (options->clipping_path)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
 
       if (! save_clipping_path (output, image,
                                 options->clipping_path_name,
@@ -992,30 +992,30 @@ save_resources (GOutputStream       *output,
         return FALSE;
 
       /* Update parasites */
-      parasite = gimp_parasite_new (PSD_PARASITE_CLIPPING_PATH, 0,
+      parasite = clay_parasite_new (PSD_PARASITE_CLIPPING_PATH, 0,
                                     strlen (options->clipping_path_name) + 1,
                                     options->clipping_path_name);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
 
-      parasite = gimp_parasite_new (PSD_PARASITE_PATH_FLATNESS, 0,
+      parasite = clay_parasite_new (PSD_PARASITE_PATH_FLATNESS, 0,
                                     sizeof (gfloat),
                                     (gpointer) &options->clipping_path_flatness);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
   /* --------------- Write resolution data ------------------- */
   {
     gdouble   xres = 0, yres = 0;
     guint32   xres_fix, yres_fix;
-    GimpUnit *g_unit;
+    ClayUnit *g_unit;
     gint16    psd_unit;
 
-    g_unit = gimp_image_get_unit (image);
-    gimp_image_get_resolution (image, &xres, &yres);
+    g_unit = clay_image_get_unit (image);
+    clay_image_get_resolution (image, &xres, &yres);
 
-    if (g_unit == gimp_unit_mm ())
+    if (g_unit == clay_unit_mm ())
       {
         psd_unit = PSD_UNIT_CM;
       }
@@ -1045,7 +1045,7 @@ save_resources (GOutputStream       *output,
 
   /* Get the selected layers */
 
-  SelLayers = gimp_image_list_selected_layers (image);
+  SelLayers = clay_image_list_selected_layers (image);
 
   if (SelLayers)
     {
@@ -1103,7 +1103,7 @@ save_resources (GOutputStream       *output,
                     g_list_free (SelLayers));
       for (iter = SelLayers; iter; iter = iter->next)
         WRITE_RETURN (gint32, output,
-                      GPOINTER_TO_INT (gimp_item_get_tattoo (iter->data)),
+                      GPOINTER_TO_INT (clay_item_get_tattoo (iter->data)),
                       "4 bytes layer ID",
                       g_list_free (SelLayers));
     }
@@ -1111,18 +1111,18 @@ save_resources (GOutputStream       *output,
 
   /* --------------- Write ICC profile data ------------------- */
   {
-    GimpColorProfile *profile = NULL;
+    ClayColorProfile *profile = NULL;
 
     if (options->cmyk)
       {
-        profile = gimp_image_get_simulation_profile (image);
+        profile = clay_image_get_simulation_profile (image);
 
-        if (profile && ! gimp_color_profile_is_cmyk (profile))
+        if (profile && ! clay_color_profile_is_cmyk (profile))
           g_clear_object (&profile);
       }
     else if (! options->duotone)
       {
-        profile = gimp_image_get_effective_color_profile (image);
+        profile = clay_image_get_effective_color_profile (image);
       }
 
     if (profile)
@@ -1130,7 +1130,7 @@ save_resources (GOutputStream       *output,
         const guint8 *icc_data;
         gsize         icc_length;
 
-        icc_data = gimp_color_profile_get_icc_profile (profile, &icc_length);
+        icc_data = clay_color_profile_get_icc_profile (profile, &icc_length);
 
         XFWRITE_RETURN (output, "8BIM", 4, "imageresources signature",
                         g_object_unref (profile));
@@ -1306,13 +1306,13 @@ double_to_psd_fixed_16_16 (gdouble value,
 /* Ported from /plug-ins/file-tiff/file-tiff-export.c */
 static gboolean
 save_paths (GOutputStream  *output,
-            GimpImage      *image,
+            ClayImage      *image,
             GError        **error)
 {
   gshort  id     = 0x07D0; /* Photoshop paths have IDs >= 2000,
                               Working path has ID = 1025 */
-  gdouble width  = gimp_image_get_width (image);
-  gdouble height = gimp_image_get_height (image);
+  gdouble width  = clay_image_get_width (image);
+  gdouble height = clay_image_get_height (image);
   GList  *paths;
   GList  *iter;
   gint    v;
@@ -1320,7 +1320,7 @@ save_paths (GOutputStream  *output,
   gint   *strokes;
   gint    s;
 
-  paths = gimp_image_list_paths (image);
+  paths = clay_image_list_paths (image);
 
   if (! paths)
     return TRUE;
@@ -1343,7 +1343,7 @@ save_paths (GOutputStream  *output,
        * - use iso8859-1 if possible
        * - otherwise use ASCII
        */
-      name    = gimp_item_get_name (iter->data);
+      name    = clay_item_get_name (iter->data);
       tmpname = g_convert (name, -1, "ISO-8859-1", "UTF-8", NULL, &len, &err);
 
       is_working_path = ! strcmp (name, "Working Path");
@@ -1390,20 +1390,20 @@ save_paths (GOutputStream  *output,
       pointrecord[1] = 6;  /* fill rule record */
       g_string_append_len (data, pointrecord, 26);
 
-      strokes = gimp_path_get_strokes (iter->data, &num_strokes);
+      strokes = clay_path_get_strokes (iter->data, &num_strokes);
 
       for (s = 0; s < num_strokes; s++)
         {
-          GimpPathStrokeType  type;
+          ClayPathStrokeType  type;
           gdouble            *points;
           gsize               num_points;
           gboolean            closed;
           gint                p = 0;
 
-          type = gimp_path_stroke_get_points (iter->data, strokes[s],
+          type = clay_path_stroke_get_points (iter->data, strokes[s],
                                               &num_points, &points, &closed);
 
-          if (type != GIMP_PATH_STROKE_TYPE_BEZIER ||
+          if (type != CLAY_PATH_STROKE_TYPE_BEZIER ||
               num_points > 65535                   ||
               num_points % 6)
             {
@@ -1457,7 +1457,7 @@ save_paths (GOutputStream  *output,
 
 static gboolean
 save_clipping_path (GOutputStream  *output,
-                    GimpImage      *image,
+                    ClayImage      *image,
                     const gchar    *path_name,
                     gfloat          path_flatness,
                     GError        **error)
@@ -1470,7 +1470,7 @@ save_clipping_path (GOutputStream  *output,
   GList   *paths;
   GError  *err = NULL;
 
-  paths = gimp_image_list_paths (image);
+  paths = clay_image_list_paths (image);
 
   if (! paths)
     return TRUE;
@@ -1519,7 +1519,7 @@ save_clipping_path (GOutputStream  *output,
 
 static gboolean
 save_layer_and_mask (GOutputStream       *output,
-                     GimpImage           *image,
+                     ClayImage           *image,
                      PSDResourceOptions  *options,
                      GError             **error)
 {
@@ -1535,7 +1535,7 @@ save_layer_and_mask (GOutputStream       *output,
   gint           nChannelsLayer;         /* Number of channels of a layer */
   gint64         ChanSize;               /* Data length for a channel */
   gchar         *layerName;              /* Layer name */
-  GimpLayerMask *mask;                   /* Layer mask */
+  ClayLayerMask *mask;                   /* Layer mask */
   gint           depth;                  /* Layer group nesting depth */
   gint           bpc;                    /* Image BPC */
 
@@ -1573,7 +1573,7 @@ save_layer_and_mask (GOutputStream       *output,
 
   /* Layer structure section */
 
-  if (! options->tif && gimp_drawable_has_alpha (GIMP_DRAWABLE (PSDImageData.merged_layer)))
+  if (! options->tif && clay_drawable_has_alpha (CLAY_DRAWABLE (PSDImageData.merged_layer)))
     WRITE_RETURN (gint16, output, -PSDImageData.nLayers, "Layer structure count", ;);
   else
     WRITE_RETURN (gint16, output, PSDImageData.nLayers, "Layer structure count", ;);
@@ -1583,7 +1583,7 @@ save_layer_and_mask (GOutputStream       *output,
   bpc = get_bpc (image);
 
   /* Layer records section */
-  /* GIMP layers must be written in reverse order */
+  /* Clay layers must be written in reverse order */
 
   for (iter = g_list_last (PSDImageData.lLayers), i = PSDImageData.nLayers;
        iter;
@@ -1594,10 +1594,10 @@ save_layer_and_mask (GOutputStream       *output,
 
       if (psd_layer->type == PSD_LAYER_TYPE_LAYER)
         {
-          gimp_drawable_get_offsets (GIMP_DRAWABLE (psd_layer->layer),
+          clay_drawable_get_offsets (CLAY_DRAWABLE (psd_layer->layer),
                                      &offset_x, &offset_y);
-          layerWidth = gimp_drawable_get_width (GIMP_DRAWABLE (psd_layer->layer));
-          layerHeight = gimp_drawable_get_height (GIMP_DRAWABLE (psd_layer->layer));
+          layerWidth = clay_drawable_get_width (CLAY_DRAWABLE (psd_layer->layer));
+          layerHeight = clay_drawable_get_height (CLAY_DRAWABLE (psd_layer->layer));
         }
       else
         {
@@ -1638,18 +1638,18 @@ save_layer_and_mask (GOutputStream       *output,
       WRITE_RETURN (gint32, output, offset_x + layerWidth,  "Layer right",  ;);
 
       hasMask = (psd_layer->type != PSD_LAYER_TYPE_GROUP_END &&
-                 gimp_layer_get_mask (psd_layer->layer) != NULL);
+                 clay_layer_get_mask (psd_layer->layer) != NULL);
       nChannelsLayer = nChansLayer (PSDImageData.baseType,
-                                    gimp_drawable_has_alpha (GIMP_DRAWABLE (psd_layer->layer)),
+                                    clay_drawable_has_alpha (CLAY_DRAWABLE (psd_layer->layer)),
                                     hasMask);
 
       /* Manually set channels to 4 or 5 when export as CMYK;
-       * Can be removed once CMYK channels are accessible in GIMP
+       * Can be removed once CMYK channels are accessible in Clay
        */
       if (options->cmyk)
         {
           nChannelsLayer =
-            gimp_drawable_has_alpha (GIMP_DRAWABLE (psd_layer->layer)) ?
+            clay_drawable_has_alpha (CLAY_DRAWABLE (psd_layer->layer)) ?
             5 : 4;
         }
 
@@ -1660,11 +1660,11 @@ save_layer_and_mask (GOutputStream       *output,
 
       ChannelLengthPos[i-1] = g_new (goffset, nChannelsLayer);
 
-      /* Try with gimp_drawable_get_bpp() */
+      /* Try with clay_drawable_get_bpp() */
 
       for (j = 0; j < nChannelsLayer; j++)
         {
-          if (gimp_drawable_has_alpha (GIMP_DRAWABLE (psd_layer->layer)))
+          if (clay_drawable_has_alpha (CLAY_DRAWABLE (psd_layer->layer)))
             idChannel = j - 1;
           else
             idChannel = j;
@@ -1697,18 +1697,18 @@ save_layer_and_mask (GOutputStream       *output,
       IFDBG(1) g_debug ("\t\tBlend mode: %s", blendMode);
       XFWRITE_RETURN (output, blendMode, 4, "blend mode key", ;);
 
-      layerOpacity = RINT ((gimp_layer_get_opacity (psd_layer->layer) * 255.0) / 100.0);
+      layerOpacity = RINT ((clay_layer_get_opacity (psd_layer->layer) * 255.0) / 100.0);
       IFDBG(1) g_debug ("\t\tOpacity: %u", layerOpacity);
       WRITE_RETURN (gchar, output, layerOpacity, "Opacity", ;);
 
-      if (gimp_layer_get_composite_mode (psd_layer->layer) == GIMP_LAYER_COMPOSITE_CLIP_TO_BACKDROP)
+      if (clay_layer_get_composite_mode (psd_layer->layer) == CLAY_LAYER_COMPOSITE_CLIP_TO_BACKDROP)
         WRITE_RETURN (gchar, output, 1, "Clipping", ;);
       else
         WRITE_RETURN (gchar, output, 0, "Clipping", ;);
 
       flags = 0;
-      if (gimp_layer_get_lock_alpha (psd_layer->layer)) flags |= 1;
-      if (! gimp_item_get_visible (GIMP_ITEM (psd_layer->layer))) flags |= 2;
+      if (clay_layer_get_lock_alpha (psd_layer->layer)) flags |= 1;
+      if (! clay_item_get_visible (CLAY_ITEM (psd_layer->layer))) flags |= 2;
       if (psd_layer->type != PSD_LAYER_TYPE_LAYER) flags |= 0x18;
       IFDBG(1) g_debug ("\t\tFlags: %u", flags);
       WRITE_RETURN (gchar, output, flags, "Flags", ;);
@@ -1727,13 +1727,13 @@ save_layer_and_mask (GOutputStream       *output,
           gint     maskHeight;
           gboolean apply;
 
-          mask = gimp_layer_get_mask (psd_layer->layer);
+          mask = clay_layer_get_mask (psd_layer->layer);
 
-          gimp_drawable_get_offsets (GIMP_DRAWABLE (mask), &maskOffset_x, &maskOffset_y);
+          clay_drawable_get_offsets (CLAY_DRAWABLE (mask), &maskOffset_x, &maskOffset_y);
 
-          maskWidth  = gimp_drawable_get_width  (GIMP_DRAWABLE (mask));
-          maskHeight = gimp_drawable_get_height (GIMP_DRAWABLE (mask));
-          apply      = gimp_layer_get_apply_mask (psd_layer->layer);
+          maskWidth  = clay_drawable_get_width  (CLAY_DRAWABLE (mask));
+          maskHeight = clay_drawable_get_height (CLAY_DRAWABLE (mask));
+          apply      = clay_layer_get_apply_mask (psd_layer->layer);
 
           IFDBG(1) g_debug ("\t\tLayer mask size: %d", 20);
           WRITE_RETURN (gint32, output, 20,                        "Layer mask size", ;);
@@ -1760,7 +1760,7 @@ save_layer_and_mask (GOutputStream       *output,
       IFDBG(1) g_debug ("\t\tLayer blending size: %d", 0);
 
       if (psd_layer->type != PSD_LAYER_TYPE_GROUP_END)
-        layerName = gimp_item_get_name (GIMP_ITEM (psd_layer->layer));
+        layerName = clay_item_get_name (CLAY_ITEM (psd_layer->layer));
       else
         layerName = g_strdup ("</Layer group>");
 
@@ -1779,13 +1779,13 @@ save_layer_and_mask (GOutputStream       *output,
       /* Layer ID */
       XFWRITE_RETURN (output, "8BIMlyid", 8, "lyid signature", ;);
       WRITE_RETURN (gint32, output, 4, "lyid size", ;);
-      WRITE_RETURN (gint32, output, gimp_item_get_tattoo (GIMP_ITEM (psd_layer->layer)), "Layer ID", ;);
+      WRITE_RETURN (gint32, output, clay_item_get_tattoo (CLAY_ITEM (psd_layer->layer)), "Layer ID", ;);
 
       /* Layer color tag */
       XFWRITE_RETURN (output, "8BIMlclr", 8, "sheet color signature", ;);
       WRITE_RETURN (gint32, output, 8, "sheet color size", ;);
       WRITE_RETURN (gint16, output,
-                    gimp_to_psd_layer_color_tag (gimp_item_get_color_tag (GIMP_ITEM (psd_layer->layer))),
+                    clay_to_psd_layer_color_tag (clay_item_get_color_tag (CLAY_ITEM (psd_layer->layer))),
                     "sheet color code", ;);
       WRITE_RETURN (gint16, output, 0, "sheet color unused value", ;);
       WRITE_RETURN (gint16, output, 0, "sheet color unused value", ;);
@@ -1801,7 +1801,7 @@ save_layer_and_mask (GOutputStream       *output,
 
           if (psd_layer->type == PSD_LAYER_TYPE_GROUP_START)
             {
-              type = gimp_item_get_expanded (GIMP_ITEM (psd_layer->layer)) ? 1 : 2;
+              type = clay_item_get_expanded (CLAY_ITEM (psd_layer->layer)) ? 1 : 2;
 
               depth--;
             }
@@ -1851,7 +1851,7 @@ save_layer_and_mask (GOutputStream       *output,
 
 
   /* Channel image data section */
-  /* Gimp layers must be written in reverse order */
+  /* Clay layers must be written in reverse order */
 
   for (iter = g_list_last (PSDImageData.lLayers), i = PSDImageData.nLayers;
        iter;
@@ -1859,10 +1859,10 @@ save_layer_and_mask (GOutputStream       *output,
     {
       PSD_Layer *psd_layer = (PSD_Layer *) iter->data;
 
-      gimp_progress_update ((PSDImageData.nLayers - i - 1.0) / (PSDImageData.nLayers + 1.0));
+      clay_progress_update ((PSDImageData.nLayers - i - 1.0) / (PSDImageData.nLayers + 1.0));
 
       IFDBG(1) g_debug ("\t\tWriting pixel data for layer slot %d", i-1);
-      if (! write_pixel_data (output, image, GIMP_DRAWABLE (psd_layer->layer), ChannelLengthPos[i-1], 0,
+      if (! write_pixel_data (output, image, CLAY_DRAWABLE (psd_layer->layer), ChannelLengthPos[i-1], 0,
                               psd_layer->type != PSD_LAYER_TYPE_GROUP_END, options,
                               error))
         {
@@ -1872,7 +1872,7 @@ save_layer_and_mask (GOutputStream       *output,
       g_free (ChannelLengthPos[i-1]);
     }
 
-  gimp_progress_update (PSDImageData.nLayers / (PSDImageData.nLayers + 1.0));
+  clay_progress_update (PSDImageData.nLayers / (PSDImageData.nLayers + 1.0));
   eof_pos = g_seekable_tell (G_SEEKABLE (output));
 
   /* Write actual size of Layer info section */
@@ -1927,22 +1927,22 @@ save_layer_and_mask (GOutputStream       *output,
 
 static gboolean
 write_pixel_data (GOutputStream       *output,
-                  GimpImage           *image,
-                  GimpDrawable        *drawable,
+                  ClayImage           *image,
+                  ClayDrawable        *drawable,
                   goffset             *ChanLenPosition,
                   goffset              ltable_offset,
                   gboolean             write_mask,
                   PSDResourceOptions  *options,
                   GError             **error)
 {
-  GeglBuffer       *buffer  = gimp_drawable_get_buffer (drawable);
+  GeglBuffer       *buffer  = clay_drawable_get_buffer (drawable);
   GeglBuffer       *mbuffer = NULL;
   const Babl       *format;
   const Babl       *space  = NULL;
   const Babl       *type;
-  GimpColorProfile *profile;
-  GimpLayerMask    *mask;
-  gint32            tile_height = gimp_tile_height ();
+  ClayColorProfile *profile;
+  ClayLayerMask    *mask;
+  gint32            tile_height = clay_tile_height ();
   gint32            height = gegl_buffer_get_height (buffer);
   gint32            width  = gegl_buffer_get_width (buffer);
   gint32            bytes;
@@ -1958,31 +1958,31 @@ write_pixel_data (GOutputStream       *output,
   int               i, j;
 
   IFDBG(1) g_debug ("Function: write_pixel_data, drw %d, lto %" G_GOFFSET_FORMAT,
-                    gimp_item_get_id (GIMP_ITEM (drawable)), ltable_offset);
+                    clay_item_get_id (CLAY_ITEM (drawable)), ltable_offset);
 
   if (write_mask)
-    mask = gimp_layer_get_mask (GIMP_LAYER (drawable));
+    mask = clay_layer_get_mask (CLAY_LAYER (drawable));
   else
     mask = NULL;
 
   /* groups have empty channel data, but may have a mask */
-  if (gimp_item_is_group (GIMP_ITEM (drawable)) && mask == NULL)
+  if (clay_item_is_group (CLAY_ITEM (drawable)) && mask == NULL)
     {
       width  = 0;
       height = 0;
     }
 
-  if (gimp_item_is_channel (GIMP_ITEM (drawable)))
+  if (clay_item_is_channel (CLAY_ITEM (drawable)))
     format = get_channel_format (drawable);
   else
     format = get_pixel_format (drawable, options->cmyk, error);
 
-  if (options->cmyk && ! gimp_item_is_channel (GIMP_ITEM (drawable)))
+  if (options->cmyk && ! clay_item_is_channel (CLAY_ITEM (drawable)))
     {
-      profile = gimp_image_get_simulation_profile (image);
-      if (profile && gimp_color_profile_is_cmyk (profile))
-        space = gimp_color_profile_get_space (profile,
-                                              gimp_image_get_simulation_intent (image),
+      profile = clay_image_get_simulation_profile (image);
+      if (profile && clay_color_profile_is_cmyk (profile))
+        space = clay_color_profile_get_space (profile,
+                                              clay_image_get_simulation_intent (image),
                                               NULL);
       if (profile)
         g_object_unref (profile);
@@ -1992,7 +1992,7 @@ write_pixel_data (GOutputStream       *output,
       else
         type = babl_type ("u16");
 
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format_new (babl_model ("cmykA"),
                                   type,
                                   babl_component ("cyan"),
@@ -2020,8 +2020,8 @@ write_pixel_data (GOutputStream       *output,
 
   colors = components;
 
-  if (gimp_drawable_has_alpha  (drawable) &&
-      ! gimp_drawable_is_indexed (drawable))
+  if (clay_drawable_has_alpha  (drawable) &&
+      ! clay_drawable_is_indexed (drawable))
     colors -= 1;
 
   LengthsTable = g_new (gint32, height);
@@ -2031,7 +2031,7 @@ write_pixel_data (GOutputStream       *output,
   data = g_new (guchar, MIN (height, tile_height) * width * bytes);
 
   /* groups have empty channel data */
-  if (gimp_item_is_group (GIMP_ITEM (drawable)))
+  if (clay_item_is_group (CLAY_ITEM (drawable)))
     {
       width  = 0;
       height = 0;
@@ -2149,7 +2149,7 @@ write_pixel_data (GOutputStream       *output,
     {
       const Babl *mformat = get_mask_format (mask);
 
-      mbuffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (mask));
+      mbuffer = clay_drawable_get_buffer (CLAY_DRAWABLE (mask));
       width   = gegl_buffer_get_width (buffer);
       height  = gegl_buffer_get_height (buffer);
 
@@ -2251,7 +2251,7 @@ clean:
 
 static gboolean
 save_data (GOutputStream       *output,
-           GimpImage           *image,
+           ClayImage           *image,
            PSDResourceOptions  *options,
            GError             **error)
 {
@@ -2266,13 +2266,13 @@ save_data (GOutputStream       *output,
 
   if (! options->cmyk)
     chan = nChansLayer (PSDImageData.baseType,
-                        gimp_drawable_has_alpha (GIMP_DRAWABLE (PSDImageData.merged_layer)), 0);
+                        clay_drawable_has_alpha (CLAY_DRAWABLE (PSDImageData.merged_layer)), 0);
   else
-    chan = gimp_drawable_has_alpha (GIMP_DRAWABLE (PSDImageData.merged_layer)) ? 5 : 4;
+    chan = clay_drawable_has_alpha (CLAY_DRAWABLE (PSDImageData.merged_layer)) ? 5 : 4;
 
   ChanCount = PSDImageData.nChannels + chan;
 
-  imageHeight = gimp_image_get_height (image);
+  imageHeight = clay_image_get_height (image);
 
   WRITE_RETURN (gint16, output, 1, "RLE compression", ;);
 
@@ -2290,7 +2290,7 @@ save_data (GOutputStream       *output,
       }
 
   IFDBG(1) g_debug ("\t\tWriting compressed image data");
-  if (! write_pixel_data (output, image, GIMP_DRAWABLE (PSDImageData.merged_layer),
+  if (! write_pixel_data (output, image, CLAY_DRAWABLE (PSDImageData.merged_layer),
                           NULL, offset, FALSE, options, error))
     return FALSE;
 
@@ -2310,20 +2310,20 @@ save_data (GOutputStream       *output,
   return TRUE;
 }
 
-static GimpLayer *
-create_merged_image (GimpImage           *image,
+static ClayLayer *
+create_merged_image (ClayImage           *image,
                      PSDResourceOptions  *options,
                      GError             **error)
 
 {
-  GimpLayer *projection;
+  ClayLayer *projection;
 
-  projection = gimp_layer_new_from_visible (image, image, "psd-export");
+  projection = clay_layer_new_from_visible (image, image, "psd-export");
 
-  if (! gimp_drawable_has_alpha (GIMP_DRAWABLE (projection)))
+  if (! clay_drawable_has_alpha (CLAY_DRAWABLE (projection)))
     return projection;
 
-  if (gimp_image_get_base_type (image) != GIMP_INDEXED)
+  if (clay_image_get_base_type (image) != CLAY_INDEXED)
     {
       GeglBuffer         *buffer;
       const Babl         *format;
@@ -2331,8 +2331,8 @@ create_merged_image (GimpImage           *image,
       gint                bpp;
       GeglBufferIterator *iter;
 
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (projection));
-      format = get_pixel_format (GIMP_DRAWABLE (projection), options->cmyk,
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (projection));
+      format = get_pixel_format (CLAY_DRAWABLE (projection), options->cmyk,
                                  error);
       bpp    = babl_format_get_bytes_per_pixel (format);
 
@@ -2366,18 +2366,18 @@ create_merged_image (GimpImage           *image,
       g_object_unref (buffer);
 
       if (! transparency_found)
-        gimp_layer_flatten (projection);
+        clay_layer_flatten (projection);
     }
   else
     {
-      gimp_layer_flatten (projection);  /* PSDs don't support transparency information in indexed images*/
+      clay_layer_flatten (projection);  /* PSDs don't support transparency information in indexed images*/
     }
 
   return projection;
 }
 
 static void
-get_image_data (GimpImage           *image,
+get_image_data (ClayImage           *image,
                 PSDResourceOptions  *options,
                 GError             **error)
 
@@ -2386,18 +2386,18 @@ get_image_data (GimpImage           *image,
 
   PSDImageData.compression = FALSE;
 
-  PSDImageData.image_height = gimp_image_get_height (image);
+  PSDImageData.image_height = clay_image_get_height (image);
   IFDBG(1) g_debug ("\tGot number of rows: %d", PSDImageData.image_height);
 
-  PSDImageData.image_width = gimp_image_get_width (image);
+  PSDImageData.image_width = clay_image_get_width (image);
   IFDBG(1) g_debug ("\tGot number of cols: %d", PSDImageData.image_width);
 
-  PSDImageData.baseType = gimp_image_get_base_type (image);
+  PSDImageData.baseType = clay_image_get_base_type (image);
   IFDBG(1) g_debug ("\tGot base type: %d", PSDImageData.baseType);
 
   PSDImageData.merged_layer = create_merged_image (image, options, error);
 
-  PSDImageData.lChannels = gimp_image_list_channels (image);
+  PSDImageData.lChannels = clay_image_list_channels (image);
   PSDImageData.nChannels = g_list_length (PSDImageData.lChannels);
   IFDBG(1) g_debug ("\tGot number of channels: %d", PSDImageData.nChannels);
 
@@ -2420,8 +2420,8 @@ clear_image_data (void)
 
 gboolean
 export_image (GFile          *file,
-              GimpImage      *image,
-              GimpProcedure  *procedure,
+              ClayImage      *image,
+              ClayProcedure  *procedure,
               GObject        *config,
               GError        **error)
 {
@@ -2429,13 +2429,13 @@ export_image (GFile          *file,
   GeglBuffer         *buffer;
   GList              *iter;
   GError             *local_error = NULL;
-  GimpParasite       *parasite    = NULL;
+  ClayParasite       *parasite    = NULL;
   PSDResourceOptions  resource_options;
   gsize               max_dim;
 
   resource_options.tif = FALSE;
   resource_options.psb =
-    (! strcmp (gimp_procedure_get_name (procedure), EXPORT_PSB_PROC));
+    (! strcmp (clay_procedure_get_name (procedure), EXPORT_PSB_PROC));
   g_object_get (config,
                 "cmyk",                 &resource_options.cmyk,
                 "duotone",              &resource_options.duotone,
@@ -2451,37 +2451,37 @@ export_image (GFile          *file,
 
   max_dim = (! resource_options.psb) ? 30000 : 300000;
 
-  if (gimp_image_get_width (image) > max_dim ||
-      gimp_image_get_height (image) > max_dim)
+  if (clay_image_get_width (image) > max_dim ||
+      clay_image_get_height (image) > max_dim)
     {
       if (! resource_options.psb)
         g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                      _("Unable to export '%s'.  The PSD file format does not "
                        "support images that are more than 30,000 pixels wide "
                        "or tall."),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
       else
         g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                      _("Unable to export '%s'.  The PSB file format does not "
                        "support images that are more than 300,000 pixels wide "
                        "or tall."),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
       return FALSE;
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /* If image is not grayscale or lacks Duotone color space parasite,
    * turn off "Export as Duotone".
    */
-  parasite = gimp_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
+  parasite = clay_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
   if (parasite)
     {
-      if (gimp_image_get_base_type (image) != GIMP_GRAY)
+      if (clay_image_get_base_type (image) != CLAY_GRAY)
         resource_options.duotone = FALSE;
 
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
     }
   else
     {
@@ -2497,7 +2497,7 @@ export_image (GFile          *file,
 
       if (layer->type == PSD_LAYER_TYPE_LAYER)
         {
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer->layer));
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer->layer));
 
           if (gegl_buffer_get_width (buffer)  > max_dim ||
               gegl_buffer_get_height (buffer) > max_dim)
@@ -2507,13 +2507,13 @@ export_image (GFile          *file,
                              _("Unable to export '%s'.  The PSD file format "
                                "does not support images with layers that are "
                                "more than 30,000 pixels wide or tall."),
-                             gimp_file_get_utf8_name (file));
+                             clay_file_get_utf8_name (file));
               else
                 g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                              _("Unable to export '%s'.  The PSB file format "
                                "does not support images with layers that are "
                                "more than 300,000 pixels wide or tall."),
-                             gimp_file_get_utf8_name (file));
+                             clay_file_get_utf8_name (file));
               clear_image_data ();
               return FALSE;
             }
@@ -2532,13 +2532,13 @@ export_image (GFile          *file,
         {
           g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                        _("Could not open '%s' for writing: %s"),
-                       gimp_file_get_utf8_name (file), g_strerror (errno));
+                       clay_file_get_utf8_name (file), g_strerror (errno));
         }
       else
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not open '%s' for reading: %s"),
-                       gimp_file_get_utf8_name (file), local_error->message);
+                       clay_file_get_utf8_name (file), local_error->message);
           g_error_free (local_error);
         }
       clear_image_data ();
@@ -2547,7 +2547,7 @@ export_image (GFile          *file,
     }
 
   IFDBG(1) g_debug ("\tFile '%s' has been opened",
-                    gimp_file_get_utf8_name (file));
+                    clay_file_get_utf8_name (file));
 
   if (! save_header (output, image, &resource_options, error)                 ||
       ! save_color_mode_data (output, image, resource_options.duotone, error) ||
@@ -2556,7 +2556,7 @@ export_image (GFile          *file,
 
   /* PSD format does not support layers in indexed images */
 
-  if (PSDImageData.baseType == GIMP_INDEXED)
+  if (PSDImageData.baseType == CLAY_INDEXED)
     {
       if (! resource_options.psb)
         WRITE_GOTO (gint32, output, 0, "layers info section length");
@@ -2575,8 +2575,8 @@ export_image (GFile          *file,
 
   /* Delete merged image now */
 clean:
-  if (GIMP_ITEM (PSDImageData.merged_layer))
-    gimp_item_delete (GIMP_ITEM (PSDImageData.merged_layer));
+  if (CLAY_ITEM (PSDImageData.merged_layer))
+    clay_item_delete (CLAY_ITEM (PSDImageData.merged_layer));
 
   clear_image_data ();
 
@@ -2585,7 +2585,7 @@ clean:
   g_object_unref (output);
   g_free (resource_options.clipping_path_name);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return (*error == NULL);
 }
@@ -2593,7 +2593,7 @@ clean:
 /* Saving metadata for external file formats */
 gboolean
 export_image_metadata (GFile      *file,
-                       GimpImage  *image,
+                       ClayImage  *image,
                        gboolean    for_layers,
                        gboolean    cmyk,
                        GError    **error)
@@ -2603,12 +2603,12 @@ export_image_metadata (GFile      *file,
   GeglBuffer         *buffer;
   GList              *iter;
   GError             *local_error            = NULL;
-  GimpParasite       *clipping_path_parasite = NULL;
-  GimpParasite       *path_flatness_parasite = NULL;
+  ClayParasite       *clipping_path_parasite = NULL;
+  ClayParasite       *path_flatness_parasite = NULL;
   gsize               max_dim                = 300000;
 
-  resource_options.psb = (gimp_image_get_width (image) > 30000 ||
-                         gimp_image_get_height (image) > 30000);
+  resource_options.psb = (clay_image_get_width (image) > 30000 ||
+                         clay_image_get_height (image) > 30000);
 
   resource_options.cmyk                   = cmyk;
   resource_options.duotone                = FALSE;
@@ -2621,39 +2621,39 @@ export_image_metadata (GFile      *file,
 
   max_dim = (! resource_options.psb) ? 30000 : 300000;
 
-  if (gimp_image_get_width (image) > max_dim ||
-      gimp_image_get_height (image) > max_dim)
+  if (clay_image_get_width (image) > max_dim ||
+      clay_image_get_height (image) > max_dim)
     {
       if (! resource_options.psb)
         g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                      _("Unable to export '%s'.  The PSD file format does not "
                        "support images that are more than 30,000 pixels wide "
                        "or tall."),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
       else
         g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                      _("Unable to export '%s'.  The PSB file format does not "
                        "support images that are more than 300,000 pixels wide "
                        "or tall."),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
       return FALSE;
     }
 
-  clipping_path_parasite = gimp_image_get_parasite (image, PSD_PARASITE_CLIPPING_PATH);
+  clipping_path_parasite = clay_image_get_parasite (image, PSD_PARASITE_CLIPPING_PATH);
   if (clipping_path_parasite)
     {
       resource_options.clipping_path      = TRUE;
       resource_options.clipping_path_name =
-        g_strdup ((gchar *) gimp_parasite_get_data (clipping_path_parasite, NULL));
-      gimp_parasite_free (clipping_path_parasite);
+        g_strdup ((gchar *) clay_parasite_get_data (clipping_path_parasite, NULL));
+      clay_parasite_free (clipping_path_parasite);
     }
 
-  path_flatness_parasite = gimp_image_get_parasite (image, PSD_PARASITE_PATH_FLATNESS);
+  path_flatness_parasite = clay_image_get_parasite (image, PSD_PARASITE_PATH_FLATNESS);
   if (path_flatness_parasite)
     {
       resource_options.clipping_path_flatness =
-        *(gfloat *) gimp_parasite_get_data (path_flatness_parasite, NULL);
-      gimp_parasite_free (path_flatness_parasite);
+        *(gfloat *) clay_parasite_get_data (path_flatness_parasite, NULL);
+      clay_parasite_free (path_flatness_parasite);
     }
 
   get_image_data (image, &resource_options, error);
@@ -2665,7 +2665,7 @@ export_image_metadata (GFile      *file,
 
       if (layer->type == PSD_LAYER_TYPE_LAYER)
         {
-          buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer->layer));
+          buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer->layer));
 
           if (gegl_buffer_get_width (buffer)  > max_dim ||
               gegl_buffer_get_height (buffer) > max_dim)
@@ -2675,13 +2675,13 @@ export_image_metadata (GFile      *file,
                              _("Unable to export '%s'.  The PSD file format "
                                "does not support images with layers that are "
                                "more than 30,000 pixels wide or tall."),
-                             gimp_file_get_utf8_name (file));
+                             clay_file_get_utf8_name (file));
               else
                 g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                              _("Unable to export '%s'.  The PSB file format "
                                "does not support images with layers that are "
                                "more than 300,000 pixels wide or tall."),
-                             gimp_file_get_utf8_name (file));
+                             clay_file_get_utf8_name (file));
               clear_image_data ();
               return FALSE;
             }
@@ -2700,13 +2700,13 @@ export_image_metadata (GFile      *file,
         {
           g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                        _("Could not open '%s' for writing: %s"),
-                       gimp_file_get_utf8_name (file), g_strerror (errno));
+                       clay_file_get_utf8_name (file), g_strerror (errno));
         }
       else
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not open '%s' for reading: %s"),
-                       gimp_file_get_utf8_name (file), local_error->message);
+                       clay_file_get_utf8_name (file), local_error->message);
           g_error_free (local_error);
         }
       clear_image_data ();
@@ -2715,11 +2715,11 @@ export_image_metadata (GFile      *file,
     }
 
   IFDBG(1) g_debug ("\tFile '%s' has been opened",
-                    gimp_file_get_utf8_name (file));
+                    clay_file_get_utf8_name (file));
 
   if (for_layers)
     {
-      if (PSDImageData.baseType == GIMP_INDEXED)
+      if (PSDImageData.baseType == CLAY_INDEXED)
         {
           if (! resource_options.psb)
             WRITE_GOTO (gint32, output, 0, "layers info section length");
@@ -2742,8 +2742,8 @@ export_image_metadata (GFile      *file,
 
 clean:
 
-  if (GIMP_ITEM (PSDImageData.merged_layer))
-    gimp_item_delete (GIMP_ITEM (PSDImageData.merged_layer));
+  if (CLAY_ITEM (PSDImageData.merged_layer))
+    clay_item_delete (CLAY_ITEM (PSDImageData.merged_layer));
 
   clear_image_data ();
 
@@ -2756,29 +2756,29 @@ clean:
 }
 
 static gint
-get_bpc (GimpImage *image)
+get_bpc (ClayImage *image)
 {
-  switch (gimp_image_get_precision (image))
+  switch (clay_image_get_precision (image))
     {
-    case GIMP_PRECISION_U8_LINEAR:
-    case GIMP_PRECISION_U8_NON_LINEAR:
-    case GIMP_PRECISION_U8_PERCEPTUAL:
+    case CLAY_PRECISION_U8_LINEAR:
+    case CLAY_PRECISION_U8_NON_LINEAR:
+    case CLAY_PRECISION_U8_PERCEPTUAL:
       return 1;
 
-    case GIMP_PRECISION_U16_LINEAR:
-    case GIMP_PRECISION_U16_NON_LINEAR:
-    case GIMP_PRECISION_U16_PERCEPTUAL:
-    case GIMP_PRECISION_HALF_LINEAR:
-    case GIMP_PRECISION_HALF_NON_LINEAR:
-    case GIMP_PRECISION_HALF_PERCEPTUAL:
+    case CLAY_PRECISION_U16_LINEAR:
+    case CLAY_PRECISION_U16_NON_LINEAR:
+    case CLAY_PRECISION_U16_PERCEPTUAL:
+    case CLAY_PRECISION_HALF_LINEAR:
+    case CLAY_PRECISION_HALF_NON_LINEAR:
+    case CLAY_PRECISION_HALF_PERCEPTUAL:
       return 2;
 
-    case GIMP_PRECISION_U32_LINEAR:
-    case GIMP_PRECISION_U32_NON_LINEAR:
-    case GIMP_PRECISION_U32_PERCEPTUAL:
-    case GIMP_PRECISION_FLOAT_LINEAR:
-    case GIMP_PRECISION_FLOAT_NON_LINEAR:
-    case GIMP_PRECISION_FLOAT_PERCEPTUAL:
+    case CLAY_PRECISION_U32_LINEAR:
+    case CLAY_PRECISION_U32_NON_LINEAR:
+    case CLAY_PRECISION_U32_PERCEPTUAL:
+    case CLAY_PRECISION_FLOAT_LINEAR:
+    case CLAY_PRECISION_FLOAT_NON_LINEAR:
+    case CLAY_PRECISION_FLOAT_PERCEPTUAL:
       return 4;
 
     default:
@@ -2787,24 +2787,24 @@ get_bpc (GimpImage *image)
 }
 
 static const Babl *
-get_pixel_format (GimpDrawable  *drawable,
+get_pixel_format (ClayDrawable  *drawable,
                   gboolean       cmyk,
                   GError       **error)
 {
-  GimpImage        *image;
-  GimpColorProfile *profile = NULL;
+  ClayImage        *image;
+  ClayColorProfile *profile = NULL;
   const Babl       *space   = NULL;
 
-  image = gimp_item_get_image (GIMP_ITEM (drawable));
+  image = clay_item_get_image (CLAY_ITEM (drawable));
 
-  if (gimp_image_get_base_type (image) == GIMP_RGB)
+  if (clay_image_get_base_type (image) == CLAY_RGB)
     {
-      profile = gimp_image_get_color_profile (image);
+      profile = clay_image_get_color_profile (image);
       if (profile)
         {
           space =
-            gimp_color_profile_get_space (profile,
-                                          GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+            clay_color_profile_get_space (profile,
+                                          CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                           error);
 
           if (! space)
@@ -2816,9 +2816,9 @@ get_pixel_format (GimpDrawable  *drawable,
         }
     }
 
-  switch (gimp_drawable_type (drawable))
+  switch (clay_drawable_type (drawable))
     {
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       switch (get_bpc (image))
         {
         case 4:
@@ -2834,7 +2834,7 @@ get_pixel_format (GimpDrawable  *drawable,
           return NULL;
         }
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       switch (get_bpc (image))
         {
         case 4:
@@ -2850,7 +2850,7 @@ get_pixel_format (GimpDrawable  *drawable,
           return NULL;
         }
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       switch (get_bpc (image))
         {
         case 4:
@@ -2868,7 +2868,7 @@ get_pixel_format (GimpDrawable  *drawable,
           return NULL;
         }
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       switch (get_bpc (image))
         {
         case 4:
@@ -2886,9 +2886,9 @@ get_pixel_format (GimpDrawable  *drawable,
           return NULL;
         }
 
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
-      return gimp_drawable_get_format (drawable);
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
+      return clay_drawable_get_format (drawable);
 
     default:
       g_return_val_if_reached (NULL);
@@ -2896,9 +2896,9 @@ get_pixel_format (GimpDrawable  *drawable,
 }
 
 static const Babl *
-get_channel_format (GimpDrawable *drawable)
+get_channel_format (ClayDrawable *drawable)
 {
-  GimpImage *image = gimp_item_get_image (GIMP_ITEM (drawable));
+  ClayImage *image = clay_item_get_image (CLAY_ITEM (drawable));
 
   switch (get_bpc (image))
     {
@@ -2917,9 +2917,9 @@ get_channel_format (GimpDrawable *drawable)
 }
 
 static const Babl *
-get_mask_format (GimpLayerMask *mask)
+get_mask_format (ClayLayerMask *mask)
 {
-  GimpImage *image = gimp_item_get_image (GIMP_ITEM (mask));
+  ClayImage *image = clay_item_get_image (CLAY_ITEM (mask));
 
   switch (get_bpc (image))
     {
@@ -2953,7 +2953,7 @@ append_layers (GList *layers)
 
       layer->layer = iter->data;
 
-      is_group = gimp_item_is_group (iter->data);
+      is_group = clay_item_is_group (iter->data);
 
       if (! is_group)
         layer->type = PSD_LAYER_TYPE_LAYER;
@@ -2967,7 +2967,7 @@ append_layers (GList *layers)
           PSD_Layer *end_layer = g_new0 (PSD_Layer, 1);
           GList     *group_layers;
 
-          group_layers = gimp_item_list_children (iter->data);
+          group_layers = clay_item_list_children (iter->data);
           psd_layers = g_list_concat (psd_layers,
                                       append_layers (group_layers));
           g_list_free (group_layers);
@@ -2982,13 +2982,13 @@ append_layers (GList *layers)
 }
 
 static GList *
-image_get_all_layers (GimpImage *image,
+image_get_all_layers (ClayImage *image,
                       gint      *n_layers)
 {
   GList *psd_layers = NULL;
   GList *layers;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   psd_layers = append_layers (layers);
   g_list_free (layers);
 
@@ -2998,8 +2998,8 @@ image_get_all_layers (GimpImage *image,
 }
 
 gboolean
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget        *dialog;
@@ -3007,41 +3007,41 @@ save_dialog (GimpImage     *image,
   GtkWidget        *label;
   gchar            *text;
   GtkWidget        *profile_label;
-  GimpColorProfile *cmyk_profile;
-  GimpParasite     *parasite         = NULL;
+  ClayColorProfile *cmyk_profile;
+  ClayParasite     *parasite         = NULL;
   gboolean          has_duotone_data = FALSE;
   GList            *paths;
   gboolean          run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /* CMYK profile label */
-  profile_label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  profile_label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                    "profile-label", _("No soft-proofing profile"),
                                                    FALSE, FALSE);
   gtk_label_set_xalign (GTK_LABEL (profile_label), 0.0);
   gtk_label_set_ellipsize (GTK_LABEL (profile_label), PANGO_ELLIPSIZE_END);
-  gimp_label_set_attributes (GTK_LABEL (profile_label),
+  clay_label_set_attributes (GTK_LABEL (profile_label),
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                              -1);
-  gimp_help_set_help_data (profile_label,
+  clay_help_set_help_data (profile_label,
                            _("Name of the color profile used for CMYK export."), NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "cmyk-frame", "cmyk", FALSE,
                                     "profile-label");
-  cmyk_profile = gimp_image_get_simulation_profile (image);
+  cmyk_profile = clay_image_get_simulation_profile (image);
   if (cmyk_profile)
     {
-      if (gimp_color_profile_is_cmyk (cmyk_profile))
+      if (clay_color_profile_is_cmyk (cmyk_profile))
         {
           gchar *label_text;
 
           label_text = g_strdup_printf (_("Profile: %s"),
-                                        gimp_color_profile_get_label (cmyk_profile));
+                                        clay_color_profile_get_label (cmyk_profile));
           gtk_label_set_text (GTK_LABEL (profile_label), label_text);
-          gimp_label_set_attributes (GTK_LABEL (profile_label),
+          clay_label_set_attributes (GTK_LABEL (profile_label),
                                      PANGO_ATTR_STYLE, PANGO_STYLE_NORMAL,
                                      -1);
           g_free (label_text);
@@ -3052,15 +3052,15 @@ save_dialog (GimpImage     *image,
   /* Only show dialog if image is grayscale and duotone color space
    * information was attached from the original image imported
    */
-   parasite = gimp_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
+   parasite = clay_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
    if (parasite)
      {
-       if (gimp_image_get_base_type (image) == GIMP_GRAY)
+       if (clay_image_get_base_type (image) == CLAY_GRAY)
          {
            has_duotone_data = TRUE;
 
            /* Duotone Option label */
-           duotone_notice = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+           duotone_notice = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                              "duotone-notice",
                                                              _("Duotone color space information "
                                                              "from the original\nimported image "
@@ -3068,29 +3068,29 @@ save_dialog (GimpImage     *image,
                                                              FALSE, FALSE);
            gtk_label_set_xalign (GTK_LABEL (duotone_notice), 0.0);
            gtk_label_set_ellipsize (GTK_LABEL (duotone_notice), PANGO_ELLIPSIZE_END);
-           gimp_label_set_attributes (GTK_LABEL (duotone_notice),
+           clay_label_set_attributes (GTK_LABEL (duotone_notice),
                                       PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                                       -1);
 
-           gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+           clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                              "duotone-frame", "duotone", FALSE,
                                              "duotone-notice");
 
            /* Prevent you from setting both Duotone and CMYK exports */
-           gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+           clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "duotone",
                                                 TRUE, config, "cmyk", TRUE);
-           gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+           clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "cmyk",
                                                 TRUE, config, "duotone", TRUE);
 
          }
 
-       gimp_parasite_free (parasite);
+       clay_parasite_free (parasite);
      }
 
   /* Clipping Path */
-  paths = gimp_image_list_paths (image);
+  paths = clay_image_list_paths (image);
   if (paths)
     {
       GtkWidget    *vbox;
@@ -3105,15 +3105,15 @@ save_dialog (GimpImage     *image,
       gint          saved_id  = -1;
       gchar        *path_name = NULL;
 
-      parasite = gimp_image_get_parasite (image, PSD_PARASITE_CLIPPING_PATH);
+      parasite = clay_image_get_parasite (image, PSD_PARASITE_CLIPPING_PATH);
       if (parasite)
         {
           guint32  parasite_size;
 
-          path_name = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          path_name = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           path_name = g_strndup (path_name, parasite_size);
 
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
       else
         {
@@ -3124,12 +3124,12 @@ save_dialog (GimpImage     *image,
         }
 
       vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
-      combo = gimp_path_combo_box_new (NULL, NULL, NULL);
+      combo = clay_path_combo_box_new (NULL, NULL, NULL);
 
       /* Alert user if they have more than 998 paths */
       if (g_list_length (paths) > 998)
         {
-          label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+          label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                    "path-warning",
                                                    _("PSD files can store up to "
                                                      "998 paths. \nThe rest "
@@ -3137,10 +3137,10 @@ save_dialog (GimpImage     *image,
                                                    FALSE, FALSE);
            gtk_label_set_xalign (GTK_LABEL (label), 0.0);
            gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
-           gimp_label_set_attributes (GTK_LABEL (label),
+           clay_label_set_attributes (GTK_LABEL (label),
                                       PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                                       -1);
-          gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+          clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                       "path-warning",
                                       NULL);
           gtk_widget_set_visible (label, TRUE);
@@ -3155,37 +3155,37 @@ save_dialog (GimpImage     *image,
         {
           gtk_list_store_append (GTK_LIST_STORE (model), &iter);
           gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-                              GIMP_INT_STORE_VALUE,     gimp_item_get_id (list->data),
-                              GIMP_INT_STORE_LABEL,     gimp_item_get_name (list->data),
-                              GIMP_INT_STORE_PIXBUF,    NULL,
-                              GIMP_INT_STORE_USER_DATA, gimp_item_get_name (list->data),
+                              CLAY_INT_STORE_VALUE,     clay_item_get_id (list->data),
+                              CLAY_INT_STORE_LABEL,     clay_item_get_name (list->data),
+                              CLAY_INT_STORE_PIXBUF,    NULL,
+                              CLAY_INT_STORE_USER_DATA, clay_item_get_name (list->data),
                               -1);
 
-          if (! g_strcmp0 (gimp_item_get_name (list->data),
+          if (! g_strcmp0 (clay_item_get_name (list->data),
                            path_name))
-            saved_id = gimp_item_get_id (list->data);
+            saved_id = clay_item_get_id (list->data);
         }
 
       if (saved_id != -1)
-        gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo),
+        clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo),
                                        saved_id);
 
-      gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                                   0,
                                   G_CALLBACK (update_clipping_path),
                                   config, NULL);
       gtk_widget_set_visible (combo, TRUE);
 
-      entry = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+      entry = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                     "clippingpathflatness", 1.0);
 
-      parasite = gimp_image_get_parasite (image, PSD_PARASITE_PATH_FLATNESS);
+      parasite = clay_image_get_parasite (image, PSD_PARASITE_PATH_FLATNESS);
       if (parasite)
         {
           gfloat  *path_flatness = NULL;
           guint32  parasite_size;
 
-          path_flatness = (gfloat *) gimp_parasite_get_data (parasite, &parasite_size);
+          path_flatness = (gfloat *) clay_parasite_get_data (parasite, &parasite_size);
           if (path_flatness && *path_flatness > 0)
             {
               gtk_spin_button_set_value (GTK_SPIN_BUTTON (entry), *path_flatness);
@@ -3194,15 +3194,15 @@ save_dialog (GimpImage     *image,
                             NULL);
             }
 
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
         }
 
       gtk_widget_set_visible (entry, TRUE);
 
-      gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                         "clipping-path-frame", "clippingpath", FALSE,
                                         NULL);
-      frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "clipping-path-subframe", NULL, FALSE,
                                                 NULL);
 
@@ -3211,34 +3211,34 @@ save_dialog (GimpImage     *image,
       gtk_box_pack_start (GTK_BOX (vbox), entry, FALSE, FALSE, 0);
       gtk_widget_set_visible (vbox, TRUE);
 
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "clipping-path-frame",
                                   "clipping-path-subframe",
                                   NULL);
 
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                            "clipping-path-subframe",
                                            TRUE, config, "clippingpath", FALSE);
     }
 
   if (has_duotone_data)
-    gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+    clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                 "cmyk-frame",
                                 "duotone-frame",
                                 NULL);
   else
-    gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+    clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                 "cmyk-frame",
                                 NULL);
 
 /* Multi-layer Indexed Image Warning */
-  if (gimp_image_get_base_type (image) == GIMP_INDEXED)
+  if (clay_image_get_base_type (image) == CLAY_INDEXED)
     {
-      GimpLayer **layers;
+      ClayLayer **layers;
 
-      layers = gimp_image_get_layers (image);
+      layers = clay_image_get_layers (image);
 
-      if (gimp_core_object_array_get_length ((GObject **) layers) > 1)
+      if (clay_core_object_array_get_length ((GObject **) layers) > 1)
         {
             text = g_strdup_printf ("\n<b>%s</b>: %s",
                           _("Indexed Image Warning"),
@@ -3246,7 +3246,7 @@ save_dialog (GimpImage     *image,
                             "that have more than one layer. Layers will "
                             "be merged on export."));
 
-            label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+            label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "indexed-notice", "Indexed Image Warning",
                                                      FALSE, FALSE);
             gtk_label_set_markup (GTK_LABEL (label), text);
@@ -3254,7 +3254,7 @@ save_dialog (GimpImage     *image,
             gtk_label_set_max_width_chars (GTK_LABEL (label), 50);
             gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
 
-            gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+            clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                         "indexed-notice", NULL);
             g_free (text);
         }
@@ -3271,7 +3271,7 @@ save_dialog (GimpImage     *image,
                             "If you encounter display issues, consider "
                             "switching to those layer modes."));
 
-  label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                            "compat-notice", "Compatibility Notice",
                                            FALSE, FALSE);
   gtk_label_set_markup (GTK_LABEL (label), text);
@@ -3279,25 +3279,25 @@ save_dialog (GimpImage     *image,
   gtk_label_set_max_width_chars (GTK_LABEL (label), 50);
   gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "compat-notice", NULL);
   g_free (text);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
   return run;
 }
 
-static void update_clipping_path (GimpIntComboBox *combo,
+static void update_clipping_path (ClayIntComboBox *combo,
                                   gpointer         data)
 {
   gpointer value;
 
-  if (gimp_int_combo_box_get_active_user_data (GIMP_INT_COMBO_BOX (combo),
+  if (clay_int_combo_box_get_active_user_data (CLAY_INT_COMBO_BOX (combo),
                                                &value))
     {
       GObject *config = G_OBJECT (data);

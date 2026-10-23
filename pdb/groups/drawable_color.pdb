@@ -29,7 +29,7 @@ HELP
     $date = '1997';
     $since = '2.10';
 
-    $deprecated = 'gimp:brightness-contrast';
+    $deprecated = 'clay:brightness-contrast';
     $deprecated_since = '3.2';
 
     @inargs = (
@@ -42,21 +42,21 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("operations/gimpbrightnesscontrastconfig.h") ],
+        headers => [ qw("operations/claybrightnesscontrastconfig.h") ],
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
-      GObject *config = g_object_new (GIMP_TYPE_BRIGHTNESS_CONTRAST_CONFIG,
+      GObject *config = g_object_new (CLAY_TYPE_BRIGHTNESS_CONTRAST_CONFIG,
                                       "brightness", brightness,
                                       "contrast",   contrast,
                                       NULL);
 
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Brightness-Contrast"),
-                                             "gimp:brightness-contrast",
+                                             "clay:brightness-contrast",
                                              config);
       g_object_unref (config);
     }
@@ -84,13 +84,13 @@ HELP
     $date = '1997';
     $since = '2.10';
 
-    $deprecated = 'gimp:color-balance';
+    $deprecated = 'clay:color-balance';
     $deprecated_since = '3.2';
 
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'transfer_mode', type => 'enum GimpTransferMode',
+	{ name => 'transfer_mode', type => 'enum ClayTransferMode',
 	  desc => 'Transfer mode' },
 	{ name => 'preserve_lum', type => 'boolean',
 	  desc => 'Preserve luminosity values at each pixel' },
@@ -103,14 +103,14 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("operations/gimpcolorbalanceconfig.h") ],
+	headers => [ qw("operations/claycolorbalanceconfig.h") ],
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error)  &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error)  &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
-      GObject *config = g_object_new (GIMP_TYPE_COLOR_BALANCE_CONFIG,
+      GObject *config = g_object_new (CLAY_TYPE_COLOR_BALANCE_CONFIG,
                                       "range",               transfer_mode,
                                       "preserve-luminosity", preserve_lum,
                                       NULL);
@@ -121,9 +121,9 @@ HELP
                     "yellow-blue",   yellow_blue   / 100.0,
                     NULL);
 
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Color Balance"),
-                                             "gimp:color-balance",
+                                             "clay:color-balance",
                                              config);
       g_object_unref (config);
     }
@@ -144,7 +144,7 @@ HELP
 
     &neo_pdb_misc('2004', '2.10');
 
-    $deprecated = 'gimp:colorize';
+    $deprecated = 'clay:colorize';
     $deprecated_since = '3.2';
 
     @inargs = (
@@ -161,20 +161,20 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
-      ! gimp_drawable_is_gray (drawable))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
+      ! clay_drawable_is_gray (drawable))
     {
       GeglNode *node =
         gegl_node_new_child (NULL,
-                             "operation", "gimp:colorize",
+                             "operation", "clay:colorize",
                              "hue",        hue        / 360.0,
                              "saturation", saturation / 100.0,
                              "lightness",  lightness  / 100.0,
                              NULL);
 
-      gimp_drawable_apply_operation (drawable, progress,
+      clay_drawable_apply_operation (drawable, progress,
                                      C_("undo-type", "Colorize"),
                                      node);
       g_object_unref (node);
@@ -194,20 +194,20 @@ Modifies the intensity mapping for one channel in the specified
 drawable. The channel can be either an intensity component, or the
 value. The 'values' parameter is an array of doubles which explicitly
 defines how each pixel value in the drawable will be modified.  Use
-the gimp_drawable_curves_spline() function to modify intensity levels
+the clay_drawable_curves_spline() function to modify intensity levels
 with Catmull Rom splines.
 HELP
 
     &std_pdb_misc;
     $since = '2.10';
 
-    $deprecated = 'gimp:curves';
+    $deprecated = 'clay:curves';
     $deprecated_since = '3.2';
 
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'channel', type => 'enum GimpHistogramChannel',
+	{ name => 'channel', type => 'enum ClayHistogramChannel',
 	  desc => 'The channel to modify' },
 	{ name => 'values', type => 'doublearray',
 	  desc => 'The explicit curve',
@@ -216,26 +216,26 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("operations/gimpcurvesconfig.h") ],
+	headers => [ qw("operations/claycurvesconfig.h") ],
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
       (num_values >= 256) &&
       (num_values <= 4096) &&
-      (gimp_drawable_has_alpha (drawable) || channel != GIMP_HISTOGRAM_ALPHA) &&
-      (! gimp_drawable_is_gray (drawable) ||
-       channel == GIMP_HISTOGRAM_VALUE || channel == GIMP_HISTOGRAM_ALPHA) &&
-      channel != GIMP_HISTOGRAM_LUMINANCE)
+      (clay_drawable_has_alpha (drawable) || channel != CLAY_HISTOGRAM_ALPHA) &&
+      (! clay_drawable_is_gray (drawable) ||
+       channel == CLAY_HISTOGRAM_VALUE || channel == CLAY_HISTOGRAM_ALPHA) &&
+      channel != CLAY_HISTOGRAM_LUMINANCE)
     {
-      GObject *config = gimp_curves_config_new_explicit (channel,
+      GObject *config = clay_curves_config_new_explicit (channel,
                                                          values,
                                                          num_values);
 
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Curves"),
-                                             "gimp:curves",
+                                             "clay:curves",
                                              config);
       g_object_unref (config);
     }
@@ -262,20 +262,20 @@ the size of @points (@num_coordinates) must be a multiple of 2, equal or
 bigger than 4 (i.e. a minimum of 2 points).
 
 
-Use [method@Gimp.Drawable.curves_explicit] to explicitly modify intensity
+Use [method@Clay.Drawable.curves_explicit] to explicitly modify intensity
 levels.
 HELP
 
     &std_pdb_misc;
     $since = '2.10';
 
-    $deprecated = 'gimp:curves';
+    $deprecated = 'clay:curves';
     $deprecated_since = '3.2';
 
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'channel', type => 'enum GimpHistogramChannel',
+	{ name => 'channel', type => 'enum ClayHistogramChannel',
 	  desc => 'The channel to modify' },
 	{ name => 'points', type => 'doublearray',
 	  desc => 'The spline control points: { cp1.x, cp1.y, cp2.x, cp2.y,
@@ -286,25 +286,25 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("operations/gimpcurvesconfig.h") ],
+	headers => [ qw("operations/claycurvesconfig.h") ],
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
       ! (num_coordinates & 1) &&
-      (gimp_drawable_has_alpha (drawable) || channel != GIMP_HISTOGRAM_ALPHA) &&
-      (! gimp_drawable_is_gray (drawable) ||
-       channel == GIMP_HISTOGRAM_VALUE || channel == GIMP_HISTOGRAM_ALPHA) &&
-      channel != GIMP_HISTOGRAM_LUMINANCE)
+      (clay_drawable_has_alpha (drawable) || channel != CLAY_HISTOGRAM_ALPHA) &&
+      (! clay_drawable_is_gray (drawable) ||
+       channel == CLAY_HISTOGRAM_VALUE || channel == CLAY_HISTOGRAM_ALPHA) &&
+      channel != CLAY_HISTOGRAM_LUMINANCE)
     {
-      GObject *config = gimp_curves_config_new_spline (channel,
+      GObject *config = clay_curves_config_new_spline (channel,
                                                        points,
                                                        num_coordinates / 2);
 
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Curves"),
-                                             "gimp:curves",
+                                             "clay:curves",
                                              config);
       g_object_unref (config);
     }
@@ -345,10 +345,10 @@ sub drawable_extract_component {
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
-      gimp_drawable_is_rgb (drawable))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
+      clay_drawable_is_rgb (drawable))
     {
       GeglNode *node =
         gegl_node_new_child (NULL,
@@ -358,7 +358,7 @@ sub drawable_extract_component {
                              "linear",    linear,
                              NULL);
 
-      gimp_drawable_apply_operation (drawable, progress,
+      clay_drawable_apply_operation (drawable, progress,
                                      C_("undo-type", "Extract Component"),
                                      node);
       g_object_unref (node);
@@ -385,31 +385,31 @@ HELP
     $date = '2005';
     $since = '2.10';
 
-    $deprecated = 'gimp:desaturate';
+    $deprecated = 'clay:desaturate';
     $deprecated_since = '3.2';
 
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'desaturate_mode', type => 'enum GimpDesaturateMode',
+	{ name => 'desaturate_mode', type => 'enum ClayDesaturateMode',
 	  desc => 'The formula to use to desaturate' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
-      gimp_drawable_is_rgb (drawable))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
+      clay_drawable_is_rgb (drawable))
     {
       GeglNode *node =
         gegl_node_new_child (NULL,
-                             "operation", "gimp:desaturate",
+                             "operation", "clay:desaturate",
                              "mode",      desaturate_mode,
                              NULL);
 
-      gimp_drawable_apply_operation (drawable, progress,
+      clay_drawable_apply_operation (drawable, progress,
                                      C_("undo-type", "Desaturate"),
                                      node);
       g_object_unref (node);
@@ -445,16 +445,16 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-equalize.h") ],
+	headers => [ qw("core/claydrawable-equalize.h") ],
 	code => <<'CODE'
 {
-  if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                   GIMP_PDB_ITEM_CONTENT, error) ||
-      ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (! clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                   CLAY_PDB_ITEM_CONTENT, error) ||
+      ! clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     success = FALSE;
 
   if (success)
-    gimp_drawable_equalize (drawable, mask_only);
+    clay_drawable_equalize (drawable, mask_only);
 }
 CODE
     );
@@ -471,7 +471,7 @@ This tool makes it possible to gather information about the intensity
 histogram of a drawable. A channel to examine is first specified. This
 can be either value, red, green, or blue, depending on whether the
 drawable is of type color or grayscale. Second, a range of intensities
-are specified. The gimp_drawable_histogram() function returns
+are specified. The clay_drawable_histogram() function returns
 statistics based on the pixels in the drawable that fall under this
 range of values. Mean, standard deviation, median, number of pixels,
 and percentile are all returned.  Additionally, the total count of
@@ -491,7 +491,7 @@ HELP
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'channel', type => 'enum GimpHistogramChannel',
+	{ name => 'channel', type => 'enum ClayHistogramChannel',
 	  desc => 'The channel to query' },
 	{ name => 'start_range', type => '0.0 <= double <= 1.0',
 	  desc => 'Start of the intensity measurement range' },
@@ -515,43 +515,43 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("core/gimpdrawable-histogram.h"
-                        "core/gimphistogram.h") ],
+	headers => [ qw("core/claydrawable-histogram.h"
+                        "core/clayhistogram.h") ],
 	code => <<'CODE'
 {
-  if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL, 0, error) ||
-      (! gimp_drawable_has_alpha (drawable) &&
-       channel == GIMP_HISTOGRAM_ALPHA) ||
-      (gimp_drawable_is_gray (drawable) &&
-       channel != GIMP_HISTOGRAM_VALUE && channel != GIMP_HISTOGRAM_ALPHA))
+  if (! clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL, 0, error) ||
+      (! clay_drawable_has_alpha (drawable) &&
+       channel == CLAY_HISTOGRAM_ALPHA) ||
+      (clay_drawable_is_gray (drawable) &&
+       channel != CLAY_HISTOGRAM_VALUE && channel != CLAY_HISTOGRAM_ALPHA))
     success = FALSE;
 
   if (success)
     {
-      GimpHistogram *histogram;
+      ClayHistogram *histogram;
       gint           n_bins;
       gint           start;
-      GimpTRCType    trc;
+      ClayTRCType    trc;
       gint           end;
 
-      trc = gimp_drawable_get_trc (drawable);
+      trc = clay_drawable_get_trc (drawable);
 
-      histogram = gimp_histogram_new (trc);
-      gimp_drawable_calculate_histogram (drawable, histogram, FALSE);
+      histogram = clay_histogram_new (trc);
+      clay_drawable_calculate_histogram (drawable, histogram, FALSE);
 
-      n_bins = gimp_histogram_n_bins (histogram);
+      n_bins = clay_histogram_n_bins (histogram);
 
       start = ROUND (start_range * (n_bins - 1));
       end   = ROUND (end_range   * (n_bins - 1));
 
-      mean       = gimp_histogram_get_mean (histogram, channel,
+      mean       = clay_histogram_get_mean (histogram, channel,
 		 			    start, end);
-      std_dev    = gimp_histogram_get_std_dev (histogram, channel,
+      std_dev    = clay_histogram_get_std_dev (histogram, channel,
 					       start, end);
-      median     = gimp_histogram_get_median (histogram, channel,
+      median     = clay_histogram_get_median (histogram, channel,
 					      start, end);
-      pixels     = gimp_histogram_get_count (histogram, channel, 0, n_bins - 1);
-      count      = gimp_histogram_get_count (histogram, channel,
+      pixels     = clay_histogram_get_count (histogram, channel, 0, n_bins - 1);
+      count      = clay_histogram_get_count (histogram, channel,
                                              start, end);
       percentile = count / pixels;
 
@@ -584,13 +584,13 @@ HELP
     &std_pdb_misc;
     $since = '2.10';
 
-    $deprecated = 'gimp:hue-saturation';
+    $deprecated = 'clay:hue-saturation';
     $deprecated_since = '3.2';
 
     @inargs = (
         { name => 'drawable', type => 'drawable',
           desc => 'The drawable' },
-        { name => 'hue_range', type => 'enum GimpHueRange',
+        { name => 'hue_range', type => 'enum ClayHueRange',
           desc => 'Range of affected hues' },
         { name => 'hue_offset', type => '-180 <= double <= 180',
           desc => 'Hue offset in degrees' },
@@ -603,14 +603,14 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("operations/gimphuesaturationconfig.h") ],
+        headers => [ qw("operations/clayhuesaturationconfig.h") ],
         code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
-      GObject *config = g_object_new (GIMP_TYPE_HUE_SATURATION_CONFIG,
+      GObject *config = g_object_new (CLAY_TYPE_HUE_SATURATION_CONFIG,
                                       "range", hue_range,
                                       NULL);
 
@@ -621,9 +621,9 @@ HELP
                      "overlap",    overlap / 100.0,
                      NULL);
 
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Hue-Saturation"),
-                                             "gimp:hue-saturation",
+                                             "clay:hue-saturation",
                                              config);
       g_object_unref (config);
     }
@@ -660,11 +660,11 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Invert"),
                                              linear ?
                                              "gegl:invert-linear" :
@@ -697,13 +697,13 @@ HELP
     &std_pdb_misc;
     $since = '2.10';
 
-    $deprecated = 'gimp:levels';
+    $deprecated = 'clay:levels';
     $deprecated_since = '3.2';
 
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'channel', type => 'enum GimpHistogramChannel',
+	{ name => 'channel', type => 'enum ClayHistogramChannel',
 	  desc => 'The channel to modify' },
 	{ name => 'low_input', type => '0.0 <= double <= 1.0',
 	  desc => "Intensity of lowest input" },
@@ -722,18 +722,18 @@ HELP
     );
 
     %invoke = (
-	headers => [ qw("operations/gimplevelsconfig.h") ],
+	headers => [ qw("operations/claylevelsconfig.h") ],
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error) &&
-      (gimp_drawable_has_alpha (drawable) || channel != GIMP_HISTOGRAM_ALPHA) &&
-      (! gimp_drawable_is_gray (drawable) ||
-       channel == GIMP_HISTOGRAM_VALUE || channel == GIMP_HISTOGRAM_ALPHA) &&
-      channel != GIMP_HISTOGRAM_LUMINANCE)
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error) &&
+      (clay_drawable_has_alpha (drawable) || channel != CLAY_HISTOGRAM_ALPHA) &&
+      (! clay_drawable_is_gray (drawable) ||
+       channel == CLAY_HISTOGRAM_VALUE || channel == CLAY_HISTOGRAM_ALPHA) &&
+      channel != CLAY_HISTOGRAM_LUMINANCE)
     {
-      GObject *config = g_object_new (GIMP_TYPE_LEVELS_CONFIG,
+      GObject *config = g_object_new (CLAY_TYPE_LEVELS_CONFIG,
                                       "channel", channel,
                                       NULL);
 
@@ -747,9 +747,9 @@ HELP
                     "clamp-output", clamp_output,
                     NULL);
 
-      gimp_drawable_apply_operation_by_name (drawable, progress,
+      clay_drawable_apply_operation_by_name (drawable, progress,
                                              C_("undo-type", "Levels"),
-                                             "gimp:levels",
+                                             "clay:levels",
                                              config);
       g_object_unref (config);
     }
@@ -779,14 +779,14 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpdrawable-levels.h") ],
+        headers => [ qw("core/claydrawable-levels.h") ],
         code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
-      gimp_drawable_levels_stretch (drawable, progress);
+      clay_drawable_levels_stretch (drawable, progress);
     }
   else
     success = FALSE;
@@ -833,9 +833,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
       GeglNode  *node;
       node = gegl_node_new_child (NULL,
@@ -849,7 +849,7 @@ HELP
                                   "highlights-ccorrect", highlights_ccorrect,
                                   NULL);
 
-      gimp_drawable_apply_operation (drawable, progress,
+      clay_drawable_apply_operation (drawable, progress,
                                      C_("undo-type", "Shadows-Highlights"),
                                      node);
       g_object_unref (node);
@@ -873,7 +873,7 @@ HELP
     $date = '1997';
     $since = '2.10';
 
-    $deprecated = 'gimp:posterize';
+    $deprecated = 'clay:posterize';
     $deprecated_since = '3.2';
 
     @inargs = (
@@ -886,17 +886,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
       GeglNode *node =
         gegl_node_new_child (NULL,
-                             "operation", "gimp:posterize",
+                             "operation", "clay:posterize",
                              "levels",    levels,
                              NULL);
 
-      gimp_drawable_apply_operation (drawable, progress,
+      clay_drawable_apply_operation (drawable, progress,
                                      C_("undo-type", "Posterize"),
                                      node);
       g_object_unref (node);
@@ -922,13 +922,13 @@ HELP
     $date = '1997';
     $since = '2.10';
 
-    $deprecated = 'gimp:threshold';
+    $deprecated = 'clay:threshold';
     $deprecated_since = '3.2';
 
     @inargs = (
 	{ name => 'drawable', type => 'drawable',
 	  desc => 'The drawable' },
-	{ name => 'channel', type => 'enum GimpHistogramChannel',
+	{ name => 'channel', type => 'enum ClayHistogramChannel',
 	  desc => 'The channel to base the threshold on' },
 	{ name => 'low_threshold', type => '0.0 <= double <= 1.0',
 	  desc => 'The low threshold value' },
@@ -939,19 +939,19 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                 GIMP_PDB_ITEM_CONTENT, error) &&
-      gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+  if (clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                 CLAY_PDB_ITEM_CONTENT, error) &&
+      clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
     {
       GeglNode *node =
         gegl_node_new_child (NULL,
-                             "operation", "gimp:threshold",
+                             "operation", "clay:threshold",
                              "channel",   channel,
                              "low",       low_threshold,
                              "high",      high_threshold,
                              NULL);
 
-      gimp_drawable_apply_operation (drawable, progress,
+      clay_drawable_apply_operation (drawable, progress,
                                      C_("undo-type", "Threshold"),
                                      node);
       g_object_unref (node);
@@ -964,12 +964,12 @@ CODE
 }
 
 
-@headers = qw("libgimpmath/gimpmath.h"
-              "core/gimp.h"
-              "core/gimpdrawable.h"
-              "core/gimpdrawable-operation.h"
-              "gimppdb-utils.h"
-              "gimp-intl.h");
+@headers = qw("libclaymath/claymath.h"
+              "core/clay.h"
+              "core/claydrawable.h"
+              "core/claydrawable-operation.h"
+              "claypdb-utils.h"
+              "clay-intl.h");
 
 @procs = qw(drawable_brightness_contrast
             drawable_color_balance
@@ -991,7 +991,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Color';
-$doc_title = 'gimpdrawablecolor';
+$doc_title = 'claydrawablecolor';
 $doc_short_desc = "Functions for manipulating a drawable's color.";
 $doc_long_desc = "Functions for manipulating a drawable's color, including curves and histograms.";
 

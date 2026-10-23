@@ -20,7 +20,7 @@
 
 #include <string.h>
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 /* for batch
  *   interpolate

@@ -1,4 +1,4 @@
-/* Lighting Effects - A plug-in for GIMP
+/* Lighting Effects - A plug-in for Clay
  *
  * Dialog creation and updaters, callbacks and event-handlers
  *
@@ -23,8 +23,8 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "lighting-ui.h"
 #include "lighting-main.h"
@@ -33,7 +33,7 @@
 #include "lighting-apply.h"
 #include "lighting-preview.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 extern LightingValues mapvals;
@@ -51,7 +51,7 @@ GtkWidget *spin_dir_z                 = NULL;
 
 static gchar     *lighting_effects_path = NULL;
 
-static void     update_preview         (GimpProcedureConfig *config);
+static void     update_preview         (ClayProcedureConfig *config);
 
 static void     save_lighting_preset   (GtkWidget           *widget,
                                         gpointer             data);
@@ -65,15 +65,15 @@ static void     load_preset_response   (GtkNativeDialog     *chooser,
                                         gpointer             data);
 static void     light_source_changed   (GtkWidget           *widget,
                                         gpointer             data);
-static void     apply_settings         (GimpProcedureConfig *config);
-static void     isolate_selected_light (GimpProcedureConfig *config);
+static void     apply_settings         (ClayProcedureConfig *config);
+static void     isolate_selected_light (ClayProcedureConfig *config);
 
 /*****************************************/
 /* Main window light type menu callback. */
 /*****************************************/
 
 static void
-apply_settings (GimpProcedureConfig *config)
+apply_settings (ClayProcedureConfig *config)
 {
   gint k       = mapvals.light_selected;
   gchar *pos_x = g_strdup_printf (("light-position-x-%d"), k + 1);
@@ -86,45 +86,45 @@ apply_settings (GimpProcedureConfig *config)
   switch (mapvals.lightsource[k].type)
     {
     case NO_LIGHT:
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_x,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_x,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_y,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_y,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_z,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_z,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_x,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_x,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_y,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_y,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_z,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_z,
                                            FALSE, NULL, NULL, FALSE);
       break;
     case POINT_LIGHT:
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_x,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_x,
                                            TRUE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_y,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_y,
                                            TRUE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_z,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_z,
                                            TRUE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_x,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_x,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_y,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_y,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_z,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_z,
                                            FALSE, NULL, NULL, FALSE);
       break;
     case DIRECTIONAL_LIGHT:
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_x,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_x,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_y,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_y,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), pos_z,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), pos_z,
                                            FALSE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_x,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_x,
                                            TRUE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_y,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_y,
                                            TRUE, NULL, NULL, FALSE);
-      gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (appwin), dir_z,
+      clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (appwin), dir_z,
                                            TRUE, NULL, NULL, FALSE);
       break;
     default:
@@ -151,7 +151,7 @@ preview_callback (GtkWidget *widget)
 }
 
 static void
-update_preview (GimpProcedureConfig *config)
+update_preview (ClayProcedureConfig *config)
 {
   copy_from_config (config);
   isolate_selected_light (config);
@@ -167,9 +167,9 @@ update_preview (GimpProcedureConfig *config)
 /********************************/
 
 gboolean
-main_dialog (GimpProcedure       *procedure,
-             GimpProcedureConfig *config,
-             GimpDrawable        *drawable)
+main_dialog (ClayProcedure       *procedure,
+             ClayProcedureConfig *config,
+             ClayDrawable        *drawable)
 {
   GtkWidget *main_hbox;
   GtkWidget *vbox;
@@ -186,9 +186,9 @@ main_dialog (GimpProcedure       *procedure,
   GtkWidget *image;
   */
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  path = gimp_gimprc_query ("lighting-effects-path");
+  path = clay_clayrc_query ("lighting-effects-path");
   if (path)
     {
       lighting_effects_path = g_filename_from_utf8 (path, -1, NULL, NULL, NULL);
@@ -197,8 +197,8 @@ main_dialog (GimpProcedure       *procedure,
 
   lighting_icons_init ();
 
-  appwin = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  appwin = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Lighting Effects"));
 
   /* Create the Preview */
@@ -244,14 +244,14 @@ main_dialog (GimpProcedure       *procedure,
                     NULL);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_help_set_help_data (button, _("Recompute preview image"), NULL);
+  clay_help_set_help_data (button, _("Recompute preview image"), NULL);
 
   toggle = gtk_check_button_new_with_mnemonic (_("I_nteractive"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle),
                                 mapvals.interactive_preview);
   gtk_box_pack_start (GTK_BOX (hbox), toggle, TRUE, TRUE, 0);
   g_signal_connect (toggle, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &mapvals.interactive_preview);
   g_signal_connect (toggle, "toggled",
                     G_CALLBACK (interactive_preview_callback),
@@ -259,40 +259,40 @@ main_dialog (GimpProcedure       *procedure,
 
   gtk_widget_set_visible (toggle, TRUE);
 
-  gimp_help_set_help_data (toggle,
+  clay_help_set_help_data (toggle,
                            _("Enable/disable real time preview of changes"),
                            NULL);
 
-  /* GimpProcedureDialog begins here */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  /* ClayProcedureDialog begins here */
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "options-tab", _("Op_tions"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "light-tab", _("_Light"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "material-tab", _("_Material"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "bump-map-tab", _("_Bump Map"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "environment-map-tab", _("_Environment Map"),
                                    FALSE, TRUE);
 
   /* Options tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "general-options", _("General Options"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "distance", 1.0);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "general-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "general-box",
                                   "transparent-background",
                                   "new-image",
                                   "antialiasing",
                                   "distance",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "options-frame",
                                     "general-options", FALSE,
                                     "general-box");
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "options-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "options-box",
                                   "options-frame", NULL);
 
   g_signal_connect (config, "notify::transparent-background",
@@ -309,7 +309,7 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Light tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "light-label", _("Light Settings"),
                                    FALSE, FALSE);
 
@@ -323,17 +323,17 @@ main_dialog (GimpProcedure       *procedure,
       gchar *temp_notify;
 
       temp_label = g_strdup_printf ("light-color-label-%d", i);
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                        temp_label, _("Color"),
                                        FALSE, FALSE);
       g_free (temp_label);
       temp_label = g_strdup_printf ("light-position-label-%d", i);
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                        temp_label, _("Position"),
                                        FALSE, FALSE);
       g_free (temp_label);
       temp_label = g_strdup_printf ("light-direction-label-%d", i);
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                        temp_label, _("Direction"),
                                        FALSE, FALSE);
       g_free (temp_label);
@@ -343,7 +343,7 @@ main_dialog (GimpProcedure       *procedure,
       temp_field_1 = g_strdup_printf ("light-type-%d", i);
       temp_field_2 = g_strdup_printf ("light-color-%d", i);
       temp_field_3 = g_strdup_printf ("light-intensity-%d", i);
-      gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), temp_box,
+      clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), temp_box,
                                       temp_label,
                                       temp_field_1,
                                       temp_field_2,
@@ -377,7 +377,7 @@ main_dialog (GimpProcedure       *procedure,
       temp_field_1 = g_strdup_printf ("light-position-x-%d", i);
       temp_field_2 = g_strdup_printf ("light-position-y-%d", i);
       temp_field_3 = g_strdup_printf ("light-position-z-%d", i);
-      gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), temp_box,
+      clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), temp_box,
                                       temp_label,
                                       temp_field_1,
                                       temp_field_2,
@@ -411,7 +411,7 @@ main_dialog (GimpProcedure       *procedure,
       temp_field_1 = g_strdup_printf ("light-direction-x-%d", i);
       temp_field_2 = g_strdup_printf ("light-direction-y-%d", i);
       temp_field_3 = g_strdup_printf ("light-direction-z-%d", i);
-      gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), temp_box,
+      clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), temp_box,
                                       temp_label,
                                       temp_field_1,
                                       temp_field_2,
@@ -444,7 +444,7 @@ main_dialog (GimpProcedure       *procedure,
       temp_field_1 = g_strdup_printf ("light-color-vbox-%d", i);
       temp_field_2 = g_strdup_printf ("light-position-vbox-%d", i);
       temp_field_3 = g_strdup_printf ("light-direction-vbox-%d", i);
-      hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), temp_box,
+      hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), temp_box,
                                              temp_field_1,
                                              temp_field_2,
                                              temp_field_3,
@@ -457,9 +457,9 @@ main_dialog (GimpProcedure       *procedure,
                                       GTK_ORIENTATION_HORIZONTAL);
     }
 
-  combo = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (appwin),
+  combo = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (appwin),
                                             "which-light", G_TYPE_NONE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "light-settings-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "light-settings-box",
                                   "which-light",
                                   "light-hbox-1",
                                   "light-hbox-2",
@@ -469,15 +469,15 @@ main_dialog (GimpProcedure       *procedure,
                                   "light-hbox-6",
                                   "isolate",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "light-frame",
                                     "light-label", FALSE,
                                     "light-settings-box");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "preset-label", _("Lighting presets: "),
                                    FALSE, FALSE);
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "preset-hbox",
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "preset-hbox",
                                          "preset-label", NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
                                   GTK_ORIENTATION_HORIZONTAL);
@@ -496,7 +496,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "light-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "light-box",
                                   "light-frame", "preset-hbox", NULL);
 
   g_signal_connect (config, "notify::which-light",
@@ -507,11 +507,11 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Material Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "material-label", _("Material Properties"),
                                    FALSE, FALSE);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "glowing-hbox",
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "glowing-hbox",
                                          "ambient-intensity",
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -526,7 +526,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
   gtk_widget_set_visible (image, TRUE);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "bright-hbox",
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "bright-hbox",
                                          "diffuse-intensity",
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -542,7 +542,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_widget_set_visible (image, TRUE);
 
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "diffuse-reflect-hbox",
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "diffuse-reflect-hbox",
                                          "diffuse-reflectivity",
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -557,7 +557,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
   gtk_widget_set_visible (image, TRUE);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "shiny-hbox",
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "shiny-hbox",
                                          "specular-reflectivity",
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -572,7 +572,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
   gtk_widget_set_visible (image, TRUE);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "polished-hbox",
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "polished-hbox",
                                          "highlight",
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
@@ -587,7 +587,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
   gtk_widget_set_visible (image, TRUE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "material-values-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "material-values-box",
                                   "glowing-hbox",
                                   "bright-hbox",
                                   "diffuse-reflect-hbox",
@@ -595,11 +595,11 @@ main_dialog (GimpProcedure       *procedure,
                                   "polished-hbox",
                                   "metallic",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "material-frame",
                                     "material-label", FALSE,
                                     "material-values-box");
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "material-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "material-box",
                                   "material-frame", NULL);
 
   g_signal_connect (config, "notify::ambient-intensity",
@@ -622,17 +622,17 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Bump Map Tab */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "bump-map-options-box",
                                   "bump-drawable",
                                   "bumpmap-type",
                                   "bumpmap-max-height",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "bump-map-frame",
                                     "do-bumpmap", FALSE,
                                     "bump-map-options-box");
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "bump-map-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "bump-map-box",
                                   "bump-map-frame",
                                   NULL);
 
@@ -650,11 +650,11 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Environment Map Tab */
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "environment-map-frame",
                                     "do-envmap", FALSE,
                                     "env-drawable");
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "environment-map-box",
                                   "environment-map-frame",
                                   NULL);
@@ -667,7 +667,7 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Create Notebook */
-  gimp_procedure_dialog_fill_notebook (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_notebook (CLAY_PROCEDURE_DIALOG (appwin),
                                        "main-notebook",
                                        "options-tab", "options-box",
                                        "light-tab", "light-box",
@@ -679,7 +679,7 @@ main_dialog (GimpProcedure       *procedure,
   light_source_changed (combo, config);
 
   /* Create overall layout */
-  main_hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  main_hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                               "main-hbox",
                                               "main-notebook",
                                               NULL);
@@ -688,7 +688,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (main_hbox), vbox, FALSE, FALSE, 0);
   gtk_box_reorder_child (GTK_BOX (main_hbox), vbox, 0);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (appwin), "main-hbox", NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (appwin), "main-hbox", NULL);
 
   gtk_widget_set_visible (appwin, TRUE);
 
@@ -708,7 +708,7 @@ main_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (light_source_changed),
                     config);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (appwin));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (appwin));
 
   if (preview_rgb_data != NULL)
     g_free (preview_rgb_data);
@@ -749,12 +749,12 @@ save_lighting_preset (GtkWidget *widget,
       GList *list;
       gchar *dir;
 
-      list = gimp_parse_search_path (lighting_effects_path, 256, FALSE, NULL);
-      dir = gimp_get_user_writable_dir (list);
-      gimp_free_paths (list);
+      list = clay_parse_search_path (lighting_effects_path, 256, FALSE, NULL);
+      dir = clay_get_user_writable_dir (list);
+      clay_free_paths (list);
 
       if (! dir)
-        dir = g_strdup (gimp_directory ());
+        dir = g_strdup (clay_directory ());
 
       gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (window), dir);
 
@@ -878,12 +878,12 @@ load_lighting_preset (GtkWidget *widget,
       GList *list;
       gchar *dir;
 
-      list = gimp_parse_search_path (lighting_effects_path, 256, FALSE, NULL);
-      dir = gimp_get_user_writable_dir (list);
-      gimp_free_paths (list);
+      list = clay_parse_search_path (lighting_effects_path, 256, FALSE, NULL);
+      dir = clay_get_user_writable_dir (list);
+      clay_free_paths (list);
 
       if (! dir)
-        dir = g_strdup (gimp_directory ());
+        dir = g_strdup (clay_directory ());
 
       gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (window), dir);
 
@@ -1045,9 +1045,9 @@ light_source_changed (GtkWidget *widget,
 {
   gint                 light_source;
   gboolean             isolate = FALSE;
-  GimpProcedureConfig *config  = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config  = (ClayProcedureConfig *) data;
 
-  light_source = gimp_procedure_config_get_choice_id (config, "which_light") + 1;
+  light_source = clay_procedure_config_get_choice_id (config, "which_light") + 1;
   g_object_get (config,
                 "isolate", &isolate,
                 NULL);
@@ -1058,7 +1058,7 @@ light_source_changed (GtkWidget *widget,
       gchar     *temp_box;
 
       temp_box = g_strdup_printf ("light-hbox-%d", i);
-      hbox = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (appwin),
+      hbox = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (appwin),
                                                temp_box, G_TYPE_NONE);
       g_free (temp_box);
 
@@ -1076,14 +1076,14 @@ light_source_changed (GtkWidget *widget,
         }
     }
 
-  mapvals.light_selected = gimp_procedure_config_get_choice_id (config, "which-light");
+  mapvals.light_selected = clay_procedure_config_get_choice_id (config, "which-light");
   apply_settings (config);
   if (previewarea != NULL && GTK_IS_WIDGET (previewarea))
     update_preview (config);
 }
 
 static void
-isolate_selected_light (GimpProcedureConfig *config)
+isolate_selected_light (ClayProcedureConfig *config)
 {
   gint     k;
   gboolean isolate;

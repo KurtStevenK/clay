@@ -18,33 +18,33 @@
 #pragma once
 
 
-void   documents_open_cmd_callback                 (GimpAction *action,
+void   documents_open_cmd_callback                 (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_raise_or_open_cmd_callback        (GimpAction *action,
+void   documents_raise_or_open_cmd_callback        (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_file_open_dialog_cmd_callback     (GimpAction *action,
+void   documents_file_open_dialog_cmd_callback     (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_copy_location_cmd_callback        (GimpAction *action,
+void   documents_copy_location_cmd_callback        (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_show_in_file_manager_cmd_callback (GimpAction *action,
+void   documents_show_in_file_manager_cmd_callback (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_remove_cmd_callback               (GimpAction *action,
+void   documents_remove_cmd_callback               (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_clear_cmd_callback                (GimpAction *action,
+void   documents_clear_cmd_callback                (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_recreate_preview_cmd_callback     (GimpAction *action,
+void   documents_recreate_preview_cmd_callback     (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_reload_previews_cmd_callback      (GimpAction *action,
+void   documents_reload_previews_cmd_callback      (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);
-void   documents_remove_dangling_cmd_callback      (GimpAction *action,
+void   documents_remove_dangling_cmd_callback      (ClayAction *action,
                                                     GVariant   *value,
                                                     gpointer    data);

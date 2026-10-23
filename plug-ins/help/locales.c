@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * The GIMP Help plug-in
+ * The Clay Help plug-in
  * Copyright (C) 1999-2008 Sven Neumann <sven@gimp.org>
  *                         Michael Natterer <mitch@gimp.org>
  *                         Henrik Brix Andersen <brix@gimp.org>
@@ -55,13 +55,13 @@ locales_parse (const gchar *help_locales)
 
   /*  if the list doesn't contain the default domain yet, append it  */
   for (list = locales; list; list = list->next)
-    if (strcmp ((const gchar *) list->data, GIMP_HELP_DEFAULT_LOCALE) == 0)
+    if (strcmp ((const gchar *) list->data, CLAY_HELP_DEFAULT_LOCALE) == 0)
       break;
 
   if (! list)
-    locales = g_list_append (locales, g_strdup (GIMP_HELP_DEFAULT_LOCALE));
+    locales = g_list_append (locales, g_strdup (CLAY_HELP_DEFAULT_LOCALE));
 
-#ifdef GIMP_HELP_DEBUG
+#ifdef CLAY_HELP_DEBUG
   g_printerr ("help: locales: ");
   for (list = locales; list; list = list->next)
     g_printerr ("%s ", (const gchar *) list->data);

@@ -44,63 +44,63 @@
 #include <unistd.h>
 #endif
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "gui-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimp-parallel.h"
-#include "core/gimp-spawn.h"
-#include "core/gimp-utils.h"
-#include "core/gimpasync.h"
-#include "core/gimpbrush.h"
-#include "core/gimpcancelable.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpgradient.h"
-#include "core/gimpimage.h"
-#include "core/gimpimagefile.h"
-#include "core/gimplist.h"
-#include "core/gimppalette.h"
-#include "core/gimppattern.h"
-#include "core/gimpprogress.h"
-#include "core/gimpwaitable.h"
+#include "core/clay.h"
+#include "core/clay-parallel.h"
+#include "core/clay-spawn.h"
+#include "core/clay-utils.h"
+#include "core/clayasync.h"
+#include "core/claybrush.h"
+#include "core/claycancelable.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/claydrawable.h"
+#include "core/claygradient.h"
+#include "core/clayimage.h"
+#include "core/clayimagefile.h"
+#include "core/claylist.h"
+#include "core/claypalette.h"
+#include "core/claypattern.h"
+#include "core/clayprogress.h"
+#include "core/claywaitable.h"
 
-#include "text/gimpfont.h"
+#include "text/clayfont.h"
 
-#include "pdb/gimppdb.h"
-#include "pdb/gimpprocedure.h"
+#include "pdb/claypdb.h"
+#include "pdb/clayprocedure.h"
 
-#include "plug-in/gimppluginmanager-file.h"
+#include "plug-in/claypluginmanager-file.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpbrushselect.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdocked.h"
-#include "widgets/gimpfontselect.h"
-#include "widgets/gimpgradientselect.h"
-#include "widgets/gimphelp.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpimageselect.h"
-#include "widgets/gimpimageview.h"
-#include "widgets/gimpitemselect.h"
-#include "widgets/gimpmenufactory.h"
-#include "widgets/gimppaletteselect.h"
-#include "widgets/gimppatternselect.h"
-#include "widgets/gimpprogressdialog.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claybrushselect.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydocked.h"
+#include "widgets/clayfontselect.h"
+#include "widgets/claygradientselect.h"
+#include "widgets/clayhelp.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayimageselect.h"
+#include "widgets/clayimageview.h"
+#include "widgets/clayitemselect.h"
+#include "widgets/claymenufactory.h"
+#include "widgets/claypaletteselect.h"
+#include "widgets/claypatternselect.h"
+#include "widgets/clayprogressdialog.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplay-foreach.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpsinglewindowstrategy.h"
-#include "display/gimpmultiwindowstrategy.h"
+#include "display/claydisplay.h"
+#include "display/claydisplay-foreach.h"
+#include "display/claydisplayshell.h"
+#include "display/claysinglewindowstrategy.h"
+#include "display/claymultiwindowstrategy.h"
 
 #include "actions/plug-in-actions.h"
 
@@ -115,133 +115,133 @@
 #include "icon-themes.h"
 #include "themes.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static void           gui_ungrab                    (Gimp                *gimp);
+static void           gui_ungrab                    (Clay                *clay);
 
-static void           gui_set_busy                  (Gimp                *gimp);
-static void           gui_unset_busy                (Gimp                *gimp);
+static void           gui_set_busy                  (Clay                *clay);
+static void           gui_unset_busy                (Clay                *clay);
 
-static void           gui_help                      (Gimp                *gimp,
-                                                     GimpProgress        *progress,
+static void           gui_help                      (Clay                *clay,
+                                                     ClayProgress        *progress,
                                                      const gchar         *help_domain,
                                                      const gchar         *help_id);
-static const gchar  * gui_get_program_class         (Gimp                *gimp);
-static gchar        * gui_get_display_name          (Gimp                *gimp,
+static const gchar  * gui_get_program_class         (Clay                *clay);
+static gchar        * gui_get_display_name          (Clay                *clay,
                                                      gint                 display_id,
                                                      GObject            **monitor,
                                                      gint                *monitor_number);
-static guint32        gui_get_user_time             (Gimp                *gimp);
-static GFile        * gui_get_theme_dir             (Gimp                *gimp);
-static GFile        * gui_get_icon_theme_dir        (Gimp                *gimp);
-static GimpObject   * gui_get_window_strategy       (Gimp                *gimp);
-static GimpDisplay  * gui_get_empty_display         (Gimp                *gimp);
-static GBytes       * gui_display_get_window_handle (GimpDisplay         *display);
-static GimpDisplay  * gui_display_create            (Gimp                *gimp,
-                                                     GimpImage           *image,
-                                                     GimpUnit            *unit,
+static guint32        gui_get_user_time             (Clay                *clay);
+static GFile        * gui_get_theme_dir             (Clay                *clay);
+static GFile        * gui_get_icon_theme_dir        (Clay                *clay);
+static ClayObject   * gui_get_window_strategy       (Clay                *clay);
+static ClayDisplay  * gui_get_empty_display         (Clay                *clay);
+static GBytes       * gui_display_get_window_handle (ClayDisplay         *display);
+static ClayDisplay  * gui_display_create            (Clay                *clay,
+                                                     ClayImage           *image,
+                                                     ClayUnit            *unit,
                                                      gdouble              scale,
                                                      GObject             *monitor);
-static void           gui_display_delete            (GimpDisplay         *display);
-static void           gui_displays_reconnect        (Gimp                *gimp,
-                                                     GimpImage           *old_image,
-                                                     GimpImage           *new_image);
-static gboolean       gui_wait                      (Gimp                *gimp,
-                                                     GimpWaitable        *waitable,
+static void           gui_display_delete            (ClayDisplay         *display);
+static void           gui_displays_reconnect        (Clay                *clay,
+                                                     ClayImage           *old_image,
+                                                     ClayImage           *new_image);
+static gboolean       gui_wait                      (Clay                *clay,
+                                                     ClayWaitable        *waitable,
                                                      const gchar         *message);
-static GimpProgress * gui_new_progress              (Gimp                *gimp,
-                                                     GimpDisplay         *display);
-static void           gui_free_progress             (Gimp                *gimp,
-                                                     GimpProgress        *progress);
-static gboolean       gui_pdb_dialog_new            (Gimp                *gimp,
-                                                     GimpContext         *context,
-                                                     GimpProgress        *progress,
+static ClayProgress * gui_new_progress              (Clay                *clay,
+                                                     ClayDisplay         *display);
+static void           gui_free_progress             (Clay                *clay,
+                                                     ClayProgress        *progress);
+static gboolean       gui_pdb_dialog_new            (Clay                *clay,
+                                                     ClayContext         *context,
+                                                     ClayProgress        *progress,
                                                      GType                object_type,
                                                      GBytes              *parent_handle,
                                                      const gchar         *title,
                                                      const gchar         *callback_name,
-                                                     GimpObject          *object,
+                                                     ClayObject          *object,
                                                      va_list              args);
-static gboolean       gui_pdb_dialog_set            (Gimp                *gimp,
+static gboolean       gui_pdb_dialog_set            (Clay                *clay,
                                                      GType                contents_type,
                                                      const gchar         *callback_name,
-                                                     GimpObject          *object,
+                                                     ClayObject          *object,
                                                      va_list              args);
-static gboolean       gui_pdb_dialog_close          (Gimp                *gimp,
+static gboolean       gui_pdb_dialog_close          (Clay                *clay,
                                                      GType                contents_type,
                                                      const gchar         *callback_name);
-static gboolean       gui_recent_list_add_file      (Gimp                *gimp,
+static gboolean       gui_recent_list_add_file      (Clay                *clay,
                                                      GFile               *file,
                                                      const gchar         *mime_type);
-static void           gui_recent_list_load          (Gimp                *gimp);
+static void           gui_recent_list_load          (Clay                *clay);
 
 static GMountOperation
-                    * gui_get_mount_operation       (Gimp                *gimp,
-                                                     GimpProgress        *progress);
+                    * gui_get_mount_operation       (Clay                *clay,
+                                                     ClayProgress        *progress);
 
-static GimpColorProfilePolicy
-                      gui_query_profile_policy      (Gimp                *gimp,
-                                                     GimpImage           *image,
-                                                     GimpContext         *context,
-                                                     GimpColorProfile   **dest_profile,
-                                                     GimpColorRenderingIntent *intent,
+static ClayColorProfilePolicy
+                      gui_query_profile_policy      (Clay                *clay,
+                                                     ClayImage           *image,
+                                                     ClayContext         *context,
+                                                     ClayColorProfile   **dest_profile,
+                                                     ClayColorRenderingIntent *intent,
                                                      gboolean            *bpc,
                                                      gboolean            *dont_ask);
-static GimpMetadataRotationPolicy
-                      gui_query_rotation_policy     (Gimp                *gimp,
-                                                     GimpImage           *image,
-                                                     GimpContext         *context,
+static ClayMetadataRotationPolicy
+                      gui_query_rotation_policy     (Clay                *clay,
+                                                     ClayImage           *image,
+                                                     ClayContext         *context,
                                                      gboolean            *dont_ask);
 
-static void           gui_inhibit                   (Gimp                *gimp);
-static void           gui_image_disconnect          (GimpImage           *image,
-                                                     Gimp                *gimp);
+static void           gui_inhibit                   (Clay                *clay);
+static void           gui_image_disconnect          (ClayImage           *image,
+                                                     Clay                *clay);
 
 
 /*  public functions  */
 
 void
-gui_vtable_init (Gimp *gimp)
+gui_vtable_init (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  gimp->gui.ungrab                    = gui_ungrab;
-  gimp->gui.set_busy                  = gui_set_busy;
-  gimp->gui.unset_busy                = gui_unset_busy;
-  gimp->gui.show_message              = gui_message;
-  gimp->gui.help                      = gui_help;
-  gimp->gui.get_program_class         = gui_get_program_class;
-  gimp->gui.get_display_name          = gui_get_display_name;
-  gimp->gui.get_user_time             = gui_get_user_time;
-  gimp->gui.get_theme_dir             = gui_get_theme_dir;
-  gimp->gui.get_icon_theme_dir        = gui_get_icon_theme_dir;
-  gimp->gui.get_window_strategy       = gui_get_window_strategy;
-  gimp->gui.get_empty_display         = gui_get_empty_display;
-  gimp->gui.display_get_window_handle = gui_display_get_window_handle;
-  gimp->gui.display_create            = gui_display_create;
-  gimp->gui.display_delete            = gui_display_delete;
-  gimp->gui.displays_reconnect        = gui_displays_reconnect;
-  gimp->gui.wait                      = gui_wait;
-  gimp->gui.progress_new              = gui_new_progress;
-  gimp->gui.progress_free             = gui_free_progress;
-  gimp->gui.pdb_dialog_new            = gui_pdb_dialog_new;
-  gimp->gui.pdb_dialog_set            = gui_pdb_dialog_set;
-  gimp->gui.pdb_dialog_close          = gui_pdb_dialog_close;
-  gimp->gui.recent_list_add_file      = gui_recent_list_add_file;
-  gimp->gui.recent_list_load          = gui_recent_list_load;
-  gimp->gui.get_mount_operation       = gui_get_mount_operation;
-  gimp->gui.query_profile_policy      = gui_query_profile_policy;
-  gimp->gui.query_rotation_policy     = gui_query_rotation_policy;
+  clay->gui.ungrab                    = gui_ungrab;
+  clay->gui.set_busy                  = gui_set_busy;
+  clay->gui.unset_busy                = gui_unset_busy;
+  clay->gui.show_message              = gui_message;
+  clay->gui.help                      = gui_help;
+  clay->gui.get_program_class         = gui_get_program_class;
+  clay->gui.get_display_name          = gui_get_display_name;
+  clay->gui.get_user_time             = gui_get_user_time;
+  clay->gui.get_theme_dir             = gui_get_theme_dir;
+  clay->gui.get_icon_theme_dir        = gui_get_icon_theme_dir;
+  clay->gui.get_window_strategy       = gui_get_window_strategy;
+  clay->gui.get_empty_display         = gui_get_empty_display;
+  clay->gui.display_get_window_handle = gui_display_get_window_handle;
+  clay->gui.display_create            = gui_display_create;
+  clay->gui.display_delete            = gui_display_delete;
+  clay->gui.displays_reconnect        = gui_displays_reconnect;
+  clay->gui.wait                      = gui_wait;
+  clay->gui.progress_new              = gui_new_progress;
+  clay->gui.progress_free             = gui_free_progress;
+  clay->gui.pdb_dialog_new            = gui_pdb_dialog_new;
+  clay->gui.pdb_dialog_set            = gui_pdb_dialog_set;
+  clay->gui.pdb_dialog_close          = gui_pdb_dialog_close;
+  clay->gui.recent_list_add_file      = gui_recent_list_add_file;
+  clay->gui.recent_list_load          = gui_recent_list_load;
+  clay->gui.get_mount_operation       = gui_get_mount_operation;
+  clay->gui.query_profile_policy      = gui_query_profile_policy;
+  clay->gui.query_rotation_policy     = gui_query_rotation_policy;
 }
 
 
 /*  private functions  */
 
 static void
-gui_ungrab (Gimp *gimp)
+gui_ungrab (Clay *clay)
 {
   GdkDisplay *display = gdk_display_get_default ();
 
@@ -250,34 +250,34 @@ gui_ungrab (Gimp *gimp)
 }
 
 static void
-gui_set_busy (Gimp *gimp)
+gui_set_busy (Clay *clay)
 {
-  gimp_displays_set_busy (gimp);
-  gimp_dialog_factory_set_busy (gimp_dialog_factory_get_singleton ());
+  clay_displays_set_busy (clay);
+  clay_dialog_factory_set_busy (clay_dialog_factory_get_singleton ());
 
   gdk_display_flush (gdk_display_get_default ());
 }
 
 static void
-gui_unset_busy (Gimp *gimp)
+gui_unset_busy (Clay *clay)
 {
-  gimp_displays_unset_busy (gimp);
-  gimp_dialog_factory_unset_busy (gimp_dialog_factory_get_singleton ());
+  clay_displays_unset_busy (clay);
+  clay_dialog_factory_unset_busy (clay_dialog_factory_get_singleton ());
 
   gdk_display_flush (gdk_display_get_default ());
 }
 
 static void
-gui_help (Gimp         *gimp,
-          GimpProgress *progress,
+gui_help (Clay         *clay,
+          ClayProgress *progress,
           const gchar  *help_domain,
           const gchar  *help_id)
 {
-  gimp_help_show (gimp, progress, help_domain, help_id);
+  clay_help_show (clay, progress, help_domain, help_id);
 }
 
 static const gchar *
-gui_get_program_class (Gimp *gimp)
+gui_get_program_class (Clay *clay)
 {
   return gdk_get_program_class ();
 }
@@ -297,31 +297,31 @@ get_monitor_number (GdkMonitor *monitor)
 }
 
 static gchar *
-gui_get_display_name (Gimp     *gimp,
+gui_get_display_name (Clay     *clay,
                       gint      display_id,
                       GObject **monitor,
                       gint     *monitor_number)
 {
-  GimpDisplay *display = NULL;
+  ClayDisplay *display = NULL;
   GdkDisplay  *gdk_display;
 
   if (display_id > 0)
-    display = gimp_display_get_by_id (gimp, display_id);
+    display = clay_display_get_by_id (clay, display_id);
 
   if (display)
     {
-      GimpDisplayShell *shell = gimp_display_get_shell (display);
+      ClayDisplayShell *shell = clay_display_get_shell (display);
 
       gdk_display = gtk_widget_get_display (GTK_WIDGET (shell));
 
-      *monitor = G_OBJECT (gimp_widget_get_monitor (GTK_WIDGET (shell)));
+      *monitor = G_OBJECT (clay_widget_get_monitor (GTK_WIDGET (shell)));
     }
   else
     {
-      *monitor = G_OBJECT (gui_get_initial_monitor (gimp));
+      *monitor = G_OBJECT (gui_get_initial_monitor (clay));
 
       if (! *monitor)
-        *monitor = G_OBJECT (gimp_get_monitor_at_pointer ());
+        *monitor = G_OBJECT (clay_get_monitor_at_pointer ());
 
       gdk_display = gdk_monitor_get_display (GDK_MONITOR (*monitor));
     }
@@ -332,7 +332,7 @@ gui_get_display_name (Gimp     *gimp,
 }
 
 static guint32
-gui_get_user_time (Gimp *gimp)
+gui_get_user_time (Clay *clay)
 {
 #ifdef GDK_WINDOWING_X11
   if (GDK_IS_X11_DISPLAY (gdk_display_get_default ()))
@@ -343,36 +343,36 @@ gui_get_user_time (Gimp *gimp)
 }
 
 static GFile *
-gui_get_theme_dir (Gimp *gimp)
+gui_get_theme_dir (Clay *clay)
 {
-  return themes_get_theme_dir (gimp, GIMP_GUI_CONFIG (gimp->config)->theme);
+  return themes_get_theme_dir (clay, CLAY_GUI_CONFIG (clay->config)->theme);
 }
 
 static GFile *
-gui_get_icon_theme_dir (Gimp *gimp)
+gui_get_icon_theme_dir (Clay *clay)
 {
-  return icon_themes_get_theme_dir (gimp, GIMP_GUI_CONFIG (gimp->config)->icon_theme);
+  return icon_themes_get_theme_dir (clay, CLAY_GUI_CONFIG (clay->config)->icon_theme);
 }
 
-static GimpObject *
-gui_get_window_strategy (Gimp *gimp)
+static ClayObject *
+gui_get_window_strategy (Clay *clay)
 {
-  if (GIMP_GUI_CONFIG (gimp->config)->single_window_mode)
-    return gimp_single_window_strategy_get_singleton ();
+  if (CLAY_GUI_CONFIG (clay->config)->single_window_mode)
+    return clay_single_window_strategy_get_singleton ();
   else
-    return gimp_multi_window_strategy_get_singleton ();
+    return clay_multi_window_strategy_get_singleton ();
 }
 
-static GimpDisplay *
-gui_get_empty_display (Gimp *gimp)
+static ClayDisplay *
+gui_get_empty_display (Clay *clay)
 {
-  GimpDisplay *display = NULL;
+  ClayDisplay *display = NULL;
 
-  if (gimp_container_get_n_children (gimp->displays) == 1)
+  if (clay_container_get_n_children (clay->displays) == 1)
     {
-      display = (GimpDisplay *) gimp_container_get_first_child (gimp->displays);
+      display = (ClayDisplay *) clay_container_get_first_child (clay->displays);
 
-      if (gimp_display_get_image (display))
+      if (clay_display_get_image (display))
         {
           /* The display was not empty */
           display = NULL;
@@ -383,94 +383,94 @@ gui_get_empty_display (Gimp *gimp)
 }
 
 static GBytes *
-gui_display_get_window_handle (GimpDisplay *display)
+gui_display_get_window_handle (ClayDisplay *display)
 {
-  GimpDisplay      *disp  = GIMP_DISPLAY (display);
-  GimpDisplayShell *shell = gimp_display_get_shell (disp);
+  ClayDisplay      *disp  = CLAY_DISPLAY (display);
+  ClayDisplayShell *shell = clay_display_get_shell (disp);
 
   if (shell)
-    return gimp_progress_get_window_handle (GIMP_PROGRESS (shell));
+    return clay_progress_get_window_handle (CLAY_PROGRESS (shell));
 
   return NULL;
 }
 
-static GimpDisplay *
-gui_display_create (Gimp      *gimp,
-                    GimpImage *image,
-                    GimpUnit  *unit,
+static ClayDisplay *
+gui_display_create (Clay      *clay,
+                    ClayImage *image,
+                    ClayUnit  *unit,
                     gdouble    scale,
                     GObject   *monitor)
 {
-  GimpContext *context = gimp_get_user_context (gimp);
-  GimpDisplay *display = GIMP_DISPLAY (gui_get_empty_display (gimp));
+  ClayContext *context = clay_get_user_context (clay);
+  ClayDisplay *display = CLAY_DISPLAY (gui_get_empty_display (clay));
 
   if (! monitor)
-    monitor = G_OBJECT (gimp_get_monitor_at_pointer ());
+    monitor = G_OBJECT (clay_get_monitor_at_pointer ());
 
   if (display)
     {
-      gimp_display_fill (display, image, unit, scale);
+      clay_display_fill (display, image, unit, scale);
     }
   else
     {
-      GList *image_managers = gimp_ui_managers_from_name ("<Image>");
+      GList *image_managers = clay_ui_managers_from_name ("<Image>");
 
       g_return_val_if_fail (image_managers != NULL, NULL);
 
-      display = gimp_display_new (gimp, image, unit, scale,
+      display = clay_display_new (clay, image, unit, scale,
                                   image_managers->data,
-                                  gimp_dialog_factory_get_singleton (),
+                                  clay_dialog_factory_get_singleton (),
                                   GDK_MONITOR (monitor));
    }
 
-  if (gimp_context_get_display (context) == display)
+  if (clay_context_get_display (context) == display)
     {
-      gimp_context_set_image (context, image);
-      gimp_context_display_changed (context);
+      clay_context_set_image (context, image);
+      clay_context_display_changed (context);
     }
   else
     {
-      gimp_context_set_display (context, display);
+      clay_context_set_display (context, display);
     }
 
   if (image)
     {
       g_signal_handlers_disconnect_by_func (image,
                                             G_CALLBACK (gui_inhibit),
-                                            gimp);
+                                            clay);
       g_signal_handlers_disconnect_by_func (image,
                                             G_CALLBACK (gui_image_disconnect),
-                                            gimp);
+                                            clay);
       g_signal_connect_swapped (image, "dirty",
                                 G_CALLBACK (gui_inhibit),
-                                gimp);
+                                clay);
       g_signal_connect_swapped (image, "clean",
                                 G_CALLBACK (gui_inhibit),
-                                gimp);
+                                clay);
       g_signal_connect_after (image, "disconnect",
                               G_CALLBACK (gui_image_disconnect),
-                              gimp);
+                              clay);
     }
 
   return display;
 }
 
 static void
-gui_display_delete (GimpDisplay *display)
+gui_display_delete (ClayDisplay *display)
 {
-  gimp_display_close (display);
+  clay_display_close (display);
 }
 
 static void
-gui_displays_reconnect (Gimp      *gimp,
-                        GimpImage *old_image,
-                        GimpImage *new_image)
+gui_displays_reconnect (Clay      *clay,
+                        ClayImage *old_image,
+                        ClayImage *new_image)
 {
-  gimp_displays_reconnect (gimp, old_image, new_image);
+  clay_displays_reconnect (clay, old_image, new_image);
 }
 
 static void
-gui_wait_input_async (GimpAsync  *async,
+gui_wait_input_async (ClayAsync  *async,
                       const gint  input_pipe[2])
 {
   guint8 buffer[1];
@@ -478,22 +478,22 @@ gui_wait_input_async (GimpAsync  *async,
   while (read (input_pipe[0], buffer, sizeof (buffer)) == -1 &&
          errno == EINTR);
 
-  gimp_async_finish (async, NULL);
+  clay_async_finish (async, NULL);
 }
 
 static gboolean
-gui_wait (Gimp         *gimp,
-          GimpWaitable *waitable,
+gui_wait (Clay         *clay,
+          ClayWaitable *waitable,
           const gchar  *message)
 {
-  GimpProcedure  *procedure;
-  GimpValueArray *args;
-  GimpAsync      *input_async = NULL;
+  ClayProcedure  *procedure;
+  ClayValueArray *args;
+  ClayAsync      *input_async = NULL;
   GError         *error       = NULL;
   gint            input_pipe[2];
   gint            output_pipe[2];
 
-  procedure = gimp_pdb_lookup_procedure (gimp->pdb, "plug-in-busy-dialog");
+  procedure = clay_pdb_lookup_procedure (clay->pdb, "plug-in-busy-dialog");
 
   if (! procedure)
     return FALSE;
@@ -509,28 +509,28 @@ gui_wait (Gimp         *gimp,
       return FALSE;
     }
 
-  gimp_spawn_set_cloexec (input_pipe[0]);
-  gimp_spawn_set_cloexec (output_pipe[1]);
+  clay_spawn_set_cloexec (input_pipe[0]);
+  clay_spawn_set_cloexec (output_pipe[1]);
 
-  args = gimp_procedure_get_arguments (procedure);
-  gimp_value_array_truncate (args, 5);
+  args = clay_procedure_get_arguments (procedure);
+  clay_value_array_truncate (args, 5);
 
-  g_value_set_enum    (gimp_value_array_index (args, 0),
-                       GIMP_RUN_INTERACTIVE);
-  g_value_set_int     (gimp_value_array_index (args, 1),
+  g_value_set_enum    (clay_value_array_index (args, 0),
+                       CLAY_RUN_INTERACTIVE);
+  g_value_set_int     (clay_value_array_index (args, 1),
                        output_pipe[0]);
-  g_value_set_int     (gimp_value_array_index (args, 2),
+  g_value_set_int     (clay_value_array_index (args, 2),
                        input_pipe[1]);
-  g_value_set_string  (gimp_value_array_index (args, 3),
+  g_value_set_string  (clay_value_array_index (args, 3),
                        message);
-  g_value_set_boolean (gimp_value_array_index (args, 4),
-                       GIMP_IS_CANCELABLE (waitable));
+  g_value_set_boolean (clay_value_array_index (args, 4),
+                       CLAY_IS_CANCELABLE (waitable));
 
-  gimp_procedure_execute_async (procedure, gimp,
-                                gimp_get_user_context (gimp),
+  clay_procedure_execute_async (procedure, clay,
+                                clay_get_user_context (clay),
                                 NULL, args, NULL, &error);
 
-  gimp_value_array_unref (args);
+  clay_value_array_unref (args);
 
   close (input_pipe[1]);
   close (output_pipe[0]);
@@ -545,34 +545,34 @@ gui_wait (Gimp         *gimp,
       return FALSE;
     }
 
-  if (GIMP_IS_CANCELABLE (waitable))
+  if (CLAY_IS_CANCELABLE (waitable))
     /* listens for a cancellation request */
-    input_async = gimp_parallel_run_async_independent ((GimpRunAsyncFunc) gui_wait_input_async,
+    input_async = clay_parallel_run_async_independent ((ClayRunAsyncFunc) gui_wait_input_async,
                                                        input_pipe);
 
-  while (! gimp_waitable_wait_for (waitable, 0.1 * G_TIME_SPAN_SECOND))
+  while (! clay_waitable_wait_for (waitable, 0.1 * G_TIME_SPAN_SECOND))
     {
       /* Making sure main GUI is not frozen while waiting. */
       while (g_main_context_pending (NULL))
         g_main_context_iteration (NULL, FALSE);
 
       /* check for a cancellation request */
-      if (input_async && gimp_waitable_try_wait (GIMP_WAITABLE (input_async)))
+      if (input_async && clay_waitable_try_wait (CLAY_WAITABLE (input_async)))
         {
-          gimp_cancelable_cancel (GIMP_CANCELABLE (waitable));
+          clay_cancelable_cancel (CLAY_CANCELABLE (waitable));
 
           break;
         }
     }
 
-  gimp_waitable_wait (waitable);
+  clay_waitable_wait (waitable);
 
   /* signal completion to the plug-in */
   close (output_pipe[1]);
 
   if (input_async)
     {
-      gimp_waitable_wait (GIMP_WAITABLE (input_async));
+      clay_waitable_wait (CLAY_WAITABLE (input_async));
 
       g_object_unref (input_async);
     }
@@ -582,25 +582,25 @@ gui_wait (Gimp         *gimp,
   return TRUE;
 }
 
-static GimpProgress *
-gui_new_progress (Gimp        *gimp,
-                  GimpDisplay *display)
+static ClayProgress *
+gui_new_progress (Clay        *clay,
+                  ClayDisplay *display)
 {
-  g_return_val_if_fail (display == NULL || GIMP_IS_DISPLAY (display), NULL);
+  g_return_val_if_fail (display == NULL || CLAY_IS_DISPLAY (display), NULL);
 
   if (display)
-    return GIMP_PROGRESS (display);
+    return CLAY_PROGRESS (display);
 
-  return GIMP_PROGRESS (gimp_progress_dialog_new ());
+  return CLAY_PROGRESS (clay_progress_dialog_new ());
 }
 
 static void
-gui_free_progress (Gimp          *gimp,
-                   GimpProgress  *progress)
+gui_free_progress (Clay          *clay,
+                   ClayProgress  *progress)
 {
-  g_return_if_fail (GIMP_IS_PROGRESS (progress));
+  g_return_if_fail (CLAY_IS_PROGRESS (progress));
 
-  if (GIMP_IS_PROGRESS_DIALOG (progress))
+  if (CLAY_IS_PROGRESS_DIALOG (progress))
     gtk_widget_destroy (GTK_WIDGET (progress));
 }
 
@@ -613,60 +613,60 @@ gui_pdb_dialog_present (GtkWindow *window)
 }
 
 static gboolean
-gui_pdb_dialog_new (Gimp          *gimp,
-                    GimpContext   *context,
-                    GimpProgress  *progress,
+gui_pdb_dialog_new (Clay          *clay,
+                    ClayContext   *context,
+                    ClayProgress  *progress,
                     GType          contents_type,
                     GBytes        *parent_handle,
                     const gchar   *title,
                     const gchar   *callback_name,
-                    GimpObject    *object,
+                    ClayObject    *object,
                     va_list        args)
 {
   GType        dialog_type = G_TYPE_NONE;
   const gchar *dialog_role = NULL;
   const gchar *help_id     = NULL;
 
-  if (contents_type == GIMP_TYPE_BRUSH)
+  if (contents_type == CLAY_TYPE_BRUSH)
     {
-      dialog_type = GIMP_TYPE_BRUSH_SELECT;
-      dialog_role = "gimp-brush-selection";
-      help_id     = GIMP_HELP_BRUSH_DIALOG;
+      dialog_type = CLAY_TYPE_BRUSH_SELECT;
+      dialog_role = "clay-brush-selection";
+      help_id     = CLAY_HELP_BRUSH_DIALOG;
     }
-  else if (contents_type == GIMP_TYPE_FONT)
+  else if (contents_type == CLAY_TYPE_FONT)
     {
-      dialog_type = GIMP_TYPE_FONT_SELECT;
-      dialog_role = "gimp-font-selection";
-      help_id     = GIMP_HELP_FONT_DIALOG;
+      dialog_type = CLAY_TYPE_FONT_SELECT;
+      dialog_role = "clay-font-selection";
+      help_id     = CLAY_HELP_FONT_DIALOG;
     }
-  else if (contents_type == GIMP_TYPE_GRADIENT)
+  else if (contents_type == CLAY_TYPE_GRADIENT)
     {
-      dialog_type = GIMP_TYPE_GRADIENT_SELECT;
-      dialog_role = "gimp-gradient-selection";
-      help_id     = GIMP_HELP_GRADIENT_DIALOG;
+      dialog_type = CLAY_TYPE_GRADIENT_SELECT;
+      dialog_role = "clay-gradient-selection";
+      help_id     = CLAY_HELP_GRADIENT_DIALOG;
     }
-  else if (contents_type == GIMP_TYPE_IMAGE)
+  else if (contents_type == CLAY_TYPE_IMAGE)
     {
-      dialog_type = GIMP_TYPE_IMAGE_SELECT;
-      dialog_role = "gimp-image-selection";
-      help_id     = GIMP_HELP_IMAGE_DIALOG;
+      dialog_type = CLAY_TYPE_IMAGE_SELECT;
+      dialog_role = "clay-image-selection";
+      help_id     = CLAY_HELP_IMAGE_DIALOG;
     }
-  else if (contents_type == GIMP_TYPE_PALETTE)
+  else if (contents_type == CLAY_TYPE_PALETTE)
     {
-      dialog_type = GIMP_TYPE_PALETTE_SELECT;
-      dialog_role = "gimp-palette-selection";
-      help_id     = GIMP_HELP_PALETTE_DIALOG;
+      dialog_type = CLAY_TYPE_PALETTE_SELECT;
+      dialog_role = "clay-palette-selection";
+      help_id     = CLAY_HELP_PALETTE_DIALOG;
     }
-  else if (contents_type == GIMP_TYPE_PATTERN)
+  else if (contents_type == CLAY_TYPE_PATTERN)
     {
-      dialog_type = GIMP_TYPE_PATTERN_SELECT;
-      dialog_role = "gimp-pattern-selection";
-      help_id     = GIMP_HELP_PATTERN_DIALOG;
+      dialog_type = CLAY_TYPE_PATTERN_SELECT;
+      dialog_role = "clay-pattern-selection";
+      help_id     = CLAY_HELP_PATTERN_DIALOG;
     }
-  else if (g_type_is_a (contents_type, GIMP_TYPE_ITEM))
+  else if (g_type_is_a (contents_type, CLAY_TYPE_ITEM))
     {
-      dialog_type = GIMP_TYPE_ITEM_SELECT;
-      dialog_role = "gimp-item-selection";
+      dialog_type = CLAY_TYPE_ITEM_SELECT;
+      dialog_role = "clay-item-selection";
     }
   else
     {
@@ -675,10 +675,10 @@ gui_pdb_dialog_new (Gimp          *gimp,
 
   if (dialog_type != G_TYPE_NONE)
     {
-      if (! object && ! g_type_is_a (contents_type, GIMP_TYPE_ITEM))
-        object = gimp_context_get_by_type (context, contents_type);
+      if (! object && ! g_type_is_a (contents_type, CLAY_TYPE_ITEM))
+        object = clay_context_get_by_type (context, contents_type);
 
-      if (object || g_type_is_a (contents_type, GIMP_TYPE_ITEM))
+      if (object || g_type_is_a (contents_type, CLAY_TYPE_ITEM))
         {
           gint        n_properties = 0;
           gchar     **names        = NULL;
@@ -691,22 +691,22 @@ gui_pdb_dialog_new (Gimp          *gimp,
                         "gtk-dialogs-use-header", &use_header_bar,
                         NULL);
 
-          names = gimp_properties_append (dialog_type,
+          names = clay_properties_append (dialog_type,
                                           &n_properties, names, &values,
                                           "title",          title,
                                           "role",           dialog_role,
-                                          "help-func",      gimp_standard_help_func,
+                                          "help-func",      clay_standard_help_func,
                                           "help-id",        help_id,
-                                          "pdb",            gimp->pdb,
+                                          "pdb",            clay->pdb,
                                           "context",        context,
                                           "select-type",    contents_type,
                                           "initial-object", object,
                                           "callback-name",  callback_name,
-                                          "menu-factory",   menus_get_global_menu_factory (gimp),
+                                          "menu-factory",   menus_get_global_menu_factory (clay),
                                           "use-header-bar", use_header_bar,
                                           NULL);
 
-          names = gimp_properties_append_valist (dialog_type,
+          names = clay_properties_append_valist (dialog_type,
                                                  &n_properties, names, &values,
                                                  args);
 
@@ -716,14 +716,14 @@ gui_pdb_dialog_new (Gimp          *gimp,
                                           (const gchar **) names,
                                           (const GValue *) values);
 
-          gimp_properties_free (n_properties, names, values);
+          clay_properties_free (n_properties, names, values);
 
-          view = GIMP_PDB_DIALOG (dialog)->view;
+          view = CLAY_PDB_DIALOG (dialog)->view;
           if (view)
-            gimp_docked_set_show_button_bar (GIMP_DOCKED (view), FALSE);
+            clay_docked_set_show_button_bar (CLAY_DOCKED (view), FALSE);
 
           if (progress)
-            gimp_window_set_transient_for (GTK_WINDOW (dialog), progress);
+            clay_window_set_transient_for (GTK_WINDOW (dialog), progress);
 
           gtk_widget_set_visible (dialog, TRUE);
 
@@ -741,7 +741,7 @@ gui_pdb_dialog_new (Gimp          *gimp,
             }
 
           if (parent_handle != NULL)
-            gimp_window_set_transient_for_handle (GTK_WINDOW (dialog), parent_handle);
+            clay_window_set_transient_for_handle (GTK_WINDOW (dialog), parent_handle);
 
           return TRUE;
         }
@@ -751,64 +751,64 @@ gui_pdb_dialog_new (Gimp          *gimp,
 }
 
 static gboolean
-gui_pdb_dialog_set (Gimp          *gimp,
+gui_pdb_dialog_set (Clay          *clay,
                     GType          contents_type,
                     const gchar   *callback_name,
-                    GimpObject    *object,
+                    ClayObject    *object,
                     va_list        args)
 {
-  GimpPdbDialogClass *klass     = NULL;
-  GimpContainer      *container = NULL;
-  GimpPdbDialog      *dialog;
+  ClayPdbDialogClass *klass     = NULL;
+  ClayContainer      *container = NULL;
+  ClayPdbDialog      *dialog;
 
-  if (contents_type == GIMP_TYPE_BRUSH)
+  if (contents_type == CLAY_TYPE_BRUSH)
     {
-      klass = g_type_class_ref (GIMP_TYPE_BRUSH_SELECT);
-      container = gimp_data_factory_get_container (gimp->brush_factory);
+      klass = g_type_class_ref (CLAY_TYPE_BRUSH_SELECT);
+      container = clay_data_factory_get_container (clay->brush_factory);
     }
-  else if (contents_type == GIMP_TYPE_FONT)
+  else if (contents_type == CLAY_TYPE_FONT)
     {
-      klass = g_type_class_ref (GIMP_TYPE_FONT_SELECT);
-      container = gimp_data_factory_get_container (gimp->font_factory);
+      klass = g_type_class_ref (CLAY_TYPE_FONT_SELECT);
+      container = clay_data_factory_get_container (clay->font_factory);
     }
-  else if (contents_type == GIMP_TYPE_GRADIENT)
+  else if (contents_type == CLAY_TYPE_GRADIENT)
     {
-      klass = g_type_class_ref (GIMP_TYPE_GRADIENT_SELECT);
-      container = gimp_data_factory_get_container (gimp->gradient_factory);
+      klass = g_type_class_ref (CLAY_TYPE_GRADIENT_SELECT);
+      container = clay_data_factory_get_container (clay->gradient_factory);
     }
-  else if (contents_type == GIMP_TYPE_IMAGE)
+  else if (contents_type == CLAY_TYPE_IMAGE)
     {
-      klass = g_type_class_ref (GIMP_TYPE_IMAGE_SELECT);
+      klass = g_type_class_ref (CLAY_TYPE_IMAGE_SELECT);
     }
-  else if (contents_type == GIMP_TYPE_PALETTE)
+  else if (contents_type == CLAY_TYPE_PALETTE)
     {
-      klass = g_type_class_ref (GIMP_TYPE_PALETTE_SELECT);
-      container = gimp_data_factory_get_container (gimp->palette_factory);
+      klass = g_type_class_ref (CLAY_TYPE_PALETTE_SELECT);
+      container = clay_data_factory_get_container (clay->palette_factory);
     }
-  else if (contents_type == GIMP_TYPE_PATTERN)
+  else if (contents_type == CLAY_TYPE_PATTERN)
     {
-      klass = g_type_class_ref (GIMP_TYPE_PATTERN_SELECT);
-      container = gimp_data_factory_get_container (gimp->pattern_factory);
+      klass = g_type_class_ref (CLAY_TYPE_PATTERN_SELECT);
+      container = clay_data_factory_get_container (clay->pattern_factory);
     }
-  else if (g_type_is_a (contents_type, GIMP_TYPE_ITEM))
+  else if (g_type_is_a (contents_type, CLAY_TYPE_ITEM))
     {
-      klass = g_type_class_ref (GIMP_TYPE_ITEM_SELECT);
+      klass = g_type_class_ref (CLAY_TYPE_ITEM_SELECT);
     }
 
   g_return_val_if_fail (klass != NULL, FALSE);
 
-  dialog = gimp_pdb_dialog_get_by_callback (klass, callback_name);
+  dialog = clay_pdb_dialog_get_by_callback (klass, callback_name);
 
   if (dialog != NULL                       &&
       dialog->select_type == contents_type &&
-      (container == NULL || gimp_container_get_child_index (container, object) != -1))
+      (container == NULL || clay_container_get_child_index (container, object) != -1))
     {
       const gchar *prop_name = va_arg (args, const gchar *);
 
-      if (g_type_is_a (contents_type, GIMP_TYPE_RESOURCE))
+      if (g_type_is_a (contents_type, CLAY_TYPE_RESOURCE))
         {
           g_return_val_if_fail (container != NULL, FALSE);
-          gimp_context_set_by_type (dialog->context, dialog->select_type, object);
+          clay_context_set_by_type (dialog->context, dialog->select_type, object);
         }
       else
         {
@@ -831,32 +831,32 @@ gui_pdb_dialog_set (Gimp          *gimp,
 }
 
 static gboolean
-gui_pdb_dialog_close (Gimp        *gimp,
+gui_pdb_dialog_close (Clay        *clay,
                       GType        contents_type,
                       const gchar *callback_name)
 {
-  GimpPdbDialogClass *klass = NULL;
+  ClayPdbDialogClass *klass = NULL;
 
-  if (contents_type == GIMP_TYPE_BRUSH)
-    klass = g_type_class_peek (GIMP_TYPE_BRUSH_SELECT);
-  else if (contents_type == GIMP_TYPE_FONT)
-    klass = g_type_class_peek (GIMP_TYPE_FONT_SELECT);
-  else if (contents_type == GIMP_TYPE_GRADIENT)
-    klass = g_type_class_peek (GIMP_TYPE_GRADIENT_SELECT);
-  else if (contents_type == GIMP_TYPE_IMAGE)
-    klass = g_type_class_peek (GIMP_TYPE_IMAGE_SELECT);
-  else if (contents_type == GIMP_TYPE_PALETTE)
-    klass = g_type_class_peek (GIMP_TYPE_PALETTE_SELECT);
-  else if (contents_type == GIMP_TYPE_PATTERN)
-    klass = g_type_class_peek (GIMP_TYPE_PATTERN_SELECT);
-  else if (g_type_is_a (contents_type, GIMP_TYPE_ITEM))
-    klass = g_type_class_peek (GIMP_TYPE_ITEM_SELECT);
+  if (contents_type == CLAY_TYPE_BRUSH)
+    klass = g_type_class_peek (CLAY_TYPE_BRUSH_SELECT);
+  else if (contents_type == CLAY_TYPE_FONT)
+    klass = g_type_class_peek (CLAY_TYPE_FONT_SELECT);
+  else if (contents_type == CLAY_TYPE_GRADIENT)
+    klass = g_type_class_peek (CLAY_TYPE_GRADIENT_SELECT);
+  else if (contents_type == CLAY_TYPE_IMAGE)
+    klass = g_type_class_peek (CLAY_TYPE_IMAGE_SELECT);
+  else if (contents_type == CLAY_TYPE_PALETTE)
+    klass = g_type_class_peek (CLAY_TYPE_PALETTE_SELECT);
+  else if (contents_type == CLAY_TYPE_PATTERN)
+    klass = g_type_class_peek (CLAY_TYPE_PATTERN_SELECT);
+  else if (g_type_is_a (contents_type, CLAY_TYPE_ITEM))
+    klass = g_type_class_peek (CLAY_TYPE_ITEM_SELECT);
 
   if (klass)
     {
-      GimpPdbDialog *dialog;
+      ClayPdbDialog *dialog;
 
-      dialog = gimp_pdb_dialog_get_by_callback (klass, callback_name);
+      dialog = clay_pdb_dialog_get_by_callback (klass, callback_name);
 
       if (dialog && dialog->select_type == contents_type)
         {
@@ -869,7 +869,7 @@ gui_pdb_dialog_close (Gimp        *gimp,
 }
 
 static gboolean
-gui_recent_list_add_file (Gimp        *gimp,
+gui_recent_list_add_file (Clay        *clay,
                           GFile       *file,
                           const gchar *mime_type)
 {
@@ -878,7 +878,7 @@ gui_recent_list_add_file (Gimp        *gimp,
   gchar         *uri;
   gboolean       success;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
   /* use last part of the URI */
@@ -889,7 +889,7 @@ gui_recent_list_add_file (Gimp        *gimp,
   recent.mime_type    = (mime_type ?
                          (gchar *) mime_type : "application/octet-stream");
   recent.app_name     = "Clay Image Beautification Program";
-  recent.app_exec     = GIMP_COMMAND " %u";
+  recent.app_exec     = CLAY_COMMAND " %u";
   recent.groups       = (gchar **) groups;
   recent.is_private   = FALSE;
 
@@ -912,15 +912,15 @@ gui_recent_list_compare (gconstpointer a,
 }
 
 static void
-gui_recent_list_load (Gimp *gimp)
+gui_recent_list_load (Clay *clay)
 {
   GList *items;
   GList *list;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  gimp_container_freeze (gimp->documents);
-  gimp_container_clear (gimp->documents);
+  clay_container_freeze (clay->documents);
+  clay_container_clear (clay->documents);
 
   items = gtk_recent_manager_get_items (gtk_recent_manager_get_default ());
 
@@ -936,20 +936,20 @@ gui_recent_list_load (Gimp *gimp)
           const gchar *mime_type = gtk_recent_info_get_mime_type (info);
 
           if (mime_type &&
-              gimp_plug_in_manager_file_procedure_find_by_mime_type (gimp->plug_in_manager,
-                                                                     GIMP_FILE_PROCEDURE_GROUP_OPEN,
+              clay_plug_in_manager_file_procedure_find_by_mime_type (clay->plug_in_manager,
+                                                                     CLAY_FILE_PROCEDURE_GROUP_OPEN,
                                                                      mime_type))
             {
-              GimpImagefile *imagefile;
+              ClayImagefile *imagefile;
               GFile         *file;
 
               file = g_file_new_for_uri (gtk_recent_info_get_uri (info));
-              imagefile = gimp_imagefile_new (gimp, file);
+              imagefile = clay_imagefile_new (clay, file);
               g_object_unref (file);
 
-              gimp_imagefile_set_mime_type (imagefile, mime_type);
+              clay_imagefile_set_mime_type (imagefile, mime_type);
 
-              gimp_container_add (gimp->documents, GIMP_OBJECT (imagefile));
+              clay_container_add (clay->documents, CLAY_OBJECT (imagefile));
               g_object_unref (imagefile);
             }
         }
@@ -959,12 +959,12 @@ gui_recent_list_load (Gimp *gimp)
 
   g_list_free (items);
 
-  gimp_container_thaw (gimp->documents);
+  clay_container_thaw (clay->documents);
 }
 
 static GMountOperation *
-gui_get_mount_operation (Gimp         *gimp,
-                         GimpProgress *progress)
+gui_get_mount_operation (Clay         *clay,
+                         ClayProgress *progress)
 {
   GtkWidget *toplevel = NULL;
 
@@ -974,12 +974,12 @@ gui_get_mount_operation (Gimp         *gimp,
   return gtk_mount_operation_new (GTK_WINDOW (toplevel));
 }
 
-static GimpColorProfilePolicy
-gui_query_profile_policy (Gimp                      *gimp,
-                          GimpImage                 *image,
-                          GimpContext               *context,
-                          GimpColorProfile         **dest_profile,
-                          GimpColorRenderingIntent  *intent,
+static ClayColorProfilePolicy
+gui_query_profile_policy (Clay                      *clay,
+                          ClayImage                 *image,
+                          ClayContext               *context,
+                          ClayColorProfile         **dest_profile,
+                          ClayColorRenderingIntent  *intent,
                           gboolean                  *bpc,
                           gboolean                  *dont_ask)
 {
@@ -989,10 +989,10 @@ gui_query_profile_policy (Gimp                      *gimp,
                                           dont_ask);
 }
 
-static GimpMetadataRotationPolicy
-gui_query_rotation_policy (Gimp        *gimp,
-                           GimpImage   *image,
-                           GimpContext *context,
+static ClayMetadataRotationPolicy
+gui_query_rotation_policy (Clay        *clay,
+                           ClayImage   *image,
+                           ClayContext *context,
                            gboolean    *dont_ask)
 {
   return metadata_rotation_import_dialog_run (image, context,
@@ -1000,19 +1000,19 @@ gui_query_rotation_policy (Gimp        *gimp,
 }
 
 static void
-gui_inhibit (Gimp *gimp)
+gui_inhibit (Clay *clay)
 {
   static gboolean  in_test      = TRUE;
   static gint      cookie       = 0;
   static gint      n_images     = 0;
   static gint64    last_failure = 0;
   GtkApplication  *app;
-  GimpContainer   *images  = NULL;
+  ClayContainer   *images  = NULL;
 
   if (in_test)
     {
       /* Do not call inhibit code while unit-testing the UI code. */
-      in_test = (g_getenv ("GIMP_TESTING_ABS_TOP_SRCDIR") != NULL);
+      in_test = (g_getenv ("CLAY_TESTING_ABS_TOP_SRCDIR") != NULL);
       if (in_test)
         return;
     }
@@ -1024,12 +1024,12 @@ gui_inhibit (Gimp *gimp)
      */
     return;
 
-  if (gimp_displays_dirty (gimp))
+  if (clay_displays_dirty (clay))
     {
       gint n_dirty_images;
 
-      images         = gimp_displays_get_dirty_images (gimp);
-      n_dirty_images = gimp_container_get_n_children (images);
+      images         = clay_displays_get_dirty_images (clay);
+      n_dirty_images = clay_container_get_n_children (images);
 
       if (cookie && n_images == n_dirty_images)
         {
@@ -1056,26 +1056,26 @@ gui_inhibit (Gimp *gimp)
     }
   last_failure = 0;
 
-  if (gimp_displays_dirty (gimp))
+  if (clay_displays_dirty (clay))
     {
-      GimpImage *image;
+      ClayImage *image;
       GList     *list;
       GtkWindow *window = NULL;
       gchar     *reason;
 
-      image = (GimpImage *) gimp_container_get_first_child (images);
+      image = (ClayImage *) clay_container_get_first_child (images);
       g_object_unref (images);
 
-      for (list = gimp_get_display_iter (gimp); list; list = list->next)
+      for (list = clay_get_display_iter (clay); list; list = list->next)
         {
-          GimpDisplay *display = list->data;
+          ClayDisplay *display = list->data;
 
-          if (gimp_display_get_image (display) == image)
+          if (clay_display_get_image (display) == image)
             {
-              GimpDisplayShell *shell;
+              ClayDisplayShell *shell;
               GtkWidget        *toplevel;
 
-              shell    = gimp_display_get_shell (display);
+              shell    = clay_display_get_shell (display);
               toplevel = gtk_widget_get_toplevel (GTK_WIDGET (shell));
 
               if (GTK_IS_WINDOW (toplevel))
@@ -1107,15 +1107,15 @@ gui_inhibit (Gimp *gimp)
 }
 
 static void
-gui_image_disconnect (GimpImage *image,
-                      Gimp      *gimp)
+gui_image_disconnect (ClayImage *image,
+                      Clay      *clay)
 {
-  gui_inhibit (gimp);
+  gui_inhibit (clay);
 
   g_signal_handlers_disconnect_by_func (image,
                                         G_CALLBACK (gui_inhibit),
-                                        gimp);
+                                        clay);
   g_signal_handlers_disconnect_by_func (image,
                                         G_CALLBACK (gui_image_disconnect),
-                                        gimp);
+                                        clay);
 }

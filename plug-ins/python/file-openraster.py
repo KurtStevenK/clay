@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# GIMP Plug-in for the OpenRaster file format
+# Clay Plug-in for the OpenRaster file format
 # http://create.freedesktop.org/wiki/OpenRaster
 
 # Copyright (C) 2009 by Jon Nordby <jononor@gmail.com>
@@ -14,8 +14,8 @@
 # http://gitorious.org/mypaint/mypaint/blobs/edd84bcc1e091d0d56aa6d26637aa8a925987b6a/lib/document.py
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 gi.require_version('Gegl', '0.4')
 from gi.repository import Gegl
 from gi.repository import GObject
@@ -31,95 +31,95 @@ def _(message): return GLib.dgettext(None, message)
 NESTED_STACK_END = object()
 
 layermodes_map = {
-    "svg:src-over":     Gimp.LayerMode.NORMAL,
-    "svg:multiply":     Gimp.LayerMode.MULTIPLY,
-    "svg:screen":       Gimp.LayerMode.SCREEN,
-    "svg:overlay":      Gimp.LayerMode.OVERLAY,
-    "svg:darken":       Gimp.LayerMode.DARKEN_ONLY,
-    "svg:lighten":      Gimp.LayerMode.LIGHTEN_ONLY,
-    "svg:color-dodge":  Gimp.LayerMode.DODGE,
-    "svg:color-burn":   Gimp.LayerMode.BURN,
-    "svg:hard-light":   Gimp.LayerMode.HARDLIGHT,
-    "svg:soft-light":   Gimp.LayerMode.SOFTLIGHT,
-    "svg:difference":   Gimp.LayerMode.DIFFERENCE,
-    "svg:color":        Gimp.LayerMode.HSL_COLOR,
-    "svg:luminosity":   Gimp.LayerMode.HSV_VALUE,
-    "svg:hue":          Gimp.LayerMode.HSV_HUE,
-    "svg:saturation":   Gimp.LayerMode.HSV_SATURATION,
-    "svg:plus":         Gimp.LayerMode.ADDITION,
+    "svg:src-over":     Clay.LayerMode.NORMAL,
+    "svg:multiply":     Clay.LayerMode.MULTIPLY,
+    "svg:screen":       Clay.LayerMode.SCREEN,
+    "svg:overlay":      Clay.LayerMode.OVERLAY,
+    "svg:darken":       Clay.LayerMode.DARKEN_ONLY,
+    "svg:lighten":      Clay.LayerMode.LIGHTEN_ONLY,
+    "svg:color-dodge":  Clay.LayerMode.DODGE,
+    "svg:color-burn":   Clay.LayerMode.BURN,
+    "svg:hard-light":   Clay.LayerMode.HARDLIGHT,
+    "svg:soft-light":   Clay.LayerMode.SOFTLIGHT,
+    "svg:difference":   Clay.LayerMode.DIFFERENCE,
+    "svg:color":        Clay.LayerMode.HSL_COLOR,
+    "svg:luminosity":   Clay.LayerMode.HSV_VALUE,
+    "svg:hue":          Clay.LayerMode.HSV_HUE,
+    "svg:saturation":   Clay.LayerMode.HSV_SATURATION,
+    "svg:plus":         Clay.LayerMode.ADDITION,
 }
 
-# There are less svg blending ops than we have GIMP blend modes.
+# There are less svg blending ops than we have Clay blend modes.
 # We are going to map them as closely as possible.
-gimp_layermodes_map = {
-    Gimp.LayerMode.NORMAL:                  "svg:src-over",
-    Gimp.LayerMode.NORMAL_LEGACY:           "svg:src-over",
-    Gimp.LayerMode.MULTIPLY:                "svg:multiply",
-    Gimp.LayerMode.MULTIPLY_LEGACY:         "svg:multiply",
-    Gimp.LayerMode.SCREEN:                  "svg:screen",
-    Gimp.LayerMode.SCREEN_LEGACY:           "svg:screen",
-    Gimp.LayerMode.OVERLAY:                 "svg:overlay",
-    Gimp.LayerMode.OVERLAY_LEGACY:          "svg:overlay",
-    Gimp.LayerMode.DARKEN_ONLY:             "svg:darken",
-    Gimp.LayerMode.DARKEN_ONLY_LEGACY:      "svg:darken",
-    Gimp.LayerMode.LIGHTEN_ONLY:            "svg:lighten",
-    Gimp.LayerMode.LIGHTEN_ONLY_LEGACY:     "svg:lighten",
-    Gimp.LayerMode.DODGE:                   "svg:color-dodge",
-    Gimp.LayerMode.DODGE_LEGACY:            "svg:color-dodge",
-    Gimp.LayerMode.BURN:                    "svg:color-burn",
-    Gimp.LayerMode.BURN_LEGACY:             "svg:color-burn",
-    Gimp.LayerMode.HARDLIGHT:               "svg:hard-light",
-    Gimp.LayerMode.HARDLIGHT_LEGACY:        "svg:hard-light",
-    Gimp.LayerMode.SOFTLIGHT:               "svg:soft-light",
-    Gimp.LayerMode.SOFTLIGHT_LEGACY:        "svg:soft-light",
-    Gimp.LayerMode.DIFFERENCE:              "svg:difference",
-    Gimp.LayerMode.DIFFERENCE_LEGACY:       "svg:difference",
-    Gimp.LayerMode.HSL_COLOR:               "svg:color",
-    Gimp.LayerMode.HSL_COLOR_LEGACY:        "svg:color",
-    Gimp.LayerMode.HSV_VALUE:               "svg:luminosity",
-    Gimp.LayerMode.HSV_VALUE_LEGACY:        "svg:luminosity",
-    Gimp.LayerMode.HSV_HUE:                 "svg:hue",
-    Gimp.LayerMode.HSV_HUE_LEGACY:          "svg:hue",
-    Gimp.LayerMode.HSV_SATURATION:          "svg:saturation",
-    Gimp.LayerMode.HSV_SATURATION_LEGACY:   "svg:saturation",
-    Gimp.LayerMode.ADDITION:                "svg:plus",
-    Gimp.LayerMode.ADDITION_LEGACY:         "svg:plus",
+clay_layermodes_map = {
+    Clay.LayerMode.NORMAL:                  "svg:src-over",
+    Clay.LayerMode.NORMAL_LEGACY:           "svg:src-over",
+    Clay.LayerMode.MULTIPLY:                "svg:multiply",
+    Clay.LayerMode.MULTIPLY_LEGACY:         "svg:multiply",
+    Clay.LayerMode.SCREEN:                  "svg:screen",
+    Clay.LayerMode.SCREEN_LEGACY:           "svg:screen",
+    Clay.LayerMode.OVERLAY:                 "svg:overlay",
+    Clay.LayerMode.OVERLAY_LEGACY:          "svg:overlay",
+    Clay.LayerMode.DARKEN_ONLY:             "svg:darken",
+    Clay.LayerMode.DARKEN_ONLY_LEGACY:      "svg:darken",
+    Clay.LayerMode.LIGHTEN_ONLY:            "svg:lighten",
+    Clay.LayerMode.LIGHTEN_ONLY_LEGACY:     "svg:lighten",
+    Clay.LayerMode.DODGE:                   "svg:color-dodge",
+    Clay.LayerMode.DODGE_LEGACY:            "svg:color-dodge",
+    Clay.LayerMode.BURN:                    "svg:color-burn",
+    Clay.LayerMode.BURN_LEGACY:             "svg:color-burn",
+    Clay.LayerMode.HARDLIGHT:               "svg:hard-light",
+    Clay.LayerMode.HARDLIGHT_LEGACY:        "svg:hard-light",
+    Clay.LayerMode.SOFTLIGHT:               "svg:soft-light",
+    Clay.LayerMode.SOFTLIGHT_LEGACY:        "svg:soft-light",
+    Clay.LayerMode.DIFFERENCE:              "svg:difference",
+    Clay.LayerMode.DIFFERENCE_LEGACY:       "svg:difference",
+    Clay.LayerMode.HSL_COLOR:               "svg:color",
+    Clay.LayerMode.HSL_COLOR_LEGACY:        "svg:color",
+    Clay.LayerMode.HSV_VALUE:               "svg:luminosity",
+    Clay.LayerMode.HSV_VALUE_LEGACY:        "svg:luminosity",
+    Clay.LayerMode.HSV_HUE:                 "svg:hue",
+    Clay.LayerMode.HSV_HUE_LEGACY:          "svg:hue",
+    Clay.LayerMode.HSV_SATURATION:          "svg:saturation",
+    Clay.LayerMode.HSV_SATURATION_LEGACY:   "svg:saturation",
+    Clay.LayerMode.ADDITION:                "svg:plus",
+    Clay.LayerMode.ADDITION_LEGACY:         "svg:plus",
 
     # FIXME Determine the closest available layer mode
     #       Alternatively we could add additional modes
-    #       e.g. something like "gimp:dissolve", this
+    #       e.g. something like "clay:dissolve", this
     #       is what Krita seems to do too
-    Gimp.LayerMode.DISSOLVE:                "svg:src-over",
-    Gimp.LayerMode.DIVIDE:                  "svg:src-over",
-    Gimp.LayerMode.DIVIDE_LEGACY:           "svg:src-over",
-    Gimp.LayerMode.BEHIND:                  "svg:src-over",
-    Gimp.LayerMode.BEHIND_LEGACY:           "svg:src-over",
-    Gimp.LayerMode.GRAIN_EXTRACT:           "svg:src-over",
-    Gimp.LayerMode.GRAIN_EXTRACT_LEGACY:    "svg:src-over",
-    Gimp.LayerMode.GRAIN_MERGE:             "svg:src-over",
-    Gimp.LayerMode.GRAIN_MERGE_LEGACY:      "svg:src-over",
-    Gimp.LayerMode.COLOR_ERASE:             "svg:src-over",
-    Gimp.LayerMode.COLOR_ERASE_LEGACY:      "svg:src-over",
-    Gimp.LayerMode.LCH_HUE:                 "svg:src-over",
-    Gimp.LayerMode.LCH_CHROMA:              "svg:src-over",
-    Gimp.LayerMode.LCH_COLOR:               "svg:src-over",
-    Gimp.LayerMode.LCH_LIGHTNESS:           "svg:src-over",
-    Gimp.LayerMode.SUBTRACT:                "svg:src-over",
-    Gimp.LayerMode.SUBTRACT_LEGACY:         "svg:src-over",
-    Gimp.LayerMode.VIVID_LIGHT:             "svg:src-over",
-    Gimp.LayerMode.PIN_LIGHT:               "svg:src-over",
-    Gimp.LayerMode.LINEAR_LIGHT:            "svg:src-over",
-    Gimp.LayerMode.HARD_MIX:                "svg:src-over",
-    Gimp.LayerMode.EXCLUSION:               "svg:src-over",
-    Gimp.LayerMode.LINEAR_BURN:             "svg:src-over",
-    Gimp.LayerMode.LUMA_DARKEN_ONLY:        "svg:src-over",
-    Gimp.LayerMode.LUMA_LIGHTEN_ONLY:       "svg:src-over",
-    Gimp.LayerMode.LUMINANCE:               "svg:src-over",
-    Gimp.LayerMode.COLOR_ERASE:             "svg:src-over",
-    Gimp.LayerMode.ERASE:                   "svg:src-over",
-    Gimp.LayerMode.MERGE:                   "svg:src-over",
-    Gimp.LayerMode.SPLIT:                   "svg:src-over",
-    Gimp.LayerMode.PASS_THROUGH:            "svg:src-over",
+    Clay.LayerMode.DISSOLVE:                "svg:src-over",
+    Clay.LayerMode.DIVIDE:                  "svg:src-over",
+    Clay.LayerMode.DIVIDE_LEGACY:           "svg:src-over",
+    Clay.LayerMode.BEHIND:                  "svg:src-over",
+    Clay.LayerMode.BEHIND_LEGACY:           "svg:src-over",
+    Clay.LayerMode.GRAIN_EXTRACT:           "svg:src-over",
+    Clay.LayerMode.GRAIN_EXTRACT_LEGACY:    "svg:src-over",
+    Clay.LayerMode.GRAIN_MERGE:             "svg:src-over",
+    Clay.LayerMode.GRAIN_MERGE_LEGACY:      "svg:src-over",
+    Clay.LayerMode.COLOR_ERASE:             "svg:src-over",
+    Clay.LayerMode.COLOR_ERASE_LEGACY:      "svg:src-over",
+    Clay.LayerMode.LCH_HUE:                 "svg:src-over",
+    Clay.LayerMode.LCH_CHROMA:              "svg:src-over",
+    Clay.LayerMode.LCH_COLOR:               "svg:src-over",
+    Clay.LayerMode.LCH_LIGHTNESS:           "svg:src-over",
+    Clay.LayerMode.SUBTRACT:                "svg:src-over",
+    Clay.LayerMode.SUBTRACT_LEGACY:         "svg:src-over",
+    Clay.LayerMode.VIVID_LIGHT:             "svg:src-over",
+    Clay.LayerMode.PIN_LIGHT:               "svg:src-over",
+    Clay.LayerMode.LINEAR_LIGHT:            "svg:src-over",
+    Clay.LayerMode.HARD_MIX:                "svg:src-over",
+    Clay.LayerMode.EXCLUSION:               "svg:src-over",
+    Clay.LayerMode.LINEAR_BURN:             "svg:src-over",
+    Clay.LayerMode.LUMA_DARKEN_ONLY:        "svg:src-over",
+    Clay.LayerMode.LUMA_LIGHTEN_ONLY:       "svg:src-over",
+    Clay.LayerMode.LUMINANCE:               "svg:src-over",
+    Clay.LayerMode.COLOR_ERASE:             "svg:src-over",
+    Clay.LayerMode.ERASE:                   "svg:src-over",
+    Clay.LayerMode.MERGE:                   "svg:src-over",
+    Clay.LayerMode.SPLIT:                   "svg:src-over",
+    Clay.LayerMode.PASS_THROUGH:            "svg:src-over",
 }
 
 def reverse_map(mapping):
@@ -143,7 +143,7 @@ def get_layer_attributes(layer):
     opac = float(a.get('opacity', '1.0'))
     visible = a.get('visibility', 'visible') != 'hidden'
     m = a.get('composite-op', 'svg:src-over')
-    layer_mode = layermodes_map.get(m, Gimp.LayerMode.NORMAL)
+    layer_mode = layermodes_map.get(m, Clay.LayerMode.NORMAL)
     selected = a.get('selected', 'false') == 'true'
     locked = a.get('edit-locked', 'false') == 'true'
 
@@ -155,14 +155,14 @@ def get_group_layer_attributes(layer):
     opac = float(a.get('opacity', '1.0'))
     visible = a.get('visibility', 'visible') != 'hidden'
     m = a.get('composite-op', 'svg:src-over')
-    layer_mode = layermodes_map.get(m, Gimp.LayerMode.NORMAL)
+    layer_mode = layermodes_map.get(m, Clay.LayerMode.NORMAL)
     selected = a.get('selected', 'false') == 'true'
     locked = a.get('edit-locked', 'false') == 'true'
 
     return name, 0, 0, opac, visible, layer_mode, selected, locked
 
 def thumbnail_ora(procedure, file, thumb_size, args, data):
-    tempdir = tempfile.mkdtemp('gimp-plugin-file-openraster')
+    tempdir = tempfile.mkdtemp('clay-plugin-file-openraster')
     orafile = zipfile.ZipFile(file.peek_path())
     stack, w, h = get_image_attributes(orafile)
 
@@ -172,24 +172,24 @@ def thumbnail_ora(procedure, file, thumb_size, args, data):
         fid.write(orafile.read('Thumbnails/thumbnail.png'))
 
     thumb_file = Gio.file_new_for_path(tmp)
-    pdb_proc   = Gimp.get_pdb().lookup_procedure('file-png-load')
+    pdb_proc   = Clay.get_pdb().lookup_procedure('file-png-load')
     pdb_config = pdb_proc.create_config()
-    pdb_config.set_property('run-mode', Gimp.RunMode.NONINTERACTIVE)
+    pdb_config.set_property('run-mode', Clay.RunMode.NONINTERACTIVE)
     pdb_config.set_property('file', thumb_file)
     result = pdb_proc.run(pdb_config)
     os.remove(tmp)
     os.rmdir(tempdir)
 
-    if (result.index(0) == Gimp.PDBStatusType.SUCCESS):
+    if (result.index(0) == Clay.PDBStatusType.SUCCESS):
         img = result.index(1)
         # TODO: scaling
 
-        return Gimp.ValueArray.new_from_values([
-            GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.SUCCESS),
-            GObject.Value(Gimp.Image, img),
+        return Clay.ValueArray.new_from_values([
+            GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.SUCCESS),
+            GObject.Value(Clay.Image, img),
             GObject.Value(GObject.TYPE_INT, w),
             GObject.Value(GObject.TYPE_INT, h),
-            GObject.Value(Gimp.ImageType, Gimp.ImageType.RGB_IMAGE),
+            GObject.Value(Clay.ImageType, Clay.ImageType.RGB_IMAGE),
             GObject.Value(GObject.TYPE_INT, 1)
         ])
     else:
@@ -203,8 +203,8 @@ def export_ora(procedure, run_mode, image, file, options, metadata, config, data
         zi.external_attr = int("100644", 8) << 16
         zfile.writestr(zi, data)
 
-    Gimp.progress_init("Exporting openraster image")
-    tempdir = tempfile.mkdtemp('gimp-plugin-file-openraster')
+    Clay.progress_init("Exporting openraster image")
+    tempdir = tempfile.mkdtemp('clay-plugin-file-openraster')
 
     # use .tmpsave extension, so we don't overwrite a valid file if
     # there is an exception
@@ -224,20 +224,20 @@ def export_ora(procedure, run_mode, image, file, options, metadata, config, data
         interlace, compression = 0, 2
 
         width, height = drawable.get_width(), drawable.get_height()
-        tmp_img = Gimp.Image.new(width, height, image.get_base_type())
-        if (image.get_base_type() == Gimp.ImageBaseType.INDEXED):
+        tmp_img = Clay.Image.new(width, height, image.get_base_type())
+        if (image.get_base_type() == Clay.ImageBaseType.INDEXED):
             tmp_img.set_palette(image.get_palette())
 
-        tmp_layer = Gimp.Layer.new_from_drawable (drawable, tmp_img)
+        tmp_layer = Clay.Layer.new_from_drawable (drawable, tmp_img)
         tmp_layer.set_offsets (0, 0)
         # Set opacity to 100% to prevent doubling it on import with the
         # XML's opacity setting
         tmp_layer.set_opacity (100.0)
         tmp_img.insert_layer (tmp_layer, None, 0)
 
-        pdb_proc   = Gimp.get_pdb().lookup_procedure('file-png-export')
+        pdb_proc   = Clay.get_pdb().lookup_procedure('file-png-export')
         pdb_config = pdb_proc.create_config()
-        pdb_config.set_property('run-mode', Gimp.RunMode.NONINTERACTIVE)
+        pdb_config.set_property('run-mode', Clay.RunMode.NONINTERACTIVE)
         pdb_config.set_property('image', tmp_img)
         pdb_config.set_property('file', Gio.File.new_for_path(tmp))
         pdb_config.set_property('options', None)
@@ -258,41 +258,41 @@ def export_ora(procedure, run_mode, image, file, options, metadata, config, data
 
         tmp_img.delete()
 
-    def add_layer(parent, x, y, opac, gimp_layer, path, visible=True):
-        store_layer(image, gimp_layer, path)
+    def add_layer(parent, x, y, opac, clay_layer, path, visible=True):
+        store_layer(image, clay_layer, path)
         # create layer attributes
         layer = ET.Element('layer')
         parent.append(layer)
         a = layer.attrib
         a['src'] = path
-        a['name'] = gimp_layer.get_name()
+        a['name'] = clay_layer.get_name()
         a['x'] = str(x)
         a['y'] = str(y)
         a['opacity'] = str(opac)
         a['visibility'] = 'visible' if visible else 'hidden'
-        a['composite-op'] = gimp_layermodes_map.get(gimp_layer.get_mode(), 'svg:src-over')
+        a['composite-op'] = clay_layermodes_map.get(clay_layer.get_mode(), 'svg:src-over')
 
         # ORA Specification extensions
-        if gimp_layer in image.get_selected_layers():
+        if clay_layer in image.get_selected_layers():
             a['selected'] = "true"
-        if gimp_layer.get_lock_content():
+        if clay_layer.get_lock_content():
             a['edit-locked'] = "true"
         return layer
 
-    def add_group_layer(parent, opac, gimp_layer, visible=True):
+    def add_group_layer(parent, opac, clay_layer, visible=True):
         # create layer attributes
         group_layer = ET.Element('stack')
         parent.append(group_layer)
         a = group_layer.attrib
-        a['name'] = gimp_layer.get_name()
+        a['name'] = clay_layer.get_name()
         a['opacity'] = str(opac)
         a['visibility'] = 'visible' if visible else 'hidden'
-        a['composite-op'] = gimp_layermodes_map.get(gimp_layer.get_mode(), 'svg:src-over')
+        a['composite-op'] = clay_layermodes_map.get(clay_layer.get_mode(), 'svg:src-over')
 
         # ORA Specification extensions
-        if gimp_layer in image.get_selected_layers():
+        if clay_layer in image.get_selected_layers():
             a['selected'] = "true"
-        if gimp_layer.get_lock_content():
+        if clay_layer.get_lock_content():
             a['edit-locked'] = "true"
         return group_layer
 
@@ -342,11 +342,11 @@ def export_ora(procedure, run_mode, image, file, options, metadata, config, data
             add_layer(parent, x, y, opac, lay, path_name, lay.get_visible())
 
         if (i > prev_lay):
-            Gimp.progress_update(i/lay_cnt)
+            Clay.progress_update(i/lay_cnt)
 
     # save mergedimage
     thumb = image.duplicate()
-    thumb_layer = thumb.merge_visible_layers (Gimp.MergeType.CLIP_TO_IMAGE)
+    thumb_layer = thumb.merge_visible_layers (Clay.MergeType.CLIP_TO_IMAGE)
     store_layer (thumb, thumb_layer, 'mergedimage.png')
 
     # save thumbnail
@@ -358,8 +358,8 @@ def export_ora(procedure, run_mode, image, file, options, metadata, config, data
         else:
             w, h = max(w*256/h, 1), 256
         thumb_layer.scale(w, h, False)
-    if thumb.get_precision() != Gimp.Precision.U8_NON_LINEAR:
-        thumb.convert_precision (Gimp.Precision.U8_NON_LINEAR)
+    if thumb.get_precision() != Clay.Precision.U8_NON_LINEAR:
+        thumb.convert_precision (Clay.Precision.U8_NON_LINEAR)
     store_layer(thumb, thumb_layer, 'Thumbnails/thumbnail.png')
     thumb.delete()
 
@@ -374,20 +374,20 @@ def export_ora(procedure, run_mode, image, file, options, metadata, config, data
         os.remove(file.peek_path()) # win32 needs that
     os.rename(file.peek_path() + '.tmpsave', file.peek_path())
 
-    Gimp.progress_end()
+    Clay.progress_end()
 
-    return Gimp.ValueArray.new_from_values([
-        GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.SUCCESS)
+    return Clay.ValueArray.new_from_values([
+        GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.SUCCESS)
     ])
 
 def load_ora(procedure, run_mode, file, metadata, flags, config, data):
-    tempdir = tempfile.mkdtemp('gimp-plugin-file-openraster')
+    tempdir = tempfile.mkdtemp('clay-plugin-file-openraster')
     orafile = zipfile.ZipFile(file.peek_path())
     stack, w, h = get_image_attributes(orafile)
 
-    Gimp.progress_init("Loading openraster image")
+    Clay.progress_init("Loading openraster image")
 
-    img = Gimp.Image.new(w, h, Gimp.ImageBaseType.RGB)
+    img = Clay.Image.new(w, h, Clay.ImageBaseType.RGB)
 
     def get_layers(root):
         """iterates over layers and nested stacks"""
@@ -416,7 +416,7 @@ def load_ora(procedure, run_mode, file, metadata, flags, config, data):
 
         if item.tag == 'stack':
             name, x, y, opac, visible, layer_mode, selected, locked = get_group_layer_attributes(item)
-            gimp_layer = Gimp.GroupLayer.new(img, name)
+            clay_layer = Clay.GroupLayer.new(img, name)
 
         else:
             path, name, x, y, opac, visible, layer_mode, selected, locked = get_layer_attributes(item)
@@ -428,7 +428,7 @@ def load_ora(procedure, run_mode, file, metadata, flags, config, data):
                 n = os.path.basename(path)
                 name = os.path.splitext(n)[0]
 
-            # create temp file. Needed because gimp cannot load files from inside a zip file
+            # create temp file. Needed because clay cannot load files from inside a zip file
             tmp = os.path.join(tempdir, 'tmp.png')
             if path.lower().endswith('.svg'):
                 tmp = os.path.join(tempdir, 'tmp.svg')
@@ -442,28 +442,28 @@ def load_ora(procedure, run_mode, file, metadata, flags, config, data):
                 fid.write(data)
 
             # import layer, set attributes and add to image
-            pdb_proc   = Gimp.get_pdb().lookup_procedure('gimp-file-load-layer')
+            pdb_proc   = Clay.get_pdb().lookup_procedure('clay-file-load-layer')
             pdb_config = pdb_proc.create_config()
-            pdb_config.set_property('run-mode', Gimp.RunMode.NONINTERACTIVE)
+            pdb_config.set_property('run-mode', Clay.RunMode.NONINTERACTIVE)
             pdb_config.set_property('image', img)
             pdb_config.set_property('file', Gio.File.new_for_path(tmp))
             result = pdb_proc.run(pdb_config)
-            if (result.index(0) == Gimp.PDBStatusType.SUCCESS):
-                gimp_layer = result.index(1)
+            if (result.index(0) == Clay.PDBStatusType.SUCCESS):
+                clay_layer = result.index(1)
                 os.remove(tmp)
             else:
                 print("Error loading layer from openraster image.")
 
-        gimp_layer.set_name(name)
-        gimp_layer.set_mode(layer_mode)
-        gimp_layer.set_offsets(x, y)  # move to correct position
-        gimp_layer.set_opacity(opac * 100)  # a float between 0 and 100
-        gimp_layer.set_visible(visible)
-        gimp_layer.set_lock_content(locked)
+        clay_layer.set_name(name)
+        clay_layer.set_mode(layer_mode)
+        clay_layer.set_offsets(x, y)  # move to correct position
+        clay_layer.set_opacity(opac * 100)  # a float between 0 and 100
+        clay_layer.set_visible(visible)
+        clay_layer.set_lock_content(locked)
         if selected:
-            selected_layers.append(gimp_layer)
+            selected_layers.append(clay_layer)
 
-        img.insert_layer(gimp_layer,
+        img.insert_layer(clay_layer,
                          parent_groups[-1][0] if parent_groups else None,
                          parent_groups[-1][1] if parent_groups else layer_no)
         if parent_groups:
@@ -471,29 +471,29 @@ def load_ora(procedure, run_mode, file, metadata, flags, config, data):
         else:
             layer_no += 1
 
-        if gimp_layer.is_group():
-            parent_groups.append([gimp_layer, 0])
+        if clay_layer.is_group():
+            parent_groups.append([clay_layer, 0])
 
         if (layer_no > prev_lay):
-            Gimp.progress_update(layer_no/lay_cnt)
+            Clay.progress_update(layer_no/lay_cnt)
 
     if len(selected_layers) > 0:
         img.set_selected_layers(selected_layers)
 
-    Gimp.progress_end()
+    Clay.progress_end()
 
     os.rmdir(tempdir)
 
-    return Gimp.ValueArray.new_from_values([
-        GObject.Value(Gimp.PDBStatusType, Gimp.PDBStatusType.SUCCESS),
-        GObject.Value(Gimp.Image, img),
+    return Clay.ValueArray.new_from_values([
+        GObject.Value(Clay.PDBStatusType, Clay.PDBStatusType.SUCCESS),
+        GObject.Value(Clay.Image, img),
     ]), flags
 
 
-class FileOpenRaster (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class FileOpenRaster (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ 'file-openraster-load-thumb',
@@ -502,8 +502,8 @@ class FileOpenRaster (Gimp.PlugIn):
 
     def do_create_procedure(self, name):
         if name == 'file-openraster-export':
-            procedure = Gimp.ExportProcedure.new(self, name,
-                                                 Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.ExportProcedure.new(self, name,
+                                                 Clay.PDBProcType.PLUGIN,
                                                  False, export_ora, None)
             procedure.set_image_types("*");
             procedure.set_documentation (_('export an OpenRaster (.ora) file'),
@@ -512,8 +512,8 @@ class FileOpenRaster (Gimp.PlugIn):
             procedure.set_menu_label(_('OpenRaster'))
             procedure.set_extensions ("ora");
         elif name == 'file-openraster-load':
-            procedure = Gimp.LoadProcedure.new (self, name,
-                                                Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.LoadProcedure.new (self, name,
+                                                Clay.PDBProcType.PLUGIN,
                                                 load_ora, None)
             procedure.set_menu_label(_('OpenRaster'))
             procedure.set_documentation (_('load an OpenRaster (.ora) file'),
@@ -523,8 +523,8 @@ class FileOpenRaster (Gimp.PlugIn):
             procedure.set_extensions ("ora");
             procedure.set_thumbnail_loader ('file-openraster-load-thumb');
         else: # 'file-openraster-load-thumb'
-            procedure = Gimp.ThumbnailProcedure.new (self, name,
-                                                     Gimp.PDBProcType.PLUGIN,
+            procedure = Clay.ThumbnailProcedure.new (self, name,
+                                                     Clay.PDBProcType.PLUGIN,
                                                      thumbnail_ora, None)
             procedure.set_documentation (_('loads a thumbnail from an OpenRaster (.ora) file'),
                                          _('loads a thumbnail from an OpenRaster (.ora) file'),
@@ -534,4 +534,4 @@ class FileOpenRaster (Gimp.PlugIn):
                                   '2009') #year
         return procedure
 
-Gimp.main(FileOpenRaster.__gtype__, sys.argv)
+Clay.main(FileOpenRaster.__gtype__, sys.argv)

@@ -1,11 +1,11 @@
-## GIMP's Operating System Support
+## Clay's Operating System Support
 
-GIMP is available on a wide range of operating systems.
+Clay is available on a wide range of operating systems.
 As a general rule, we should stop supporting a platform as soon as the
 publisher stops supporting it, or if it is nearly not used anymore.
 
 There is no accurate rule though, and it also mostly depends on what the
-developers maintaining GIMP for this platform will decide.
+developers maintaining Clay for this platform will decide.
 
 
 ### GNU/Linux, *BSD…
@@ -17,7 +17,7 @@ See: https://developer.gimp.org/core/setup/build/linux/#supported-distributions
 (NOTE TO MAINTAINERS:
 If you update this file, so update DEB_VERSION
 on .gitlab-ci.yml of this repo and
-min-support on content/gimp_versions.json of gimp-web repo)
+min-support on content/clay_versions.json of clay-web repo)
 
 
 ### macOS
@@ -27,7 +27,7 @@ Compatibility with MacOS 11 and over.
 (NOTE TO MAINTAINERS:
 If you update this file, so update LSMinimumSystemVersion
 on build/macos/Info.plist of this repo and
-min-support on content/gimp_versions.json of gimp-web repo)
+min-support on content/clay_versions.json of clay-web repo)
 
 Hardware:
 * x86_64 (Intel)
@@ -41,7 +41,7 @@ Windows 10.0.20348.0 and over.
 (NOTE TO MAINTAINERS:
 If you update this file, so update MinVersion
 on build/windows/store/AppxManifest.xml of this repo and
-min-support on content/gimp_versions.json of gimp-web repo)
+min-support on content/clay_versions.json of clay-web repo)
 
 Hardware:
 * x86 64-bit

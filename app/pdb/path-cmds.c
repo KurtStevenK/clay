@@ -27,89 +27,89 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpimage-undo-push.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimplist.h"
-#include "core/gimpparamspecs.h"
-#include "path/gimpanchor.h"
-#include "path/gimpbezierstroke.h"
-#include "path/gimppath.h"
-#include "path/gimpstroke-new.h"
-#include "text/gimptext-path.h"
-#include "text/gimptextlayer.h"
+#include "core/clayimage-undo-push.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/claylist.h"
+#include "core/clayparamspecs.h"
+#include "path/clayanchor.h"
+#include "path/claybezierstroke.h"
+#include "path/claypath.h"
+#include "path/claystroke-new.h"
+#include "text/claytext-path.h"
+#include "text/claytextlayer.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-path_new_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+path_new_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   const gchar *name;
-  GimpPath *path = NULL;
+  ClayPath *path = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  name = g_value_get_string (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      path = gimp_path_new (image, name);
+      path = clay_path_new (image, name);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), path);
+    g_value_set_object (clay_value_array_index (return_vals, 1), path);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_new_from_text_layer_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+path_new_from_text_layer_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
-  GimpLayer *layer;
-  GimpPath *path = NULL;
+  ClayValueArray *return_vals;
+  ClayImage *image;
+  ClayLayer *layer;
+  ClayPath *path = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  layer = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_pdb_layer_is_text_layer (layer, 0, error))
+      if (clay_pdb_layer_is_text_layer (layer, 0, error))
         {
           gint x, y;
 
-          path = gimp_text_path_new (image,
-                                           gimp_text_layer_get_text (GIMP_TEXT_LAYER (layer)));
+          path = clay_text_path_new (image,
+                                           clay_text_layer_get_text (CLAY_TEXT_LAYER (layer)));
 
-          gimp_item_get_offset (GIMP_ITEM (layer), &x, &y);
-          gimp_item_translate (GIMP_ITEM (path), x, y, FALSE);
+          clay_item_get_offset (CLAY_ITEM (layer), &x, &y);
+          clay_item_translate (CLAY_ITEM (path), x, y, FALSE);
         }
       else
         {
@@ -117,143 +117,143 @@ path_new_from_text_layer_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), path);
+    g_value_set_object (clay_value_array_index (return_vals, 1), path);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_copy_invoker (GimpProcedure         *procedure,
-                   Gimp                  *gimp,
-                   GimpContext           *context,
-                   GimpProgress          *progress,
-                   const GimpValueArray  *args,
+static ClayValueArray *
+path_copy_invoker (ClayProcedure         *procedure,
+                   Clay                  *clay,
+                   ClayContext           *context,
+                   ClayProgress          *progress,
+                   const ClayValueArray  *args,
                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
-  GimpPath *path_copy = NULL;
+  ClayValueArray *return_vals;
+  ClayPath *path;
+  ClayPath *path_copy = NULL;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
+  path = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      path_copy = GIMP_PATH (gimp_item_duplicate (GIMP_ITEM (path),
+      path_copy = CLAY_PATH (clay_item_duplicate (CLAY_ITEM (path),
                              G_TYPE_FROM_INSTANCE (path)));
 
       if (! path_copy)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), path_copy);
+    g_value_set_object (clay_value_array_index (return_vals, 1), path_copy);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_get_strokes_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+path_get_strokes_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gsize num_strokes = 0;
   gint32 *stroke_ids = NULL;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
+  path = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      num_strokes = gimp_path_get_n_strokes (path);
+      num_strokes = clay_path_get_n_strokes (path);
 
       if (num_strokes)
         {
-          GimpStroke *cur_stroke;
+          ClayStroke *cur_stroke;
           gint        i = 0;
 
           stroke_ids = g_new (gint32, num_strokes);
 
-          for (cur_stroke = gimp_path_stroke_get_next (path, NULL);
+          for (cur_stroke = clay_path_stroke_get_next (path, NULL);
                cur_stroke;
-               cur_stroke = gimp_path_stroke_get_next (path, cur_stroke))
+               cur_stroke = clay_path_stroke_get_next (path, cur_stroke))
             {
-              stroke_ids[i] = gimp_stroke_get_id (cur_stroke);
+              stroke_ids[i] = clay_stroke_get_id (cur_stroke);
               i++;
             }
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    gimp_value_take_int32_array (gimp_value_array_index (return_vals, 1), stroke_ids, num_strokes);
+    clay_value_take_int32_array (clay_value_array_index (return_vals, 1), stroke_ids, num_strokes);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_stroke_get_length_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_get_length_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gint stroke_id;
   gdouble precision;
   gdouble length = 0.0;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  precision = g_value_get_double (gimp_value_array_index (args, 2));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  precision = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
       if (stroke)
-        length = gimp_stroke_get_length (stroke, precision);
+        length = clay_stroke_get_length (stroke, precision);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), length);
+    g_value_set_double (clay_value_array_index (return_vals, 1), length);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_stroke_get_point_at_dist_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_get_point_at_dist_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gint stroke_id;
   gdouble dist;
   gdouble precision;
@@ -262,20 +262,20 @@ path_stroke_get_point_at_dist_invoker (GimpProcedure         *procedure,
   gdouble slope = 0.0;
   gboolean valid = FALSE;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  dist = g_value_get_double (gimp_value_array_index (args, 2));
-  precision = g_value_get_double (gimp_value_array_index (args, 3));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  dist = g_value_get_double (clay_value_array_index (args, 2));
+  precision = g_value_get_double (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
       if (stroke)
         {
-          GimpCoords coord;
+          ClayCoords coord;
 
-          valid = gimp_stroke_get_point_at_dist (stroke, dist, precision,
+          valid = clay_stroke_get_point_at_dist (stroke, dist, precision,
                                                  &coord, &slope);
           x_point = valid ? coord.x : 0;
           y_point = valid ? coord.y : 0;
@@ -284,409 +284,409 @@ path_stroke_get_point_at_dist_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_double (gimp_value_array_index (return_vals, 1), x_point);
-      g_value_set_double (gimp_value_array_index (return_vals, 2), y_point);
-      g_value_set_double (gimp_value_array_index (return_vals, 3), slope);
-      g_value_set_boolean (gimp_value_array_index (return_vals, 4), valid);
+      g_value_set_double (clay_value_array_index (return_vals, 1), x_point);
+      g_value_set_double (clay_value_array_index (return_vals, 2), y_point);
+      g_value_set_double (clay_value_array_index (return_vals, 3), slope);
+      g_value_set_boolean (clay_value_array_index (return_vals, 4), valid);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_remove_stroke_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+path_remove_stroke_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT, error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Remove path stroke"),
                                            path);
 
-          gimp_path_stroke_remove (path, stroke);
+          clay_path_stroke_remove (path, stroke);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_close_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_close_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT, error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Close path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_close (stroke);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_close (stroke);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_reverse_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_reverse_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT, error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Reverse path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_reverse (stroke);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_reverse (stroke);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_translate_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_translate_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble off_x;
   gdouble off_y;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  off_x = g_value_get_double (gimp_value_array_index (args, 2));
-  off_y = g_value_get_double (gimp_value_array_index (args, 3));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  off_x = g_value_get_double (clay_value_array_index (args, 2));
+  off_y = g_value_get_double (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT |
-                                                     GIMP_PDB_ITEM_POSITION,
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT |
+                                                     CLAY_PDB_ITEM_POSITION,
                                                      error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Translate path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_translate (stroke, off_x, off_y);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_translate (stroke, off_x, off_y);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_scale_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_scale_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble scale_x;
   gdouble scale_y;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  scale_x = g_value_get_double (gimp_value_array_index (args, 2));
-  scale_y = g_value_get_double (gimp_value_array_index (args, 3));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  scale_x = g_value_get_double (clay_value_array_index (args, 2));
+  scale_y = g_value_get_double (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT |
-                                                     GIMP_PDB_ITEM_POSITION,
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT |
+                                                     CLAY_PDB_ITEM_POSITION,
                                                      error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Scale path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_scale (stroke, scale_x, scale_y);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_scale (stroke, scale_x, scale_y);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_rotate_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_rotate_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble center_x;
   gdouble center_y;
   gdouble angle;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  center_x = g_value_get_double (gimp_value_array_index (args, 2));
-  center_y = g_value_get_double (gimp_value_array_index (args, 3));
-  angle = g_value_get_double (gimp_value_array_index (args, 4));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  center_x = g_value_get_double (clay_value_array_index (args, 2));
+  center_y = g_value_get_double (clay_value_array_index (args, 3));
+  angle = g_value_get_double (clay_value_array_index (args, 4));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT |
-                                                     GIMP_PDB_ITEM_POSITION,
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT |
+                                                     CLAY_PDB_ITEM_POSITION,
                                                      error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Rotate path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_rotate (stroke, center_x, center_y, angle);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_rotate (stroke, center_x, center_y, angle);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_flip_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_flip_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gint flip_type;
   gdouble axis;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  flip_type = g_value_get_enum (gimp_value_array_index (args, 2));
-  axis = g_value_get_double (gimp_value_array_index (args, 3));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  flip_type = g_value_get_enum (clay_value_array_index (args, 2));
+  axis = g_value_get_double (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT |
-                                                     GIMP_PDB_ITEM_POSITION,
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT |
+                                                     CLAY_PDB_ITEM_POSITION,
                                                      error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Flip path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_flip (stroke, flip_type, axis);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_flip (stroke, flip_type, axis);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_flip_free_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_flip_free_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble x1;
   gdouble y1;
   gdouble x2;
   gdouble y2;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  x1 = g_value_get_double (gimp_value_array_index (args, 2));
-  y1 = g_value_get_double (gimp_value_array_index (args, 3));
-  x2 = g_value_get_double (gimp_value_array_index (args, 4));
-  y2 = g_value_get_double (gimp_value_array_index (args, 5));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  x1 = g_value_get_double (clay_value_array_index (args, 2));
+  y1 = g_value_get_double (clay_value_array_index (args, 3));
+  x2 = g_value_get_double (clay_value_array_index (args, 4));
+  y2 = g_value_get_double (clay_value_array_index (args, 5));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT |
-                                                     GIMP_PDB_ITEM_POSITION,
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT |
+                                                     CLAY_PDB_ITEM_POSITION,
                                                      error);
 
       if (stroke)
         {
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Flip path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_stroke_flip_free (stroke, x1, y1, x2, y2);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_stroke_flip_free (stroke, x1, y1, x2, y2);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_stroke_get_points_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_get_points_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gint stroke_id;
   gint type = 0;
   gsize num_points = 0;
   gdouble *controlpoints = NULL;
   gboolean closed = FALSE;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
-      if (GIMP_IS_BEZIER_STROKE (stroke))
+      if (CLAY_IS_BEZIER_STROKE (stroke))
         {
           GArray *points_array;
           gint    i;
 
-          points_array = gimp_stroke_control_points_get (stroke, &closed);
+          points_array = clay_stroke_control_points_get (stroke, &closed);
 
           if (points_array)
             {
               num_points = points_array->len;
               controlpoints = g_new (gdouble, num_points * 2);
 
-              type = GIMP_PATH_STROKE_TYPE_BEZIER;
+              type = CLAY_PATH_STROKE_TYPE_BEZIER;
               for (i = 0; i < num_points; i++)
                 {
                   controlpoints[2*i]   = g_array_index (points_array,
-                                                        GimpAnchor, i).position.x;
+                                                        ClayAnchor, i).position.x;
                   controlpoints[2*i+1] = g_array_index (points_array,
-                                                        GimpAnchor, i).position.y;
+                                                        ClayAnchor, i).position.y;
                 }
               g_array_free (points_array, TRUE);
               num_points *= 2;
@@ -698,54 +698,54 @@ path_stroke_get_points_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_enum (gimp_value_array_index (return_vals, 1), type);
-      gimp_value_take_double_array (gimp_value_array_index (return_vals, 2), controlpoints, num_points);
-      g_value_set_boolean (gimp_value_array_index (return_vals, 3), closed);
+      g_value_set_enum (clay_value_array_index (return_vals, 1), type);
+      clay_value_take_double_array (clay_value_array_index (return_vals, 2), controlpoints, num_points);
+      g_value_set_boolean (clay_value_array_index (return_vals, 3), closed);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_stroke_new_from_points_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_new_from_points_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gint type;
   gsize num_points;
   const gdouble *controlpoints;
   gboolean closed;
   gint stroke_id = 0;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  type = g_value_get_enum (gimp_value_array_index (args, 1));
-  controlpoints = gimp_value_get_double_array (gimp_value_array_index (args, 2), &num_points);
-  closed = g_value_get_boolean (gimp_value_array_index (args, 3));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  type = g_value_get_enum (clay_value_array_index (args, 1));
+  controlpoints = clay_value_get_double_array (clay_value_array_index (args, 2), &num_points);
+  closed = g_value_get_boolean (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpStroke *stroke;
-      GimpCoords *coords;
-      GimpCoords  default_coords = GIMP_COORDS_DEFAULT_VALUES;
+      ClayStroke *stroke;
+      ClayCoords *coords;
+      ClayCoords  default_coords = CLAY_COORDS_DEFAULT_VALUES;
       gint i;
 
       success = FALSE;
 
-      if (type == GIMP_PATH_STROKE_TYPE_BEZIER &&
+      if (type == CLAY_PATH_STROKE_TYPE_BEZIER &&
           num_points % 6 == 0)
         {
-          coords = g_new (GimpCoords, num_points/2);
+          coords = g_new (ClayCoords, num_points/2);
           for (i = 0; i < num_points/2; i++)
             {
               coords[i] = default_coords;
@@ -753,18 +753,18 @@ path_stroke_new_from_points_invoker (GimpProcedure         *procedure,
               coords[i].y = controlpoints[i*2+1];
             }
 
-          stroke = gimp_stroke_new_from_coords (type, coords, num_points/2, closed);
+          stroke = clay_stroke_new_from_coords (type, coords, num_points/2, closed);
           if (stroke)
             {
-              if (gimp_item_is_attached (GIMP_ITEM (path)))
-                gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+              if (clay_item_is_attached (CLAY_ITEM (path)))
+                clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                                _("Add path stroke"),
                                                path);
 
-              gimp_path_stroke_add (path, stroke);
+              clay_path_stroke_add (path, stroke);
               g_object_unref (stroke);
 
-              stroke_id = gimp_stroke_get_id (stroke);
+              stroke_id = clay_stroke_get_id (stroke);
 
               success = TRUE;
             }
@@ -773,46 +773,46 @@ path_stroke_new_from_points_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), stroke_id);
+    g_value_set_int (clay_value_array_index (return_vals, 1), stroke_id);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_stroke_interpolate_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+path_stroke_interpolate_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gint stroke_id;
   gdouble precision;
   gsize num_coords = 0;
   gdouble *coords = NULL;
   gboolean closed = FALSE;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  precision = g_value_get_double (gimp_value_array_index (args, 2));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  precision = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id, 0, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id, 0, error);
 
       if (stroke)
         {
           GArray *coords_array;
           gint    i;
 
-          coords_array = gimp_stroke_interpolate (stroke, precision, &closed);
+          coords_array = clay_stroke_interpolate (stroke, precision, &closed);
 
           if (coords_array)
             {
@@ -821,8 +821,8 @@ path_stroke_interpolate_invoker (GimpProcedure         *procedure,
 
               for (i = 0; i < num_coords; i++)
                 {
-                  coords[2*i]   = g_array_index (coords_array, GimpCoords, i).x;
-                  coords[2*i+1] = g_array_index (coords_array, GimpCoords, i).y;
+                  coords[2*i]   = g_array_index (coords_array, ClayCoords, i).x;
+                  coords[2*i+1] = g_array_index (coords_array, ClayCoords, i).y;
                 }
               g_array_free (coords_array, TRUE);
               num_coords *= 2;
@@ -834,154 +834,154 @@ path_stroke_interpolate_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      gimp_value_take_double_array (gimp_value_array_index (return_vals, 1), coords, num_coords);
-      g_value_set_boolean (gimp_value_array_index (return_vals, 2), closed);
+      clay_value_take_double_array (clay_value_array_index (return_vals, 1), coords, num_coords);
+      g_value_set_boolean (clay_value_array_index (return_vals, 2), closed);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_bezier_stroke_new_moveto_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+path_bezier_stroke_new_moveto_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gdouble x0;
   gdouble y0;
   gint stroke_id = 0;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  x0 = g_value_get_double (gimp_value_array_index (args, 1));
-  y0 = g_value_get_double (gimp_value_array_index (args, 2));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  x0 = g_value_get_double (clay_value_array_index (args, 1));
+  y0 = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_pdb_item_is_modifiable (GIMP_ITEM (path),
-                                       GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (path), error))
+      if (clay_pdb_item_is_modifiable (CLAY_ITEM (path),
+                                       CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (path), error))
         {
-          GimpStroke *stroke;
-          GimpCoords  coord0 = GIMP_COORDS_DEFAULT_VALUES;
+          ClayStroke *stroke;
+          ClayCoords  coord0 = CLAY_COORDS_DEFAULT_VALUES;
 
           coord0.x = x0;
           coord0.y = y0;
 
-          stroke = gimp_bezier_stroke_new_moveto (&coord0);
+          stroke = clay_bezier_stroke_new_moveto (&coord0);
 
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Add path stroke"),
                                            path);
 
-          gimp_path_stroke_add (path, stroke);
+          clay_path_stroke_add (path, stroke);
           g_object_unref (stroke);
 
-          stroke_id = gimp_stroke_get_id (stroke);
+          stroke_id = clay_stroke_get_id (stroke);
         }
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), stroke_id);
+    g_value_set_int (clay_value_array_index (return_vals, 1), stroke_id);
 
   return return_vals;
 }
 
-static GimpValueArray *
-path_bezier_stroke_lineto_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+path_bezier_stroke_lineto_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble x0;
   gdouble y0;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  x0 = g_value_get_double (gimp_value_array_index (args, 2));
-  y0 = g_value_get_double (gimp_value_array_index (args, 3));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  x0 = g_value_get_double (clay_value_array_index (args, 2));
+  y0 = g_value_get_double (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT, error);
 
       if (stroke)
         {
-          GimpCoords coord0 = GIMP_COORDS_DEFAULT_VALUES;
+          ClayCoords coord0 = CLAY_COORDS_DEFAULT_VALUES;
 
           coord0.x = x0;
           coord0.y = y0;
 
-         if (gimp_item_is_attached (GIMP_ITEM (path)))
-           gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+         if (clay_item_is_attached (CLAY_ITEM (path)))
+           clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                           _("Extend path stroke"),
                                           path);
 
-          gimp_path_freeze (path);
-          gimp_bezier_stroke_lineto (stroke, &coord0);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_bezier_stroke_lineto (stroke, &coord0);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_bezier_stroke_conicto_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+path_bezier_stroke_conicto_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble x0;
   gdouble y0;
   gdouble x1;
   gdouble y1;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  x0 = g_value_get_double (gimp_value_array_index (args, 2));
-  y0 = g_value_get_double (gimp_value_array_index (args, 3));
-  x1 = g_value_get_double (gimp_value_array_index (args, 4));
-  y1 = g_value_get_double (gimp_value_array_index (args, 5));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  x0 = g_value_get_double (clay_value_array_index (args, 2));
+  y0 = g_value_get_double (clay_value_array_index (args, 3));
+  x1 = g_value_get_double (clay_value_array_index (args, 4));
+  y1 = g_value_get_double (clay_value_array_index (args, 5));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT, error);
 
       if (stroke)
         {
-          GimpCoords coord0 = GIMP_COORDS_DEFAULT_VALUES;
-          GimpCoords coord1 = GIMP_COORDS_DEFAULT_VALUES;
+          ClayCoords coord0 = CLAY_COORDS_DEFAULT_VALUES;
+          ClayCoords coord1 = CLAY_COORDS_DEFAULT_VALUES;
 
           coord0.x = x0;
           coord0.y = y0;
@@ -989,33 +989,33 @@ path_bezier_stroke_conicto_invoker (GimpProcedure         *procedure,
           coord1.x = x1;
           coord1.y = y1;
 
-         if (gimp_item_is_attached (GIMP_ITEM (path)))
-           gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+         if (clay_item_is_attached (CLAY_ITEM (path)))
+           clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                           _("Extend path stroke"),
                                           path);
 
-          gimp_path_freeze (path);
-          gimp_bezier_stroke_conicto (stroke, &coord0, &coord1);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_bezier_stroke_conicto (stroke, &coord0, &coord1);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_bezier_stroke_cubicto_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+path_bezier_stroke_cubicto_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpPath *path;
+  ClayPath *path;
   gint stroke_id;
   gdouble x0;
   gdouble y0;
@@ -1024,25 +1024,25 @@ path_bezier_stroke_cubicto_invoker (GimpProcedure         *procedure,
   gdouble x2;
   gdouble y2;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  stroke_id = g_value_get_int (gimp_value_array_index (args, 1));
-  x0 = g_value_get_double (gimp_value_array_index (args, 2));
-  y0 = g_value_get_double (gimp_value_array_index (args, 3));
-  x1 = g_value_get_double (gimp_value_array_index (args, 4));
-  y1 = g_value_get_double (gimp_value_array_index (args, 5));
-  x2 = g_value_get_double (gimp_value_array_index (args, 6));
-  y2 = g_value_get_double (gimp_value_array_index (args, 7));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  stroke_id = g_value_get_int (clay_value_array_index (args, 1));
+  x0 = g_value_get_double (clay_value_array_index (args, 2));
+  y0 = g_value_get_double (clay_value_array_index (args, 3));
+  x1 = g_value_get_double (clay_value_array_index (args, 4));
+  y1 = g_value_get_double (clay_value_array_index (args, 5));
+  x2 = g_value_get_double (clay_value_array_index (args, 6));
+  y2 = g_value_get_double (clay_value_array_index (args, 7));
 
   if (success)
     {
-      GimpStroke *stroke = gimp_pdb_get_path_stroke (path, stroke_id,
-                                                     GIMP_PDB_ITEM_CONTENT, error);
+      ClayStroke *stroke = clay_pdb_get_path_stroke (path, stroke_id,
+                                                     CLAY_PDB_ITEM_CONTENT, error);
 
       if (stroke)
         {
-          GimpCoords coord0 = GIMP_COORDS_DEFAULT_VALUES;
-          GimpCoords coord1 = GIMP_COORDS_DEFAULT_VALUES;
-          GimpCoords coord2 = GIMP_COORDS_DEFAULT_VALUES;
+          ClayCoords coord0 = CLAY_COORDS_DEFAULT_VALUES;
+          ClayCoords coord1 = CLAY_COORDS_DEFAULT_VALUES;
+          ClayCoords coord2 = CLAY_COORDS_DEFAULT_VALUES;
 
           coord0.x = x0;
           coord0.y = y0;
@@ -1053,34 +1053,34 @@ path_bezier_stroke_cubicto_invoker (GimpProcedure         *procedure,
           coord2.x = x2;
           coord2.y = y2;
 
-         if (gimp_item_is_attached (GIMP_ITEM (path)))
-           gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+         if (clay_item_is_attached (CLAY_ITEM (path)))
+           clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Extend path stroke"),
                                            path);
 
-          gimp_path_freeze (path);
-          gimp_bezier_stroke_cubicto (stroke, &coord0, &coord1, &coord2);
-          gimp_path_thaw (path);
+          clay_path_freeze (path);
+          clay_bezier_stroke_cubicto (stroke, &coord0, &coord1, &coord2);
+          clay_path_thaw (path);
         }
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-path_bezier_stroke_new_ellipse_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+path_bezier_stroke_new_ellipse_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPath *path;
+  ClayValueArray *return_vals;
+  ClayPath *path;
   gdouble x0;
   gdouble y0;
   gdouble radius_x;
@@ -1088,1004 +1088,1004 @@ path_bezier_stroke_new_ellipse_invoker (GimpProcedure         *procedure,
   gdouble angle;
   gint stroke_id = 0;
 
-  path = g_value_get_object (gimp_value_array_index (args, 0));
-  x0 = g_value_get_double (gimp_value_array_index (args, 1));
-  y0 = g_value_get_double (gimp_value_array_index (args, 2));
-  radius_x = g_value_get_double (gimp_value_array_index (args, 3));
-  radius_y = g_value_get_double (gimp_value_array_index (args, 4));
-  angle = g_value_get_double (gimp_value_array_index (args, 5));
+  path = g_value_get_object (clay_value_array_index (args, 0));
+  x0 = g_value_get_double (clay_value_array_index (args, 1));
+  y0 = g_value_get_double (clay_value_array_index (args, 2));
+  radius_x = g_value_get_double (clay_value_array_index (args, 3));
+  radius_y = g_value_get_double (clay_value_array_index (args, 4));
+  angle = g_value_get_double (clay_value_array_index (args, 5));
 
   if (success)
     {
-      if (gimp_pdb_item_is_modifiable (GIMP_ITEM (path),
-                                       GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (path), error))
+      if (clay_pdb_item_is_modifiable (CLAY_ITEM (path),
+                                       CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (path), error))
         {
-          GimpStroke *stroke;
-          GimpCoords  coord0 = GIMP_COORDS_DEFAULT_VALUES;
+          ClayStroke *stroke;
+          ClayCoords  coord0 = CLAY_COORDS_DEFAULT_VALUES;
 
           coord0.x = x0;
           coord0.y = y0;
 
-          stroke = gimp_bezier_stroke_new_ellipse (&coord0, radius_x, radius_y, angle);
+          stroke = clay_bezier_stroke_new_ellipse (&coord0, radius_x, radius_y, angle);
 
-          if (gimp_item_is_attached (GIMP_ITEM (path)))
-            gimp_image_undo_push_path_mod (gimp_item_get_image (GIMP_ITEM (path)),
+          if (clay_item_is_attached (CLAY_ITEM (path)))
+            clay_image_undo_push_path_mod (clay_item_get_image (CLAY_ITEM (path)),
                                            _("Add path stroke"),
                                            path);
 
-          gimp_path_stroke_add (path, stroke);
+          clay_path_stroke_add (path, stroke);
           g_object_unref (stroke);
 
-          stroke_id = gimp_stroke_get_id (stroke);
+          stroke_id = clay_stroke_get_id (stroke);
         }
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), stroke_id);
+    g_value_set_int (clay_value_array_index (return_vals, 1), stroke_id);
 
   return return_vals;
 }
 
 void
-register_path_procs (GimpPDB *pdb)
+register_path_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-path-new
+   * clay-path-new
    */
-  procedure = gimp_procedure_new (path_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new empty path object.",
                                   "This procedure creates a new empty path object. If @name is %NULL, a default path name will be used.\n"
                                   "\n"
                                   "The new path still needs to be added to the image as this is not automatic. Add the new path with the [method@Image.insert_path] method.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "the name of the new path object.",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_path ("path",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_path ("path",
                                                          "path",
                                                          "the current path object, 0 if no path exists in the image.",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-new-from-text-layer
+   * clay-path-new-from-text-layer
    */
-  procedure = gimp_procedure_new (path_new_from_text_layer_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-new-from-text-layer");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_new_from_text_layer_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-new-from-text-layer");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new path object from a text layer.",
                                   "This procedure creates a new path object from a text layer.\n"
                                   "\n"
                                   "The new path still needs to be added to the image as this is not automatic. Add the new path with the [method@Image.insert_path] method.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Marcus Heese <heese@cip.ifi.lmu.de>",
                                          "Marcus Heese",
                                          "2008");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image.",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_layer ("layer",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_layer ("layer",
                                                       "layer",
                                                       "The text layer.",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_path ("path",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_path ("path",
                                                          "path",
                                                          "The path of the text layer.",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-copy
+   * clay-path-copy
    */
-  procedure = gimp_procedure_new (path_copy_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-copy");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_copy_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-copy");
+  clay_procedure_set_static_help (procedure,
                                   "Copy a path object.",
                                   "This procedure copies the specified path object and returns the copy.\n"
                                   "\n"
                                   "The new path still needs to be added to the image as this is not automatic. Add the new path with the [method@Image.insert_path] method.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Barak Itkin <lightningismyname@gmail.com>",
                                          "Barak Itkin",
                                          "2008");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object to copy",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_path ("path-copy",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_path ("path-copy",
                                                          "path copy",
                                                          "The newly copied path object",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-get-strokes
+   * clay-path-get-strokes
    */
-  procedure = gimp_procedure_new (path_get_strokes_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-get-strokes");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_get_strokes_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-get-strokes");
+  clay_procedure_set_static_help (procedure,
                                   "List the strokes associated with the passed path.",
                                   "Returns an Array with the stroke-IDs associated with the passed path.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_int32_array ("stroke-ids",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_int32_array ("stroke-ids",
                                                                 "stroke ids",
                                                                 "List of the strokes belonging to the path.",
-                                                                GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-get-length
+   * clay-path-stroke-get-length
    */
-  procedure = gimp_procedure_new (path_stroke_get_length_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-get-length");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_get_length_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-get-length");
+  clay_procedure_set_static_help (procedure,
                                   "Measure the length of the given stroke.",
                                   "Measure the length of the given stroke.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("precision",
                                                     "precision",
                                                     "The precision used for approximating straight portions of the stroke",
                                                     0.0, G_MAXDOUBLE, 0.1,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("length",
                                                         "length",
                                                         "The length (in pixels) of the given stroke.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-get-point-at-dist
+   * clay-path-stroke-get-point-at-dist
    */
-  procedure = gimp_procedure_new (path_stroke_get_point_at_dist_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-get-point-at-dist");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_get_point_at_dist_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-get-point-at-dist");
+  clay_procedure_set_static_help (procedure,
                                   "Get point at a specified distance along the stroke.",
                                   "This will return the x,y position of a point at a given distance along the stroke. The distance will be obtained by first digitizing the curve internally and then walking along the curve. For a closed stroke the start of the path is the first point on the path that was created. This might not be obvious. If the stroke is not long enough, a \"valid\" flag will be FALSE.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("dist",
                                                     "dist",
                                                     "The given distance.",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("precision",
                                                     "precision",
                                                     "The precision used for the approximation",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("x-point",
                                                         "x point",
                                                         "The x position of the point.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("y-point",
                                                         "y point",
                                                         "The y position of the point.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("slope",
                                                         "slope",
                                                         "The slope (dy / dx) at the specified point.",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("valid",
                                                          "valid",
                                                          "Indicator for the validity of the returned data.",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-remove-stroke
+   * clay-path-remove-stroke
    */
-  procedure = gimp_procedure_new (path_remove_stroke_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-remove-stroke");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_remove_stroke_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-remove-stroke");
+  clay_procedure_set_static_help (procedure,
                                   "remove the stroke from a path object.",
                                   "Remove the stroke from a path object.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-close
+   * clay-path-stroke-close
    */
-  procedure = gimp_procedure_new (path_stroke_close_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-close");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_close_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-close");
+  clay_procedure_set_static_help (procedure,
                                   "closes the specified stroke.",
                                   "Closes the specified stroke.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-reverse
+   * clay-path-stroke-reverse
    */
-  procedure = gimp_procedure_new (path_stroke_reverse_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-reverse");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_reverse_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-reverse");
+  clay_procedure_set_static_help (procedure,
                                   "reverses the specified stroke.",
                                   "Reverses the specified stroke.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2020");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-translate
+   * clay-path-stroke-translate
    */
-  procedure = gimp_procedure_new (path_stroke_translate_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-translate");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_translate_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-translate");
+  clay_procedure_set_static_help (procedure,
                                   "translate the given stroke.",
                                   "Translate the given stroke.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("off-x",
                                                     "off x",
                                                     "Offset in x direction",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("off-y",
                                                     "off y",
                                                     "Offset in y direction",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-scale
+   * clay-path-stroke-scale
    */
-  procedure = gimp_procedure_new (path_stroke_scale_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-scale");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_scale_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-scale");
+  clay_procedure_set_static_help (procedure,
                                   "scales the given stroke.",
                                   "Scale the given stroke.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("scale-x",
                                                     "scale x",
                                                     "Scale factor in x direction",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("scale-y",
                                                     "scale y",
                                                     "Scale factor in y direction",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-rotate
+   * clay-path-stroke-rotate
    */
-  procedure = gimp_procedure_new (path_stroke_rotate_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-rotate");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_rotate_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-rotate");
+  clay_procedure_set_static_help (procedure,
                                   "rotates the given stroke.",
                                   "Rotates the given stroke around given center by angle (in degrees).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jo\xc3\xa3o S. O. Bueno",
                                          "Jo\xc3\xa3o S. O. Bueno",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("center-x",
                                                     "center x",
                                                     "X coordinate of the rotation center",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("center-y",
                                                     "center y",
                                                     "Y coordinate of the rotation center",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("angle",
                                                     "angle",
                                                     "angle to rotate about",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-flip
+   * clay-path-stroke-flip
    */
-  procedure = gimp_procedure_new (path_stroke_flip_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-flip");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_flip_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-flip");
+  clay_procedure_set_static_help (procedure,
                                   "flips the given stroke.",
                                   "Rotates the given stroke around given center by angle (in degrees).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jo\xc3\xa3o S. O. Bueno",
                                          "Jo\xc3\xa3o S. O. Bueno",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_enum ("flip-type",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_enum ("flip-type",
                                                      "flip type",
                                                      "Flip orientation, either vertical or horizontal",
-                                                     GIMP_TYPE_ORIENTATION_TYPE,
-                                                     GIMP_ORIENTATION_HORIZONTAL,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_param_spec_enum_exclude_value (GIMP_PARAM_SPEC_ENUM (procedure->args[2]),
-                                      GIMP_ORIENTATION_UNKNOWN);
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_TYPE_ORIENTATION_TYPE,
+                                                     CLAY_ORIENTATION_HORIZONTAL,
+                                                     CLAY_PARAM_READWRITE));
+  clay_param_spec_enum_exclude_value (CLAY_PARAM_SPEC_ENUM (procedure->args[2]),
+                                      CLAY_ORIENTATION_UNKNOWN);
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("axis",
                                                     "axis",
                                                     "axis coordinate about which to flip, in pixels",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-flip-free
+   * clay-path-stroke-flip-free
    */
-  procedure = gimp_procedure_new (path_stroke_flip_free_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-flip-free");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_flip_free_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-flip-free");
+  clay_procedure_set_static_help (procedure,
                                   "flips the given stroke about an arbitrary axis.",
                                   "Flips the given stroke about an arbitrary axis. Axis is defined by two coordinates in the image (in pixels), through which the flipping axis passes.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jo\xc3\xa3o S. O. Bueno",
                                          "Jo\xc3\xa3o S. O. Bueno",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x1",
                                                     "x1",
                                                     "X coordinate of the first point of the flipping axis",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y1",
                                                     "y1",
                                                     "Y coordinate of the first point of the flipping axis",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x2",
                                                     "x2",
                                                     "X coordinate of the second point of the flipping axis",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y2",
                                                     "y2",
                                                     "Y coordinate of the second point of the flipping axis",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-get-points
+   * clay-path-stroke-get-points
    */
-  procedure = gimp_procedure_new (path_stroke_get_points_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-get-points");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_get_points_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-get-points");
+  clay_procedure_set_static_help (procedure,
                                   "returns the control points of a stroke.",
-                                  "returns the control points of a stroke. The interpretation of the coordinates returned depends on the type of the stroke. For Gimp 2.4 this is always a bezier stroke, where the coordinates are the control points.",
+                                  "returns the control points of a stroke. The interpretation of the coordinates returned depends on the type of the stroke. For Clay 2.4 this is always a bezier stroke, where the coordinates are the control points.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("type",
                                                       "type",
-                                                      "type of the stroke (always GIMP_PATH_STROKE_TYPE_BEZIER for now).",
-                                                      GIMP_TYPE_PATH_STROKE_TYPE,
-                                                      GIMP_PATH_STROKE_TYPE_BEZIER,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_double_array ("controlpoints",
+                                                      "type of the stroke (always CLAY_PATH_STROKE_TYPE_BEZIER for now).",
+                                                      CLAY_TYPE_PATH_STROKE_TYPE,
+                                                      CLAY_PATH_STROKE_TYPE_BEZIER,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_double_array ("controlpoints",
                                                                  "controlpoints",
                                                                  "List of the control points for the stroke (x0, y0, x1, y1, ...).",
-                                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("closed",
                                                          "closed",
                                                          "Whether the stroke is closed or not.",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-new-from-points
+   * clay-path-stroke-new-from-points
    */
-  procedure = gimp_procedure_new (path_stroke_new_from_points_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-new-from-points");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_new_from_points_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-new-from-points");
+  clay_procedure_set_static_help (procedure,
                                   "Adds a stroke of a given type to the path object.",
-                                  "Adds a stroke of a given type to the path object. The coordinates of the control points can be specified. For now only strokes of the type GIMP_PATH_STROKE_TYPE_BEZIER are supported. The control points are specified as a pair of double values for the x- and y-coordinate. The Bezier stroke type needs a multiple of three control points. Each Bezier segment endpoint (anchor, A) has two additional control points (C) associated. They are specified in the order CACCACCAC...",
+                                  "Adds a stroke of a given type to the path object. The coordinates of the control points can be specified. For now only strokes of the type CLAY_PATH_STROKE_TYPE_BEZIER are supported. The control points are specified as a pair of double values for the x- and y-coordinate. The Bezier stroke type needs a multiple of three control points. Each Bezier segment endpoint (anchor, A) has two additional control points (C) associated. They are specified in the order CACCACCAC...",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("type",
                                                   "type",
-                                                  "type of the stroke (always GIMP_PATH_STROKE_TYPE_BEZIER for now).",
-                                                  GIMP_TYPE_PATH_STROKE_TYPE,
-                                                  GIMP_PATH_STROKE_TYPE_BEZIER,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("controlpoints",
+                                                  "type of the stroke (always CLAY_PATH_STROKE_TYPE_BEZIER for now).",
+                                                  CLAY_TYPE_PATH_STROKE_TYPE,
+                                                  CLAY_PATH_STROKE_TYPE_BEZIER,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("controlpoints",
                                                              "controlpoints",
                                                              "List of the x- and y-coordinates of the control points.",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("closed",
                                                      "closed",
                                                      "Whether the stroke is to be closed or not.",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("stroke-id",
                                                      "stroke id",
                                                      "The stroke ID of the newly created stroke.",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-stroke-interpolate
+   * clay-path-stroke-interpolate
    */
-  procedure = gimp_procedure_new (path_stroke_interpolate_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-stroke-interpolate");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_stroke_interpolate_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-stroke-interpolate");
+  clay_procedure_set_static_help (procedure,
                                   "returns polygonal approximation of the stroke.",
                                   "returns polygonal approximation of the stroke.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("precision",
                                                     "precision",
                                                     "The precision used for the approximation",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_double_array ("coords",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_double_array ("coords",
                                                                  "coords",
                                                                  "List of the coords along the path (x0, y0, x1, y1, ...).",
-                                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("closed",
                                                          "closed",
                                                          "Whether the stroke is closed or not.",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-bezier-stroke-new-moveto
+   * clay-path-bezier-stroke-new-moveto
    */
-  procedure = gimp_procedure_new (path_bezier_stroke_new_moveto_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-bezier-stroke-new-moveto");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_bezier_stroke_new_moveto_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-bezier-stroke-new-moveto");
+  clay_procedure_set_static_help (procedure,
                                   "Adds a bezier stroke with a single moveto to the path object.",
                                   "Adds a bezier stroke with a single moveto to the path object.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x0",
                                                     "x0",
                                                     "The x-coordinate of the moveto",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y0",
                                                     "y0",
                                                     "The y-coordinate of the moveto",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("stroke-id",
                                                      "stroke id",
                                                      "The resulting stroke",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-bezier-stroke-lineto
+   * clay-path-bezier-stroke-lineto
    */
-  procedure = gimp_procedure_new (path_bezier_stroke_lineto_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-bezier-stroke-lineto");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_bezier_stroke_lineto_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-bezier-stroke-lineto");
+  clay_procedure_set_static_help (procedure,
                                   "Extends a bezier stroke with a lineto.",
                                   "Extends a bezier stroke with a lineto.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x0",
                                                     "x0",
                                                     "The x-coordinate of the lineto",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y0",
                                                     "y0",
                                                     "The y-coordinate of the lineto",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-bezier-stroke-conicto
+   * clay-path-bezier-stroke-conicto
    */
-  procedure = gimp_procedure_new (path_bezier_stroke_conicto_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-bezier-stroke-conicto");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_bezier_stroke_conicto_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-bezier-stroke-conicto");
+  clay_procedure_set_static_help (procedure,
                                   "Extends a bezier stroke with a conic bezier spline.",
                                   "Extends a bezier stroke with a conic bezier spline. Actually a cubic bezier spline gets added that realizes the shape of a conic bezier spline.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x0",
                                                     "x0",
                                                     "The x-coordinate of the control point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y0",
                                                     "y0",
                                                     "The y-coordinate of the control point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x1",
                                                     "x1",
                                                     "The x-coordinate of the end point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y1",
                                                     "y1",
                                                     "The y-coordinate of the end point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-bezier-stroke-cubicto
+   * clay-path-bezier-stroke-cubicto
    */
-  procedure = gimp_procedure_new (path_bezier_stroke_cubicto_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-bezier-stroke-cubicto");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_bezier_stroke_cubicto_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-bezier-stroke-cubicto");
+  clay_procedure_set_static_help (procedure,
                                   "Extends a bezier stroke with a cubic bezier spline.",
                                   "Extends a bezier stroke with a cubic bezier spline.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("stroke-id",
                                                  "stroke id",
                                                  "The stroke ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x0",
                                                     "x0",
                                                     "The x-coordinate of the first control point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y0",
                                                     "y0",
                                                     "The y-coordinate of the first control point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x1",
                                                     "x1",
                                                     "The x-coordinate of the second control point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y1",
                                                     "y1",
                                                     "The y-coordinate of the second control point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x2",
                                                     "x2",
                                                     "The x-coordinate of the end point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y2",
                                                     "y2",
                                                     "The y-coordinate of the end point",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-path-bezier-stroke-new-ellipse
+   * clay-path-bezier-stroke-new-ellipse
    */
-  procedure = gimp_procedure_new (path_bezier_stroke_new_ellipse_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-path-bezier-stroke-new-ellipse");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (path_bezier_stroke_new_ellipse_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-path-bezier-stroke-new-ellipse");
+  clay_procedure_set_static_help (procedure,
                                   "Adds a bezier stroke describing an ellipse the path object.",
                                   "Adds a bezier stroke describing an ellipse on the path object.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_path ("path",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_path ("path",
                                                      "path",
                                                      "The path object",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x0",
                                                     "x0",
                                                     "The x-coordinate of the center",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y0",
                                                     "y0",
                                                     "The y-coordinate of the center",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("radius-x",
                                                     "radius x",
                                                     "The radius in x direction",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("radius-y",
                                                     "radius y",
                                                     "The radius in y direction",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("angle",
                                                     "angle",
                                                     "The angle the x-axis of the ellipse (radians, counterclockwise)",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("stroke-id",
                                                      "stroke id",
                                                      "The resulting stroke",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

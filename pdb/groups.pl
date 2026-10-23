@@ -20,8 +20,8 @@
     font
     font_select
     fonts
-    gimp
-    gimprc
+    clay
+    clayrc
     gradient_select
     gradient
     gradients

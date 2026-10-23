@@ -18,20 +18,20 @@
 #pragma once
 
 
-typedef void (* GimpResolutionCallback) (GtkWidget *dialog,
-                                         GimpImage *image,
+typedef void (* ClayResolutionCallback) (GtkWidget *dialog,
+                                         ClayImage *image,
                                          gdouble    xresolution,
                                          gdouble    yresolution,
-                                         GimpUnit  *resolution_unit,
+                                         ClayUnit  *resolution_unit,
                                          gpointer   user_data);
 
 
-GtkWidget * print_size_dialog_new (GimpImage              *image,
-                                   GimpContext            *context,
+GtkWidget * print_size_dialog_new (ClayImage              *image,
+                                   ClayContext            *context,
                                    const gchar            *title,
                                    const gchar            *role,
                                    GtkWidget              *parent,
-                                   GimpHelpFunc            help_func,
+                                   ClayHelpFunc            help_func,
                                    const gchar            *help_id,
-                                   GimpResolutionCallback  callback,
+                                   ClayResolutionCallback  callback,
                                    gpointer                user_data);

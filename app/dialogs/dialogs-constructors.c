@@ -20,54 +20,54 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
 #include "menus/menus.h"
 
-#include "widgets/gimpbrusheditor.h"
-#include "widgets/gimpbrushfactoryview.h"
-#include "widgets/gimpbufferview.h"
-#include "widgets/gimpchanneltreeview.h"
-#include "widgets/gimpcoloreditor.h"
-#include "widgets/gimpcolormapeditor.h"
-#include "widgets/gimpcriticaldialog.h"
-#include "widgets/gimpdashboard.h"
-#include "widgets/gimpdevicestatus.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdockwindow.h"
-#include "widgets/gimpdocumentview.h"
-#include "widgets/gimpdynamicseditor.h"
-#include "widgets/gimpdynamicsfactoryview.h"
-#include "widgets/gimperrorconsole.h"
-#include "widgets/gimperrordialog.h"
-#include "widgets/gimpfontfactoryview.h"
-#include "widgets/gimpgradienteditor.h"
-#include "widgets/gimphistogrameditor.h"
-#include "widgets/gimpimageview.h"
-#include "widgets/gimplayertreeview.h"
-#include "widgets/gimpmenudock.h"
-#include "widgets/gimppaletteeditor.h"
-#include "widgets/gimppatternfactoryview.h"
-#include "widgets/gimpsamplepointeditor.h"
-#include "widgets/gimpselectioneditor.h"
-#include "widgets/gimpsymmetryeditor.h"
-#include "widgets/gimptemplateview.h"
-#include "widgets/gimptoolbox.h"
-#include "widgets/gimptooloptionseditor.h"
-#include "widgets/gimptoolpresetfactoryview.h"
-#include "widgets/gimptoolpreseteditor.h"
-#include "widgets/gimpundoeditor.h"
-#include "widgets/gimppathtreeview.h"
+#include "widgets/claybrusheditor.h"
+#include "widgets/claybrushfactoryview.h"
+#include "widgets/claybufferview.h"
+#include "widgets/claychanneltreeview.h"
+#include "widgets/claycoloreditor.h"
+#include "widgets/claycolormapeditor.h"
+#include "widgets/claycriticaldialog.h"
+#include "widgets/claydashboard.h"
+#include "widgets/claydevicestatus.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydockwindow.h"
+#include "widgets/claydocumentview.h"
+#include "widgets/claydynamicseditor.h"
+#include "widgets/claydynamicsfactoryview.h"
+#include "widgets/clayerrorconsole.h"
+#include "widgets/clayerrordialog.h"
+#include "widgets/clayfontfactoryview.h"
+#include "widgets/claygradienteditor.h"
+#include "widgets/clayhistogrameditor.h"
+#include "widgets/clayimageview.h"
+#include "widgets/claylayertreeview.h"
+#include "widgets/claymenudock.h"
+#include "widgets/claypaletteeditor.h"
+#include "widgets/claypatternfactoryview.h"
+#include "widgets/claysamplepointeditor.h"
+#include "widgets/clayselectioneditor.h"
+#include "widgets/claysymmetryeditor.h"
+#include "widgets/claytemplateview.h"
+#include "widgets/claytoolbox.h"
+#include "widgets/claytooloptionseditor.h"
+#include "widgets/claytoolpresetfactoryview.h"
+#include "widgets/claytoolpreseteditor.h"
+#include "widgets/clayundoeditor.h"
+#include "widgets/claypathtreeview.h"
 
-#include "display/gimpcursorview.h"
-#include "display/gimpnavigationeditor.h"
+#include "display/claycursorview.h"
+#include "display/claynavigationeditor.h"
 
 #include "about-dialog.h"
 #include "action-search-dialog.h"
@@ -87,7 +87,7 @@
 #include "tips-dialog.h"
 #include "welcome-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /**********************/
@@ -95,176 +95,176 @@
 /**********************/
 
 GtkWidget *
-dialogs_image_new_new (GimpDialogFactory *factory,
-                       GimpContext       *context,
-                       GimpUIManager     *ui_manager,
+dialogs_image_new_new (ClayDialogFactory *factory,
+                       ClayContext       *context,
+                       ClayUIManager     *ui_manager,
                        gint               view_size)
 {
   return image_new_dialog_new (context);
 }
 
 GtkWidget *
-dialogs_file_open_new (GimpDialogFactory *factory,
-                       GimpContext       *context,
-                       GimpUIManager     *ui_manager,
+dialogs_file_open_new (ClayDialogFactory *factory,
+                       ClayContext       *context,
+                       ClayUIManager     *ui_manager,
                        gint               view_size)
 {
-  return file_open_dialog_new (context->gimp);
+  return file_open_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_file_open_location_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_file_open_location_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return file_open_location_dialog_new (context->gimp);
+  return file_open_location_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_file_save_new (GimpDialogFactory *factory,
-                       GimpContext       *context,
-                       GimpUIManager     *ui_manager,
+dialogs_file_save_new (ClayDialogFactory *factory,
+                       ClayContext       *context,
+                       ClayUIManager     *ui_manager,
                        gint               view_size)
 {
-  return file_save_dialog_new (context->gimp, FALSE);
+  return file_save_dialog_new (context->clay, FALSE);
 }
 
 GtkWidget *
-dialogs_file_export_new (GimpDialogFactory *factory,
-                         GimpContext       *context,
-                         GimpUIManager     *ui_manager,
+dialogs_file_export_new (ClayDialogFactory *factory,
+                         ClayContext       *context,
+                         ClayUIManager     *ui_manager,
                          gint               view_size)
 {
-  return file_save_dialog_new (context->gimp, TRUE);
+  return file_save_dialog_new (context->clay, TRUE);
 }
 
 GtkWidget *
-dialogs_preferences_get (GimpDialogFactory *factory,
-                         GimpContext       *context,
-                         GimpUIManager     *ui_manager,
+dialogs_preferences_get (ClayDialogFactory *factory,
+                         ClayContext       *context,
+                         ClayUIManager     *ui_manager,
                          gint               view_size)
 {
-  return preferences_dialog_create (context->gimp);
+  return preferences_dialog_create (context->clay);
 }
 
 GtkWidget *
-dialogs_extensions_get (GimpDialogFactory *factory,
-                        GimpContext       *context,
-                        GimpUIManager     *ui_manager,
+dialogs_extensions_get (ClayDialogFactory *factory,
+                        ClayContext       *context,
+                        ClayUIManager     *ui_manager,
                         gint               view_size)
 {
-  return extensions_dialog_new (context->gimp);
+  return extensions_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_keyboard_shortcuts_get (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_keyboard_shortcuts_get (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return keyboard_shortcuts_dialog_new (context->gimp);
+  return keyboard_shortcuts_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_input_devices_get (GimpDialogFactory *factory,
-                           GimpContext       *context,
-                           GimpUIManager     *ui_manager,
+dialogs_input_devices_get (ClayDialogFactory *factory,
+                           ClayContext       *context,
+                           ClayUIManager     *ui_manager,
                            gint               view_size)
 {
-  return input_devices_dialog_new (context->gimp);
+  return input_devices_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_module_get (GimpDialogFactory *factory,
-                    GimpContext       *context,
-                    GimpUIManager     *ui_manager,
+dialogs_module_get (ClayDialogFactory *factory,
+                    ClayContext       *context,
+                    ClayUIManager     *ui_manager,
                     gint               view_size)
 {
-  return module_dialog_new (context->gimp);
+  return module_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_palette_import_get (GimpDialogFactory *factory,
-                            GimpContext       *context,
-                            GimpUIManager     *ui_manager,
+dialogs_palette_import_get (ClayDialogFactory *factory,
+                            ClayContext       *context,
+                            ClayUIManager     *ui_manager,
                             gint               view_size)
 {
   return palette_import_dialog_new (context);
 }
 
 GtkWidget *
-dialogs_tips_get (GimpDialogFactory *factory,
-                  GimpContext       *context,
-                  GimpUIManager     *ui_manager,
+dialogs_tips_get (ClayDialogFactory *factory,
+                  ClayContext       *context,
+                  ClayUIManager     *ui_manager,
                   gint               view_size)
 {
-  return tips_dialog_create (context->gimp);
+  return tips_dialog_create (context->clay);
 }
 
 GtkWidget *
-dialogs_welcome_get (GimpDialogFactory *factory,
-                     GimpContext       *context,
-                     GimpUIManager     *ui_manager,
+dialogs_welcome_get (ClayDialogFactory *factory,
+                     ClayContext       *context,
+                     ClayUIManager     *ui_manager,
                      gint               view_size)
 {
-  return welcome_dialog_create (context->gimp, TRUE);
+  return welcome_dialog_create (context->clay, TRUE);
 }
 
 GtkWidget *
-dialogs_about_get (GimpDialogFactory *factory,
-                   GimpContext       *context,
-                   GimpUIManager     *ui_manager,
+dialogs_about_get (ClayDialogFactory *factory,
+                   ClayContext       *context,
+                   ClayUIManager     *ui_manager,
                    gint               view_size)
 {
-  return about_dialog_create (context->gimp, context->gimp->edit_config);
+  return about_dialog_create (context->clay, context->clay->edit_config);
 }
 
 GtkWidget *
-dialogs_action_search_get (GimpDialogFactory *factory,
-                           GimpContext       *context,
-                           GimpUIManager     *ui_manager,
+dialogs_action_search_get (ClayDialogFactory *factory,
+                           ClayContext       *context,
+                           ClayUIManager     *ui_manager,
                            gint               view_size)
 {
-  return action_search_dialog_create (context->gimp);
+  return action_search_dialog_create (context->clay);
 }
 
 GtkWidget *
-dialogs_error_get (GimpDialogFactory *factory,
-                   GimpContext       *context,
-                   GimpUIManager     *ui_manager,
+dialogs_error_get (ClayDialogFactory *factory,
+                   ClayContext       *context,
+                   ClayUIManager     *ui_manager,
                    gint               view_size)
 {
-  return gimp_error_dialog_new (_("Clay Message"));
+  return clay_error_dialog_new (_("Clay Message"));
 }
 
 GtkWidget *
-dialogs_critical_get (GimpDialogFactory *factory,
-                      GimpContext       *context,
-                      GimpUIManager     *ui_manager,
+dialogs_critical_get (ClayDialogFactory *factory,
+                      ClayContext       *context,
+                      ClayUIManager     *ui_manager,
                       gint               view_size)
 {
-  return gimp_critical_dialog_new (_("Clay Debug"),
-                                   context->gimp->config->last_known_release,
-                                   context->gimp->config->last_release_timestamp);
+  return clay_critical_dialog_new (_("Clay Debug"),
+                                   context->clay->config->last_known_release,
+                                   context->clay->config->last_release_timestamp);
 }
 
 GtkWidget *
-dialogs_close_all_get (GimpDialogFactory *factory,
-                       GimpContext       *context,
-                       GimpUIManager     *ui_manager,
+dialogs_close_all_get (ClayDialogFactory *factory,
+                       ClayContext       *context,
+                       ClayUIManager     *ui_manager,
                        gint               view_size)
 {
-  return close_all_dialog_new (context->gimp);
+  return close_all_dialog_new (context->clay);
 }
 
 GtkWidget *
-dialogs_quit_get (GimpDialogFactory *factory,
-                  GimpContext       *context,
-                  GimpUIManager     *ui_manager,
+dialogs_quit_get (ClayDialogFactory *factory,
+                  ClayContext       *context,
+                  ClayUIManager     *ui_manager,
                   gint               view_size)
 {
-  return quit_dialog_new (context->gimp);
+  return quit_dialog_new (context->clay);
 }
 
 
@@ -273,28 +273,28 @@ dialogs_quit_get (GimpDialogFactory *factory,
 /***********/
 
 GtkWidget *
-dialogs_toolbox_new (GimpDialogFactory *factory,
-                     GimpContext       *context,
-                     GimpUIManager     *ui_manager,
+dialogs_toolbox_new (ClayDialogFactory *factory,
+                     ClayContext       *context,
+                     ClayUIManager     *ui_manager,
                      gint               view_size)
 {
-  return gimp_toolbox_new (factory,
+  return clay_toolbox_new (factory,
                            context,
                            ui_manager);
 }
 
 GtkWidget *
-dialogs_toolbox_dock_window_new (GimpDialogFactory *factory,
-                                 GimpContext       *context,
-                                 GimpUIManager     *ui_manager,
+dialogs_toolbox_dock_window_new (ClayDialogFactory *factory,
+                                 ClayContext       *context,
+                                 ClayUIManager     *ui_manager,
                                  gint               view_size)
 {
   static gint  role_serial = 1;
   GtkWidget   *dock;
   gchar       *role;
 
-  role = g_strdup_printf ("gimp-toolbox-%d", role_serial++);
-  dock = gimp_dock_window_new (role,
+  role = g_strdup_printf ("clay-toolbox-%d", role_serial++);
+  dock = clay_dock_window_new (role,
                                "<Toolbox>",
                                TRUE,
                                factory,
@@ -305,26 +305,26 @@ dialogs_toolbox_dock_window_new (GimpDialogFactory *factory,
 }
 
 GtkWidget *
-dialogs_dock_new (GimpDialogFactory *factory,
-                  GimpContext       *context,
-                  GimpUIManager     *ui_manager,
+dialogs_dock_new (ClayDialogFactory *factory,
+                  ClayContext       *context,
+                  ClayUIManager     *ui_manager,
                   gint               view_size)
 {
-  return gimp_menu_dock_new ();
+  return clay_menu_dock_new ();
 }
 
 GtkWidget *
-dialogs_dock_window_new (GimpDialogFactory *factory,
-                         GimpContext       *context,
-                         GimpUIManager     *ui_manager,
+dialogs_dock_window_new (ClayDialogFactory *factory,
+                         ClayContext       *context,
+                         ClayUIManager     *ui_manager,
                          gint               view_size)
 {
   static gint  role_serial = 1;
   GtkWidget   *dock;
   gchar       *role;
 
-  role = g_strdup_printf ("gimp-dock-%d", role_serial++);
-  dock = gimp_dock_window_new (role,
+  role = g_strdup_printf ("clay-dock-%d", role_serial++);
+  dock = clay_dock_window_new (role,
                                "<Dock>",
                                FALSE,
                                factory,
@@ -342,523 +342,523 @@ dialogs_dock_window_new (GimpDialogFactory *factory,
 /*****  singleton dialogs  *****/
 
 GtkWidget *
-dialogs_tool_options_new (GimpDialogFactory *factory,
-                          GimpContext       *context,
-                          GimpUIManager     *ui_manager,
+dialogs_tool_options_new (ClayDialogFactory *factory,
+                          ClayContext       *context,
+                          ClayUIManager     *ui_manager,
                           gint               view_size)
 {
-  return gimp_tool_options_editor_new (context->gimp,
-                                       menus_get_global_menu_factory (context->gimp));
+  return clay_tool_options_editor_new (context->clay,
+                                       menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_device_status_new (GimpDialogFactory *factory,
-                           GimpContext       *context,
-                           GimpUIManager     *ui_manager,
+dialogs_device_status_new (ClayDialogFactory *factory,
+                           ClayContext       *context,
+                           ClayUIManager     *ui_manager,
                            gint               view_size)
 {
-  return gimp_device_status_new (context->gimp);
+  return clay_device_status_new (context->clay);
 }
 
 GtkWidget *
-dialogs_error_console_new (GimpDialogFactory *factory,
-                           GimpContext       *context,
-                           GimpUIManager     *ui_manager,
+dialogs_error_console_new (ClayDialogFactory *factory,
+                           ClayContext       *context,
+                           ClayUIManager     *ui_manager,
                            gint               view_size)
 {
-  return gimp_error_console_new (context->gimp,
-                                 menus_get_global_menu_factory (context->gimp));
+  return clay_error_console_new (context->clay,
+                                 menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_cursor_view_new (GimpDialogFactory *factory,
-                         GimpContext       *context,
-                         GimpUIManager     *ui_manager,
+dialogs_cursor_view_new (ClayDialogFactory *factory,
+                         ClayContext       *context,
+                         ClayUIManager     *ui_manager,
                          gint               view_size)
 {
-  return gimp_cursor_view_new (context->gimp,
-                               menus_get_global_menu_factory (context->gimp));
+  return clay_cursor_view_new (context->clay,
+                               menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_dashboard_new (GimpDialogFactory *factory,
-                       GimpContext       *context,
-                       GimpUIManager     *ui_manager,
+dialogs_dashboard_new (ClayDialogFactory *factory,
+                       ClayContext       *context,
+                       ClayUIManager     *ui_manager,
                        gint               view_size)
 {
-  return gimp_dashboard_new (context->gimp,
-                             menus_get_global_menu_factory (context->gimp));
+  return clay_dashboard_new (context->clay,
+                             menus_get_global_menu_factory (context->clay));
 }
 
 
 /*****  list views  *****/
 
 GtkWidget *
-dialogs_image_list_view_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_image_list_view_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_image_view_new (GIMP_VIEW_TYPE_LIST,
-                              context->gimp->images,
+  return clay_image_view_new (CLAY_VIEW_TYPE_LIST,
+                              context->clay->images,
                               context,
                               view_size, 1,
-                              menus_get_global_menu_factory (context->gimp));
+                              menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_brush_list_view_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_brush_list_view_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_brush_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                      context->gimp->brush_factory,
+  return clay_brush_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                      context->clay->brush_factory,
                                       context,
                                       TRUE,
                                       view_size, 1,
-                                      menus_get_global_menu_factory (context->gimp));
+                                      menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_dynamics_list_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_dynamics_list_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_dynamics_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                         context->gimp->dynamics_factory,
+  return clay_dynamics_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                         context->clay->dynamics_factory,
                                          context,
                                          view_size, 0,
-                                         menus_get_global_menu_factory (context->gimp));
+                                         menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_mypaint_brush_list_view_new (GimpDialogFactory *factory,
-                                     GimpContext       *context,
-                                     GimpUIManager     *ui_manager,
+dialogs_mypaint_brush_list_view_new (ClayDialogFactory *factory,
+                                     ClayContext       *context,
+                                     ClayUIManager     *ui_manager,
                                      gint               view_size)
 {
-  return gimp_data_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                     context->gimp->mybrush_factory,
+  return clay_data_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                     context->clay->mybrush_factory,
                                      context,
                                      view_size, 0,
-                                     menus_get_global_menu_factory (context->gimp),
+                                     menus_get_global_menu_factory (context->clay),
                                      "<MyPaintBrushes>",
                                      "/mypaint-brushes-popup",
                                      "mypaint-brushes");
 }
 
 GtkWidget *
-dialogs_pattern_list_view_new (GimpDialogFactory *factory,
-                               GimpContext       *context,
-                               GimpUIManager     *ui_manager,
+dialogs_pattern_list_view_new (ClayDialogFactory *factory,
+                               ClayContext       *context,
+                               ClayUIManager     *ui_manager,
                                gint               view_size)
 {
-  return gimp_pattern_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                        context->gimp->pattern_factory,
+  return clay_pattern_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                        context->clay->pattern_factory,
                                         context,
                                         view_size, 1,
-                                        menus_get_global_menu_factory (context->gimp));
+                                        menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_gradient_list_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_gradient_list_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_data_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                     context->gimp->gradient_factory,
+  return clay_data_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                     context->clay->gradient_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp),
+                                     menus_get_global_menu_factory (context->clay),
                                      "<Gradients>",
                                      "/gradients-popup",
                                      "gradients");
 }
 
 GtkWidget *
-dialogs_palette_list_view_new (GimpDialogFactory *factory,
-                               GimpContext       *context,
-                               GimpUIManager     *ui_manager,
+dialogs_palette_list_view_new (ClayDialogFactory *factory,
+                               ClayContext       *context,
+                               ClayUIManager     *ui_manager,
                                gint               view_size)
 {
-  return gimp_data_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                     context->gimp->palette_factory,
+  return clay_data_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                     context->clay->palette_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp),
+                                     menus_get_global_menu_factory (context->clay),
                                      "<Palettes>",
                                      "/palettes-popup",
                                      "palettes");
 }
 
 GtkWidget *
-dialogs_font_list_view_new (GimpDialogFactory *factory,
-                            GimpContext       *context,
-                            GimpUIManager     *ui_manager,
+dialogs_font_list_view_new (ClayDialogFactory *factory,
+                            ClayContext       *context,
+                            ClayUIManager     *ui_manager,
                             gint               view_size)
 {
-  return gimp_font_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                     context->gimp->font_factory,
+  return clay_font_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                     context->clay->font_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp));
+                                     menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_buffer_list_view_new (GimpDialogFactory *factory,
-                              GimpContext       *context,
-                              GimpUIManager     *ui_manager,
+dialogs_buffer_list_view_new (ClayDialogFactory *factory,
+                              ClayContext       *context,
+                              ClayUIManager     *ui_manager,
                               gint               view_size)
 {
-  return gimp_buffer_view_new (GIMP_VIEW_TYPE_LIST,
-                               context->gimp->named_buffers,
+  return clay_buffer_view_new (CLAY_VIEW_TYPE_LIST,
+                               context->clay->named_buffers,
                                context,
                                view_size, 1,
-                               menus_get_global_menu_factory (context->gimp));
+                               menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_tool_preset_list_view_new (GimpDialogFactory *factory,
-                                   GimpContext       *context,
-                                   GimpUIManager     *ui_manager,
+dialogs_tool_preset_list_view_new (ClayDialogFactory *factory,
+                                   ClayContext       *context,
+                                   ClayUIManager     *ui_manager,
                                    gint               view_size)
 {
-  return gimp_tool_preset_factory_view_new (GIMP_VIEW_TYPE_LIST,
-                                            context->gimp->tool_preset_factory,
+  return clay_tool_preset_factory_view_new (CLAY_VIEW_TYPE_LIST,
+                                            context->clay->tool_preset_factory,
                                             context,
                                             view_size, 0,
-                                            menus_get_global_menu_factory (context->gimp));
+                                            menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_document_list_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_document_list_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_document_view_new (GIMP_VIEW_TYPE_LIST,
-                                 context->gimp->documents,
+  return clay_document_view_new (CLAY_VIEW_TYPE_LIST,
+                                 context->clay->documents,
                                  context,
                                  view_size, 0,
-                                 menus_get_global_menu_factory (context->gimp));
+                                 menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_template_list_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_template_list_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_template_view_new (GIMP_VIEW_TYPE_LIST,
-                                 context->gimp->templates,
+  return clay_template_view_new (CLAY_VIEW_TYPE_LIST,
+                                 context->clay->templates,
                                  context,
                                  view_size, 0,
-                                 menus_get_global_menu_factory (context->gimp));
+                                 menus_get_global_menu_factory (context->clay));
 }
 
 
 /*****  grid views  *****/
 
 GtkWidget *
-dialogs_image_grid_view_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_image_grid_view_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_image_view_new (GIMP_VIEW_TYPE_GRID,
-                              context->gimp->images,
+  return clay_image_view_new (CLAY_VIEW_TYPE_GRID,
+                              context->clay->images,
                               context,
                               view_size, 1,
-                              menus_get_global_menu_factory (context->gimp));
+                              menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_brush_grid_view_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_brush_grid_view_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_brush_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                      context->gimp->brush_factory,
+  return clay_brush_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                      context->clay->brush_factory,
                                       context,
                                       TRUE,
                                       view_size, 1,
-                                      menus_get_global_menu_factory (context->gimp));
+                                      menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_dynamics_grid_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_dynamics_grid_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_dynamics_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                         context->gimp->dynamics_factory,
+  return clay_dynamics_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                         context->clay->dynamics_factory,
                                          context,
                                          view_size, 1,
-                                         menus_get_global_menu_factory (context->gimp));
+                                         menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_mypaint_brush_grid_view_new (GimpDialogFactory *factory,
-                                     GimpContext       *context,
-                                     GimpUIManager     *ui_manager,
+dialogs_mypaint_brush_grid_view_new (ClayDialogFactory *factory,
+                                     ClayContext       *context,
+                                     ClayUIManager     *ui_manager,
                                      gint               view_size)
 {
-  return gimp_data_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                     context->gimp->mybrush_factory,
+  return clay_data_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                     context->clay->mybrush_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp),
+                                     menus_get_global_menu_factory (context->clay),
                                      "<MyPaintBrushes>",
                                      "/mypaint-brushes-popup",
                                      "mypaint-brushes");
 }
 
 GtkWidget *
-dialogs_pattern_grid_view_new (GimpDialogFactory *factory,
-                               GimpContext       *context,
-                               GimpUIManager     *ui_manager,
+dialogs_pattern_grid_view_new (ClayDialogFactory *factory,
+                               ClayContext       *context,
+                               ClayUIManager     *ui_manager,
                                gint               view_size)
 {
-  return gimp_pattern_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                        context->gimp->pattern_factory,
+  return clay_pattern_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                        context->clay->pattern_factory,
                                         context,
                                         view_size, 1,
-                                        menus_get_global_menu_factory (context->gimp));
+                                        menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_gradient_grid_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_gradient_grid_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_data_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                     context->gimp->gradient_factory,
+  return clay_data_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                     context->clay->gradient_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp),
+                                     menus_get_global_menu_factory (context->clay),
                                      "<Gradients>",
                                      "/gradients-popup",
                                      "gradients");
 }
 
 GtkWidget *
-dialogs_palette_grid_view_new (GimpDialogFactory *factory,
-                               GimpContext       *context,
-                               GimpUIManager     *ui_manager,
+dialogs_palette_grid_view_new (ClayDialogFactory *factory,
+                               ClayContext       *context,
+                               ClayUIManager     *ui_manager,
                                gint               view_size)
 {
-  return gimp_data_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                     context->gimp->palette_factory,
+  return clay_data_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                     context->clay->palette_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp),
+                                     menus_get_global_menu_factory (context->clay),
                                      "<Palettes>",
                                      "/palettes-popup",
                                      "palettes");
 }
 
 GtkWidget *
-dialogs_font_grid_view_new (GimpDialogFactory *factory,
-                            GimpContext       *context,
-                            GimpUIManager     *ui_manager,
+dialogs_font_grid_view_new (ClayDialogFactory *factory,
+                            ClayContext       *context,
+                            ClayUIManager     *ui_manager,
                             gint               view_size)
 {
-  return gimp_font_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                     context->gimp->font_factory,
+  return clay_font_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                     context->clay->font_factory,
                                      context,
                                      view_size, 1,
-                                     menus_get_global_menu_factory (context->gimp));
+                                     menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_buffer_grid_view_new (GimpDialogFactory *factory,
-                              GimpContext       *context,
-                              GimpUIManager     *ui_manager,
+dialogs_buffer_grid_view_new (ClayDialogFactory *factory,
+                              ClayContext       *context,
+                              ClayUIManager     *ui_manager,
                               gint               view_size)
 {
-  return gimp_buffer_view_new (GIMP_VIEW_TYPE_GRID,
-                               context->gimp->named_buffers,
+  return clay_buffer_view_new (CLAY_VIEW_TYPE_GRID,
+                               context->clay->named_buffers,
                                context,
                                view_size, 1,
-                               menus_get_global_menu_factory (context->gimp));
+                               menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_tool_preset_grid_view_new (GimpDialogFactory *factory,
-                                   GimpContext       *context,
-                                   GimpUIManager     *ui_manager,
+dialogs_tool_preset_grid_view_new (ClayDialogFactory *factory,
+                                   ClayContext       *context,
+                                   ClayUIManager     *ui_manager,
                                    gint               view_size)
 {
-  return gimp_tool_preset_factory_view_new (GIMP_VIEW_TYPE_GRID,
-                                            context->gimp->tool_preset_factory,
+  return clay_tool_preset_factory_view_new (CLAY_VIEW_TYPE_GRID,
+                                            context->clay->tool_preset_factory,
                                             context,
                                             view_size, 1,
-                                            menus_get_global_menu_factory (context->gimp));
+                                            menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_document_grid_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_document_grid_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_document_view_new (GIMP_VIEW_TYPE_GRID,
-                                 context->gimp->documents,
+  return clay_document_view_new (CLAY_VIEW_TYPE_GRID,
+                                 context->clay->documents,
                                  context,
                                  view_size, 0,
-                                 menus_get_global_menu_factory (context->gimp));
+                                 menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_template_grid_view_new (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_template_grid_view_new (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_template_view_new (GIMP_VIEW_TYPE_GRID,
-                                 context->gimp->templates,
+  return clay_template_view_new (CLAY_VIEW_TYPE_GRID,
+                                 context->clay->templates,
                                  context,
                                  view_size, 0,
-                                 menus_get_global_menu_factory (context->gimp));
+                                 menus_get_global_menu_factory (context->clay));
 }
 
 
 /*****  image related dialogs  *****/
 
 GtkWidget *
-dialogs_layer_list_view_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_layer_list_view_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
   if (view_size < 1)
-    view_size = context->gimp->config->layer_preview_size;
+    view_size = context->clay->config->layer_preview_size;
 
-  return gimp_item_tree_view_new (GIMP_TYPE_LAYER_TREE_VIEW,
+  return clay_item_tree_view_new (CLAY_TYPE_LAYER_TREE_VIEW,
                                   view_size, 2, TRUE,
-                                  gimp_context_get_image (context),
-                                  menus_get_global_menu_factory (context->gimp),
+                                  clay_context_get_image (context),
+                                  menus_get_global_menu_factory (context->clay),
                                   "<Layers>",
                                   "/layers-popup");
 }
 
 GtkWidget *
-dialogs_channel_list_view_new (GimpDialogFactory *factory,
-                               GimpContext       *context,
-                               GimpUIManager     *ui_manager,
+dialogs_channel_list_view_new (ClayDialogFactory *factory,
+                               ClayContext       *context,
+                               ClayUIManager     *ui_manager,
                                gint               view_size)
 {
   if (view_size < 1)
-    view_size = context->gimp->config->layer_preview_size;
+    view_size = context->clay->config->layer_preview_size;
 
-  return gimp_item_tree_view_new (GIMP_TYPE_CHANNEL_TREE_VIEW,
+  return clay_item_tree_view_new (CLAY_TYPE_CHANNEL_TREE_VIEW,
                                   view_size, 1, TRUE,
-                                  gimp_context_get_image (context),
-                                  menus_get_global_menu_factory (context->gimp),
+                                  clay_context_get_image (context),
+                                  menus_get_global_menu_factory (context->clay),
                                   "<Channels>",
                                   "/channels-popup");
 }
 
 GtkWidget *
-dialogs_path_list_view_new (GimpDialogFactory *factory,
-                            GimpContext       *context,
-                            GimpUIManager     *ui_manager,
+dialogs_path_list_view_new (ClayDialogFactory *factory,
+                            ClayContext       *context,
+                            ClayUIManager     *ui_manager,
                             gint               view_size)
 {
   if (view_size < 1)
-    view_size = context->gimp->config->layer_preview_size;
+    view_size = context->clay->config->layer_preview_size;
 
-  return gimp_item_tree_view_new (GIMP_TYPE_PATH_TREE_VIEW,
+  return clay_item_tree_view_new (CLAY_TYPE_PATH_TREE_VIEW,
                                   view_size, 1, TRUE,
-                                  gimp_context_get_image (context),
-                                  menus_get_global_menu_factory (context->gimp),
+                                  clay_context_get_image (context),
+                                  menus_get_global_menu_factory (context->clay),
                                   "<Paths>",
                                   "/paths-popup");
 }
 
 GtkWidget *
-dialogs_colormap_editor_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_colormap_editor_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_colormap_editor_new (menus_get_global_menu_factory (context->gimp));
+  return clay_colormap_editor_new (menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_histogram_editor_new (GimpDialogFactory *factory,
-                              GimpContext       *context,
-                              GimpUIManager     *ui_manager,
+dialogs_histogram_editor_new (ClayDialogFactory *factory,
+                              ClayContext       *context,
+                              ClayUIManager     *ui_manager,
                               gint               view_size)
 {
-  return gimp_histogram_editor_new ();
+  return clay_histogram_editor_new ();
 }
 
 GtkWidget *
-dialogs_selection_editor_new (GimpDialogFactory *factory,
-                              GimpContext       *context,
-                              GimpUIManager     *ui_manager,
+dialogs_selection_editor_new (ClayDialogFactory *factory,
+                              ClayContext       *context,
+                              ClayUIManager     *ui_manager,
                               gint               view_size)
 {
-  return gimp_selection_editor_new (menus_get_global_menu_factory (context->gimp));
+  return clay_selection_editor_new (menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_symmetry_editor_new (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_symmetry_editor_new (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_symmetry_editor_new (menus_get_global_menu_factory (context->gimp));
+  return clay_symmetry_editor_new (menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_undo_editor_new (GimpDialogFactory *factory,
-                         GimpContext       *context,
-                         GimpUIManager     *ui_manager,
+dialogs_undo_editor_new (ClayDialogFactory *factory,
+                         ClayContext       *context,
+                         ClayUIManager     *ui_manager,
                          gint               view_size)
 {
-  return gimp_undo_editor_new (context->gimp->config,
-                               menus_get_global_menu_factory (context->gimp));
+  return clay_undo_editor_new (context->clay->config,
+                               menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_sample_point_editor_new (GimpDialogFactory *factory,
-                                 GimpContext       *context,
-                                 GimpUIManager     *ui_manager,
+dialogs_sample_point_editor_new (ClayDialogFactory *factory,
+                                 ClayContext       *context,
+                                 ClayUIManager     *ui_manager,
                                  gint               view_size)
 {
-  return gimp_sample_point_editor_new (menus_get_global_menu_factory (context->gimp));
+  return clay_sample_point_editor_new (menus_get_global_menu_factory (context->clay));
 }
 
 
 /*****  display related dialogs  *****/
 
 GtkWidget *
-dialogs_navigation_editor_new (GimpDialogFactory *factory,
-                               GimpContext       *context,
-                               GimpUIManager     *ui_manager,
+dialogs_navigation_editor_new (ClayDialogFactory *factory,
+                               ClayContext       *context,
+                               ClayUIManager     *ui_manager,
                                gint               view_size)
 {
-  return gimp_navigation_editor_new (menus_get_global_menu_factory (context->gimp));
+  return clay_navigation_editor_new (menus_get_global_menu_factory (context->clay));
 }
 
 
 /*****  misc dockables  *****/
 
 GtkWidget *
-dialogs_color_editor_new (GimpDialogFactory *factory,
-                          GimpContext       *context,
-                          GimpUIManager     *ui_manager,
+dialogs_color_editor_new (ClayDialogFactory *factory,
+                          ClayContext       *context,
+                          ClayUIManager     *ui_manager,
                           gint               view_size)
 {
-  return gimp_color_editor_new (context);
+  return clay_color_editor_new (context);
 }
 
 
@@ -867,51 +867,51 @@ dialogs_color_editor_new (GimpDialogFactory *factory,
 /*************/
 
 GtkWidget *
-dialogs_brush_editor_get (GimpDialogFactory *factory,
-                          GimpContext       *context,
-                          GimpUIManager     *ui_manager,
+dialogs_brush_editor_get (ClayDialogFactory *factory,
+                          ClayContext       *context,
+                          ClayUIManager     *ui_manager,
                           gint               view_size)
 {
-  return gimp_brush_editor_new (context,
-                                menus_get_global_menu_factory (context->gimp));
+  return clay_brush_editor_new (context,
+                                menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_dynamics_editor_get (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_dynamics_editor_get (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_dynamics_editor_new (context,
-                                   menus_get_global_menu_factory (context->gimp));
+  return clay_dynamics_editor_new (context,
+                                   menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_gradient_editor_get (GimpDialogFactory *factory,
-                             GimpContext       *context,
-                             GimpUIManager     *ui_manager,
+dialogs_gradient_editor_get (ClayDialogFactory *factory,
+                             ClayContext       *context,
+                             ClayUIManager     *ui_manager,
                              gint               view_size)
 {
-  return gimp_gradient_editor_new (context,
-                                   menus_get_global_menu_factory (context->gimp));
+  return clay_gradient_editor_new (context,
+                                   menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_palette_editor_get (GimpDialogFactory *factory,
-                            GimpContext       *context,
-                            GimpUIManager     *ui_manager,
+dialogs_palette_editor_get (ClayDialogFactory *factory,
+                            ClayContext       *context,
+                            ClayUIManager     *ui_manager,
                             gint               view_size)
 {
-  return gimp_palette_editor_new (context,
-                                  menus_get_global_menu_factory (context->gimp));
+  return clay_palette_editor_new (context,
+                                  menus_get_global_menu_factory (context->clay));
 }
 
 GtkWidget *
-dialogs_tool_preset_editor_get (GimpDialogFactory *factory,
-                                GimpContext       *context,
-                                GimpUIManager     *ui_manager,
+dialogs_tool_preset_editor_get (ClayDialogFactory *factory,
+                                ClayContext       *context,
+                                ClayUIManager     *ui_manager,
                                 gint               view_size)
 {
-  return gimp_tool_preset_editor_new (context,
-                                      menus_get_global_menu_factory (context->gimp));
+  return clay_tool_preset_editor_new (context,
+                                      menus_get_global_menu_factory (context->clay));
 }

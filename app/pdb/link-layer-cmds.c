@@ -25,46 +25,46 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpimage.h"
-#include "core/gimplink.h"
-#include "core/gimplinklayer.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimprasterizable.h"
+#include "core/clayimage.h"
+#include "core/claylink.h"
+#include "core/claylinklayer.h"
+#include "core/clayparamspecs.h"
+#include "core/clayrasterizable.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-link_layer_new_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+link_layer_new_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   GFile *file;
-  GimpLinkLayer *layer = NULL;
+  ClayLinkLayer *layer = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
       if (file == NULL)
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Failed to create link layer"));
 
           success = FALSE;
@@ -72,9 +72,9 @@ link_layer_new_invoker (GimpProcedure         *procedure,
 
       if (success)
         {
-          GimpLink *link;
+          ClayLink *link;
 
-          link = gimp_link_new (gimp, file, 0, 0, TRUE, NULL, error);
+          link = clay_link_new (clay, file, 0, 0, TRUE, NULL, error);
 
           if (link == NULL)
             {
@@ -82,11 +82,11 @@ link_layer_new_invoker (GimpProcedure         *procedure,
             }
           else
             {
-              layer = GIMP_LINK_LAYER (gimp_link_layer_new (image, link));
+              layer = CLAY_LINK_LAYER (clay_link_layer_new (image, link));
 
               if (! layer)
                 {
-                  g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+                  g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                                _("Failed to create link layer"));
 
                   success = FALSE;
@@ -97,66 +97,66 @@ link_layer_new_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), layer);
+    g_value_set_object (clay_value_array_index (return_vals, 1), layer);
 
   return return_vals;
 }
 
-static GimpValueArray *
-link_layer_get_file_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+link_layer_get_file_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpLinkLayer *layer;
+  ClayValueArray *return_vals;
+  ClayLinkLayer *layer;
   GFile *file = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      file = g_object_ref (gimp_link_get_file (gimp_link_layer_get_link (layer), NULL, NULL));
+      file = g_object_ref (clay_link_get_file (clay_link_layer_get_link (layer), NULL, NULL));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), file);
+    g_value_take_object (clay_value_array_index (return_vals, 1), file);
 
   return return_vals;
 }
 
-static GimpValueArray *
-link_layer_set_file_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+link_layer_set_file_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpLinkLayer *layer;
+  ClayLinkLayer *layer;
   GFile *file;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpLink *link = gimp_link_new (gimp, file, 0, 0, TRUE, NULL, error);
+      ClayLink *link = clay_link_new (clay, file, 0, 0, TRUE, NULL, error);
 
       if (link)
         {
-          gimp_link_layer_set_link (layer, link, TRUE);
+          clay_link_layer_set_link (layer, link, TRUE);
         }
       else
         {
@@ -166,172 +166,172 @@ link_layer_set_file_invoker (GimpProcedure         *procedure,
       g_clear_object (&link);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-link_layer_get_mime_type_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+link_layer_get_mime_type_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpLinkLayer *layer;
+  ClayValueArray *return_vals;
+  ClayLinkLayer *layer;
   gchar *mimetype = NULL;
 
-  layer = g_value_get_object (gimp_value_array_index (args, 0));
+  layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      mimetype = g_strdup (gimp_link_get_mime_type (gimp_link_layer_get_link (layer)));
+      mimetype = g_strdup (clay_link_get_mime_type (clay_link_layer_get_link (layer)));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), mimetype);
+    g_value_take_string (clay_value_array_index (return_vals, 1), mimetype);
 
   return return_vals;
 }
 
 void
-register_link_layer_procs (GimpPDB *pdb)
+register_link_layer_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-link-layer-new
+   * clay-link-layer-new
    */
-  procedure = gimp_procedure_new (link_layer_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-link-layer-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (link_layer_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-link-layer-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new link layer.",
                                   "This procedure creates a link layer monitoring the specified @file.\n"
                                   "\n"
                                   "The new layer still needs to be added to the image as this is not automatic. Add the new layer with the [method@Image.insert_layer] method.\n"
                                   "\n"
-                                  "The arguments are kept as simple as necessary for the basic case. All link attributes, however, can be modified with the appropriate `gimp_link_layer_set_*()` procedures.",
+                                  "The arguments are kept as simple as necessary for the basic case. All link attributes, however, can be modified with the appropriate `clay_link_layer_set_*()` procedures.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "file",
                                                     "The file this link layer will monitor",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_link_layer ("layer",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_link_layer ("layer",
                                                                "layer",
-                                                               "The new link layer. The object belongs to libgimp and you should not free it.",
+                                                               "The new link layer. The object belongs to libclay and you should not free it.",
                                                                FALSE,
-                                                               GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                               CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-link-layer-get-file
+   * clay-link-layer-get-file
    */
-  procedure = gimp_procedure_new (link_layer_get_file_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-link-layer-get-file");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (link_layer_get_file_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-link-layer-get-file");
+  clay_procedure_set_static_help (procedure,
                                   "Get the monitored file.",
                                   "This procedure returns the file which is being monitored.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_link_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_link_layer ("layer",
                                                            "layer",
                                                            "The link layer",
                                                            FALSE,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_object ("file",
                                                         "file",
                                                         "The monitored file",
                                                         G_TYPE_FILE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-link-layer-set-file
+   * clay-link-layer-set-file
    */
-  procedure = gimp_procedure_new (link_layer_set_file_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-link-layer-set-file");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (link_layer_set_file_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-link-layer-set-file");
+  clay_procedure_set_static_help (procedure,
                                   "Set the monitored file.",
                                   "This procedure sets the file to be monitored. It may change the layer's render.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_link_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_link_layer ("layer",
                                                            "layer",
                                                            "The link layer",
                                                            FALSE,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "file",
                                                     "The file to monitor",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-link-layer-get-mime-type
+   * clay-link-layer-get-mime-type
    */
-  procedure = gimp_procedure_new (link_layer_get_mime_type_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-link-layer-get-mime-type");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (link_layer_get_mime_type_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-link-layer-get-mime-type");
+  clay_procedure_set_static_help (procedure,
                                   "Get the mime type of the monitored file.",
                                   "This procedure returns the mime type of the file which is being monitored by @layer.\n"
                                   "\n"
-                                  "Note that this will be the real mime type, corresponding to our format support, as returned by the [class@Gimp.LoadProcedure] which actually performs the external image file import.\n"
+                                  "Note that this will be the real mime type, corresponding to our format support, as returned by the [class@Clay.LoadProcedure] which actually performs the external image file import.\n"
                                   "\n"
                                   "This function may also return %NULL in case of error (for instance if the external file doesn't exist anymore).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_link_layer ("layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_link_layer ("layer",
                                                            "layer",
                                                            "The link layer",
                                                            FALSE,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("mimetype",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("mimetype",
                                                            "mimetype",
                                                            "The mime type of the monitored file",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

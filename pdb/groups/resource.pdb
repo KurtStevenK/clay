@@ -21,7 +21,7 @@ sub resources_loaded {
     $help  = <<HELP;
 Returns whether resources of a given type were loaded.
 
-In particular, it would return FALSE if GIMP was started with `--no-data`
+In particular, it would return FALSE if Clay was started with `--no-data`
 or `--no-fonts` for fonts.
 HELP
 
@@ -31,7 +31,7 @@ HELP
 
     @inargs = (
         { name => 'type_name', type => 'string', non_empty => 1,
-          desc => 'The name of the resource type e.g. GimpFont' }
+          desc => 'The name of the resource type e.g. ClayFont' }
     );
 
     @outargs = (
@@ -42,10 +42,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  if (g_type_from_name (type_name) == GIMP_TYPE_FONT)
-    loaded = ! gimp->no_fonts;
+  if (g_type_from_name (type_name) == CLAY_TYPE_FONT)
+    loaded = ! clay->no_fonts;
   else
-    loaded = ! gimp->no_data;
+    loaded = ! clay->no_data;
 }
 CODE
     );
@@ -58,7 +58,7 @@ Returns an existing resource having the given name.
 Returns %NULL when no resource exists of that name.
 
 There may be many fonts having the same name.
-See gimp_font_get_by_name().
+See clay_font_get_by_name().
 HELP
 
     &jehan_pdb_misc('2023', '3.0');
@@ -67,7 +67,7 @@ HELP
 
     @inargs = (
         { name => 'type_name', type => 'string', non_empty => 1,
-          desc => 'The name of the resource type e.g. GimpFont' },
+          desc => 'The name of the resource type e.g. ClayFont' },
 	{ name => 'resource_name', type => 'string', non_empty => 1,
 	  desc => 'The name of the resource' }
     );
@@ -82,9 +82,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  resource = gimp_pdb_get_resource (gimp, g_type_from_name (type_name), resource_name,
-                                    GIMP_PDB_DATA_ACCESS_READ, error);
-  /* gimp_pdb_get_resource can return errors about writeable or renameable when not ACCESS_READ,
+  resource = clay_pdb_get_resource (clay, g_type_from_name (type_name), resource_name,
+                                    CLAY_PDB_DATA_ACCESS_READ, error);
+  /* clay_pdb_get_resource can return errors about writeable or renameable when not ACCESS_READ,
    * but only "not found" error for ACCESS_READ.
    * Ignore "not found" error, just return NULL.
    */
@@ -125,9 +125,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  resource = gimp_pdb_get_resource_by_id (gimp, g_type_from_name (type_name),
+  resource = clay_pdb_get_resource_by_id (clay, g_type_from_name (type_name),
                                           resource_name, collection, is_internal,
-                                          GIMP_PDB_DATA_ACCESS_READ, error);
+                                          CLAY_PDB_DATA_ACCESS_READ, error);
 
   if (! resource)
     success = FALSE;
@@ -145,7 +145,7 @@ existing resource.
 
 
 *Note*: in most use cases, you should not use this function. If you got a
-[class@Gimp.Resource] from the API, you should trust it is valid. This
+[class@Clay.Resource] from the API, you should trust it is valid. This
 function is mostly for internal usage.
 HELP
 
@@ -164,9 +164,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpData *data = gimp_data_get_by_id (resource_id);
+  ClayData *data = clay_data_get_by_id (resource_id);
 
-  valid = GIMP_IS_DATA (data);
+  valid = CLAY_IS_DATA (data);
 }
 CODE
     );
@@ -194,9 +194,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpData *data = gimp_data_get_by_id (resource_id);
+  ClayData *data = clay_data_get_by_id (resource_id);
 
-  brush = GIMP_IS_BRUSH (data);
+  brush = CLAY_IS_BRUSH (data);
 }
 CODE
     );
@@ -224,9 +224,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpData *data = gimp_data_get_by_id (resource_id);
+  ClayData *data = clay_data_get_by_id (resource_id);
 
-  pattern = GIMP_IS_PATTERN (data);
+  pattern = CLAY_IS_PATTERN (data);
 }
 CODE
     );
@@ -254,9 +254,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpData *data = gimp_data_get_by_id (resource_id);
+  ClayData *data = clay_data_get_by_id (resource_id);
 
-  gradient = GIMP_IS_GRADIENT (data);
+  gradient = CLAY_IS_GRADIENT (data);
 }
 CODE
     );
@@ -284,9 +284,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpData *data = gimp_data_get_by_id (resource_id);
+  ClayData *data = clay_data_get_by_id (resource_id);
 
-  palette = GIMP_IS_PALETTE (data);
+  palette = CLAY_IS_PALETTE (data);
 }
 CODE
     );
@@ -314,9 +314,9 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpData *data = gimp_data_get_by_id (resource_id);
+  ClayData *data = clay_data_get_by_id (resource_id);
 
-  font = GIMP_IS_FONT (data);
+  font = CLAY_IS_FONT (data);
 }
 CODE
     );
@@ -344,7 +344,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  name = g_strdup (gimp_object_get_name (GIMP_OBJECT (resource)));
+  name = g_strdup (clay_object_get_name (CLAY_OBJECT (resource)));
 }
 CODE
     );
@@ -355,16 +355,16 @@ sub resource_get_identifiers {
 
     $help = <<HELP;
 This procedure returns 2 strings and a boolean. The first string is the resource
-name, similar to what you would obtain calling gimp_resource_get_name(). The
+name, similar to what you would obtain calling clay_resource_get_name(). The
 second is an opaque identifier for the collection this resource belongs to.
 
 
-*Note*: as far as GIMP is concerned, a collection of resource usually corresponds
+*Note*: as far as Clay is concerned, a collection of resource usually corresponds
 to a single file on disk (which may or may not contain several resources).
 Therefore the identifier may be derived from the local file path. Nevertheless
 you should not use this string as such as this is not guaranteed to be always
 the case. You should consider it as an opaque identifier only to be used again
-through _gimp_resource_get_by_identifier().
+through _clay_resource_get_by_identifier().
 HELP
 
     &jehan_pdb_misc('2023', '3.0');
@@ -388,7 +388,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_data_get_identifiers (GIMP_DATA (resource), &name, &collection_id, &is_internal);
+  clay_data_get_identifiers (CLAY_DATA (resource), &name, &collection_id, &is_internal);
 }
 CODE
     );
@@ -413,7 +413,7 @@ sub resource_is_editable {
     %invoke = (
         code => <<'CODE'
 {
-  editable = gimp_data_is_writable (GIMP_DATA (resource));
+  editable = clay_data_is_writable (CLAY_DATA (resource));
 }
 CODE
     );
@@ -439,12 +439,12 @@ sub resource_duplicate {
     %invoke = (
         code => <<'CODE'
 {
-  GimpDataFactory *factory;
+  ClayDataFactory *factory;
 
-  factory = gimp_get_data_factory (gimp, G_TYPE_FROM_INSTANCE (resource));
+  factory = clay_get_data_factory (clay, G_TYPE_FROM_INSTANCE (resource));
 
-  resource_copy = (GimpResource *)
-    gimp_data_factory_data_duplicate (factory, GIMP_DATA (resource));
+  resource_copy = (ClayResource *)
+    clay_data_factory_data_duplicate (factory, CLAY_DATA (resource));
 
   if (! resource_copy)
     success = FALSE;
@@ -457,7 +457,7 @@ sub resource_rename {
     $blurb = "Renames a resource. When the name is in use, renames to a unique name.";
 
     $help = <<'HELP';
-Renames a resource. When the proposed name is already used, GIMP
+Renames a resource. When the proposed name is already used, Clay
 generates a unique name.
 HELP
 
@@ -473,15 +473,15 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_viewable_is_name_editable (GIMP_VIEWABLE (resource)))
+  if (clay_viewable_is_name_editable (CLAY_VIEWABLE (resource)))
     {
-      gimp_object_set_name (GIMP_OBJECT (resource), new_name);
+      clay_object_set_name (CLAY_OBJECT (resource), new_name);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    _("Resource '%s' is not renamable"),
-                  gimp_object_get_name (GIMP_OBJECT (resource)));
+                  clay_object_get_name (CLAY_OBJECT (resource)));
       success = FALSE;
     }
 }
@@ -506,12 +506,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpDataFactory *factory;
+  ClayDataFactory *factory;
 
-  factory = gimp_get_data_factory (gimp, G_TYPE_FROM_INSTANCE (resource));
+  factory = clay_get_data_factory (clay, G_TYPE_FROM_INSTANCE (resource));
 
-  if (gimp_data_is_deletable (GIMP_DATA (resource)))
-    success = gimp_data_factory_data_delete (factory, GIMP_DATA (resource),
+  if (clay_data_is_deletable (CLAY_DATA (resource)))
+    success = clay_data_factory_data_delete (factory, CLAY_DATA (resource),
                                              TRUE, error);
   else
     success = FALSE;
@@ -521,16 +521,16 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpbrush.h"
-              "core/gimpdatafactory.h"
-              "core/gimpgradient.h"
-              "core/gimppalette.h"
-              "core/gimppattern.h"
-              "text/gimpfont.h"
-              "gimppdb-utils.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+@headers = qw("core/clay.h"
+              "core/claybrush.h"
+              "core/claydatafactory.h"
+              "core/claygradient.h"
+              "core/claypalette.h"
+              "core/claypattern.h"
+              "text/clayfont.h"
+              "claypdb-utils.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(resources_loaded
             resource_get_by_name
@@ -551,7 +551,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Resource procedures';
-$doc_title = 'gimpresource';
+$doc_title = 'clayresource';
 $doc_short_desc = 'Functions to manipulate resources.';
 $doc_long_desc = 'Functions to manipulate resources.';
 

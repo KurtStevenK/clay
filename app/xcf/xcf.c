@@ -25,18 +25,18 @@
 #include <glib/gstdio.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/claydrawable.h"
+#include "core/clayparamspecs.h"
+#include "core/clayprogress.h"
 
-#include "plug-in/gimppluginmanager.h"
-#include "plug-in/gimppluginprocedure.h"
+#include "plug-in/claypluginmanager.h"
+#include "plug-in/claypluginprocedure.h"
 
 #include "xcf.h"
 #include "xcf-private.h"
@@ -44,29 +44,29 @@
 #include "xcf-read.h"
 #include "xcf-save.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-typedef GimpImage * GimpXcfLoaderFunc (Gimp     *gimp,
+typedef ClayImage * ClayXcfLoaderFunc (Clay     *clay,
                                        XcfInfo  *info,
                                        GError  **error);
 
 
-static GimpValueArray * xcf_load_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray * xcf_load_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error);
-static GimpValueArray * xcf_save_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray * xcf_save_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error);
 
 
-static GimpXcfLoaderFunc * const xcf_loaders[] =
+static ClayXcfLoaderFunc * const xcf_loaders[] =
 {
   xcf_load_image,   /* version  0 */
   xcf_load_image,   /* version  1 */
@@ -100,13 +100,13 @@ static GimpXcfLoaderFunc * const xcf_loaders[] =
 
 
 void
-xcf_init (Gimp *gimp)
+xcf_init (Clay *clay)
 {
-  GimpPlugInProcedure *proc;
+  ClayPlugInProcedure *proc;
   GFile               *file;
-  GimpProcedure       *procedure;
+  ClayProcedure       *procedure;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   /* So this is sort of a hack, but its better than it was before.  To
    * do this right there would be a file load-save handler type and
@@ -117,26 +117,26 @@ xcf_init (Gimp *gimp)
    * PlugInProcDef struct.  -josh
    */
 
-  /*  gimp-xcf-save  */
-  file = g_file_new_for_path ("gimp-xcf-save");
-  procedure = gimp_plug_in_procedure_new (GIMP_PDB_PROC_TYPE_INTERNAL, file, NULL);
+  /*  clay-xcf-save  */
+  file = g_file_new_for_path ("clay-xcf-save");
+  procedure = clay_plug_in_procedure_new (CLAY_PDB_PROC_TYPE_INTERNAL, file, NULL);
   g_object_unref (file);
 
   procedure->marshal_func = xcf_save_invoker;
 
-  proc = GIMP_PLUG_IN_PROCEDURE (procedure);
+  proc = CLAY_PLUG_IN_PROCEDURE (procedure);
   proc->menu_label = g_strdup (_("Clay XCF image"));
-  gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
-                                   (const guint8 *) "gimp-wilber",
-                                   strlen ("gimp-wilber") + 1,
+  clay_plug_in_procedure_set_icon (proc, CLAY_ICON_TYPE_ICON_NAME,
+                                   (const guint8 *) "clay-wilber",
+                                   strlen ("clay-wilber") + 1,
                                    NULL);
-  gimp_plug_in_procedure_set_image_types (proc, "RGB*, GRAY*, INDEXED*");
-  gimp_plug_in_procedure_set_file_proc (proc, "xcf", NULL, "", NULL);
-  gimp_plug_in_procedure_set_mime_types (proc, "image/x-xcf");
-  gimp_plug_in_procedure_set_handles_remote (proc);
+  clay_plug_in_procedure_set_image_types (proc, "RGB*, GRAY*, INDEXED*");
+  clay_plug_in_procedure_set_file_proc (proc, "xcf", NULL, "", NULL);
+  clay_plug_in_procedure_set_mime_types (proc, "image/x-xcf");
+  clay_plug_in_procedure_set_handles_remote (proc);
 
-  gimp_object_set_static_name (GIMP_OBJECT (procedure), "gimp-xcf-save");
-  gimp_procedure_set_static_help (procedure,
+  clay_object_set_static_name (CLAY_OBJECT (procedure), "clay-xcf-save");
+  clay_procedure_set_static_help (procedure,
                                   "Saves file in the .xcf file format",
                                   "The XCF file format has been designed "
                                   "specifically for loading and saving "
@@ -144,55 +144,55 @@ xcf_init (Gimp *gimp)
                                   "This procedure will save the specified "
                                   "image in the xcf file format.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
 
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_enum ("run-mode",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_enum ("run-mode",
                                                      "Dummy Param",
                                                      "Dummy parameter",
-                                                     GIMP_TYPE_RUN_MODE,
-                                                     GIMP_RUN_INTERACTIVE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+                                                     CLAY_TYPE_RUN_MODE,
+                                                     CLAY_RUN_INTERACTIVE,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "Image",
                                                       "Input image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "File",
                                                     "The file "
                                                     "to save the image in",
                                                     G_TYPE_FILE,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_plug_in_manager_add_procedure (gimp->plug_in_manager, proc);
+                                                    CLAY_PARAM_READWRITE));
+  clay_plug_in_manager_add_procedure (clay->plug_in_manager, proc);
   g_object_unref (procedure);
 
-  /*  gimp-xcf-load  */
-  file = g_file_new_for_path ("gimp-xcf-load");
-  procedure = gimp_plug_in_procedure_new (GIMP_PDB_PROC_TYPE_INTERNAL, file, NULL);
+  /*  clay-xcf-load  */
+  file = g_file_new_for_path ("clay-xcf-load");
+  procedure = clay_plug_in_procedure_new (CLAY_PDB_PROC_TYPE_INTERNAL, file, NULL);
   g_object_unref (file);
 
   procedure->marshal_func = xcf_load_invoker;
 
-  proc = GIMP_PLUG_IN_PROCEDURE (procedure);
+  proc = CLAY_PLUG_IN_PROCEDURE (procedure);
   proc->menu_label = g_strdup (_("Clay XCF image"));
-  gimp_plug_in_procedure_set_icon (proc, GIMP_ICON_TYPE_ICON_NAME,
-                                   (const guint8 *) "gimp-wilber",
-                                   strlen ("gimp-wilber") + 1,
+  clay_plug_in_procedure_set_icon (proc, CLAY_ICON_TYPE_ICON_NAME,
+                                   (const guint8 *) "clay-wilber",
+                                   strlen ("clay-wilber") + 1,
                                    NULL);
-  gimp_plug_in_procedure_set_image_types (proc, NULL);
-  gimp_plug_in_procedure_set_file_proc (proc, "xcf", NULL, "",
-                                        "0,string,gimp\\040xcf\\040");
-  gimp_plug_in_procedure_set_mime_types (proc, "image/x-xcf");
-  gimp_plug_in_procedure_set_handles_remote (proc);
+  clay_plug_in_procedure_set_image_types (proc, NULL);
+  clay_plug_in_procedure_set_file_proc (proc, "xcf", NULL, "",
+                                        "0,string,clay\\040xcf\\040");
+  clay_plug_in_procedure_set_mime_types (proc, "image/x-xcf");
+  clay_plug_in_procedure_set_handles_remote (proc);
 
-  gimp_object_set_static_name (GIMP_OBJECT (procedure), "gimp-xcf-load");
-  gimp_procedure_set_static_help (procedure,
+  clay_object_set_static_name (CLAY_OBJECT (procedure), "clay-xcf-load");
+  clay_procedure_set_static_help (procedure,
                                   "Loads file saved in the .xcf file format",
                                   "The XCF file format has been designed "
                                   "specifically for loading and saving "
@@ -200,75 +200,75 @@ xcf_init (Gimp *gimp)
                                   "This procedure will load the specified "
                                   "file.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
 
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_enum ("run-mode",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_enum ("run-mode",
                                                      "Dummy Param",
                                                      "Dummy parameter",
-                                                     GIMP_TYPE_RUN_MODE,
-                                                     GIMP_RUN_INTERACTIVE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     CLAY_TYPE_RUN_MODE,
+                                                     CLAY_RUN_INTERACTIVE,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_object ("file",
                                                     "File",
                                                     "The file to load",
                                                     G_TYPE_FILE,
-                                                  GIMP_PARAM_READWRITE));
+                                                  CLAY_PARAM_READWRITE));
 
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_image ("image",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_image ("image",
                                                           "Image",
                                                           "Output image",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_plug_in_manager_add_procedure (gimp->plug_in_manager, proc);
+                                                          CLAY_PARAM_READWRITE));
+  clay_plug_in_manager_add_procedure (clay->plug_in_manager, proc);
   g_object_unref (procedure);
 }
 
 void
-xcf_exit (Gimp *gimp)
+xcf_exit (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 }
 
-GimpImage *
-xcf_load_stream (Gimp          *gimp,
+ClayImage *
+xcf_load_stream (Clay          *clay,
                  GInputStream  *input,
                  GFile         *input_file,
-                 GimpProgress  *progress,
+                 ClayProgress  *progress,
                  GError       **error)
 {
   XcfInfo      info  = { 0, };
   const gchar *filename;
-  GimpImage   *image = NULL;
+  ClayImage   *image = NULL;
   gboolean     success;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (G_IS_INPUT_STREAM (input), NULL);
   g_return_val_if_fail (input_file == NULL || G_IS_FILE (input_file), NULL);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), NULL);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   if (input_file)
-    filename = gimp_file_get_utf8_name (input_file);
+    filename = clay_file_get_utf8_name (input_file);
   else
     filename = _("Memory Stream");
 
   if (progress)
-    gimp_progress_start (progress, FALSE, _("Opening '%s'"), filename);
+    clay_progress_start (progress, FALSE, _("Opening '%s'"), filename);
 
-  success = xcf_load_magic_version (gimp, input, input_file, progress, &info);
+  success = xcf_load_magic_version (clay, input, input_file, progress, &info);
 
   if (success)
     {
       if (info.file_version >= 0 &&
           info.file_version < G_N_ELEMENTS (xcf_loaders))
         {
-          image = (*(xcf_loaders[info.file_version])) (gimp, &info, error);
+          image = (*(xcf_loaders[info.file_version])) (clay, &info, error);
 
           if (! image)
             success = FALSE;
@@ -285,17 +285,17 @@ xcf_load_stream (Gimp          *gimp,
     }
 
   if (progress)
-    gimp_progress_end (progress);
+    clay_progress_end (progress);
 
   return image;
 }
 
 gboolean
-xcf_save_stream (Gimp           *gimp,
-                 GimpImage      *image,
+xcf_save_stream (Clay           *clay,
+                 ClayImage      *image,
                  GOutputStream  *output,
                  GFile          *output_file,
-                 GimpProgress   *progress,
+                 ClayProgress   *progress,
                  GError        **error)
 {
   XcfInfo       info     = { 0, };
@@ -304,31 +304,31 @@ xcf_save_stream (Gimp           *gimp,
   GError       *my_error = NULL;
   GCancellable *cancellable;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
   g_return_val_if_fail (G_IS_OUTPUT_STREAM (output), FALSE);
   g_return_val_if_fail (output_file == NULL || G_IS_FILE (output_file), FALSE);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), FALSE);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   if (output_file)
-    filename = gimp_file_get_utf8_name (output_file);
+    filename = clay_file_get_utf8_name (output_file);
   else
     filename = _("Memory Stream");
 
-  info.gimp             = gimp;
+  info.clay             = clay;
   info.output           = output;
   info.seekable         = G_SEEKABLE (output);
   info.bytes_per_offset = 4;
   info.progress         = progress;
   info.file             = output_file;
 
-  if (gimp_image_get_xcf_compression (image))
+  if (clay_image_get_xcf_compression (image))
     info.compression = COMPRESS_ZLIB;
   else
     info.compression = COMPRESS_RLE;
 
-  info.file_version = gimp_image_get_xcf_version (image,
+  info.file_version = clay_image_get_xcf_version (image,
                                                   info.compression ==
                                                   COMPRESS_ZLIB,
                                                   NULL, NULL, NULL);
@@ -337,7 +337,7 @@ xcf_save_stream (Gimp           *gimp,
     info.bytes_per_offset = 8;
 
   if (progress)
-    gimp_progress_start (progress, FALSE, _("Saving '%s'"), filename);
+    clay_progress_start (progress, FALSE, _("Saving '%s'"), filename);
 
   success = xcf_save_image (&info, image, &my_error);
 
@@ -345,7 +345,7 @@ xcf_save_stream (Gimp           *gimp,
   if (success)
     {
       if (progress)
-        gimp_progress_set_text (progress, _("Closing '%s'"), filename);
+        clay_progress_set_text (progress, _("Closing '%s'"), filename);
     }
   else
     {
@@ -366,7 +366,7 @@ xcf_save_stream (Gimp           *gimp,
                                 _("Error writing '%s': "), filename);
 
   if (progress)
-    gimp_progress_end (progress);
+    clay_progress_end (progress);
 
   return success;
 }
@@ -374,29 +374,29 @@ xcf_save_stream (Gimp           *gimp,
 
 /*  private functions  */
 
-static GimpValueArray *
-xcf_load_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+xcf_load_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image = NULL;
+  ClayValueArray *return_vals;
+  ClayImage      *image = NULL;
   GFile          *file;
   GInputStream   *input;
   GError         *my_error = NULL;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   input = G_INPUT_STREAM (g_file_read (file, NULL, &my_error));
 
   if (input)
     {
-      image = xcf_load_stream (gimp, input, file, progress, error);
+      image = xcf_load_stream (clay, input, file, progress, error);
 
       g_object_unref (input);
     }
@@ -404,39 +404,39 @@ xcf_load_invoker (GimpProcedure         *procedure,
     {
       g_propagate_prefixed_error (error, my_error,
                                   _("Could not open '%s' for reading: "),
-                                  gimp_file_get_utf8_name (file));
+                                  clay_file_get_utf8_name (file));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, image != NULL,
+  return_vals = clay_procedure_get_return_values (procedure, image != NULL,
                                                   error ? *error : NULL);
 
   if (image)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), image);
+    g_value_set_object (clay_value_array_index (return_vals, 1), image);
 
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }
 
-static GimpValueArray *
-xcf_save_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+xcf_save_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GFile          *file;
   GOutputStream  *output;
   gboolean        success  = FALSE;
   GError         *my_error = NULL;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  image = g_value_get_object (gimp_value_array_index (args, 1));
-  file  = g_value_get_object (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 1));
+  file  = g_value_get_object (clay_value_array_index (args, 2));
 
   output = G_OUTPUT_STREAM (g_file_replace (file,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
@@ -444,7 +444,7 @@ xcf_save_invoker (GimpProcedure         *procedure,
 
   if (output)
     {
-      success = xcf_save_stream (gimp, image, output, file, progress, error);
+      success = xcf_save_stream (clay, image, output, file, progress, error);
 
       g_object_unref (output);
     }
@@ -452,13 +452,13 @@ xcf_save_invoker (GimpProcedure         *procedure,
     {
       g_propagate_prefixed_error (error, my_error,
                                   _("Error creating '%s': "),
-                                  gimp_file_get_utf8_name (file));
+                                  clay_file_get_utf8_name (file));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }

@@ -18,21 +18,21 @@
 #pragma once
 
 
-void   filters_apply_cmd_callback             (GimpAction *action,
+void   filters_apply_cmd_callback             (ClayAction *action,
                                                GVariant   *value,
                                                gpointer    data);
-void   filters_apply_interactive_cmd_callback (GimpAction *action,
-                                               GVariant   *value,
-                                               gpointer    data);
-
-void   filters_repeat_cmd_callback            (GimpAction *action,
-                                               GVariant   *value,
-                                               gpointer    data);
-void   filters_history_cmd_callback           (GimpAction *action,
+void   filters_apply_interactive_cmd_callback (ClayAction *action,
                                                GVariant   *value,
                                                gpointer    data);
 
-void    filters_run_procedure                 (Gimp          *gimp,
-                                               GimpDisplay   *display,
-                                               GimpProcedure *procedure,
-                                               GimpRunMode    run_mode);
+void   filters_repeat_cmd_callback            (ClayAction *action,
+                                               GVariant   *value,
+                                               gpointer    data);
+void   filters_history_cmd_callback           (ClayAction *action,
+                                               GVariant   *value,
+                                               gpointer    data);
+
+void    filters_run_procedure                 (Clay          *clay,
+                                               ClayDisplay   *display,
+                                               ClayProcedure *procedure,
+                                               ClayRunMode    run_mode);

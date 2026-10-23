@@ -5,7 +5,7 @@
 ;    1. test attributes of a minimal item
 ;    2. test transformations of item
 
-; Test of gimp-item-is-<ItemType> are elsewhere
+; Test of clay-item-is-<ItemType> are elsewhere
 
 ; Test of tree/group (raise/lower, reorder) are elsewhere
 
@@ -20,45 +20,45 @@
 ; Test methods of bare, minimal item.
 (define (test-bare-item item)
   ; item is a numeric ID is valid
-  (assert `(gimp-item-id-is-valid ,item))
+  (assert `(clay-item-id-is-valid ,item))
 
   ; item is not a group (can have no children)
-  (assert `(= (car (gimp-item-is-group ,item))
+  (assert `(= (car (clay-item-is-group ,item))
               0))
 
   ; item has no color tag
-  (assert `(= (car (gimp-item-get-color-tag ,item))
+  (assert `(= (car (clay-item-get-color-tag ,item))
               COLOR-TAG-NONE))
 
   ; item is not expanded
-  (assert `(= (car (gimp-item-get-expanded ,item))
+  (assert `(= (car (clay-item-get-expanded ,item))
               0))
 
   ; item has name, tattoo
   ; Test does not check returned value
-  (assert `(gimp-item-get-name ,item))
-  (assert `(gimp-item-get-tattoo ,item))
+  (assert `(clay-item-get-name ,item))
+  (assert `(clay-item-get-tattoo ,item))
 
   ; item has no parasites, yields no list of string
   ; !!! C GStrv marshaled to empty list
   ; Scheme null? tests for empty list
-  (assert `(null? (car (gimp-item-get-parasite-list ,item))))
+  (assert `(null? (car (clay-item-get-parasite-list ,item))))
 
   ; item has no parent
   ; yields -1 for NULL ID
-  (assert `(= (car (gimp-item-get-parent ,item))
+  (assert `(= (car (clay-item-get-parent ,item))
               -1))
 
   ; item has-a image
   ; Test does not compare item ID
-  (assert `(gimp-item-get-image ,item))
+  (assert `(clay-item-get-image ,item))
 
   ; item's content, position, visibility is not locked
-  (assert `(= (car (gimp-item-get-lock-content ,item))
+  (assert `(= (car (clay-item-get-lock-content ,item))
               0))
-  (assert `(= (car (gimp-item-get-lock-position ,item))
+  (assert `(= (car (clay-item-get-lock-position ,item))
               0))
-  (assert `(= (car (gimp-item-get-lock-visibility ,item))
+  (assert `(= (car (clay-item-get-lock-visibility ,item))
               0))
 )
 
@@ -66,7 +66,7 @@
 ; Test methods of image,item
 (define (test-item-in-image image item)
   ; item can produce a selection
-  (assert `(gimp-image-select-item
+  (assert `(clay-image-select-item
               ,image
               CHANNEL-OP-ADD
               ,item))
@@ -74,7 +74,7 @@
 
 
 
-; !!! GimpParasite does not have method new in PDB.
+; !!! ClayParasite does not have method new in PDB.
 ; But you can create one in ScriptFu as (list "name" <flags> "data")
 ; <flags>
 ; 0 - Not persistent and not UNDOable
@@ -82,8 +82,8 @@
 ; 2 - Not persistent and UNDOable
 ; 3 - Persistent and UNDOable
 
-; https://www.gimpusers.com/forums/gimp-user/12970-how-are-parasites-represented-in-script-fu
-; https://www.mail-archive.com/gimp-user@lists.xcf.berkeley.edu/msg20099.html
+; https://www.clayusers.com/forums/clay-user/12970-how-are-parasites-represented-in-script-fu
+; https://www.mail-archive.com/clay-user@lists.xcf.berkeley.edu/msg20099.html
 
 ; A returned parasite in ScriptFu is-a list (list "name" <flags> "data")
 
@@ -94,33 +94,33 @@
 
   ; not has-a parasite
   ; !!! procedure expected to fail when no parasite
-  (assert-error `(gimp-item-get-parasite
+  (assert-error `(clay-item-get-parasite
                   ,item
                   "Test Parasite") ; name
-                "Procedure execution of gimp-item-get-parasite failed")
+                "Procedure execution of clay-item-get-parasite failed")
 
   ; can attach parasite
-  (assert `(gimp-item-attach-parasite
+  (assert `(clay-item-attach-parasite
               ,item
               (list "Parasite New" 1 "Parasite Data")))
   ; attach was effective: now item has parasite
   ; and its name is as previously given
   (assert `(string=?
               ; !!! Parasite is list in list, and first element is name
-              (caar (gimp-item-get-parasite
+              (caar (clay-item-get-parasite
                         ,item
                         "Parasite New")) ; name
               "Parasite New"))
 
   ; can detach parasite
-  (assert `(gimp-item-detach-parasite
+  (assert `(clay-item-detach-parasite
               ,item
               "Parasite New"))
   ; detach was effective
-  (assert-error `(gimp-item-get-parasite
+  (assert-error `(clay-item-get-parasite
                   ,item
                   "Test Parasite") ; name
-                "Procedure execution of gimp-item-get-parasite failed")
+                "Procedure execution of clay-item-get-parasite failed")
 )
 
 
@@ -131,14 +131,14 @@
 ; All the items in the same testImage
 ; See earlier tests, where setup is lifted from
 
-(define testImage (testing:load-test-image "gimp-logo.png"))
-(define testLayer (vector-ref (car (gimp-image-get-layers testImage ))
+(define testImage (testing:load-test-image "clay-logo.png"))
+(define testLayer (vector-ref (car (clay-image-get-layers testImage ))
                                   0))
-(define testSelection (car (gimp-image-get-selection testImage)))
-(define testFont (car (gimp-context-get-font)))
+(define testSelection (car (clay-image-get-selection testImage)))
+(define testFont (car (clay-context-get-font)))
 (define
   testTextLayer
-   (car (gimp-text-font
+   (car (clay-text-font
               testImage
               -1     ; drawable.  -1 means NULL means create new text layer
               0 0   ; coords
@@ -147,30 +147,30 @@
               1     ; antialias true
               31    ; fontsize
               testFont )))
-(define testChannel (car (gimp-channel-new
+(define testChannel (car (clay-channel-new
             testImage      ; image
             "Test Channel" ; name
             23 24          ; width, height
             50.0           ; opacity
             "red" )))      ; compositing color
 ; must add to image
-(gimp-image-insert-channel
+(clay-image-insert-channel
             testImage
             testChannel
             0            ; parent, moot since channel groups not supported
             0)
 (define
   testLayerMask
-    (car (gimp-layer-create-mask
+    (car (clay-layer-create-mask
                     testLayer
                     ADD-MASK-WHITE)))
 ; must add to layer
-(gimp-layer-add-mask
+(clay-layer-add-mask
             testLayer
             testLayerMask)
-(define testPath (car (gimp-path-new testImage "Test Path")))
+(define testPath (car (clay-path-new testImage "Test Path")))
 ; must add to image
-(gimp-image-insert-path
+(clay-image-insert-path
                   testImage
                   testPath
                   0 0) ; parent=0 position=0
@@ -211,8 +211,8 @@
 
 ; TODO other item types e.g. ?
 
-; gimp-image-get-item-position
-; gimp-image-raise-item
-; gimp-image-raise-item-to-top
+; clay-image-get-item-position
+; clay-image-raise-item
+; clay-image-raise-item-to-top
 ; lower
 ; reorder

@@ -1,0 +1,34 @@
+/* Catppuccin theme, light scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(76,79,105);
+@define-color bg-color                   rgb(239,241,245);
+@define-color border-color               rgb(216,218,225);
+@define-color dimmed-fg-color            rgb(117,120,140);
+@define-color disabled-fg-color          rgb(149,152,168);
+@define-color disabled-button-color      rgb(187,189,200);
+@define-color hover-color                rgb(219,222,228);
+@define-color widget-bg-color            rgb(231,233,238);
+@define-color selected-color             rgb(210,212,220);
+@define-color extreme-bg-color           rgb(247,248,250);
+@define-color extreme-selected-color     rgb(216,218,225);
+@define-color strong-border-color        rgb(182,184,196);
+@define-color stronger-border-color      rgb(182,184,196);
+@define-color edge-border-color          rgb(182,184,196);
+@define-color scrollbar-slider-color     rgb(182,184,196);
+@define-color scrollbar-trough-color     rgb(239,241,245);
+@define-color ruler-color                rgba(216,218,225,0.3);
+@define-color accent-color               rgb(136,57,239);
+@define-color accent-hover-color         rgb(157,93,242);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(196,43,28);
+@define-color good-color                 rgb(31,122,63);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

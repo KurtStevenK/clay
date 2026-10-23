@@ -1,10 +1,10 @@
-__gimp()
+__clay()
 {
     COMPREPLY=()
     local current="${COMP_WORDS[COMP_CWORD]}"
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    # GIMP options, sorted alphabetically
+    # Clay options, sorted alphabetically
     #
     # Note that we don't specify short options here, since they're quite unintuitive
     options=(
@@ -13,12 +13,12 @@ __gimp()
         "--batch-interpreter"
         "--console-messages"
         "--debug-handlers"
-        "--dump-gimprc"
-        "--dump-gimprc-manpage"
-        "--dump-gimprc-system"
+        "--dump-clayrc"
+        "--dump-clayrc-manpage"
+        "--dump-clayrc-system"
         "--dump-pdb-procedures-deprecated"
         "--g-fatal-warnings"
-        "--gimprc"
+        "--clayrc"
         "--help"
         "--help-all"
         "--help-gegl"
@@ -36,7 +36,7 @@ __gimp()
         "--show-playground"
         "--show-debug-menu"
         "--stack-trace-mode"
-        "--system-gimprc"
+        "--system-clayrc"
         "--verbose"
         "--version"
     )
@@ -50,7 +50,7 @@ __gimp()
             return 0
             ;;
         # Expect a filename
-        gimprc | session | system-gimprc)
+        clayrc | session | system-clayrc)
             COMPREPLY=( $(compgen -f -- ${current}) )
             return 0
             ;;
@@ -60,7 +60,7 @@ __gimp()
             ;;
         batch-interpreter)
             # FIXME: we should try to get the list of interpreters somehow
-            local interpreters=$(gimp --LIST_INTERPRETERS)
+            local interpreters=$(clay --LIST_INTERPRETERS)
             COMPREPLY=("python-fu-eval" "plug-in-script-fu-eval")
             return 0
             ;;
@@ -73,19 +73,19 @@ __gimp()
    return 0
 }
 
-complete -F __gimp @GIMP_MAIN_EXE@
-if command -v @GIMP_SYMLINK1@ 2>&1 > /dev/null
+complete -F __clay @CLAY_MAIN_EXE@
+if command -v @CLAY_SYMLINK1@ 2>&1 > /dev/null
 then
-  complete -F __gimp @GIMP_SYMLINK1@
-  complete -F __gimp @GIMP_SYMLINK2@
+  complete -F __clay @CLAY_SYMLINK1@
+  complete -F __clay @CLAY_SYMLINK2@
 fi
 
-if command -v @GIMP_CONSOLE_EXE@ 2>&1 > /dev/null
+if command -v @CLAY_CONSOLE_EXE@ 2>&1 > /dev/null
 then
-  complete -F __gimp @GIMP_CONSOLE_EXE@
-  if command -v @GIMP_CONSOLE_SYMLINK1@ 2>&1 > /dev/null
+  complete -F __clay @CLAY_CONSOLE_EXE@
+  if command -v @CLAY_CONSOLE_SYMLINK1@ 2>&1 > /dev/null
   then
-    complete -F __gimp @GIMP_CONSOLE_SYMLINK1@
-    complete -F __gimp @GIMP_CONSOLE_SYMLINK2@
+    complete -F __clay @CLAY_CONSOLE_SYMLINK1@
+    complete -F __clay @CLAY_CONSOLE_SYMLINK2@
   fi
 fi

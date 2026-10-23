@@ -21,12 +21,12 @@
 #pragma once
 
 
-void       modifiers_init    (Gimp       *gimp);
-void       modifiers_exit    (Gimp       *gimp);
+void       modifiers_init    (Clay       *clay);
+void       modifiers_exit    (Clay       *clay);
 
-void       modifiers_restore (Gimp       *gimp);
-void       modifiers_save    (Gimp       *gimp,
+void       modifiers_restore (Clay       *clay);
+void       modifiers_save    (Clay       *clay,
                               gboolean    always_save);
 
-gboolean   modifiers_clear   (Gimp       *gimp,
+gboolean   modifiers_clear   (Clay       *clay,
                               GError    **error);

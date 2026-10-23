@@ -1,4 +1,4 @@
-/* tiff loading for GIMP
+/* tiff loading for Clay
  *  -Peter Mattis
  *
  * The TIFF loading code has been completely revamped by Nick Lamb

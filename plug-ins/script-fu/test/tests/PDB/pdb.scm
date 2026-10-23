@@ -28,7 +28,7 @@
 (testing:load-test "layer-mask.scm")
 ; TODO layer stack ops, moving up and down?
 
-; TODO broken until ScriptFu marshalls GimpUnit
+; TODO broken until ScriptFu marshalls ClayUnit
 ; and it crosses the wire?
 ; (testing:load-test "text-layer-new.scm")
 
@@ -83,15 +83,15 @@
 
 (testing:load-test "file.scm")
 
-; gimp module, gimp-get methods
+; clay module, clay-get methods
 
-; Since 3.0rc2 private to libgimp
-; gimp PDB as a queryable store i.e. database
+; Since 3.0rc2 private to libclay
+; clay PDB as a queryable store i.e. database
 ; (testing:load-test "PDB.scm")
 ; test methods on PDBProcedure
 ;(testing:load-test "procedures.scm")
 
-; test gimp as a refreshable set of installed resources
+; test clay as a refreshable set of installed resources
 (testing:load-test "refresh.scm")
 
 ; test methods on DrawableFilter
@@ -109,7 +109,7 @@
 ;   unit
 ;   parasite
 
-; gimp-parasite
+; clay-parasite
 
 ; uncategorized tests
 (testing:load-test "misc.scm")

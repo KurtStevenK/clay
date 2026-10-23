@@ -20,35 +20,35 @@
 
 #include "widgets/widgets-types.h"
 
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayuimanager.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimplayer-new.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/claylayer-new.h"
 
-#include "operations/gimplevelsconfig.h"
+#include "operations/claylevelsconfig.h"
 
 #include "tests.h"
 
-#include "gimp-app-test-utils.h"
+#include "clay-app-test-utils.h"
 
 
-#define GIMP_TEST_IMAGE_SIZE 100
+#define CLAY_TEST_IMAGE_SIZE 100
 
 #define ADD_IMAGE_TEST(function) \
-  g_test_add ("/gimp-core/" #function, \
-              GimpTestFixture, \
-              gimp, \
-              gimp_test_image_setup, \
+  g_test_add ("/clay-core/" #function, \
+              ClayTestFixture, \
+              clay, \
+              clay_test_image_setup, \
               function, \
-              gimp_test_image_teardown);
+              clay_test_image_teardown);
 
 #define ADD_TEST(function) \
-  g_test_add ("/gimp-core/" #function, \
-              GimpTestFixture, \
-              gimp, \
+  g_test_add ("/clay-core/" #function, \
+              ClayTestFixture, \
+              clay, \
               NULL, \
               function, \
               NULL);
@@ -56,45 +56,45 @@
 
 typedef struct
 {
-  GimpImage *image;
-} GimpTestFixture;
+  ClayImage *image;
+} ClayTestFixture;
 
 
-static void gimp_test_image_setup    (GimpTestFixture *fixture,
+static void clay_test_image_setup    (ClayTestFixture *fixture,
                                       gconstpointer    data);
-static void gimp_test_image_teardown (GimpTestFixture *fixture,
+static void clay_test_image_teardown (ClayTestFixture *fixture,
                                       gconstpointer    data);
 
 
 /**
- * gimp_test_image_setup:
+ * clay_test_image_setup:
  * @fixture:
  * @data:
  *
  * Test fixture setup for a single image.
  **/
 static void
-gimp_test_image_setup (GimpTestFixture *fixture,
+clay_test_image_setup (ClayTestFixture *fixture,
                        gconstpointer    data)
 {
-  Gimp *gimp = GIMP (data);
+  Clay *clay = Clay (data);
 
-  fixture->image = gimp_image_new (gimp,
-                                   GIMP_TEST_IMAGE_SIZE,
-                                   GIMP_TEST_IMAGE_SIZE,
-                                   GIMP_RGB,
-                                   GIMP_PRECISION_FLOAT_LINEAR);
+  fixture->image = clay_image_new (clay,
+                                   CLAY_TEST_IMAGE_SIZE,
+                                   CLAY_TEST_IMAGE_SIZE,
+                                   CLAY_RGB,
+                                   CLAY_PRECISION_FLOAT_LINEAR);
 }
 
 /**
- * gimp_test_image_teardown:
+ * clay_test_image_teardown:
  * @fixture:
  * @data:
  *
  * Test fixture teardown for a single image.
  **/
 static void
-gimp_test_image_teardown (GimpTestFixture *fixture,
+clay_test_image_teardown (ClayTestFixture *fixture,
                           gconstpointer    data)
 {
   g_object_unref (fixture->image);
@@ -106,41 +106,41 @@ gimp_test_image_teardown (GimpTestFixture *fixture,
  * @data:
  *
  * Super basic test that makes sure we can add a layer
- * and call gimp_item_rotate with center at (0, -10)
+ * and call clay_item_rotate with center at (0, -10)
  * without triggering a failed assertion .
  **/
 static void
-rotate_non_overlapping (GimpTestFixture *fixture,
+rotate_non_overlapping (ClayTestFixture *fixture,
                         gconstpointer    data)
 {
-  Gimp        *gimp    = GIMP (data);
-  GimpImage   *image   = fixture->image;
-  GimpLayer   *layer;
-  GimpContext *context = gimp_context_new (gimp, "Test", NULL /*template*/);
+  Clay        *clay    = Clay (data);
+  ClayImage   *image   = fixture->image;
+  ClayLayer   *layer;
+  ClayContext *context = clay_context_new (clay, "Test", NULL /*template*/);
   gboolean     result;
 
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 0);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 0);
 
-  layer = gimp_layer_new (image,
-                          GIMP_TEST_IMAGE_SIZE,
-                          GIMP_TEST_IMAGE_SIZE,
+  layer = clay_layer_new (image,
+                          CLAY_TEST_IMAGE_SIZE,
+                          CLAY_TEST_IMAGE_SIZE,
                           babl_format ("R'G'B'A u8"),
                           "Test Layer",
-                          GIMP_OPACITY_OPAQUE,
-                          GIMP_LAYER_MODE_NORMAL);
+                          CLAY_OPACITY_OPAQUE,
+                          CLAY_LAYER_MODE_NORMAL);
 
-  g_assert_cmpint (GIMP_IS_LAYER (layer), ==, TRUE);
+  g_assert_cmpint (CLAY_IS_LAYER (layer), ==, TRUE);
 
-  result = gimp_image_add_layer (image,
+  result = clay_image_add_layer (image,
                                  layer,
-                                 GIMP_IMAGE_ACTIVE_PARENT,
+                                 CLAY_IMAGE_ACTIVE_PARENT,
                                  0,
                                  FALSE);
 
-  gimp_item_rotate (GIMP_ITEM (layer), context, GIMP_ROTATE_DEGREES90, 0., -10., TRUE);
+  clay_item_rotate (CLAY_ITEM (layer), context, CLAY_ROTATE_DEGREES90, 0., -10., TRUE);
 
   g_assert_cmpint (result, ==, TRUE);
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 1);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 1);
   g_object_unref (context);
 }
 
@@ -152,33 +152,33 @@ rotate_non_overlapping (GimpTestFixture *fixture,
  * Super basic test that makes sure we can add a layer.
  **/
 static void
-add_layer (GimpTestFixture *fixture,
+add_layer (ClayTestFixture *fixture,
            gconstpointer    data)
 {
-  GimpImage *image = fixture->image;
-  GimpLayer *layer;
+  ClayImage *image = fixture->image;
+  ClayLayer *layer;
   gboolean   result;
 
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 0);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 0);
 
-  layer = gimp_layer_new (image,
-                          GIMP_TEST_IMAGE_SIZE,
-                          GIMP_TEST_IMAGE_SIZE,
+  layer = clay_layer_new (image,
+                          CLAY_TEST_IMAGE_SIZE,
+                          CLAY_TEST_IMAGE_SIZE,
                           babl_format ("R'G'B'A u8"),
                           "Test Layer",
-                          GIMP_OPACITY_OPAQUE,
-                          GIMP_LAYER_MODE_NORMAL);
+                          CLAY_OPACITY_OPAQUE,
+                          CLAY_LAYER_MODE_NORMAL);
 
-  g_assert_cmpint (GIMP_IS_LAYER (layer), ==, TRUE);
+  g_assert_cmpint (CLAY_IS_LAYER (layer), ==, TRUE);
 
-  result = gimp_image_add_layer (image,
+  result = clay_image_add_layer (image,
                                  layer,
-                                 GIMP_IMAGE_ACTIVE_PARENT,
+                                 CLAY_IMAGE_ACTIVE_PARENT,
                                  0,
                                  FALSE);
 
   g_assert_cmpint (result, ==, TRUE);
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 1);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 1);
 }
 
 /**
@@ -189,40 +189,40 @@ add_layer (GimpTestFixture *fixture,
  * Super basic test that makes sure we can remove a layer.
  **/
 static void
-remove_layer (GimpTestFixture *fixture,
+remove_layer (ClayTestFixture *fixture,
               gconstpointer    data)
 {
-  GimpImage *image = fixture->image;
-  GimpLayer *layer;
+  ClayImage *image = fixture->image;
+  ClayLayer *layer;
   gboolean   result;
 
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 0);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 0);
 
-  layer = gimp_layer_new (image,
-                          GIMP_TEST_IMAGE_SIZE,
-                          GIMP_TEST_IMAGE_SIZE,
+  layer = clay_layer_new (image,
+                          CLAY_TEST_IMAGE_SIZE,
+                          CLAY_TEST_IMAGE_SIZE,
                           babl_format ("R'G'B'A u8"),
                           "Test Layer",
-                          GIMP_OPACITY_OPAQUE,
-                          GIMP_LAYER_MODE_NORMAL);
+                          CLAY_OPACITY_OPAQUE,
+                          CLAY_LAYER_MODE_NORMAL);
 
-  g_assert_cmpint (GIMP_IS_LAYER (layer), ==, TRUE);
+  g_assert_cmpint (CLAY_IS_LAYER (layer), ==, TRUE);
 
-  result = gimp_image_add_layer (image,
+  result = clay_image_add_layer (image,
                                  layer,
-                                 GIMP_IMAGE_ACTIVE_PARENT,
+                                 CLAY_IMAGE_ACTIVE_PARENT,
                                  0,
                                  FALSE);
 
   g_assert_cmpint (result, ==, TRUE);
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 1);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 1);
 
-  gimp_image_remove_layer (image,
+  clay_image_remove_layer (image,
                            layer,
                            FALSE,
                            NULL);
 
-  g_assert_cmpint (gimp_image_get_n_layers (image), ==, 0);
+  g_assert_cmpint (clay_image_get_n_layers (image), ==, 0);
 }
 
 /**
@@ -235,18 +235,18 @@ remove_layer (GimpTestFixture *fixture,
  * calculate what gamma will give a white graypoint.
  **/
 static void
-white_graypoint_in_red_levels (GimpTestFixture *fixture,
+white_graypoint_in_red_levels (ClayTestFixture *fixture,
                                gconstpointer    data)
 {
   GeglColor            *black   = gegl_color_new ("transparent");
   GeglColor            *gray    = gegl_color_new ("white");
   GeglColor            *white   = gegl_color_new ("white");
-  GimpHistogramChannel  channel = GIMP_HISTOGRAM_RED;
-  GimpLevelsConfig     *config;
+  ClayHistogramChannel  channel = CLAY_HISTOGRAM_RED;
+  ClayLevelsConfig     *config;
 
-  config = g_object_new (GIMP_TYPE_LEVELS_CONFIG, NULL);
+  config = g_object_new (CLAY_TYPE_LEVELS_CONFIG, NULL);
 
-  gimp_levels_config_adjust_by_colors (config,
+  clay_levels_config_adjust_by_colors (config,
                                        channel,
                                        NULL,
                                        black,
@@ -267,16 +267,16 @@ int
 main (int    argc,
       char **argv)
 {
-  Gimp *gimp;
+  Clay *clay;
   int   result;
 
   g_test_init (&argc, &argv, NULL);
 
-  gimp_test_utils_set_gimp3_directory ("GIMP_TESTING_ABS_TOP_SRCDIR",
-                                       "app/tests/gimpdir");
+  clay_test_utils_set_clay3_directory ("CLAY_TESTING_ABS_TOP_SRCDIR",
+                                       "app/tests/claydir");
 
   /* We share the same application instance across all tests */
-  gimp = gimp_init_for_testing ();
+  clay = clay_init_for_testing ();
 
   /* Add tests */
   ADD_IMAGE_TEST (add_layer);
@@ -288,11 +288,11 @@ main (int    argc,
   result = g_test_run ();
 
   /* Don't write files to the source dir */
-  gimp_test_utils_set_gimp3_directory ("GIMP_TESTING_ABS_TOP_BUILDDIR",
-                                       "app/tests/gimpdir-output");
+  clay_test_utils_set_clay3_directory ("CLAY_TESTING_ABS_TOP_BUILDDIR",
+                                       "app/tests/claydir-output");
 
   /* Exit so we don't break script-fu plug-in wire */
-  gimp_exit (gimp, TRUE);
+  clay_exit (clay, TRUE);
 
   return result;
 }

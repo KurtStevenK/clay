@@ -18,28 +18,28 @@
 #pragma once
 
 
-void   dockable_add_tab_cmd_callback         (GimpAction *action,
+void   dockable_add_tab_cmd_callback         (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   dockable_close_tab_cmd_callback       (GimpAction *action,
+void   dockable_close_tab_cmd_callback       (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   dockable_detach_tab_cmd_callback      (GimpAction *action,
+void   dockable_detach_tab_cmd_callback      (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   dockable_lock_tab_cmd_callback        (GimpAction *action,
+void   dockable_lock_tab_cmd_callback        (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
 
-void   dockable_toggle_view_cmd_callback     (GimpAction *action,
+void   dockable_toggle_view_cmd_callback     (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   dockable_view_size_cmd_callback       (GimpAction *action,
+void   dockable_view_size_cmd_callback       (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   dockable_tab_style_cmd_callback       (GimpAction *action,
+void   dockable_tab_style_cmd_callback       (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   dockable_show_button_bar_cmd_callback (GimpAction *action,
+void   dockable_show_button_bar_cmd_callback (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);

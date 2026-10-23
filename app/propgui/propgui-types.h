@@ -26,13 +26,13 @@
 
 typedef enum
 {
-  GIMP_CONTROLLER_TYPE_LINE,
-  GIMP_CONTROLLER_TYPE_SLIDER_LINE,
-  GIMP_CONTROLLER_TYPE_TRANSFORM_GRID,
-  GIMP_CONTROLLER_TYPE_TRANSFORM_GRIDS,
-  GIMP_CONTROLLER_TYPE_GYROSCOPE,
-  GIMP_CONTROLLER_TYPE_FOCUS
-} GimpControllerType;
+  CLAY_CONTROLLER_TYPE_LINE,
+  CLAY_CONTROLLER_TYPE_SLIDER_LINE,
+  CLAY_CONTROLLER_TYPE_TRANSFORM_GRID,
+  CLAY_CONTROLLER_TYPE_TRANSFORM_GRIDS,
+  CLAY_CONTROLLER_TYPE_GYROSCOPE,
+  CLAY_CONTROLLER_TYPE_FOCUS
+} ClayControllerType;
 
 
 /*  structs  */
@@ -49,15 +49,15 @@ typedef struct
   guint          removable  : 1;  /*  slider is removable                    */
 
   guint          autohide   : 1;  /*  whether to autohide the slider         */
-  GimpHandleType type;            /*  slider handle type                     */
+  ClayHandleType type;            /*  slider handle type                     */
   gdouble        size;            /*  slider handle size, as a fraction of   *
                                    *  the default size                       */
 
   gpointer       data;            /*  user data                              */
-} GimpControllerSlider;
+} ClayControllerSlider;
 
-#define GIMP_CONTROLLER_SLIDER_DEFAULT                                         \
-  ((const GimpControllerSlider) {                                              \
+#define CLAY_CONTROLLER_SLIDER_DEFAULT                                         \
+  ((const ClayControllerSlider) {                                              \
     .value      = 0.0,                                                         \
     .min        = 0.0,                                                         \
     .max        = 1.0,                                                         \
@@ -68,7 +68,7 @@ typedef struct
     .removable  = FALSE,                                                       \
                                                                                \
     .autohide   = FALSE,                                                       \
-    .type       = GIMP_HANDLE_FILLED_DIAMOND,                                  \
+    .type       = CLAY_HANDLE_FILLED_DIAMOND,                                  \
     .size       = 1.0,                                                         \
                                                                                \
     .data       = NULL                                                         \
@@ -77,44 +77,44 @@ typedef struct
 
 /*  function types  */
 
-typedef void (* GimpPickerCallback)                   (gpointer                    data,
+typedef void (* ClayPickerCallback)                   (gpointer                    data,
                                                        gpointer                    identifier,
                                                        gdouble                     x,
                                                        gdouble                     y,
                                                        const Babl                 *sample_format,
                                                        GeglColor                  *color);
 
-typedef void (* GimpControllerLineCallback)           (gpointer                    data,
+typedef void (* ClayControllerLineCallback)           (gpointer                    data,
                                                        GeglRectangle              *area,
                                                        gdouble                     x1,
                                                        gdouble                     y1,
                                                        gdouble                     x2,
                                                        gdouble                     y2);
-typedef void (* GimpControllerSliderLineCallback)     (gpointer                    data,
+typedef void (* ClayControllerSliderLineCallback)     (gpointer                    data,
                                                        GeglRectangle              *area,
                                                        gdouble                     x1,
                                                        gdouble                     y1,
                                                        gdouble                     x2,
                                                        gdouble                     y2,
-                                                       const GimpControllerSlider *sliders,
+                                                       const ClayControllerSlider *sliders,
                                                        gint                        n_sliders);
-typedef void (* GimpControllerTransformGridCallback)  (gpointer                    data,
+typedef void (* ClayControllerTransformGridCallback)  (gpointer                    data,
                                                        GeglRectangle              *area,
-                                                       const GimpMatrix3          *transform);
-typedef void (* GimpControllerTransformGridsCallback) (gpointer                    data,
+                                                       const ClayMatrix3          *transform);
+typedef void (* ClayControllerTransformGridsCallback) (gpointer                    data,
                                                        GeglRectangle              *area,
-                                                       const GimpMatrix3          *transforms,
+                                                       const ClayMatrix3          *transforms,
                                                        gint                        n_transforms);
-typedef void (* GimpControllerGyroscopeCallback)      (gpointer                    data,
+typedef void (* ClayControllerGyroscopeCallback)      (gpointer                    data,
                                                        GeglRectangle              *area,
                                                        gdouble                     yaw,
                                                        gdouble                     pitch,
                                                        gdouble                     roll,
                                                        gdouble                     zoom,
                                                        gboolean                    invert);
-typedef void (* GimpControllerFocusCallback)          (gpointer                    data,
+typedef void (* ClayControllerFocusCallback)          (gpointer                    data,
                                                        GeglRectangle              *area,
-                                                       GimpLimitType               type,
+                                                       ClayLimitType               type,
                                                        gdouble                     x,
                                                        gdouble                     y,
                                                        gdouble                     radius,
@@ -124,16 +124,16 @@ typedef void (* GimpControllerFocusCallback)          (gpointer                 
                                                        gdouble                     midpoint);
 
 
-typedef GtkWidget * (* GimpCreatePickerFunc)          (gpointer                    creator,
+typedef GtkWidget * (* ClayCreatePickerFunc)          (gpointer                    creator,
                                                        const gchar                *property_name,
                                                        const gchar                *icon_name,
                                                        const gchar                *tooltip,
                                                        gboolean                    pick_abyss,
-                                                       GimpPickerCallback          callback,
+                                                       ClayPickerCallback          callback,
                                                        gpointer                    callback_data);
 
-typedef GCallback   (* GimpCreateControllerFunc)      (gpointer                    creator,
-                                                       GimpControllerType          controller_type,
+typedef GCallback   (* ClayCreateControllerFunc)      (gpointer                    creator,
+                                                       ClayControllerType          controller_type,
                                                        const gchar                *status_title,
                                                        GCallback                   callback,
                                                        gpointer                    callback_data,

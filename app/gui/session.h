@@ -18,13 +18,13 @@
 #pragma once
 
 
-void       session_init    (Gimp       *gimp);
-void       session_exit    (Gimp       *gimp);
+void       session_init    (Clay       *clay);
+void       session_exit    (Clay       *clay);
 
-void       session_restore (Gimp       *gimp,
+void       session_restore (Clay       *clay,
                             GdkMonitor *monitor);
-void       session_save    (Gimp       *gimp,
+void       session_save    (Clay       *clay,
                             gboolean    always_save);
 
-gboolean   session_clear   (Gimp       *gimp,
+gboolean   session_clear   (Clay       *clay,
                             GError    **error);

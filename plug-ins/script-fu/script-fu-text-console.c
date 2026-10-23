@@ -24,28 +24,28 @@
 #include <unistd.h>
 #endif
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 #include "script-fu-text-console.h"
 
 #include "script-fu-intl.h"
 #include "script-fu-lib.h"
 
-GimpValueArray *
-script_fu_text_console_run (GimpProcedure        *procedure,
-                            GimpProcedureConfig  *config)
+ClayValueArray *
+script_fu_text_console_run (ClayProcedure        *procedure,
+                            ClayProcedureConfig  *config)
 {
   script_fu_redirect_output_to_stdout ();
 
   script_fu_print_welcome ();
 
-  gimp_plug_in_set_pdb_error_handler (gimp_procedure_get_plug_in (procedure),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_procedure_get_plug_in (procedure),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   script_fu_run_read_eval_print_loop ();
 
-  gimp_plug_in_set_pdb_error_handler (gimp_procedure_get_plug_in (procedure),
-                                      GIMP_PDB_ERROR_HANDLER_INTERNAL);
+  clay_plug_in_set_pdb_error_handler (clay_procedure_get_plug_in (procedure),
+                                      CLAY_PDB_ERROR_HANDLER_INTERNAL);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }

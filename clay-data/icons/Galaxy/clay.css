@@ -1,0 +1,25 @@
+/* Galaxy icon theme: with "Use symbolic icons" switched on, the toolbox icons
+ * cycle through the colours below, each tool one step behind the previous
+ * one, so the colours rotate across the toolbox. With it switched off the
+ * theme's own static colour icons are shown instead.
+ */
+@keyframes clay-galaxy-cycle {
+    0% { color: #7B2FF7; }
+   17% { color: #C13CF0; }
+   33% { color: #FF4FD8; }
+   50% { color: #2EC5FF; }
+   67% { color: #4D6BFF; }
+   83% { color: #9B3DF5; }
+  100% { color: #7B2FF7; }
+}
+
+toolbutton button image {
+  animation: clay-galaxy-cycle 8s linear infinite;
+}
+
+toolbutton:nth-child(6n+1) button image { animation-delay: 0.0s; }
+toolbutton:nth-child(6n+2) button image { animation-delay: 1.3s; }
+toolbutton:nth-child(6n+3) button image { animation-delay: 2.7s; }
+toolbutton:nth-child(6n+4) button image { animation-delay: 4.0s; }
+toolbutton:nth-child(6n+5) button image { animation-delay: 5.3s; }
+toolbutton:nth-child(6n+6) button image { animation-delay: 6.7s; }

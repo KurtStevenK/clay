@@ -25,45 +25,45 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpparamspecs.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-plug_in_web_browser_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+plug_in_web_browser_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
   const gchar *url;
 
-  url = g_value_get_string (gimp_value_array_index (args, 0));
+  url = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
       success = g_app_info_launch_default_for_uri (url, NULL, error);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gimp_online_main_web_site_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+clay_online_main_web_site_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
@@ -71,16 +71,16 @@ gimp_online_main_web_site_invoker (GimpProcedure         *procedure,
     {
       success = g_app_info_launch_default_for_uri ("https://www.gimp.org/", NULL, error);
     }
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gimp_online_docs_web_site_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+clay_online_docs_web_site_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
@@ -88,33 +88,33 @@ gimp_online_docs_web_site_invoker (GimpProcedure         *procedure,
     {
       success = g_app_info_launch_default_for_uri ("https://docs.gimp.org/", NULL, error);
     }
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gimp_online_bugs_features_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+clay_online_bugs_features_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   if (success)
     {
-      success = g_app_info_launch_default_for_uri ("https://gitlab.gnome.org/GNOME/gimp/issues", NULL, error);
+      success = g_app_info_launch_default_for_uri ("https://github.com/KurtStevenK/clay/issues", NULL, error);
     }
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gimp_online_developer_web_site_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+clay_online_developer_web_site_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
@@ -122,16 +122,16 @@ gimp_online_developer_web_site_invoker (GimpProcedure         *procedure,
     {
       success = g_app_info_launch_default_for_uri ("https://developer.gimp.org/", NULL, error);
     }
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gimp_online_roadmap_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+clay_online_roadmap_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
@@ -139,22 +139,22 @@ gimp_online_roadmap_invoker (GimpProcedure         *procedure,
     {
       success = g_app_info_launch_default_for_uri ("https://developer.gimp.org/core/roadmap/", NULL, error);
     }
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_plug_in_compat_procs (GimpPDB *pdb)
+register_plug_in_compat_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-plug-in-web-browser
+   * clay-plug-in-web-browser
    */
-  procedure = gimp_procedure_new (plug_in_web_browser_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
+  procedure = clay_procedure_new (plug_in_web_browser_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
                                "plug-in-web-browser");
-  gimp_procedure_set_static_help (procedure,
+  clay_procedure_set_static_help (procedure,
                                   "Open a URI",
                                   "Open a URI in the user specified software.\n"
                                   "\n"
@@ -162,163 +162,163 @@ register_plug_in_compat_procs (GimpPDB *pdb)
                                   "\n"
                                   "This PDB procedure is deprecated without any replacement because you should not need a PDB procedure to open a given URI in your browser.\n"
                                   "Instead use the GLib function `g_app_info_launch_default_for_uri()`, or again the GTK function `gtk_show_uri_on_window()`.\n"
-                                  "In Script-Fu, you may use `(gimp-show-uri)`.\n"
+                                  "In Script-Fu, you may use `(clay-show-uri)`.\n"
                                   "\n"
                                   "Deprecated: There is no replacement for this procedure.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "2003-09-16");
-  gimp_procedure_set_deprecated (procedure,
+  clay_procedure_set_deprecated (procedure,
                                  "NONE");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("url",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("url",
                                                        "url",
                                                        "URI to open",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gimp-online-main-web-site
+   * clay-clay-online-main-web-site
    */
-  procedure = gimp_procedure_new (gimp_online_main_web_site_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-online-main-web-site");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clay_online_main_web_site_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-online-main-web-site");
+  clay_procedure_set_static_help (procedure,
                                   "Main Web Site",
-                                  "Bookmark to the GIMP web site\n"
+                                  "Bookmark to the Clay web site\n"
                                   "\n"
                                   "Deprecated: Use plug_in_web_browser() instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "2003");
-  gimp_procedure_set_deprecated (procedure,
+  clay_procedure_set_deprecated (procedure,
                                  "plug-in-web-browser");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("run-mode",
                                                   "run mode",
                                                   "The run mode",
-                                                  GIMP_TYPE_RUN_MODE,
-                                                  GIMP_RUN_INTERACTIVE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_RUN_MODE,
+                                                  CLAY_RUN_INTERACTIVE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gimp-online-docs-web-site
+   * clay-clay-online-docs-web-site
    */
-  procedure = gimp_procedure_new (gimp_online_docs_web_site_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-online-docs-web-site");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clay_online_docs_web_site_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-online-docs-web-site");
+  clay_procedure_set_static_help (procedure,
                                   "User Manual Web Site",
-                                  "Bookmark to the GIMP Documentation web site\n"
+                                  "Bookmark to the Clay Documentation web site\n"
                                   "\n"
                                   "Deprecated: Use plug_in_web_browser() instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "2006");
-  gimp_procedure_set_deprecated (procedure,
+  clay_procedure_set_deprecated (procedure,
                                  "plug-in-web-browser");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("run-mode",
                                                   "run mode",
                                                   "The run mode",
-                                                  GIMP_TYPE_RUN_MODE,
-                                                  GIMP_RUN_INTERACTIVE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_RUN_MODE,
+                                                  CLAY_RUN_INTERACTIVE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gimp-online-bugs-features
+   * clay-clay-online-bugs-features
    */
-  procedure = gimp_procedure_new (gimp_online_bugs_features_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-online-bugs-features");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clay_online_bugs_features_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-online-bugs-features");
+  clay_procedure_set_static_help (procedure,
                                   "Bug Tracker",
-                                  "Bookmark to the bug tracker of GIMP\n"
+                                  "Bookmark to the bug tracker of Clay\n"
                                   "\n"
                                   "Deprecated: Use plug_in_web_browser() instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "2018");
-  gimp_procedure_set_deprecated (procedure,
+  clay_procedure_set_deprecated (procedure,
                                  "plug-in-web-browser");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("run-mode",
                                                   "run mode",
                                                   "The run mode",
-                                                  GIMP_TYPE_RUN_MODE,
-                                                  GIMP_RUN_INTERACTIVE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_RUN_MODE,
+                                                  CLAY_RUN_INTERACTIVE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gimp-online-developer-web-site
+   * clay-clay-online-developer-web-site
    */
-  procedure = gimp_procedure_new (gimp_online_developer_web_site_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-online-developer-web-site");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clay_online_developer_web_site_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-online-developer-web-site");
+  clay_procedure_set_static_help (procedure,
                                   "Bug Tracker",
-                                  "Bookmark to the bug tracker of GIMP\n"
+                                  "Bookmark to the bug tracker of Clay\n"
                                   "\n"
                                   "Deprecated: Use plug_in_web_browser() instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "2003");
-  gimp_procedure_set_deprecated (procedure,
+  clay_procedure_set_deprecated (procedure,
                                  "plug-in-web-browser");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("run-mode",
                                                   "run mode",
                                                   "The run mode",
-                                                  GIMP_TYPE_RUN_MODE,
-                                                  GIMP_RUN_INTERACTIVE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_RUN_MODE,
+                                                  CLAY_RUN_INTERACTIVE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gimp-online-roadmap
+   * clay-clay-online-roadmap
    */
-  procedure = gimp_procedure_new (gimp_online_roadmap_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-online-roadmap");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clay_online_roadmap_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-online-roadmap");
+  clay_procedure_set_static_help (procedure,
                                   "Roadmaps",
-                                  "Bookmark to the roadmaps of GIMP\n"
+                                  "Bookmark to the roadmaps of Clay\n"
                                   "\n"
                                   "Deprecated: Use plug_in_web_browser() instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "2018");
-  gimp_procedure_set_deprecated (procedure,
+  clay_procedure_set_deprecated (procedure,
                                  "plug-in-web-browser");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("run-mode",
                                                   "run mode",
                                                   "The run mode",
-                                                  GIMP_TYPE_RUN_MODE,
-                                                  GIMP_RUN_INTERACTIVE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_RUN_MODE,
+                                                  CLAY_RUN_INTERACTIVE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

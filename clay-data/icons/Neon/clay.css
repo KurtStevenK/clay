@@ -1,0 +1,25 @@
+/* Neon icon theme: with "Use symbolic icons" switched on, the toolbox icons
+ * cycle through the colours below, each tool one step behind the previous
+ * one, so the colours rotate across the toolbox. With it switched off the
+ * theme's own static colour icons are shown instead.
+ */
+@keyframes clay-neon-cycle {
+    0% { color: #00F0FF; }
+   17% { color: #39FF14; }
+   33% { color: #FFF000; }
+   50% { color: #FF6A00; }
+   67% { color: #FF2BD6; }
+   83% { color: #B026FF; }
+  100% { color: #00F0FF; }
+}
+
+toolbutton button image {
+  animation: clay-neon-cycle 6s linear infinite;
+}
+
+toolbutton:nth-child(6n+1) button image { animation-delay: 0.0s; }
+toolbutton:nth-child(6n+2) button image { animation-delay: 1.0s; }
+toolbutton:nth-child(6n+3) button image { animation-delay: 2.0s; }
+toolbutton:nth-child(6n+4) button image { animation-delay: 3.0s; }
+toolbutton:nth-child(6n+5) button image { animation-delay: 4.0s; }
+toolbutton:nth-child(6n+6) button image { animation-delay: 5.0s; }

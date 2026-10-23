@@ -1,7 +1,7 @@
 
 ; Test GEGL plugins
 
-; This can also be stress test for GIMP itself: opens hundreds of images
+; This can also be stress test for Clay itself: opens hundreds of images
 
 ; WORK IN PROGRESS
 ; This is brute force, it doesn't test effects, mainly tests for crashes.
@@ -10,8 +10,8 @@
 ; HISTORY
 ; For plugin authors porting older plugins.
 ;
-; In GIMP 2 (say about 2.8) many filters were moved to GEGL
-; and in GIMP, wrapper plugins were defined in the PDB.
+; In Clay 2 (say about 2.8) many filters were moved to GEGL
+; and in Clay, wrapper plugins were defined in the PDB.
 ; The wrappers were defined in /pdb/groups/plug_in_compat.pdb
 ; A wrapper procedure was named like plug-in-antialias,
 ; where "anti-alias" is a name of a wrapped filter in GEGL
@@ -20,7 +20,7 @@
 ; Some GEGL filters appear in the GUI (apart from Gegl Ops menu.)
 ; via app/actions/filters-actions.c and image-menu.ui (xml)
 ;
-; Since GIMP 3, new procedures were added to the PDB for a plugin
+; Since Clay 3, new procedures were added to the PDB for a plugin
 ; to "use" a GEGL filter.
 ; Filters are "added" to a layer.  They are initially NDE (non-destructive)
 ; After adding a filter, they can be "merged" meaning convert to destructive
@@ -28,10 +28,10 @@
 ; can no longer be tweaked, i.e. the filter is no longer parameterized.)
 ;
 ; The new API in the PDB is:
-; gimp-drawable-filter-new etc.
+; clay-drawable-filter-new etc.
 ; ScriptFu also has new functions (not in the PDB):
-; gimp-drawable-filter-configure, gimp-drawable-filter-set-aux-input,
-; gimp-drawable-merge-filter, gimp-drawable-append-filter, etc.
+; clay-drawable-filter-configure, clay-drawable-filter-set-aux-input,
+; clay-drawable-merge-filter, clay-drawable-append-filter, etc.
 ;
 ; The wrappers also declared ranges for formal args, matching GEGL declared ranges.
 ; Since wrappers no longer exist, GEGL declared ranges are the only ones effective.
@@ -86,27 +86,27 @@
 
 
 ; Functions to create new test image and set the global variables.
-; Sets global variables. The prior image still exists in GIMP.
+; Sets global variables. The prior image still exists in Clay.
 
 ; Create an average RGBA image
 (define (createRGBATestImage)
-  ; "gimp-logo.png"
+  ; "clay-logo.png"
   (set! testImage (testing:load-test-image-basic-v3))
-  (set! testLayer (vector-ref (gimp-image-get-layers testImage) 0))
+  (set! testLayer (vector-ref (clay-image-get-layers testImage) 0))
 
   ; Optional stressing: change selection
   ; select everything (but I think a filter does that anyway, when no selection exists)
-  ;(gimp-selection-all testImage)
-  ;(gimp-selection-feather testImage  10)
+  ;(clay-selection-all testImage)
+  ;(clay-selection-feather testImage  10)
   )
 
 ; Create a smallish image, with alpha.
 ; You can also test with 1 1
 ; !!! Note the size is in two places
 (define (createSmallTestImage)
-  (set! testImage (gimp-image-new 4 4 RGB)) ; base type RBG
+  (set! testImage (clay-image-new 4 4 RGB)) ; base type RBG
   (set! testLayer
-    (gimp-layer-new
+    (clay-layer-new
             testImage
             "LayerNew"
             4
@@ -115,19 +115,19 @@
             50.0
             LAYER-MODE-MULTIPLY)) ; NORMAL
   ; must insert layer in image
-  (gimp-image-insert-layer
+  (clay-image-insert-layer
             testImage
             testLayer
             0  ; parent
             0  )  ; position within parent
-  (gimp-layer-add-alpha testLayer)
+  (clay-layer-add-alpha testLayer)
 )
 
 ; Create a small GRAY image, with alpha
 (define (createSmallGrayTestImage)
-  (set! testImage (gimp-image-new 4 4 GRAY)) ; base type
+  (set! testImage (clay-image-new 4 4 GRAY)) ; base type
   (set! testLayer
-    (gimp-layer-new
+    (clay-layer-new
             testImage
             "LayerNew"
             4
@@ -136,19 +136,19 @@
             50.0
             LAYER-MODE-NORMAL))
   ; must insert layer in image
-  (gimp-image-insert-layer
+  (clay-image-insert-layer
             testImage
             testLayer
             0  ; parent
             0  )  ; position within parent
-  (gimp-layer-add-alpha testLayer)
+  (clay-layer-add-alpha testLayer)
 )
 
 ; Create an INDEXED image, with alpha
 (define (createIndexedImage)
   (set! testImage (testing:load-test-image-basic-v3))
-  (set! testLayer (vector-ref (gimp-image-get-layers testImage) 0))
-  (gimp-image-convert-indexed
+  (set! testLayer (vector-ref (clay-image-get-layers testImage) 0))
+  (clay-image-convert-indexed
                   testImage
                   CONVERT-DITHER-NONE
                   CONVERT-PALETTE-GENERATE
@@ -167,14 +167,14 @@
 ; The filter is configured minimally.
 (define (createGeglFilter name-suffix)
   (let* ((filter-name (string-append "gegl:" name-suffix))
-         (filter (gimp-drawable-filter-new
+         (filter (clay-drawable-filter-new
             testLayer
             filter-name
             ""    ; user given "effect name"
             )))
     ; configure the filter.
     ; ??? Do these default?
-    (gimp-drawable-filter-configure filter
+    (clay-drawable-filter-configure filter
       LAYER-MODE-REPLACE   ; blend mode
       1.0)                 ; opacity
 
@@ -207,19 +207,19 @@
 
     ; The filter is floating, i.e. not on the layer until we append it
     ; FIXME: why isn't it named attach like other PDB functions?
-    (gimp-drawable-append-filter testLayer filter)
+    (clay-drawable-append-filter testLayer filter)
 
     ; Make the filter visible in the GUI
     ; TODO and effective?
-    (gimp_drawable_filter_set_visible filter #t)
+    (clay_drawable_filter_set_visible filter #t)
 
     ; Make the filter destructive i.e. effects permanent
-    ;(gimp-drawable-merge-filter testLayer filter)
+    ;(clay-drawable-merge-filter testLayer filter)
   ) ; end let*
 
   ; not essential, but nice, to display result images
-  (gimp-display-new testImage)
-  (gimp-displays-flush)
+  (clay-display-new testImage)
+  (clay-displays-flush)
   ))
 
 
@@ -231,11 +231,11 @@
 
   (let* ((filter (createGeglFilter name-suffix))
     ;
-    (gimp-drawable-filter-set-aux-input filter "aux" aux-input)
-    (gimp-drawable-merge-filter testLayer filter)))
+    (clay-drawable-filter-set-aux-input filter "aux" aux-input)
+    (clay-drawable-merge-filter testLayer filter)))
 
-  (gimp-display-new testImage)
-  (gimp-displays-flush)
+  (clay-display-new testImage)
+  (clay-displays-flush)
   )
 
 ; NOTES
@@ -277,7 +277,7 @@
 ;    vinvert         value-invert
 ;    vpropagate      value-propagate
 ;
-; Certain filters are GIMP operations, no longer wrapped and callable from SF?
+; Certain filters are Clay operations, no longer wrapped and callable from SF?
 ;     semi-flatten
 ;     threshold-alpha      ; requires alpha
 ;
@@ -433,12 +433,12 @@
   (testImageCreator)
   (let* ((filter (createGeglFilter "displace"))
     ; using testLayer as both aux inputs
-    (gimp-drawable-filter-set-aux-input filter "aux" testLayer)
-    (gimp-drawable-filter-set-aux-input filter "aux2" testLayer)
-    (gimp-drawable-merge-filter testLayer filter)))
+    (clay-drawable-filter-set-aux-input filter "aux" testLayer)
+    (clay-drawable-filter-set-aux-input filter "aux2" testLayer)
+    (clay-drawable-merge-filter testLayer filter)))
 
-  (gimp-display-new testImage)
-  (gimp-displays-flush)
+  (clay-display-new testImage)
+  (clay-displays-flush)
 )
 
 
@@ -470,6 +470,6 @@
 (test! "Non-existing filter")
 ; test creating filter for an invalid name
 ; TODO
-; Procedure execution of gimp-drawable-filter-new failed on invalid input arguments:
+; Procedure execution of clay-drawable-filter-new failed on invalid input arguments:
 ; drawable_filter_new_invoker: the filter "gegl:bump-map-tiled" is not installed.
 

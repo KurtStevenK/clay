@@ -25,227 +25,227 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claydatafactory.h"
+#include "core/claydrawable.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-drawables_popup_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+drawables_popup_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
   const gchar *callback;
   const gchar *popup_title;
   const gchar *drawable_type;
-  GimpDrawable *initial_drawable;
+  ClayDrawable *initial_drawable;
   GBytes *parent_window;
 
-  callback = g_value_get_string (gimp_value_array_index (args, 0));
-  popup_title = g_value_get_string (gimp_value_array_index (args, 1));
-  drawable_type = g_value_get_string (gimp_value_array_index (args, 2));
-  initial_drawable = g_value_get_object (gimp_value_array_index (args, 3));
-  parent_window = g_value_get_boxed (gimp_value_array_index (args, 4));
+  callback = g_value_get_string (clay_value_array_index (args, 0));
+  popup_title = g_value_get_string (clay_value_array_index (args, 1));
+  drawable_type = g_value_get_string (clay_value_array_index (args, 2));
+  initial_drawable = g_value_get_object (clay_value_array_index (args, 3));
+  parent_window = g_value_get_boxed (clay_value_array_index (args, 4));
 
   if (success)
     {
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-          ! gimp_pdb_dialog_new (gimp, context, progress,
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+          ! clay_pdb_dialog_new (clay, context, progress,
                                  g_type_from_name (drawable_type),
                                  parent_window, popup_title, callback,
-                                 GIMP_OBJECT (initial_drawable),
+                                 CLAY_OBJECT (initial_drawable),
                                  NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-drawables_close_popup_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+drawables_close_popup_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
   const gchar *callback;
 
-  callback = g_value_get_string (gimp_value_array_index (args, 0));
+  callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-          ! gimp_pdb_dialog_close (gimp, GIMP_TYPE_DRAWABLE, callback))
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+          ! clay_pdb_dialog_close (clay, CLAY_TYPE_DRAWABLE, callback))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-drawables_set_popup_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+drawables_set_popup_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
   const gchar *callback;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
-  callback = g_value_get_string (gimp_value_array_index (args, 0));
-  drawable = g_value_get_object (gimp_value_array_index (args, 1));
+  callback = g_value_get_string (clay_value_array_index (args, 0));
+  drawable = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-          ! gimp_pdb_dialog_set (gimp, GIMP_TYPE_DRAWABLE, callback, GIMP_OBJECT (drawable), NULL))
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+          ! clay_pdb_dialog_set (clay, CLAY_TYPE_DRAWABLE, callback, CLAY_OBJECT (drawable), NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_drawable_select_procs (GimpPDB *pdb)
+register_drawable_select_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-drawables-popup
+   * clay-drawables-popup
    */
-  procedure = gimp_procedure_new (drawables_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawables-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawables_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawables-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Invokes the drawable selection dialog.",
                                   "Opens a dialog letting a user choose an drawable.\n"
                                   "\n"
-                                  "Deprecated: Use 'gimp-items-popup' instead.",
+                                  "Deprecated: Use 'clay-items-popup' instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_set_deprecated (procedure,
-                                 "gimp-items-popup");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("callback",
+  clay_procedure_set_deprecated (procedure,
+                                 "clay-items-popup");
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("callback",
                                                        "callback",
                                                        "The callback PDB proc to call when user chooses an drawable",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("popup-title",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("popup-title",
                                                        "popup title",
                                                        "Title of the drawable selection dialog",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("drawable-type",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("drawable-type",
                                                        "drawable type",
-                                                       "The name of the GIMP_TYPE_DRAWABLE subtype",
+                                                       "The name of the CLAY_TYPE_DRAWABLE subtype",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("initial-drawable",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("initial-drawable",
                                                          "initial drawable",
                                                          "The drawable to set as the initial choice",
                                                          TRUE,
-                                                         GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("parent-window",
                                                    "parent window",
                                                    "An optional parent window handle for the popup to be set transient to",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawables-close-popup
+   * clay-drawables-close-popup
    */
-  procedure = gimp_procedure_new (drawables_close_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawables-close-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawables_close_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawables-close-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Close the drawable selection dialog.",
                                   "Closes an open drawable selection dialog.\n"
                                   "\n"
-                                  "Deprecated: Use 'gimp-items-close-popup' instead.",
+                                  "Deprecated: Use 'clay-items-close-popup' instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_set_deprecated (procedure,
-                                 "gimp-items-close-popup");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("callback",
+  clay_procedure_set_deprecated (procedure,
+                                 "clay-items-close-popup");
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("callback",
                                                        "callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-drawables-set-popup
+   * clay-drawables-set-popup
    */
-  procedure = gimp_procedure_new (drawables_set_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-drawables-set-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (drawables_set_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-drawables-set-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the selected drawable in a drawable selection dialog.",
                                   "Sets the selected drawable in a drawable selection dialog.\n"
                                   "\n"
-                                  "Deprecated: Use 'gimp-items-set-popup' instead.",
+                                  "Deprecated: Use 'clay-items-set-popup' instead.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_set_deprecated (procedure,
-                                 "gimp-items-set-popup");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("callback",
+  clay_procedure_set_deprecated (procedure,
+                                 "clay-items-set-popup");
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("callback",
                                                        "callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The drawable to set as selected",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

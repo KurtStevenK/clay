@@ -22,65 +22,65 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
 
-#include "plug-in/gimppluginmanager.h"
-#include "plug-in/gimppluginmanager-help-domain.h"
-#include "plug-in/gimppluginprocedure.h"
+#include "plug-in/claypluginmanager.h"
+#include "plug-in/claypluginmanager-help-domain.h"
+#include "plug-in/claypluginprocedure.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpactionimpl.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayactionimpl.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "actions.h"
 #include "plug-in-actions.h"
 #include "plug-in-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static void     plug_in_actions_register_procedure   (GimpPDB             *pdb,
-                                                      GimpProcedure       *procedure,
-                                                      GimpActionGroup     *group);
-static void     plug_in_actions_unregister_procedure (GimpPDB             *pdb,
-                                                      GimpProcedure       *procedure,
-                                                      GimpActionGroup     *group);
-static void     plug_in_actions_add_proc             (GimpActionGroup     *group,
-                                                      GimpPlugInProcedure *proc);
+static void     plug_in_actions_register_procedure   (ClayPDB             *pdb,
+                                                      ClayProcedure       *procedure,
+                                                      ClayActionGroup     *group);
+static void     plug_in_actions_unregister_procedure (ClayPDB             *pdb,
+                                                      ClayProcedure       *procedure,
+                                                      ClayActionGroup     *group);
+static void     plug_in_actions_add_proc             (ClayActionGroup     *group,
+                                                      ClayPlugInProcedure *proc);
 
 
 /*  private variables  */
 
-static const GimpActionEntry plug_in_actions[] =
+static const ClayActionEntry plug_in_actions[] =
 {
-  { "plug-in-reset-all", GIMP_ICON_RESET,
+  { "plug-in-reset-all", CLAY_ICON_RESET,
     NC_("plug-in-action", "Reset all _Filters"), NULL, { NULL },
     NC_("plug-in-action", "Reset all plug-ins to their default settings"),
     plug_in_reset_all_cmd_callback,
-    GIMP_HELP_FILTER_RESET_ALL }
+    CLAY_HELP_FILTER_RESET_ALL }
 };
 
 
 /*  public functions  */
 
 void
-plug_in_actions_setup (GimpActionGroup *group)
+plug_in_actions_setup (ClayActionGroup *group)
 {
-  GimpPlugInManager *manager = group->gimp->plug_in_manager;
+  ClayPlugInManager *manager = group->clay->plug_in_manager;
   GSList            *list;
 
-  gimp_action_group_add_actions (group, "plug-in-action",
+  clay_action_group_add_actions (group, "plug-in-action",
                                  plug_in_actions,
                                  G_N_ELEMENTS (plug_in_actions));
 
@@ -88,53 +88,53 @@ plug_in_actions_setup (GimpActionGroup *group)
        list;
        list = g_slist_next (list))
     {
-      GimpPlugInProcedure *plug_in_proc = list->data;
+      ClayPlugInProcedure *plug_in_proc = list->data;
 
       if (plug_in_proc->file)
-        plug_in_actions_register_procedure (group->gimp->pdb,
-                                            GIMP_PROCEDURE (plug_in_proc),
+        plug_in_actions_register_procedure (group->clay->pdb,
+                                            CLAY_PROCEDURE (plug_in_proc),
                                             group);
     }
 
-  g_signal_connect_object (group->gimp->pdb, "register-procedure",
+  g_signal_connect_object (group->clay->pdb, "register-procedure",
                            G_CALLBACK (plug_in_actions_register_procedure),
                            group, 0);
-  g_signal_connect_object (group->gimp->pdb, "unregister-procedure",
+  g_signal_connect_object (group->clay->pdb, "unregister-procedure",
                            G_CALLBACK (plug_in_actions_unregister_procedure),
                            group, 0);
 }
 
 void
-plug_in_actions_update (GimpActionGroup *group,
+plug_in_actions_update (ClayActionGroup *group,
                         gpointer         data)
 {
-  GimpImage         *image    = action_data_get_image (data);
-  GimpPlugInManager *manager  = group->gimp->plug_in_manager;
+  ClayImage         *image    = action_data_get_image (data);
+  ClayPlugInManager *manager  = group->clay->plug_in_manager;
   GSList            *list;
 
   for (list = manager->plug_in_procedures; list; list = g_slist_next (list))
     {
-      GimpPlugInProcedure *proc = list->data;
+      ClayPlugInProcedure *proc = list->data;
 
       if (proc->menu_label && ! proc->file_proc)
         {
-          GimpProcedure *procedure = GIMP_PROCEDURE (proc);
+          ClayProcedure *procedure = CLAY_PROCEDURE (proc);
           gboolean       sensitive;
           const gchar   *tooltip;
           const gchar   *reason = NULL;
 
-          sensitive = gimp_procedure_get_sensitive (procedure,
-                                                    GIMP_OBJECT (image),
+          sensitive = clay_procedure_get_sensitive (procedure,
+                                                    CLAY_OBJECT (image),
                                                     &reason);
 
-          gimp_action_group_set_action_sensitive (group,
-                                                  gimp_object_get_name (proc),
+          clay_action_group_set_action_sensitive (group,
+                                                  clay_object_get_name (proc),
                                                   sensitive, reason);
 
-          tooltip = gimp_procedure_get_blurb (procedure);
+          tooltip = clay_procedure_get_blurb (procedure);
           if (tooltip)
-            gimp_action_group_set_action_tooltip (group,
-                                                  gimp_object_get_name (proc),
+            clay_action_group_set_action_tooltip (group,
+                                                  clay_object_get_name (proc),
                                                   tooltip);
         }
     }
@@ -144,20 +144,20 @@ plug_in_actions_update (GimpActionGroup *group,
 /*  private functions  */
 
 static void
-plug_in_actions_register_procedure (GimpPDB         *pdb,
-                                    GimpProcedure   *procedure,
-                                    GimpActionGroup *group)
+plug_in_actions_register_procedure (ClayPDB         *pdb,
+                                    ClayProcedure   *procedure,
+                                    ClayActionGroup *group)
 {
-  if (GIMP_IS_PLUG_IN_PROCEDURE (procedure))
+  if (CLAY_IS_PLUG_IN_PROCEDURE (procedure))
     {
-      GimpPlugInProcedure *plug_in_proc = GIMP_PLUG_IN_PROCEDURE (procedure);
+      ClayPlugInProcedure *plug_in_proc = CLAY_PLUG_IN_PROCEDURE (procedure);
 
       if (plug_in_proc->menu_label &&
           ! plug_in_proc->file_proc)
         {
 #if 0
           g_print ("%s: %s\n", G_STRFUNC,
-                   gimp_object_get_name (procedure));
+                   clay_object_get_name (procedure));
 #endif
 
           plug_in_actions_add_proc (group, plug_in_proc);
@@ -166,70 +166,70 @@ plug_in_actions_register_procedure (GimpPDB         *pdb,
 }
 
 static void
-plug_in_actions_unregister_procedure (GimpPDB         *pdb,
-                                      GimpProcedure   *procedure,
-                                      GimpActionGroup *group)
+plug_in_actions_unregister_procedure (ClayPDB         *pdb,
+                                      ClayProcedure   *procedure,
+                                      ClayActionGroup *group)
 {
-  if (GIMP_IS_PLUG_IN_PROCEDURE (procedure))
+  if (CLAY_IS_PLUG_IN_PROCEDURE (procedure))
     {
-      GimpPlugInProcedure *plug_in_proc = GIMP_PLUG_IN_PROCEDURE (procedure);
+      ClayPlugInProcedure *plug_in_proc = CLAY_PLUG_IN_PROCEDURE (procedure);
 
       if (plug_in_proc->menu_label &&
           ! plug_in_proc->file_proc)
         {
-          GimpAction *action;
+          ClayAction *action;
 
 #if 0
           g_print ("%s: %s\n", G_STRFUNC,
-                   gimp_object_get_name (procedure));
+                   clay_object_get_name (procedure));
 #endif
 
-          action = gimp_action_group_get_action (group,
-                                                 gimp_object_get_name (procedure));
+          action = clay_action_group_get_action (group,
+                                                 clay_object_get_name (procedure));
 
           if (action)
-            gimp_action_group_remove_action (group, action);
+            clay_action_group_remove_action (group, action);
         }
     }
 }
 
 static void
-plug_in_actions_add_proc (GimpActionGroup     *group,
-                          GimpPlugInProcedure *proc)
+plug_in_actions_add_proc (ClayActionGroup     *group,
+                          ClayPlugInProcedure *proc)
 {
-  GimpProcedureActionEntry  entry;
+  ClayProcedureActionEntry  entry;
 
-  entry.name        = gimp_object_get_name (proc);
-  entry.icon_name   = gimp_viewable_get_icon_name (GIMP_VIEWABLE (proc));
-  entry.label       = gimp_procedure_get_menu_label (GIMP_PROCEDURE (proc));
+  entry.name        = clay_object_get_name (proc);
+  entry.icon_name   = clay_viewable_get_icon_name (CLAY_VIEWABLE (proc));
+  entry.label       = clay_procedure_get_menu_label (CLAY_PROCEDURE (proc));
   entry.accelerator = NULL;
-  entry.tooltip     = gimp_procedure_get_blurb (GIMP_PROCEDURE (proc));
-  entry.procedure   = GIMP_PROCEDURE (proc);
-  entry.help_id     = gimp_procedure_get_help_id (GIMP_PROCEDURE (proc));
+  entry.tooltip     = clay_procedure_get_blurb (CLAY_PROCEDURE (proc));
+  entry.procedure   = CLAY_PROCEDURE (proc);
+  entry.help_id     = clay_procedure_get_help_id (CLAY_PROCEDURE (proc));
 
-  gimp_action_group_add_procedure_actions (group, &entry, 1,
+  clay_action_group_add_procedure_actions (group, &entry, 1,
                                            plug_in_run_cmd_callback);
 
   if (proc->image_types_val)
     {
-      GimpContext  *context  = gimp_get_user_context (group->gimp);
-      GimpImage    *image    = gimp_context_get_image (context);
+      ClayContext  *context  = clay_get_user_context (group->clay);
+      ClayImage    *image    = clay_context_get_image (context);
       gboolean      sensitive;
       const gchar  *tooltip;
       const gchar  *reason;
 
-      sensitive = gimp_procedure_get_sensitive (GIMP_PROCEDURE (proc),
-                                                GIMP_OBJECT (image),
+      sensitive = clay_procedure_get_sensitive (CLAY_PROCEDURE (proc),
+                                                CLAY_OBJECT (image),
                                                 &reason);
 
-      gimp_action_group_set_action_sensitive (group,
-                                              gimp_object_get_name (proc),
+      clay_action_group_set_action_sensitive (group,
+                                              clay_object_get_name (proc),
                                               sensitive, reason);
 
-      tooltip = gimp_procedure_get_blurb (GIMP_PROCEDURE (proc));
+      tooltip = clay_procedure_get_blurb (CLAY_PROCEDURE (proc));
       if (tooltip)
-        gimp_action_group_set_action_tooltip (group,
-                                              gimp_object_get_name (proc),
+        clay_action_group_set_action_tooltip (group,
+                                              clay_object_get_name (proc),
                                               tooltip);
     }
 }

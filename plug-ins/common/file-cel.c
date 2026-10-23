@@ -25,16 +25,16 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-cel-load"
 #define EXPORT_PROC    "file-cel-export"
 #define PLUG_IN_BINARY "file-cel"
-#define PLUG_IN_ROLE   "gimp-file-cel"
+#define PLUG_IN_ROLE   "clay-file-cel"
 
 
 typedef struct _Cel      Cel;
@@ -42,12 +42,12 @@ typedef struct _CelClass CelClass;
 
 struct _Cel
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _CelClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -56,53 +56,53 @@ struct _CelClass
 
 GType                   cel_get_type         (void);
 
-static GList          * cel_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * cel_create_procedure (GimpPlugIn            *plug_in,
+static GList          * cel_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * cel_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * cel_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * cel_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * cel_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * cel_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
 static gint             load_palette         (GFile                 *file,
                                               guchar                 palette[],
                                               GError               **error);
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GFile                 *palette_file,
                                               GError               **error);
 static gboolean         export_image         (GFile                 *file,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable,
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable,
                                               GError               **error);
 static gboolean         palette_dialog       (const gchar           *title,
-                                              GimpProcedure         *procedure,
-                                              GimpProcedureConfig   *config);
+                                              ClayProcedure         *procedure,
+                                              ClayProcedureConfig   *config);
 static gboolean         need_palette         (GFile                 *file,
                                               GError               **error);
 
 
-G_DEFINE_TYPE (Cel, cel, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Cel, cel, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (CEL_TYPE)
+CLAY_MAIN (CEL_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 cel_class_init (CelClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = cel_query_procedures;
   plug_in_class->create_procedure = cel_create_procedure;
@@ -115,7 +115,7 @@ cel_init (Cel *cel)
 }
 
 static GList *
-cel_query_procedures (GimpPlugIn *plug_in)
+cel_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -125,77 +125,77 @@ cel_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-cel_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+cel_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            cel_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("KISS CEL"));
+      clay_procedure_set_menu_label (procedure, _("KISS CEL"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files in KISS CEL file format",
                                         "This plug-in loads individual KISS "
                                         "cell files.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nick Lamb",
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       "May 1998");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "cel");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,KiSS\\040");
 
-      gimp_procedure_add_file_argument (procedure, "palette-file",
+      clay_procedure_add_file_argument (procedure, "palette-file",
                                         _("_Palette file"),
                                         _("KCF file to load palette from"),
-                                        GIMP_FILE_CHOOSER_ACTION_OPEN,
+                                        CLAY_FILE_CHOOSER_ACTION_OPEN,
                                         FALSE, NULL,
                                         G_PARAM_READWRITE);
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, cel_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, INDEXED*");
+      clay_procedure_set_image_types (procedure, "RGB*, INDEXED*");
 
-      gimp_procedure_set_menu_label (procedure, _("KISS CEL"));
+      clay_procedure_set_menu_label (procedure, _("KISS CEL"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports files in KISS CEL file format",
                                         "This plug-in exports individual KISS "
                                         "cell files.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Nick Lamb",
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       "May 1998");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "cel");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB   |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB   |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_file_argument (procedure, "palette-file",
+      clay_procedure_add_file_argument (procedure, "palette-file",
                                         _("_Palette file"),
                                         _("File to save palette to"),
-                                        GIMP_FILE_CHOOSER_ACTION_SAVE,
+                                        CLAY_FILE_CHOOSER_ACTION_SAVE,
                                         FALSE, NULL,
                                         G_PARAM_READWRITE);
     }
@@ -203,17 +203,17 @@ cel_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-cel_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+cel_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image         = NULL;
+  ClayValueArray *return_vals;
+  ClayImage      *image         = NULL;
   gboolean        needs_palette = FALSE;
   GFile          *palette_file  = NULL;
   GError         *error         = NULL;
@@ -222,34 +222,34 @@ cel_load (GimpProcedure         *procedure,
 
   needs_palette = need_palette (file, &error);
   if (error != NULL)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   g_object_get (config, "palette-file", &palette_file, NULL);
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       if (needs_palette)
         {
           /* Let user choose KCF palette (cancel ignores) */
           if (! palette_dialog (_("Load KISS Palette"), procedure, config))
-            return gimp_procedure_new_return_values (procedure,
-                                                     GIMP_PDB_CANCEL,
+            return clay_procedure_new_return_values (procedure,
+                                                     CLAY_PDB_CANCEL,
                                                      NULL);
 
           g_clear_object (&palette_file);
           g_object_get (config, "palette-file", &palette_file, NULL);
         }
       break;
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       if (! needs_palette)
         /* It is possible to have a palette file from a previous call. Just ignore
          * it if it's unneeded, yet keep it stored.
          */
         g_clear_object (&palette_file);
       break;
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       /* Note: we don't forbid setting a palette file when unneeded as a way to
        * override the embedded palette in scripts.
        */
@@ -261,56 +261,56 @@ cel_load (GimpProcedure         *procedure,
       g_set_error (&error, G_FILE_ERROR, 0,
                    _("This KISS CEL image requires a palette file."));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
 
   image = load_image (file, palette_file, &error);
   g_clear_object (&palette_file);
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-cel_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+cel_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
 
-  drawables = gimp_image_list_layers (image);
+  drawables = clay_image_list_layers (image);
 
   if (! export_image (file, image, drawables->data, &error))
-    status = GIMP_PDB_EXECUTION_ERROR;
+    status = CLAY_PDB_EXECUTION_ERROR;
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 /* Peek into the file to determine whether we need a palette */
@@ -328,7 +328,7 @@ need_palette (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -346,9 +346,9 @@ need_palette (GFile   *file,
   return (header[5] < 32);
 }
 
-/* Load CEL image into GIMP */
+/* Load CEL image into Clay */
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GFile   *palette_file,
             GError **error)
@@ -361,8 +361,8 @@ load_image (GFile   *file,
               offx, offy,    /* Layer offsets */
               colors;        /* Number of colors */
 
-  GimpImage  *image;         /* Image */
-  GimpLayer  *layer;         /* Layer */
+  ClayImage  *image;         /* Image */
+  ClayLayer  *layer;         /* Layer */
   guchar     *buf;           /* Temporary buffer */
   guchar     *line;          /* Pixel data */
   GeglBuffer *buffer;        /* Buffer for layer */
@@ -370,8 +370,8 @@ load_image (GFile   *file,
   gint        i, j, k;       /* Counters */
   size_t      n_read;        /* Number of items read from file */
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /* Open the file for reading */
   fp = g_fopen (g_file_peek_path (file), "rb");
@@ -380,7 +380,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -447,8 +447,8 @@ load_image (GFile   *file,
       offy = header[10] + (256 * header[11]);
     }
 
-  if ((width == 0) || (height == 0) || (width + offx > GIMP_MAX_IMAGE_SIZE) ||
-      (height + offy > GIMP_MAX_IMAGE_SIZE))
+  if ((width == 0) || (height == 0) || (width + offx > CLAY_MAX_IMAGE_SIZE) ||
+      (height + offy > CLAY_MAX_IMAGE_SIZE))
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("illegal image dimensions: width: %d, horizontal offset: "
@@ -459,9 +459,9 @@ load_image (GFile   *file,
     }
 
   if (bpp == 32)
-    image = gimp_image_new (width + offx, height + offy, GIMP_RGB);
+    image = clay_image_new (width + offx, height + offy, CLAY_RGB);
   else
-    image = gimp_image_new (width + offx, height + offy, GIMP_INDEXED);
+    image = clay_image_new (width + offx, height + offy, CLAY_INDEXED);
 
   if (! image)
     {
@@ -472,23 +472,23 @@ load_image (GFile   *file,
 
   /* Create an indexed-alpha layer to hold the image... */
   if (bpp == 32)
-    layer = gimp_layer_new (image, _("Background"), width, height,
-                            GIMP_RGBA_IMAGE,
+    layer = clay_layer_new (image, _("Background"), width, height,
+                            CLAY_RGBA_IMAGE,
                             100,
-                            gimp_image_get_default_new_layer_mode (image));
+                            clay_image_get_default_new_layer_mode (image));
   else
-    layer = gimp_layer_new (image, _("Background"), width, height,
-                            GIMP_INDEXEDA_IMAGE,
+    layer = clay_layer_new (image, _("Background"), width, height,
+                            CLAY_INDEXEDA_IMAGE,
                             100,
-                            gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
-  gimp_layer_set_offsets (layer, offx, offy);
+                            clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
+  clay_layer_set_offsets (layer, offx, offy);
 
   /* Get the drawable and set the pixel region for our load... */
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
-  /* Read the image in and give it to GIMP a line at a time */
+  /* Read the image in and give it to Clay a line at a time */
   buf  = g_new (guchar, width * 4);
   line = g_new (guchar, (width + 1) * 4);
 
@@ -571,7 +571,7 @@ load_image (GFile   *file,
             }
 
           /* The CEL file order is BGR so we need to swap B and R
-           * to get the Gimp RGB order.
+           * to get the Clay RGB order.
            */
           for (j= 0; j < width; j++)
             {
@@ -591,7 +591,7 @@ load_image (GFile   *file,
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, i, width, 1), 0,
                        NULL, line, GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((float) i / (float) height);
+      clay_progress_update ((float) i / (float) height);
     }
 
   /* Close image files, give back allocated memory */
@@ -619,14 +619,14 @@ load_image (GFile   *file,
             }
         }
 
-      gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), palette + 3, (colors - 1) * 3);
+      clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), palette + 3, (colors - 1) * 3);
     }
 
   /* Now get everything redrawn and hand back the finished image */
 
   g_object_unref (buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
@@ -671,7 +671,7 @@ load_palette (GFile   *file,
           g_object_unref (input);
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("'%s': is not a KCF palette file"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           return -1;
         }
 
@@ -681,7 +681,7 @@ load_palette (GFile   *file,
           g_object_unref (input);
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("'%s': illegal bpp value in palette: %hhu"),
-                       gimp_file_get_utf8_name (file), bpp);
+                       clay_file_get_utf8_name (file), bpp);
           return -1;
         }
 
@@ -691,7 +691,7 @@ load_palette (GFile   *file,
           g_object_unref (input);
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("'%s': illegal number of colors: %u"),
-                       gimp_file_get_utf8_name (file), colors);
+                       clay_file_get_utf8_name (file), colors);
           return -1;
         }
 
@@ -708,7 +708,7 @@ load_palette (GFile   *file,
                   g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                _("'%s': EOF or error while reading "
                                  "palette data"),
-                               gimp_file_get_utf8_name (file));
+                               clay_file_get_utf8_name (file));
                   return -1;
                 }
               else if (n_read < 1)
@@ -735,7 +735,7 @@ load_palette (GFile   *file,
               g_object_unref (input);
               g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                            _("'%s': EOF or error while reading palette data"),
-                           gimp_file_get_utf8_name (file));
+                           clay_file_get_utf8_name (file));
               return -1;
             }
           break;
@@ -766,7 +766,7 @@ load_palette (GFile   *file,
               g_object_unref (input);
               g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                            _("'%s': EOF or error while reading palette data"),
-                           gimp_file_get_utf8_name (file));
+                           clay_file_get_utf8_name (file));
               return -1;
             }
 
@@ -781,8 +781,8 @@ load_palette (GFile   *file,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GError       **error)
 {
   GOutputStream *output;
@@ -801,9 +801,9 @@ export_image (GFile         *file,
   gint           i, j, k;       /* Counters */
 
   /* Check that this is an indexed image, fail otherwise */
-  type = gimp_drawable_type (drawable);
+  type = clay_drawable_type (drawable);
 
-  if (type == GIMP_INDEXEDA_IMAGE)
+  if (type == CLAY_INDEXEDA_IMAGE)
     {
       bpp    = 4;
       format = NULL;
@@ -815,15 +815,15 @@ export_image (GFile         *file,
     }
 
   /* Find out how offset this layer was */
-  gimp_drawable_get_offsets (drawable, &offx, &offy);
+  clay_drawable_get_offsets (drawable, &offx, &offy);
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   output = G_OUTPUT_STREAM (g_file_replace (file,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
@@ -850,7 +850,7 @@ export_image (GFile         *file,
   /* Work out whether to save as 8bit or 4bit */
   if (bpp < 32)
     {
-      colors = gimp_palette_get_color_count (gimp_image_get_palette (image));
+      colors = clay_palette_get_color_count (clay_image_get_palette (image));
 
       if (colors > 15)
         {
@@ -884,7 +884,7 @@ export_image (GFile         *file,
   buf  = g_new (guchar, width * 4);
   line = g_new (guchar, (width + 1) * 4);
 
-  /* Get the image from GIMP one line at a time and write it out */
+  /* Get the image from Clay one line at a time and write it out */
   for (i = 0; i < height; ++i)
     {
       gegl_buffer_get (buffer, GEGL_RECTANGLE (0, i, width, 1), 1.0,
@@ -943,13 +943,13 @@ export_image (GFile         *file,
             goto fail;
         }
 
-      gimp_progress_update ((float) i / (float) height);
+      clay_progress_update ((float) i / (float) height);
     }
 
   if (! g_output_stream_close (output, NULL, error))
     goto fail;
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_free (buf);
   g_free (line);
@@ -975,21 +975,21 @@ export_image (GFile         *file,
 
 static gboolean
 palette_dialog (const gchar         *title,
-                GimpProcedure       *procedure,
-                GimpProcedureConfig *config)
+                ClayProcedure       *procedure,
+                ClayProcedureConfig *config)
 {
   GtkWidget *dialog;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (GIMP_PROCEDURE (procedure),
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (CLAY_PROCEDURE (procedure),
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       title);
-  gimp_procedure_dialog_set_ok_label (GIMP_PROCEDURE_DIALOG (dialog), _("_Open"));
+  clay_procedure_dialog_set_ok_label (CLAY_PROCEDURE_DIALOG (dialog), _("_Open"));
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

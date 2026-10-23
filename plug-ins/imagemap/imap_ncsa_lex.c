@@ -544,7 +544,7 @@ char *ncsa_text;
 #line 1 "imap_ncsa.l"
 #line 2 "imap_ncsa.l"
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *

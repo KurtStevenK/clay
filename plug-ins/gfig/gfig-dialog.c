@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -34,13 +34,13 @@
 #include <glib.h>
 
 #ifdef G_OS_WIN32
-#include <libgimpbase/gimpwin32-io.h>
+#include <libclaybase/claywin32-io.h>
 #endif
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "gfig.h"
 #include "gfig-style.h"
@@ -112,7 +112,7 @@ SelectItVals selvals =
 
 selection_option selopt =
 {
-  GIMP_CHANNEL_OP_ADD, /* type */
+  CLAY_CHANNEL_OP_ADD, /* type */
   FALSE,               /* Antia */
   FALSE,               /* Feather */
   10.0,                /* feather radius */
@@ -250,14 +250,14 @@ static const GActionEntry ACTIONS[] =
 };
 
 gboolean
-gfig_dialog (GimpGfig *gfig)
+gfig_dialog (ClayGfig *gfig)
 {
   GAction      *action;
   GtkWidget    *main_hbox;
   GtkWidget    *vbox;
   GFigObj      *gfig_obj;
-  GimpParasite *parasite;
-  GimpLayer    *newlayer;
+  ClayParasite *parasite;
+  ClayLayer    *newlayer;
   GtkWidget    *menubar;
   GMenuModel   *model;
   GtkWidget    *toolbar;
@@ -265,18 +265,18 @@ gfig_dialog (GimpGfig *gfig)
   GtkWidget    *frame;
   gint          img_width;
   gint          img_height;
-  GimpImageType img_type;
+  ClayImageType img_type;
   GtkWidget    *toggle;
   GtkWidget    *right_vbox;
   GtkWidget    *hbox;
   GtkWidget    *empty_label;
   gchar        *path;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  img_width  = gimp_drawable_get_width (gfig_context->drawable);
-  img_height = gimp_drawable_get_height (gfig_context->drawable);
-  img_type   = gimp_drawable_type_with_alpha (gfig_context->drawable);
+  img_width  = clay_drawable_get_width (gfig_context->drawable);
+  img_height = clay_drawable_get_height (gfig_context->drawable);
+  img_type   = clay_drawable_type_with_alpha (gfig_context->drawable);
 
   /*
    * See if there is a "gfig" parasite.  If so, this is a gfig layer,
@@ -285,38 +285,38 @@ gfig_dialog (GimpGfig *gfig)
    */
   gfig_list = NULL;
   undo_level = -1;
-  parasite = gimp_item_get_parasite (GIMP_ITEM (gfig_context->drawable), "gfig");
+  parasite = clay_item_get_parasite (CLAY_ITEM (gfig_context->drawable), "gfig");
   gfig_context->enable_repaint = FALSE;
 
   /* debug */
   gfig_context->debug_styles = FALSE;
 
   /* initial default style */
-  gfig_read_gimp_style (&gfig_context->default_style, "Base");
+  gfig_read_clay_style (&gfig_context->default_style, "Base");
   gfig_context->default_style.paint_type = selvals.painttype;
 
   if (parasite)
     {
-      gimp_drawable_fill (gfig_context->drawable, GIMP_FILL_TRANSPARENT);
+      clay_drawable_fill (gfig_context->drawable, CLAY_FILL_TRANSPARENT);
       gfig_context->using_new_layer = FALSE;
-      gimp_parasite_free (parasite);
+      clay_parasite_free (parasite);
     }
   else
     {
-      newlayer = gimp_layer_new (gfig_context->image, "GFig",
+      newlayer = clay_layer_new (gfig_context->image, "GFig",
                                  img_width, img_height,
                                  img_type,
                                  100.0,
-                                 gimp_image_get_default_new_layer_mode (gfig_context->image));
-      gimp_drawable_fill (GIMP_DRAWABLE (newlayer), GIMP_FILL_TRANSPARENT);
-      gimp_image_insert_layer (gfig_context->image, newlayer, NULL, -1);
-      gfig_context->drawable = GIMP_DRAWABLE (newlayer);
+                                 clay_image_get_default_new_layer_mode (gfig_context->image));
+      clay_drawable_fill (CLAY_DRAWABLE (newlayer), CLAY_FILL_TRANSPARENT);
+      clay_image_insert_layer (gfig_context->image, newlayer, NULL, -1);
+      gfig_context->drawable = CLAY_DRAWABLE (newlayer);
       gfig_context->using_new_layer = TRUE;
     }
 
   gfig_icons_init ();
 
-  path = gimp_gimprc_query ("gfig-path");
+  path = clay_clayrc_query ("gfig-path");
 
   if (path)
     {
@@ -325,26 +325,26 @@ gfig_dialog (GimpGfig *gfig)
     }
   else
     {
-      GFile *gimprc    = gimp_directory_file ("gimprc", NULL);
-      gchar *full_path = gimp_config_build_data_path ("gfig");
+      GFile *clayrc    = clay_directory_file ("clayrc", NULL);
+      gchar *full_path = clay_config_build_data_path ("gfig");
       gchar *esc_path  = g_strescape (full_path, NULL);
       g_free (full_path);
 
-      g_message (_("No %s in gimprc:\n"
+      g_message (_("No %s in clayrc:\n"
                    "You need to add an entry like\n"
                    "(%s \"%s\")\n"
                    "to your %s file."),
                    "gfig-path", "gfig-path", esc_path,
-                   gimp_file_get_utf8_name (gimprc));
+                   clay_file_get_utf8_name (clayrc));
 
-      g_object_unref (gimprc);
+      g_object_unref (clayrc);
       g_free (esc_path);
     }
 
   /* Start building the dialog up */
-  gfig->top_level_dlg = gimp_dialog_new (_("Gfig"), PLUG_IN_ROLE,
+  gfig->top_level_dlg = clay_dialog_new (_("Gfig"), PLUG_IN_ROLE,
                                          NULL, 0,
-                                         gimp_standard_help_func, PLUG_IN_PROC,
+                                         clay_standard_help_func, PLUG_IN_PROC,
 
                                          _("_Cancel"), GTK_RESPONSE_CANCEL,
                                          _("_Close"),  GTK_RESPONSE_OK,
@@ -352,9 +352,9 @@ gfig_dialog (GimpGfig *gfig)
                                          NULL);
 
   gtk_window_set_application (GTK_WINDOW (gfig->top_level_dlg), gfig->app);
-  gimp_window_set_transient (GTK_WINDOW (gfig->top_level_dlg));
+  clay_window_set_transient (GTK_WINDOW (gfig->top_level_dlg));
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (gfig->top_level_dlg),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (gfig->top_level_dlg),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -403,21 +403,21 @@ gfig_dialog (GimpGfig *gfig)
                      _("Copy"), _("Copy an object"));
   add_toggle_button (toolbar, "app.shape::delete", GFIG_ICON_DELETE_OBJECT,
                      _("Delete"), _("Delete an object"));
-  add_toggle_button (toolbar, "app.shape::select", GIMP_ICON_CURSOR,
+  add_toggle_button (toolbar, "app.shape::select", CLAY_ICON_CURSOR,
                      _("Select"), _("Select an object"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.raise", GIMP_ICON_GO_UP,
+  add_tool_button (toolbar, "app.raise", CLAY_ICON_GO_UP,
                    _("Raise"), _("Raise selected object"));
-  add_tool_button (toolbar, "app.lower", GIMP_ICON_GO_DOWN,
+  add_tool_button (toolbar, "app.lower", CLAY_ICON_GO_DOWN,
                    _("Lower"), _("Lower selected object"));
-  add_tool_button (toolbar, "app.raise", GIMP_ICON_GO_TOP,
+  add_tool_button (toolbar, "app.raise", CLAY_ICON_GO_TOP,
                    _("To Top"), _("Raise selected object to top"));
-  add_tool_button (toolbar, "app.lower", GIMP_ICON_GO_BOTTOM,
+  add_tool_button (toolbar, "app.lower", CLAY_ICON_GO_BOTTOM,
                    _("To Bottom"), _("Lower selected object to bottom"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.show-prev", GIMP_ICON_GO_PREVIOUS,
+  add_tool_button (toolbar, "app.show-prev", CLAY_ICON_GO_PREVIOUS,
                    _("Show Previous"), _("Show previous object"));
-  add_tool_button (toolbar, "app.show-next", GIMP_ICON_GO_NEXT,
+  add_tool_button (toolbar, "app.show-next", CLAY_ICON_GO_NEXT,
                    _("Show Next"), _("Show next object"));
   add_tool_button (toolbar, "app.show-all", GFIG_ICON_SHOW_ALL,
                    _("Show All"), _("Show all objects"));
@@ -448,7 +448,7 @@ gfig_dialog (GimpGfig *gfig)
   gtk_widget_set_visible (right_vbox, TRUE);
 
   /* Tool options notebook */
-  frame = gimp_frame_new ( _("Tool Options"));
+  frame = clay_frame_new ( _("Tool Options"));
   gtk_box_pack_start (GTK_BOX (right_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -460,7 +460,7 @@ gfig_dialog (GimpGfig *gfig)
   create_notebook_pages (tool_options_notebook);
 
   /* Stroke frame on right side */
-  frame = gimp_frame_new (NULL);
+  frame = clay_frame_new (NULL);
   gtk_box_pack_start (GTK_BOX (right_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -486,11 +486,11 @@ gfig_dialog (GimpGfig *gfig)
 
   /* foreground color button in Stroke frame*/
   gfig_context->fg_color = gegl_color_duplicate (gfig_context->default_style.foreground);
-  gfig_context->fg_color_button = gimp_color_button_new (_("Foreground"),
+  gfig_context->fg_color_button = clay_color_button_new (_("Foreground"),
                                                          SEL_BUTTON_WIDTH,
                                                          SEL_BUTTON_HEIGHT,
                                                          gfig_context->fg_color,
-                                                         GIMP_COLOR_AREA_SMALL_CHECKS);
+                                                         CLAY_COLOR_AREA_SMALL_CHECKS);
   g_signal_connect (gfig_context->fg_color_button, "color-changed",
                     G_CALLBACK (set_foreground_callback),
                     gfig_context->fg_color);
@@ -500,7 +500,7 @@ gfig_dialog (GimpGfig *gfig)
 
   /* brush selector in Stroke frame */
   gfig_context->brush_select
-    = gimp_brush_chooser_new (_("Brush"), _("Brush"),
+    = clay_brush_chooser_new (_("Brush"), _("Brush"),
                               gfig_context->default_style.brush);
   g_signal_connect (gfig_context->brush_select, "resource-set",
                     G_CALLBACK (gfig_brush_changed_callback), NULL);
@@ -509,7 +509,7 @@ gfig_dialog (GimpGfig *gfig)
   gtk_widget_set_visible (gfig_context->brush_select, TRUE);
 
   /* Fill frame on right side */
-  frame = gimp_frame_new (_("Fill"));
+  frame = clay_frame_new (_("Fill"));
   gtk_box_pack_start (GTK_BOX (right_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -523,14 +523,14 @@ gfig_dialog (GimpGfig *gfig)
 
   /* fill style combo box in Style frame  */
   gfig_context->fillstyle_combo = combo
-    = gimp_int_combo_box_new (_("No fill"),             FILL_NONE,
+    = clay_int_combo_box_new (_("No fill"),             FILL_NONE,
                               _("Color fill"),          FILL_COLOR,
                               _("Pattern fill"),        FILL_PATTERN,
                               _("Shape gradient"),      FILL_GRADIENT,
                               _("Vertical gradient"),   FILL_VERTICAL,
                               _("Horizontal gradient"), FILL_HORIZONTAL,
                               NULL);
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo), 0);
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo), 0);
   g_signal_connect (combo, "changed",
                     G_CALLBACK (select_filltype_callback),
                     NULL);
@@ -551,10 +551,10 @@ gfig_dialog (GimpGfig *gfig)
 
   /* A page for the fill color button */
   gfig_context->bg_color = gegl_color_duplicate (gfig_context->default_style.background);
-  gfig_context->bg_color_button = gimp_color_button_new (_("Background"),
+  gfig_context->bg_color_button = clay_color_button_new (_("Background"),
                                                          SEL_BUTTON_WIDTH, SEL_BUTTON_HEIGHT,
                                                          gfig_context->bg_color,
-                                                         GIMP_COLOR_AREA_SMALL_CHECKS);
+                                                         CLAY_COLOR_AREA_SMALL_CHECKS);
   g_signal_connect (gfig_context->bg_color_button, "color-changed",
                     G_CALLBACK (set_background_callback),
                     gfig_context->bg_color);
@@ -564,7 +564,7 @@ gfig_dialog (GimpGfig *gfig)
 
   /* A page for the pattern selector */
   gfig_context->pattern_select
-    = gimp_pattern_chooser_new (_("Pattern"), _("Pattern"),
+    = clay_pattern_chooser_new (_("Pattern"), _("Pattern"),
                                 gfig_context->default_style.pattern);
   g_signal_connect (gfig_context->pattern_select, "resource-set",
                     G_CALLBACK (gfig_pattern_changed_callback), NULL);
@@ -574,7 +574,7 @@ gfig_dialog (GimpGfig *gfig)
 
   /* A page for the gradient selector */
   gfig_context->gradient_select
-    = gimp_gradient_chooser_new (_("Gradient"), _("Gradient"),
+    = clay_gradient_chooser_new (_("Gradient"), _("Gradient"),
                                  gfig_context->default_style.gradient);
   g_signal_connect (gfig_context->gradient_select, "resource-set",
                     G_CALLBACK (gfig_gradient_changed_callback), NULL);
@@ -593,7 +593,7 @@ gfig_dialog (GimpGfig *gfig)
                                 gfig_context->show_background);
   gtk_box_pack_end (GTK_BOX (vbox), toggle, FALSE, FALSE, 0);
   g_signal_connect (toggle, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &gfig_context->show_background);
   g_signal_connect_swapped (toggle, "toggled",
                     G_CALLBACK (gtk_widget_queue_draw),
@@ -604,7 +604,7 @@ gfig_dialog (GimpGfig *gfig)
   toggle = gtk_check_button_new_with_label (C_("checkbutton", "Snap to grid"));
   gtk_box_pack_end (GTK_BOX (vbox), toggle, FALSE, FALSE, 0);
   g_signal_connect (toggle, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &selvals.opts.snap2grid);
   gtk_widget_set_visible (toggle, TRUE);
   gfig_opt_widget.snap2grid = toggle;
@@ -613,7 +613,7 @@ gfig_dialog (GimpGfig *gfig)
   toggle = gtk_check_button_new_with_label (_("Show grid"));
   gtk_box_pack_end (GTK_BOX (vbox), toggle, FALSE, FALSE, 0);
   g_signal_connect (toggle, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &selvals.opts.drawgrid);
   g_signal_connect (toggle, "toggled",
                     G_CALLBACK (draw_grid_clear),
@@ -625,8 +625,8 @@ gfig_dialog (GimpGfig *gfig)
   gfig_list_load_all (gfig_path);
 
   /* Setup initial brush settings */
-  if (gimp_context_get_brush ())
-    set_context_bdesc (gimp_context_get_brush ());
+  if (clay_context_get_brush ())
+    set_context_bdesc (clay_context_get_brush ());
 
   gtk_widget_set_visible (main_hbox, TRUE);
 
@@ -706,18 +706,18 @@ gfig_response (GtkWidget *widget,
       /* if we created a new layer, delete it */
       if (gfig_context->using_new_layer)
         {
-          gimp_image_remove_layer (gfig_context->image,
-                                   GIMP_LAYER (gfig_context->drawable));
+          clay_image_remove_layer (gfig_context->image,
+                                   CLAY_LAYER (gfig_context->drawable));
         }
       else /* revert back to the original figure */
         {
           free_all_objs (gfig_context->current_obj->obj_list);
           gfig_context->current_obj->obj_list = NULL;
-          gfig_obj = gfig_load_from_parasite (GIMP_GFIG (data));
+          gfig_obj = gfig_load_from_parasite (CLAY_GFIG (data));
           if (gfig_obj)
             {
               gfig_list_insert (gfig_obj);
-              new_obj_2edit (GIMP_GFIG (data), gfig_obj);
+              new_obj_2edit (CLAY_GFIG (data), gfig_obj);
             }
           gfig_context->enable_repaint = TRUE;
           gfig_paint_callback ();
@@ -732,8 +732,8 @@ gfig_response (GtkWidget *widget,
       break;
     }
 
-  gtk_application_remove_window ((GIMP_GFIG (data))->app,
-                                 GTK_WINDOW ((GIMP_GFIG (data))->top_level_dlg));
+  gtk_application_remove_window ((CLAY_GFIG (data))->app,
+                                 GTK_WINDOW ((CLAY_GFIG (data))->top_level_dlg));
 }
 
 static gchar *
@@ -744,14 +744,14 @@ gfig_get_user_writable_dir (void)
       GList *list;
       gchar *dir;
 
-      list = gimp_parse_search_path (gfig_path, 256, FALSE, NULL);
-      dir = gimp_get_user_writable_dir (list);
-      gimp_free_paths (list);
+      list = clay_parse_search_path (gfig_path, 256, FALSE, NULL);
+      dir = clay_get_user_writable_dir (list);
+      clay_free_paths (list);
 
       return dir;
     }
 
-  return g_strdup (gimp_directory ());
+  return g_strdup (clay_directory ());
 }
 
 static void
@@ -842,7 +842,7 @@ gfig_close_action (GSimpleAction *action,
                    GVariant      *parameter,
                    gpointer       user_data)
 {
-  GimpGfig *gfig = GIMP_GFIG (user_data);
+  ClayGfig *gfig = CLAY_GFIG (user_data);
 
   gtk_dialog_response (GTK_DIALOG (gfig->top_level_dlg), GTK_RESPONSE_OK);
 }
@@ -853,7 +853,7 @@ gfig_undo_action (GSimpleAction *action,
                   gpointer       user_data)
 {
   GAction  *action_undo;
-  GimpGfig *gfig = GIMP_GFIG (user_data);
+  ClayGfig *gfig = CLAY_GFIG (user_data);
 
   if (undo_level >= 0)
     {
@@ -889,7 +889,7 @@ gfig_clear_action (GSimpleAction *action,
   if (!gfig_context->current_obj->obj_list)
     return;
 
-  setup_undo (GIMP_GFIG (user_data));
+  setup_undo (CLAY_GFIG (user_data));
   /* Free all objects */
   free_all_objs (gfig_context->current_obj->obj_list);
   gfig_context->current_obj->obj_list = NULL;
@@ -1138,7 +1138,7 @@ select_filltype_callback (GtkWidget *widget)
 {
   gint value;
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), &value);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), &value);
   gtk_notebook_set_current_page (GTK_NOTEBOOK (fill_type_notebook),
                                  MIN (value, FILL_GRADIENT));
 
@@ -1183,7 +1183,7 @@ gfig_prefs_action (GSimpleAction *action,
       GtkWidget     *scale;
       GtkAdjustment *scale_data;
 
-      dialog = gimp_dialog_new (_("Options"), "gimp-gfig-options",
+      dialog = clay_dialog_new (_("Options"), "clay-gfig-options",
                                 NULL, 0, NULL, NULL,
 
                                 _("_Close"),  GTK_RESPONSE_CLOSE,
@@ -1210,7 +1210,7 @@ gfig_prefs_action (GSimpleAction *action,
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle),
                                     selvals.showpos);
       g_signal_connect (toggle, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &selvals.showpos);
       g_signal_connect_after (toggle, "toggled",
                               G_CALLBACK (gfig_pos_enable),
@@ -1222,7 +1222,7 @@ gfig_prefs_action (GSimpleAction *action,
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle),
                                     selvals.opts.showcontrol);
       g_signal_connect (toggle, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &selvals.opts.showcontrol);
       g_signal_connect (toggle, "toggled",
                         G_CALLBACK (toggle_show_image),
@@ -1237,7 +1237,7 @@ gfig_prefs_action (GSimpleAction *action,
       gtk_box_pack_start (GTK_BOX (main_vbox), toggle, FALSE, FALSE, 6);
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle), selopt.antia);
       g_signal_connect (toggle, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &selopt.antia);
       g_signal_connect (toggle, "toggled",
                         G_CALLBACK (gfig_paint_callback),
@@ -1251,39 +1251,39 @@ gfig_prefs_action (GSimpleAction *action,
       gtk_widget_set_visible (grid, TRUE);
 
       scale_data = gtk_adjustment_new (selvals.maxundo, MIN_UNDO, MAX_UNDO, 1.0, 10.0, 0.0);
-      undo_scale = gimp_spin_scale_new (scale_data, _("Max undo"), 1);
+      undo_scale = clay_spin_scale_new (scale_data, _("Max undo"), 1);
       g_signal_connect (scale_data, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &selvals.maxundo);
       gtk_grid_attach (GTK_GRID (grid), undo_scale, 0, 0, 3, 1);
       gtk_widget_set_visible (undo_scale, TRUE);
 
-      page_menu_bg = gimp_int_combo_box_new (_("Transparent"), LAYER_TRANS_BG,
+      page_menu_bg = clay_int_combo_box_new (_("Transparent"), LAYER_TRANS_BG,
                                              _("Background"),  LAYER_BG_BG,
                                              _("Foreground"),  LAYER_FG_BG,
                                              _("White"),       LAYER_WHITE_BG,
                                              _("Copy"),        LAYER_COPY_BG,
                                              NULL);
-      gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (page_menu_bg), selvals.onlayerbg);
+      clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (page_menu_bg), selvals.onlayerbg);
 
       g_signal_connect (page_menu_bg, "changed",
                         G_CALLBACK (paint_combo_callback),
                         GINT_TO_POINTER (PAINT_BGS_MENU));
 
-      gimp_help_set_help_data (page_menu_bg,
+      clay_help_set_help_data (page_menu_bg,
                                _("Layer background type. Copy causes the "
                                  "previous layer to be copied before the "
                                  "draw is performed."),
                                NULL);
 
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                                 _("Background:"), 0.0, 0.5,
                                 page_menu_bg, 2);
 
       toggle = gtk_check_button_new_with_label (_("Feather"));
       gtk_grid_attach (GTK_GRID (grid), toggle, 2, 2, 1, 1);
       g_signal_connect (toggle, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &selopt.feather);
       g_signal_connect (toggle, "toggled",
                         G_CALLBACK (gfig_paint_callback),
@@ -1291,10 +1291,10 @@ gfig_prefs_action (GSimpleAction *action,
       gtk_widget_set_visible (toggle, TRUE);
 
       scale_data = gtk_adjustment_new (selopt.feather_radius, 0.0, 100.0, 1.0, 1.0, 0.0);
-      scale = gimp_spin_scale_new (scale_data, _("Radius"), 1);
+      scale = clay_spin_scale_new (scale_data, _("Radius"), 1);
 
       g_signal_connect (scale_data, "value-changed",
-                        G_CALLBACK (gimp_double_adjustment_update),
+                        G_CALLBACK (clay_double_adjustment_update),
                         &selopt.feather_radius);
       g_signal_connect (scale_data, "value-changed",
                         G_CALLBACK (gfig_paint_delayed),
@@ -1328,7 +1328,7 @@ gfig_grid_action (GSimpleAction *action,
       GtkWidget     *sectors_scale;
       GtkWidget     *radius_scale;
 
-      dialog = gimp_dialog_new (_("Grid"), "gimp-gfig-grid",
+      dialog = clay_dialog_new (_("Grid"), "clay-gfig-grid",
                                 NULL, 0, NULL, NULL,
 
                                 _("_Close"),  GTK_RESPONSE_CLOSE,
@@ -1360,9 +1360,9 @@ gfig_grid_action (GSimpleAction *action,
       gtk_widget_set_visible (grid, TRUE);
 
       scale_data = gtk_adjustment_new (selvals.opts.gridspacing, MIN_GRID, MAX_GRID, 1.0, 10.0, 0.0);
-      grid_scale = gimp_spin_scale_new (scale_data, _("Grid spacing"), 1);
+      grid_scale = clay_spin_scale_new (scale_data, _("Grid spacing"), 1);
       g_signal_connect (scale_data, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &selvals.opts.gridspacing);
       g_signal_connect (scale_data, "value-changed",
                         G_CALLBACK (draw_grid_clear),
@@ -1375,9 +1375,9 @@ gfig_grid_action (GSimpleAction *action,
                                  (gpointer) &gfig_opt_widget.gridspacing);
 
       scale_data = gtk_adjustment_new (selvals.opts.grid_sectors_desired, 5, 360, 1.0, 10.0, 0.0);
-      sectors_scale = gimp_spin_scale_new (scale_data, _("Polar grid sectors desired"), 1);
+      sectors_scale = clay_spin_scale_new (scale_data, _("Polar grid sectors desired"), 1);
       g_signal_connect (scale_data, "value-changed",
-                        G_CALLBACK (gimp_int_adjustment_update),
+                        G_CALLBACK (clay_int_adjustment_update),
                         &selvals.opts.grid_sectors_desired);
       g_signal_connect (scale_data, "value-changed",
                         G_CALLBACK (draw_grid_clear),
@@ -1391,9 +1391,9 @@ gfig_grid_action (GSimpleAction *action,
                                  (gpointer) &gfig_opt_widget.grid_sectors_desired);
 
       scale_data = gtk_adjustment_new (selvals.opts.grid_radius_interval, 5, 360, 1.0, 10.0, 0.0);
-      radius_scale = gimp_spin_scale_new (scale_data, _("Polar grid radius interval"), 1);
+      radius_scale = clay_spin_scale_new (scale_data, _("Polar grid radius interval"), 1);
       g_signal_connect (scale_data, "value-changed",
-                        G_CALLBACK (gimp_double_adjustment_update),
+                        G_CALLBACK (clay_double_adjustment_update),
                         &selvals.opts.grid_radius_interval);
       g_signal_connect (scale_data, "value-changed",
                         G_CALLBACK (draw_grid_clear),
@@ -1405,17 +1405,17 @@ gfig_grid_action (GSimpleAction *action,
       g_object_add_weak_pointer (G_OBJECT (gfig_opt_widget.grid_radius_interval),
                                  (gpointer) &gfig_opt_widget.grid_radius_interval);
 
-      combo = gimp_int_combo_box_new (_("Rectangle"), RECT_GRID,
+      combo = clay_int_combo_box_new (_("Rectangle"), RECT_GRID,
                                       _("Polar"),     POLAR_GRID,
                                       _("Isometric"), ISO_GRID,
                                       NULL);
-      gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo), selvals.opts.gridtype);
+      clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo), selvals.opts.gridtype);
 
       g_signal_connect (combo, "changed",
                         G_CALLBACK (gridtype_combo_callback),
                         GINT_TO_POINTER (GRID_TYPE_MENU));
 
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                                 _("Grid type:"), 0.0, 0.5,
                                 combo, 2);
 
@@ -1423,7 +1423,7 @@ gfig_grid_action (GSimpleAction *action,
       g_object_add_weak_pointer (G_OBJECT (gfig_opt_widget.gridtypemenu),
                                  (gpointer) &gfig_opt_widget.gridtypemenu);
 
-      combo = gimp_int_combo_box_new (_("Normal"),    GFIG_NORMAL_GC,
+      combo = clay_int_combo_box_new (_("Normal"),    GFIG_NORMAL_GC,
                                       _("Black"),     GFIG_BLACK_GC,
                                       _("White"),     GFIG_WHITE_GC,
                                       _("Grey"),      GFIG_GREY_GC,
@@ -1431,13 +1431,13 @@ gfig_grid_action (GSimpleAction *action,
                                       _("Lighter"),   GFIG_LIGHTER_GC,
                                       _("Very dark"), GFIG_VERY_DARK_GC,
                                       NULL);
-      gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo), grid_gc_type);
+      clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo), grid_gc_type);
 
       g_signal_connect (combo, "changed",
                         G_CALLBACK (gridtype_combo_callback),
                         GINT_TO_POINTER (GRID_RENDER_MENU));
 
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 2,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 2,
                                 _("Grid color:"), 0.0, 0.5,
                                 combo, 2);
 
@@ -1508,7 +1508,7 @@ options_update (GFigObj *old_obj)
   if (selvals.opts.gridtype != gfig_context->current_obj->opts.gridtype)
     {
       if (gfig_opt_widget.gridtypemenu)
-        gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (gfig_opt_widget.gridtypemenu),
+        clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (gfig_opt_widget.gridtypemenu),
                                        gfig_context->current_obj->opts.gridtype);
     }
   if (selvals.opts.drawgrid != gfig_context->current_obj->opts.drawgrid)
@@ -1665,26 +1665,26 @@ num_sides_widget (const gchar *d_title,
   gtk_widget_set_visible (grid, TRUE);
 
   scale_data = gtk_adjustment_new (*num_sides, adj_min, adj_max, 1.0, 10.0, 0.0);
-  scale = gimp_spin_scale_new (scale_data, _("Sides"), 1);
+  scale = clay_spin_scale_new (scale_data, _("Sides"), 1);
   g_signal_connect (scale_data, "value-changed",
-                    G_CALLBACK (gimp_int_adjustment_update),
+                    G_CALLBACK (clay_int_adjustment_update),
                     num_sides);
   gtk_grid_attach (GTK_GRID (grid), scale, 0, 0, 3, 1);
   gtk_widget_set_visible (scale, TRUE);
 
   if (which_way)
     {
-      GtkWidget *combo = gimp_int_combo_box_new (_("Right"),      0,
+      GtkWidget *combo = clay_int_combo_box_new (_("Right"),      0,
                                                  _("Left"), 1,
                                                  NULL);
 
-      gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo), *which_way);
+      clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo), *which_way);
 
       g_signal_connect (combo, "changed",
-                        G_CALLBACK (gimp_int_combo_box_get_active),
+                        G_CALLBACK (clay_int_combo_box_get_active),
                         which_way);
 
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                                 _("Orientation:"), 0.0, 0.5,
                                 combo, 1);
     }
@@ -1693,35 +1693,35 @@ num_sides_widget (const gchar *d_title,
 
 void
 gfig_paint (BrushType     brush_type,
-            GimpDrawable *drawable,
+            ClayDrawable *drawable,
             gint          seg_count,
             gdouble       line_pnts[])
 {
   switch (brush_type)
     {
     case BRUSH_BRUSH_TYPE:
-      gimp_paintbrush (drawable,
+      clay_paintbrush (drawable,
                        selvals.brushfade,
                        seg_count, line_pnts,
-                       GIMP_PAINT_CONSTANT,
+                       CLAY_PAINT_CONSTANT,
                        selvals.brushgradient);
       break;
 
     case BRUSH_PENCIL_TYPE:
-      gimp_pencil (drawable,
+      clay_pencil (drawable,
                    seg_count, line_pnts);
       break;
 
     case BRUSH_AIRBRUSH_TYPE:
-      gimp_airbrush (drawable,
+      clay_airbrush (drawable,
                      selvals.airbrushpressure,
                      seg_count, line_pnts);
       break;
 
     case BRUSH_PATTERN_TYPE:
-      gimp_clone (drawable,
+      clay_clone (drawable,
                   drawable,
-                  GIMP_CLONE_PATTERN,
+                  CLAY_CLONE_PATTERN,
                   0.0, 0.0,
                   seg_count, line_pnts);
       break;
@@ -1736,7 +1736,7 @@ paint_combo_callback (GtkWidget *widget,
   gint mtype = GPOINTER_TO_INT (data);
   gint value;
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), &value);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), &value);
 
   switch (mtype)
     {
@@ -1760,7 +1760,7 @@ gridtype_combo_callback (GtkWidget *widget,
   gint mtype = GPOINTER_TO_INT (data);
   gint value;
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), &value);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), &value);
 
   switch (mtype)
     {
@@ -1782,7 +1782,7 @@ gridtype_combo_callback (GtkWidget *widget,
 
 /*
  *  The edit gfig name attributes dialog
- *  Modified from Gimp source - layer edit.
+ *  Modified from Clay source - layer edit.
  */
 
 typedef struct _GfigListOptions
@@ -1814,7 +1814,7 @@ load_file_chooser_response (GtkNativeDialog *chooser,
            */
           current_saved = gfig_context->current_obj;
           gfig_context->current_obj = NULL;
-          gfig_obj = gfig_load (GIMP_GFIG (data), filename, filename);
+          gfig_obj = gfig_load (CLAY_GFIG (data), filename, filename);
           gfig_context->current_obj = current_saved;
 
           if (gfig_obj)
@@ -1824,7 +1824,7 @@ load_file_chooser_response (GtkNativeDialog *chooser,
                 gfig_obj->obj_status |= GFIG_READONLY;
 
               gfig_list_insert (gfig_obj);
-              new_obj_2edit (GIMP_GFIG (data), gfig_obj);
+              new_obj_2edit (CLAY_GFIG (data), gfig_obj);
             }
         }
 
@@ -1838,17 +1838,17 @@ load_file_chooser_response (GtkNativeDialog *chooser,
 void
 paint_layer_fill (gdouble x1, gdouble y1, gdouble x2, gdouble y2)
 {
-  GimpFillType fill_type = GIMP_FILL_FOREGROUND;
+  ClayFillType fill_type = CLAY_FILL_FOREGROUND;
   Style *current_style;
 
   current_style = gfig_context_get_current_style ();
 
-  gimp_context_push ();
+  clay_context_push ();
 
-  gimp_context_set_paint_mode (GIMP_LAYER_MODE_NORMAL_LEGACY);
-  gimp_context_set_opacity (100.0);
-  gimp_context_set_gradient_repeat_mode (GIMP_REPEAT_NONE);
-  gimp_context_set_gradient_reverse (FALSE);
+  clay_context_set_paint_mode (CLAY_LAYER_MODE_NORMAL_LEGACY);
+  clay_context_set_opacity (100.0);
+  clay_context_set_gradient_repeat_mode (CLAY_REPEAT_NONE);
+  clay_context_set_gradient_reverse (FALSE);
 
   switch (current_style->fill_type)
     {
@@ -1856,16 +1856,16 @@ paint_layer_fill (gdouble x1, gdouble y1, gdouble x2, gdouble y2)
       return;
 
     case FILL_COLOR:
-      fill_type = GIMP_FILL_BACKGROUND;
+      fill_type = CLAY_FILL_BACKGROUND;
       break;
 
     case FILL_PATTERN:
-      fill_type = GIMP_FILL_PATTERN;
+      fill_type = CLAY_FILL_PATTERN;
       break;
 
     case FILL_GRADIENT:
-      gimp_drawable_edit_gradient_fill (gfig_context->drawable,
-                                        GIMP_GRADIENT_SHAPEBURST_DIMPLED,
+      clay_drawable_edit_gradient_fill (gfig_context->drawable,
+                                        CLAY_GRADIENT_SHAPEBURST_DIMPLED,
                                         0.0,       /* offset             */
                                         FALSE,     /* supersampling      */
                                         0,         /* max_depth          */
@@ -1875,8 +1875,8 @@ paint_layer_fill (gdouble x1, gdouble y1, gdouble x2, gdouble y2)
                                         0.0, 0.0); /* (x2, y2) - ignored */
       return;
     case FILL_VERTICAL:
-      gimp_drawable_edit_gradient_fill (gfig_context->drawable,
-                                        GIMP_GRADIENT_LINEAR,
+      clay_drawable_edit_gradient_fill (gfig_context->drawable,
+                                        CLAY_GRADIENT_LINEAR,
                                         0.0,
                                         FALSE,
                                         0,
@@ -1886,8 +1886,8 @@ paint_layer_fill (gdouble x1, gdouble y1, gdouble x2, gdouble y2)
                                         x1, y2);
       return;
     case FILL_HORIZONTAL:
-      gimp_drawable_edit_gradient_fill (gfig_context->drawable,
-                                        GIMP_GRADIENT_LINEAR,
+      clay_drawable_edit_gradient_fill (gfig_context->drawable,
+                                        CLAY_GRADIENT_LINEAR,
                                         0.0,
                                         FALSE,
                                         0,
@@ -1898,12 +1898,12 @@ paint_layer_fill (gdouble x1, gdouble y1, gdouble x2, gdouble y2)
       return;
     }
 
-  gimp_context_set_opacity (current_style->fill_opacity);
+  clay_context_set_opacity (current_style->fill_opacity);
 
-  gimp_drawable_edit_fill (gfig_context->drawable,
+  clay_drawable_edit_fill (gfig_context->drawable,
                            fill_type);
 
-  gimp_context_pop ();
+  clay_context_pop ();
 }
 
 void
@@ -1918,7 +1918,7 @@ gfig_paint_callback (void)
 
   objs = gfig_context->current_obj->obj_list;
 
-  gimp_drawable_fill (gfig_context->drawable, GIMP_FILL_TRANSPARENT);
+  clay_drawable_fill (gfig_context->drawable, CLAY_FILL_TRANSPARENT);
 
   while (objs)
     {
@@ -1941,7 +1941,7 @@ gfig_paint_callback (void)
       ccount++;
     }
 
-  gimp_displays_flush ();
+  clay_displays_flush ();
 
   if (back_pixbuf)
     {

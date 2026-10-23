@@ -33,13 +33,13 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "bmp.h"
 #include "bmp-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static  gboolean  write_image     (FILE          *f,
@@ -55,10 +55,10 @@ static  gboolean  write_image     (FILE          *f,
                                    gint           mask_info_size,
                                    gint           color_space_size);
 
-static  gboolean  export_dialog   (GimpProcedure *procedure,
+static  gboolean  export_dialog   (ClayProcedure *procedure,
                                    GObject       *config,
-                                   GimpImage     *image,
-                                   GimpImageType  drawable_type,
+                                   ClayImage     *image,
+                                   ClayImageType  drawable_type,
                                    gint           channels,
                                    gint           bpp);
 
@@ -86,12 +86,12 @@ write_color_map (FILE *f,
   return TRUE;
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
-              GimpRunMode    run_mode,
-              GimpProcedure *procedure,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
+              ClayRunMode    run_mode,
+              ClayProcedure *procedure,
               GObject       *config,
               GError       **error)
 {
@@ -109,7 +109,7 @@ export_image (GFile         *file,
   guchar         *pixels = NULL;
   GeglBuffer     *buffer;
   const Babl     *format;
-  GimpImageType   drawable_type;
+  ClayImageType   drawable_type;
   gint            drawable_width;
   gint            drawable_height;
   gint            i;
@@ -120,22 +120,22 @@ export_image (GFile         *file,
   gboolean        write_color_space;
   RGBMode         rgb_format;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
-  drawable_type   = gimp_drawable_type (drawable);
-  drawable_width  = gimp_drawable_get_width (drawable);
-  drawable_height = gimp_drawable_get_height(drawable);
+  drawable_type   = clay_drawable_type (drawable);
+  drawable_width  = clay_drawable_get_width (drawable);
+  drawable_height = clay_drawable_get_height(drawable);
 
   switch (drawable_type)
     {
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       format       = babl_format ("R'G'B'A u8");
       colors       = 0;
       BitsPerPixel = 32;
       MapSize      = 0;
       channels     = 4;
 
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         g_object_set (config,
                       "rgb-format", "rgba-8888",
                       "use-rle",    FALSE,
@@ -146,14 +146,14 @@ export_image (GFile         *file,
                       NULL);
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       format       = babl_format ("R'G'B' u8");
       colors       = 0;
       BitsPerPixel = 24;
       MapSize      = 0;
       channels     = 3;
 
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         g_object_set (config,
                       "rgb-format", "rgb-888",
                       "use-rle",    FALSE,
@@ -164,13 +164,13 @@ export_image (GFile         *file,
                       NULL);
       break;
 
-    case GIMP_GRAYA_IMAGE:
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAYA_IMAGE:
+    case CLAY_GRAY_IMAGE:
       colors       = 256;
       BitsPerPixel = 8;
       MapSize      = 1024;
 
-      if (drawable_type == GIMP_GRAYA_IMAGE)
+      if (drawable_type == CLAY_GRAYA_IMAGE)
         {
           format   = babl_format ("Y'A u8");
           channels = 2;
@@ -189,15 +189,15 @@ export_image (GFile         *file,
         }
       break;
 
-    case GIMP_INDEXEDA_IMAGE:
-    case GIMP_INDEXED_IMAGE:
-      format   = gimp_drawable_get_format (drawable);
-      cmap     = gimp_palette_get_colormap (gimp_image_get_palette (image),
+    case CLAY_INDEXEDA_IMAGE:
+    case CLAY_INDEXED_IMAGE:
+      format   = clay_drawable_get_format (drawable);
+      cmap     = clay_palette_get_colormap (clay_image_get_palette (image),
                                             babl_format ("R'G'B' u8"), &colors,
                                             NULL);
       MapSize  = 4 * colors;
 
-      if (drawable_type == GIMP_INDEXEDA_IMAGE)
+      if (drawable_type == CLAY_INDEXEDA_IMAGE)
         channels = 2;
       else
         channels = 1;
@@ -228,27 +228,27 @@ export_image (GFile         *file,
 
   mask_info_size = 0;
 
-  if (run_mode == GIMP_RUN_INTERACTIVE &&
+  if (run_mode == CLAY_RUN_INTERACTIVE &&
       (BitsPerPixel == 8 ||
        BitsPerPixel == 4 ||
        BitsPerPixel == 1))
     {
       if (! export_dialog (procedure, config, image, drawable_type, 1,
                            BitsPerPixel))
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
     }
   else if (BitsPerPixel == 24 ||
            BitsPerPixel == 32)
     {
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         {
           if (! export_dialog (procedure, config, image, drawable_type,
                                channels, BitsPerPixel))
-            return GIMP_PDB_CANCEL;
+            return CLAY_PDB_CANCEL;
         }
 
       rgb_format =
-        gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+        clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                              "rgb-format");
 
       /* mask_info_size is only set to non-zero for 16- and 32-bpp */
@@ -278,7 +278,7 @@ export_image (GFile         *file,
           mask_info_size = 16;
           break;
         default:
-          g_return_val_if_reached (GIMP_PDB_EXECUTION_ERROR);
+          g_return_val_if_reached (CLAY_PDB_EXECUTION_ERROR);
         }
     }
 
@@ -287,11 +287,11 @@ export_image (GFile         *file,
                 "write-color-space", &write_color_space,
                 NULL);
   rgb_format =
-    gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                          "rgb-format");
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   outfile = g_fopen (g_file_peek_path (file), "wb");
 
@@ -299,8 +299,8 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return GIMP_PDB_EXECUTION_ERROR;
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* fetch the image */
@@ -378,10 +378,10 @@ export_image (GFile         *file,
     gdouble xresolution;
     gdouble yresolution;
 
-    gimp_image_get_resolution (image, &xresolution, &yresolution);
+    clay_image_get_resolution (image, &xresolution, &yresolution);
 
-    if (xresolution > GIMP_MIN_RESOLUTION &&
-        yresolution > GIMP_MIN_RESOLUTION)
+    if (xresolution > CLAY_MIN_RESOLUTION &&
+        yresolution > CLAY_MIN_RESOLUTION)
       {
         /*
          * xresolution and yresolution are in dots per inch.
@@ -551,7 +551,7 @@ export_image (GFile         *file,
   fclose (outfile);
   g_free (pixels);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 
 abort:
   if (outfile)
@@ -561,7 +561,7 @@ abort:
   g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                _("Error writing to file."));
 
-  return GIMP_PDB_EXECUTION_ERROR;
+  return CLAY_PDB_EXECUTION_ERROR;
 }
 
 static inline void
@@ -722,7 +722,7 @@ write_image (FILE     *f,
 
           cur_progress++;
           if ((cur_progress % 5) == 0)
-            gimp_progress_update ((gdouble) cur_progress /
+            clay_progress_update ((gdouble) cur_progress /
                                   (gdouble) max_progress);
 
           xpos = 0;
@@ -766,7 +766,7 @@ write_image (FILE     *f,
 
               cur_progress++;
               if ((cur_progress % 5) == 0)
-                gimp_progress_update ((gdouble) cur_progress /
+                clay_progress_update ((gdouble) cur_progress /
                                         (gdouble) max_progress);
             }
         }
@@ -903,7 +903,7 @@ write_image (FILE     *f,
 
               cur_progress++;
               if ((cur_progress % 5) == 0)
-                gimp_progress_update ((gdouble) cur_progress /
+                clay_progress_update ((gdouble) cur_progress /
                                       (gdouble) max_progress);
             }
 
@@ -930,7 +930,7 @@ write_image (FILE     *f,
         }
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
   return TRUE;
 
 abort:
@@ -947,7 +947,7 @@ format_sensitive_callback (GObject *config,
   gint value;
   gint channels = GPOINTER_TO_INT (data);
 
-  value = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  value = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                "rgb-format");
 
   switch (value)
@@ -969,7 +969,7 @@ config_notify (GObject          *config,
   gint    channels = GPOINTER_TO_INT (data);
   RGBMode format;
 
-  format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "rgb-format");
 
   switch (format)
@@ -995,10 +995,10 @@ config_notify (GObject          *config,
 }
 
 static gboolean
-export_dialog (GimpProcedure *procedure,
+export_dialog (ClayProcedure *procedure,
                GObject       *config,
-               GimpImage     *image,
-               GimpImageType  drawable_type,
+               ClayImage     *image,
+               ClayImageType  drawable_type,
                gint           channels,
                gint           bpp)
 {
@@ -1009,77 +1009,77 @@ export_dialog (GimpProcedure *procedure,
   gboolean   is_format_sensitive;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 
-  if ((drawable_type == GIMP_GRAYA_IMAGE ||
-       drawable_type == GIMP_INDEXEDA_IMAGE) &&
-      gimp_image_has_transparency (image))
+  if ((drawable_type == CLAY_GRAYA_IMAGE ||
+       drawable_type == CLAY_INDEXEDA_IMAGE) &&
+      clay_image_has_transparency (image))
     {
       const gchar *title   = _("Cannot export indexed image with "
                                "transparency in BMP file format.");
       const gchar *warning = _("Alpha channel will be ignored.");
 
       /* Used to create vbox to store hintbox in */
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "spacer-alpha", " ",
                                        FALSE, FALSE);
 
-      vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                              "alpha-warning-vbox",
                                              "spacer-alpha", NULL);
 
-      gimp_procedure_dialog_set_warning (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_set_warning (CLAY_PROCEDURE_DIALOG (dialog),
                                          title, warning, FALSE);
     }
 
   /* Run-Length Encoded */
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "use-rle",
                                        ! (channels > 1 || bpp == 1),
                                        NULL, NULL, FALSE);
 
   /* Compatibility Options */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "color-space-title", _("Compatibility"),
                                    FALSE, FALSE);
-  toggle = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  toggle = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                              "write-color-space",
                                              GTK_TYPE_CHECK_BUTTON);
-  gimp_help_set_help_data (toggle,
+  clay_help_set_help_data (toggle,
                            _("Some applications can not read BMP images that "
                              "include color space information. Clay writes "
                              "color space information by default. Disabling "
                              "this option will cause Clay to not write color "
                              "space information to the file."),
                            NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "color-space-frame", "color-space-title",
                                     FALSE, "write-color-space");
 
   /* RGB Encoding Options */
-  combo = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  combo = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                             "rgb-format", G_TYPE_NONE);
   g_object_set (combo, "margin", 12, NULL);
 
   /* Determine if RGB Format combo should be initially sensitive */
   is_format_sensitive = format_sensitive_callback (config,
                                                    GINT_TO_POINTER (channels));
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "rgb-format",
                                        is_format_sensitive,
                                        NULL, NULL, FALSE);
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "rgb-format",
                                        (channels >= 3),
                                        NULL, NULL, FALSE);
 
   /* Formatting the dialog */
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "bmp-save-vbox",
                                          "use-rle",
                                          "color-space-frame",
@@ -1087,7 +1087,7 @@ export_dialog (GimpProcedure *procedure,
                                          NULL);
   gtk_box_set_spacing (GTK_BOX (vbox), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "bmp-save-vbox",
                               NULL);
 
@@ -1097,7 +1097,7 @@ export_dialog (GimpProcedure *procedure,
                     G_CALLBACK (config_notify),
                     GINT_TO_POINTER (channels));
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   g_signal_handlers_disconnect_by_func (config,
                                         config_notify,

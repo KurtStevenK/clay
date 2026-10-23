@@ -1,0 +1,34 @@
+/* Lavender theme, light scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(43,35,64);
+@define-color bg-color                   rgb(238,232,248);
+@define-color border-color               rgb(211,204,222);
+@define-color dimmed-fg-color            rgb(92,84,110);
+@define-color disabled-fg-color          rgb(131,124,147);
+@define-color disabled-button-color      rgb(176,169,189);
+@define-color hover-color                rgb(215,208,226);
+@define-color widget-bg-color            rgb(228,222,239);
+@define-color selected-color             rgb(203,197,215);
+@define-color extreme-bg-color           rgb(246,244,252);
+@define-color extreme-selected-color     rgb(211,204,222);
+@define-color strong-border-color        rgb(170,163,184);
+@define-color stronger-border-color      rgb(170,163,184);
+@define-color edge-border-color          rgb(170,163,184);
+@define-color scrollbar-slider-color     rgb(170,163,184);
+@define-color scrollbar-trough-color     rgb(238,232,248);
+@define-color ruler-color                rgba(211,204,222,0.3);
+@define-color accent-color               rgb(123,97,201);
+@define-color accent-hover-color         rgb(147,125,211);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(196,43,28);
+@define-color good-color                 rgb(31,122,63);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

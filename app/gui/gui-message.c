@@ -22,33 +22,33 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "gui-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clayprogress.h"
 
-#include "plug-in/gimpplugin.h"
+#include "plug-in/clayplugin.h"
 
-#include "widgets/gimpcriticaldialog.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdockable.h"
-#include "widgets/gimperrorconsole.h"
-#include "widgets/gimperrordialog.h"
-#include "widgets/gimpprogressdialog.h"
-#include "widgets/gimpsessioninfo.h"
-#include "widgets/gimpwidgets-utils.h"
-#include "widgets/gimpwindowstrategy.h"
+#include "widgets/claycriticaldialog.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydockable.h"
+#include "widgets/clayerrorconsole.h"
+#include "widgets/clayerrordialog.h"
+#include "widgets/clayprogressdialog.h"
+#include "widgets/claysessioninfo.h"
+#include "widgets/claywidgets-utils.h"
+#include "widgets/claywindowstrategy.h"
 
 #include "about.h"
 
 #include "gui-message.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define MAX_TRACES 3
@@ -57,30 +57,30 @@
 
 typedef struct
 {
-  Gimp                *gimp;
+  Clay                *clay;
   gchar               *domain;
   gchar               *message;
   gchar               *trace;
   GObject             *handler;
-  GimpMessageSeverity  severity;
-} GimpLogMessageData;
+  ClayMessageSeverity  severity;
+} ClayLogMessageData;
 
 
 static gboolean  gui_message_idle           (gpointer             user_data);
-static gboolean  gui_message_error_console  (Gimp                *gimp,
-                                             GimpMessageSeverity  severity,
+static gboolean  gui_message_error_console  (Clay                *clay,
+                                             ClayMessageSeverity  severity,
                                              const gchar         *domain,
                                              const gchar         *message);
-static gboolean  gui_message_error_dialog   (Gimp                *gimp,
+static gboolean  gui_message_error_dialog   (Clay                *clay,
                                              GObject             *handler,
-                                             GimpMessageSeverity  severity,
+                                             ClayMessageSeverity  severity,
                                              const gchar         *domain,
                                              const gchar         *message,
                                              const gchar         *trace);
-static void      gui_message_console        (GimpMessageSeverity  severity,
+static void      gui_message_console        (ClayMessageSeverity  severity,
                                              const gchar         *domain,
                                              const gchar         *message);
-static gchar *   gui_message_format         (GimpMessageSeverity  severity,
+static gchar *   gui_message_format         (ClayMessageSeverity  severity,
                                              const gchar         *domain,
                                              const gchar         *message);
 
@@ -97,26 +97,26 @@ static gint   n_errors = 0;
 
 
 void
-gui_message (Gimp                *gimp,
+gui_message (Clay                *clay,
              GObject             *handler,
-             GimpMessageSeverity  severity,
+             ClayMessageSeverity  severity,
              const gchar         *domain,
              const gchar         *message)
 {
   gchar    *trace     = NULL;
   gboolean  gen_trace = FALSE;
 
-  switch (gimp->message_handler)
+  switch (clay->message_handler)
     {
-    case GIMP_ERROR_CONSOLE:
-      if (gui_message_error_console (gimp, severity, domain, message))
+    case CLAY_ERROR_CONSOLE:
+      if (gui_message_error_console (clay, severity, domain, message))
         return;
 
-      gimp->message_handler = GIMP_MESSAGE_BOX;
+      clay->message_handler = CLAY_MESSAGE_BOX;
       /*  fallthru  */
 
-    case GIMP_MESSAGE_BOX:
-      if (severity >= GIMP_MESSAGE_BUG_WARNING)
+    case CLAY_MESSAGE_BOX:
+      if (severity >= CLAY_MESSAGE_BUG_WARNING)
         {
           g_mutex_lock (&mutex);
           /* Trace creation can be time consuming so don't block the
@@ -134,23 +134,23 @@ gui_message (Gimp                *gimp,
       if (gen_trace)
         {
           /* We need to create the trace here because for multi-thread
-           * errors (i.e. non-GIMP ones), the backtrace after a idle
+           * errors (i.e. non-Clay ones), the backtrace after a idle
            * function will simply be useless. It needs to happen in the
            * buggy thread to be meaningful.
            */
-          gimp_stack_trace_print (NULL, NULL, &trace);
+          clay_stack_trace_print (NULL, NULL, &trace);
         }
 
-      if (g_strcmp0 (GIMP_ACRONYM, domain) != 0)
+      if (g_strcmp0 (CLAY_ACRONYM, domain) != 0)
         {
-          /* Handle non-GIMP messages in a multi-thread safe way,
+          /* Handle non-Clay messages in a multi-thread safe way,
            * because we can't know for sure whether the log message may
            * not have been called from a thread other than the main one.
            */
-          GimpLogMessageData *data;
+          ClayLogMessageData *data;
 
-          data = g_new0 (GimpLogMessageData, 1);
-          data->gimp     = gimp;
+          data = g_new0 (ClayLogMessageData, 1);
+          data->clay     = clay;
           data->domain   = g_strdup (domain);
           data->message  = g_strdup (message);
           data->trace    = trace;
@@ -162,14 +162,14 @@ gui_message (Gimp                *gimp,
                                      data, g_free);
           return;
         }
-      if (gui_message_error_dialog (gimp, handler, severity,
+      if (gui_message_error_dialog (clay, handler, severity,
                                     domain, message, trace))
         break;
 
-      gimp->message_handler = GIMP_CONSOLE;
+      clay->message_handler = CLAY_CONSOLE;
       /*  fallthru  */
 
-    case GIMP_CONSOLE:
+    case CLAY_CONSOLE:
       gui_message_console (severity, domain, message);
       break;
     }
@@ -180,9 +180,9 @@ gui_message (Gimp                *gimp,
 static gboolean
 gui_message_idle (gpointer user_data)
 {
-  GimpLogMessageData *data = (GimpLogMessageData *) user_data;
+  ClayLogMessageData *data = (ClayLogMessageData *) user_data;
 
-  if (! gui_message_error_dialog (data->gimp,
+  if (! gui_message_error_dialog (data->clay,
                                   data->handler,
                                   data->severity,
                                   data->domain,
@@ -204,42 +204,42 @@ gui_message_idle (gpointer user_data)
 }
 
 static gboolean
-gui_message_error_console (Gimp                *gimp,
-                           GimpMessageSeverity  severity,
+gui_message_error_console (Clay                *clay,
+                           ClayMessageSeverity  severity,
                            const gchar         *domain,
                            const gchar         *message)
 {
   GtkWidget *dockable;
 
-  dockable = gimp_dialog_factory_find_widget (gimp_dialog_factory_get_singleton (),
-                                              "gimp-error-console");
+  dockable = clay_dialog_factory_find_widget (clay_dialog_factory_get_singleton (),
+                                              "clay-error-console");
 
   /* avoid raising the error console for unhighlighted messages */
   if (dockable)
     {
       GtkWidget *child = gtk_bin_get_child (GTK_BIN (dockable));
 
-      if (GIMP_ERROR_CONSOLE (child)->highlight[severity])
+      if (CLAY_ERROR_CONSOLE (child)->highlight[severity])
         dockable = NULL;
     }
 
   if (! dockable)
     {
-      GdkMonitor *monitor = gimp_get_monitor_at_pointer ();
+      GdkMonitor *monitor = clay_get_monitor_at_pointer ();
 
       dockable =
-        gimp_window_strategy_show_dockable_dialog (GIMP_WINDOW_STRATEGY (gimp_get_window_strategy (gimp)),
-                                                   gimp,
-                                                   gimp_dialog_factory_get_singleton (),
+        clay_window_strategy_show_dockable_dialog (CLAY_WINDOW_STRATEGY (clay_get_window_strategy (clay)),
+                                                   clay,
+                                                   clay_dialog_factory_get_singleton (),
                                                    monitor,
-                                                   "gimp-error-console");
+                                                   "clay-error-console");
     }
 
   if (dockable)
     {
       GtkWidget *child = gtk_bin_get_child (GTK_BIN (dockable));
 
-      gimp_error_console_add (GIMP_ERROR_CONSOLE (child),
+      clay_error_console_add (CLAY_ERROR_CONSOLE (child),
                               severity, domain, message);
 
       return TRUE;
@@ -249,25 +249,25 @@ gui_message_error_console (Gimp                *gimp,
 }
 
 static void
-progress_error_dialog_unset (GimpProgress *progress)
+progress_error_dialog_unset (ClayProgress *progress)
 {
-  g_object_set_data (G_OBJECT (progress), "gimp-error-dialog", NULL);
+  g_object_set_data (G_OBJECT (progress), "clay-error-dialog", NULL);
 }
 
 static GtkWidget *
-progress_error_dialog (GimpProgress *progress)
+progress_error_dialog (ClayProgress *progress)
 {
   GtkWidget *dialog;
 
-  g_return_val_if_fail (GIMP_IS_PROGRESS (progress), NULL);
+  g_return_val_if_fail (CLAY_IS_PROGRESS (progress), NULL);
 
-  dialog = g_object_get_data (G_OBJECT (progress), "gimp-error-dialog");
+  dialog = g_object_get_data (G_OBJECT (progress), "clay-error-dialog");
 
   if (! dialog)
     {
-      dialog = gimp_error_dialog_new (_("Clay Message"));
+      dialog = clay_error_dialog_new (_("Clay Message"));
 
-      g_object_set_data (G_OBJECT (progress), "gimp-error-dialog", dialog);
+      g_object_set_data (G_OBJECT (progress), "clay-error-dialog", dialog);
 
       g_signal_connect_object (dialog, "destroy",
                                G_CALLBACK (progress_error_dialog_unset),
@@ -283,7 +283,7 @@ progress_error_dialog (GimpProgress *progress)
         }
       else
         {
-          gimp_window_set_transient_for (GTK_WINDOW (dialog), progress);
+          clay_window_set_transient_for (GTK_WINDOW (dialog), progress);
         }
     }
 
@@ -291,9 +291,9 @@ progress_error_dialog (GimpProgress *progress)
 }
 
 static gboolean
-gui_message_error_dialog (Gimp                *gimp,
+gui_message_error_dialog (Clay                *clay,
                           GObject             *handler,
-                          GimpMessageSeverity  severity,
+                          ClayMessageSeverity  severity,
                           const gchar         *domain,
                           const gchar         *message,
                           const gchar         *trace)
@@ -303,22 +303,22 @@ gui_message_error_dialog (Gimp                *gimp,
 
   switch (severity)
     {
-    case GIMP_MESSAGE_INFO:
+    case CLAY_MESSAGE_INFO:
       type = GTK_MESSAGE_INFO;
       break;
-    case GIMP_MESSAGE_WARNING:
+    case CLAY_MESSAGE_WARNING:
       type = GTK_MESSAGE_WARNING;
       break;
-    case GIMP_MESSAGE_ERROR:
+    case CLAY_MESSAGE_ERROR:
       type = GTK_MESSAGE_ERROR;
       break;
-    case GIMP_MESSAGE_BUG_WARNING:
-    case GIMP_MESSAGE_BUG_CRITICAL:
+    case CLAY_MESSAGE_BUG_WARNING:
+    case CLAY_MESSAGE_BUG_CRITICAL:
       type = GTK_MESSAGE_OTHER;
       break;
     }
 
-  if (severity >= GIMP_MESSAGE_BUG_WARNING)
+  if (severity >= CLAY_MESSAGE_BUG_WARNING)
     {
       /* Process differently programming errors.
        * The reason is that we will generate traces, which will take
@@ -343,7 +343,7 @@ gui_message_error_dialog (Gimp                *gimp,
           dialog = global_critical_dialog ();
 
           text = gui_message_format (severity, domain, message);
-          gimp_critical_dialog_add (dialog, text, trace, FALSE, NULL, 0);
+          clay_critical_dialog_add (dialog, text, trace, FALSE, NULL, 0);
 
           gtk_widget_set_visible (dialog, TRUE);
 
@@ -355,7 +355,7 @@ gui_message_error_dialog (Gimp                *gimp,
         {
           const gchar *reason = "Message";
 
-          gimp_enum_get_value (GIMP_TYPE_MESSAGE_SEVERITY, severity,
+          clay_enum_get_value (CLAY_TYPE_MESSAGE_SEVERITY, severity,
                                NULL, NULL, &reason, NULL);
 
           /* Since we overridden glib default's WARNING and CRITICAL
@@ -369,13 +369,13 @@ gui_message_error_dialog (Gimp                *gimp,
           return TRUE;
         }
     }
-  else if (GIMP_IS_PROGRESS (handler))
+  else if (CLAY_IS_PROGRESS (handler))
     {
       /* If there's already an error dialog associated with this
-       * progress, then continue without trying gimp_progress_message().
+       * progress, then continue without trying clay_progress_message().
        */
-      if (! g_object_get_data (handler, "gimp-error-dialog") &&
-          gimp_progress_message (GIMP_PROGRESS (handler), gimp,
+      if (! g_object_get_data (handler, "clay-error-dialog") &&
+          clay_progress_message (CLAY_PROGRESS (handler), clay,
                                  severity, domain, message))
         {
           return TRUE;
@@ -400,16 +400,16 @@ gui_message_error_dialog (Gimp                *gimp,
       return TRUE;
     }
 
-  if (GIMP_IS_PROGRESS (handler) && ! GIMP_IS_PROGRESS_DIALOG (handler))
-    dialog = progress_error_dialog (GIMP_PROGRESS (handler));
+  if (CLAY_IS_PROGRESS (handler) && ! CLAY_IS_PROGRESS_DIALOG (handler))
+    dialog = progress_error_dialog (CLAY_PROGRESS (handler));
   else
     dialog = global_error_dialog ();
 
   if (dialog)
     {
       gtk_window_set_keep_above (GTK_WINDOW (dialog), TRUE);
-      gimp_error_dialog_add (GIMP_ERROR_DIALOG (dialog),
-                             gimp_get_message_icon_name (severity),
+      clay_error_dialog_add (CLAY_ERROR_DIALOG (dialog),
+                             clay_get_message_icon_name (severity),
                              domain, message);
       gtk_window_present (GTK_WINDOW (dialog));
 
@@ -420,7 +420,7 @@ gui_message_error_dialog (Gimp                *gimp,
 }
 
 static void
-gui_message_console (GimpMessageSeverity  severity,
+gui_message_console (ClayMessageSeverity  severity,
                      const gchar         *domain,
                      const gchar         *message)
 {
@@ -432,14 +432,14 @@ gui_message_console (GimpMessageSeverity  severity,
 }
 
 static gchar *
-gui_message_format (GimpMessageSeverity  severity,
+gui_message_format (ClayMessageSeverity  severity,
                     const gchar         *domain,
                     const gchar         *message)
 {
   const gchar *desc = "Message";
   gchar       *formatted_message;
 
-  gimp_enum_get_value (GIMP_TYPE_MESSAGE_SEVERITY, severity,
+  clay_enum_get_value (CLAY_TYPE_MESSAGE_SEVERITY, severity,
                        NULL, NULL, &desc, NULL);
 
   formatted_message = g_strdup_printf ("%s-%s: %s", domain, desc, message);
@@ -450,27 +450,27 @@ gui_message_format (GimpMessageSeverity  severity,
 static GtkWidget *
 global_error_dialog (void)
 {
-  GdkMonitor *monitor = gimp_get_monitor_at_pointer ();
+  GdkMonitor *monitor = clay_get_monitor_at_pointer ();
 
-  return gimp_dialog_factory_dialog_new (gimp_dialog_factory_get_singleton (),
+  return clay_dialog_factory_dialog_new (clay_dialog_factory_get_singleton (),
                                          monitor,
                                          NULL /*ui_manager*/,
                                          NULL,
-                                         "gimp-error-dialog", -1,
+                                         "clay-error-dialog", -1,
                                          FALSE);
 }
 
 static GtkWidget *
 global_critical_dialog (void)
 {
-  GdkMonitor *monitor = gimp_get_monitor_at_pointer ();
+  GdkMonitor *monitor = clay_get_monitor_at_pointer ();
   GtkWidget  *dialog;
 
-  dialog = gimp_dialog_factory_dialog_new (gimp_dialog_factory_get_singleton (),
+  dialog = clay_dialog_factory_dialog_new (clay_dialog_factory_get_singleton (),
                                            monitor,
                                            NULL /*ui_manager*/,
                                            NULL,
-                                           "gimp-critical-dialog", -1,
+                                           "clay-critical-dialog", -1,
                                            FALSE);
   g_signal_handlers_disconnect_by_func (dialog,
                                         gui_message_reset_errors,

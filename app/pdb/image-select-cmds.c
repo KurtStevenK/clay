@@ -27,58 +27,58 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpchannel-select.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
-#include "core/gimpitem.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claychannel-select.h"
+#include "core/claydatafactory.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
+#include "core/clayitem.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimppdbcontext.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "claypdbcontext.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-image_select_color_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+image_select_color_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   GeglColor *color;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  drawable = g_value_get_object (gimp_value_array_index (args, 2));
-  color = g_value_get_object (gimp_value_array_index (args, 3));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  drawable = g_value_get_object (clay_value_array_index (args, 2));
+  color = g_value_get_object (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
       if (pdb_context->sample_merged ||
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), image, 0, error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), image, 0, error))
         {
           GList *drawables = g_list_prepend (NULL, drawable);
-          gimp_channel_select_by_color (gimp_image_get_mask (image), drawables,
+          clay_channel_select_by_color (clay_image_get_mask (image), drawables,
                                         pdb_context->sample_merged,
                                         color,
                                         pdb_context->sample_threshold,
@@ -95,40 +95,40 @@ image_select_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_select_contiguous_color_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+image_select_contiguous_color_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gdouble x;
   gdouble y;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  drawable = g_value_get_object (gimp_value_array_index (args, 2));
-  x = g_value_get_double (gimp_value_array_index (args, 3));
-  y = g_value_get_double (gimp_value_array_index (args, 4));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  drawable = g_value_get_object (clay_value_array_index (args, 2));
+  x = g_value_get_double (clay_value_array_index (args, 3));
+  y = g_value_get_double (clay_value_array_index (args, 4));
 
   if (success)
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
       if (pdb_context->sample_merged ||
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), image, 0, error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), image, 0, error))
         {
 
-          gimp_channel_select_fuzzy (gimp_image_get_mask (image),
+          clay_channel_select_fuzzy (clay_image_get_mask (image),
                                      drawable,
                                      pdb_context->sample_merged,
                                      x, y,
@@ -146,38 +146,38 @@ image_select_contiguous_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_select_rectangle_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+image_select_rectangle_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
   gdouble x;
   gdouble y;
   gdouble width;
   gdouble height;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  x = g_value_get_double (gimp_value_array_index (args, 2));
-  y = g_value_get_double (gimp_value_array_index (args, 3));
-  width = g_value_get_double (gimp_value_array_index (args, 4));
-  height = g_value_get_double (gimp_value_array_index (args, 5));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  x = g_value_get_double (clay_value_array_index (args, 2));
+  y = g_value_get_double (clay_value_array_index (args, 3));
+  width = g_value_get_double (clay_value_array_index (args, 4));
+  height = g_value_get_double (clay_value_array_index (args, 5));
 
   if (success)
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-      gimp_channel_select_rectangle (gimp_image_get_mask (image),
+      clay_channel_select_rectangle (clay_image_get_mask (image),
                                      (gint) x, (gint) y,
                                      (gint) width, (gint) height,
                                      operation,
@@ -187,20 +187,20 @@ image_select_rectangle_invoker (GimpProcedure         *procedure,
                                      TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_select_round_rectangle_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+image_select_round_rectangle_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
   gdouble x;
   gdouble y;
@@ -209,20 +209,20 @@ image_select_round_rectangle_invoker (GimpProcedure         *procedure,
   gdouble corner_radius_x;
   gdouble corner_radius_y;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  x = g_value_get_double (gimp_value_array_index (args, 2));
-  y = g_value_get_double (gimp_value_array_index (args, 3));
-  width = g_value_get_double (gimp_value_array_index (args, 4));
-  height = g_value_get_double (gimp_value_array_index (args, 5));
-  corner_radius_x = g_value_get_double (gimp_value_array_index (args, 6));
-  corner_radius_y = g_value_get_double (gimp_value_array_index (args, 7));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  x = g_value_get_double (clay_value_array_index (args, 2));
+  y = g_value_get_double (clay_value_array_index (args, 3));
+  width = g_value_get_double (clay_value_array_index (args, 4));
+  height = g_value_get_double (clay_value_array_index (args, 5));
+  corner_radius_x = g_value_get_double (clay_value_array_index (args, 6));
+  corner_radius_y = g_value_get_double (clay_value_array_index (args, 7));
 
   if (success)
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-      gimp_channel_select_round_rect (gimp_image_get_mask (image),
+      clay_channel_select_round_rect (clay_image_get_mask (image),
                                       (gint) x, (gint) y,
                                       (gint) width, (gint) height,
                                       corner_radius_x,
@@ -235,38 +235,38 @@ image_select_round_rectangle_invoker (GimpProcedure         *procedure,
                                       TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_select_ellipse_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+image_select_ellipse_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
   gdouble x;
   gdouble y;
   gdouble width;
   gdouble height;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  x = g_value_get_double (gimp_value_array_index (args, 2));
-  y = g_value_get_double (gimp_value_array_index (args, 3));
-  width = g_value_get_double (gimp_value_array_index (args, 4));
-  height = g_value_get_double (gimp_value_array_index (args, 5));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  x = g_value_get_double (clay_value_array_index (args, 2));
+  y = g_value_get_double (clay_value_array_index (args, 3));
+  width = g_value_get_double (clay_value_array_index (args, 4));
+  height = g_value_get_double (clay_value_array_index (args, 5));
 
   if (success)
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-      gimp_channel_select_ellipse (gimp_image_get_mask (image),
+      clay_channel_select_ellipse (clay_image_get_mask (image),
                                    (gint) x, (gint) y,
                                    (gint) width, (gint) height,
                                    operation,
@@ -277,36 +277,36 @@ image_select_ellipse_invoker (GimpProcedure         *procedure,
                                    TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_select_polygon_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+image_select_polygon_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
   gsize num_segs;
   const gdouble *segs;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  segs = gimp_value_get_double_array (gimp_value_array_index (args, 2), &num_segs);
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  segs = clay_value_get_double_array (clay_value_array_index (args, 2), &num_segs);
 
   if (success)
     {
-      GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+      ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-      gimp_channel_select_polygon (gimp_image_get_mask (image),
+      clay_channel_select_polygon (clay_image_get_mask (image),
                                    _("Free Select"),
                                    num_segs / 2,
-                                   (GimpVector2 *) segs,
+                                   (ClayVector2 *) segs,
                                    operation,
                                    pdb_context->antialias,
                                    pdb_context->feather,
@@ -315,34 +315,34 @@ image_select_polygon_invoker (GimpProcedure         *procedure,
                                    TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_select_item_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+image_select_item_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint operation;
-  GimpItem *item;
+  ClayItem *item;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  operation = g_value_get_enum (gimp_value_array_index (args, 1));
-  item = g_value_get_object (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  operation = g_value_get_enum (clay_value_array_index (args, 1));
+  item = g_value_get_object (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_pdb_item_is_attached (item, image, 0, error))
+      if (clay_pdb_item_is_attached (item, image, 0, error))
         {
-          GimpPDBContext *pdb_context = GIMP_PDB_CONTEXT (context);
+          ClayPDBContext *pdb_context = CLAY_PDB_CONTEXT (context);
 
-          gimp_item_to_selection (item, operation,
+          clay_item_to_selection (item, operation,
                                   pdb_context->antialias,
                                   pdb_context->feather,
                                   pdb_context->feather_radius_x,
@@ -352,550 +352,550 @@ image_select_item_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-images_popup_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+images_popup_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
   const gchar *callback;
   const gchar *popup_title;
-  GimpImage *initial_image;
+  ClayImage *initial_image;
   GBytes *parent_window;
 
-  callback = g_value_get_string (gimp_value_array_index (args, 0));
-  popup_title = g_value_get_string (gimp_value_array_index (args, 1));
-  initial_image = g_value_get_object (gimp_value_array_index (args, 2));
-  parent_window = g_value_get_boxed (gimp_value_array_index (args, 3));
+  callback = g_value_get_string (clay_value_array_index (args, 0));
+  popup_title = g_value_get_string (clay_value_array_index (args, 1));
+  initial_image = g_value_get_object (clay_value_array_index (args, 2));
+  parent_window = g_value_get_boxed (clay_value_array_index (args, 3));
 
   if (success)
     {
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-          ! gimp_pdb_dialog_new (gimp, context, progress,
-                                 GIMP_TYPE_IMAGE,
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+          ! clay_pdb_dialog_new (clay, context, progress,
+                                 CLAY_TYPE_IMAGE,
                                  parent_window, popup_title, callback,
-                                 GIMP_OBJECT (initial_image),
+                                 CLAY_OBJECT (initial_image),
                                  NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-images_close_popup_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+images_close_popup_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
   const gchar *callback;
 
-  callback = g_value_get_string (gimp_value_array_index (args, 0));
+  callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-          ! gimp_pdb_dialog_close (gimp, GIMP_TYPE_IMAGE, callback))
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+          ! clay_pdb_dialog_close (clay, CLAY_TYPE_IMAGE, callback))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-images_set_popup_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+images_set_popup_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
   const gchar *callback;
-  GimpImage *image;
+  ClayImage *image;
 
-  callback = g_value_get_string (gimp_value_array_index (args, 0));
-  image = g_value_get_object (gimp_value_array_index (args, 1));
+  callback = g_value_get_string (clay_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, callback) ||
-          ! gimp_pdb_dialog_set (gimp, GIMP_TYPE_IMAGE, callback, GIMP_OBJECT (image), NULL))
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, callback) ||
+          ! clay_pdb_dialog_set (clay, CLAY_TYPE_IMAGE, callback, CLAY_OBJECT (image), NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_image_select_procs (GimpPDB *pdb)
+register_image_select_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-image-select-color
+   * clay-image-select-color
    */
-  procedure = gimp_procedure_new (image_select_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-color");
+  clay_procedure_set_static_help (procedure,
                                   "Create a selection by selecting all pixels (in the specified drawable) with the same (or similar) color to that specified.",
                                   "This tool creates a selection over the specified image. A by-color selection is determined by the supplied color under the constraints of the current context settings. Essentially, all pixels (in the drawable) that have color sufficiently close to the specified color (as determined by the threshold and criterion context values) are included in the selection. To select transparent regions, the color specified must also have minimum alpha.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-antialias', 'gimp-context-set-feather', 'gimp-context-set-feather-radius', 'gimp-context-set-sample-merged', 'gimp-context-set-sample-criterion', 'gimp-context-set-sample-threshold', 'gimp-context-set-sample-transparent'.\n"
+                                  "This procedure is affected by the following context setters: 'clay-context-set-antialias', 'clay-context-set-feather', 'clay-context-set-feather-radius', 'clay-context-set-sample-merged', 'clay-context-set-sample-criterion', 'clay-context-set-sample-threshold', 'clay-context-set-sample-transparent'.\n"
                                   "\n"
                                   "In the case of a merged sampling, the supplied drawable is ignored.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "David Gowers",
                                          "David Gowers",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The affected image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The color to select",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-select-contiguous-color
+   * clay-image-select-contiguous-color
    */
-  procedure = gimp_procedure_new (image_select_contiguous_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-contiguous-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_contiguous_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-contiguous-color");
+  clay_procedure_set_static_help (procedure,
                                   "Create a selection by selecting all pixels around specified coordinates with the same (or similar) color to that at the coordinates.",
                                   "This tool creates a contiguous selection over the specified image. A contiguous color selection is determined by a seed fill under the constraints of the current context settings. Essentially, the color at the specified coordinates (in the drawable) is measured and the selection expands outwards from that point to any adjacent pixels which are not significantly different (as determined by the threshold and criterion context settings). This process continues until no more expansion is possible. If antialiasing is turned on, the final selection mask will contain intermediate values based on close misses to the threshold bar at pixels along the seed fill boundary.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-antialias', 'gimp-context-set-feather', 'gimp-context-set-feather-radius', 'gimp-context-set-sample-merged', 'gimp-context-set-sample-criterion', 'gimp-context-set-sample-threshold', 'gimp-context-set-sample-transparent', 'gimp-context-set-diagonal-neighbors'.\n"
+                                  "This procedure is affected by the following context setters: 'clay-context-set-antialias', 'clay-context-set-feather', 'clay-context-set-feather-radius', 'clay-context-set-sample-merged', 'clay-context-set-sample-criterion', 'clay-context-set-sample-threshold', 'clay-context-set-sample-transparent', 'clay-context-set-diagonal-neighbors'.\n"
                                   "\n"
                                   "In the case of a merged sampling, the supplied drawable is ignored. If the sample is merged, the specified coordinates are relative to the image origin; otherwise, they are relative to the drawable's origin.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "David Gowers",
                                          "David Gowers",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The affected image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x",
                                                     "x",
                                                     "x coordinate of initial seed fill point: (image coordinates)",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y",
                                                     "y",
                                                     "y coordinate of initial seed fill point: (image coordinates)",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-select-rectangle
+   * clay-image-select-rectangle
    */
-  procedure = gimp_procedure_new (image_select_rectangle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-rectangle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_rectangle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-rectangle");
+  clay_procedure_set_static_help (procedure,
                                   "Create a rectangular selection over the specified image;",
                                   "This tool creates a rectangular selection over the specified image. The rectangular region can be either added to, subtracted from, or replace the contents of the previous selection mask.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-feather', 'gimp-context-set-feather-radius'.",
+                                  "This procedure is affected by the following context setters: 'clay-context-set-feather', 'clay-context-set-feather-radius'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x",
                                                     "x",
                                                     "x coordinate of upper-left corner of rectangle",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y",
                                                     "y",
                                                     "y coordinate of upper-left corner of rectangle",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("width",
                                                     "width",
                                                     "The width of the rectangle",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("height",
                                                     "height",
                                                     "The height of the rectangle",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-select-round-rectangle
+   * clay-image-select-round-rectangle
    */
-  procedure = gimp_procedure_new (image_select_round_rectangle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-round-rectangle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_round_rectangle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-round-rectangle");
+  clay_procedure_set_static_help (procedure,
                                   "Create a rectangular selection with round corners over the specified image;",
                                   "This tool creates a rectangular selection with round corners over the specified image. The rectangular region can be either added to, subtracted from, or replace the contents of the previous selection mask.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-antialias', 'gimp-context-set-feather', 'gimp-context-set-feather-radius'.",
+                                  "This procedure is affected by the following context setters: 'clay-context-set-antialias', 'clay-context-set-feather', 'clay-context-set-feather-radius'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Martin Nordholts",
                                          "Martin Nordholts",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x",
                                                     "x",
                                                     "x coordinate of upper-left corner of rectangle",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y",
                                                     "y",
                                                     "y coordinate of upper-left corner of rectangle",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("width",
                                                     "width",
                                                     "The width of the rectangle",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("height",
                                                     "height",
                                                     "The height of the rectangle",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("corner-radius-x",
                                                     "corner radius x",
                                                     "The corner radius in X direction",
-                                                    0, GIMP_MAX_IMAGE_SIZE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    0, CLAY_MAX_IMAGE_SIZE, 0,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("corner-radius-y",
                                                     "corner radius y",
                                                     "The corner radius in Y direction",
-                                                    0, GIMP_MAX_IMAGE_SIZE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    0, CLAY_MAX_IMAGE_SIZE, 0,
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-select-ellipse
+   * clay-image-select-ellipse
    */
-  procedure = gimp_procedure_new (image_select_ellipse_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-ellipse");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_ellipse_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-ellipse");
+  clay_procedure_set_static_help (procedure,
                                   "Create an elliptical selection over the specified image.",
                                   "This tool creates an elliptical selection over the specified image. The elliptical region can be either added to, subtracted from, or replace the contents of the previous selection mask.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-antialias', 'gimp-context-set-feather', 'gimp-context-set-feather-radius'.",
+                                  "This procedure is affected by the following context setters: 'clay-context-set-antialias', 'clay-context-set-feather', 'clay-context-set-feather-radius'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("x",
                                                     "x",
                                                     "x coordinate of upper-left corner of ellipse bounding box",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("y",
                                                     "y",
                                                     "y coordinate of upper-left corner of ellipse bounding box",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("width",
                                                     "width",
                                                     "The width of the ellipse",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("height",
                                                     "height",
                                                     "The height of the ellipse",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-select-polygon
+   * clay-image-select-polygon
    */
-  procedure = gimp_procedure_new (image_select_polygon_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-polygon");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_polygon_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-polygon");
+  clay_procedure_set_static_help (procedure,
                                   "Create a polygonal selection over the specified image.",
                                   "This tool creates a polygonal selection over the specified image. The polygonal region can be either added to, subtracted from, or replace the contents of the previous selection mask. The polygon is specified through an array of floating point numbers and its length. The length of array must be 2n, where n is the number of points. Each point is defined by 2 floating point values which correspond to the x and y coordinates. If the final point does not connect to the starting point, a connecting segment is automatically added.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-antialias', 'gimp-context-set-feather', 'gimp-context-set-feather-radius'.",
+                                  "This procedure is affected by the following context setters: 'clay-context-set-antialias', 'clay-context-set-feather', 'clay-context-set-feather-radius'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The selection operation",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("segs",
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("segs",
                                                              "segs",
                                                              "Array of points: { p1.x, p1.y, p2.x, p2.y, ..., pn.x, pn.y}",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-select-item
+   * clay-image-select-item
    */
-  procedure = gimp_procedure_new (image_select_item_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-select-item");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_select_item_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-select-item");
+  clay_procedure_set_static_help (procedure,
                                   "Transforms the specified item into a selection",
                                   "This procedure renders the item's outline into the current selection of the image the item belongs to. What exactly the item's outline is depends on the item type: for layers, it's the layer's alpha channel, for paths the path's shape.\n"
                                   "\n"
-                                  "This procedure is affected by the following context setters: 'gimp-context-set-antialias', 'gimp-context-set-feather', 'gimp-context-set-feather-radius'.",
+                                  "This procedure is affected by the following context setters: 'clay-context-set-antialias', 'clay-context-set-feather', 'clay-context-set-feather-radius'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("operation",
                                                   "operation",
                                                   "The desired operation with current selection",
-                                                  GIMP_TYPE_CHANNEL_OPS,
-                                                  GIMP_CHANNEL_OP_ADD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_item ("item",
+                                                  CLAY_TYPE_CHANNEL_OPS,
+                                                  CLAY_CHANNEL_OP_ADD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_item ("item",
                                                      "item",
                                                      "The item to render to the selection",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-images-popup
+   * clay-images-popup
    */
-  procedure = gimp_procedure_new (images_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-images-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (images_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-images-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Invokes the image selection dialog.",
                                   "Opens a dialog letting a user choose an image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("callback",
                                                        "callback",
                                                        "The callback PDB proc to call when user chooses an image",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("popup-title",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("popup-title",
                                                        "popup title",
                                                        "Title of the image selection dialog",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("initial-image",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("initial-image",
                                                       "initial image",
                                                       "The image to set as the initial choice",
                                                       TRUE,
-                                                      GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("parent-window",
                                                    "parent window",
                                                    "An optional parent window handle for the popup to be set transient to",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-images-close-popup
+   * clay-images-close-popup
    */
-  procedure = gimp_procedure_new (images_close_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-images-close-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (images_close_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-images-close-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Close the image selection dialog.",
                                   "Closes an open image selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("callback",
                                                        "callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-images-set-popup
+   * clay-images-set-popup
    */
-  procedure = gimp_procedure_new (images_set_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-images-set-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (images_set_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-images-set-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the selected image in a image selection dialog.",
                                   "Sets the selected image in a image selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("callback",
                                                        "callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image to set as selected",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

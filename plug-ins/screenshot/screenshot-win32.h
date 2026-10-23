@@ -33,11 +33,11 @@ gboolean               screenshot_win32_available        (void);
 
 ScreenshotCapabilities screenshot_win32_get_capabilities (void);
 
-GimpPDBStatusType      screenshot_win32_shoot            (ShootType    shoot_type,
+ClayPDBStatusType      screenshot_win32_shoot            (ShootType    shoot_type,
                                                           guint        screenshot_delay,
                                                           gboolean     show_cursor,
                                                           GdkMonitor  *monitor,
-                                                          GimpImage  **image,
+                                                          ClayImage  **image,
                                                           GError     **error);
 
 #endif /* G_OS_WIN32 */

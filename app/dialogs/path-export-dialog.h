@@ -18,8 +18,8 @@
 #pragma once
 
 
-typedef void (* GimpPathExportCallback) (GtkNativeDialog *dialog,
-                                         GimpImage       *image,
+typedef void (* ClayPathExportCallback) (GtkNativeDialog *dialog,
+                                         ClayImage       *image,
                                          GFile           *file,
                                          GFile           *export_folder,
                                          gboolean         active_only,
@@ -27,9 +27,9 @@ typedef void (* GimpPathExportCallback) (GtkNativeDialog *dialog,
 
 
 
-GtkNativeDialog * path_export_dialog_new (GimpImage                 *image,
+GtkNativeDialog * path_export_dialog_new (ClayImage                 *image,
                                           GtkWidget                 *parent,
                                           GFile                     *export_folder,
                                           gboolean                   active_only,
-                                          GimpPathExportCallback     callback,
+                                          ClayPathExportCallback     callback,
                                           gpointer                   user_data);

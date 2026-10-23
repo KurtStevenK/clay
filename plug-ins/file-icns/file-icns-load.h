@@ -21,11 +21,11 @@
 #ifndef __ICNS_LOAD_H__
 #define __ICNS_LOAD_H__
 
-GimpImage * icns_load_image           (GFile         *file,
+ClayImage * icns_load_image           (GFile         *file,
                                        gint32        *file_offset,
                                        GError       **error);
 
-GimpImage * icns_load_thumbnail_image (GFile         *file,
+ClayImage * icns_load_thumbnail_image (GFile         *file,
                                        gint          *width,
                                        gint          *height,
                                        gint32         file_offset,

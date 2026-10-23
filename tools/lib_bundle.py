@@ -247,7 +247,7 @@ def check_macos_version(binary):
 
   # 1. Check for LC_BUILD_VERSION (minos)
   if parse_version(bin_minos) > parse_version(supported_minos_cache):
-    sys.stderr.write(f"\033[31m(ERROR)\033[0m: {binary} requires macOS {bin_minos}, which is higher than macOS {supported_minos_cache} which GIMP was built against.\n")
+    sys.stderr.write(f"\033[31m(ERROR)\033[0m: {binary} requires macOS {bin_minos}, which is higher than macOS {supported_minos_cache} which Clay was built against.\n")
     sys.exit(1)
 
   # 2. Check for LC_BUILD_VERSION (sdk) symbols
@@ -319,7 +319,7 @@ def check_macos_version(binary):
                   if old_avail_match:
                     violating_version = old_avail_match.group(1).replace('_', '.')
                 if violating_version and parse_version(violating_version) > parse_version(supported_minos_cache):
-                  sys.stderr.write(f"\033[31m(ERROR)\033[0m: {binary} requires macOS {violating_version} due to '{sym}' symbol, which is higher than macOS {supported_minos_cache} which GIMP was built against.\n")
+                  sys.stderr.write(f"\033[31m(ERROR)\033[0m: {binary} requires macOS {violating_version} due to '{sym}' symbol, which is higher than macOS {supported_minos_cache} which Clay was built against.\n")
                   sys.exit(1)
                 symbols_to_find.remove(sym)
                 break
@@ -400,7 +400,7 @@ def set_rpath(binary, destbin=None):
       sys.stderr.write(f"Failed to run install_name_tool on {binary}: {e}\n")
 
   # Normalize signature after all the changes
-  # 'if "invalid signature"' is needed to not use 'codesign --force' on 3_dist-gimp-apple.sh
+  # 'if "invalid signature"' is needed to not use 'codesign --force' on 3_dist-clay-apple.sh
   result = subprocess.run(["codesign", "-v", binary], capture_output=True, text=True)
   if "invalid signature" in result.stdout + result.stderr:
     try:

@@ -6,14 +6,14 @@
 
 #include <sys/types.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "lighting-main.h"
 #include "lighting-image.h"
 #include "lighting-shade.h"
 #include "lighting-apply.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /*************/
@@ -26,9 +26,9 @@ compute_image (void)
   gint         xcount, ycount;
   gdouble      color[4];
   glong        progress_counter = 0;
-  GimpVector3  p;
-  GimpImage   *new_image = NULL;
-  GimpLayer   *new_layer = NULL;
+  ClayVector3  p;
+  ClayImage   *new_image = NULL;
+  ClayLayer   *new_layer = NULL;
   gint32       index;
   guchar      *row = NULL;
   guchar       obpp;
@@ -37,43 +37,43 @@ compute_image (void)
 
   if (mapvals.create_new_image == TRUE ||
       (mapvals.transparent_background == TRUE &&
-       ! gimp_drawable_has_alpha (input_drawable)))
+       ! clay_drawable_has_alpha (input_drawable)))
     {
       /* Create a new image */
       /* ================== */
 
-      new_image = gimp_image_new (width, height, GIMP_RGB);
+      new_image = clay_image_new (width, height, CLAY_RGB);
 
       if (mapvals.transparent_background == TRUE)
         {
           /* Add a layer with an alpha channel */
           /* ================================= */
 
-          new_layer = gimp_layer_new (new_image, "Background",
+          new_layer = clay_layer_new (new_image, "Background",
                                       width, height,
-                                      GIMP_RGBA_IMAGE,
+                                      CLAY_RGBA_IMAGE,
                                       100.0,
-                                      gimp_image_get_default_new_layer_mode (new_image));
+                                      clay_image_get_default_new_layer_mode (new_image));
         }
       else
         {
           /* Create a "normal" layer */
           /* ======================= */
 
-          new_layer = gimp_layer_new (new_image, "Background",
+          new_layer = clay_layer_new (new_image, "Background",
                                       width, height,
-                                      GIMP_RGB_IMAGE,
+                                      CLAY_RGB_IMAGE,
                                       100.0,
-                                      gimp_image_get_default_new_layer_mode (new_image));
+                                      clay_image_get_default_new_layer_mode (new_image));
         }
 
-      gimp_image_insert_layer (new_image, new_layer, NULL, 0);
-      output_drawable = GIMP_DRAWABLE (new_layer);
+      clay_image_insert_layer (new_image, new_layer, NULL, 0);
+      output_drawable = CLAY_DRAWABLE (new_layer);
     }
 
   if (mapvals.bump_mapped == TRUE && mapvals.bumpmap_id != -1)
     {
-      bumpmap_setup (gimp_drawable_get_by_id (mapvals.bumpmap_id));
+      bumpmap_setup (clay_drawable_get_by_id (mapvals.bumpmap_id));
     }
 
   precompute_init (width, height);
@@ -84,21 +84,21 @@ compute_image (void)
     }
   else
     {
-      envmap_setup (gimp_drawable_get_by_id (mapvals.envmap_id));
+      envmap_setup (clay_drawable_get_by_id (mapvals.envmap_id));
 
       ray_func = get_ray_color_ref;
     }
 
-  dest_buffer = gimp_drawable_get_shadow_buffer (output_drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (output_drawable);
 
-  has_alpha = gimp_drawable_has_alpha (output_drawable);
+  has_alpha = clay_drawable_has_alpha (output_drawable);
 
   /* FIXME */
-  obpp = has_alpha ? 4 : 3; //gimp_drawable_get_bpp (output_drawable);
+  obpp = has_alpha ? 4 : 3; //clay_drawable_get_bpp (output_drawable);
 
   row = g_new (guchar, obpp * width);
 
-  gimp_progress_init (_("Lighting Effects"));
+  clay_progress_init (_("Lighting Effects"));
 
   /* Init the first row */
   if (mapvals.bump_mapped == TRUE && mapvals.bumpmap_id != -1 && height >= 2)
@@ -126,7 +126,7 @@ compute_image (void)
           progress_counter++;
         }
 
-      gimp_progress_update ((gdouble) progress_counter /
+      clay_progress_update ((gdouble) progress_counter /
                             (gdouble) maxcounter);
 
       gegl_buffer_set (dest_buffer, GEGL_RECTANGLE (0, ycount, width, 1), 0,
@@ -136,27 +136,27 @@ compute_image (void)
                        GEGL_AUTO_ROWSTRIDE);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_free (row);
 
   g_object_unref (dest_buffer);
 
-  gimp_drawable_merge_shadow (output_drawable, TRUE);
-  gimp_drawable_update (output_drawable, 0, 0, width, height);
+  clay_drawable_merge_shadow (output_drawable, TRUE);
+  clay_drawable_update (output_drawable, 0, 0, width, height);
 
   if (new_image)
     {
-      gimp_display_new (new_image);
-      gimp_displays_flush ();
+      clay_display_new (new_image);
+      clay_displays_flush ();
     }
 }
 
 void
-copy_from_config (GimpProcedureConfig *config)
+copy_from_config (ClayProcedureConfig *config)
 {
-  GimpDrawable *temp_bump_map_drawable = NULL;
-  GimpDrawable *temp_env_map_drawable  = NULL;
+  ClayDrawable *temp_bump_map_drawable = NULL;
+  ClayDrawable *temp_env_map_drawable  = NULL;
   GeglColor    *color_1;
   GeglColor    *color_2;
   GeglColor    *color_3;
@@ -270,23 +270,23 @@ copy_from_config (GimpProcedureConfig *config)
       g_object_unref (color_6);
     }
 
-  mapvals.bumpmaptype    = gimp_procedure_config_get_choice_id (config, "bumpmap-type");
-  mapvals.light_selected = gimp_procedure_config_get_choice_id (config, "which-light");
+  mapvals.bumpmaptype    = clay_procedure_config_get_choice_id (config, "bumpmap-type");
+  mapvals.light_selected = clay_procedure_config_get_choice_id (config, "which-light");
 
-  mapvals.lightsource[0].type = gimp_procedure_config_get_choice_id (config, "light-type-1");
-  mapvals.lightsource[1].type = gimp_procedure_config_get_choice_id (config, "light-type-2");
-  mapvals.lightsource[2].type = gimp_procedure_config_get_choice_id (config, "light-type-3");
-  mapvals.lightsource[3].type = gimp_procedure_config_get_choice_id (config, "light-type-4");
-  mapvals.lightsource[4].type = gimp_procedure_config_get_choice_id (config, "light-type-5");
-  mapvals.lightsource[5].type = gimp_procedure_config_get_choice_id (config, "light-type-6");
+  mapvals.lightsource[0].type = clay_procedure_config_get_choice_id (config, "light-type-1");
+  mapvals.lightsource[1].type = clay_procedure_config_get_choice_id (config, "light-type-2");
+  mapvals.lightsource[2].type = clay_procedure_config_get_choice_id (config, "light-type-3");
+  mapvals.lightsource[3].type = clay_procedure_config_get_choice_id (config, "light-type-4");
+  mapvals.lightsource[4].type = clay_procedure_config_get_choice_id (config, "light-type-5");
+  mapvals.lightsource[5].type = clay_procedure_config_get_choice_id (config, "light-type-6");
 
   if (temp_bump_map_drawable)
-    mapvals.bumpmap_id = gimp_item_get_id (GIMP_ITEM (temp_bump_map_drawable));
+    mapvals.bumpmap_id = clay_item_get_id (CLAY_ITEM (temp_bump_map_drawable));
   else
     mapvals.bumpmap_id = -1;
 
   if (temp_env_map_drawable)
-    mapvals.envmap_id = gimp_item_get_id (GIMP_ITEM (temp_env_map_drawable));
+    mapvals.envmap_id = clay_item_get_id (CLAY_ITEM (temp_env_map_drawable));
   else
     mapvals.envmap_id = -1;
 }

@@ -18,21 +18,21 @@
 #pragma once
 
 
-void              menus_init                        (Gimp      *gimp);
-void              menus_exit                        (Gimp      *gimp);
+void              menus_init                        (Clay      *clay);
+void              menus_exit                        (Clay      *clay);
 
-void              menus_restore                     (Gimp      *gimp);
-void              menus_save                        (Gimp      *gimp,
+void              menus_restore                     (Clay      *clay);
+void              menus_save                        (Clay      *clay,
                                                      gboolean   always_save);
 
-gboolean          menus_clear                       (Gimp      *gimp,
+gboolean          menus_clear                       (Clay      *clay,
                                                      GError   **error);
-void              menus_remove                      (Gimp      *gimp);
+void              menus_remove                      (Clay      *clay);
 
-GimpMenuFactory * menus_get_global_menu_factory     (Gimp      *gimp);
-GimpUIManager   * menus_get_image_manager_singleton (Gimp      *gimp);
+ClayMenuFactory * menus_get_global_menu_factory     (Clay      *clay);
+ClayUIManager   * menus_get_image_manager_singleton (Clay      *clay);
 
 #ifdef PLATFORM_OSX
-void              menus_quartz_app_menu             (Gimp      *gimp);
+void              menus_quartz_app_menu             (Clay      *clay);
 gchar           * menus_quartz_get_settings_label   (void);
 #endif

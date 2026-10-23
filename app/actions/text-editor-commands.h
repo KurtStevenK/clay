@@ -18,12 +18,12 @@
 #pragma once
 
 
-void   text_editor_load_cmd_callback      (GimpAction *action,
+void   text_editor_load_cmd_callback      (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   text_editor_clear_cmd_callback     (GimpAction *action,
+void   text_editor_clear_cmd_callback     (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   text_editor_direction_cmd_callback (GimpAction *action,
+void   text_editor_direction_cmd_callback (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);

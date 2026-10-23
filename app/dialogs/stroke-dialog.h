@@ -20,21 +20,21 @@
 #pragma once
 
 
-typedef void (* GimpStrokeCallback) (GtkWidget         *dialog,
+typedef void (* ClayStrokeCallback) (GtkWidget         *dialog,
                                      GList             *items,
                                      GList             *drawables,
-                                     GimpContext       *context,
-                                     GimpStrokeOptions *options,
+                                     ClayContext       *context,
+                                     ClayStrokeOptions *options,
                                      gpointer           user_data);
 
 
 GtkWidget * stroke_dialog_new (GList              *items,
                                GList              *drawables,
-                               GimpContext        *context,
+                               ClayContext        *context,
                                const gchar        *title,
                                const gchar        *icon_name,
                                const gchar        *help_id,
                                GtkWidget          *parent,
-                               GimpStrokeOptions  *options,
-                               GimpStrokeCallback  callback,
+                               ClayStrokeOptions  *options,
+                               ClayStrokeCallback  callback,
                                gpointer            user_data);

@@ -1,9 +1,9 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; Test byte, file/string ports and string handling.
 
 (define temp-path
-  (string-append (car (gimp-gimprc-query "temp-path")) "/"))
+  (string-append (car (clay-clayrc-query "temp-path")) "/"))
 
 (define (plugin-tmp-filepath name)
   (string-append temp-path "script-fu-test9-" name ".txt"))
@@ -48,7 +48,7 @@
     (if (port? port)
       (function port)
       (begin
-        (gimp-message "Fail open string-port")
+        (clay-message "Fail open string-port")
         (make-testresult #f "Failed to open string for string port!")))))
 
 
@@ -444,10 +444,10 @@
   (display msg) (newline))
 
 (define (run-test test)
-  ; log the test to Gimp Error Console when executed.
+  ; log the test to Clay Error Console when executed.
   ; So severe errors leave a trace.
   ; And until we fix SF hijacking stdout.
-  (gimp-message (symbol->string test))
+  (clay-message (symbol->string test))
   (display test) (display ": ")
   (let ((result ((eval test))))
     (if (car result)
@@ -514,11 +514,11 @@
 
 ; SF hijacks stdout so all calls to display just write to SF (as an error msg)
 ; so it usually disappears.
-; This is a hack, writing a few lines to Gimp Error Console using gimp-message.
+; This is a hack, writing a few lines to Clay Error Console using clay-message.
 ; We should not need to redirect display to a string-port
-; using with-log-to-gimp-message see below.
+; using with-log-to-clay-message see below.
 (define (run-all-tests)
-  (gimp-message "Begin all tests")
+  (clay-message "Begin all tests")
   (displayln "========== Information ==========")
   (displayln "To run a single test individually, specify the name of the test.")
   (displayln (string-append "Temporary files with format 'script-fu-test9-*.txt' can be found in: " temp-path))
@@ -543,19 +543,19 @@
   (newline)
   (if (= tests-failed 0)
     ;(displayln "ALL tests passed!")
-    (gimp-message "ALL tests passed!")
+    (clay-message "ALL tests passed!")
     ;(displayln
-    (gimp-message
+    (clay-message
       (string-append
         "Test 9: " (number->string tests-failed)
         " tests FAILED. Run tests in Script-Fu console for details."))))
 
-; wrapper that redirects display to gimp-message.
+; wrapper that redirects display to clay-message.
 ; Not used because buffering messages makes it hard to debug this test program.
 ; FUTURE: fix ScriptFu to not hijack the output port
 ; and display function will write to stdout as it should.
-(define (with-log-to-gimp-message function)
-    (gimp-message (call-with-output-string
+(define (with-log-to-clay-message function)
+    (clay-message (call-with-output-string
                     (lambda (port)
                       (set-output-port port)
                       (function)))))
@@ -564,9 +564,9 @@
   (eval (call-with-input-string (string-append "'" name) read)))
 
 (define (script-fu-test9 testname)
-  ; OLD (with-log-to-gimp-message (select-run-function testname)))
-  ; NEW log to gimp later, at each test
-  (gimp-message testname)
+  ; OLD (with-log-to-clay-message (select-run-function testname)))
+  ; NEW log to clay later, at each test
+  (clay-message testname)
   (if (> (string-length testname) 0)
     (run-test (name->function testname))
     (run-all-tests)))
@@ -576,7 +576,7 @@
 (script-fu-register
   "script-fu-test9"
   "Test TinyScheme byte and UTF-8 char handling."
-  "Logs tests to Gimp Error Console and stdout."
+  "Logs tests to Clay Error Console and stdout."
   "Richard Szibele"
   "Copyright (C) 2022, Richard Szibele"
   "2022"

@@ -25,221 +25,221 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
-#include "text/gimpfont.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
+#include "text/clayfont.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-font_get_lookup_name_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+font_get_lookup_name_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpFont *font;
+  ClayValueArray *return_vals;
+  ClayFont *font;
   gchar *lookup_name = NULL;
 
-  font = g_value_get_object (gimp_value_array_index (args, 0));
+  font = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-        lookup_name = g_strdup (gimp_font_get_lookup_name (font));
+        lookup_name = g_strdup (clay_font_get_lookup_name (font));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), lookup_name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), lookup_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-font_get_by_name_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+font_get_by_name_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpFont *font = NULL;
+  ClayFont *font = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      font = GIMP_FONT (gimp_pdb_get_resource (gimp, GIMP_TYPE_FONT, name, GIMP_PDB_DATA_ACCESS_READ, error));
+      font = CLAY_FONT (clay_pdb_get_resource (clay, CLAY_TYPE_FONT, name, CLAY_PDB_DATA_ACCESS_READ, error));
       /* Ignore "not found" error, just return NULL. */
       g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), font);
+    g_value_set_object (clay_value_array_index (return_vals, 1), font);
 
   return return_vals;
 }
 
-static GimpValueArray *
-font_get_by_postscript_name_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+font_get_by_postscript_name_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *psname;
-  GimpFont *font = NULL;
+  ClayFont *font = NULL;
 
-  psname = g_value_get_string (gimp_value_array_index (args, 0));
+  psname = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-        GimpContainer *fonts_container;
+        ClayContainer *fonts_container;
 
-        fonts_container = gimp_data_factory_get_container (gimp->font_factory);
+        fonts_container = clay_data_factory_get_container (clay->font_factory);
 
-        font = GIMP_FONT (gimp_container_search (fonts_container,
-                                                 (GimpContainerSearchFunc) gimp_font_match_by_postscript_name,
+        font = CLAY_FONT (clay_container_search (fonts_container,
+                                                 (ClayContainerSearchFunc) clay_font_match_by_postscript_name,
                                                  (gpointer) psname));
         /* Ignore "not found" error, just return NULL. */
         g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), font);
+    g_value_set_object (clay_value_array_index (return_vals, 1), font);
 
   return return_vals;
 }
 
 void
-register_font_procs (GimpPDB *pdb)
+register_font_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-font-get-lookup-name
+   * clay-font-get-lookup-name
    */
-  procedure = gimp_procedure_new (font_get_lookup_name_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-font-get-lookup-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (font_get_lookup_name_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-font-get-lookup-name");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve the font lookup name.",
                                   "Retrieve the font lookup name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Idriss Fekir",
                                          "Idriss Fekir",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_font ("font",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_font ("font",
                                                      "font",
-                                                     "GimpFont object",
+                                                     "ClayFont object",
                                                      FALSE,
                                                      NULL,
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("lookup-name",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("lookup-name",
                                                            "lookup name",
                                                            "font lookup name",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-font-get-by-name
+   * clay-font-get-by-name
    */
-  procedure = gimp_procedure_new (font_get_by_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-font-get-by-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (font_get_by_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-font-get-by-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns a font with the given name.",
                                   "If several fonts are named identically, the one which is returned by this function should be considered random. This can be used when you know you won't have multiple fonts of this name or that you don't want to choose (non-interactive scripts, etc.).\n"
                                   "If you need more control, you should use [func@fonts_get_list] instead.\n"
                                   "Returns %NULL when no font exists of that name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The name of the font",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_font ("font",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_font ("font",
                                                          "font",
                                                          "The font",
                                                          TRUE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-font-get-by-postscript-name
+   * clay-font-get-by-postscript-name
    */
-  procedure = gimp_procedure_new (font_get_by_postscript_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-font-get-by-postscript-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (font_get_by_postscript_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-font-get-by-postscript-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns a font with the given PostScript name.",
                                   "If several fonts are named identically, the one which is returned by this function should be considered random. This can be used when you know you won't have multiple fonts of this name or that you don't want to choose (non-interactive scripts, etc.).\n"
                                   "If you need more control, you should use [func@fonts_get_list] instead.\n"
                                   "Returns %NULL when no font exists of that name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2026");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("psname",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("psname",
                                                        "psname",
                                                        "The PostScript name of the font",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_font ("font",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_font ("font",
                                                          "font",
                                                          "The font",
                                                          TRUE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

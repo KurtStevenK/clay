@@ -16,7 +16,7 @@
  */
 
 #include "config.h"
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 #include "tinyscheme/scheme-private.h"
 #include "script-fu-errors.h"
 #include "script-fu-version.h"
@@ -27,11 +27,11 @@
 #undef cons
 
 static pointer marshal_PDB_return_by_arity  (scheme         *sc,
-                                             GimpValueArray *values,
+                                             ClayValueArray *values,
                                              pointer        *error);
 
 static pointer marshal_returned_PDB_values  (scheme         *sc,
-                                             GimpValueArray *values,
+                                             ClayValueArray *values,
                                              pointer        *error);
 
 static pointer marshal_returned_PDB_value   (scheme        *sc,
@@ -48,7 +48,7 @@ static pointer marshal_returned_PDB_value   (scheme        *sc,
  */
 pointer
 marshal_PDB_return (scheme         *sc,
-                    GimpValueArray *values,
+                    ClayValueArray *values,
                     gchar          *proc_name,
                     pointer        *error)
 {
@@ -58,16 +58,16 @@ marshal_PDB_return (scheme         *sc,
   *error = NULL;
 
   /* caller asserts status value index 0 exists. */
-  switch (GIMP_VALUES_GET_ENUM (values, 0))
+  switch (CLAY_VALUES_GET_ENUM (values, 0))
     {
-    case GIMP_PDB_EXECUTION_ERROR:
-      if (gimp_value_array_length (values) > 1 &&
-          G_VALUE_HOLDS_STRING (gimp_value_array_index (values, 1)))
+    case CLAY_PDB_EXECUTION_ERROR:
+      if (clay_value_array_length (values) > 1 &&
+          G_VALUE_HOLDS_STRING (clay_value_array_index (values, 1)))
         {
           g_snprintf (error_str, sizeof (error_str),
                       "Procedure execution of %s failed: %s",
                       proc_name,
-                      GIMP_VALUES_GET_STRING (values, 1));
+                      CLAY_VALUES_GET_STRING (values, 1));
         }
       else
         {
@@ -79,14 +79,14 @@ marshal_PDB_return (scheme         *sc,
       *error = foreign_error (sc, error_str, 0);
       break;
 
-    case GIMP_PDB_CALLING_ERROR:
-      if (gimp_value_array_length (values) > 1 &&
-          G_VALUE_HOLDS_STRING (gimp_value_array_index (values, 1)))
+    case CLAY_PDB_CALLING_ERROR:
+      if (clay_value_array_length (values) > 1 &&
+          G_VALUE_HOLDS_STRING (clay_value_array_index (values, 1)))
         {
           g_snprintf (error_str, sizeof (error_str),
                       "Procedure execution of %s failed on invalid input arguments: %s",
                       proc_name,
-                      GIMP_VALUES_GET_STRING (values, 1));
+                      CLAY_VALUES_GET_STRING (values, 1));
         }
       else
         {
@@ -94,14 +94,14 @@ marshal_PDB_return (scheme         *sc,
                       "Procedure execution of %s failed on invalid input arguments",
                       proc_name);
         }
-      /* not language errors, GIMP validated the GValueArray
+      /* not language errors, Clay validated the GValueArray
        * and decided it doesn't match the registered signature
        * or the procedure decided its preconditions not met (e.g. out of range)
        */
       *error = foreign_error (sc, error_str, 0);
       break;
 
-    case GIMP_PDB_SUCCESS:
+    case CLAY_PDB_SUCCESS:
       {
         pointer marshalling_error;
 
@@ -119,16 +119,16 @@ marshal_PDB_return (scheme         *sc,
       }
       break;
 
-    case GIMP_PDB_PASS_THROUGH:
+    case CLAY_PDB_PASS_THROUGH:
       /* Should not happen. No plugin in the repo returns this.
-       * See app/pdb/gimp-pdb.c for what little doc there is.
+       * See app/pdb/clay-pdb.c for what little doc there is.
        * It says there the result should be discarded
        * in lieu of the subsequent procedure's result.
        * */
       g_warning ("Status is PASS_THROUGH, not handled properly.");
       result = sc->vptr->cons (sc, sc->F, sc->NIL);
 
-    case GIMP_PDB_CANCEL:
+    case CLAY_PDB_CANCEL:
       /* A PDB procedure called interactively showed a dialog which the user cancelled. */
       g_debug ("cancelled PDB proc returns (#f)");
       /* A scheme function must return a value.
@@ -174,7 +174,7 @@ marshal_PDB_return (scheme         *sc,
  */
 pointer
 marshal_PDB_return_by_arity (scheme         *sc,
-                             GimpValueArray *values,
+                             ClayValueArray *values,
                              pointer        *error)
 {
   /* NULL, not defaulting to sc->NIL. */
@@ -188,7 +188,7 @@ marshal_PDB_return_by_arity (scheme         *sc,
    * This is actual signature of the returned values.
    * Could compare with the declared formal signature.
    */
-  return_arity = gimp_value_array_length (values) - 1;
+  return_arity = clay_value_array_length (values) - 1;
 
   /* Require caller ensured there is a status value. */
   g_assert (return_arity >= 0);
@@ -219,7 +219,7 @@ marshal_PDB_return_by_arity (scheme         *sc,
         {
           /* Marshal to single value not wrapped in list. */
           /* The value is second in the GVA, beyond the PDB status value. */
-          result = marshal_returned_PDB_value (sc, gimp_value_array_index (values, 1), &marshalling_error);
+          result = marshal_returned_PDB_value (sc, clay_value_array_index (values, 1), &marshalling_error);
         }
       else
         {
@@ -269,7 +269,7 @@ marshal_PDB_return_by_arity (scheme         *sc,
  */
 static pointer
 marshal_returned_PDB_values (scheme         *sc,
-                             GimpValueArray *values,
+                             ClayValueArray *values,
                              pointer        *error)
 {
   /* Result is empty list. */
@@ -278,9 +278,9 @@ marshal_returned_PDB_values (scheme         *sc,
   *error = NULL;
 
   /* Counting down, i.e. traversing in reverse. */
-  for (gint i = gimp_value_array_length (values) - 1; i > 0; --i)
+  for (gint i = clay_value_array_length (values) - 1; i > 0; --i)
     {
-      GValue *value = gimp_value_array_index (values, i);
+      GValue *value = clay_value_array_index (values, i);
       pointer scheme_value;
       pointer single_error = NULL;
 
@@ -352,7 +352,7 @@ marshal_returned_PDB_value (scheme  *sc,
 
   /* Order is important.
     * GFile before other objects.
-    * GIMP Image, Drawable, etc. objects.
+    * Clay Image, Drawable, etc. objects.
     * Alternatively, more specific tests.
     */
   if (G_VALUE_TYPE (value) == G_TYPE_FILE)
@@ -373,7 +373,7 @@ marshal_returned_PDB_value (scheme  *sc,
         }
       /* Ensure result holds a string, possibly empty. */
     }
-  else if (GIMP_VALUE_HOLDS_COLOR (value))
+  else if (CLAY_VALUE_HOLDS_COLOR (value))
     {
       GeglColor *color = g_value_get_object (value);
 
@@ -383,14 +383,14 @@ marshal_returned_PDB_value (scheme  *sc,
   else if (G_VALUE_HOLDS_OBJECT (value))
     {
       /* G_VALUE_HOLDS_OBJECT only ensures value derives from GObject.
-        * Could be a GIMP or a GLib type.
-        * Here we handle GIMP types, which all have an id property.
+        * Could be a Clay or a GLib type.
+        * Here we handle Clay types, which all have an id property.
         * Resources, Images, Drawables etc. have an int ID.
         */
       GObject *object = g_value_get_object (value);
       gint     id     = -1;
 
-      /* expect a GIMP opaque object having an "id" property */
+      /* expect a Clay opaque object having an "id" property */
       if (object)
         g_object_get (object, "id", &id, NULL);
 
@@ -450,10 +450,10 @@ marshal_returned_PDB_value (scheme  *sc,
 
       result = sc->vptr->mk_string (sc, v);
     }
-  else if (GIMP_VALUE_HOLDS_INT32_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_INT32_ARRAY (value))
     {
       guint         array_length;
-      const gint32 *v      = gimp_value_get_int32_array (value, (gsize *) &array_length);
+      const gint32 *v      = clay_value_get_int32_array (value, (gsize *) &array_length);
       pointer       vector = sc->vptr->mk_vector (sc, array_length);
 
       for (j = 0; j < array_length; j++)
@@ -479,10 +479,10 @@ marshal_returned_PDB_value (scheme  *sc,
 
       result = vector;
     }
-  else if (GIMP_VALUE_HOLDS_DOUBLE_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_DOUBLE_ARRAY (value))
     {
       guint          array_length;
-      const gdouble *v      = gimp_value_get_double_array (value, (gsize *) &array_length);
+      const gdouble *v      = clay_value_get_double_array (value, (gsize *) &array_length);
       pointer        vector = sc->vptr->mk_vector (sc, array_length);
 
       for (j = 0; j < array_length; j++)
@@ -511,19 +511,19 @@ marshal_returned_PDB_value (scheme  *sc,
 
       result = list;
     }
-  else if (GIMP_VALUE_HOLDS_COLOR_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_COLOR_ARRAY (value))
     {
-      /* unlike RBG_ARRAY, gimp_value_get_color_array (value) is not defined */
-      GimpColorArray color_array = g_value_get_boxed (value);
+      /* unlike RBG_ARRAY, clay_value_get_color_array (value) is not defined */
+      ClayColorArray color_array = g_value_get_boxed (value);
 
       /* unlike RBG_ARRAY, array is null-terminated and has method to get length.
-       * The length was NOT passed in the prior element of gimp_value_array.
+       * The length was NOT passed in the prior element of clay_value_array.
        */
       result = marshal_color_array_to_vector (sc, color_array);
     }
-  else if (GIMP_VALUE_HOLDS_PARASITE (value))
+  else if (CLAY_VALUE_HOLDS_PARASITE (value))
     {
-      GimpParasite *v = g_value_get_boxed (value);
+      ClayParasite *v = g_value_get_boxed (value);
 
       if (v->name == NULL)
         {
@@ -561,11 +561,11 @@ marshal_returned_PDB_value (scheme  *sc,
           g_debug ("data '%.*s'", v->size, (gchar *) v->data);
         }
     }
-  else if (GIMP_VALUE_HOLDS_CORE_OBJECT_ARRAY (value))
+  else if (CLAY_VALUE_HOLDS_CORE_OBJECT_ARRAY (value))
     {
       result = marshal_returned_object_array_to_vector (sc, value);
     }
-  else if (G_VALUE_TYPE (&value) == GIMP_TYPE_PDB_STATUS_TYPE)
+  else if (G_VALUE_TYPE (&value) == CLAY_TYPE_PDB_STATUS_TYPE)
     {
       /* Called procedure implemented incorrectly. */
       *error = implementation_error (sc, "Procedure execution returned multiple status values", 0);

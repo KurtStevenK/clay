@@ -1,9 +1,9 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; A script to test calls to Scheme function: (quit 1)
 ;
 ; Setup: copy this file w/ executable permission, and its parent dir to /plug-ins
-; Example: to ~/.gimp-2.99/plug-ins/test-quit/test-quit.scm
+; Example: to ~/.clay-2.99/plug-ins/test-quit/test-quit.scm
 
 ; Expect "Filters>Dev>Script-Fu>Test>Quit with code" in the menus
 
@@ -12,13 +12,13 @@
 ; Choose OK.
 ; Expect:
 ;   1. a message in stderr
-;   2. an error dialog in GIMP that must be OK'd
-;      OR a message in Gimp Error Console when it is open.)
+;   2. an error dialog in Clay that must be OK'd
+;      OR a message in Clay Error Console when it is open.)
 ; !!! FIXME: this fails now, for reasons unrelated to (quit)
 
 ; Repeat, but enter 0.
 ; Expect:
-;   No error in stderr OR Gimp
+;   No error in stderr OR Clay
 
 ; Test non-interactive:
 ; Enter "(script-fu-test-quit 1)" in SF Console
@@ -35,7 +35,7 @@
 
 (script-fu-register "script-fu-test-quit"
   "Quit with code"
-  "Expect error in Gimp, or PDB execution error when called by another"
+  "Expect error in Clay, or PDB execution error when called by another"
   "lkk"
   "lkk"
   "2023"

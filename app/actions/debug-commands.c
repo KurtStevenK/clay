@@ -22,27 +22,27 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimp-utils.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpprojectable.h"
-#include "core/gimpprojection.h"
+#include "core/clay.h"
+#include "core/clay-utils.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayprojectable.h"
+#include "core/clayprojection.h"
 
-#include "gegl/gimp-gegl-utils.h"
+#include "gegl/clay-gegl-utils.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpmenufactory.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claymenufactory.h"
+#include "widgets/clayuimanager.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpimagewindow.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/clayimagewindow.h"
 
 #include "menus/menus.h"
 
@@ -52,10 +52,10 @@
 
 /*  local function prototypes  */
 
-static gboolean  debug_benchmark_projection    (GimpDisplay *display);
-static gboolean  debug_show_image_graph        (GimpImage   *source_image);
+static gboolean  debug_benchmark_projection    (ClayDisplay *display);
+static gboolean  debug_show_image_graph        (ClayImage   *source_image);
 
-static void      debug_print_qdata             (GimpObject  *object);
+static void      debug_print_qdata             (ClayObject  *object);
 static void      debug_print_qdata_foreach     (GQuark       key_id,
                                                 gpointer     data,
                                                 gpointer     user_data);
@@ -64,7 +64,7 @@ static void      debug_print_qdata_foreach     (GQuark       key_id,
 /*  public functions  */
 
 void
-debug_gtk_inspector_cmd_callback (GimpAction *action,
+debug_gtk_inspector_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
@@ -72,87 +72,87 @@ debug_gtk_inspector_cmd_callback (GimpAction *action,
 }
 
 void
-debug_mem_profile_cmd_callback (GimpAction *action,
+debug_mem_profile_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  extern gboolean  gimp_debug_memsize;
-  Gimp            *gimp;
-  return_if_no_gimp (gimp, data);
+  extern gboolean  clay_debug_memsize;
+  Clay            *clay;
+  return_if_no_clay (clay, data);
 
-  gimp_debug_memsize = TRUE;
+  clay_debug_memsize = TRUE;
 
-  gimp_object_get_memsize (GIMP_OBJECT (gimp), NULL);
+  clay_object_get_memsize (CLAY_OBJECT (clay), NULL);
 
-  gimp_debug_memsize = FALSE;
+  clay_debug_memsize = FALSE;
 }
 
 void
-debug_benchmark_projection_cmd_callback (GimpAction *action,
+debug_benchmark_projection_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpDisplay *display;
+  ClayDisplay *display;
   return_if_no_display (display, data);
 
   g_idle_add ((GSourceFunc) debug_benchmark_projection, g_object_ref (display));
 }
 
 void
-debug_show_image_graph_cmd_callback (GimpAction *action,
+debug_show_image_graph_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  GimpImage *source_image = NULL;
+  ClayImage *source_image = NULL;
   return_if_no_image (source_image, data);
 
   g_idle_add ((GSourceFunc) debug_show_image_graph, g_object_ref (source_image));
 }
 
 void
-debug_dump_keyboard_shortcuts_cmd_callback (GimpAction *action,
+debug_dump_keyboard_shortcuts_cmd_callback (ClayAction *action,
                                             GVariant   *value,
                                             gpointer    data)
 {
-  GimpDisplay   *display;
-  GimpUIManager *manager;
+  ClayDisplay   *display;
+  ClayUIManager *manager;
   GList         *group_it;
   GList         *strings = NULL;
 
   return_if_no_display (display, data);
 
-  manager = menus_get_image_manager_singleton (display->gimp);
+  manager = menus_get_image_manager_singleton (display->clay);
 
   /* Gather formatted strings of keyboard shortcuts */
-  for (group_it = gimp_ui_manager_get_action_groups (manager);
+  for (group_it = clay_ui_manager_get_action_groups (manager);
        group_it;
        group_it = g_list_next (group_it))
     {
-      GimpActionGroup *group     = group_it->data;
+      ClayActionGroup *group     = group_it->data;
       GList           *actions   = NULL;
       GList           *action_it = NULL;
 
-      actions = gimp_action_group_list_actions (group);
-      actions = g_list_sort (actions, (GCompareFunc) gimp_action_name_compare);
+      actions = clay_action_group_list_actions (group);
+      actions = g_list_sort (actions, (GCompareFunc) clay_action_name_compare);
 
       for (action_it = actions; action_it; action_it = g_list_next (action_it))
         {
           gchar       **accels;
-          GimpAction   *action = action_it->data;
-          const gchar  *name   = gimp_action_get_name (action);
+          ClayAction   *action = action_it->data;
+          const gchar  *name   = clay_action_get_name (action);
 
           if (name[0] == '<')
             continue;
 
-          accels = gimp_action_get_display_accels (action);
+          accels = clay_action_get_display_accels (action);
 
           if (accels && accels[0])
             {
               const gchar *label_tmp;
               gchar       *label;
 
-              label_tmp  = gimp_action_get_label (action);
-              label      = gimp_strip_uline (label_tmp);
+              label_tmp  = clay_action_get_label (action);
+              label      = clay_strip_uline (label_tmp);
 
               strings = g_list_prepend (strings,
                                         g_strdup_printf ("%-20s %s",
@@ -187,37 +187,37 @@ debug_dump_keyboard_shortcuts_cmd_callback (GimpAction *action,
 }
 
 void
-debug_dump_attached_data_cmd_callback (GimpAction *action,
+debug_dump_attached_data_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data)
 {
-  Gimp        *gimp         = action_data_get_gimp (data);
-  GimpContext *user_context = gimp_get_user_context (gimp);
+  Clay        *clay         = action_data_get_clay (data);
+  ClayContext *user_context = clay_get_user_context (clay);
 
-  debug_print_qdata (GIMP_OBJECT (gimp));
-  debug_print_qdata (GIMP_OBJECT (user_context));
+  debug_print_qdata (CLAY_OBJECT (clay));
+  debug_print_qdata (CLAY_OBJECT (user_context));
 }
 
 
 /*  private functions  */
 
 static gboolean
-debug_benchmark_projection (GimpDisplay *display)
+debug_benchmark_projection (ClayDisplay *display)
 {
-  GimpImage *image = gimp_display_get_image (display);
+  ClayImage *image = clay_display_get_image (display);
 
   if (image)
     {
-      GimpProjection *projection = gimp_image_get_projection (image);
+      ClayProjection *projection = clay_image_get_projection (image);
 
-      gimp_projection_stop_rendering (projection);
+      clay_projection_stop_rendering (projection);
 
-      GIMP_TIMER_START ();
+      CLAY_TIMER_START ();
 
-      gimp_image_invalidate_all (image);
-      gimp_projection_flush_now (projection, TRUE);
+      clay_image_invalidate_all (image);
+      clay_projection_flush_now (projection, TRUE);
 
-      GIMP_TIMER_END ("Validation of the entire projection");
+      CLAY_TIMER_END ("Validation of the entire projection");
 
       g_object_unref (display);
     }
@@ -226,16 +226,16 @@ debug_benchmark_projection (GimpDisplay *display)
 }
 
 static gboolean
-debug_show_image_graph (GimpImage *source_image)
+debug_show_image_graph (ClayImage *source_image)
 {
   GeglNode   *image_graph;
   GeglNode   *output_node;
-  GimpImage  *new_image;
+  ClayImage  *new_image;
   GeglNode   *introspect;
   GeglNode   *sink;
   GeglBuffer *buffer = NULL;
 
-  image_graph = gimp_projectable_get_graph (GIMP_PROJECTABLE (source_image));
+  image_graph = clay_projectable_get_graph (CLAY_PROJECTABLE (source_image));
 
   output_node = gegl_node_get_output_proxy (image_graph, "output");
 
@@ -261,11 +261,11 @@ debug_show_image_graph (GimpImage *source_image)
        * GEGL will output one itself.
        */
       new_name = g_strdup_printf ("%s GEGL graph",
-                                  gimp_image_get_display_name (source_image));
+                                  clay_image_get_display_name (source_image));
 
-      new_image = gimp_create_image_from_buffer (source_image->gimp,
+      new_image = clay_create_image_from_buffer (source_image->clay,
                                                  buffer, new_name);
-      gimp_image_set_file (new_image, g_file_new_for_uri (new_name));
+      clay_image_set_file (new_image, g_file_new_for_uri (new_name));
 
       g_free (new_name);
       g_object_unref (buffer);
@@ -280,9 +280,9 @@ debug_show_image_graph (GimpImage *source_image)
 }
 
 static void
-debug_print_qdata (GimpObject *object)
+debug_print_qdata (ClayObject *object)
 {
-  g_print ("\nData attached to '%s':\n\n", gimp_object_get_name (object));
+  g_print ("\nData attached to '%s':\n\n", clay_object_get_name (object));
   g_datalist_foreach (&G_OBJECT (object)->qdata,
                       debug_print_qdata_foreach,
                       NULL);

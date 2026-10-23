@@ -42,15 +42,15 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-spheredesigner"
 #define PLUG_IN_BINARY "sphere-designer"
-#define PLUG_IN_ROLE   "gimp-sphere-designer"
+#define PLUG_IN_ROLE   "clay-sphere-designer"
 
 #define RESPONSE_RESET 1
 
@@ -133,7 +133,7 @@ typedef struct
 {
   gshort        numcol;
   gdouble       pos[MAXCOLPERGRADIENT];
-  GimpVector4   color[MAXCOLPERGRADIENT];
+  ClayVector4   color[MAXCOLPERGRADIENT];
 } gradient;
 
 typedef struct
@@ -141,28 +141,28 @@ typedef struct
   gint          majtype;
   gint          type;
   gulong        flags;
-  GimpVector4   color1, color2;
+  ClayVector4   color1, color2;
   gradient      gradient;
-  GimpVector4   ambient, diffuse;
+  ClayVector4   ambient, diffuse;
   gdouble       oscale;
-  GimpVector4   scale, translate, rotate;
+  ClayVector4   scale, translate, rotate;
   image         image;
-  GimpVector4   reflection;
-  GimpVector4   refraction;
-  GimpVector4   transparent;
+  ClayVector4   reflection;
+  ClayVector4   refraction;
+  ClayVector4   transparent;
   gdouble       ior;
-  GimpVector4   phongcolor;
+  ClayVector4   phongcolor;
   gdouble       phongsize;
   gdouble       amount;
   gdouble       exp;
-  GimpVector4   turbulence;
+  ClayVector4   turbulence;
 } texture;
 
 typedef struct
 {
   gshort  type;
   gdouble density;
-  GimpVector4  color;
+  ClayVector4  color;
   gdouble turbulence;
 } atmos;
 
@@ -179,46 +179,46 @@ typedef struct
 typedef struct
 {
   common com;
-  GimpVector4 a, b, c;
+  ClayVector4 a, b, c;
 } triangle;
 
 typedef struct
 {
   common        com;
-  GimpVector4   a;
+  ClayVector4   a;
   gdouble       b, r;
 } disc;
 
 typedef struct
 {
   common        com;
-  GimpVector4   a;
+  ClayVector4   a;
   gdouble       r;
 } sphere;
 
 typedef struct
 {
   common        com;
-  GimpVector4   a, b, c;
+  ClayVector4   a, b, c;
 } cylinder;
 
 typedef struct
 {
   common        com;
-  GimpVector4   a;
+  ClayVector4   a;
   gdouble       b;
 } plane;
 
 typedef struct
 {
   common        com;
-  GimpVector4   color;
-  GimpVector4   a;
+  ClayVector4   color;
+  ClayVector4   a;
 } light;
 
 typedef struct
 {
-  GimpVector4   v1, v2;
+  ClayVector4   v1, v2;
   gshort        inside;
   gdouble       ior;
 } ray;
@@ -255,12 +255,12 @@ typedef struct _DesignerClass DesignerClass;
 
 struct _Designer
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _DesignerClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -269,18 +269,18 @@ struct _DesignerClass
 
 GType                   designer_get_type         (void);
 
-static GList          * designer_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * designer_create_procedure (GimpPlugIn           *plug_in,
+static GList          * designer_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * designer_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * designer_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * designer_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
-static inline void vset          (GimpVector4          *v,
+static inline void vset          (ClayVector4          *v,
                                   gdouble               a,
                                   gdouble               b,
                                   gdouble               c);
@@ -288,11 +288,11 @@ static void        restartrender (void);
 static void        drawcolor1    (GtkWidget            *widget);
 static void        drawcolor2    (GtkWidget            *widget);
 static gboolean    render        (void);
-static void        realrender    (GimpDrawable         *drawable);
+static void        realrender    (ClayDrawable         *drawable);
 static void        fileselect    (GtkFileChooserAction  action,
                                   GtkWidget            *parent);
 static gint        traceray      (ray                  *r,
-                                  GimpVector4          *col,
+                                  ClayVector4          *col,
                                   gint                  level,
                                   gdouble               imp);
 static gdouble     turbulence    (gdouble              *point,
@@ -300,9 +300,9 @@ static gdouble     turbulence    (gdouble              *point,
                                   gdouble               hifreq);
 
 
-G_DEFINE_TYPE (Designer, designer, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Designer, designer, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (DESIGNER_TYPE)
+CLAY_MAIN (DESIGNER_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -365,7 +365,7 @@ static GRand    *gr;
 static void
 designer_class_init (DesignerClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = designer_query_procedures;
   plug_in_class->create_procedure = designer_create_procedure;
@@ -378,31 +378,31 @@ designer_init (Designer *designer)
 }
 
 static GList *
-designer_query_procedures (GimpPlugIn *plug_in)
+designer_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-designer_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+designer_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             designer_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("Sphere _Designer..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Render");
+      clay_procedure_set_menu_label (procedure, _("Sphere _Designer..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Render");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create an image of a textured "
                                           "sphere"),
                                         "This plug-in can be used to create "
@@ -411,15 +411,15 @@ designer_create_procedure (GimpPlugIn  *plug_in,
                                         "raytracer to perform the task with "
                                         "good quality",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Vidar Madsen",
                                       "Vidar Madsen",
                                       "1999");
 
-      gimp_procedure_add_bytes_aux_argument (procedure, "settings-data",
+      clay_procedure_add_bytes_aux_argument (procedure, "settings-data",
                                              "Settings data",
                                              "TODO: eventually we must implement proper args for every settings",
-                                             GIMP_PARAM_READWRITE);
+                                             CLAY_PARAM_READWRITE);
     }
 
   return procedure;
@@ -570,13 +570,13 @@ turbulence (gdouble * point, gdouble lofreq, gdouble hifreq)
 static struct world_t  world;
 
 static inline void
-vcopy (GimpVector4 *a, GimpVector4 *b)
+vcopy (ClayVector4 *a, ClayVector4 *b)
 {
   *a = *b;
 }
 
 static inline void
-vcross (GimpVector4 *r, GimpVector4 *a, GimpVector4 *b)
+vcross (ClayVector4 *r, ClayVector4 *a, ClayVector4 *b)
 {
   r->x = a->y * b->z - a->z * b->y;
   r->y = -(a->x * b->z - a->z * b->x);
@@ -584,13 +584,13 @@ vcross (GimpVector4 *r, GimpVector4 *a, GimpVector4 *b)
 }
 
 static inline gdouble
-vdot (GimpVector4 *a, GimpVector4 *b)
+vdot (ClayVector4 *a, ClayVector4 *b)
 {
   return a->x * b->x + a->y * b->y + a->z * b->z;
 }
 
 static inline gdouble
-vdist (GimpVector4 *a, GimpVector4 *b)
+vdist (ClayVector4 *a, ClayVector4 *b)
 {
   gdouble x, y, z;
 
@@ -602,7 +602,7 @@ vdist (GimpVector4 *a, GimpVector4 *b)
 }
 
 static inline gdouble
-vdist2 (GimpVector4 *a, GimpVector4 *b)
+vdist2 (ClayVector4 *a, ClayVector4 *b)
 {
   gdouble x, y, z;
 
@@ -614,13 +614,13 @@ vdist2 (GimpVector4 *a, GimpVector4 *b)
 }
 
 static inline gdouble
-vlen (GimpVector4 *a)
+vlen (ClayVector4 *a)
 {
   return sqrt (a->x * a->x + a->y * a->y + a->z * a->z);
 }
 
 static inline void
-vnorm (GimpVector4 *a, gdouble v)
+vnorm (ClayVector4 *a, gdouble v)
 {
   gdouble d;
 
@@ -631,7 +631,7 @@ vnorm (GimpVector4 *a, gdouble v)
 }
 
 static inline void
-vrotate (GimpVector4 *axis, gdouble ang, GimpVector4 *vector)
+vrotate (ClayVector4 *axis, gdouble ang, ClayVector4 *vector)
 {
   gdouble rad = ang / 180.0 * G_PI;
   gdouble ax  = vector->x;
@@ -659,7 +659,7 @@ vrotate (GimpVector4 *axis, gdouble ang, GimpVector4 *vector)
 }
 
 static inline void
-vset (GimpVector4 *v, gdouble a, gdouble b, gdouble c)
+vset (ClayVector4 *v, gdouble a, gdouble b, gdouble c)
 {
   v->x = a;
   v->y = b;
@@ -668,7 +668,7 @@ vset (GimpVector4 *v, gdouble a, gdouble b, gdouble c)
 }
 
 static inline void
-vcset (GimpVector4 *v, gdouble a, gdouble b, gdouble c, gdouble d)
+vcset (ClayVector4 *v, gdouble a, gdouble b, gdouble c, gdouble d)
 {
   v->x = a;
   v->y = b;
@@ -677,9 +677,9 @@ vcset (GimpVector4 *v, gdouble a, gdouble b, gdouble c, gdouble d)
 }
 
 static inline void
-vvrotate (GimpVector4 *p, GimpVector4 *rot)
+vvrotate (ClayVector4 *p, ClayVector4 *rot)
 {
-  GimpVector4 axis;
+  ClayVector4 axis;
 
   if (rot->x != 0.0)
     {
@@ -699,7 +699,7 @@ vvrotate (GimpVector4 *p, GimpVector4 *rot)
 }
 
 static inline void
-vsub (GimpVector4 *a, GimpVector4 *b)
+vsub (ClayVector4 *a, ClayVector4 *b)
 {
   a->x -= b->x;
   a->y -= b->y;
@@ -708,7 +708,7 @@ vsub (GimpVector4 *a, GimpVector4 *b)
 }
 
 static inline void
-vadd (GimpVector4 *a, GimpVector4 *b)
+vadd (ClayVector4 *a, ClayVector4 *b)
 {
   a->x += b->x;
   a->y += b->y;
@@ -718,7 +718,7 @@ vadd (GimpVector4 *a, GimpVector4 *b)
 
 /*
 static inline void
-vneg (GimpVector4 *a)
+vneg (ClayVector4 *a)
 {
   a->x = -a->x;
   a->y = -a->y;
@@ -728,7 +728,7 @@ vneg (GimpVector4 *a)
 */
 
 static inline void
-vmul (GimpVector4 *v, gdouble a)
+vmul (ClayVector4 *v, gdouble a)
 {
   v->x *= a;
   v->y *= a;
@@ -737,7 +737,7 @@ vmul (GimpVector4 *v, gdouble a)
 }
 
 static inline void
-vvmul (GimpVector4 *a, GimpVector4 *b)
+vvmul (ClayVector4 *a, ClayVector4 *b)
 {
   a->x *= b->x;
   a->y *= b->y;
@@ -746,7 +746,7 @@ vvmul (GimpVector4 *a, GimpVector4 *b)
 }
 
 static inline void
-vvdiv (GimpVector4 *a, GimpVector4 *b)
+vvdiv (ClayVector4 *a, ClayVector4 *b)
 {
   a->x /= b->x;
   a->y /= b->y;
@@ -754,7 +754,7 @@ vvdiv (GimpVector4 *a, GimpVector4 *b)
 }
 
 static void
-vmix (GimpVector4 *r, GimpVector4 *a, GimpVector4 *b, gdouble v)
+vmix (ClayVector4 *r, ClayVector4 *a, ClayVector4 *b, gdouble v)
 {
   gdouble i = 1.0 - v;
 
@@ -765,7 +765,7 @@ vmix (GimpVector4 *r, GimpVector4 *a, GimpVector4 *b, gdouble v)
 }
 
 static double
-vmax (GimpVector4 *a)
+vmax (ClayVector4 *a)
 {
   gdouble max = fabs (a->x);
 
@@ -781,7 +781,7 @@ vmax (GimpVector4 *a)
 
 #if 0
 static void
-vavg (GimpVector4 * a)
+vavg (ClayVector4 * a)
 {
   gdouble s;
 
@@ -791,7 +791,7 @@ vavg (GimpVector4 * a)
 #endif
 
 static void
-trianglenormal (GimpVector4 * n, gdouble *t, triangle * tri)
+trianglenormal (ClayVector4 * n, gdouble *t, triangle * tri)
 {
   triangle tmp;
   vcopy (&tmp.b, &tri->b);
@@ -807,7 +807,7 @@ trianglenormal (GimpVector4 * n, gdouble *t, triangle * tri)
 static gdouble
 checkdisc (ray * r, disc * disc)
 {
-  GimpVector4 p, *v = &disc->a;
+  ClayVector4 p, *v = &disc->a;
   gdouble t, d2;
   gdouble i, j, k;
 
@@ -833,7 +833,7 @@ checkdisc (ray * r, disc * disc)
 static gdouble
 checksphere (ray * r, sphere * sphere)
 {
-  GimpVector4 cendir, rdir;
+  ClayVector4 cendir, rdir;
   gdouble dirproj, cdlensq;
   gdouble linear, constant, rsq, quadratic, discriminant;
   gdouble smallzero, solmin, solmax, tolerance = 0.001;
@@ -912,7 +912,7 @@ checkcylinder (ray * r, cylinder * cylinder)
 static gdouble
 checkplane (ray * r, plane * plane)
 {
-  GimpVector4 *v = &plane->a;
+  ClayVector4 *v = &plane->a;
   gdouble t;
   gdouble i, j, k;
 
@@ -929,10 +929,10 @@ checkplane (ray * r, plane * plane)
 static gdouble
 checktri (ray * r, triangle * tri)
 {
-  GimpVector4  ed1, ed2;
-  GimpVector4  tvec, pvec, qvec;
+  ClayVector4  ed1, ed2;
+  ClayVector4  tvec, pvec, qvec;
   gdouble det, idet, t, u, v;
-  GimpVector4 *orig, dir;
+  ClayVector4 *orig, dir;
 
   orig = &r->v1;
   dir = r->v2;
@@ -972,7 +972,7 @@ checktri (ray * r, triangle * tri)
 }
 
 static void
-transformpoint (GimpVector4 * p, texture * t)
+transformpoint (ClayVector4 * p, texture * t)
 {
   gdouble point[3], f;
 
@@ -996,10 +996,10 @@ transformpoint (GimpVector4 * p, texture * t)
 }
 
 static void
-checker (GimpVector4 *q, GimpVector4 *col, texture *t)
+checker (ClayVector4 *q, ClayVector4 *col, texture *t)
 {
   gint   c = 0;
-  GimpVector4 p;
+  ClayVector4 p;
 
   p = *q;
   transformpoint (&p, t);
@@ -1028,11 +1028,11 @@ checker (GimpVector4 *q, GimpVector4 *col, texture *t)
 }
 
 static void
-gradcolor (GimpVector4 *col, gradient *t, gdouble val)
+gradcolor (ClayVector4 *col, gradient *t, gdouble val)
 {
   gint    i;
   gdouble d;
-  GimpVector4  tmpcol;
+  ClayVector4  tmpcol;
 
   val = CLAMP (val, 0.0, 1.0);
 
@@ -1060,10 +1060,10 @@ gradcolor (GimpVector4 *col, gradient *t, gdouble val)
 }
 
 static void
-marble (GimpVector4 *q, GimpVector4 *col, texture *t)
+marble (ClayVector4 *q, ClayVector4 *col, texture *t)
 {
   gdouble f;
-  GimpVector4 p;
+  ClayVector4 p;
 
   p = *q;
   transformpoint (&p, t);
@@ -1078,10 +1078,10 @@ marble (GimpVector4 *q, GimpVector4 *col, texture *t)
 }
 
 static void
-lizard (GimpVector4 *q, GimpVector4 *col, texture *t)
+lizard (ClayVector4 *q, ClayVector4 *col, texture *t)
 {
   gdouble f;
-  GimpVector4 p;
+  ClayVector4 p;
 
   p = *q;
   transformpoint (&p, t);
@@ -1099,10 +1099,10 @@ lizard (GimpVector4 *q, GimpVector4 *col, texture *t)
 }
 
 static void
-wood (GimpVector4 *q, GimpVector4 *col, texture *t)
+wood (ClayVector4 *q, ClayVector4 *col, texture *t)
 {
   gdouble f;
-  GimpVector4 p;
+  ClayVector4 p;
 
   p = *q;
   transformpoint (&p, t);
@@ -1119,10 +1119,10 @@ wood (GimpVector4 *q, GimpVector4 *col, texture *t)
 }
 
 static void
-spiral (GimpVector4 *q, GimpVector4 *col, texture *t)
+spiral (ClayVector4 *q, ClayVector4 *col, texture *t)
 {
   gdouble f;
-  GimpVector4 p;
+  ClayVector4 p;
 
   p = *q;
   transformpoint (&p, t);
@@ -1139,10 +1139,10 @@ spiral (GimpVector4 *q, GimpVector4 *col, texture *t)
 }
 
 static void
-spots (GimpVector4 *q, GimpVector4 *col, texture *t)
+spots (ClayVector4 *q, ClayVector4 *col, texture *t)
 {
   gdouble f;
-  GimpVector4 p, r;
+  ClayVector4 p, r;
 
   p = *q;
   transformpoint (&p, t);
@@ -1164,10 +1164,10 @@ spots (GimpVector4 *q, GimpVector4 *col, texture *t)
 }
 
 static void
-perlin (GimpVector4 * q, GimpVector4 * col, texture * t)
+perlin (ClayVector4 * q, ClayVector4 * col, texture * t)
 {
   gdouble f, point[3];
-  GimpVector4  p;
+  ClayVector4  p;
 
   p = *q;
   transformpoint (&p, t);
@@ -1187,9 +1187,9 @@ perlin (GimpVector4 * q, GimpVector4 * col, texture * t)
 }
 
 static void
-imagepixel (GimpVector4 * q, GimpVector4 * col, texture * t)
+imagepixel (ClayVector4 * q, ClayVector4 * col, texture * t)
 {
-  GimpVector4 p;
+  ClayVector4 p;
   gint x, y;
   guchar *rgb;
 
@@ -1207,11 +1207,11 @@ imagepixel (GimpVector4 * q, GimpVector4 * col, texture * t)
 }
 
 static void
-objcolor (GimpVector4 *col, GimpVector4 *p, common *obj)
+objcolor (ClayVector4 *col, ClayVector4 *p, common *obj)
 {
   gint     i;
   texture *t;
-  GimpVector4   tmpcol;
+  ClayVector4   tmpcol;
 
   vcset (col, 0, 0, 0, 0);
 
@@ -1277,7 +1277,7 @@ objcolor (GimpVector4 *col, GimpVector4 *p, common *obj)
 }
 
 static void
-objnormal (GimpVector4 *res, common *obj, GimpVector4 *p)
+objnormal (ClayVector4 *res, common *obj, ClayVector4 *p)
 {
   gint i;
 
@@ -1307,8 +1307,8 @@ objnormal (GimpVector4 *res, common *obj, GimpVector4 *p)
   for (i = 0; i < obj->numnormal; i++)
     {
       gint     k;
-      GimpVector4   tmpcol[6];
-      GimpVector4   q[6], nres;
+      ClayVector4   tmpcol[6];
+      ClayVector4   q[6], nres;
       texture *t = &obj->normal[i];
       gdouble  nstep = 0.1;
 
@@ -1390,14 +1390,14 @@ objnormal (GimpVector4 *res, common *obj, GimpVector4 *p)
  */
 
 static void
-calclight (GimpVector4 * col, GimpVector4 * point, common * obj)
+calclight (ClayVector4 * col, ClayVector4 * point, common * obj)
 {
   gint i, j;
   ray r;
   gdouble b, a;
-  GimpVector4 lcol;
-  GimpVector4 norm;
-  GimpVector4 pcol;
+  ClayVector4 lcol;
+  ClayVector4 norm;
+  ClayVector4 pcol;
 
   vcset (col, 0, 0, 0, 0);
 
@@ -1469,14 +1469,14 @@ calclight (GimpVector4 * col, GimpVector4 * point, common * obj)
 }
 
 static void
-calcphong (common * obj, ray * r2, GimpVector4 * col)
+calcphong (common * obj, ray * r2, ClayVector4 * col)
 {
   gint    i, j;
   ray     r;
   gdouble b;
-  GimpVector4  lcol;
-  GimpVector4  norm;
-  GimpVector4  pcol;
+  ClayVector4  lcol;
+  ClayVector4  norm;
+  ClayVector4  pcol;
   gdouble ps;
 
   vcopy (&pcol, col);
@@ -1523,13 +1523,13 @@ calcphong (common * obj, ray * r2, GimpVector4 * col)
 }
 
 static int
-traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
+traceray (ray * r, ClayVector4 * col, gint level, gdouble imp)
 {
   gint         i, b = -1;
   gdouble      t = -1.0, min = 0.0;
   common      *obj, *bobj = NULL;
   gint         hits = 0;
-  GimpVector4  p = { 0, 0, 0, 0 };
+  ClayVector4  p = { 0, 0, 0, 0 };
 
   if ((level == 0) || (imp < 0.005))
     {
@@ -1591,7 +1591,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
       if (world.flags & SMARTAMBIENT)
         {
           gdouble ambient = 0.3 * exp (-min / world.smartambient);
-          GimpVector4 lcol;
+          ClayVector4 lcol;
           objcolor (&lcol, &p, bobj);
           vmul (&lcol, ambient);
           vadd (col, &lcol);
@@ -1605,7 +1605,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
                   || (bobj->texture[i].type == PHONG)))
             {
 
-              GimpVector4 refcol, norm, ocol;
+              ClayVector4 refcol, norm, ocol;
               ray ref;
 
               objcolor (&ocol, &p, bobj);
@@ -1649,7 +1649,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
 
           if ((world.quality >= 5) && (col->w < 1.0))
             {
-              GimpVector4 refcol;
+              ClayVector4 refcol;
               ray ref;
 
               vcopy (&ref.v1, &p);
@@ -1666,7 +1666,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
 
           if ((world.quality >= 5) && (bobj->texture[i].type == TRANSPARENT))
             {
-              GimpVector4 refcol;
+              ClayVector4 refcol;
               ray ref;
 
               vcopy (&ref.v1, &p);
@@ -1686,7 +1686,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
 
           if ((world.quality >= 5) && (bobj->texture[i].type == SMOKE))
             {
-              GimpVector4 smcol, raydir, norm;
+              ClayVector4 smcol, raydir, norm;
               double tran;
               ray ref;
 
@@ -1711,7 +1711,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
 
           if ((world.quality >= 5) && (bobj->texture[i].type == REFRACTION))
             {
-              GimpVector4 refcol, norm, tmpv;
+              ClayVector4 refcol, norm, tmpv;
               ray ref;
               double c1, c2, n1, n2, n;
 
@@ -1782,7 +1782,7 @@ traceray (ray * r, GimpVector4 * col, gint level, gdouble imp)
 
   for (i = 0; i < world.numatmos; i++)
     {
-      GimpVector4 tmpcol;
+      ClayVector4 tmpcol;
       if (world.atmos[i].type == FOG)
         {
           gdouble v, pt[3];
@@ -1930,14 +1930,14 @@ setvals (texture *t)
     {
       if (l->n == t->type)
         {
-          gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (texturemenu),
+          clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (texturemenu),
                                          l->index);
           break;
         }
       l++;
     }
 
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (typemenu), t->majtype);
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (typemenu), t->majtype);
 
   noupdate = FALSE;
 }
@@ -2087,7 +2087,7 @@ loadit (const gchar * fn)
   if (! f)
     {
       g_message (_("Could not open '%s' for reading: %s"),
-                 gimp_filename_to_utf8 (fn), g_strerror (errno));
+                 clay_filename_to_utf8 (fn), g_strerror (errno));
       return;
     }
 
@@ -2098,7 +2098,7 @@ loadit (const gchar * fn)
 #endif
     {
       g_message (_("File '%s' is not a valid save file."),
-                 gimp_filename_to_utf8 (fn));
+                 clay_filename_to_utf8 (fn));
       fclose (f);
       return;
     }
@@ -2206,7 +2206,7 @@ saveit (const gchar *fn)
   if (!f)
     {
       g_message (_("Could not open '%s' for writing: %s"),
-                 gimp_filename_to_utf8 (fn), g_strerror (errno));
+                 clay_filename_to_utf8 (fn), g_strerror (errno));
       return;
     }
 
@@ -2402,7 +2402,7 @@ selecttexture (GtkWidget *widget,
   if (!t)
     return;
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), &t->type);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), &t->type);
 
   relabel ();
   restartrender ();
@@ -2421,7 +2421,7 @@ selecttype (GtkWidget *widget,
   if (!t)
     return;
 
-  gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (widget), &t->majtype);
+  clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (widget), &t->majtype);
 
   relabel ();
   restartrender ();
@@ -2466,7 +2466,7 @@ getscales (GtkWidget *widget,
 
 
 static void
-color1_changed (GimpColorButton *button)
+color1_changed (ClayColorButton *button)
 {
   texture *t = currenttexture ();
 
@@ -2475,7 +2475,7 @@ color1_changed (GimpColorButton *button)
       GeglColor *color;
       gdouble    rgba[4];
 
-      color = gimp_color_button_get_color (button);
+      color = clay_color_button_get_color (button);
       gegl_color_get_pixel (color, babl_format ("R'G'B'A double"), rgba);
 
       t->color1.x = rgba[0];
@@ -2490,7 +2490,7 @@ color1_changed (GimpColorButton *button)
 }
 
 static void
-color2_changed (GimpColorButton *button)
+color2_changed (ClayColorButton *button)
 {
   texture *t = currenttexture ();
 
@@ -2499,7 +2499,7 @@ color2_changed (GimpColorButton *button)
       GeglColor *color;
       gdouble    rgba[4];
 
-      color = gimp_color_button_get_color (button);
+      color = clay_color_button_get_color (button);
       gegl_color_get_pixel (color, babl_format ("R'G'B'A double"), rgba);
 
       t->color2.x = rgba[0];
@@ -2538,7 +2538,7 @@ drawcolor1 (GtkWidget *w)
   rgba[3] = t->color1.w;
   gegl_color_set_pixel (color, babl_format ("R'G'B'A double"), rgba);
 
-  gimp_color_button_set_color (GIMP_COLOR_BUTTON (w), color);
+  clay_color_button_set_color (CLAY_COLOR_BUTTON (w), color);
   g_object_unref (color);
 }
 
@@ -2567,7 +2567,7 @@ drawcolor2 (GtkWidget *w)
   rgba[3] = t->color2.w;
   gegl_color_set_pixel (color, babl_format ("R'G'B'A double"), rgba);
 
-  gimp_color_button_set_color (GIMP_COLOR_BUTTON (w), color);
+  clay_color_button_set_color (CLAY_COLOR_BUTTON (w), color);
   g_object_unref (color);
 }
 
@@ -2635,9 +2635,9 @@ makewindow (void)
   GtkWidget  *list;
   GeglColor  *color = gegl_color_new ("transparent");
 
-  window = gimp_dialog_new (_("Sphere Designer"), PLUG_IN_ROLE,
+  window = clay_dialog_new (_("Sphere Designer"), PLUG_IN_ROLE,
                             NULL, 0,
-                            gimp_standard_help_func, PLUG_IN_PROC,
+                            clay_standard_help_func, PLUG_IN_PROC,
 
                             _("_Reset"),  RESPONSE_RESET,
                             _("_Cancel"), GTK_RESPONSE_CANCEL,
@@ -2645,13 +2645,13 @@ makewindow (void)
 
                             NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (window),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (window),
                                            RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
 
-  gimp_window_set_transient (GTK_WINDOW (window));
+  clay_window_set_transient (GTK_WINDOW (window));
 
   g_signal_connect (window, "response",
                     G_CALLBACK (sphere_response),
@@ -2769,7 +2769,7 @@ makewindow (void)
   gtk_box_pack_start (GTK_BOX (main_vbox), main_hbox, FALSE, FALSE, 0);
   gtk_widget_set_visible (main_hbox, TRUE);
 
-  frame = gimp_frame_new (_("Properties"));
+  frame = clay_frame_new (_("Properties"));
   gtk_box_pack_start (GTK_BOX (main_hbox), frame, TRUE, TRUE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -2783,45 +2783,45 @@ makewindow (void)
   gtk_box_pack_start (GTK_BOX (vbox), grid, FALSE, FALSE, 0);
   gtk_widget_set_visible (grid, TRUE);
 
-  typemenu = gimp_int_combo_box_new (_("Texture"), 0,
+  typemenu = clay_int_combo_box_new (_("Texture"), 0,
                                      _("Bump"),    1,
                                      _("Light"),   2,
                                      NULL);
-  gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (typemenu), 0,
+  clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (typemenu), 0,
                               G_CALLBACK (selecttype),
                               NULL, NULL);
 
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 0,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 0,
                             _("Type"), 0.0, 0.5,
                             typemenu, 2);
 
-  texturemenu = g_object_new (GIMP_TYPE_INT_COMBO_BOX, NULL);
+  texturemenu = g_object_new (CLAY_TYPE_INT_COMBO_BOX, NULL);
   {
     struct textures_t *t;
 
     for (t = textures; t->s; t++)
-      gimp_int_combo_box_append (GIMP_INT_COMBO_BOX (texturemenu),
-                                 GIMP_INT_STORE_VALUE, t->n,
-                                 GIMP_INT_STORE_LABEL, gettext (t->s),
+      clay_int_combo_box_append (CLAY_INT_COMBO_BOX (texturemenu),
+                                 CLAY_INT_STORE_VALUE, t->n,
+                                 CLAY_INT_STORE_LABEL, gettext (t->s),
                                  -1);
   }
 
-  gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (texturemenu), 0,
+  clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (texturemenu), 0,
                               G_CALLBACK (selecttexture),
                               NULL, NULL);
 
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                             _("Texture"), 0.0, 0.5,
                             texturemenu, 2);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 2,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 2,
                             _("Colors"), 0.0, 0.5,
                             hbox, 2);
 
-  button = gimp_color_button_new (_("Color Selection Dialog"),
+  button = clay_color_button_new (_("Color Selection Dialog"),
                                   COLORBUTTONWIDTH, COLORBUTTONHEIGHT,
-                                  color, GIMP_COLOR_AREA_FLAT);
+                                  color, CLAY_COLOR_AREA_FLAT);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
   gtk_widget_set_visible (button, TRUE);
   drawcolor1 (button);
@@ -2830,9 +2830,9 @@ makewindow (void)
                     G_CALLBACK (color1_changed),
                     NULL);
 
-  button = gimp_color_button_new (_("Color Selection Dialog"),
+  button = clay_color_button_new (_("Color Selection Dialog"),
                                   COLORBUTTONWIDTH, COLORBUTTONHEIGHT,
-                                  color, GIMP_COLOR_AREA_FLAT);
+                                  color, CLAY_COLOR_AREA_FLAT);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
   gtk_widget_set_visible (button, TRUE);
   drawcolor2 (button);
@@ -2842,7 +2842,7 @@ makewindow (void)
                     NULL);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 10.0, 0.1, 1.0, 0.0);
-  scalescale = gimp_spin_scale_new (adjustment, _("Scale"), 1);
+  scalescale = clay_spin_scale_new (adjustment, _("Scale"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2850,7 +2850,7 @@ makewindow (void)
   gtk_widget_set_visible (scalescale, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 10.0, 0.1, 1.0, 0.0);
-  turbulencescale = gimp_spin_scale_new (adjustment, _("Turbulence"), 1);
+  turbulencescale = clay_spin_scale_new (adjustment, _("Turbulence"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2858,7 +2858,7 @@ makewindow (void)
   gtk_widget_set_visible (turbulencescale, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 1.0, 0.1, 1.0, 0.0);
-  amountscale = gimp_spin_scale_new (adjustment, _("Amount"), 2);
+  amountscale = clay_spin_scale_new (adjustment, _("Amount"), 2);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2866,14 +2866,14 @@ makewindow (void)
   gtk_widget_set_visible (amountscale, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 1.0, 0.1, 1.0, 0.0);
-  expscale = gimp_spin_scale_new (adjustment, _("Exponent"), 2);
+  expscale = clay_spin_scale_new (adjustment, _("Exponent"), 2);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
   gtk_grid_attach (GTK_GRID (grid), expscale, 0, 6, 3, 1);
   gtk_widget_set_visible (expscale, TRUE);
 
-  frame = gimp_frame_new (_("Transformations"));
+  frame = clay_frame_new (_("Transformations"));
   gtk_box_pack_start (GTK_BOX (main_hbox), frame, TRUE, TRUE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -2882,7 +2882,7 @@ makewindow (void)
   gtk_widget_set_visible (vbox, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 10.0, 0.1, 1.0, 0.0);
-  scalexscale = gimp_spin_scale_new (adjustment, _("Scale X"), 2);
+  scalexscale = clay_spin_scale_new (adjustment, _("Scale X"), 2);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2890,7 +2890,7 @@ makewindow (void)
   gtk_widget_set_visible (scalexscale, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 10.0, 0.1, 1.0, 0.0);
-  scaleyscale = gimp_spin_scale_new (adjustment, _("Scale Y"), 2);
+  scaleyscale = clay_spin_scale_new (adjustment, _("Scale Y"), 2);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2898,7 +2898,7 @@ makewindow (void)
   gtk_widget_set_visible (scaleyscale, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 10.0, 0.1, 1.0, 0.0);
-  scalezscale = gimp_spin_scale_new (adjustment, _("Scale Z"), 2);
+  scalezscale = clay_spin_scale_new (adjustment, _("Scale Z"), 2);
   gtk_widget_set_margin_bottom (scalezscale, 6);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
@@ -2907,7 +2907,7 @@ makewindow (void)
   gtk_widget_set_visible (scalezscale, TRUE);
 
   adjustment = gtk_adjustment_new (0.0, 0.0, 360.0, 0.1, 1.0, 0.0);
-  rotxscale = gimp_spin_scale_new (adjustment, _("Rotate X"), 1);
+  rotxscale = clay_spin_scale_new (adjustment, _("Rotate X"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2915,7 +2915,7 @@ makewindow (void)
   gtk_widget_set_visible (rotxscale, TRUE);
 
   adjustment = gtk_adjustment_new (0.0, 0.0, 360.0, 0.1, 1.0, 0.0);
-  rotyscale = gimp_spin_scale_new (adjustment, _("Rotate Y"), 1);
+  rotyscale = clay_spin_scale_new (adjustment, _("Rotate Y"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2923,7 +2923,7 @@ makewindow (void)
   gtk_widget_set_visible (rotyscale, TRUE);
 
   adjustment = gtk_adjustment_new (1.0, 0.0, 360.0, 0.1, 1.0, 0.0);
-  rotzscale = gimp_spin_scale_new (adjustment, _("Rotate Z"), 1);
+  rotzscale = clay_spin_scale_new (adjustment, _("Rotate Z"), 1);
   gtk_widget_set_margin_bottom (rotzscale, 6);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
@@ -2932,7 +2932,7 @@ makewindow (void)
   gtk_widget_set_visible (rotzscale, TRUE);
 
   adjustment = gtk_adjustment_new (0.0, -20.0, 20.0, 0.1, 1.0, 0.0);
-  posxscale = gimp_spin_scale_new (adjustment, _("Position X"), 1);
+  posxscale = clay_spin_scale_new (adjustment, _("Position X"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2940,7 +2940,7 @@ makewindow (void)
   gtk_widget_set_visible (posxscale, TRUE);
 
   adjustment = gtk_adjustment_new (0.0, -20.0, 20.0, 0.1, 1.0, 0.0);
-  posyscale = gimp_spin_scale_new (adjustment, _("Position Y"), 1);
+  posyscale = clay_spin_scale_new (adjustment, _("Position Y"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2948,7 +2948,7 @@ makewindow (void)
   gtk_widget_set_visible (posyscale, TRUE);
 
   adjustment = gtk_adjustment_new (0.0, -20.0, 20.0, 0.1, 1.0, 0.0);
-  poszscale = gimp_spin_scale_new (adjustment, _("Position Z"), 1);
+  poszscale = clay_spin_scale_new (adjustment, _("Position Z"), 1);
   g_signal_connect (adjustment, "value-changed",
                     G_CALLBACK (getscales),
                     NULL);
@@ -2976,7 +2976,7 @@ pixelval (gdouble v)
 static gboolean
 render (void)
 {
-  GimpVector4  col;
+  ClayVector4  col;
   guchar *dest_row;
   ray     r;
   gint    x, y, p;
@@ -3017,7 +3017,7 @@ render (void)
               else if (col.w > 1.0)
                 col.w = 1.0;
 
-              GIMP_CAIRO_RGB24_SET_PIXEL ((dest_row + p),
+              CLAY_CAIRO_RGB24_SET_PIXEL ((dest_row + p),
                 pixelval (255 * col.x) * col.w + g * (1.0 - col.w),
                 pixelval (255 * col.y) * col.w + g * (1.0 - col.w),
                 pixelval (255 * col.z) * col.w + g * (1.0 - col.w));
@@ -3033,14 +3033,14 @@ render (void)
 }
 
 static void
-realrender (GimpDrawable *drawable)
+realrender (ClayDrawable *drawable)
 {
   GeglBuffer  *src_buffer;
   GeglBuffer  *dest_buffer;
   const Babl  *format;
   gint         x, y;
   ray          r;
-  GimpVector4  rcol;
+  ClayVector4  rcol;
   gint         width, height;
   gint         x1, y1;
   guchar      *dest;
@@ -3052,23 +3052,23 @@ realrender (GimpDrawable *drawable)
   r.v1.z = -10.0;
   r.v2.z = 0.0;
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &x1, &y1, &width, &height))
     return;
 
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format ("R'G'B'A u8");
       else
         format = babl_format ("R'G'B' u8");
     }
   else
     {
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         format = babl_format ("Y'A u8");
       else
         format = babl_format ("Y' u8");
@@ -3079,7 +3079,7 @@ realrender (GimpDrawable *drawable)
   buffer  = g_malloc (width * 4);
   ibuffer = g_malloc (width * 4);
 
-  gimp_progress_init (_("Rendering sphere"));
+  clay_progress_init (_("Rendering sphere"));
 
   for (y = 0; y < height; y++)
     {
@@ -3117,24 +3117,24 @@ realrender (GimpDrawable *drawable)
                        format, ibuffer,
                        GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((gdouble) y / (gdouble) height);
+      clay_progress_update ((gdouble) y / (gdouble) height);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
   g_free (buffer);
   g_free (ibuffer);
 
   g_object_unref (src_buffer);
   g_object_unref (dest_buffer);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, x1, y1, width, height);
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, x1, y1, width, height);
 }
 
 static gboolean
-sphere_main (GimpDrawable *drawable)
+sphere_main (ClayDrawable *drawable)
 {
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   img_stride = cairo_format_stride_for_width (CAIRO_FORMAT_RGB24, PREVIEWSIZE);
   img = g_malloc0 (img_stride * PREVIEWSIZE);
@@ -3165,30 +3165,30 @@ sphere_main (GimpDrawable *drawable)
   return do_run;
 }
 
-static GimpValueArray *
-designer_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+designer_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
   GBytes       *settings_bytes = NULL;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gint          x, y, w, h;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -3196,17 +3196,17 @@ designer_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (! gimp_drawable_mask_intersect (drawable, &x, &y, &w, &h))
+  if (! clay_drawable_mask_intersect (drawable, &x, &y, &w, &h))
     {
       g_message (_("Region selected for plug-in is empty"));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_SUCCESS,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_SUCCESS,
                                                NULL);
     }
 
   s.com.numtexture = 0;
-  /* Temporary code replacing legacy gimp_[gs]et_data() using an AUX argument.
+  /* Temporary code replacing legacy clay_[gs]et_data() using an AUX argument.
    * This doesn't actually fix the "Reset to initial values|factory defaults"
    * features, but at least makes per-run value storage work.
    * TODO: eventually we want proper separate arguments as a complete fix.
@@ -3218,23 +3218,23 @@ designer_run (GimpProcedure        *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       if (! sphere_main (drawable))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       if (s.com.numtexture == 0)
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_EXECUTION_ERROR,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_EXECUTION_ERROR,
                                                  NULL);
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+    case CLAY_RUN_NONINTERACTIVE:
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
@@ -3243,7 +3243,7 @@ designer_run (GimpProcedure        *procedure,
   g_bytes_unref (settings_bytes);
 
   realrender (drawable);
-  gimp_displays_flush ();
+  clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }

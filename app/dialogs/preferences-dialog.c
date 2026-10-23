@@ -23,53 +23,53 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpmath/gimpmath.h"
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaymath/claymath.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "gimp-version.h"
+#include "clay-version.h"
 
-#include "config/gimprc.h"
-#include "config/gimpguiconfig.h"
+#include "config/clayrc.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimptemplate.h"
-#include "core/gimp-utils.h"
+#include "core/clay.h"
+#include "core/claytemplate.h"
+#include "core/clay-utils.h"
 
-#include "display/gimpmodifiersmanager.h"
+#include "display/claymodifiersmanager.h"
 
-#include "plug-in/gimppluginmanager.h"
+#include "plug-in/claypluginmanager.h"
 
-#include "widgets/gimpaction-history.h"
-#include "widgets/gimpcolorpanel.h"
-#include "widgets/gimpcontainercombobox.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpcontrollerlist.h"
-#include "widgets/gimpcontrollers.h"
-#include "widgets/gimpdevices.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpgrideditor.h"
-#include "widgets/gimphelp.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimplanguagecombobox.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
-#include "widgets/gimppluginview.h"
-#include "widgets/gimpprefsbox.h"
-#include "widgets/gimppropwidgets.h"
-#include "widgets/gimpmodifierseditor.h"
-#include "widgets/gimpstrokeeditor.h"
-#include "widgets/gimptemplateeditor.h"
-#include "widgets/gimptooleditor.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayaction-history.h"
+#include "widgets/claycolorpanel.h"
+#include "widgets/claycontainercombobox.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claycontrollerlist.h"
+#include "widgets/claycontrollers.h"
+#include "widgets/claydevices.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claygrideditor.h"
+#include "widgets/clayhelp.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claylanguagecombobox.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
+#include "widgets/claypluginview.h"
+#include "widgets/clayprefsbox.h"
+#include "widgets/claypropwidgets.h"
+#include "widgets/claymodifierseditor.h"
+#include "widgets/claystrokeeditor.h"
+#include "widgets/claytemplateeditor.h"
+#include "widgets/claytooleditor.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "menus/menus.h"
 
-#include "tools/gimp-tools.h"
+#include "tools/clay-tools.h"
 
 #include "gui/icon-themes.h"
 #include "gui/session.h"
@@ -80,7 +80,7 @@
 #include "preferences-dialog-utils.h"
 #include "resolution-calibrate-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -88,8 +88,8 @@
 
 /*  preferences local functions  */
 
-static GtkWidget * prefs_dialog_new                (Gimp       *gimp,
-                                                    GimpConfig *config);
+static GtkWidget * prefs_dialog_new                (Clay       *clay,
+                                                    ClayConfig *config);
 static void        prefs_response                  (GtkWidget  *widget,
                                                     gint        response_id,
                                                     GtkWidget  *dialog);
@@ -111,33 +111,33 @@ static void   prefs_resolution_source_callback     (GtkWidget    *widget,
 static void   prefs_resolution_calibrate_callback  (GtkWidget    *widget,
                                                     GtkWidget    *entry);
 static void   prefs_input_devices_dialog           (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_keyboard_shortcuts_dialog      (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_menus_save_callback            (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_menus_clear_callback           (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_menus_remove_callback          (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_session_save_callback          (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_session_clear_callback         (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_devices_save_callback          (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_devices_clear_callback         (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_modifiers_clear_callback       (GtkWidget    *widget,
-                                                    GimpModifiersEditor *editor);
+                                                    ClayModifiersEditor *editor);
 static void   prefs_search_clear_callback          (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_tool_options_save_callback     (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_tool_options_clear_callback    (GtkWidget    *widget,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_help_language_change_callback  (GtkComboBox  *combo,
-                                                    Gimp         *gimp);
+                                                    Clay         *clay);
 static void   prefs_help_language_change_callback2 (GtkComboBox  *combo,
                                                     GtkContainer *box);
 static void   prefs_check_style_callback           (GObject      *config,
@@ -185,7 +185,7 @@ prefs_startup_monitor_add (GObject *config,
 
   display = gdk_display_get_default ();
   n_monitors = gdk_display_get_n_monitors (display);
-  current = GIMP_GUI_CONFIG (config)->startup_monitor;
+  current = CLAY_GUI_CONFIG (config)->startup_monitor;
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_pack_start (vbox, hbox, FALSE, FALSE, 0);
@@ -235,23 +235,23 @@ prefs_startup_monitor_add (GObject *config,
 /*  public function  */
 
 GtkWidget *
-preferences_dialog_create (Gimp *gimp)
+preferences_dialog_create (Clay *clay)
 {
-  GimpConfig *config;
-  GimpConfig *config_copy;
-  GimpConfig *config_orig;
+  ClayConfig *config;
+  ClayConfig *config_copy;
+  ClayConfig *config_orig;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
   if (prefs_dialog)
     return prefs_dialog;
 
   /*  turn off autosaving while the prefs dialog is open  */
-  gimp_rc_set_autosave (GIMP_RC (gimp->edit_config), FALSE);
+  clay_rc_set_autosave (CLAY_RC (clay->edit_config), FALSE);
 
-  config       = GIMP_CONFIG (gimp->edit_config);
-  config_copy  = gimp_config_duplicate (config);
-  config_orig  = gimp_config_duplicate (config);
+  config       = CLAY_CONFIG (clay->edit_config);
+  config_copy  = clay_config_duplicate (config);
+  config_orig  = clay_config_duplicate (config);
 
   g_signal_connect_object (config, "notify",
                            G_CALLBACK (prefs_config_notify),
@@ -260,9 +260,9 @@ preferences_dialog_create (Gimp *gimp)
                            G_CALLBACK (prefs_config_copy_notify),
                            config, 0);
 
-  g_set_weak_pointer (&prefs_dialog, prefs_dialog_new (gimp, config_copy));
+  g_set_weak_pointer (&prefs_dialog, prefs_dialog_new (clay, config_copy));
 
-  g_object_set_data (G_OBJECT (prefs_dialog), "gimp", gimp);
+  g_object_set_data (G_OBJECT (prefs_dialog), "clay", clay);
 
   g_object_set_data_full (G_OBJECT (prefs_dialog), "config-copy", config_copy,
                           (GDestroyNotify) g_object_unref);
@@ -280,7 +280,7 @@ prefs_response (GtkWidget *widget,
                 gint       response_id,
                 GtkWidget *dialog)
 {
-  Gimp   *gimp = g_object_get_data (G_OBJECT (dialog), "gimp");
+  Clay   *clay = g_object_get_data (G_OBJECT (dialog), "clay");
   gulong  reset_handler;
 
   switch (response_id)
@@ -289,35 +289,35 @@ prefs_response (GtkWidget *widget,
       {
         GtkWidget *confirm;
 
-        confirm = gimp_message_dialog_new (_("Reset All Preferences"),
-                                           GIMP_ICON_DIALOG_QUESTION,
+        confirm = clay_message_dialog_new (_("Reset All Preferences"),
+                                           CLAY_ICON_DIALOG_QUESTION,
                                            dialog,
                                            GTK_DIALOG_MODAL |
                                            GTK_DIALOG_DESTROY_WITH_PARENT,
-                                           gimp_standard_help_func, NULL,
+                                           clay_standard_help_func, NULL,
 
                                            _("_Cancel"), GTK_RESPONSE_CANCEL,
                                            _("_Reset"),  GTK_RESPONSE_OK,
 
                                            NULL);
 
-        gimp_dialog_set_alternative_button_order (GTK_DIALOG (confirm),
+        clay_dialog_set_alternative_button_order (GTK_DIALOG (confirm),
                                                   GTK_RESPONSE_OK,
                                                   GTK_RESPONSE_CANCEL,
                                                   -1);
 
-        gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (confirm)->box,
+        clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (confirm)->box,
                                            _("Do you really want to reset all "
                                              "preferences to default values?"));
 
-        if (gimp_dialog_run (GIMP_DIALOG (confirm)) == GTK_RESPONSE_OK)
+        if (clay_dialog_run (CLAY_DIALOG (confirm)) == GTK_RESPONSE_OK)
           {
-            GimpConfig *config_copy;
+            ClayConfig *config_copy;
 
             config_copy = g_object_get_data (G_OBJECT (dialog), "config-copy");
 
-            gimp_config_reset (config_copy);
-            gimp_rc_load_system (GIMP_RC (config_copy));
+            clay_config_reset (config_copy);
+            clay_rc_load_system (CLAY_RC (config_copy));
           }
 
         gtk_widget_destroy (confirm);
@@ -340,11 +340,11 @@ prefs_response (GtkWidget *widget,
 
         gtk_widget_set_sensitive (GTK_WIDGET (dialog), FALSE);
 
-        confirm_diff = gimp_config_diff (G_OBJECT (gimp->edit_config),
+        confirm_diff = clay_config_diff (G_OBJECT (clay->edit_config),
                                          config_copy,
-                                         GIMP_CONFIG_PARAM_CONFIRM);
+                                         CLAY_CONFIG_PARAM_CONFIRM);
 
-        g_object_freeze_notify (G_OBJECT (gimp->edit_config));
+        g_object_freeze_notify (G_OBJECT (clay->edit_config));
 
         for (list = confirm_diff; list; list = g_list_next (list))
           {
@@ -355,24 +355,24 @@ prefs_response (GtkWidget *widget,
 
             g_object_get_property (config_copy,
                                    param_spec->name, &value);
-            g_object_set_property (G_OBJECT (gimp->edit_config),
+            g_object_set_property (G_OBJECT (clay->edit_config),
                                    param_spec->name, &value);
 
             g_value_unset (&value);
           }
 
-        g_object_thaw_notify (G_OBJECT (gimp->edit_config));
+        g_object_thaw_notify (G_OBJECT (clay->edit_config));
 
         g_list_free (confirm_diff);
 
-        gimp_rc_save (GIMP_RC (gimp->edit_config));
+        clay_rc_save (CLAY_RC (clay->edit_config));
 
         /*  spit out a solely informational warning about changed values
          *  which need restart
          */
-        restart_diff = gimp_config_diff (G_OBJECT (gimp->edit_config),
-                                         G_OBJECT (gimp->config),
-                                         GIMP_CONFIG_PARAM_RESTART);
+        restart_diff = clay_config_diff (G_OBJECT (clay->edit_config),
+                                         G_OBJECT (clay->config),
+                                         CLAY_CONFIG_PARAM_RESTART);
 
         if (restart_diff)
           {
@@ -414,11 +414,11 @@ prefs_response (GtkWidget *widget,
 
         gtk_widget_set_sensitive (GTK_WIDGET (dialog), FALSE);
 
-        diff = gimp_config_diff (G_OBJECT (gimp->edit_config),
+        diff = clay_config_diff (G_OBJECT (clay->edit_config),
                                  config_orig,
-                                 GIMP_CONFIG_PARAM_SERIALIZE);
+                                 CLAY_CONFIG_PARAM_SERIALIZE);
 
-        g_object_freeze_notify (G_OBJECT (gimp->edit_config));
+        g_object_freeze_notify (G_OBJECT (clay->edit_config));
 
         for (list = diff; list; list = g_list_next (list))
           {
@@ -429,15 +429,15 @@ prefs_response (GtkWidget *widget,
 
             g_object_get_property (config_orig,
                                    param_spec->name, &value);
-            g_object_set_property (G_OBJECT (gimp->edit_config),
+            g_object_set_property (G_OBJECT (clay->edit_config),
                                    param_spec->name, &value);
 
             g_value_unset (&value);
           }
 
-        gimp_tool_editor_revert_changes (GIMP_TOOL_EDITOR (tool_editor));
+        clay_tool_editor_revert_changes (CLAY_TOOL_EDITOR (tool_editor));
 
-        g_object_thaw_notify (G_OBJECT (gimp->edit_config));
+        g_object_thaw_notify (G_OBJECT (clay->edit_config));
 
         g_list_free (diff);
       }
@@ -449,15 +449,15 @@ prefs_response (GtkWidget *widget,
    * theme and icon theme list boxes, since they're not directly
    * connected to their properties like the other widgets */
   reset_handler = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (dialog),
-                                    "gimp-theme-reset-handler"));
-  g_signal_handler_disconnect (gimp->config, reset_handler);
+                                    "clay-theme-reset-handler"));
+  g_signal_handler_disconnect (clay->config, reset_handler);
 
   reset_handler = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (dialog),
-                                    "gimp-icon-theme-reset-handler"));
-  g_signal_handler_disconnect (gimp->config, reset_handler);
+                                    "clay-icon-theme-reset-handler"));
+  g_signal_handler_disconnect (clay->config, reset_handler);
 
   /*  enable autosaving again  */
-  gimp_rc_set_autosave (GIMP_RC (gimp->edit_config), TRUE);
+  clay_rc_set_autosave (CLAY_RC (clay->edit_config), TRUE);
 
   gtk_widget_destroy (dialog);
 }
@@ -465,7 +465,7 @@ prefs_response (GtkWidget *widget,
 static void
 prefs_box_style_updated (GtkWidget *widget)
 {
-  GimpPrefsBox *box = GIMP_PREFS_BOX (widget);
+  ClayPrefsBox *box = CLAY_PREFS_BOX (widget);
 
   GTK_WIDGET_GET_CLASS (box)->style_updated (GTK_WIDGET (box));
 }
@@ -474,10 +474,10 @@ static void
 prefs_color_management_reset (GtkWidget *widget,
                               GObject   *config)
 {
-  GimpCoreConfig *core_config = GIMP_CORE_CONFIG (config);
+  ClayCoreConfig *core_config = CLAY_CORE_CONFIG (config);
 
-  gimp_config_reset (GIMP_CONFIG (core_config->color_management));
-  gimp_config_reset_property (config, "color-profile-policy");
+  clay_config_reset (CLAY_CONFIG (core_config->color_management));
+  clay_config_reset_property (config, "color-profile-policy");
 }
 
 static void
@@ -497,12 +497,12 @@ prefs_dialog_defaults_reset (GtkWidget *widget,
     {
       GParamSpec *pspec = pspecs[i];
 
-      if (pspec->owner_type == GIMP_TYPE_DIALOG_CONFIG)
-        gimp_config_reset_property (config, pspec->name);
+      if (pspec->owner_type == CLAY_TYPE_DIALOG_CONFIG)
+        clay_config_reset_property (config, pspec->name);
     }
 
-  gimp_config_reset_property (config, "filter-tool-max-recent");
-  gimp_config_reset_property (config, "filter-tool-use-last-settings");
+  clay_config_reset_property (config, "filter-tool-max-recent");
+  clay_config_reset_property (config, "filter-tool-use-last-settings");
 
   g_object_thaw_notify (config);
 
@@ -513,8 +513,8 @@ static void
 prefs_folders_reset (GtkWidget *widget,
                      GObject   *config)
 {
-  gimp_config_reset_property (config, "temp-path");
-  gimp_config_reset_property (config, "swap-path");
+  clay_config_reset_property (config, "temp-path");
+  clay_config_reset_property (config, "swap-path");
 }
 
 static void
@@ -527,24 +527,24 @@ prefs_path_reset (GtkWidget *widget,
   path_property     = g_object_get_data (G_OBJECT (widget), "path");
   writable_property = g_object_get_data (G_OBJECT (widget), "path-writable");
 
-  gimp_config_reset_property (config, path_property);
+  clay_config_reset_property (config, path_property);
 
   if (writable_property)
-    gimp_config_reset_property (config, writable_property);
+    clay_config_reset_property (config, writable_property);
 }
 
 static void
-prefs_template_select_callback (GimpContainerView *view,
-                                GimpTemplate      *edit_template)
+prefs_template_select_callback (ClayContainerView *view,
+                                ClayTemplate      *edit_template)
 {
-  GimpViewable *item = gimp_container_view_get_1_selected (view);
+  ClayViewable *item = clay_container_view_get_1_selected (view);
 
   if (item)
     {
       /*  make sure the resolution values are copied first (see bug #546924)  */
-      gimp_config_sync (G_OBJECT (item), G_OBJECT (edit_template),
-                        GIMP_TEMPLATE_PARAM_COPY_FIRST);
-      gimp_config_sync (G_OBJECT (item), G_OBJECT (edit_template),
+      clay_config_sync (G_OBJECT (item), G_OBJECT (edit_template),
+                        CLAY_TEMPLATE_PARAM_COPY_FIRST);
+      clay_config_sync (G_OBJECT (item), G_OBJECT (edit_template),
                         0);
     }
 }
@@ -555,7 +555,7 @@ prefs_import_raw_procedure_callback (GtkWidget *widget,
 {
   gchar *raw_plug_in;
 
-  raw_plug_in = gimp_plug_in_view_get_plug_in (GIMP_PLUG_IN_VIEW (widget));
+  raw_plug_in = clay_plug_in_view_get_plug_in (CLAY_PLUG_IN_VIEW (widget));
 
   g_object_set (config,
                 "import-raw-plug-in", raw_plug_in,
@@ -576,18 +576,18 @@ prefs_resolution_source_callback (GtkWidget *widget,
 
   if (from_gdk)
     {
-      gimp_get_monitor_resolution (gimp_widget_get_monitor (widget),
+      clay_get_monitor_resolution (clay_widget_get_monitor (widget),
                                    &xres, &yres);
     }
   else
     {
-      GimpSizeEntry *entry = g_object_get_data (G_OBJECT (widget),
+      ClaySizeEntry *entry = g_object_get_data (G_OBJECT (widget),
                                                 "monitor_resolution_sizeentry");
 
-      g_return_if_fail (GIMP_IS_SIZE_ENTRY (entry));
+      g_return_if_fail (CLAY_IS_SIZE_ENTRY (entry));
 
-      xres = gimp_size_entry_get_refval (entry, 0);
-      yres = gimp_size_entry_get_refval (entry, 1);
+      xres = clay_size_entry_get_refval (entry, 0);
+      yres = clay_size_entry_get_refval (entry, 1);
     }
 
   g_object_set (config,
@@ -608,38 +608,38 @@ prefs_resolution_calibrate_callback (GtkWidget *widget,
   dialog = gtk_widget_get_toplevel (entry);
 
   prefs_box = g_object_get_data (G_OBJECT (dialog), "prefs-box");
-  icon_name = gimp_prefs_box_get_current_icon_name (GIMP_PREFS_BOX (prefs_box));
+  icon_name = clay_prefs_box_get_current_icon_name (CLAY_PREFS_BOX (prefs_box));
 
   resolution_calibrate_dialog (entry, icon_name);
 }
 
 static void
 prefs_input_devices_dialog (GtkWidget *widget,
-                            Gimp      *gimp)
+                            Clay      *clay)
 {
-  gimp_dialog_factory_dialog_raise (gimp_dialog_factory_get_singleton (),
-                                    gimp_widget_get_monitor (widget),
+  clay_dialog_factory_dialog_raise (clay_dialog_factory_get_singleton (),
+                                    clay_widget_get_monitor (widget),
                                     widget,
-                                    "gimp-input-devices-dialog", 0);
+                                    "clay-input-devices-dialog", 0);
 }
 
 static void
 prefs_keyboard_shortcuts_dialog (GtkWidget *widget,
-                                 Gimp      *gimp)
+                                 Clay      *clay)
 {
-  gimp_dialog_factory_dialog_raise (gimp_dialog_factory_get_singleton (),
-                                    gimp_widget_get_monitor (widget),
+  clay_dialog_factory_dialog_raise (clay_dialog_factory_get_singleton (),
+                                    clay_widget_get_monitor (widget),
                                     widget,
-                                    "gimp-keyboard-shortcuts-dialog", 0);
+                                    "clay-keyboard-shortcuts-dialog", 0);
 }
 
 static void
 prefs_menus_save_callback (GtkWidget *widget,
-                           Gimp      *gimp)
+                           Clay      *clay)
 {
   GtkWidget *clear_button;
 
-  menus_save (gimp, TRUE);
+  menus_save (clay, TRUE);
 
   clear_button = g_object_get_data (G_OBJECT (widget), "clear-button");
 
@@ -649,11 +649,11 @@ prefs_menus_save_callback (GtkWidget *widget,
 
 static void
 prefs_menus_clear_callback (GtkWidget *widget,
-                            Gimp      *gimp)
+                            Clay      *clay)
 {
   GError *error = NULL;
 
-  if (! menus_clear (gimp, &error))
+  if (! menus_clear (clay, &error))
     {
       prefs_message (prefs_dialog, GTK_MESSAGE_ERROR, TRUE, error->message);
       g_clear_error (&error);
@@ -670,23 +670,23 @@ prefs_menus_clear_callback (GtkWidget *widget,
 
 static void
 prefs_menus_remove_callback (GtkWidget *widget,
-                             Gimp      *gimp)
+                             Clay      *clay)
 {
   GtkWidget *dialog;
 
-  dialog = gimp_message_dialog_new (_("Remove all Keyboard Shortcuts"),
-                                    GIMP_ICON_DIALOG_QUESTION,
+  dialog = clay_message_dialog_new (_("Remove all Keyboard Shortcuts"),
+                                    CLAY_ICON_DIALOG_QUESTION,
                                     gtk_widget_get_toplevel (widget),
                                     GTK_DIALOG_MODAL |
                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-                                    gimp_standard_help_func, NULL,
+                                    clay_standard_help_func, NULL,
 
                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
                                     _("Cl_ear"),  GTK_RESPONSE_OK,
 
                                     NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
@@ -695,13 +695,13 @@ prefs_menus_remove_callback (GtkWidget *widget,
                            G_CALLBACK (gtk_widget_destroy),
                            dialog, G_CONNECT_SWAPPED);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("Do you really want to remove all "
                                        "keyboard shortcuts from all menus?"));
 
-  if (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_OK)
+  if (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_OK)
     {
-      menus_remove (gimp);
+      menus_remove (clay);
     }
 
   gtk_widget_destroy (dialog);
@@ -709,11 +709,11 @@ prefs_menus_remove_callback (GtkWidget *widget,
 
 static void
 prefs_session_save_callback (GtkWidget *widget,
-                             Gimp      *gimp)
+                             Clay      *clay)
 {
   GtkWidget *clear_button;
 
-  session_save (gimp, TRUE);
+  session_save (clay, TRUE);
 
   clear_button = g_object_get_data (G_OBJECT (widget), "clear-button");
 
@@ -723,11 +723,11 @@ prefs_session_save_callback (GtkWidget *widget,
 
 static void
 prefs_session_clear_callback (GtkWidget *widget,
-                              Gimp      *gimp)
+                              Clay      *clay)
 {
   GError *error = NULL;
 
-  if (! session_clear (gimp, &error))
+  if (! session_clear (clay, &error))
     {
       prefs_message (prefs_dialog, GTK_MESSAGE_ERROR, TRUE, error->message);
       g_clear_error (&error);
@@ -744,11 +744,11 @@ prefs_session_clear_callback (GtkWidget *widget,
 
 static void
 prefs_devices_save_callback (GtkWidget *widget,
-                             Gimp      *gimp)
+                             Clay      *clay)
 {
   GtkWidget *clear_button;
 
-  gimp_devices_save (gimp, TRUE);
+  clay_devices_save (clay, TRUE);
 
   clear_button = g_object_get_data (G_OBJECT (widget), "clear-button");
 
@@ -758,11 +758,11 @@ prefs_devices_save_callback (GtkWidget *widget,
 
 static void
 prefs_devices_clear_callback (GtkWidget *widget,
-                              Gimp      *gimp)
+                              Clay      *clay)
 {
   GError *error = NULL;
 
-  if (! gimp_devices_clear (gimp, &error))
+  if (! clay_devices_clear (clay, &error))
     {
       prefs_message (prefs_dialog, GTK_MESSAGE_ERROR, TRUE, error->message);
       g_clear_error (&error);
@@ -779,9 +779,9 @@ prefs_devices_clear_callback (GtkWidget *widget,
 
 static void
 prefs_modifiers_clear_callback (GtkWidget           *widget,
-                                GimpModifiersEditor *editor)
+                                ClayModifiersEditor *editor)
 {
-  gimp_modifiers_editor_clear (editor);
+  clay_modifiers_editor_clear (editor);
 }
 
 #ifdef G_OS_WIN32
@@ -796,17 +796,17 @@ prefs_devices_api_sensitivity_func (gint      value,
 
   if (!inited)
     {
-      have_wintab      = gimp_win32_have_wintab ();
-      have_windows_ink = gimp_win32_have_windows_ink ();
+      have_wintab      = clay_win32_have_wintab ();
+      have_windows_ink = clay_win32_have_windows_ink ();
 
       inited = TRUE;
     }
 
   switch (value)
     {
-    case GIMP_WIN32_POINTER_INPUT_API_WINTAB:
+    case CLAY_WIN32_POINTER_INPUT_API_WINTAB:
       return have_wintab;
-    case GIMP_WIN32_POINTER_INPUT_API_WINDOWS_INK:
+    case CLAY_WIN32_POINTER_INPUT_API_WINDOWS_INK:
       return have_windows_ink;
     default:
       return TRUE;
@@ -817,18 +817,18 @@ prefs_devices_api_sensitivity_func (gint      value,
 
 static void
 prefs_search_clear_callback (GtkWidget *widget,
-                             Gimp      *gimp)
+                             Clay      *clay)
 {
-  gimp_action_history_clear (gimp);
+  clay_action_history_clear (clay);
 }
 
 static void
 prefs_tool_options_save_callback (GtkWidget *widget,
-                                  Gimp      *gimp)
+                                  Clay      *clay)
 {
   GtkWidget *clear_button;
 
-  gimp_tools_save (gimp, TRUE, TRUE);
+  clay_tools_save (clay, TRUE, TRUE);
 
   clear_button = g_object_get_data (G_OBJECT (widget), "clear-button");
 
@@ -838,11 +838,11 @@ prefs_tool_options_save_callback (GtkWidget *widget,
 
 static void
 prefs_tool_options_clear_callback (GtkWidget *widget,
-                                   Gimp      *gimp)
+                                   Clay      *clay)
 {
   GError *error = NULL;
 
-  if (! gimp_tools_clear (gimp, &error))
+  if (! clay_tools_clear (clay, &error))
     {
       prefs_message (prefs_dialog, GTK_MESSAGE_ERROR, TRUE, error->message);
       g_clear_error (&error);
@@ -859,17 +859,17 @@ prefs_tool_options_clear_callback (GtkWidget *widget,
 
 static void
 prefs_help_language_change_callback (GtkComboBox *combo,
-                                     Gimp        *gimp)
+                                     Clay        *clay)
 {
   gchar *help_locales = NULL;
   gchar *code;
 
-  code = gimp_language_combo_box_get_code (GIMP_LANGUAGE_COMBO_BOX (combo));
+  code = clay_language_combo_box_get_code (CLAY_LANGUAGE_COMBO_BOX (combo));
   if (code && g_strcmp0 ("", code) != 0)
     {
       help_locales = g_strdup_printf ("%s:", code);
     }
-  g_object_set (gimp->config,
+  g_object_set (clay->config,
                 "help-locales", help_locales? help_locales : "",
                 NULL);
   g_free (code);
@@ -881,7 +881,7 @@ static void
 prefs_help_language_change_callback2 (GtkComboBox  *combo,
                                       GtkContainer *box)
 {
-  Gimp        *gimp;
+  Clay        *clay;
   GtkLabel    *label = NULL;
   GtkImage    *icon  = NULL;
   GList       *children;
@@ -889,7 +889,7 @@ prefs_help_language_change_callback2 (GtkComboBox  *combo,
   const gchar *text;
   const gchar *icon_name;
 
-  gimp = g_object_get_data (G_OBJECT (box), "gimp");
+  clay = g_object_get_data (G_OBJECT (box), "clay");
   children = gtk_container_get_children (box);
   for (iter = children; iter; iter = iter->next)
     {
@@ -902,15 +902,15 @@ prefs_help_language_change_callback2 (GtkComboBox  *combo,
           icon = iter->data;
         }
     }
-  if (gimp_help_user_manual_is_installed (gimp))
+  if (clay_help_user_manual_is_installed (clay))
     {
       text = _("There's a local installation of the user manual.");
-      icon_name = GIMP_ICON_DIALOG_INFORMATION;
+      icon_name = CLAY_ICON_DIALOG_INFORMATION;
     }
   else
     {
       text = _("The user manual is not installed locally.");
-      icon_name = GIMP_ICON_DIALOG_WARNING;
+      icon_name = CLAY_ICON_DIALOG_WARNING;
     }
   if (label)
     {
@@ -930,10 +930,10 @@ prefs_check_style_callback (GObject    *config,
                             GParamSpec *pspec,
                             GtkWidget  *widget)
 {
-  GimpDisplayConfig *display_config = GIMP_DISPLAY_CONFIG (config);
+  ClayDisplayConfig *display_config = CLAY_DISPLAY_CONFIG (config);
 
   gtk_widget_set_sensitive (widget,
-                            display_config->transparency_type == GIMP_CHECK_TYPE_CUSTOM_CHECKS);
+                            display_config->transparency_type == CLAY_CHECK_TYPE_CUSTOM_CHECKS);
 }
 
 static void
@@ -949,7 +949,7 @@ prefs_format_string_select_callback (GtkListBox    *listbox,
 static void
 prefs_theme_select_callback (GtkListBox    *listbox,
                              GtkListBoxRow *row,
-                             Gimp          *gimp)
+                             Clay          *clay)
 {
   const char *theme;
 
@@ -957,20 +957,20 @@ prefs_theme_select_callback (GtkListBox    *listbox,
 
   theme = g_object_get_data (G_OBJECT (row), "theme");
 
-  g_signal_handlers_block_by_func (gimp->config,
+  g_signal_handlers_block_by_func (clay->config,
                                    G_CALLBACK (prefs_theme_reset_callback),
                                    listbox);
-  g_object_set (gimp->config, "theme", theme, NULL);
-  g_signal_handlers_unblock_by_func (gimp->config,
+  g_object_set (clay->config, "theme", theme, NULL);
+  g_signal_handlers_unblock_by_func (clay->config,
                                      G_CALLBACK (prefs_theme_reset_callback),
                                      listbox);
 }
 
 static void
 prefs_theme_reload_callback (GtkWidget *button,
-                             Gimp      *gimp)
+                             Clay      *clay)
 {
-  g_object_notify (G_OBJECT (gimp->config), "theme");
+  g_object_notify (G_OBJECT (clay->config), "theme");
 }
 
 static void
@@ -1004,7 +1004,7 @@ prefs_theme_reset_callback (GObject    *config,
 static void
 prefs_icon_theme_select_callback (GtkListBox    *listbox,
                                   GtkListBoxRow *row,
-                                  Gimp          *gimp)
+                                  Clay          *clay)
 {
   const char *icon_theme;
 
@@ -1012,11 +1012,11 @@ prefs_icon_theme_select_callback (GtkListBox    *listbox,
 
   icon_theme = g_object_get_data (G_OBJECT (row), "icon-theme");
 
-  g_signal_handlers_block_by_func (gimp->config,
+  g_signal_handlers_block_by_func (clay->config,
                                    G_CALLBACK (prefs_icon_theme_reset_callback),
                                    listbox);
-  g_object_set (gimp->config, "icon-theme", icon_theme, NULL);
-  g_signal_handlers_unblock_by_func (gimp->config,
+  g_object_set (clay->config, "icon-theme", icon_theme, NULL);
+  g_signal_handlers_unblock_by_func (clay->config,
                                      G_CALLBACK (prefs_icon_theme_reset_callback),
                                      listbox);
 }
@@ -1054,12 +1054,12 @@ static void
 prefs_canvas_padding_color_changed (GtkWidget *button,
                                     GtkWidget *combo)
 {
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (combo),
-                                 GIMP_CANVAS_PADDING_MODE_CUSTOM);
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (combo),
+                                 CLAY_CANVAS_PADDING_MODE_CUSTOM);
 }
 
 static void
-prefs_display_options_frame_add (Gimp         *gimp,
+prefs_display_options_frame_add (Clay         *clay,
                                  GObject      *object,
                                  const gchar  *label,
                                  GtkContainer *parent)
@@ -1130,7 +1130,7 @@ prefs_display_options_frame_add (Gimp         *gimp,
                                    _("Custom p_adding color:"),
                                    _("Select Custom Canvas Padding Color"),
                                    GTK_GRID (grid), 1, NULL,
-                                   gimp_get_user_context (gimp));
+                                   clay_get_user_context (clay));
 
   g_signal_connect (button, "color-changed",
                     G_CALLBACK (prefs_canvas_padding_color_changed),
@@ -1142,7 +1142,7 @@ prefs_display_options_frame_add (Gimp         *gimp,
 }
 
 static void
-prefs_behavior_options_frame_add (Gimp         *gimp,
+prefs_behavior_options_frame_add (Clay         *clay,
                                   GObject      *object,
                                   const gchar  *label,
                                   GtkContainer *parent)
@@ -1194,14 +1194,14 @@ prefs_help_func (const gchar *help_id,
 
   prefs_box = g_object_get_data (G_OBJECT (help_data), "prefs-box");
 
-  help_id = gimp_prefs_box_get_current_help_id (GIMP_PREFS_BOX (prefs_box));
+  help_id = clay_prefs_box_get_current_help_id (CLAY_PREFS_BOX (prefs_box));
 
-  gimp_standard_help_func (help_id, NULL);
+  clay_standard_help_func (help_id, NULL);
 }
 
 static GtkWidget *
-prefs_dialog_new (Gimp       *gimp,
-                  GimpConfig *config)
+prefs_dialog_new (Clay       *clay,
+                  ClayConfig *config)
 {
   GtkWidget         *dialog;
   GtkTreeIter        top_iter;
@@ -1225,20 +1225,20 @@ prefs_dialog_new (Gimp       *gimp,
   gint               i;
 
   GObject           *object;
-  GimpCoreConfig    *core_config;
-  GimpDisplayConfig *display_config;
+  ClayCoreConfig    *core_config;
+  ClayDisplayConfig *display_config;
   GList             *manuals;
   const gchar       *title;
 #ifdef PLATFORM_OSX
   gchar             *mac_title;
 #endif
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
-  g_return_val_if_fail (GIMP_IS_CONFIG (config), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
+  g_return_val_if_fail (CLAY_IS_CONFIG (config), NULL);
 
   object         = G_OBJECT (config);
-  core_config    = GIMP_CORE_CONFIG (config);
-  display_config = GIMP_DISPLAY_CONFIG (config);
+  core_config    = CLAY_CORE_CONFIG (config);
+  display_config = CLAY_DISPLAY_CONFIG (config);
 
   title = _("Preferences");
 #ifdef PLATFORM_OSX
@@ -1248,10 +1248,10 @@ prefs_dialog_new (Gimp       *gimp,
     title = mac_title;
 #endif
 
-  dialog = gimp_dialog_new (title, "gimp-preferences",
+  dialog = clay_dialog_new (title, "clay-preferences",
                             NULL, 0,
                             prefs_help_func,
-                            GIMP_HELP_PREFS_DIALOG,
+                            CLAY_HELP_PREFS_DIALOG,
 
                             _("_Reset"),  RESPONSE_RESET,
                             _("_Cancel"), GTK_RESPONSE_CANCEL,
@@ -1263,7 +1263,7 @@ prefs_dialog_new (Gimp       *gimp,
   g_free (mac_title);
 #endif
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             RESPONSE_RESET,
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
@@ -1274,7 +1274,7 @@ prefs_dialog_new (Gimp       *gimp,
                     dialog);
 
   /* The prefs box */
-  prefs_box = gimp_prefs_box_new ();
+  prefs_box = clay_prefs_box_new ();
   gtk_container_set_border_width (GTK_CONTAINER (prefs_box), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       prefs_box, TRUE, TRUE, 0);
@@ -1296,14 +1296,14 @@ prefs_dialog_new (Gimp       *gimp,
   /**********************/
   /*  System Resources  */
   /**********************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-system-resources",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-system-resources",
                                   _("System Resources"),
                                   _("System Resources"),
-                                  GIMP_HELP_PREFS_SYSTEM_RESOURCES,
+                                  CLAY_HELP_PREFS_SYSTEM_RESOURCES,
                                   NULL,
                                   &top_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
@@ -1337,7 +1337,7 @@ prefs_dialog_new (Gimp       *gimp,
 
   /*  Internet access  */
 #ifdef CHECK_UPDATE
-  if (gimp_version_check_update ())
+  if (clay_version_check_update ())
     {
       vbox2 = prefs_frame_new (_("Network access"), GTK_CONTAINER (vbox),
                                FALSE);
@@ -1376,22 +1376,22 @@ prefs_dialog_new (Gimp       *gimp,
   /***************/
   /*  Debugging  */
   /***************/
-  /* No debugging preferences are needed on win32. Either GIMP has been
+  /* No debugging preferences are needed on win32. Either Clay has been
    * built with DrMinGW support (HAVE_EXCHNDL) or not. If it has, then
    * the backtracing is enabled and can't be disabled. It assume it will
    * work only upon a crash.
    */
 #ifndef G_OS_WIN32
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-wilber-eek", /* TODO: icon needed. */
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-wilber-eek", /* TODO: icon needed. */
                                   _("Debugging"),
                                   _("Debugging"),
-                                  GIMP_HELP_PREFS_DEBUGGING,
+                                  CLAY_HELP_PREFS_DEBUGGING,
                                   NULL,
                                   &top_iter);
 
-  hbox = g_object_new (GIMP_TYPE_HINT_BOX,
-                       "icon-name", GIMP_ICON_DIALOG_WARNING,
+  hbox = g_object_new (CLAY_TYPE_HINT_BOX,
+                       "icon-name", CLAY_ICON_DIALOG_WARNING,
                        "hint",      _("We hope you will never need these "
                                       "settings, but as all software, Clay "
                                       "has bugs, and crashes can occur. If it "
@@ -1415,14 +1415,14 @@ prefs_dialog_new (Gimp       *gimp,
    * which case the feature is always available.
    */
   hbox = NULL;
-  if (! gimp_stack_trace_available (TRUE))
+  if (! clay_stack_trace_available (TRUE))
     {
 #ifndef HAVE_EXECINFO_H
-      hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
+      hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_WARNING,
                                  _("This feature requires \"gdb\" or \"lldb\" installed on your system."));
       gtk_widget_set_sensitive (button, FALSE);
 #else
-      hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
+      hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_WARNING,
                                  _("This feature is more efficient with \"gdb\" or \"lldb\" installed on your system."));
 #endif /* ! HAVE_EXECINFO_H */
     }
@@ -1434,17 +1434,17 @@ prefs_dialog_new (Gimp       *gimp,
   /**********************/
   /*  Color Management  */
   /**********************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-color-management",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-color-management",
                                   _("Color Management"),
                                   _("Color Management"),
-                                  GIMP_HELP_PREFS_COLOR_MANAGEMENT,
+                                  CLAY_HELP_PREFS_COLOR_MANAGEMENT,
                                   NULL,
                                   &top_iter);
 
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
-  button = gimp_prefs_box_set_page_resettable (GIMP_PREFS_BOX (prefs_box),
+  button = clay_prefs_box_set_page_resettable (CLAY_PREFS_BOX (prefs_box),
                                                vbox,
                                                _("R_eset Color Management"));
   g_signal_connect (button, "clicked",
@@ -1457,11 +1457,11 @@ prefs_dialog_new (Gimp       *gimp,
     GFile        *file;
     gint          row = 0;
 
-    file = gimp_directory_file ("profilerc", NULL);
-    store = gimp_color_profile_store_new (file);
+    file = clay_directory_file ("profilerc", NULL);
+    store = clay_color_profile_store_new (file);
     g_object_unref (file);
 
-    gimp_color_profile_store_add_file (GIMP_COLOR_PROFILE_STORE (store),
+    clay_color_profile_store_add_file (CLAY_COLOR_PROFILE_STORE (store),
                                        NULL, NULL);
 
     size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
@@ -1491,7 +1491,7 @@ prefs_dialog_new (Gimp       *gimp,
       GdkDisplay       *display         = gdk_display_get_default ();
       gint              monitor_list    = gdk_display_get_n_monitors (display);
       gint              monitor_number;
-      GimpColorProfile *monitor_profile = NULL;
+      ClayColorProfile *monitor_profile = NULL;
       gboolean          monitor_agree   = TRUE;
       gchar            *label;
 
@@ -1499,10 +1499,10 @@ prefs_dialog_new (Gimp       *gimp,
       for (monitor_number = 0; monitor_number < monitor_list; monitor_number++)
         {
           GdkMonitor       *monitor = gdk_display_get_monitor (display, monitor_number);
-          GimpColorProfile *profile = NULL;
+          ClayColorProfile *profile = NULL;
 
           if (monitor)
-            profile = gimp_monitor_get_color_profile (monitor);
+            profile = clay_monitor_get_color_profile (monitor);
 
           if (monitor_number == 0)
             {
@@ -1512,7 +1512,7 @@ prefs_dialog_new (Gimp       *gimp,
             {
               if ((monitor_profile == NULL) != (profile == NULL) ||
                   (monitor_profile != NULL && profile != NULL &&
-                   ! gimp_color_profile_is_equal (monitor_profile, profile)))
+                   ! clay_color_profile_is_equal (monitor_profile, profile)))
                 monitor_agree = FALSE;
 
               g_clear_object (&profile);
@@ -1526,13 +1526,13 @@ prefs_dialog_new (Gimp       *gimp,
         label = g_strdup_printf ("%s (%s)",
                                  _("_Try to use the system monitor "
                                    "profile"),
-                                 gimp_color_profile_get_label (monitor_profile));
+                                 clay_color_profile_get_label (monitor_profile));
       else
         label = g_strdup (_("_Try to use the system monitor profile"));
 
       g_clear_object (&monitor_profile);
 
-      button = gimp_prop_check_button_new (color_config,
+      button = clay_prop_check_button_new (color_config,
                                            "display-profile-from-gdk",
                                            label);
       g_free (label);
@@ -1545,7 +1545,7 @@ prefs_dialog_new (Gimp       *gimp,
                               _("_Rendering intent:"),
                               GTK_GRID (grid), row++, size_group);
 
-    button = gimp_prop_check_button_new (color_config,
+    button = clay_prop_check_button_new (color_config,
                                          "display-use-black-point-compensation",
                                          _("Use _black point compensation"));
     gtk_grid_attach (GTK_GRID (grid), button, 1, row, 1, 1);
@@ -1578,19 +1578,19 @@ prefs_dialog_new (Gimp       *gimp,
     gtk_widget_set_visible (hbox, TRUE);
     row++;
 
-    button = gimp_prop_check_button_new (color_config, "simulation-gamut-check",
+    button = clay_prop_check_button_new (color_config, "simulation-gamut-check",
                                          _("Mar_k out of gamut colors"));
     gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
 
-    button = gimp_prop_color_button_new (color_config, "out-of-gamut-color",
+    button = clay_prop_color_button_new (color_config, "out-of-gamut-color",
                                          _("Select Warning Color"), FALSE,
                                          PREFS_COLOR_BUTTON_WIDTH,
                                          PREFS_COLOR_BUTTON_HEIGHT,
-                                         GIMP_COLOR_AREA_FLAT);
+                                         CLAY_COLOR_AREA_FLAT);
     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 
-    gimp_color_panel_set_context (GIMP_COLOR_PANEL (button),
-                                  gimp_get_user_context (gimp));
+    clay_color_panel_set_context (CLAY_COLOR_PANEL (button),
+                                  clay_get_user_context (clay));
 
     /*  Preferred profiles  */
     vbox2 = prefs_frame_new (_("Preferred Profiles"), GTK_CONTAINER (vbox),
@@ -1641,15 +1641,15 @@ prefs_dialog_new (Gimp       *gimp,
   /***************************/
   /*  Image Import / Export  */
   /***************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-import-export",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-import-export",
                                   _("Image Import & Export"),
                                   _("Image Import & Export"),
-                                  GIMP_HELP_PREFS_IMPORT_EXPORT,
+                                  CLAY_HELP_PREFS_IMPORT_EXPORT,
                                   NULL,
                                   &top_iter);
 
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
@@ -1723,7 +1723,7 @@ prefs_dialog_new (Gimp       *gimp,
   button = prefs_check_button_add (object, "export-update-metadata",
                                    _("Update metadata automatically"),
                                    GTK_BOX (vbox2));
-  hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
+  hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_WARNING,
                              _("Metadata can contain sensitive information."));
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
 
@@ -1751,8 +1751,8 @@ prefs_dialog_new (Gimp       *gimp,
     gtk_box_pack_start (GTK_BOX (vbox2), scrolled_window, TRUE, TRUE, 0);
     gtk_widget_set_visible (scrolled_window, TRUE);
 
-    view = gimp_plug_in_view_new (gimp->plug_in_manager->display_raw_load_procs);
-    gimp_plug_in_view_set_plug_in (GIMP_PLUG_IN_VIEW (view),
+    view = clay_plug_in_view_new (clay->plug_in_manager->display_raw_load_procs);
+    clay_plug_in_view_set_plug_in (CLAY_PLUG_IN_VIEW (view),
                                    core_config->import_raw_plug_in);
     gtk_container_add (GTK_CONTAINER (scrolled_window), view);
     gtk_widget_set_visible (view, TRUE);
@@ -1768,18 +1768,18 @@ prefs_dialog_new (Gimp       *gimp,
   /****************/
   /*  Playground  */
   /****************/
-  if (gimp->show_playground)
+  if (clay->show_playground)
     {
-      vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                      "gimp-prefs-playground",
+      vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                      "clay-prefs-playground",
                                       _("Experimental Playground"),
                                       _("Playground"),
-                                      GIMP_HELP_PREFS_PLAYGROUND,
+                                      CLAY_HELP_PREFS_PLAYGROUND,
                                       NULL,
                                       &top_iter);
 
-      hbox = g_object_new (GIMP_TYPE_HINT_BOX,
-                           "icon-name", GIMP_ICON_DIALOG_WARNING,
+      hbox = g_object_new (CLAY_TYPE_HINT_BOX,
+                           "icon-name", CLAY_ICON_DIALOG_WARNING,
                            "hint",      _("These features are unfinished, buggy "
                                           "and may crash Clay. It is unadvised to "
                                           "use them unless you really know what "
@@ -1793,7 +1793,7 @@ prefs_dialog_new (Gimp       *gimp,
       vbox2 = prefs_frame_new (_("Hardware Acceleration"), GTK_CONTAINER (vbox),
                                FALSE);
 
-      hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
+      hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_WARNING,
                                  _("OpenCL drivers and support are experimental, "
                                    "expect slowdowns and possible crashes "
                                    "(please report)."));
@@ -1827,7 +1827,7 @@ prefs_dialog_new (Gimp       *gimp,
            * dev-release testers, but no need to bother translators with
            * a temporary string otherwise.
            */
-          gimp_help_set_help_data (button, "Missing GEGL operation 'gegl:paint-select'.", NULL);
+          clay_help_set_help_data (button, "Missing GEGL operation 'gegl:paint-select'.", NULL);
         }
       button = prefs_check_button_add (object, "playground-use-list-box",
                                        _("Use GtkListBox in simple lists"),
@@ -1838,14 +1838,14 @@ prefs_dialog_new (Gimp       *gimp,
   /******************/
   /*  Tool Options  */
   /******************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-tool-options",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-tool-options",
                                   C_("preferences", "Tool Options"),
                                   C_("preferences", "Tool Options"),
-                                  GIMP_HELP_PREFS_TOOL_OPTIONS,
+                                  CLAY_HELP_PREFS_TOOL_OPTIONS,
                                   NULL,
                                   &top_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
@@ -1860,20 +1860,20 @@ prefs_dialog_new (Gimp       *gimp,
                           _("_Save tool options on exit"),
                           GTK_BOX (vbox2));
 
-  button = prefs_button_add (GIMP_ICON_DOCUMENT_SAVE,
+  button = prefs_button_add (CLAY_ICON_DOCUMENT_SAVE,
                              _("Save Tool Options _Now"),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_tool_options_save_callback),
-                    gimp);
+                    clay);
 
-  button2 = prefs_button_add (GIMP_ICON_RESET,
+  button2 = prefs_button_add (CLAY_ICON_RESET,
                               _("_Reset Saved Tool Options to "
                                 "Default Values"),
                               GTK_BOX (vbox2));
   g_signal_connect (button2, "clicked",
                     G_CALLBACK (prefs_tool_options_clear_callback),
-                    gimp);
+                    clay);
 
   g_object_set_data (G_OBJECT (button), "clear-button", button2);
 
@@ -1894,19 +1894,19 @@ prefs_dialog_new (Gimp       *gimp,
                            GTK_CONTAINER (vbox), FALSE);
 
   prefs_check_button_add_with_icon (object, "global-brush",
-                                    _("_Brush"),    GIMP_ICON_BRUSH,
+                                    _("_Brush"),    CLAY_ICON_BRUSH,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "global-dynamics",
-                                    _("_Dynamics"), GIMP_ICON_DYNAMICS,
+                                    _("_Dynamics"), CLAY_ICON_DYNAMICS,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "global-pattern",
-                                    _("_Pattern"),  GIMP_ICON_PATTERN,
+                                    _("_Pattern"),  CLAY_ICON_PATTERN,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "global-gradient",
-                                    _("_Gradient"), GIMP_ICON_GRADIENT,
+                                    _("_Gradient"), CLAY_ICON_GRADIENT,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "global-expand",
-                                    _("E_xpand Layers"), GIMP_ICON_TOOL_SCALE,
+                                    _("E_xpand Layers"), CLAY_ICON_TOOL_SCALE,
                                     GTK_BOX (vbox2), size_group);
 
   /*  Move Tool */
@@ -1915,7 +1915,7 @@ prefs_dialog_new (Gimp       *gimp,
 
   prefs_check_button_add_with_icon (object, "move-tool-changes-active",
                                     _("Set _layer or path as active"),
-                                    GIMP_ICON_TOOL_MOVE,
+                                    CLAY_ICON_TOOL_MOVE,
                                     GTK_BOX (vbox2), size_group);
 
   g_clear_object (&size_group);
@@ -1924,38 +1924,38 @@ prefs_dialog_new (Gimp       *gimp,
   /*******************/
   /*  Default Image  */
   /*******************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-new-image",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-new-image",
                                   _("Default New Image"),
                                   _("Default Image"),
-                                  GIMP_HELP_PREFS_NEW_IMAGE,
+                                  CLAY_HELP_PREFS_NEW_IMAGE,
                                   NULL,
                                   &top_iter);
 
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   grid = prefs_grid_new (GTK_CONTAINER (vbox));
 
   {
     GtkWidget *combo;
 
-    combo = gimp_container_combo_box_new (gimp->templates,
-                                          gimp_get_user_context (gimp),
+    combo = clay_container_combo_box_new (clay->templates,
+                                          clay_get_user_context (clay),
                                           16, 0);
-    gimp_grid_attach_aligned (GTK_GRID (grid), 0, 0,
+    clay_grid_attach_aligned (GTK_GRID (grid), 0, 0,
                                _("_Template:"),  0.0, 0.5,
                                combo, 1);
 
-    gimp_container_view_set_1_selected (GIMP_CONTAINER_VIEW (combo), NULL);
+    clay_container_view_set_1_selected (CLAY_CONTAINER_VIEW (combo), NULL);
 
     g_signal_connect (combo, "selection-changed",
                       G_CALLBACK (prefs_template_select_callback),
                       core_config->default_image);
   }
 
-  editor = gimp_template_editor_new (core_config->default_image, gimp, FALSE);
+  editor = clay_template_editor_new (core_config->default_image, clay, FALSE);
   gtk_widget_set_vexpand (editor, FALSE);
-  gimp_template_editor_show_advanced (GIMP_TEMPLATE_EDITOR (editor), TRUE);
+  clay_template_editor_show_advanced (CLAY_TEMPLATE_EDITOR (editor), TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), editor, FALSE, FALSE, 0);
   gtk_widget_set_visible (editor, TRUE);
 
@@ -1967,26 +1967,26 @@ prefs_dialog_new (Gimp       *gimp,
                           _("Quick Mask color:"),
                           _("Set the default Quick Mask color"),
                           GTK_GRID (grid), 0, NULL,
-                          gimp_get_user_context (gimp));
+                          clay_get_user_context (clay));
 
 
   /**********************************/
   /*  Default Image / Default Grid  */
   /**********************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-default-grid",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-default-grid",
                                   _("Default Image Grid"),
                                   _("Default Grid"),
-                                  GIMP_HELP_PREFS_DEFAULT_GRID,
+                                  CLAY_HELP_PREFS_DEFAULT_GRID,
                                   &top_iter,
                                   &child_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   /*  Grid  */
-  editor = gimp_grid_editor_new (core_config->default_grid,
-                                 gimp_get_user_context (gimp),
-                                 gimp_template_get_resolution_x (core_config->default_image),
-                                 gimp_template_get_resolution_y (core_config->default_image));
+  editor = clay_grid_editor_new (core_config->default_grid,
+                                 clay_get_user_context (clay),
+                                 clay_template_get_resolution_x (core_config->default_image),
+                                 clay_template_get_resolution_y (core_config->default_image));
   gtk_box_pack_start (GTK_BOX (vbox), editor, TRUE, TRUE, 0);
   gtk_widget_set_visible (editor, TRUE);
 
@@ -1994,14 +1994,14 @@ prefs_dialog_new (Gimp       *gimp,
   /***************/
   /*  Interface  */
   /***************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-interface",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-interface",
                                   _("User Interface"),
                                   _("Interface"),
-                                  GIMP_HELP_PREFS_INTERFACE,
+                                  CLAY_HELP_PREFS_INTERFACE,
                                   NULL,
                                   &top_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   /*  Language  */
 
@@ -2050,49 +2050,49 @@ prefs_dialog_new (Gimp       *gimp,
   vbox2 = prefs_frame_new (_("Keyboard Shortcuts"),
                            GTK_CONTAINER (vbox), FALSE);
 
-  button = prefs_button_add (GIMP_ICON_PREFERENCES_SYSTEM,
+  button = prefs_button_add (CLAY_ICON_PREFERENCES_SYSTEM,
                              _("Configure _Keyboard Shortcuts..."),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_keyboard_shortcuts_dialog),
-                    gimp);
+                    clay);
 
   prefs_check_button_add (object, "save-accels",
                           _("_Save keyboard shortcuts on exit"),
                           GTK_BOX (vbox2));
 
-  button = prefs_button_add (GIMP_ICON_DOCUMENT_SAVE,
+  button = prefs_button_add (CLAY_ICON_DOCUMENT_SAVE,
                              _("Save Keyboard Shortcuts _Now"),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_menus_save_callback),
-                    gimp);
+                    clay);
 
-  button2 = prefs_button_add (GIMP_ICON_RESET,
+  button2 = prefs_button_add (CLAY_ICON_RESET,
                               _("_Reset Keyboard Shortcuts to Default Values"),
                               GTK_BOX (vbox2));
   g_signal_connect (button2, "clicked",
                     G_CALLBACK (prefs_menus_clear_callback),
-                    gimp);
+                    clay);
 
   g_object_set_data (G_OBJECT (button), "clear-button", button2);
 
-  button = prefs_button_add (GIMP_ICON_EDIT_CLEAR,
+  button = prefs_button_add (CLAY_ICON_EDIT_CLEAR,
                              _("Remove _All Keyboard Shortcuts"),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_menus_remove_callback),
-                    gimp);
+                    clay);
 
 
   /***********************/
   /*  Interface / Theme  */
   /***********************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-theme",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-theme",
                                   _("Theme"),
                                   _("Theme"),
-                                  GIMP_HELP_PREFS_THEME,
+                                  CLAY_HELP_PREFS_THEME,
                                   &top_iter,
                                   &child_iter);
 
@@ -2125,14 +2125,14 @@ prefs_dialog_new (Gimp       *gimp,
     gtk_container_add (GTK_CONTAINER (scrolled_win), listbox);
     gtk_widget_set_visible (listbox, TRUE);
 
-    themes = themes_list_themes (gimp, &n_themes);
+    themes = themes_list_themes (clay, &n_themes);
 
     for (i = 0; i < n_themes; i++)
       {
         GtkWidget *row;
         GtkWidget *grid;
         GtkWidget *name_label, *folder_label;
-        GFile     *theme_dir = themes_get_theme_dir (gimp, themes[i]);
+        GFile     *theme_dir = themes_get_theme_dir (clay, themes[i]);
 
         row = gtk_list_box_row_new ();
         g_object_set_data_full (G_OBJECT (row),
@@ -2144,7 +2144,7 @@ prefs_dialog_new (Gimp       *gimp,
         gtk_grid_set_column_spacing (GTK_GRID (grid), 12);
         gtk_container_add (GTK_CONTAINER (row), grid);
 
-        if (themes_theme_is_system (gimp, themes[i]))
+        if (themes_theme_is_system (clay, themes[i]))
           {
             gchar *gtk_theme = NULL;
             gchar *label_text;
@@ -2156,7 +2156,7 @@ prefs_dialog_new (Gimp       *gimp,
             g_object_get (gtk_settings_get_default (),
                           "gtk-theme-name", &gtk_theme, NULL);
 
-            /* TRANSLATORS: this is the name of GIMP's "System" theme
+            /* TRANSLATORS: this is the name of Clay's "System" theme
              * (which makes only minor styling over the real system
              * theme). The part between parenthese will be the name of
              * the actual system theme. E.g.: "System (Adwaita)"
@@ -2167,7 +2167,7 @@ prefs_dialog_new (Gimp       *gimp,
             g_free (label_text);
             g_free (gtk_theme);
           }
-        else if (themes_theme_is_default (gimp, themes[i]))
+        else if (themes_theme_is_default (clay, themes[i]))
           {
             /* TRANSLATORS: this is the name of Clay's default theme. */
             name_label = gtk_label_new (C_("theme-name", "Clay"));
@@ -2179,7 +2179,7 @@ prefs_dialog_new (Gimp       *gimp,
         g_object_set (name_label, "xalign", 0.0, NULL);
         gtk_grid_attach (GTK_GRID (grid), name_label, 1, 0, 1, 1);
 
-        folder_label = gtk_label_new (gimp_file_get_utf8_name (theme_dir));
+        folder_label = gtk_label_new (clay_file_get_utf8_name (theme_dir));
         g_object_set (folder_label, "xalign", 0.0, NULL);
         gtk_style_context_add_class (gtk_widget_get_style_context (folder_label),
                                      "dim-label");
@@ -2188,8 +2188,8 @@ prefs_dialog_new (Gimp       *gimp,
         gtk_widget_show_all (row);
         gtk_list_box_insert (GTK_LIST_BOX (listbox), row, -1);
 
-        if (GIMP_GUI_CONFIG (object)->theme &&
-            ! strcmp (GIMP_GUI_CONFIG (object)->theme, themes[i]))
+        if (CLAY_GUI_CONFIG (object)->theme &&
+            ! strcmp (CLAY_GUI_CONFIG (object)->theme, themes[i]))
           {
             gtk_list_box_select_row (GTK_LIST_BOX (listbox),
                                      GTK_LIST_BOX_ROW (row));
@@ -2200,12 +2200,12 @@ prefs_dialog_new (Gimp       *gimp,
 
     g_signal_connect (listbox, "row-selected",
                       G_CALLBACK (prefs_theme_select_callback),
-                      gimp);
+                      clay);
     reset_handler =
-      g_signal_connect (G_OBJECT (gimp->config), "notify::theme",
+      g_signal_connect (G_OBJECT (clay->config), "notify::theme",
                         G_CALLBACK (prefs_theme_reset_callback),
                         listbox);
-    g_object_set_data (G_OBJECT (dialog), "gimp-theme-reset-handler",
+    g_object_set_data (G_OBJECT (dialog), "clay-theme-reset-handler",
                        GUINT_TO_POINTER (reset_handler));
 
     grid = prefs_grid_new (GTK_CONTAINER (vbox2));
@@ -2237,10 +2237,10 @@ prefs_dialog_new (Gimp       *gimp,
     gtk_scale_add_mark (GTK_SCALE (scale), 3.0, GTK_POS_BOTTOM,
                         _("Huge"));
     gtk_range_set_value (GTK_RANGE (scale),
-                         (gdouble) GIMP_GUI_CONFIG (object)->custom_icon_size);
+                         (gdouble) CLAY_GUI_CONFIG (object)->custom_icon_size);
     g_signal_connect (G_OBJECT (scale), "value-changed",
                       G_CALLBACK (prefs_icon_size_value_changed),
-                      GIMP_GUI_CONFIG (object));
+                      CLAY_GUI_CONFIG (object));
     g_signal_connect (G_OBJECT (object), "notify::custom-icon-size",
                       G_CALLBACK (prefs_gui_config_notify_icon_size),
                       scale);
@@ -2249,7 +2249,7 @@ prefs_dialog_new (Gimp       *gimp,
 
     /* Font sizes. */
     vbox3 = prefs_frame_new (_("Font Scaling"), GTK_CONTAINER (vbox2), FALSE);
-    gimp_help_set_help_data (vbox3,
+    clay_help_set_help_data (vbox3,
                              _("Font scaling will not work with themes using absolute sizes."),
                              NULL);
     scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL,
@@ -2264,10 +2264,10 @@ prefs_dialog_new (Gimp       *gimp,
     gtk_scale_add_mark (GTK_SCALE (scale), 200.0, GTK_POS_BOTTOM,
                         _("200%"));
     gtk_range_set_value (GTK_RANGE (scale),
-                         (gdouble) GIMP_GUI_CONFIG (object)->font_relative_size * 100.0);
+                         (gdouble) CLAY_GUI_CONFIG (object)->font_relative_size * 100.0);
     g_signal_connect (G_OBJECT (scale), "value-changed",
                       G_CALLBACK (prefs_font_size_value_changed),
-                      GIMP_GUI_CONFIG (object));
+                      CLAY_GUI_CONFIG (object));
     g_signal_connect (G_OBJECT (object), "notify::font-relative-size",
                       G_CALLBACK (prefs_gui_config_notify_font_size),
                       scale);
@@ -2279,22 +2279,22 @@ prefs_dialog_new (Gimp       *gimp,
     gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
     gtk_widget_set_visible (hbox, TRUE);
 
-    button = prefs_button_add (GIMP_ICON_VIEW_REFRESH,
+    button = prefs_button_add (CLAY_ICON_VIEW_REFRESH,
                                _("Reload C_urrent Theme"),
                                GTK_BOX (hbox));
     g_signal_connect (button, "clicked",
                       G_CALLBACK (prefs_theme_reload_callback),
-                      gimp);
+                      clay);
   }
 
   /****************************/
   /*  Interface / Icon Theme  */
   /****************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-icon-theme",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-icon-theme",
                                   _("Icon Theme"),
                                   _("Icon Theme"),
-                                  GIMP_HELP_PREFS_ICON_THEME,
+                                  CLAY_HELP_PREFS_ICON_THEME,
                                   &top_iter,
                                   &child_iter);
 
@@ -2331,7 +2331,7 @@ prefs_dialog_new (Gimp       *gimp,
      /* _("Folder"), */
 
     scale_factor = gtk_widget_get_scale_factor (scrolled_win);
-    icon_themes = icon_themes_list_themes (gimp, &n_icon_themes);
+    icon_themes = icon_themes_list_themes (clay, &n_icon_themes);
 
     for (i = 0; i < n_icon_themes; i++)
       {
@@ -2339,7 +2339,7 @@ prefs_dialog_new (Gimp       *gimp,
         GtkWidget       *grid;
         GtkWidget       *image;
         GtkWidget       *name_label, *folder_label;
-        GFile           *icon_theme_dir = icon_themes_get_theme_dir (gimp, icon_themes[i]);
+        GFile           *icon_theme_dir = icon_themes_get_theme_dir (clay, icon_themes[i]);
         GFile           *icon_theme_search_path = g_file_get_parent (icon_theme_dir);
         GtkIconTheme    *theme;
         gchar           *example;
@@ -2347,7 +2347,7 @@ prefs_dialog_new (Gimp       *gimp,
 
         theme = gtk_icon_theme_new ();
         gtk_icon_theme_prepend_search_path (theme,
-                                            gimp_file_get_utf8_name (icon_theme_search_path));
+                                            clay_file_get_utf8_name (icon_theme_search_path));
         g_object_unref (icon_theme_search_path);
         gtk_icon_theme_set_custom_theme (theme, icon_themes[i]);
 
@@ -2355,9 +2355,9 @@ prefs_dialog_new (Gimp       *gimp,
         if (! example)
           {
             /* If the icon theme didn't explicitly specify an example
-             * icon, try "gimp-wilber".
+             * icon, try "clay-wilber".
              */
-            example = g_strdup ("gimp-wilber-symbolic");
+            example = g_strdup ("clay-wilber-symbolic");
           }
         surface = gtk_icon_theme_load_surface (theme, example, 30,
                                                scale_factor, NULL,
@@ -2377,11 +2377,11 @@ prefs_dialog_new (Gimp       *gimp,
         image = gtk_image_new_from_surface (surface);
         gtk_grid_attach (GTK_GRID (grid), image, 0, 0, 1, 2);
 
-        if (icon_themes_theme_is_default (gimp, icon_themes[i]))
-          /* TRANSLATORS: this is the name of GIMP's "Default" icon theme. */
+        if (icon_themes_theme_is_default (clay, icon_themes[i]))
+          /* TRANSLATORS: this is the name of Clay's "Default" icon theme. */
           name_label = gtk_label_new (C_("icon-theme-name", "Default"));
-        else if (icon_themes_theme_is_legacy (gimp, icon_themes[i]))
-          /* TRANSLATORS: this is the name of GIMP's "Legacy" icon theme. */
+        else if (icon_themes_theme_is_legacy (clay, icon_themes[i]))
+          /* TRANSLATORS: this is the name of Clay's "Legacy" icon theme. */
           name_label = gtk_label_new (C_("icon-theme-name", "Legacy"));
         else
           name_label = gtk_label_new (icon_themes[i]);
@@ -2389,7 +2389,7 @@ prefs_dialog_new (Gimp       *gimp,
         g_object_set (name_label, "xalign", 0.0, NULL);
         gtk_grid_attach (GTK_GRID (grid), name_label, 1, 0, 1, 1);
 
-        folder_label = gtk_label_new (gimp_file_get_utf8_name (icon_theme_dir));
+        folder_label = gtk_label_new (clay_file_get_utf8_name (icon_theme_dir));
         g_object_set (folder_label, "xalign", 0.0, NULL);
         gtk_style_context_add_class (gtk_widget_get_style_context (folder_label),
                                      "dim-label");
@@ -2402,8 +2402,8 @@ prefs_dialog_new (Gimp       *gimp,
         cairo_surface_destroy (surface);
         g_free (example);
 
-        if (GIMP_GUI_CONFIG (object)->icon_theme &&
-            ! strcmp (GIMP_GUI_CONFIG (object)->icon_theme, icon_themes[i]))
+        if (CLAY_GUI_CONFIG (object)->icon_theme &&
+            ! strcmp (CLAY_GUI_CONFIG (object)->icon_theme, icon_themes[i]))
           {
             gtk_list_box_select_row (GTK_LIST_BOX (listbox),
                                      GTK_LIST_BOX_ROW (row));
@@ -2415,12 +2415,12 @@ prefs_dialog_new (Gimp       *gimp,
 
     g_signal_connect (listbox, "row-selected",
                       G_CALLBACK (prefs_icon_theme_select_callback),
-                      gimp);
+                      clay);
     reset_handler =
-      g_signal_connect (G_OBJECT (gimp->config), "notify::icon-theme",
+      g_signal_connect (G_OBJECT (clay->config), "notify::icon-theme",
                         G_CALLBACK (prefs_icon_theme_reset_callback),
                         listbox);
-    g_object_set_data (G_OBJECT (dialog), "gimp-icon-theme-reset-handler",
+    g_object_set_data (G_OBJECT (dialog), "clay-icon-theme-reset-handler",
                        GUINT_TO_POINTER (reset_handler));
 
     prefs_check_button_add (object, "prefer-symbolic-icons",
@@ -2432,11 +2432,11 @@ prefs_dialog_new (Gimp       *gimp,
   /*************************/
   /*  Interface / Toolbox  */
   /*************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-toolbox",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-toolbox",
                                   _("Toolbox"),
                                   _("Toolbox"),
-                                  GIMP_HELP_PREFS_TOOLBOX,
+                                  CLAY_HELP_PREFS_TOOLBOX,
                                   &top_iter,
                                   &child_iter);
 
@@ -2448,19 +2448,19 @@ prefs_dialog_new (Gimp       *gimp,
 
   prefs_check_button_add_with_icon (object, "toolbox-wilber",
                                     _("Show Clay _logo (drag-and-drop target)"),
-                                    GIMP_ICON_WILBER,
+                                    CLAY_ICON_WILBER,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "toolbox-color-area",
                                     _("Show _foreground & background color"),
-                                    GIMP_ICON_COLORS_DEFAULT,
+                                    CLAY_ICON_COLORS_DEFAULT,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "toolbox-foo-area",
                                     _("Show active _brush, pattern & gradient"),
-                                    GIMP_ICON_BRUSH,
+                                    CLAY_ICON_BRUSH,
                                     GTK_BOX (vbox2), size_group);
   prefs_check_button_add_with_icon (object, "toolbox-image-area",
                                     _("Show active _image"),
-                                    GIMP_ICON_IMAGE,
+                                    CLAY_ICON_IMAGE,
                                     GTK_BOX (vbox2), size_group);
 
   separator = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
@@ -2477,8 +2477,8 @@ prefs_dialog_new (Gimp       *gimp,
   /* Tool Editor */
   vbox2 = prefs_frame_new (_("Tools Configuration"),
                            GTK_CONTAINER (vbox), TRUE);
-  tool_editor = gimp_tool_editor_new (gimp->tool_item_list, gimp->user_context,
-                                      GIMP_VIEW_SIZE_SMALL, 0);
+  tool_editor = clay_tool_editor_new (clay->tool_item_list, clay->user_context,
+                                      CLAY_VIEW_SIZE_SMALL, 0);
 
   gtk_box_pack_start (GTK_BOX (vbox2), tool_editor, TRUE, TRUE, 0);
   gtk_widget_set_visible (tool_editor, TRUE);
@@ -2487,18 +2487,18 @@ prefs_dialog_new (Gimp       *gimp,
   /*********************************/
   /*  Interface / Dialog Defaults  */
   /*********************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
                                   /* FIXME need an icon */
-                                  "gimp-prefs-controllers",
+                                  "clay-prefs-controllers",
                                   _("Dialog Defaults"),
                                   _("Dialog Defaults"),
-                                  GIMP_HELP_PREFS_DIALOG_DEFAULTS,
+                                  CLAY_HELP_PREFS_DIALOG_DEFAULTS,
                                   &top_iter,
                                   &child_iter);
 
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
-  button = gimp_prefs_box_set_page_resettable (GIMP_PREFS_BOX (prefs_box),
+  button = clay_prefs_box_set_page_resettable (CLAY_PREFS_BOX (prefs_box),
                                                vbox,
                                                _("Reset Dialog _Defaults"));
   g_signal_connect (button, "clicked",
@@ -2662,8 +2662,8 @@ prefs_dialog_new (Gimp       *gimp,
   grid = prefs_grid_new (GTK_CONTAINER (vbox2));
 
   prefs_enum_combo_box_add (object, "layer-merge-type",
-                            GIMP_EXPAND_AS_NECESSARY,
-                            GIMP_CLIP_TO_BOTTOM_LAYER,
+                            CLAY_EXPAND_AS_NECESSARY,
+                            CLAY_CLIP_TO_BOTTOM_LAYER,
                             _("Merged layer size:"),
                             GTK_GRID (grid), 0, size_group);
 
@@ -2687,7 +2687,7 @@ prefs_dialog_new (Gimp       *gimp,
                           _("Color and opacity:"),
                           _("Default New Channel Color and Opacity"),
                           GTK_GRID (grid), 1, size_group,
-                          gimp_get_user_context (gimp));
+                          clay_get_user_context (clay));
 
   /*  New Path Dialog  */
   vbox2 = prefs_frame_new (_("New Path Dialog"),
@@ -2785,7 +2785,7 @@ prefs_dialog_new (Gimp       *gimp,
   vbox2 = prefs_frame_new (_("Fill Selection Outline & Fill Path Dialogs"),
                            GTK_CONTAINER (vbox), FALSE);
 
-  editor = gimp_fill_editor_new (GIMP_DIALOG_CONFIG (object)->fill_options,
+  editor = clay_fill_editor_new (CLAY_DIALOG_CONFIG (object)->fill_options,
                                  FALSE, FALSE);
   gtk_box_pack_start (GTK_BOX (vbox2), editor, FALSE, FALSE, 0);
   gtk_widget_set_visible (editor, TRUE);
@@ -2800,8 +2800,8 @@ prefs_dialog_new (Gimp       *gimp,
    * uses the y resolution on the opened image. So using the y resolution
    * of the default image seems like the best compromise in the preferences.
    */
-  editor = gimp_stroke_editor_new (GIMP_DIALOG_CONFIG (object)->stroke_options,
-                                   gimp_template_get_resolution_y (core_config->default_image),
+  editor = clay_stroke_editor_new (CLAY_DIALOG_CONFIG (object)->stroke_options,
+                                   clay_template_get_resolution_y (core_config->default_image),
                                    FALSE, FALSE);
   gtk_box_pack_start (GTK_BOX (vbox2), editor, FALSE, FALSE, 0);
   gtk_widget_set_visible (editor, TRUE);
@@ -2812,11 +2812,11 @@ prefs_dialog_new (Gimp       *gimp,
   /*****************************/
   /*  Interface / Help System  */
   /*****************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-help-system",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-help-system",
                                   _("Help System"),
                                   _("Help System"),
-                                  GIMP_HELP_PREFS_HELP,
+                                  CLAY_HELP_PREFS_HELP,
                                   &top_iter,
                                   &child_iter);
 
@@ -2835,15 +2835,15 @@ prefs_dialog_new (Gimp       *gimp,
                                         _("Use a locally installed copy"),
                                         _("U_ser manual:"),
                                         GTK_GRID (grid), 0, size_group);
-  gimp_help_set_help_data (button, NULL, NULL);
+  clay_help_set_help_data (button, NULL, NULL);
 
-  manuals = gimp_help_get_installed_languages ();
+  manuals = clay_help_get_installed_languages ();
   entry   = NULL;
   if (manuals != NULL)
     {
       gchar *help_locales = NULL;
 
-      entry = gimp_language_combo_box_new (TRUE,
+      entry = clay_language_combo_box_new (TRUE,
                                            _("User interface language"));
 
       g_object_get (config, "help-locales", &help_locales, NULL);
@@ -2857,37 +2857,37 @@ prefs_dialog_new (Gimp       *gimp,
         }
       if (help_locales)
         {
-          gimp_language_combo_box_set_code (GIMP_LANGUAGE_COMBO_BOX (entry),
+          clay_language_combo_box_set_code (CLAY_LANGUAGE_COMBO_BOX (entry),
                                             help_locales);
           g_free (help_locales);
         }
       else
         {
-          gimp_language_combo_box_set_code (GIMP_LANGUAGE_COMBO_BOX (entry),
+          clay_language_combo_box_set_code (CLAY_LANGUAGE_COMBO_BOX (entry),
                                             "");
         }
       g_signal_connect (entry, "changed",
                         G_CALLBACK (prefs_help_language_change_callback),
-                        gimp);
+                        clay);
       gtk_grid_attach (GTK_GRID (grid), entry, 1, 1, 1, 1);
       gtk_widget_set_visible (entry, TRUE);
     }
 
-  if (gimp_help_user_manual_is_installed (gimp))
+  if (clay_help_user_manual_is_installed (clay))
     {
-      hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_INFORMATION,
+      hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_INFORMATION,
                                  _("There's a local installation "
                                    "of the user manual."));
     }
   else
     {
-      hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
+      hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_WARNING,
                                  _("The user manual is not installed "
                                    "locally."));
     }
   if (manuals)
     {
-      g_object_set_data (G_OBJECT (hbox), "gimp", gimp);
+      g_object_set_data (G_OBJECT (hbox), "clay", clay);
       g_signal_connect (entry, "changed",
                         G_CALLBACK (prefs_help_language_change_callback2),
                         hbox);
@@ -2905,12 +2905,12 @@ prefs_dialog_new (Gimp       *gimp,
                          _("_Maximum History Size:"),
                          GTK_GRID (grid), 0, size_group);
 
-  button = prefs_button_add (GIMP_ICON_SHRED,
+  button = prefs_button_add (CLAY_ICON_SHRED,
                              _("C_lear Action History"),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_search_clear_callback),
-                    gimp);
+                    clay);
 
   g_clear_object (&size_group);
 
@@ -2918,14 +2918,14 @@ prefs_dialog_new (Gimp       *gimp,
   /*************************/
   /*  Interface / Display  */
   /*************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-display",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-display",
                                   _("Display"),
                                   _("Display"),
-                                  GIMP_HELP_PREFS_DISPLAY,
+                                  CLAY_HELP_PREFS_DISPLAY,
                                   &top_iter,
                                   &child_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
@@ -2937,32 +2937,32 @@ prefs_dialog_new (Gimp       *gimp,
                             _("_Check style:"),
                             GTK_GRID (grid), 0, size_group);
 
-  button = gimp_prop_label_color_new (object,
+  button = clay_prop_label_color_new (object,
                                       "transparency-custom-color1",
                                       TRUE);
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                             NULL, 0.0, 0.5,
                             button, 1);
   gtk_widget_set_hexpand (button, FALSE);
-  gimp_color_button_set_color_config (GIMP_COLOR_BUTTON (gimp_label_color_get_color_widget (GIMP_LABEL_COLOR (button))),
-                                      gimp->config->color_management);
+  clay_color_button_set_color_config (CLAY_COLOR_BUTTON (clay_label_color_get_color_widget (CLAY_LABEL_COLOR (button))),
+                                      clay->config->color_management);
   gtk_widget_set_sensitive (button,
-                            display_config->transparency_type == GIMP_CHECK_TYPE_CUSTOM_CHECKS);
+                            display_config->transparency_type == CLAY_CHECK_TYPE_CUSTOM_CHECKS);
   g_signal_connect (object, "notify::transparency-type",
                     G_CALLBACK (prefs_check_style_callback),
                     button);
 
-  button = gimp_prop_label_color_new (object,
+  button = clay_prop_label_color_new (object,
                                       "transparency-custom-color2",
                                       TRUE);
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 2,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 2,
                             NULL, 0.0, 0.5,
                             button, 1);
   gtk_widget_set_hexpand (button, FALSE);
-  gimp_color_button_set_color_config (GIMP_COLOR_BUTTON (gimp_label_color_get_color_widget (GIMP_LABEL_COLOR (button))),
-                                      gimp->config->color_management);
+  clay_color_button_set_color_config (CLAY_COLOR_BUTTON (clay_label_color_get_color_widget (CLAY_LABEL_COLOR (button))),
+                                      clay->config->color_management);
   gtk_widget_set_sensitive (button,
-                            display_config->transparency_type == GIMP_CHECK_TYPE_CUSTOM_CHECKS);
+                            display_config->transparency_type == CLAY_CHECK_TYPE_CUSTOM_CHECKS);
   g_signal_connect (object, "notify::transparency-type",
                     G_CALLBACK (prefs_check_style_callback),
                     button);
@@ -2986,12 +2986,12 @@ prefs_dialog_new (Gimp       *gimp,
   {
     gchar *pixels_per_unit = g_strconcat (_("Pixels"), "/%a", NULL);
 
-    entry = gimp_prop_coordinates_new (object,
+    entry = clay_prop_coordinates_new (object,
                                        "monitor-xresolution",
                                        "monitor-yresolution",
                                        NULL,
                                        pixels_per_unit,
-                                       GIMP_SIZE_ENTRY_UPDATE_RESOLUTION,
+                                       CLAY_SIZE_ENTRY_UPDATE_RESOLUTION,
                                        0.0, 0.0,
                                        TRUE);
 
@@ -3001,11 +3001,11 @@ prefs_dialog_new (Gimp       *gimp,
   gtk_grid_set_column_spacing (GTK_GRID (entry), 2);
   gtk_grid_set_row_spacing (GTK_GRID (entry), 2);
 
-  gimp_size_entry_attach_label (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_attach_label (CLAY_SIZE_ENTRY (entry),
                                 _("Horizontal"), 0, 1, 0.0);
-  gimp_size_entry_attach_label (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_attach_label (CLAY_SIZE_ENTRY (entry),
                                 _("Vertical"), 0, 2, 0.0);
-  gimp_size_entry_attach_label (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_attach_label (CLAY_SIZE_ENTRY (entry),
                                 _("ppi"), 1, 4, 0.0);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -3021,7 +3021,7 @@ prefs_dialog_new (Gimp       *gimp,
     gdouble  yres;
     gchar   *str;
 
-    gimp_get_monitor_resolution (gdk_display_get_monitor (gdk_display_get_default (), 0),
+    clay_get_monitor_resolution (gdk_display_get_monitor (gdk_display_get_default (), 0),
                                  &xres, &yres);
 
     str = g_strdup_printf (_("_Detect automatically (currently %d × %d ppi)"),
@@ -3085,11 +3085,11 @@ prefs_dialog_new (Gimp       *gimp,
   /***********************************/
   /*  Interface / Window Management  */
   /***********************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-window-management",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-window-management",
                                   _("Window Management"),
                                   _("Window Management"),
-                                  GIMP_HELP_PREFS_WINDOW_MANAGEMENT,
+                                  CLAY_HELP_PREFS_WINDOW_MANAGEMENT,
                                   &top_iter,
                                   &child_iter);
 
@@ -3121,20 +3121,20 @@ prefs_dialog_new (Gimp       *gimp,
                           _("Open windows on the same _monitor they were open before"),
                           GTK_BOX (vbox2));
 
-  button = prefs_button_add (GIMP_ICON_DOCUMENT_SAVE,
+  button = prefs_button_add (CLAY_ICON_DOCUMENT_SAVE,
                              _("Save Window Positions _Now"),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_session_save_callback),
-                    gimp);
+                    clay);
 
-  button2 = prefs_button_add (GIMP_ICON_RESET,
+  button2 = prefs_button_add (CLAY_ICON_RESET,
                               _("_Reset Saved Window Positions to "
                                 "Default Values"),
                               GTK_BOX (vbox2));
   g_signal_connect (button2, "clicked",
                     G_CALLBACK (prefs_session_clear_callback),
-                    gimp);
+                    clay);
 
   g_object_set_data (G_OBJECT (button), "clear-button", button2);
 
@@ -3142,14 +3142,14 @@ prefs_dialog_new (Gimp       *gimp,
   /************************/
   /*  Canvas Interaction  */
   /************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-image-windows",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-image-windows",
                                   _("Canvas Interaction"),
                                   _("Canvas Interaction"),
-                                  GIMP_HELP_PREFS_CANVAS_INTERACTION,
+                                  CLAY_HELP_PREFS_CANVAS_INTERACTION,
                                   NULL,
                                   &top_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
@@ -3183,21 +3183,21 @@ prefs_dialog_new (Gimp       *gimp,
   /************************************/
   /*  Canvas Interaction / Modifiers  */
   /************************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
                                   /* TODO: custom icon. */
-                                  "gimp-prefs-image-windows",
+                                  "clay-prefs-image-windows",
                                   _("Modifiers"),
                                   _("Modifiers"),
-                                  GIMP_HELP_PREFS_CANVAS_MODIFIERS,
+                                  CLAY_HELP_PREFS_CANVAS_MODIFIERS,
                                   &top_iter,
                                   &child_iter);
 
-  vbox2 = gimp_modifiers_editor_new (GIMP_MODIFIERS_MANAGER (display_config->modifiers_manager),
-                                     gimp);
+  vbox2 = clay_modifiers_editor_new (CLAY_MODIFIERS_MANAGER (display_config->modifiers_manager),
+                                     clay);
   gtk_widget_set_visible (vbox2, TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), vbox2, FALSE, FALSE, 0);
 
-  button2 = prefs_button_add (GIMP_ICON_RESET,
+  button2 = prefs_button_add (CLAY_ICON_RESET,
                               _("_Reset Saved Modifiers Settings to "
                                 "Default Values"),
                               GTK_BOX (vbox));
@@ -3210,19 +3210,19 @@ prefs_dialog_new (Gimp       *gimp,
   /***********************************/
   /*  Canvas Interaction / Snapping  */
   /***********************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-image-windows-snapping",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-image-windows-snapping",
                                   _("Snapping Behavior"),
                                   _("Snapping"),
-                                  GIMP_HELP_PREFS_IMAGE_WINDOW_SNAPPING,
+                                  CLAY_HELP_PREFS_IMAGE_WINDOW_SNAPPING,
                                   &top_iter,
                                   &child_iter);
 
-  prefs_behavior_options_frame_add (gimp,
+  prefs_behavior_options_frame_add (clay,
                                     G_OBJECT (display_config->default_view),
                                     _("Default Behavior in Normal Mode"),
                                     GTK_CONTAINER (vbox));
-  prefs_behavior_options_frame_add (gimp,
+  prefs_behavior_options_frame_add (clay,
                                     G_OBJECT (display_config->default_fullscreen_view),
                                     _("Default Behavior in Fullscreen Mode"),
                                     GTK_CONTAINER (vbox));
@@ -3240,21 +3240,21 @@ prefs_dialog_new (Gimp       *gimp,
   /*******************/
   /*  Image Windows  */
   /*******************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-image-windows",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-image-windows",
                                   _("Image Windows"),
                                   _("Image Windows"),
-                                  GIMP_HELP_PREFS_IMAGE_WINDOW,
+                                  CLAY_HELP_PREFS_IMAGE_WINDOW,
                                   NULL,
                                   &top_iter);
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
   /*  General  */
   vbox2 = prefs_frame_new (_("General"), GTK_CONTAINER (vbox), FALSE);
 
-  /* See app/display/gimpimagewindow.c: the code path where "custom-title-bar"
+  /* See app/display/clayimagewindow.c: the code path where "custom-title-bar"
    * is verified never happens for macOS which always uses
    * gtk_application_set_menubar() instead.
    */
@@ -3262,7 +3262,7 @@ prefs_dialog_new (Gimp       *gimp,
   prefs_check_button_add (object, "custom-title-bar",
                           _("Merge menu and title bar"),
                           GTK_BOX (vbox2));
-  hbox = prefs_hint_box_new (GIMP_ICON_DIALOG_WARNING,
+  hbox = prefs_hint_box_new (CLAY_ICON_DIALOG_WARNING,
                              _("Clay will try to convince your system not to decorate image windows. "
                                "If it doesn't work properly on your system "
                                "(i.e. you get 2 title bars), please report."));
@@ -3308,22 +3308,22 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
   /********************************/
   /*  Image Windows / Appearance  */
   /********************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-image-windows-appearance",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-image-windows-appearance",
                                   _("Image Window Appearance"),
                                   _("Appearance"),
-                                  GIMP_HELP_PREFS_IMAGE_WINDOW_APPEARANCE,
+                                  CLAY_HELP_PREFS_IMAGE_WINDOW_APPEARANCE,
                                   &top_iter,
                                   &child_iter);
 
-  gimp_prefs_box_set_page_scrollable (GIMP_PREFS_BOX (prefs_box), vbox, TRUE);
+  clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
-  prefs_display_options_frame_add (gimp,
+  prefs_display_options_frame_add (clay,
                                    G_OBJECT (display_config->default_view),
                                    _("Default Appearance in Normal Mode"),
                                    GTK_CONTAINER (vbox));
 
-  prefs_display_options_frame_add (gimp,
+  prefs_display_options_frame_add (clay,
                                    G_OBJECT (display_config->default_fullscreen_view),
                                    _("Default Appearance in Fullscreen Mode"),
                                    GTK_CONTAINER (vbox));
@@ -3332,11 +3332,11 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
   /****************************************************/
   /*  Image Windows / Image Title & Statusbar Format  */
   /****************************************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-image-title",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-image-title",
                                   _("Image Title & Statusbar Format"),
                                   _("Title & Status"),
-                                  GIMP_HELP_PREFS_IMAGE_WINDOW_TITLE,
+                                  CLAY_HELP_PREFS_IMAGE_WINDOW_TITLE,
                                   &top_iter,
                                   &child_iter);
 
@@ -3370,15 +3370,15 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
     }
     formats[] =
     {
-      { NULL, GIMP_CONFIG_DEFAULT_IMAGE_TITLE_FORMAT,
+      { NULL, CLAY_CONFIG_DEFAULT_IMAGE_TITLE_FORMAT,
         N_("Image Title Format"),     "image-title-format"  },
-      { NULL, GIMP_CONFIG_DEFAULT_IMAGE_STATUS_FORMAT,
+      { NULL, CLAY_CONFIG_DEFAULT_IMAGE_STATUS_FORMAT,
         N_("Image Statusbar Format"), "image-status-format" }
     };
 
     gint format;
 
-    gimp_assert (G_N_ELEMENTS (format_strings) == G_N_ELEMENTS (format_names));
+    clay_assert (G_N_ELEMENTS (format_strings) == G_N_ELEMENTS (format_names));
 
     formats[0].current_setting = display_config->image_title_format;
     formats[1].current_setting = display_config->image_status_format;
@@ -3396,7 +3396,7 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
         vbox2 = prefs_frame_new (gettext (formats[format].title),
                                  GTK_CONTAINER (vbox), TRUE);
 
-        entry = gimp_prop_entry_new (object, formats[format].property_name, 0);
+        entry = clay_prop_entry_new (object, formats[format].property_name, 0);
         gtk_box_pack_start (GTK_BOX (vbox2), entry, FALSE, FALSE, 0);
 
         scrolled_win = gtk_scrolled_window_new (NULL, NULL);
@@ -3467,11 +3467,11 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
   /*******************/
   /*  Input Devices  */
   /*******************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-input-devices",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-input-devices",
                                   _("Input Devices"),
                                   _("Input Devices"),
-                                  GIMP_HELP_PREFS_INPUT_DEVICES,
+                                  CLAY_HELP_PREFS_INPUT_DEVICES,
                                   NULL,
                                   &top_iter);
 
@@ -3534,7 +3534,7 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
                                         _("Pointer Input API:"),
                                         GTK_GRID (grid), 0, NULL);
 
-      gimp_int_combo_box_set_sensitivity (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_set_sensitivity (CLAY_INT_COMBO_BOX (combo),
                                           prefs_devices_api_sensitivity_func,
                                           NULL, NULL);
     }
@@ -3545,31 +3545,31 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
                           _("S_hare tool and tool options between input devices"),
                           GTK_BOX (vbox2));
 
-  button = prefs_button_add (GIMP_ICON_PREFERENCES_SYSTEM,
+  button = prefs_button_add (CLAY_ICON_PREFERENCES_SYSTEM,
                              _("Configure E_xtended Input Devices..."),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_input_devices_dialog),
-                    gimp);
+                    clay);
 
   prefs_check_button_add (object, "save-device-status",
                           _("_Save input device settings on exit"),
                           GTK_BOX (vbox2));
 
-  button = prefs_button_add (GIMP_ICON_DOCUMENT_SAVE,
+  button = prefs_button_add (CLAY_ICON_DOCUMENT_SAVE,
                              _("Save Input Device Settings _Now"),
                              GTK_BOX (vbox2));
   g_signal_connect (button, "clicked",
                     G_CALLBACK (prefs_devices_save_callback),
-                    gimp);
+                    clay);
 
-  button2 = prefs_button_add (GIMP_ICON_RESET,
+  button2 = prefs_button_add (CLAY_ICON_RESET,
                               _("_Reset Saved Input Device Settings to "
                                 "Default Values"),
                               GTK_BOX (vbox2));
   g_signal_connect (button2, "clicked",
                     G_CALLBACK (prefs_devices_clear_callback),
-                    gimp);
+                    clay);
 
   g_object_set_data (G_OBJECT (button), "clear-button", button2);
 
@@ -3577,15 +3577,15 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
   /****************************/
   /*  Additional Controllers  */
   /****************************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-controllers",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-controllers",
                                   _("Additional Input Controllers"),
                                   _("Input Controllers"),
-                                  GIMP_HELP_PREFS_INPUT_CONTROLLERS,
+                                  CLAY_HELP_PREFS_INPUT_CONTROLLERS,
                                   &top_iter,
                                   &child_iter);
 
-  vbox2 = gimp_controller_list_new (gimp_get_controller_manager (gimp));
+  vbox2 = clay_controller_list_new (clay_get_controller_manager (clay));
   gtk_box_pack_start (GTK_BOX (vbox), vbox2, TRUE, TRUE, 0);
   gtk_widget_set_visible (vbox2, TRUE);
 
@@ -3593,15 +3593,15 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
   /*************/
   /*  Folders  */
   /*************/
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
-                                  "gimp-prefs-folders",
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
+                                  "clay-prefs-folders",
                                   _("Folders"),
                                   _("Folders"),
-                                  GIMP_HELP_PREFS_FOLDERS,
+                                  CLAY_HELP_PREFS_FOLDERS,
                                   NULL,
                                   &top_iter);
 
-  button = gimp_prefs_box_set_page_resettable (GIMP_PREFS_BOX (prefs_box),
+  button = clay_prefs_box_set_page_resettable (CLAY_PREFS_BOX (prefs_box),
                                                vbox,
                                                _("Reset _Folders"));
   g_signal_connect (button, "clicked",
@@ -3660,91 +3660,91 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
     {
       { N_("Brushes"), N_("Brush Folders"),
         "folders-brushes",
-        GIMP_HELP_PREFS_FOLDERS_BRUSHES,
+        CLAY_HELP_PREFS_FOLDERS_BRUSHES,
         N_("Reset Brush _Folders"),
         N_("Select Brush Folders"),
         "brush-path", "brush-path-writable" },
       { N_("Dynamics"), N_("Dynamics Folders"),
         "folders-dynamics",
-        GIMP_HELP_PREFS_FOLDERS_DYNAMICS,
+        CLAY_HELP_PREFS_FOLDERS_DYNAMICS,
         N_("Reset Dynamics _Folders"),
         N_("Select Dynamics Folders"),
         "dynamics-path", "dynamics-path-writable" },
       { N_("Patterns"), N_("Pattern Folders"),
         "folders-patterns",
-        GIMP_HELP_PREFS_FOLDERS_PATTERNS,
+        CLAY_HELP_PREFS_FOLDERS_PATTERNS,
         N_("Reset Pattern _Folders"),
         N_("Select Pattern Folders"),
         "pattern-path", "pattern-path-writable" },
       { N_("Palettes"), N_("Palette Folders"),
         "folders-palettes",
-        GIMP_HELP_PREFS_FOLDERS_PALETTES,
+        CLAY_HELP_PREFS_FOLDERS_PALETTES,
         N_("Reset Palette _Folders"),
         N_("Select Palette Folders"),
         "palette-path", "palette-path-writable" },
       { N_("Gradients"), N_("Gradient Folders"),
         "folders-gradients",
-        GIMP_HELP_PREFS_FOLDERS_GRADIENTS,
+        CLAY_HELP_PREFS_FOLDERS_GRADIENTS,
         N_("Reset Gradient _Folders"),
         N_("Select Gradient Folders"),
         "gradient-path", "gradient-path-writable" },
       { N_("Fonts"), N_("Font Folders"),
         "folders-fonts",
-        GIMP_HELP_PREFS_FOLDERS_FONTS,
+        CLAY_HELP_PREFS_FOLDERS_FONTS,
         N_("Reset Font _Folders"),
         N_("Select Font Folders"),
         "font-path", NULL },
       { N_("Tool Presets"), N_("Tool Preset Folders"),
         "folders-tool-presets",
-        GIMP_HELP_PREFS_FOLDERS_TOOL_PRESETS,
+        CLAY_HELP_PREFS_FOLDERS_TOOL_PRESETS,
         N_("Reset Tool Preset _Folders"),
         N_("Select Tool Preset Folders"),
         "tool-preset-path", "tool-preset-path-writable" },
       { N_("MyPaint Brushes"), N_("MyPaint Brush Folders"),
         "folders-mypaint-brushes",
-        GIMP_HELP_PREFS_FOLDERS_MYPAINT_BRUSHES,
+        CLAY_HELP_PREFS_FOLDERS_MYPAINT_BRUSHES,
         N_("Reset MyPaint Brush _Folders"),
         N_("Select MyPaint Brush Folders"),
         "mypaint-brush-path", "mypaint-brush-path-writable" },
       { N_("Plug-ins"), N_("Plug-in Folders"),
         "folders-plug-ins",
-        GIMP_HELP_PREFS_FOLDERS_PLUG_INS,
+        CLAY_HELP_PREFS_FOLDERS_PLUG_INS,
         N_("Reset plug-in _Folders"),
         N_("Select plug-in Folders"),
         "plug-in-path", NULL },
       { N_("Scripts"), N_("Script-Fu Folders"),
         "folders-scripts",
-        GIMP_HELP_PREFS_FOLDERS_SCRIPTS,
+        CLAY_HELP_PREFS_FOLDERS_SCRIPTS,
         N_("Reset Script-Fu _Folders"),
         N_("Select Script-Fu Folders"),
         "script-fu-path", NULL },
       { N_("Modules"), N_("Module Folders"),
         "folders-modules",
-        GIMP_HELP_PREFS_FOLDERS_MODULES,
+        CLAY_HELP_PREFS_FOLDERS_MODULES,
         N_("Reset Module _Folders"),
         N_("Select Module Folders"),
         "module-path", NULL },
       { N_("Interpreters"), N_("Interpreter Folders"),
         "folders-interp",
-        GIMP_HELP_PREFS_FOLDERS_INTERPRETERS,
+        CLAY_HELP_PREFS_FOLDERS_INTERPRETERS,
         N_("Reset Interpreter _Folders"),
         N_("Select Interpreter Folders"),
         "interpreter-path", NULL },
       { N_("Environment"), N_("Environment Folders"),
         "folders-environ",
-        GIMP_HELP_PREFS_FOLDERS_ENVIRONMENT,
+        CLAY_HELP_PREFS_FOLDERS_ENVIRONMENT,
         N_("Reset Environment _Folders"),
         N_("Select Environment Folders"),
         "environ-path", NULL },
       { N_("Themes"), N_("Theme Folders"),
         "folders-themes",
-        GIMP_HELP_PREFS_FOLDERS_THEMES,
+        CLAY_HELP_PREFS_FOLDERS_THEMES,
         N_("Reset Theme _Folders"),
         N_("Select Theme Folders"),
         "theme-path", NULL },
       { N_("Icon Themes"), N_("Icon Theme Folders"),
         "folders-icon-themes",
-        GIMP_HELP_PREFS_FOLDERS_ICON_THEMES,
+        CLAY_HELP_PREFS_FOLDERS_ICON_THEMES,
         N_("Reset Icon Theme _Folders"),
         N_("Select Icon Theme Folders"),
         "icon-theme-path", NULL }
@@ -3755,8 +3755,8 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
         GtkWidget *editor;
         gchar     *icon_name;
 
-        icon_name = g_strconcat ("gimp-prefs-", paths[i].icon, NULL);
-        vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (prefs_box),
+        icon_name = g_strconcat ("clay-prefs-", paths[i].icon, NULL);
+        vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (prefs_box),
                                         icon_name,
                                         gettext (paths[i].label),
                                         gettext (paths[i].tree_label),
@@ -3765,7 +3765,7 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
                                         &child_iter);
         g_free (icon_name);
 
-        button = gimp_prefs_box_set_page_resettable (GIMP_PREFS_BOX (prefs_box),
+        button = clay_prefs_box_set_page_resettable (CLAY_PREFS_BOX (prefs_box),
                                                      vbox,
                                                      gettext (paths[i].reset_label));
         g_object_set_data (G_OBJECT (button), "path",
@@ -3776,7 +3776,7 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
                           G_CALLBACK (prefs_path_reset),
                           config);
 
-        editor = gimp_prop_path_editor_new (object,
+        editor = clay_prop_path_editor_new (object,
                                             paths[i].path_property_name,
                                             paths[i].writable_property_name,
                                             gettext (paths[i].fs_label));
@@ -3788,7 +3788,7 @@ prefs_boolean_combo_box_add (object, "initial-zoom-to-fit",
     GtkWidget *tv;
 
     /* Expand all folders in the tree view by default. */
-    tv = gimp_prefs_box_get_tree_view (GIMP_PREFS_BOX (prefs_box));
+    tv = clay_prefs_box_get_tree_view (CLAY_PREFS_BOX (prefs_box));
     gtk_tree_view_expand_all (GTK_TREE_VIEW (tv));
 
   }

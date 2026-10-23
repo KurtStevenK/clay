@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 #include "script-fu-console-history.h"
 
@@ -64,7 +64,7 @@ static GStrv           console_history_to_strv       (CommandHistory *self);
  * The main console logic writes TotalHistory,
  *
  * CommandHistory is persistent across sessions of the ScriptFu Console,
- * and across sessions of Gimp.
+ * and across sessions of Clay.
  * When the SFConsole starts, the TotalHistory,
  * is just the CommandHistory, without results of eval.
  * Old results are not meaningful since the environment changed.
@@ -196,7 +196,7 @@ console_history_get_at_cursor (CommandHistory *self)
  */
 GStrv
 console_history_from_settings (CommandHistory       *self,
-                               GimpProcedureConfig  *config)
+                               ClayProcedureConfig  *config)
 {
   GStrv           in_history;
 
@@ -210,7 +210,7 @@ console_history_from_settings (CommandHistory       *self,
 
 void
 console_history_to_settings (CommandHistory       *self,
-                             GimpProcedureConfig  *config)
+                             ClayProcedureConfig  *config)
 {
   GStrv           out_history;
 

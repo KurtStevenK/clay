@@ -1,11 +1,11 @@
 libapppdb_sources = [
-  'gimp-pdb-compat.c',
-  'gimppdb-query.c',
-  'gimppdb-utils.c',
-  'gimppdb.c',
-  'gimppdbcontext.c',
-  'gimppdberror.c',
-  'gimpprocedure.c',
+  'clay-pdb-compat.c',
+  'claypdb-query.c',
+  'claypdb-utils.c',
+  'claypdb.c',
+  'claypdbcontext.c',
+  'claypdberror.c',
+  'clayprocedure.c',
 ]
 libappinternalprocs_sources = [
   'brush-cmds.c',
@@ -28,8 +28,8 @@ libappinternalprocs_sources = [
   'font-cmds.c',
   'font-select-cmds.c',
   'fonts-cmds.c',
-  'gimp-cmds.c',
-  'gimprc-cmds.c',
+  'clay-cmds.c',
+  'clayrc-cmds.c',
   'gradient-cmds.c',
   'gradient-select-cmds.c',
   'gradients-cmds.c',
@@ -75,7 +75,7 @@ libappinternalprocs_sources = [
 libapppdb = static_library('apppdb',
   libapppdb_sources,
   include_directories: [ rootInclude, rootAppInclude, ],
-  c_args: '-DG_LOG_DOMAIN="Gimp-PDB"',
+  c_args: '-DG_LOG_DOMAIN="Clay-PDB"',
   dependencies: [
     cairo, gegl, gdk_pixbuf, gexiv2
   ],
@@ -85,7 +85,7 @@ libapppdb = static_library('apppdb',
 libappinternalprocs = static_library('appinternalprocs',
   libappinternalprocs_sources,
   include_directories: [ rootInclude, rootAppInclude, ],
-  c_args: '-DG_LOG_DOMAIN="Gimp-PDB"',
+  c_args: '-DG_LOG_DOMAIN="Clay-PDB"',
   dependencies: [
     cairo, gegl, gdk_pixbuf, gexiv2, pangocairo, pango,
   ],

@@ -47,7 +47,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  palette = (GimpPalette*) gimp_data_factory_data_new (gimp->palette_factory,
+  palette = (ClayPalette*) clay_data_factory_data_new (clay->palette_factory,
                                                        context, name);
 }
 CODE
@@ -78,8 +78,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  palette = GIMP_PALETTE (gimp_pdb_get_resource (gimp, GIMP_TYPE_PALETTE, name,
-                                                 GIMP_PDB_DATA_ACCESS_READ, error));
+  palette = CLAY_PALETTE (clay_pdb_get_resource (clay, CLAY_TYPE_PALETTE, name,
+                                                 CLAY_PDB_DATA_ACCESS_READ, error));
 
   /* Ignore "not found" error, just return NULL. */
   g_clear_error (error);
@@ -107,7 +107,7 @@ sub palette_get_color_count {
     %invoke = (
 	code => <<'CODE'
 {
-  num_colors = gimp_palette_get_n_colors (palette);
+  num_colors = clay_palette_get_n_colors (palette);
 }
 CODE
     );
@@ -116,7 +116,7 @@ CODE
 sub palette_get_colors {
     $blurb = 'Gets colors in the palette.';
 
-    $help = "Returns an array of colors in the palette. Free the returned array with gimp_color_array_free().";
+    $help = "Returns an array of colors in the palette. Free the returned array with clay_color_array_free().";
 
     &neo_pdb_misc('2006', '2.6');
 
@@ -132,16 +132,16 @@ sub palette_get_colors {
     %invoke = (
 	code => <<'CODE'
 {
-  GList *list = gimp_palette_get_colors (palette);
+  GList *list = clay_palette_get_colors (palette);
   gint   num_colors;
   gint   i;
 
-  num_colors = gimp_palette_get_n_colors (palette);
+  num_colors = clay_palette_get_n_colors (palette);
   colors     = g_new0 (GeglColor *, num_colors + 1);
 
   for (i = 0; i < num_colors; i++, list = g_list_next (list))
     {
-      GimpPaletteEntry *entry = list->data;
+      ClayPaletteEntry *entry = list->data;
 
       colors[i] = gegl_color_duplicate (entry->color);
     }
@@ -168,7 +168,7 @@ sub palette_get_columns {
     %invoke = (
 	code => <<'CODE'
 {
-  num_columns = gimp_palette_get_columns (palette);
+  num_columns = clay_palette_get_columns (palette);
 }
 CODE
     );
@@ -193,8 +193,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (palette)))
-    gimp_palette_set_columns (palette, columns);
+  if (clay_data_is_writable (CLAY_DATA (palette)))
+    clay_palette_set_columns (palette, columns);
   else
     success = FALSE;
 }
@@ -232,12 +232,12 @@ HELP
 	code => <<'CODE'
 {
   /* Must check writeable here, because add_entry does not fail when not writeable. */
-  if (gimp_data_is_writable (GIMP_DATA (palette)))
+  if (clay_data_is_writable (CLAY_DATA (palette)))
     {
       /* -1 for the index means append. */
-      GimpPaletteEntry *entry = gimp_palette_add_entry (palette, -1, entry_name, color);
+      ClayPaletteEntry *entry = clay_palette_add_entry (palette, -1, entry_name, color);
 
-      entry_num = gimp_palette_get_entry_position (palette, entry);
+      entry_num = clay_palette_get_entry_position (palette, entry);
     }
   else
     {
@@ -270,18 +270,18 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (palette)))
+  if (clay_data_is_writable (CLAY_DATA (palette)))
     {
-      GimpPaletteEntry *entry = gimp_palette_get_entry (palette, entry_num);
+      ClayPaletteEntry *entry = clay_palette_get_entry (palette, entry_num);
 
       if (entry)
         {
-          GimpImage *image = gimp_data_get_image (GIMP_DATA (palette));
+          ClayImage *image = clay_data_get_image (CLAY_DATA (palette));
 
           if (image != NULL)
-            success = gimp_image_delete_colormap_entry (image, entry_num, TRUE);
+            success = clay_image_delete_colormap_entry (image, entry_num, TRUE);
           else
-            gimp_palette_delete_entry (palette, entry);
+            clay_palette_delete_entry (palette, entry);
         }
       else
         {
@@ -319,7 +319,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaletteEntry *entry = gimp_palette_get_entry (palette, entry_num);
+  ClayPaletteEntry *entry = clay_palette_get_entry (palette, entry_num);
 
   if (entry)
     color = gegl_color_duplicate (entry->color);
@@ -352,8 +352,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (palette)))
-    success = gimp_palette_set_entry_color (palette, entry_num, color, TRUE);
+  if (clay_data_is_writable (CLAY_DATA (palette)))
+    success = clay_palette_set_entry_color (palette, entry_num, color, TRUE);
   else
     success = FALSE;
 }
@@ -385,7 +385,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPaletteEntry *entry = gimp_palette_get_entry (palette, entry_num);
+  ClayPaletteEntry *entry = clay_palette_get_entry (palette, entry_num);
 
   if (entry)
     entry_name = g_strdup (entry->name);
@@ -418,8 +418,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (palette)))
-    success = gimp_palette_set_entry_name (palette, entry_num, entry_name);
+  if (clay_data_is_writable (CLAY_DATA (palette)))
+    success = clay_palette_set_entry_name (palette, entry_num, entry_name);
   else
     success = FALSE;
 }
@@ -461,13 +461,13 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpimage-colormap.h") ],
+        headers => [ qw("core/clayimage-colormap.h") ],
         code => <<'CODE'
 {
   guchar *colormap_data;
   gint    bpp = babl_format_get_bytes_per_pixel (format);
 
-  colormap_data = gimp_palette_get_colormap (palette, format, &num_colors);
+  colormap_data = clay_palette_get_colormap (palette, format, &num_colors);
   colormap = g_bytes_new_take (colormap_data, bpp * num_colors);
 }
 CODE
@@ -499,7 +499,7 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpimage-colormap.h") ],
+        headers => [ qw("core/clayimage-colormap.h") ],
         code => <<'CODE'
 {
   gint bpp;
@@ -514,7 +514,7 @@ HELP
 
       data     = g_bytes_get_data (colormap, &n_bytes),
       n_colors = n_bytes / bpp;
-      gimp_palette_set_colormap (palette, format, (guchar *) data, n_colors, TRUE);
+      clay_palette_set_colormap (palette, format, (guchar *) data, n_colors, TRUE);
     }
   else
     {
@@ -526,12 +526,12 @@ CODE
 }
 
 @headers = qw(<string.h>
-              "core/gimp.h"
-              "core/gimpcontext.h"
-              "core/gimpdatafactory.h"
-              "core/gimpimage-colormap.h"
-              "core/gimppalette.h"
-              "gimppdb-utils.h");
+              "core/clay.h"
+              "core/claycontext.h"
+              "core/claydatafactory.h"
+              "core/clayimage-colormap.h"
+              "core/claypalette.h"
+              "claypdb-utils.h");
 
 @procs = qw(palette_new
             palette_get_by_name
@@ -546,7 +546,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Palette';
-$doc_title = 'gimppalette';
+$doc_title = 'claypalette';
 $doc_short_desc = 'Installable object, a small set of colors a user can choose from.';
 $doc_long_desc = 'Installable object, a small set of colors a user can choose from.';
 

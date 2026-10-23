@@ -18,9 +18,9 @@
 #pragma once
 
 
-void   dialogs_create_toplevel_cmd_callback (GimpAction *action,
+void   dialogs_create_toplevel_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);
-void   dialogs_create_dockable_cmd_callback (GimpAction *action,
+void   dialogs_create_dockable_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);

@@ -18,15 +18,15 @@
 #pragma once
 
 
-void   colormap_edit_color_cmd_callback   (GimpAction *action,
+void   colormap_edit_color_cmd_callback   (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   colormap_delete_color_cmd_callback (GimpAction *action,
+void   colormap_delete_color_cmd_callback (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   colormap_add_color_cmd_callback    (GimpAction *action,
+void   colormap_add_color_cmd_callback    (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   colormap_to_selection_cmd_callback (GimpAction *action,
+void   colormap_to_selection_cmd_callback (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);

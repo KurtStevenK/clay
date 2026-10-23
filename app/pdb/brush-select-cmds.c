@@ -25,220 +25,220 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpbrush.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claybrush.h"
+#include "core/claycontainer.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-brushes_popup_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+brushes_popup_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
   const gchar *brush_callback;
   const gchar *popup_title;
-  GimpBrush *initial_brush;
+  ClayBrush *initial_brush;
   GBytes *parent_window;
 
-  brush_callback = g_value_get_string (gimp_value_array_index (args, 0));
-  popup_title = g_value_get_string (gimp_value_array_index (args, 1));
-  initial_brush = g_value_get_object (gimp_value_array_index (args, 2));
-  parent_window = g_value_get_boxed (gimp_value_array_index (args, 3));
+  brush_callback = g_value_get_string (clay_value_array_index (args, 0));
+  popup_title = g_value_get_string (clay_value_array_index (args, 1));
+  initial_brush = g_value_get_object (clay_value_array_index (args, 2));
+  parent_window = g_value_get_boxed (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpContainer *container = gimp_data_factory_get_container (gimp->brush_factory);
+      ClayContainer *container = clay_data_factory_get_container (clay->brush_factory);
 
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, brush_callback) ||
-          ! gimp_pdb_dialog_new (gimp, context, progress,
-                                 gimp_container_get_child_type (container),
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, brush_callback) ||
+          ! clay_pdb_dialog_new (clay, context, progress,
+                                 clay_container_get_child_type (container),
                                  parent_window, popup_title, brush_callback,
-                                 GIMP_OBJECT (initial_brush), NULL))
+                                 CLAY_OBJECT (initial_brush), NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-brushes_close_popup_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+brushes_close_popup_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
   const gchar *brush_callback;
 
-  brush_callback = g_value_get_string (gimp_value_array_index (args, 0));
+  brush_callback = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpContainer *container = gimp_data_factory_get_container (gimp->brush_factory);
+      ClayContainer *container = clay_data_factory_get_container (clay->brush_factory);
 
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, brush_callback) ||
-          ! gimp_pdb_dialog_close (gimp,
-                                   gimp_container_get_child_type (container),
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, brush_callback) ||
+          ! clay_pdb_dialog_close (clay,
+                                   clay_container_get_child_type (container),
                                    brush_callback))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-brushes_set_popup_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+brushes_set_popup_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
   const gchar *brush_callback;
-  GimpBrush *brush;
+  ClayBrush *brush;
 
-  brush_callback = g_value_get_string (gimp_value_array_index (args, 0));
-  brush = g_value_get_object (gimp_value_array_index (args, 1));
+  brush_callback = g_value_get_string (clay_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpContainer *container = gimp_data_factory_get_container (gimp->brush_factory);
+      ClayContainer *container = clay_data_factory_get_container (clay->brush_factory);
 
-      if (gimp->no_interface ||
-          ! gimp_pdb_lookup_procedure (gimp->pdb, brush_callback) ||
-          ! gimp_pdb_dialog_set (gimp,
-                                 gimp_container_get_child_type (container),
-                                 brush_callback, GIMP_OBJECT (brush), NULL))
+      if (clay->no_interface ||
+          ! clay_pdb_lookup_procedure (clay->pdb, brush_callback) ||
+          ! clay_pdb_dialog_set (clay,
+                                 clay_container_get_child_type (container),
+                                 brush_callback, CLAY_OBJECT (brush), NULL))
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_brush_select_procs (GimpPDB *pdb)
+register_brush_select_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-brushes-popup
+   * clay-brushes-popup
    */
-  procedure = gimp_procedure_new (brushes_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brushes-popup");
-  gimp_procedure_set_static_help (procedure,
-                                  "Invokes the GIMP brush selection dialog.",
+  procedure = clay_procedure_new (brushes_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brushes-popup");
+  clay_procedure_set_static_help (procedure,
+                                  "Invokes the Clay brush selection dialog.",
                                   "Opens a dialog letting a user choose a brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("brush-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("brush-callback",
                                                        "brush callback",
                                                        "The callback PDB proc to call when user chooses a brush",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("popup-title",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("popup-title",
                                                        "popup title",
                                                        "Title of the brush selection dialog",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("initial-brush",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("initial-brush",
                                                       "initial brush",
                                                       "The brush to set as the initial choice",
                                                       TRUE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("parent-window",
                                                    "parent window",
                                                    "An optional parent window handle for the popup to be set transient to",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brushes-close-popup
+   * clay-brushes-close-popup
    */
-  procedure = gimp_procedure_new (brushes_close_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brushes-close-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brushes_close_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brushes-close-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Close the brush selection dialog.",
                                   "Closes an open brush selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("brush-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("brush-callback",
                                                        "brush callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-brushes-set-popup
+   * clay-brushes-set-popup
    */
-  procedure = gimp_procedure_new (brushes_set_popup_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-brushes-set-popup");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (brushes_set_popup_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-brushes-set-popup");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the selected brush in a brush selection dialog.",
                                   "Sets the selected brush in a brush selection dialog.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("brush-callback",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("brush-callback",
                                                        "brush callback",
                                                        "The name of the callback registered for this pop-up",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush to set as selected",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

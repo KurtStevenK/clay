@@ -16,7 +16,7 @@ website/.firebase/
 # Build artifacts
 *.obj
 *.pdb
-# macOS .app bundles made by build/macos/2_bundle-gimp-uni_base.py
+# macOS .app bundles made by build/macos/2_bundle-clay-uni_base.py
 /clay-*.app/
 
 # Common credential filenames (belt-and-suspenders for a public repo)

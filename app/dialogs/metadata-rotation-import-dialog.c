@@ -24,63 +24,63 @@
 #include <gexiv2/gexiv2.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-metadata.h"
-#include "core/gimppickable.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-metadata.h"
+#include "core/claypickable.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "metadata-rotation-import-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpMetadataRotationPolicy   gimp_image_metadata_rotate_dialog  (GimpImage         *image,
-                                                                        GimpContext       *context,
+static ClayMetadataRotationPolicy   clay_image_metadata_rotate_dialog  (ClayImage         *image,
+                                                                        ClayContext       *context,
                                                                         GtkWidget         *parent,
                                                                         GExiv2Orientation  orientation,
                                                                         gboolean          *dont_ask);
-static GdkPixbuf                  * gimp_image_metadata_rotate_pixbuf  (GdkPixbuf         *pixbuf,
+static GdkPixbuf                  * clay_image_metadata_rotate_pixbuf  (GdkPixbuf         *pixbuf,
                                                                         GExiv2Orientation  orientation);
-static gboolean                     gimp_image_metadata_rotate_release (GtkWidget         *widget,
+static gboolean                     clay_image_metadata_rotate_release (GtkWidget         *widget,
                                                                         GdkEvent          *event,
                                                                         GtkDialog         *dialog);
 
-static void                         gimp_image_metadata_rotate_realize (GtkWidget         *widget);
+static void                         clay_image_metadata_rotate_realize (GtkWidget         *widget);
 
 /*  public functions  */
 
-GimpMetadataRotationPolicy
-metadata_rotation_import_dialog_run (GimpImage   *image,
-                                     GimpContext *context,
+ClayMetadataRotationPolicy
+metadata_rotation_import_dialog_run (ClayImage   *image,
+                                     ClayContext *context,
                                      GtkWidget   *parent,
                                      gboolean    *dont_ask)
 {
-  GimpMetadata      *metadata;
+  ClayMetadata      *metadata;
   GExiv2Orientation  orientation;
 
-  metadata    = gimp_image_get_metadata (image);
+  metadata    = clay_image_get_metadata (image);
   orientation = gexiv2_metadata_try_get_orientation (GEXIV2_METADATA (metadata), NULL);
 
   if (orientation <= GEXIV2_ORIENTATION_NORMAL ||
       orientation >  GEXIV2_ORIENTATION_MAX)
-    return GIMP_METADATA_ROTATION_POLICY_KEEP;
+    return CLAY_METADATA_ROTATION_POLICY_KEEP;
 
-  return gimp_image_metadata_rotate_dialog (image, context, parent,
+  return clay_image_metadata_rotate_dialog (image, context, parent,
                                             orientation, dont_ask);
 }
 
-static GimpMetadataRotationPolicy
-gimp_image_metadata_rotate_dialog (GimpImage         *image,
-                                   GimpContext       *context,
+static ClayMetadataRotationPolicy
+clay_image_metadata_rotate_dialog (ClayImage         *image,
+                                   ClayContext       *context,
                                    GtkWidget         *parent,
                                    GExiv2Orientation  orientation,
                                    gboolean          *dont_ask)
@@ -98,21 +98,21 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
   gint       response;
 
   dialog =
-    gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+    clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                               _("Rotate Image?"),
-                              "gimp-metadata-rotate-dialog",
-                              GIMP_ICON_OBJECT_ROTATE_180,
+                              "clay-metadata-rotate-dialog",
+                              CLAY_ICON_OBJECT_ROTATE_180,
                               _("Apply metadata rotation"),
                               parent,
-                              gimp_standard_help_func,
-                              GIMP_HELP_IMAGE_METADATA_ROTATION_IMPORT,
+                              clay_standard_help_func,
+                              CLAY_HELP_IMAGE_METADATA_ROTATION_IMPORT,
 
                               _("_Keep Original"), GTK_RESPONSE_CANCEL,
                               _("_Rotate"),        GTK_RESPONSE_OK,
 
                               NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
@@ -127,7 +127,7 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
 
   text = g_strdup_printf (_("The image '%s' contains Exif orientation "
                             "metadata"),
-                          gimp_image_get_display_name (image));
+                          clay_image_get_display_name (image));
   label = g_object_new (GTK_TYPE_LABEL,
                         "label",   text,
                         "wrap",    TRUE,
@@ -137,15 +137,15 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
                         NULL);
   g_free (text);
 
-  gimp_label_set_attributes (GTK_LABEL (label),
+  clay_label_set_attributes (GTK_LABEL (label),
                              PANGO_ATTR_WEIGHT, PANGO_WEIGHT_BOLD,
                              -1);
   gtk_box_pack_start (GTK_BOX (main_vbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
 
   scale_factor = gtk_widget_get_scale_factor (main_vbox);
-  width        = gimp_image_get_width  (image);
-  height       = gimp_image_get_height (image);
+  width        = clay_image_get_width  (image);
+  height       = clay_image_get_height (image);
 
 #define MAX_THUMBNAIL_SIZE (128 * scale_factor)
   if (width > MAX_THUMBNAIL_SIZE || height > MAX_THUMBNAIL_SIZE)
@@ -165,8 +165,8 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
         }
     }
 
-  gimp_pickable_flush (GIMP_PICKABLE (image));
-  pixbuf = gimp_viewable_get_pixbuf (GIMP_VIEWABLE (image), context,
+  clay_pickable_flush (CLAY_PICKABLE (image));
+  pixbuf = clay_viewable_get_pixbuf (CLAY_VIEWABLE (image), context,
                                      width, height, 1, NULL);
   if (pixbuf)
     {
@@ -186,7 +186,7 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
 
       label = gtk_label_new (_("Original"));
       gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
-      gimp_label_set_attributes (GTK_LABEL (label),
+      clay_label_set_attributes (GTK_LABEL (label),
                                  PANGO_ATTR_STYLE,  PANGO_STYLE_ITALIC,
                                  -1);
       gtk_box_pack_end (GTK_BOX (vbox), label, FALSE, FALSE, 0);
@@ -203,10 +203,10 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
       g_object_set_data (G_OBJECT (event_box), "metadata-rotation-response",
                          GINT_TO_POINTER (GTK_RESPONSE_CANCEL));
       g_signal_connect_object (event_box, "button-release-event",
-                               G_CALLBACK (gimp_image_metadata_rotate_release),
+                               G_CALLBACK (clay_image_metadata_rotate_release),
                                dialog, 0);
       g_signal_connect (event_box, "realize",
-                        G_CALLBACK (gimp_image_metadata_rotate_realize),
+                        G_CALLBACK (clay_image_metadata_rotate_realize),
                         NULL);
 
       vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
@@ -214,13 +214,13 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
       gtk_widget_set_visible (vbox, TRUE);
 
       label = gtk_label_new (_("Rotated"));
-      gimp_label_set_attributes (GTK_LABEL (label),
+      clay_label_set_attributes (GTK_LABEL (label),
                                  PANGO_ATTR_STYLE,  PANGO_STYLE_ITALIC,
                                  -1);
       gtk_box_pack_end (GTK_BOX (vbox), label, FALSE, FALSE, 0);
       gtk_widget_set_visible (label, TRUE);
 
-      rotated = gimp_image_metadata_rotate_pixbuf (pixbuf, orientation);
+      rotated = clay_image_metadata_rotate_pixbuf (pixbuf, orientation);
 
       event_box = gtk_event_box_new ();
       image     = gtk_image_new_from_pixbuf (rotated);
@@ -234,10 +234,10 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
       g_object_set_data (G_OBJECT (event_box), "metadata-rotation-response",
                          GINT_TO_POINTER (GTK_RESPONSE_OK));
       g_signal_connect_object (event_box, "button-release-event",
-                               G_CALLBACK (gimp_image_metadata_rotate_release),
+                               G_CALLBACK (clay_image_metadata_rotate_release),
                                dialog, 0);
       g_signal_connect (event_box, "realize",
-                        G_CALLBACK (gimp_image_metadata_rotate_realize),
+                        G_CALLBACK (clay_image_metadata_rotate_realize),
                         NULL);
     }
 
@@ -248,7 +248,7 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
                         "xalign",  0.0,
                         "yalign",  0.5,
                         NULL);
-  gimp_label_set_attributes (GTK_LABEL (label),
+  clay_label_set_attributes (GTK_LABEL (label),
                              PANGO_ATTR_WEIGHT, PANGO_WEIGHT_BOLD,
                              -1);
   gtk_box_pack_start (GTK_BOX (main_vbox), label, FALSE, FALSE, 0);
@@ -259,18 +259,18 @@ gimp_image_metadata_rotate_dialog (GimpImage         *image,
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (toggle), FALSE);
   gtk_widget_set_visible (toggle, TRUE);
 
-  response  = gimp_dialog_run (GIMP_DIALOG (dialog));
+  response  = clay_dialog_run (CLAY_DIALOG (dialog));
   *dont_ask = (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle)));
 
   gtk_widget_destroy (dialog);
 
   return (response == GTK_RESPONSE_OK) ?
-          GIMP_METADATA_ROTATION_POLICY_ROTATE :
-          GIMP_METADATA_ROTATION_POLICY_KEEP;
+          CLAY_METADATA_ROTATION_POLICY_ROTATE :
+          CLAY_METADATA_ROTATION_POLICY_KEEP;
 }
 
 static GdkPixbuf *
-gimp_image_metadata_rotate_pixbuf (GdkPixbuf         *pixbuf,
+clay_image_metadata_rotate_pixbuf (GdkPixbuf         *pixbuf,
                                    GExiv2Orientation  orientation)
 {
   GdkPixbuf *rotated = NULL;
@@ -323,7 +323,7 @@ gimp_image_metadata_rotate_pixbuf (GdkPixbuf         *pixbuf,
 }
 
 static gboolean
-gimp_image_metadata_rotate_release (GtkWidget *widget,
+clay_image_metadata_rotate_release (GtkWidget *widget,
                                     GdkEvent  *event,
                                     GtkDialog *dialog)
 {
@@ -338,7 +338,7 @@ gimp_image_metadata_rotate_release (GtkWidget *widget,
 }
 
 static void
-gimp_image_metadata_rotate_realize (GtkWidget *widget)
+clay_image_metadata_rotate_realize (GtkWidget *widget)
 {
   GdkCursor *cursor;
 

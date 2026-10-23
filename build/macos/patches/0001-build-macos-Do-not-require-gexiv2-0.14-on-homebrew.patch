@@ -6,8 +6,8 @@ Subject: [PATCH] build/macos: Do not require gexiv2-0.14 on homebrew
 ---
  app/core/meson.build           | 5 ++++-
  app/dialogs/meson.build        | 5 ++++-
- libgimp/meson.build            | 4 ++--
- libgimpbase/meson.build        | 1 +
+ libclay/meson.build            | 4 ++--
+ libclaybase/meson.build        | 1 +
  meson.build                    | 6 ++----
  plug-ins/common/meson.build    | 2 ++
  plug-ins/file-tiff/meson.build | 1 +
@@ -22,9 +22,9 @@ index 656d36a9c2..375eafd877 100644
  libappcore = static_library('appcore',
    libappcore_sources,
    include_directories: [ rootInclude, rootAppInclude, ],
--  c_args: '-DG_LOG_DOMAIN="Gimp-Core"',
+-  c_args: '-DG_LOG_DOMAIN="Clay-Core"',
 +  c_args: [
-+    '-DG_LOG_DOMAIN="Gimp-Core"',
++    '-DG_LOG_DOMAIN="Clay-Core"',
 +    '-Wno-deprecated-declarations',
 +  ],
    dependencies: [
@@ -38,19 +38,19 @@ index 672cd934eb..dc919b8bf0 100644
  libappdialogs = static_library('appdialogs',
    libappdialogs_sources,
    include_directories: [ rootInclude, rootAppInclude, ],
--  c_args: '-DG_LOG_DOMAIN="Gimp-Dialogs"',
+-  c_args: '-DG_LOG_DOMAIN="Clay-Dialogs"',
 +  c_args: [
-+    '-DG_LOG_DOMAIN="Gimp-Dialogs"',
++    '-DG_LOG_DOMAIN="Clay-Dialogs"',
 +    '-Wno-deprecated-declarations',
 +  ],
    dependencies: [
      appstream,
      gegl,
-diff --git a/libgimp/meson.build b/libgimp/meson.build
+diff --git a/libclay/meson.build b/libclay/meson.build
 index eb82b4e41c..33f176e2e9 100644
---- a/libgimp/meson.build
-+++ b/libgimp/meson.build
-@@ -399,7 +399,7 @@ libgimp_deps_table = [
+--- a/libclay/meson.build
++++ b/libclay/meson.build
+@@ -399,7 +399,7 @@ libclay_deps_table = [
      { 'gir': 'cairo-1.0',         'vapi': 'cairo-1.0',       },
      { 'gir': 'GdkPixbuf-2.0',     'vapi': 'gdk-pixbuf-2.0',  },
      { 'gir': 'Gegl-0.4',          'vapi': 'gegl-0.4',        },
@@ -59,26 +59,26 @@ index eb82b4e41c..33f176e2e9 100644
      { 'gir': 'Gio-2.0',           'vapi': 'gio-2.0',         },
      { 'gir': gio_specific_gir,    'vapi': gio_specific_vapi, },
      { 'gir': 'GLib-2.0',          'vapi': 'glib-2.0',        },
-@@ -432,7 +432,7 @@ libgimp = library('gimp-'+ gimp_api_version,
+@@ -432,7 +432,7 @@ libclay = library('clay-'+ clay_api_version,
    sources: [
      pdbgen
    ],
--  c_args: [ '-DG_LOG_DOMAIN="LibGimp"', '-DGIMP_COMPILATION', ],
-+  c_args: [ '-DG_LOG_DOMAIN="LibGimp"', '-DGIMP_COMPILATION', '-Wno-deprecated-declarations', ],
+-  c_args: [ '-DG_LOG_DOMAIN="LibClay"', '-DCLAY_COMPILATION', ],
++  c_args: [ '-DG_LOG_DOMAIN="LibClay"', '-DCLAY_COMPILATION', '-Wno-deprecated-declarations', ],
    link_with: [
-     libgimpbase,
-     libgimpcolor,
-diff --git a/libgimpbase/meson.build b/libgimpbase/meson.build
+     libclaybase,
+     libclaycolor,
+diff --git a/libclaybase/meson.build b/libclaybase/meson.build
 index 2d82a1f79d..669cc4c976 100644
---- a/libgimpbase/meson.build
-+++ b/libgimpbase/meson.build
-@@ -132,6 +132,7 @@ libgimpbase = library('gimpbase-' + gimp_api_version,
+--- a/libclaybase/meson.build
++++ b/libclaybase/meson.build
+@@ -132,6 +132,7 @@ libclaybase = library('claybase-' + clay_api_version,
    c_args: [
-     '-DG_LOG_DOMAIN="LibGimpBase"',
-     '-DGIMP_BASE_COMPILATION',
+     '-DG_LOG_DOMAIN="LibClayBase"',
+     '-DCLAY_BASE_COMPILATION',
 +    '-Wno-deprecated-declarations',
    ],
-   vs_module_defs: libgimpbase_def,
+   vs_module_defs: libclaybase_def,
    install: true,
 diff --git a/meson.build b/meson.build
 index 5559e84126..0e416f802f 100644
@@ -135,27 +135,27 @@ index 72fb118d25..aadb4a8790 100644
 +                        c_args: [ '-Wno-deprecated-declarations', ],
                          win_subsystem: 'windows',
                          install: true,
-                         install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                         install_dir: clayplugindir / 'plug-ins' / plugin_name)
 diff --git a/plug-ins/metadata/meson.build b/plug-ins/metadata/meson.build
 index 4691ef4852..6987d367cd 100644
 --- a/plug-ins/metadata/meson.build
 +++ b/plug-ins/metadata/meson.build
 @@ -33,6 +33,7 @@ plugin_exe = executable(plugin_name,
-                           libgimpui_dep,
+                           libclayui_dep,
                            gexiv2,
                          ],
 +                        c_args: [ '-Wno-deprecated-declarations', ],
                          win_subsystem: 'windows',
                          install: true,
-                         install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                         install_dir: clayplugindir / 'plug-ins' / plugin_name)
 @@ -80,6 +81,7 @@ plugin_exe = executable(plugin_name,
                          dependencies: [
                            gtk3, gegl, gexiv2,
                          ],
 +                        c_args: [ '-Wno-deprecated-declarations', ],
                          link_with: [
-                           libgimp,
-                           libgimpbase,
+                           libclay,
+                           libclaybase,
 -- 
 2.50.1 (Apple Git-155)
 

@@ -20,15 +20,15 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-busy-dialog"
 #define PLUG_IN_BINARY "busy-dialog"
-#define PLUG_IN_ROLE   "gimp-busy-dialog"
+#define PLUG_IN_ROLE   "clay-busy-dialog"
 
 
 typedef struct
@@ -43,12 +43,12 @@ typedef struct _BusyDialogClass BusyDialogClass;
 
 struct _BusyDialog
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _BusyDialogClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -58,14 +58,14 @@ struct _BusyDialogClass
 GType                     busy_dialog_get_type         (void);
 
 
-static GList             * busy_dialog_query_procedures    (GimpPlugIn           *plug_in);
-static GimpProcedure     * busy_dialog_create_procedure    (GimpPlugIn           *plug_in,
+static GList             * busy_dialog_query_procedures    (ClayPlugIn           *plug_in);
+static ClayProcedure     * busy_dialog_create_procedure    (ClayPlugIn           *plug_in,
                                                             const gchar          *name);
-static GimpValueArray    * busy_dialog_run                 (GimpProcedure        *procedure,
-                                                            GimpProcedureConfig  *config,
+static ClayValueArray    * busy_dialog_run                 (ClayProcedure        *procedure,
+                                                            ClayProcedureConfig  *config,
                                                             gpointer              run_data);
 
-static GimpPDBStatusType   busy_dialog                     (gint              read_fd,
+static ClayPDBStatusType   busy_dialog                     (gint              read_fd,
                                                             gint              write_fd,
                                                             const gchar      *message,
                                                             gboolean          cancelable);
@@ -82,15 +82,15 @@ static void                busy_dialog_response            (GtkDialog        *di
                                                             Context          *context);
 
 
-G_DEFINE_TYPE (BusyDialog, busy_dialog, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (BusyDialog, busy_dialog, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (BUSY_DIALOG_TYPE)
+CLAY_MAIN (BUSY_DIALOG_TYPE)
 DEFINE_STD_SET_I18N
 
 static void
 busy_dialog_class_init (BusyDialogClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = busy_dialog_query_procedures;
   plug_in_class->create_procedure = busy_dialog_create_procedure;
@@ -103,24 +103,24 @@ busy_dialog_init (BusyDialog *busy_dialog)
 }
 
 static GList *
-busy_dialog_query_procedures (GimpPlugIn *plug_in)
+busy_dialog_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-busy_dialog_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+busy_dialog_create_procedure (ClayPlugIn  *plug_in,
                               const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       busy_dialog_run, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Show a dialog while waiting for an "
                                         "operation to finish",
                                         "Used by Clay to display a dialog, "
@@ -131,58 +131,58 @@ busy_dialog_create_procedure (GimpPlugIn  *plug_in,
                                         "a \"Cancel\" button, which can be used "
                                         "to cancel the operation.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Ell",
                                       "Ell",
                                       "2018");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_INTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_INTERACTIVE,
                                         G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "read-fd",
+      clay_procedure_add_int_argument (procedure, "read-fd",
                                        "The read file descriptor",
                                        "The read file descriptor",
                                        G_MININT, G_MAXINT, 0,
                                        G_PARAM_READWRITE |
-                                       GIMP_PARAM_DONT_SERIALIZE);
+                                       CLAY_PARAM_DONT_SERIALIZE);
 
-      gimp_procedure_add_int_argument (procedure, "write-fd",
+      clay_procedure_add_int_argument (procedure, "write-fd",
                                        "The write file descriptor",
                                        "The write file descriptor",
                                        G_MININT, G_MAXINT, 0,
                                        G_PARAM_READWRITE |
-                                       GIMP_PARAM_DONT_SERIALIZE);
+                                       CLAY_PARAM_DONT_SERIALIZE);
 
-      gimp_procedure_add_string_argument (procedure, "message",
+      clay_procedure_add_string_argument (procedure, "message",
                                           "The message",
                                           "The message",
                                           NULL,
                                           G_PARAM_READWRITE |
-                                          GIMP_PARAM_DONT_SERIALIZE);
+                                          CLAY_PARAM_DONT_SERIALIZE);
 
-      gimp_procedure_add_boolean_argument (procedure, "cancelable",
+      clay_procedure_add_boolean_argument (procedure, "cancelable",
                                            "Whether the dialog is cancelable",
                                            "Whether the dialog is cancelable",
                                            FALSE,
                                            G_PARAM_READWRITE |
-                                           GIMP_PARAM_DONT_SERIALIZE);
+                                           CLAY_PARAM_DONT_SERIALIZE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-busy_dialog_run (GimpProcedure        *procedure,
-                 GimpProcedureConfig  *config,
+static ClayValueArray *
+busy_dialog_run (ClayProcedure        *procedure,
+                 ClayProcedureConfig  *config,
                  gpointer              run_data)
 {
-  GimpValueArray    *return_vals = NULL;
-  GimpPDBStatusType  status      = GIMP_PDB_SUCCESS;
-  GimpRunMode        run_mode    = GIMP_RUN_INTERACTIVE;
+  ClayValueArray    *return_vals = NULL;
+  ClayPDBStatusType  status      = CLAY_PDB_SUCCESS;
+  ClayRunMode        run_mode    = CLAY_RUN_INTERACTIVE;
   gint               read_fd;
   gint               write_fd;
   const gchar       *message;
@@ -197,23 +197,23 @@ busy_dialog_run (GimpProcedure        *procedure,
                 NULL);
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
-    case GIMP_RUN_NONINTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_INTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
       status = busy_dialog (read_fd, write_fd, message, cancelable);
       break;
 
     default:
-      status = GIMP_PDB_CALLING_ERROR;
+      status = CLAY_PDB_CALLING_ERROR;
       break;
     }
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, NULL);
+  return_vals = clay_procedure_new_return_values (procedure, status, NULL);
 
   return return_vals;
 }
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 busy_dialog (gint         read_fd,
              gint         write_fd,
              const gchar *message,
@@ -244,13 +244,13 @@ busy_dialog (gint         read_fd,
                   (GIOFunc) busy_dialog_read_channel_notify,
                   &context);
 
-  /* call gtk_init() before gimp_ui_init(), to avoid DESKTOP_STARTUP_ID from
+  /* call gtk_init() before clay_ui_init(), to avoid DESKTOP_STARTUP_ID from
    * taking effect -- we want the dialog to be prominently displayed above
    * other plug-in windows.
    */
   gtk_init (NULL, NULL);
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   /* the main window */
   if (! cancelable)
@@ -260,7 +260,7 @@ busy_dialog (gint         read_fd,
                              "skip-taskbar-hint", TRUE,
                              "deletable",         FALSE,
                              "resizable",         FALSE,
-                             "role",              "gimp-busy-dialog",
+                             "role",              "clay-busy-dialog",
                              "type-hint",         GDK_WINDOW_TYPE_HINT_DIALOG,
                              "window-position",   GTK_WIN_POS_CENTER,
                              NULL);
@@ -275,7 +275,7 @@ busy_dialog (gint         read_fd,
                              "title",             _("Please Wait"),
                              "skip-taskbar-hint", TRUE,
                              "resizable",         FALSE,
-                             "role",              "gimp-busy-dialog",
+                             "role",              "clay-busy-dialog",
                              "window-position",   GTK_WIN_POS_CENTER,
                              NULL);
 
@@ -301,19 +301,19 @@ busy_dialog (gint         read_fd,
 
   /* the title label */
   label = gtk_label_new (_("Please wait for the operation to complete"));
-  gimp_label_set_attributes (GTK_LABEL (label),
+  clay_label_set_attributes (GTK_LABEL (label),
                              PANGO_ATTR_WEIGHT, PANGO_WEIGHT_BOLD,
                              -1);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
 
   /* the busy box */
-  box = gimp_busy_box_new (message);
+  box = clay_busy_box_new (message);
   gtk_container_set_border_width (GTK_CONTAINER (box), 8);
   gtk_box_pack_start (GTK_BOX (vbox), box, TRUE, TRUE, 0);
   gtk_widget_set_visible (box, TRUE);
 
-  gimp_window_set_transient (GTK_WINDOW (window));
+  clay_window_set_transient (GTK_WINDOW (window));
   gtk_window_present (GTK_WINDOW (window));
 
   gtk_main ();
@@ -323,7 +323,7 @@ busy_dialog (gint         read_fd,
   g_clear_pointer (&context.read_channel,  g_io_channel_unref);
   g_clear_pointer (&context.write_channel, g_io_channel_unref);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 static gboolean

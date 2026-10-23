@@ -20,32 +20,32 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimptemplate.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claytemplate.h"
 
-#include "widgets/gimptemplateeditor.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/claytemplateeditor.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "template-options-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _TemplateOptionsDialog TemplateOptionsDialog;
 
 struct _TemplateOptionsDialog
 {
-  GimpTemplate                *template;
-  GimpContext                 *context;
-  GimpTemplateOptionsCallback  callback;
+  ClayTemplate                *template;
+  ClayContext                 *context;
+  ClayTemplateOptionsCallback  callback;
   gpointer                     user_data;
 
   GtkWidget                   *editor;
@@ -63,24 +63,24 @@ static void   template_options_dialog_response (GtkWidget             *dialog,
 /*  public function  */
 
 GtkWidget *
-template_options_dialog_new (GimpTemplate *template,
-                             GimpContext  *context,
+template_options_dialog_new (ClayTemplate *template,
+                             ClayContext  *context,
                              GtkWidget    *parent,
                              const gchar  *title,
                              const gchar  *role,
                              const gchar  *icon_name,
                              const gchar  *desc,
                              const gchar  *help_id,
-                             GimpTemplateOptionsCallback  callback,
+                             ClayTemplateOptionsCallback  callback,
                              gpointer                     user_data)
 {
   TemplateOptionsDialog *private;
   GtkWidget             *dialog;
-  GimpViewable          *viewable = NULL;
+  ClayViewable          *viewable = NULL;
   GtkWidget             *vbox;
 
-  g_return_val_if_fail (template == NULL || GIMP_IS_TEMPLATE (template), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (template == NULL || CLAY_IS_TEMPLATE (template), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (title != NULL, NULL);
   g_return_val_if_fail (role != NULL, NULL);
@@ -98,29 +98,29 @@ template_options_dialog_new (GimpTemplate *template,
 
   if (template)
     {
-      viewable = GIMP_VIEWABLE (template);
-      template = gimp_config_duplicate (GIMP_CONFIG (template));
+      viewable = CLAY_VIEWABLE (template);
+      template = clay_config_duplicate (CLAY_CONFIG (template));
     }
   else
     {
       template =
-        gimp_config_duplicate (GIMP_CONFIG (context->gimp->config->default_image));
-      viewable = GIMP_VIEWABLE (template);
+        clay_config_duplicate (CLAY_CONFIG (context->clay->config->default_image));
+      viewable = CLAY_VIEWABLE (template);
 
-      gimp_object_set_static_name (GIMP_OBJECT (template), _("Unnamed"));
+      clay_object_set_static_name (CLAY_OBJECT (template), _("Unnamed"));
     }
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
                                      title, role, icon_name, desc,
                                      parent,
-                                     gimp_standard_help_func, help_id,
+                                     clay_standard_help_func, help_id,
 
                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
                                      _("_OK"),     GTK_RESPONSE_OK,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -140,7 +140,7 @@ template_options_dialog_new (GimpTemplate *template,
                       vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  private->editor = gimp_template_editor_new (template, context->gimp, TRUE);
+  private->editor = clay_template_editor_new (template, context->clay, TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), private->editor, FALSE, FALSE, 0);
   gtk_widget_set_visible (private->editor, TRUE);
 
@@ -165,11 +165,11 @@ template_options_dialog_response (GtkWidget             *dialog,
 {
   if (response_id == GTK_RESPONSE_OK)
     {
-      GimpTemplateEditor *editor = GIMP_TEMPLATE_EDITOR (private->editor);
+      ClayTemplateEditor *editor = CLAY_TEMPLATE_EDITOR (private->editor);
 
       private->callback (dialog,
                          private->template,
-                         gimp_template_editor_get_template (editor),
+                         clay_template_editor_get_template (editor),
                          private->context,
                          private->user_data);
     }

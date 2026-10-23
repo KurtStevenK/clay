@@ -27,27 +27,27 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-macpaint-load"
 #define PLUG_IN_BINARY "file-macpaint"
-#define PLUG_IN_ROLE   "gimp-file-macpaint"
+#define PLUG_IN_ROLE   "clay-file-macpaint"
 
 typedef struct _Macpaint      Macpaint;
 typedef struct _MacpaintClass MacpaintClass;
 
 struct _Macpaint
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _MacpaintClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -57,34 +57,34 @@ struct _MacpaintClass
 GType                   macpaint_get_type         (void);
 
 
-static GList          * macpaint_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * macpaint_create_procedure (GimpPlugIn            *plug_in,
+static GList          * macpaint_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * macpaint_create_procedure (ClayPlugIn            *plug_in,
                                                    const gchar           *name);
 
-static GimpValueArray * macpaint_load             (GimpProcedure         *procedure,
-                                                   GimpRunMode            run_mode,
+static ClayValueArray * macpaint_load             (ClayProcedure         *procedure,
+                                                   ClayRunMode            run_mode,
                                                    GFile                 *file,
-                                                   GimpMetadata          *metadata,
-                                                   GimpMetadataLoadFlags *flags,
-                                                   GimpProcedureConfig   *config,
+                                                   ClayMetadata          *metadata,
+                                                   ClayMetadataLoadFlags *flags,
+                                                   ClayProcedureConfig   *config,
                                                    gpointer               run_data);
 
-static GimpImage      * load_image                (GFile                 *file,
+static ClayImage      * load_image                (GFile                 *file,
                                                    GObject               *config,
-                                                   GimpRunMode            run_mode,
+                                                   ClayRunMode            run_mode,
                                                    GError               **error);
 
 
-G_DEFINE_TYPE (Macpaint, macpaint, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Macpaint, macpaint, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (MACPAINT_TYPE)
+CLAY_MAIN (MACPAINT_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 macpaint_class_init (MacpaintClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = macpaint_query_procedures;
   plug_in_class->create_procedure = macpaint_create_procedure;
@@ -97,7 +97,7 @@ macpaint_init (Macpaint *macpaint)
 }
 
 static GList *
-macpaint_query_procedures (GimpPlugIn *plug_in)
+macpaint_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -106,48 +106,48 @@ macpaint_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-macpaint_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+macpaint_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            macpaint_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("MacPaint image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load MacPaint image format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2026");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-macpaint");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "mac,pntg");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-macpaint_load (GimpProcedure         *procedure,
-               GimpRunMode            run_mode,
+static ClayValueArray *
+macpaint_load (ClayProcedure         *procedure,
+               ClayRunMode            run_mode,
                GFile                 *file,
-               GimpMetadata          *metadata,
-               GimpMetadataLoadFlags *flags,
-               GimpProcedureConfig   *config,
+               ClayMetadata          *metadata,
+               ClayMetadataLoadFlags *flags,
+               ClayProcedureConfig   *config,
                gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -155,27 +155,27 @@ macpaint_load (GimpProcedure         *procedure,
   image = load_image (file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage  *image      = NULL;
-  GimpLayer  *layer;
+  ClayImage  *image      = NULL;
+  ClayLayer  *layer;
   GeglBuffer *buffer;
   guchar     *pixels     = NULL;
   guchar     *data       = NULL;
@@ -195,7 +195,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -240,22 +240,22 @@ load_image (GFile        *file,
     }
 
   /* MacPaint images are always 576 x 720 pixels, black and white */
-  image = gimp_image_new_with_precision (576, 720, GIMP_GRAY,
-                                         GIMP_PRECISION_U8_NON_LINEAR);
+  image = clay_image_new_with_precision (576, 720, CLAY_GRAY,
+                                         CLAY_PRECISION_U8_NON_LINEAR);
 
-  layer = gimp_layer_new (image, _("Background"), 576, 720,
-                          GIMP_GRAY_IMAGE,
-                          100, gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  layer = clay_layer_new (image, _("Background"), 576, 720,
+                          CLAY_GRAY_IMAGE,
+                          100, clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   pixels = g_try_malloc0 (576 * 720);
   data   = g_try_malloc0 (file_size);
 
   if (! pixels || ! data)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("There was not enough memory to complete the "
                      "operation."));
       fclose (fp);

@@ -29,26 +29,26 @@
                                   inCopy)
   (let* (
         (theImage (if (= inCopy TRUE)
-                      (car (gimp-image-duplicate inImage))
+                      (car (clay-image-duplicate inImage))
                       inImage))
-        (theLayer (vector-ref (car (gimp-image-get-selected-layers theImage)) 0))
+        (theLayer (vector-ref (car (clay-image-get-selected-layers theImage)) 0))
         (n 0)
         (ang (* (/ 360 inFrames)
                 (if (= inFromLeft TRUE) 1 -1) ))
         (theFrame 0)
         )
 
-  (gimp-layer-add-alpha theLayer)
+  (clay-layer-add-alpha theLayer)
 
   (while (> inFrames n)
     (set! n (+ n 1))
-    (set! theFrame (car (gimp-layer-copy theLayer)))
-    (gimp-image-insert-layer theImage theFrame 0 0)
-    (gimp-item-set-name theFrame
+    (set! theFrame (car (clay-layer-copy theLayer)))
+    (clay-image-insert-layer theImage theFrame 0 0)
+    (clay-item-set-name theFrame
                          (string-append "Anim Frame: "
                                         (number->string (- inFrames n) 10)
                                         " (replace)"))
-    ;(gimp-message "Now call map-object")
+    ;(clay-message "Now call map-object")
     (plug-in-map-object #:run-mode              RUN-NONINTERACTIVE
                         #:image                 theImage              ; mapping image
                         #:drawables             (vector theFrame)     ; mapping drawables
@@ -92,22 +92,22 @@
     )
   )
 
-  (gimp-image-remove-layer theImage theLayer)
-  (gimp-image-autocrop theImage theFrame)
+  (clay-image-remove-layer theImage theLayer)
+  (clay-image-autocrop theImage theFrame)
 
   (if (= inIndex 0)
       ()
-      (gimp-image-convert-indexed theImage CONVERT-DITHER-FS CONVERT-PALETTE-GENERATE inIndex
+      (clay-image-convert-indexed theImage CONVERT-DITHER-FS CONVERT-PALETTE-GENERATE inIndex
                                   FALSE FALSE ""))
 
   (if (= inCopy TRUE)
     (begin
-      (gimp-image-clean-all theImage)
-      (gimp-display-new theImage)
+      (clay-image-clean-all theImage)
+      (clay-display-new theImage)
     )
   )
 
-  (gimp-displays-flush)
+  (clay-displays-flush)
   )
 )
 

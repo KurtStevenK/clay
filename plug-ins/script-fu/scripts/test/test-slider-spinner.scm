@@ -1,4 +1,4 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; Test slider and spinnner widgets i.e. SF-ADJUSTMENT
 ; re author's declaration of step, page, and digits.

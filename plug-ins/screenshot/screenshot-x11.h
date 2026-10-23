@@ -25,9 +25,9 @@ gboolean               screenshot_x11_available        (void);
 
 ScreenshotCapabilities screenshot_x11_get_capabilities (void);
 
-GimpPDBStatusType      screenshot_x11_shoot            (GimpProcedureConfig  *config,
+ClayPDBStatusType      screenshot_x11_shoot            (ClayProcedureConfig  *config,
                                                         GdkMonitor           *monitor,
-                                                        GimpImage           **image,
+                                                        ClayImage           **image,
                                                         GError              **error);
 
 #endif /* GDK_WINDOWING_X11 */

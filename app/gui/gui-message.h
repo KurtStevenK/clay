@@ -18,8 +18,8 @@
 #pragma once
 
 
-void gui_message (Gimp                *gimp,
+void gui_message (Clay                *clay,
                   GObject             *handler,
-                  GimpMessageSeverity  severity,
+                  ClayMessageSeverity  severity,
                   const gchar         *domain,
                   const gchar         *message);

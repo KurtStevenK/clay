@@ -18,16 +18,16 @@
 #pragma once
 
 
-void   palette_editor_edit_color_cmd_callback   (GimpAction *action,
+void   palette_editor_edit_color_cmd_callback   (ClayAction *action,
                                                  GVariant   *value,
                                                  gpointer    data);
-void   palette_editor_new_color_cmd_callback    (GimpAction *action,
+void   palette_editor_new_color_cmd_callback    (ClayAction *action,
                                                  GVariant   *value,
                                                  gpointer    data);
-void   palette_editor_delete_color_cmd_callback (GimpAction *action,
+void   palette_editor_delete_color_cmd_callback (ClayAction *action,
                                                  GVariant   *value,
                                                  gpointer    data);
 
-void   palette_editor_zoom_cmd_callback         (GimpAction *action,
+void   palette_editor_zoom_cmd_callback         (ClayAction *action,
                                                  GVariant   *value,
                                                  gpointer    data);

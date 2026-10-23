@@ -4,7 +4,7 @@
 ; Change the colormap of an image to the colors in a specified palette.
 ; Included is script-fu-make-cmap-array (available for use in scripts) which
 ; returns a GBytes containing the colors from a specified palette.
-; This array can be used as the cmap argument for gimp-image-set-colormap.
+; This array can be used as the cmap argument for clay-image-set-colormap.
 
 ; xyz.kainzmayer.ClayDesign
 ; Copyright (C) 1995 Spencer Kimball and Peter Mattis
@@ -24,7 +24,7 @@
 
 (define (script-fu-make-cmap-array palette)
   (let* (
-        (num-colors (car (gimp-palette-get-color-count palette)))
+        (num-colors (car (clay-palette-get-color-count palette)))
         ; cons-array is not Scheme standard
         ; but was in SIOD and is in script-fu-compat.init
         (cmap (cons-array (* num-colors 3) 'byte))
@@ -33,7 +33,7 @@
         )
 
     (while (< i num-colors)
-      (set! color (car (gimp-palette-entry-get-color palette i)))
+      (set! color (car (clay-palette-entry-get-color palette i)))
       (vector-set! cmap (* i 3) (car color))
       (vector-set! cmap (+ (* i 3) 1) (cadr color))
       (vector-set! cmap (+ (* i 3) 2) (caddr color))
@@ -45,8 +45,8 @@
 )
 
 (define (script-fu-set-cmap img drawables palette)
-  (gimp-image-set-palette img palette)
-  (gimp-displays-flush)
+  (clay-image-set-palette img palette)
+  (clay-displays-flush)
 )
 
 (script-fu-register-filter "script-fu-set-cmap"

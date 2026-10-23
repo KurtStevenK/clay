@@ -30,22 +30,22 @@ libscriptfu_sources = [
 
 # !! just "library(...)" which means shared versus static depends on configuration of project.
 # Meson defaults to shared, but you can reconfigure to static.
-# This library is not generally useful except by core GIMP developers.
+# This library is not generally useful except by core Clay developers.
 
 # Dependencies:
-# libscriptfu uses Gtk (which libgimpui_dep references)
-# FUTURE: libscriptfu should use libgimpui but not Gtk directly
+# libscriptfu uses Gtk (which libclayui_dep references)
+# FUTURE: libscriptfu should use libclayui but not Gtk directly
 # libscriptfu does not use sockets (unlike the outer script-fu or script-fu-server)
 
 # link_whole means the entire ftx and tinyscheme static libraries are in
 # this library, whether or not they are used (see meson docs.)
 
-# FUTURE: install private to gimp, in 'lib' subdir parallel to 'modules' subdir
+# FUTURE: install private to clay, in 'lib' subdir parallel to 'modules' subdir
 # Not doing this because it complicates packaging
-# Instead, this library installs in same place as libgimp
-# install_dir: gimpplugindir / 'lib',
+# Instead, this library installs in same place as libclay
+# install_dir: clayplugindir / 'lib',
 
-libscriptfu = library('clay-scriptfu-'+ gimp_api_version,
+libscriptfu = library('clay-scriptfu-'+ clay_api_version,
   libscriptfu_sources,
   include_directories: [
     rootInclude,
@@ -61,7 +61,7 @@ libscriptfu = library('clay-scriptfu-'+ gimp_api_version,
     '-D_SCHEME_SOURCE',
   ],
   dependencies: [
-    libgimpui_dep,
+    libclayui_dep,
     math,
     gi,
   ],

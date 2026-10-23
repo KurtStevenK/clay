@@ -1,0 +1,40 @@
+/* Neon theme, dim scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(242,233,255);
+@define-color bg-color                   rgb(26,16,48);
+@define-color border-color               rgb(56,46,77);
+@define-color dimmed-fg-color            rgb(188,179,203);
+@define-color disabled-fg-color          rgb(145,135,162);
+@define-color disabled-button-color      rgb(95,85,114);
+@define-color hover-color                rgb(56,46,77);
+@define-color widget-bg-color            rgb(39,29,60);
+@define-color selected-color             rgb(69,59,89);
+@define-color extreme-bg-color           rgb(18,11,34);
+@define-color extreme-selected-color     rgb(56,46,77);
+@define-color strong-border-color        rgb(102,92,120);
+@define-color stronger-border-color      rgb(102,92,120);
+@define-color edge-border-color          rgb(102,92,120);
+@define-color scrollbar-slider-color     rgb(102,92,120);
+@define-color scrollbar-trough-color     rgb(18,11,34);
+@define-color ruler-color                rgba(56,46,77,0.3);
+@define-color accent-color               rgb(255,43,214);
+@define-color accent-hover-color         rgb(255,85,222);
+@define-color on-accent-color            rgb(13,8,24);
+@define-color destructive-color          rgb(255,43,107);
+@define-color good-color                 rgb(57,255,20);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Menlo", "Monaco", "Courier New", monospace; }
+@define-color lane-rust rgb(255,106,0);
+@define-color lane-maroon rgb(255,43,214);
+@define-color lane-mustard rgb(255,240,0);
+@define-color lane-purple rgb(176,38,255);
+@define-color lane-blue rgb(0,240,255);
+@define-color lane-green rgb(57,255,20);

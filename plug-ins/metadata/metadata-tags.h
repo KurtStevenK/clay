@@ -28,12 +28,12 @@
 
 enum
 {
-  GIMP_XMP_NONE = 0,
-  GIMP_XMP_TEXT,
-  GIMP_XMP_BAG,
-  GIMP_XMP_SEQ,
-  GIMP_XMP_LANG,
-  GIMP_XMP_ALT
+  CLAY_XMP_NONE = 0,
+  CLAY_XMP_TEXT,
+  CLAY_XMP_BAG,
+  CLAY_XMP_SEQ,
+  CLAY_XMP_LANG,
+  CLAY_XMP_ALT
 };
 
 /* Beware: the order of these enums needs to stay in sync with the order

@@ -22,26 +22,26 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
-#include "core/gimppaintinfo.h"
-#include "core/gimpstrokeoptions.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
+#include "core/claypaintinfo.h"
+#include "core/claystrokeoptions.h"
+#include "core/claytoolinfo.h"
 
-#include "widgets/gimpcontainercombobox.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpviewabledialog.h"
-#include "widgets/gimpstrokeeditor.h"
+#include "widgets/claycontainercombobox.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/clayviewabledialog.h"
+#include "widgets/claystrokeeditor.h"
 
 #include "stroke-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -53,9 +53,9 @@ struct _StrokeDialog
 {
   GList              *items;
   GList              *drawables;
-  GimpContext        *context;
-  GimpStrokeOptions  *options;
-  GimpStrokeCallback  callback;
+  ClayContext        *context;
+  ClayStrokeOptions  *options;
+  ClayStrokeCallback  callback;
   gpointer            user_data;
 
   GtkWidget          *tool_combo;
@@ -78,17 +78,17 @@ static void  stroke_dialog_expand_tabs (GtkWidget    *widget,
 GtkWidget *
 stroke_dialog_new (GList              *items,
                    GList              *drawables,
-                   GimpContext        *context,
+                   ClayContext        *context,
                    const gchar        *title,
                    const gchar        *icon_name,
                    const gchar        *help_id,
                    GtkWidget          *parent,
-                   GimpStrokeOptions  *options,
-                   GimpStrokeCallback  callback,
+                   ClayStrokeOptions  *options,
+                   ClayStrokeCallback  callback,
                    gpointer            user_data)
 {
   StrokeDialog *private;
-  GimpImage    *image;
+  ClayImage    *image;
   GtkWidget    *dialog;
   GtkWidget    *main_vbox;
   GtkWidget    *switcher;
@@ -97,32 +97,32 @@ stroke_dialog_new (GList              *items,
 
   g_return_val_if_fail (items, NULL);
   g_return_val_if_fail (drawables, NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (icon_name != NULL, NULL);
   g_return_val_if_fail (help_id != NULL, NULL);
   g_return_val_if_fail (parent == NULL || GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (callback != NULL, NULL);
 
-  image = gimp_item_get_image (items->data);
+  image = clay_item_get_image (items->data);
 
   private = g_slice_new0 (StrokeDialog);
 
   private->items     = g_list_copy (items);
   private->drawables = g_list_copy (drawables);
   private->context   = context;
-  private->options   = gimp_stroke_options_new (context->gimp, context, TRUE);
+  private->options   = clay_stroke_options_new (context->clay, context, TRUE);
   private->callback  = callback;
   private->user_data = user_data;
 
-  gimp_config_sync (G_OBJECT (options),
+  clay_config_sync (G_OBJECT (options),
                     G_OBJECT (private->options), 0);
 
-  dialog = gimp_viewable_dialog_new (g_list_copy (items), context,
-                                     title, "gimp-stroke-options",
+  dialog = clay_viewable_dialog_new (g_list_copy (items), context,
+                                     title, "clay-stroke-options",
                                      icon_name,
                                      _("Choose Stroke Style"),
                                      parent,
-                                     gimp_standard_help_func,
+                                     clay_standard_help_func,
                                      help_id,
 
                                      _("_Reset"),  RESPONSE_RESET,
@@ -131,7 +131,7 @@ stroke_dialog_new (GList              *items,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
@@ -167,7 +167,7 @@ stroke_dialog_new (GList              *items,
 
   /*  the stroke frame  */
 
-  frame = gimp_frame_new (NULL);
+  frame = clay_frame_new (NULL);
   gtk_stack_add_titled (GTK_STACK (stack),
                         frame,
                         "stroke-tool",
@@ -179,9 +179,9 @@ stroke_dialog_new (GList              *items,
     gdouble    xres;
     gdouble    yres;
 
-    gimp_image_get_resolution (image, &xres, &yres);
+    clay_image_get_resolution (image, &xres, &yres);
 
-    stroke_editor = gimp_stroke_editor_new (private->options, yres, FALSE,
+    stroke_editor = clay_stroke_editor_new (private->options, yres, FALSE,
                                             FALSE);
     gtk_container_add (GTK_CONTAINER (frame), stroke_editor);
     gtk_widget_set_visible (stroke_editor, TRUE);
@@ -191,7 +191,7 @@ stroke_dialog_new (GList              *items,
 
   /*  the paint tool frame  */
 
-  frame = gimp_frame_new (NULL);
+  frame = clay_frame_new (NULL);
   gtk_stack_add_titled (GTK_STACK (stack),
                         frame,
                         "paint-tool",
@@ -217,18 +217,18 @@ stroke_dialog_new (GList              *items,
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
     gtk_widget_set_visible (label, TRUE);
 
-    combo = gimp_container_combo_box_new (image->gimp->paint_info_list,
-                                          GIMP_CONTEXT (private->options),
+    combo = clay_container_combo_box_new (image->clay->paint_info_list,
+                                          CLAY_CONTEXT (private->options),
                                           16, 0);
     gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
     gtk_widget_set_visible (combo, TRUE);
 
-    switch (gimp_stroke_options_get_method (private->options))
+    switch (clay_stroke_options_get_method (private->options))
       {
-      case GIMP_STROKE_LINE:
+      case CLAY_STROKE_LINE:
         gtk_stack_set_visible_child_name (GTK_STACK (stack), "stroke-tool");
         break;
-      case GIMP_STROKE_PAINT_METHOD:
+      case CLAY_STROKE_PAINT_METHOD:
         gtk_stack_set_visible_child_name (GTK_STACK (stack), "paint-tool");
         break;
       }
@@ -236,7 +236,7 @@ stroke_dialog_new (GList              *items,
     private->stack      = stack;
     private->tool_combo = combo;
 
-    button = gimp_prop_check_button_new (G_OBJECT (private->options),
+    button = clay_prop_check_button_new (G_OBJECT (private->options),
                                          "emulate-brush-dynamics",
                                          _("_Emulate brush dynamics"));
     gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
@@ -272,12 +272,12 @@ stroke_dialog_response (GtkWidget    *dialog,
     {
     case RESPONSE_RESET:
       {
-        GimpToolInfo *tool_info = gimp_context_get_tool (private->context);
+        ClayToolInfo *tool_info = clay_context_get_tool (private->context);
 
-        gimp_config_reset (GIMP_CONFIG (private->options));
+        clay_config_reset (CLAY_CONFIG (private->options));
 
-        gimp_container_view_set_1_selected (GIMP_CONTAINER_VIEW (private->tool_combo),
-                                            GIMP_VIEWABLE (tool_info->paint_info));
+        clay_container_view_set_1_selected (CLAY_CONTAINER_VIEW (private->tool_combo),
+                                            CLAY_VIEWABLE (tool_info->paint_info));
 
       }
       break;
@@ -290,9 +290,9 @@ stroke_dialog_response (GtkWidget    *dialog,
 
         if (g_strcmp0 (gtk_stack_get_visible_child_name (GTK_STACK (private->stack)),
                        "stroke-tool") == 0)
-          stroke_type = GIMP_STROKE_LINE;
+          stroke_type = CLAY_STROKE_LINE;
         else
-          stroke_type = GIMP_STROKE_PAINT_METHOD;
+          stroke_type = CLAY_STROKE_PAINT_METHOD;
 
         pspec = g_object_class_find_property (G_OBJECT_GET_CLASS (G_OBJECT (private->options)),
                                               "method");

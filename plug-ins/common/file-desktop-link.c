@@ -26,14 +26,14 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-desktop-link-load"
 #define PLUG_IN_BINARY "file-desktop-link"
-#define PLUG_IN_ROLE   "gimp-file-desktop-link"
+#define PLUG_IN_ROLE   "clay-file-desktop-link"
 
 
 typedef struct _Desktop      Desktop;
@@ -41,12 +41,12 @@ typedef struct _DesktopClass DesktopClass;
 
 struct _Desktop
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _DesktopClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -55,33 +55,33 @@ struct _DesktopClass
 
 GType                   desktop_get_type         (void);
 
-static GList          * desktop_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * desktop_create_procedure (GimpPlugIn            *plug_in,
+static GList          * desktop_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * desktop_create_procedure (ClayPlugIn            *plug_in,
                                                   const gchar           *name);
 
-static GimpValueArray * desktop_load             (GimpProcedure         *procedure,
-                                                  GimpRunMode            run_mode,
+static ClayValueArray * desktop_load             (ClayProcedure         *procedure,
+                                                  ClayRunMode            run_mode,
                                                   GFile                 *file,
-                                                  GimpMetadata          *metadata,
-                                                  GimpMetadataLoadFlags *flags,
-                                                  GimpProcedureConfig   *config,
+                                                  ClayMetadata          *metadata,
+                                                  ClayMetadataLoadFlags *flags,
+                                                  ClayProcedureConfig   *config,
                                                   gpointer               run_data);
 
-static GimpImage      * load_image               (GFile                 *file,
-                                                  GimpRunMode            run_mode,
+static ClayImage      * load_image               (GFile                 *file,
+                                                  ClayRunMode            run_mode,
                                                   GError               **error);
 
 
-G_DEFINE_TYPE (Desktop, desktop, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Desktop, desktop, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (DESKTOP_TYPE)
+CLAY_MAIN (DESKTOP_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 desktop_class_init (DesktopClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = desktop_query_procedures;
   plug_in_class->create_procedure = desktop_create_procedure;
@@ -94,26 +94,26 @@ desktop_init (Desktop *desktop)
 }
 
 static GList *
-desktop_query_procedures (GimpPlugIn *plug_in)
+desktop_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (LOAD_PROC));
 }
 
-static GimpProcedure *
-desktop_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+desktop_create_procedure (ClayPlugIn  *plug_in,
                           const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            desktop_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Desktop Link"));
+      clay_procedure_set_menu_label (procedure, _("Desktop Link"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Follows a link to an image in a "
                                         ".desktop file",
                                         "Opens a .desktop file and if it is "
@@ -121,54 +121,54 @@ desktop_create_procedure (GimpPlugIn  *plug_in,
                                         "file the link points to.",
                                         LOAD_PROC);
 
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Sven Neumann",
                                       "Sven Neumann",
                                       "2006");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "desktop");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-desktop_load (GimpProcedure         *procedure,
-              GimpRunMode            run_mode,
+static ClayValueArray *
+desktop_load (ClayProcedure         *procedure,
+              ClayRunMode            run_mode,
               GFile                 *file,
-              GimpMetadata          *metadata,
-              GimpMetadataLoadFlags *flags,
-              GimpProcedureConfig   *config,
+              ClayMetadata          *metadata,
+              ClayMetadataLoadFlags *flags,
+              ClayProcedureConfig   *config,
               gpointer               run_data)
 {
-  GimpValueArray *return_values;
-  GimpImage      *image;
+  ClayValueArray *return_values;
+  ClayImage      *image;
   GError         *error  = NULL;
 
   image = load_image (file, run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_values = gimp_procedure_new_return_values (procedure,
-                                                    GIMP_PDB_SUCCESS,
+  return_values = clay_procedure_new_return_values (procedure,
+                                                    CLAY_PDB_SUCCESS,
                                                     NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_values, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_values, 1, image);
 
   return return_values;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **load_error)
 {
   GKeyFile  *key_file = g_key_file_new ();
-  GimpImage *image    = NULL;
+  ClayImage *image    = NULL;
   gchar     *filename = NULL;
   gchar     *group    = NULL;
   gchar     *value    = NULL;
@@ -193,14 +193,14 @@ load_image (GFile        *file,
   value = g_key_file_get_value (key_file,
                                 group, G_KEY_FILE_DESKTOP_KEY_URL, &error);
   if (value)
-    image = gimp_file_load (run_mode, g_file_new_for_uri (value));
+    image = clay_file_load (run_mode, g_file_new_for_uri (value));
 
  out:
   if (error)
     {
       g_set_error (load_error, error->domain, error->code,
                    _("Error loading desktop file '%s': %s"),
-                   gimp_filename_to_utf8 (filename), error->message);
+                   clay_filename_to_utf8 (filename), error->message);
       g_error_free (error);
     }
 

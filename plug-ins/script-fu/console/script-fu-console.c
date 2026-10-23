@@ -22,8 +22,8 @@
 
 #include <glib/gstdio.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include <gdk/gdkkeysyms.h>
 
@@ -87,7 +87,7 @@ static void      script_fu_output_to_console     (gboolean          is_error,
                                                   gpointer          user_data);
 
 static void      script_fu_models_from_settings  (ConsoleInterface    *console,
-                                                  GimpProcedureConfig *config);
+                                                  ClayProcedureConfig *config);
 static void      script_fu_command_to_history    (ConsoleInterface    *console,
                                                   const gchar         *command);
 
@@ -95,9 +95,9 @@ static void      script_fu_command_to_history    (ConsoleInterface    *console,
  *  Function definitions
  */
 
-GimpValueArray *
-script_fu_console_run (GimpProcedure       *procedure,
-                       GimpProcedureConfig *config)
+ClayValueArray *
+script_fu_console_run (ClayProcedure       *procedure,
+                       ClayProcedureConfig *config)
 {
   ConsoleInterface  console = { 0, };
   GtkWidget        *vbox;
@@ -107,7 +107,7 @@ script_fu_console_run (GimpProcedure       *procedure,
 
   script_fu_set_print_flag (1);
 
-  gimp_ui_init ("script-fu");
+  clay_ui_init ("script-fu");
 
   /* Create model early so we can fill from settings. */
   console.total_history = console_total_history_new ();
@@ -116,10 +116,10 @@ script_fu_console_run (GimpProcedure       *procedure,
 
   script_fu_models_from_settings (&console, config);
 
-  console.dialog = gimp_dialog_new (_("Script Console"),
-                                    "gimp-script-fu-console",
+  console.dialog = clay_dialog_new (_("Script Console"),
+                                    "clay-script-fu-console",
                                     NULL, 0,
-                                    gimp_standard_help_func, PROC_NAME,
+                                    clay_standard_help_func, PROC_NAME,
 
                                     _("_Save"),  RESPONSE_SAVE,
                                     _("C_lear"), RESPONSE_CLEAR,
@@ -129,13 +129,13 @@ script_fu_console_run (GimpProcedure       *procedure,
   gtk_window_set_default_size (GTK_WINDOW (console.dialog), TEXT_WIDTH,
                                TEXT_HEIGHT);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (console.dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (console.dialog),
                                            GTK_RESPONSE_CLOSE,
                                            RESPONSE_CLEAR,
                                            RESPONSE_SAVE,
                                            -1);
 
-  gimp_window_set_transient (GTK_WINDOW (console.dialog));
+  clay_window_set_transient (GTK_WINDOW (console.dialog));
 
   g_object_add_weak_pointer (G_OBJECT (console.dialog),
                              (gpointer) &console.dialog);
@@ -214,7 +214,7 @@ script_fu_console_run (GimpProcedure       *procedure,
   /* Update config with user's change to history */
   console_history_to_settings (&console.history, config);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static void
@@ -282,7 +282,7 @@ script_fu_console_save_response (GtkNativeDialog  *dialog,
       if (! fh)
         {
           g_message (_("Could not open '%s' for writing: %s"),
-                     gimp_filename_to_utf8 (filename),
+                     clay_filename_to_utf8 (filename),
                      g_strerror (errno));
 
           g_free (filename);
@@ -307,9 +307,9 @@ script_fu_browse_callback (GtkWidget        *widget,
   if (! console->proc_browser)
     {
       console->proc_browser =
-        gimp_proc_browser_dialog_new (_("Script-Fu Procedure Browser"),
+        clay_proc_browser_dialog_new (_("Script-Fu Procedure Browser"),
                                       "script-fu-procedure-browser",
-                                      gimp_standard_help_func, PROC_NAME,
+                                      clay_standard_help_func, PROC_NAME,
 
                                       _("_Apply"), GTK_RESPONSE_APPLY,
                                       _("_Close"), GTK_RESPONSE_CLOSE,
@@ -318,7 +318,7 @@ script_fu_browse_callback (GtkWidget        *widget,
 
       gtk_dialog_set_default_response (GTK_DIALOG (console->proc_browser),
                                        GTK_RESPONSE_APPLY);
-      gimp_dialog_set_alternative_button_order (GTK_DIALOG (console->proc_browser),
+      clay_dialog_set_alternative_button_order (GTK_DIALOG (console->proc_browser),
                                                GTK_RESPONSE_CLOSE,
                                                GTK_RESPONSE_APPLY,
                                                -1);
@@ -342,8 +342,8 @@ script_fu_browse_response (GtkWidget        *widget,
                            gint              response_id,
                            ConsoleInterface *console)
 {
-  GimpProcBrowserDialog  *dialog = GIMP_PROC_BROWSER_DIALOG (widget);
-  GimpProcedure          *procedure;
+  ClayProcBrowserDialog  *dialog = CLAY_PROC_BROWSER_DIALOG (widget);
+  ClayProcedure          *procedure;
   gchar                  *proc_name;
   GParamSpec            **pspecs;
   gint                    n_pspecs;
@@ -356,14 +356,14 @@ script_fu_browse_response (GtkWidget        *widget,
       return;
     }
 
-  proc_name = gimp_proc_browser_dialog_get_selected (dialog);
+  proc_name = clay_proc_browser_dialog_get_selected (dialog);
 
   if (proc_name == NULL)
     return;
 
-  procedure = gimp_pdb_lookup_procedure (gimp_get_pdb (), proc_name);
+  procedure = clay_pdb_lookup_procedure (clay_get_pdb (), proc_name);
 
-  pspecs = gimp_procedure_get_arguments (procedure, &n_pspecs);
+  pspecs = clay_procedure_get_arguments (procedure, &n_pspecs);
 
   text = g_string_new ("(");
   text = g_string_append (text, proc_name);
@@ -482,8 +482,8 @@ script_fu_editor_key_function (GtkWidget        *widget,
       output = g_string_new (NULL);
       script_fu_redirect_output_to_gstr (output);
 
-      gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                          GIMP_PDB_ERROR_HANDLER_PLUGIN);
+      clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                          CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
       is_error = script_fu_interpret_string (command);
 
@@ -501,12 +501,12 @@ script_fu_editor_key_function (GtkWidget        *widget,
           g_free ( (gpointer) text);
         }
 
-      gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                          GIMP_PDB_ERROR_HANDLER_INTERNAL);
+      clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                          CLAY_PDB_ERROR_HANDLER_INTERNAL);
 
       g_string_free (output, TRUE);
 
-      gimp_displays_flush ();
+      clay_displays_flush ();
 
       return TRUE;
       break;
@@ -575,7 +575,7 @@ script_fu_editor_key_function (GtkWidget        *widget,
  */
 static void
 script_fu_models_from_settings (ConsoleInterface    *console,
-                                GimpProcedureConfig *config)
+                                ClayProcedureConfig *config)
 
 {
   GStrv strings_in;

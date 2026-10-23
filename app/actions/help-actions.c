@@ -20,75 +20,75 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "help-actions.h"
 #include "help-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry help_actions[] =
+static const ClayActionEntry help_actions[] =
 {
-  { "help-help", "gimp-prefs-help-system",
+  { "help-help", "clay-prefs-help-system",
     NC_("help-action", "_Help"), NULL, { "F1", NULL },
     NC_("help-action", "Open the Clay user manual"),
     help_help_cmd_callback,
-    GIMP_HELP_HELP },
+    CLAY_HELP_HELP },
 
-  { "help-context-help", "gimp-prefs-help-system",
+  { "help-context-help", "clay-prefs-help-system",
     NC_("help-action", "_Context Help"), NULL, { "<shift>F1", NULL },
     NC_("help-action", "Show the help for a specific user interface item"),
     help_context_help_cmd_callback,
-    GIMP_HELP_HELP_CONTEXT }
+    CLAY_HELP_HELP_CONTEXT }
 };
 
-static const GimpStringActionEntry help_online_actions[] =
+static const ClayStringActionEntry help_online_actions[] =
 {
-  { "help-online-main-web-site", GIMP_ICON_WEB,
+  { "help-online-main-web-site", CLAY_ICON_WEB,
     NC_("help-action", "_Main Web Site"), NULL, { NULL },
     NC_("help-action", "Bookmark to the Clay web site"),
     "https://claydesign.web.app",
-    GIMP_HELP_HELP },
+    CLAY_HELP_HELP },
 
-  { "help-online-docs-web-site", GIMP_ICON_WEB,
+  { "help-online-docs-web-site", CLAY_ICON_WEB,
     NC_("help-action", "_User Manual Web Site"), NULL, { NULL },
     NC_("help-action", "Bookmark to the Documentation web site"),
     "https://claydesign.web.app/docs",
-    GIMP_HELP_HELP },
+    CLAY_HELP_HELP },
 
-  { "help-online-bug-tracker", GIMP_ICON_WEB,
+  { "help-online-bug-tracker", CLAY_ICON_WEB,
     NC_("help-action", "_Bug Reports"), NULL, { NULL },
     NC_("help-action", "Bookmark to the bug tracker of Clay"),
     "https://github.com/KurtStevenK/clay/issues",
-    GIMP_HELP_HELP },
+    CLAY_HELP_HELP },
 
-  { "help-online-developer-web-site", GIMP_ICON_WEB,
+  { "help-online-developer-web-site", CLAY_ICON_WEB,
     NC_("help-action", "_Developer Web Site"), NULL, { NULL },
     NC_("help-action", "Bookmark to the Clay source repository"),
     "https://github.com/KurtStevenK/clay",
-    GIMP_HELP_HELP }
+    CLAY_HELP_HELP }
 };
 
 void
-help_actions_setup (GimpActionGroup *group)
+help_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "help-action",
+  clay_action_group_add_actions (group, "help-action",
                                  help_actions,
                                  G_N_ELEMENTS (help_actions));
-  gimp_action_group_add_string_actions (group, "help-action",
+  clay_action_group_add_string_actions (group, "help-action",
                                         help_online_actions,
                                         G_N_ELEMENTS (help_online_actions),
                                         help_online_cmd_callback);
 }
 
 void
-help_actions_update (GimpActionGroup *group,
+help_actions_update (ClayActionGroup *group,
                      gpointer         data)
 {
 }

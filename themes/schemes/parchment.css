@@ -1,0 +1,29 @@
+/* Clay colour scheme "Parchment": a palette laid over the selected theme's light variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(33,26,18);
+@define-color bg-color                   rgb(243,233,208);
+@define-color border-color               rgb(214,204,181);
+@define-color dimmed-fg-color            rgb(86,78,66);
+@define-color disabled-fg-color          rgb(128,119,104);
+@define-color disabled-button-color      rgb(176,167,147);
+@define-color hover-color                rgb(218,208,185);
+@define-color widget-bg-color            rgb(232,223,198);
+@define-color selected-color             rgb(205,196,174);
+@define-color extreme-bg-color           rgb(249,244,232);
+@define-color extreme-selected-color     rgb(214,204,181);
+@define-color strong-border-color        rgb(170,161,142);
+@define-color stronger-border-color      rgb(170,161,142);
+@define-color edge-border-color          rgb(170,161,142);
+@define-color scrollbar-slider-color     rgb(170,161,142);
+@define-color scrollbar-trough-color     rgb(243,233,208);
+@define-color ruler-color                rgba(214,204,181,0.3);
+@define-color accent-color               rgb(43,82,152);
+@define-color accent-hover-color         rgb(81,113,171);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(132,54,26);
+@define-color good-color                 rgb(47,94,66);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;

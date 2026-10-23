@@ -19,7 +19,7 @@
 #define __SCHEME_MARSHAL_RETURN_H__
 
 pointer marshal_PDB_return    (scheme         *sc,
-                               GimpValueArray *values,
+                               ClayValueArray *values,
                                gchar          *proc_name,
                                pointer        *error);
 

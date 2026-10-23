@@ -18,7 +18,7 @@
 #pragma once
 
 
-void    windows_actions_setup                      (GimpActionGroup *group);
-void    windows_actions_update                     (GimpActionGroup *group,
+void    windows_actions_setup                      (ClayActionGroup *group);
+void    windows_actions_update                     (ClayActionGroup *group,
                                                     gpointer         data);
-gchar * windows_actions_dock_window_to_action_name (GimpDockWindow  *dock_window);
+gchar * windows_actions_dock_window_to_action_name (ClayDockWindow  *dock_window);

@@ -1,6 +1,6 @@
 ; Test methods of Edit module of the PDB
 ; When the image has multi-layers
-; Multi-layer editing is new to GIMP v3
+; Multi-layer editing is new to Clay v3
 
 ; tested elsewhere
 ; paste when:
@@ -15,7 +15,7 @@
 ; Load test image that already has drawable
 (define testImage (testing:load-test-image-basic-v3))
 
-(assert `(= (gimp-image-get-width ,testImage)
+(assert `(= (clay-image-get-width ,testImage)
             128))
 
 ; Add a layer already inserted in image
@@ -24,7 +24,7 @@
 
 ; get all the root layers
 ; testImage has two layers at root.
-(define testLayers (gimp-image-get-layers testImage))
+(define testLayers (clay-image-get-layers testImage))
 ;testLayers is-a vector
 
 ; capture a ref to the first layer
@@ -33,7 +33,7 @@
 (test! "insert layer was effective")
 
 ; the image has two layers
-(assert `(= (vector-length (gimp-image-get-layers ,testImage))
+(assert `(= (vector-length (clay-image-get-layers ,testImage))
             2))
 
 ; our local list of layers is length 2
@@ -52,10 +52,10 @@
 ; FIXME this should fail? the passed length does not match the length of list
 ; copy first of two
 ; returns #t in v3 binding
-(assert `(gimp-edit-copy
+(assert `(clay-edit-copy
               (make-vector 1 (vector-ref ,testLayers 0))))
 ; copy both of two
-(assert `(gimp-edit-copy ,testLayers))
+(assert `(clay-edit-copy ,testLayers))
 
 
 (test! "paste with clip of two layers")
@@ -64,7 +64,7 @@
 ;  - clip has two layers
 ;  - no selection
 ; returns the pasted layers, a vector of length two
-(assert `(= (vector-length (gimp-edit-paste
+(assert `(= (vector-length (clay-edit-paste
                    ,testLayer
                   TRUE)) ; paste-into
             2))
@@ -73,7 +73,7 @@
 ; the passed layer is moot: new layers are created.
 
 ; the image now has four layers
-(assert `(= (vector-length (gimp-image-get-layers ,testImage))
+(assert `(= (vector-length (clay-image-get-layers ,testImage))
             4))
 
 ; The new layers were pasted centered at (0,0)
@@ -81,15 +81,15 @@
 
 ; The image i.e. canvas is NOT larger now
 ; Original test image was 128
-(assert `(= (gimp-image-get-width ,testImage)
+(assert `(= (clay-image-get-width ,testImage)
             128))
 ; !!! Note that some layers, when selected,
 ; might not be visible, since the scrollbars are on the current canvas
 ; not the size of the bounding box of all the layers.
 
 ; But resizing gives a larger size
-;;(assert `(gimp-image-resize-to-layers ,testImage))
-;;(assert `(= (car (gimp-image-get-width ,testImage))
+;;(assert `(clay-image-resize-to-layers ,testImage))
+;;(assert `(= (car (clay-image-get-width ,testImage))
 ;;            373))
 
 
@@ -102,25 +102,25 @@
 
 ; Get reference to one of the new layers
 ; it is top of stack, the first element in the vector of layers
-(define testOffCanvasLayer (vector-ref (gimp-image-get-layers testImage)
+(define testOffCanvasLayer (vector-ref (clay-image-get-layers testImage)
                                        0))
 
 ; returns (2 <vector>)
-(assert `(= (vector-length (gimp-edit-paste
+(assert `(= (vector-length (clay-edit-paste
                    ,testOffCanvasLayer
                   TRUE)) ; paste-into
             2))
 ; The image now has six layers, extending to the upper left.
-(assert `(gimp-image-resize-to-layers ,testImage))
+(assert `(clay-image-resize-to-layers ,testImage))
 ; ??? TODO I don't understand this test nor the results
-(assert `(= (gimp-image-get-width ,testImage)
+(assert `(= (clay-image-get-width ,testImage)
             234))
 
 
 ; copy-visible when image has many layers
 ; only puts one layer on clip
 ; returns #t
-(assert `(gimp-edit-copy-visible ,testImage))
+(assert `(clay-edit-copy-visible ,testImage))
 
 ; TODO get the clipboard and check its size
 
@@ -131,7 +131,7 @@
 ;  - clip has one layers
 ;  - no selection
 ; returns (1 <vector>) a vector of length one
-(assert `(= (vector-length (gimp-edit-paste
+(assert `(= (vector-length (clay-edit-paste
                    ,testLayer
                   TRUE)) ; paste-into
             1))
@@ -146,6 +146,6 @@
 
 
 ; for debugging individual test file:
-;(gimp-display-new testImage)
+;(clay-display-new testImage)
 
 (script-fu-use-v2)

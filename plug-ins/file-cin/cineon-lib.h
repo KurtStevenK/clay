@@ -146,7 +146,7 @@ typedef struct
 } CineonMPISpecificInformation;
 
 
-GimpImage * cineon_open (GFile   *file,
+ClayImage * cineon_open (GFile   *file,
                          GError **error);
 
 

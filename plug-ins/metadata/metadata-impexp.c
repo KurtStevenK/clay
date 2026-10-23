@@ -24,10 +24,10 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "metadata-xml.h"
 #include "metadata-misc.h"
@@ -89,7 +89,7 @@ static void     export_write_list_value         (GString *xmldata,
 void
 import_file_metadata (metadata_editor *args)
 {
-  GimpXmlParser  *xml_parser;
+  ClayXmlParser  *xml_parser;
   GError         *error = NULL;
   FILE           *file;
 
@@ -192,7 +192,7 @@ export_file_metadata (metadata_editor *args)
 
   xmldata = g_string_new ("");
   g_string_printf (xmldata, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-                            "<gimp-metadata version=\"%d\">\n",
+                            "<clay-metadata version=\"%d\">\n",
                             METADATA_XML_VERSION);
 
   for (i = 0; i < n_default_metadata_tags; i++)
@@ -242,7 +242,7 @@ export_file_metadata (metadata_editor *args)
         }
     }
 
-  g_string_append (xmldata, "</gimp-metadata>\n");
+  g_string_append (xmldata, "</clay-metadata>\n");
 
 
   if (args->filename != NULL)

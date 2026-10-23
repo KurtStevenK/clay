@@ -17,8 +17,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h> /* Gtk */
+#include <libclay/clay.h>
+#include <libclay/clayui.h> /* Gtk */
 
 #include "script-fu-progress.h"
 
@@ -30,7 +30,7 @@
  * A script can also use the PDB progress functions,
  * e.g. install a callback.
  * If a script does not install a callback,
- * then the script's use of gimp_progress may interleave
+ * then the script's use of clay_progress may interleave
  * with ScriptFu's own use.
  */
 
@@ -44,20 +44,20 @@ static gint   consec_command_count = 0;
 /* Show progress by displaying a text.
 
  * This hides where the text is going.
- * Currently gimp_progress object displays to the app's status bar.
+ * Currently clay_progress object displays to the app's status bar.
  * Formerly ScriptFu displayed to a progress bar in the plugin's dialog box.
  * In the future we might display somewhere else.
  *
- * Requires gimp_progress_init was called, else no effect.
- * Requires gimp_progress_install was NOT called, else just triggers
+ * Requires clay_progress_init was called, else no effect.
+ * Requires clay_progress_install was NOT called, else just triggers
  * the installed callback.
  */
 static void
 script_fu_interface_progress_update (const gchar *text)
 {
   g_debug ("%s calling progress_set_text", G_STRFUNC);
-  gimp_progress_set_text (text);
-  gimp_progress_pulse ();
+  clay_progress_set_text (text);
+  clay_progress_pulse ();
 }
 
 /* Called when start a script run.
@@ -71,7 +71,7 @@ script_fu_progress_init (const gchar *title)
     {
       gchar *ellipsis;
 
-      main_proc_title = gimp_strip_uline (title);
+      main_proc_title = clay_strip_uline (title);
       main_proc_title = g_strstrip (main_proc_title);
       ellipsis = g_strrstr (main_proc_title, "...");
 
@@ -83,7 +83,7 @@ script_fu_progress_init (const gchar *title)
       main_proc_title = g_strdup ("Script-Fu");
     }
 
-  gimp_progress_init (main_proc_title);
+  clay_progress_init (main_proc_title);
 
   /* If this is the long running extension-script-fu, reset these vars.
    *
@@ -101,9 +101,9 @@ script_fu_progress_init (const gchar *title)
  *
  * User's don't know the procedure names, this is less than ideal.
  *
- * Exclude calls to gimp-progress-<foo>,
+ * Exclude calls to clay-progress-<foo>,
  * when the script is itself implementing its own progress reporting.
- * No scripts in the Gimp repo implement their own progress.
+ * No scripts in the Clay repo implement their own progress.
  * This too is probably overkill, the name would flash by quickly.
  *
  * We report progress regardless of INTERACTIVE mode.
@@ -122,7 +122,7 @@ script_fu_progress_report (const gchar *command)
       /* Form a string <command> <number> */
       command_count++;
 
-      if (! g_str_has_prefix (command, "gimp-progress-"))
+      if (! g_str_has_prefix (command, "clay-progress-"))
         {
           gchar *new_command;
 
@@ -142,7 +142,7 @@ script_fu_progress_report (const gchar *command)
       g_free (last_command);
       last_command = g_strdup (command);
 
-      if (! g_str_has_prefix (command, "gimp-progress-"))
+      if (! g_str_has_prefix (command, "clay-progress-"))
         {
           gchar *new_command;
 
@@ -164,7 +164,7 @@ script_fu_progress_report (const gchar *command)
   /* In v2, ScriptFu was displaying progress to its own progress bar
    * in ScriptFu's own dialog.
    * In v2 needed: while (gtk_events_pending ())  gtk_main_iteration ();
-   * In v3 gimp_progress goes to another process, the gimp app,
+   * In v3 clay_progress goes to another process, the clay app,
    * having it's own event loop.
    */
 }

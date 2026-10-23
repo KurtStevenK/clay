@@ -25,451 +25,451 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
 #include "cairo.h"
-#include "core/gimpguide.h"
-#include "core/gimpimage-guides.h"
-#include "core/gimpimage-undo-push.h"
-#include "core/gimpimage.h"
-#include "core/gimpparamspecs.h"
+#include "core/clayguide.h"
+#include "core/clayimage-guides.h"
+#include "core/clayimage-undo-push.h"
+#include "core/clayimage.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-image_add_hguide_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+image_add_hguide_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint yposition;
   guint guide = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  yposition = g_value_get_int (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  yposition = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGuide *g;
+      ClayGuide *g;
 
-      g = gimp_image_add_hguide (image, yposition, TRUE);
+      g = clay_image_add_hguide (image, yposition, TRUE);
       if (g)
-        guide = gimp_aux_item_get_id (GIMP_AUX_ITEM (g));
+        guide = clay_aux_item_get_id (CLAY_AUX_ITEM (g));
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_uint (gimp_value_array_index (return_vals, 1), guide);
+    g_value_set_uint (clay_value_array_index (return_vals, 1), guide);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_add_vguide_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+image_add_vguide_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint xposition;
   guint guide = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  xposition = g_value_get_int (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  xposition = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGuide *g;
+      ClayGuide *g;
 
-      g = gimp_image_add_vguide (image, xposition, TRUE);
+      g = clay_image_add_vguide (image, xposition, TRUE);
       if (g)
-        guide = gimp_aux_item_get_id (GIMP_AUX_ITEM (g));
+        guide = clay_aux_item_get_id (CLAY_AUX_ITEM (g));
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_uint (gimp_value_array_index (return_vals, 1), guide);
+    g_value_set_uint (clay_value_array_index (return_vals, 1), guide);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_delete_guide_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+image_delete_guide_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   guint guide;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  guide = g_value_get_uint (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  guide = g_value_get_uint (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGuide *g = gimp_pdb_image_get_guide (image, guide, error);
+      ClayGuide *g = clay_pdb_image_get_guide (image, guide, error);
 
       if (g)
-        gimp_image_remove_guide (image, g, TRUE);
+        clay_image_remove_guide (image, g, TRUE);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_find_next_guide_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+image_find_next_guide_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint guide;
   guint next_guide = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  guide = g_value_get_int (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  guide = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGuide *g = gimp_image_get_next_guide (image, guide, &success);
+      ClayGuide *g = clay_image_get_next_guide (image, guide, &success);
 
       if (g)
-        next_guide = gimp_aux_item_get_id (GIMP_AUX_ITEM (g));
+        next_guide = clay_aux_item_get_id (CLAY_AUX_ITEM (g));
 
       if (! success)
-        g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+        g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                      _("Image '%s' (%d) does not contain guide with ID %d"),
-                     gimp_image_get_display_name (image),
-                     gimp_image_get_id (image),
+                     clay_image_get_display_name (image),
+                     clay_image_get_id (image),
                      guide);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_uint (gimp_value_array_index (return_vals, 1), next_guide);
+    g_value_set_uint (clay_value_array_index (return_vals, 1), next_guide);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_get_guide_orientation_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+image_get_guide_orientation_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   guint guide;
   gint orientation = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  guide = g_value_get_uint (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  guide = g_value_get_uint (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGuide *g = gimp_pdb_image_get_guide (image, guide, error);
+      ClayGuide *g = clay_pdb_image_get_guide (image, guide, error);
 
       if (g)
-        orientation = gimp_guide_get_orientation (g);
+        orientation = clay_guide_get_orientation (g);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), orientation);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), orientation);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_get_guide_position_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+image_get_guide_position_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   guint guide;
   gint position = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  guide = g_value_get_uint (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  guide = g_value_get_uint (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGuide *g = gimp_pdb_image_get_guide (image, guide, error);
+      ClayGuide *g = clay_pdb_image_get_guide (image, guide, error);
 
       if (g)
-        position = gimp_guide_get_position (g);
+        position = clay_guide_get_position (g);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), position);
+    g_value_set_int (clay_value_array_index (return_vals, 1), position);
 
   return return_vals;
 }
 
 void
-register_image_guides_procs (GimpPDB *pdb)
+register_image_guides_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-image-add-hguide
+   * clay-image-add-hguide
    */
-  procedure = gimp_procedure_new (image_add_hguide_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-add-hguide");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_add_hguide_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-add-hguide");
+  clay_procedure_set_static_help (procedure,
                                   "Add a horizontal guide to an image.",
                                   "This procedure adds a horizontal guide to an image. It takes the input image and the y-position of the new guide as parameters. It returns the guide ID of the new guide.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Adam D. Moss",
                                          "Adam D. Moss",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("yposition",
                                                  "yposition",
                                                  "The guide's y-offset from top of image",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_uint ("guide",
                                                       "guide",
                                                       "The new guide",
                                                       1, G_MAXUINT32, 1,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-add-vguide
+   * clay-image-add-vguide
    */
-  procedure = gimp_procedure_new (image_add_vguide_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-add-vguide");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_add_vguide_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-add-vguide");
+  clay_procedure_set_static_help (procedure,
                                   "Add a vertical guide to an image.",
                                   "This procedure adds a vertical guide to an image. It takes the input image and the x-position of the new guide as parameters. It returns the guide ID of the new guide.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Adam D. Moss",
                                          "Adam D. Moss",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("xposition",
                                                  "xposition",
                                                  "The guide's x-offset from left of image",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_uint ("guide",
                                                       "guide",
                                                       "The new guide",
                                                       1, G_MAXUINT32, 1,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-delete-guide
+   * clay-image-delete-guide
    */
-  procedure = gimp_procedure_new (image_delete_guide_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-delete-guide");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_delete_guide_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-delete-guide");
+  clay_procedure_set_static_help (procedure,
                                   "Deletes a guide from an image.",
                                   "This procedure takes an image and a guide ID as input and removes the specified guide from the specified image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Adam D. Moss",
                                          "Adam D. Moss",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_uint ("guide",
                                                   "guide",
                                                   "The ID of the guide to be removed",
                                                   1, G_MAXUINT32, 1,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-find-next-guide
+   * clay-image-find-next-guide
    */
-  procedure = gimp_procedure_new (image_find_next_guide_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-find-next-guide");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_find_next_guide_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-find-next-guide");
+  clay_procedure_set_static_help (procedure,
                                   "Find next guide on an image.",
                                   "This procedure takes an image and a guide ID as input and finds the guide ID of the successor of the given guide ID in the image's guide list. If the supplied guide ID is 0, the procedure will return the first Guide. The procedure will return 0 if given the final guide ID as an argument or the image has no guides.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Adam D. Moss",
                                          "Adam D. Moss",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("guide",
                                                  "guide",
                                                  "The ID of the current guide (0 if first invocation)",
                                                  0, G_MAXINT32, 1,
-                                                 GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_uint ("next-guide",
                                                       "next guide",
                                                       "The next guide's ID",
                                                       1, G_MAXUINT32, 1,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-get-guide-orientation
+   * clay-image-get-guide-orientation
    */
-  procedure = gimp_procedure_new (image_get_guide_orientation_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-guide-orientation");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_guide_orientation_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-guide-orientation");
+  clay_procedure_set_static_help (procedure,
                                   "Get orientation of a guide on an image.",
                                   "This procedure takes an image and a guide ID as input and returns the orientations of the guide.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Adam D. Moss",
                                          "Adam D. Moss",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_uint ("guide",
                                                   "guide",
                                                   "The guide",
                                                   1, G_MAXUINT32, 1,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_enum ("orientation",
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_enum ("orientation",
                                                          "orientation",
                                                          "The guide's orientation",
-                                                         GIMP_TYPE_ORIENTATION_TYPE,
-                                                         GIMP_ORIENTATION_HORIZONTAL,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_param_spec_enum_exclude_value (GIMP_PARAM_SPEC_ENUM (procedure->values[0]),
-                                      GIMP_ORIENTATION_UNKNOWN);
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_TYPE_ORIENTATION_TYPE,
+                                                         CLAY_ORIENTATION_HORIZONTAL,
+                                                         CLAY_PARAM_READWRITE));
+  clay_param_spec_enum_exclude_value (CLAY_PARAM_SPEC_ENUM (procedure->values[0]),
+                                      CLAY_ORIENTATION_UNKNOWN);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-get-guide-position
+   * clay-image-get-guide-position
    */
-  procedure = gimp_procedure_new (image_get_guide_position_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-get-guide-position");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_get_guide_position_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-get-guide-position");
+  clay_procedure_set_static_help (procedure,
                                   "Get position of a guide on an image.",
                                   "This procedure takes an image and a guide ID as input and returns the position of the guide relative to the top or left of the image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Adam D. Moss",
                                          "Adam D. Moss",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_uint ("guide",
                                                   "guide",
                                                   "The guide",
                                                   1, G_MAXUINT32, 1,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("position",
                                                      "position",
                                                      "The guide's position relative to top or left of image",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

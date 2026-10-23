@@ -16,10 +16,10 @@
 ; setup
 
 ; an empty image for testing
-(define newTestImage (gimp-image-new 21 22 RGB))
+(define newTestImage (clay-image-new 21 22 RGB))
 
 ; Load test image that already has drawable
-; "gimp-logo.png"
+; "clay-logo.png"
 (define testImage (testing:load-test-image-basic-v3 ))
 
 
@@ -27,14 +27,14 @@
 
 
 ; testImage is mode RGB
-(assert `(= (gimp-image-get-base-type ,testImage)
+(assert `(= (clay-image-get-base-type ,testImage)
             RGB))
 
 
 (test! "convert-indexed")
 
-; method gimp-image-convert-indexed yields truthy (now yields (#t) )
-(assert `(gimp-image-convert-indexed
+; method clay-image-convert-indexed yields truthy (now yields (#t) )
+(assert `(clay-image-convert-indexed
                   ,testImage
                   CONVERT-DITHER-NONE
                   CONVERT-PALETTE-GENERATE
@@ -44,8 +44,8 @@
                   "myPalette" ; ignored
                   ))
 
-; method gimp-image-convert-indexed works even on empty image
-(assert `(gimp-image-convert-indexed
+; method clay-image-convert-indexed works even on empty image
+(assert `(clay-image-convert-indexed
                   ,newTestImage
                   CONVERT-DITHER-NONE
                   CONVERT-PALETTE-GENERATE
@@ -57,21 +57,21 @@
 
 ; conversion was effective:
 ; basetype of indexed image is INDEXED
-(assert `(= (gimp-image-get-base-type ,testImage)
+(assert `(= (clay-image-get-base-type ,testImage)
             INDEXED))
 
 ; conversion was effective:
 ; basetype of indexed image is INDEXED
-(assert `(= (gimp-image-get-base-type ,newTestImage)
+(assert `(= (clay-image-get-base-type ,newTestImage)
             INDEXED))
 
 
-; testImage has a layer named same as file "gimp-logo.png"
-; TODO Why does "Background" work but app shows "gimp-logo.png"
+; testImage has a layer named same as file "clay-logo.png"
+; TODO Why does "Background" work but app shows "clay-logo.png"
 
 (test! "drawable of indexed image is also indexed")
-(assert `(gimp-drawable-is-indexed
-            (gimp-image-get-layer-by-name ,testImage "Background")))
+(assert `(clay-drawable-is-indexed
+            (clay-image-get-layer-by-name ,testImage "Background")))
 
 
 
@@ -83,21 +83,21 @@
 ; v3 palette is first class object, an ID in SF
 ; Here only test it does not fail.
 ; Use testImage since newTestImage has no palette until has drawable?
-(assert `(gimp-image-get-palette ,testImage))
+(assert `(clay-image-get-palette ,testImage))
 
 ; Now get the palette
-(define testPalette (gimp-image-get-palette testImage))
+(define testPalette (clay-image-get-palette testImage))
 
 ; And test its count of colors, same as given during conversion
 ;  when image has a drawable.
-(assert `(= (gimp-palette-get-color-count ,testPalette)
+(assert `(= (clay-palette-get-color-count ,testPalette)
             2))
-(display (gimp-palette-get-color-count testPalette))
+(display (clay-palette-get-color-count testPalette))
 
 
-(define bearsPalette (gimp-palette-get-by-name "Bears"))
+(define bearsPalette (clay-palette-get-by-name "Bears"))
 ; set-palette succeeds
-(assert `(gimp-image-set-palette ,testImage ,bearsPalette))
+(assert `(clay-image-set-palette ,testImage ,bearsPalette))
 
 ; effective: palette vector is same as given
 ; ID is same ID
@@ -109,17 +109,17 @@
 (test! "precision of indexed images")
 
 ; indexed images have precision PRECISION-U8-NON-LINEAR
-; FIXME annotation of PDB procedure says GIMP_PRECISION_U8
+; FIXME annotation of PDB procedure says CLAY_PRECISION_U8
 (assert `(=
-           (gimp-image-get-precision ,testImage)
+           (clay-image-get-precision ,testImage)
            PRECISION-U8-NON-LINEAR ))
 
 
 ; convert precision of indexed images yields error
-(assert-error `(gimp-image-convert-precision
+(assert-error `(clay-image-convert-precision
                   ,newTestImage
                   PRECISION-U8-PERCEPTUAL)
-               "Procedure execution of gimp-image-convert-precision failed on invalid input arguments: ")
+               "Procedure execution of clay-image-convert-precision failed on invalid input arguments: ")
                ; "Image '[Untitled]' (4) must not be of type 'indexed'"
 
 

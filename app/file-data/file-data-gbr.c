@@ -21,75 +21,75 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpbrush.h"
-#include "core/gimpbrush-load.h"
-#include "core/gimpbrush-private.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-merge.h"
-#include "core/gimpimage-new.h"
-#include "core/gimpimage-resize.h"
-#include "core/gimplayer-new.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppickable.h"
-#include "core/gimptempbuf.h"
+#include "core/clay.h"
+#include "core/claybrush.h"
+#include "core/claybrush-load.h"
+#include "core/claybrush-private.h"
+#include "core/claycontainer.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
+#include "core/clayimage-merge.h"
+#include "core/clayimage-new.h"
+#include "core/clayimage-resize.h"
+#include "core/claylayer-new.h"
+#include "core/clayparamspecs.h"
+#include "core/claypickable.h"
+#include "core/claytempbuf.h"
 
-#include "pdb/gimpprocedure.h"
+#include "pdb/clayprocedure.h"
 
 #include "file-data-gbr.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static GimpImage * file_gbr_brush_to_image (Gimp          *gimp,
-                                            GimpBrush     *brush);
-static GimpBrush * file_gbr_image_to_brush (GimpImage     *image,
-                                            GimpContext   *context,
+static ClayImage * file_gbr_brush_to_image (Clay          *clay,
+                                            ClayBrush     *brush);
+static ClayBrush * file_gbr_image_to_brush (ClayImage     *image,
+                                            ClayContext   *context,
                                             gint           n_drawables,
-                                            GimpDrawable **drawables,
+                                            ClayDrawable **drawables,
                                             const gchar   *name,
                                             gdouble        spacing);
 
 
 /*  public functions  */
 
-GimpValueArray *
-file_gbr_load_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+ClayValueArray *
+file_gbr_load_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image = NULL;
+  ClayValueArray *return_vals;
+  ClayImage      *image = NULL;
   GFile          *file;
   GInputStream   *input;
   GError         *my_error = NULL;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   input = G_INPUT_STREAM (g_file_read (file, NULL, &my_error));
 
   if (input)
     {
-      GimpBrush *brush = gimp_brush_load_brush (context, file, input, error);
+      ClayBrush *brush = clay_brush_load_brush (context, file, input, error);
 
       if (brush)
         {
-          image = file_gbr_brush_to_image (gimp, brush);
+          image = file_gbr_brush_to_image (clay, brush);
           g_object_unref (brush);
         }
 
@@ -99,101 +99,101 @@ file_gbr_load_invoker (GimpProcedure         *procedure,
     {
       g_propagate_prefixed_error (error, my_error,
                                   _("Could not open '%s' for reading: "),
-                                  gimp_file_get_utf8_name (file));
+                                  clay_file_get_utf8_name (file));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, image != NULL,
+  return_vals = clay_procedure_get_return_values (procedure, image != NULL,
                                                   error ? *error : NULL);
 
   if (image)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), image);
+    g_value_set_object (clay_value_array_index (return_vals, 1), image);
 
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }
 
-GimpValueArray *
-file_gbr_save_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+ClayValueArray *
+file_gbr_save_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  GimpValueArray  *return_vals;
-  GimpImage       *image;
-  GimpDrawable   **drawables;
+  ClayValueArray  *return_vals;
+  ClayImage       *image;
+  ClayDrawable   **drawables;
   gint             n_drawables;
-  GimpBrush       *brush;
+  ClayBrush       *brush;
   const gchar     *name;
   GFile           *file;
   gint             spacing;
   gboolean         success;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  image       = g_value_get_object (gimp_value_array_index (args, 1));
-  drawables   = (GimpDrawable **) g_value_get_boxed (gimp_value_array_index (args, 2));
-  n_drawables = gimp_core_object_array_get_length ((GObject **) drawables);
-  file        = g_value_get_object (gimp_value_array_index (args, 3));
-  spacing     = g_value_get_int    (gimp_value_array_index (args, 4));
-  name        = g_value_get_string (gimp_value_array_index (args, 5));
+  image       = g_value_get_object (clay_value_array_index (args, 1));
+  drawables   = (ClayDrawable **) g_value_get_boxed (clay_value_array_index (args, 2));
+  n_drawables = clay_core_object_array_get_length ((GObject **) drawables);
+  file        = g_value_get_object (clay_value_array_index (args, 3));
+  spacing     = g_value_get_int    (clay_value_array_index (args, 4));
+  name        = g_value_get_string (clay_value_array_index (args, 5));
 
   brush = file_gbr_image_to_brush (image, context, n_drawables, drawables, name, spacing);
 
-  gimp_data_set_file (GIMP_DATA (brush), file, TRUE, TRUE);
+  clay_data_set_file (CLAY_DATA (brush), file, TRUE, TRUE);
 
-  success = gimp_data_save (GIMP_DATA (brush), error);
+  success = clay_data_save (CLAY_DATA (brush), error);
 
   g_object_unref (brush);
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }
 
-GimpLayer *
-file_gbr_brush_to_layer (GimpImage *image,
-                         GimpBrush *brush)
+ClayLayer *
+file_gbr_brush_to_layer (ClayImage *image,
+                         ClayBrush *brush)
 {
-  GimpLayer    *layer;
+  ClayLayer    *layer;
   const Babl   *format;
   gboolean      alpha;
   gint          width;
   gint          height;
   gint          image_width;
   gint          image_height;
-  GimpTempBuf  *mask;
-  GimpTempBuf  *pixmap;
+  ClayTempBuf  *mask;
+  ClayTempBuf  *pixmap;
   GeglBuffer   *buffer;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (GIMP_IS_BRUSH (brush), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_BRUSH (brush), NULL);
 
-  mask   = gimp_brush_get_mask   (brush);
-  pixmap = gimp_brush_get_pixmap (brush);
+  mask   = clay_brush_get_mask   (brush);
+  pixmap = clay_brush_get_pixmap (brush);
 
   if (pixmap)
     alpha = TRUE;
   else
     alpha = FALSE;
 
-  width  = gimp_temp_buf_get_width  (mask);
-  height = gimp_temp_buf_get_height (mask);
+  width  = clay_temp_buf_get_width  (mask);
+  height = clay_temp_buf_get_height (mask);
 
-  image_width  = gimp_image_get_width  (image);
-  image_height = gimp_image_get_height (image);
+  image_width  = clay_image_get_width  (image);
+  image_height = clay_image_get_height (image);
 
   if (width > image_width || height > image_height)
     {
       gint new_width  = MAX (image_width,  width);
       gint new_height = MAX (image_height, height);
 
-      gimp_image_resize (image, gimp_get_user_context (image->gimp),
+      clay_image_resize (image, clay_get_user_context (image->clay),
                          new_width, new_height,
                          (new_width  - image_width) / 2,
                          (new_height - image_height) / 2,
@@ -203,17 +203,17 @@ file_gbr_brush_to_layer (GimpImage *image,
       image_height = new_height;
     }
 
-  format = gimp_image_get_layer_format (image, alpha);
+  format = clay_image_get_layer_format (image, alpha);
 
-  layer = gimp_layer_new (image, width, height, format,
-                          gimp_object_get_name (brush),
-                          1.0, GIMP_LAYER_MODE_NORMAL);
+  layer = clay_layer_new (image, width, height, format,
+                          clay_object_get_name (brush),
+                          1.0, CLAY_LAYER_MODE_NORMAL);
 
-  gimp_item_set_offset (GIMP_ITEM (layer),
+  clay_item_set_offset (CLAY_ITEM (layer),
                         (image_width  - width)  / 2,
                         (image_height - height) / 2);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   if (pixmap)
     {
@@ -225,10 +225,10 @@ file_gbr_brush_to_layer (GimpImage *image,
 
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, width, height), 0,
                        babl_format ("R'G'B' u8"),
-                       gimp_temp_buf_get_data (pixmap), GEGL_AUTO_ROWSTRIDE);
+                       clay_temp_buf_get_data (pixmap), GEGL_AUTO_ROWSTRIDE);
 
       pixmap_data = gegl_buffer_linear_open (buffer, NULL, NULL, NULL);
-      mask_data   = gimp_temp_buf_get_data (mask);
+      mask_data   = clay_temp_buf_get_data (mask);
 
       for (i = 0, p = pixmap_data, m = mask_data;
            i < width * height;
@@ -241,7 +241,7 @@ file_gbr_brush_to_layer (GimpImage *image,
     }
   else
     {
-      guchar *mask_data = gimp_temp_buf_get_data (mask);
+      guchar *mask_data = clay_temp_buf_get_data (mask);
       gint    i;
 
       for (i = 0; i < width * height; i++)
@@ -255,48 +255,48 @@ file_gbr_brush_to_layer (GimpImage *image,
   return layer;
 }
 
-GimpBrush *
-file_gbr_drawable_to_brush (GimpDrawable        *drawable,
+ClayBrush *
+file_gbr_drawable_to_brush (ClayDrawable        *drawable,
                             const GeglRectangle *rect,
                             const gchar         *name,
                             gdouble              spacing)
 {
-  GimpBrush   *brush;
+  ClayBrush   *brush;
   GeglBuffer  *buffer;
-  GimpTempBuf *mask;
-  GimpTempBuf *pixmap = NULL;
+  ClayTempBuf *mask;
+  ClayTempBuf *pixmap = NULL;
   gint         width;
   gint         height;
 
-  g_return_val_if_fail (GIMP_IS_DRAWABLE (drawable), NULL);
+  g_return_val_if_fail (CLAY_IS_DRAWABLE (drawable), NULL);
   g_return_val_if_fail (rect != NULL, NULL);
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
   width  = rect->width;
   height = rect->height;
 
   if (width < 0 || height < 0)
     return NULL;
 
-  brush = g_object_new (GIMP_TYPE_BRUSH,
+  brush = g_object_new (CLAY_TYPE_BRUSH,
                         "name",      name,
-                        "mime-type", "image/x-gimp-gbr",
+                        "mime-type", "image/x-clay-gbr",
                         "spacing",   spacing,
                         NULL);
 
-  mask = gimp_temp_buf_new (width, height, babl_format ("Y u8"));
+  mask = clay_temp_buf_new (width, height, babl_format ("Y u8"));
 
-  if (gimp_drawable_is_gray (drawable))
+  if (clay_drawable_is_gray (drawable))
     {
-      guchar *m = gimp_temp_buf_get_data (mask);
+      guchar *m = clay_temp_buf_get_data (mask);
       gint    i;
 
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         {
           GeglBufferIterator *iter;
           GeglBuffer         *mask_buffer;
 
-          mask_buffer = gimp_temp_buf_create_buffer (mask);
+          mask_buffer = clay_temp_buf_create_buffer (mask);
 
           iter = gegl_buffer_iterator_new (buffer, rect, 0,
                                            babl_format ("Y'A float"),
@@ -343,16 +343,16 @@ file_gbr_drawable_to_brush (GimpDrawable        *drawable,
     }
   else
     {
-      pixmap = gimp_temp_buf_new (width, height, babl_format ("R'G'B' u8"));
+      pixmap = clay_temp_buf_new (width, height, babl_format ("R'G'B' u8"));
 
       gegl_buffer_get (buffer, rect, 1.0,
                        babl_format ("R'G'B' u8"),
-                       gimp_temp_buf_get_data (pixmap),
+                       clay_temp_buf_get_data (pixmap),
                        GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
       gegl_buffer_get (buffer, rect, 1.0,
                        babl_format ("A u8"),
-                       gimp_temp_buf_get_data (mask),
+                       clay_temp_buf_get_data (mask),
                        GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
     }
 
@@ -366,72 +366,72 @@ file_gbr_drawable_to_brush (GimpDrawable        *drawable,
 
 /*  private functions  */
 
-static GimpImage *
-file_gbr_brush_to_image (Gimp      *gimp,
-                         GimpBrush *brush)
+static ClayImage *
+file_gbr_brush_to_image (Clay      *clay,
+                         ClayBrush *brush)
 {
-  GimpImage         *image;
-  GimpLayer         *layer;
-  GimpImageBaseType  base_type;
+  ClayImage         *image;
+  ClayLayer         *layer;
+  ClayImageBaseType  base_type;
   gint               width;
   gint               height;
-  GimpTempBuf       *mask   = gimp_brush_get_mask   (brush);
-  GimpTempBuf       *pixmap = gimp_brush_get_pixmap (brush);
+  ClayTempBuf       *mask   = clay_brush_get_mask   (brush);
+  ClayTempBuf       *pixmap = clay_brush_get_pixmap (brush);
   GString           *string;
-  GimpConfigWriter  *writer;
-  GimpParasite      *parasite;
+  ClayConfigWriter  *writer;
+  ClayParasite      *parasite;
 
   if (pixmap)
-    base_type = GIMP_RGB;
+    base_type = CLAY_RGB;
   else
-    base_type = GIMP_GRAY;
+    base_type = CLAY_GRAY;
 
-  width  = gimp_temp_buf_get_width  (mask);
-  height = gimp_temp_buf_get_height (mask);
+  width  = clay_temp_buf_get_width  (mask);
+  height = clay_temp_buf_get_height (mask);
 
-  image = gimp_image_new (gimp, width, height, base_type,
-                          GIMP_PRECISION_U8_NON_LINEAR);
+  image = clay_image_new (clay, width, height, base_type,
+                          CLAY_PRECISION_U8_NON_LINEAR);
 
   string = g_string_new (NULL);
-  writer = gimp_config_writer_new_from_string (string);
+  writer = clay_config_writer_new_from_string (string);
 
-  gimp_config_writer_open (writer, "spacing");
-  gimp_config_writer_printf (writer, "%d", gimp_brush_get_spacing (brush));
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "spacing");
+  clay_config_writer_printf (writer, "%d", clay_brush_get_spacing (brush));
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_linefeed (writer);
+  clay_config_writer_linefeed (writer);
 
-  gimp_config_writer_open (writer, "description");
-  gimp_config_writer_string (writer, gimp_object_get_name (brush));
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "description");
+  clay_config_writer_string (writer, clay_object_get_name (brush));
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_finish (writer, NULL, NULL);
+  clay_config_writer_finish (writer, NULL, NULL);
 
-  parasite = gimp_parasite_new ("GimpProcedureConfigRun-file-gbr-export-last",
-                                GIMP_PARASITE_PERSISTENT,
+  parasite = clay_parasite_new ("ClayProcedureConfigRun-file-gbr-export-last",
+                                CLAY_PARASITE_PERSISTENT,
                                 string->len + 1, string->str);
-  gimp_image_parasite_attach (image, parasite, FALSE);
-  gimp_parasite_free (parasite);
+  clay_image_parasite_attach (image, parasite, FALSE);
+  clay_parasite_free (parasite);
 
   g_string_free (string, TRUE);
 
   layer = file_gbr_brush_to_layer (image, brush);
-  gimp_image_add_layer (image, layer, NULL, 0, FALSE);
+  clay_image_add_layer (image, layer, NULL, 0, FALSE);
 
   return image;
 }
 
-static GimpBrush *
-file_gbr_image_to_brush (GimpImage     *image,
-                         GimpContext   *context,
+static ClayBrush *
+file_gbr_image_to_brush (ClayImage     *image,
+                         ClayContext   *context,
                          gint           n_drawables,
-                         GimpDrawable **drawables,
+                         ClayDrawable **drawables,
                          const gchar   *name,
                          gdouble        spacing)
 {
-  GimpBrush    *brush    = NULL;
-  GimpImage    *subimage = NULL;
-  GimpDrawable *drawable;
+  ClayBrush    *brush    = NULL;
+  ClayImage    *subimage = NULL;
+  ClayDrawable *drawable;
   gint          width;
   gint          height;
 
@@ -445,21 +445,21 @@ file_gbr_image_to_brush (GimpImage     *image,
       for (gint i = 0; i < n_drawables; i++)
         drawable_list = g_list_prepend (drawable_list, drawables[i]);
 
-      subimage = gimp_image_new_from_drawables (image->gimp, drawable_list, FALSE, FALSE);
+      subimage = clay_image_new_from_drawables (image->clay, drawable_list, FALSE, FALSE);
       g_list_free (drawable_list);
-      gimp_container_remove (image->gimp->images, GIMP_OBJECT (subimage));
-      gimp_image_resize_to_layers (subimage, context,
+      clay_container_remove (image->clay->images, CLAY_OBJECT (subimage));
+      clay_image_resize_to_layers (subimage, context,
                                    NULL, NULL, NULL, NULL, NULL);
-      drawable = GIMP_DRAWABLE (gimp_image_merge_visible_layers (subimage, context, GIMP_CLIP_TO_IMAGE,
+      drawable = CLAY_DRAWABLE (clay_image_merge_visible_layers (subimage, context, CLAY_CLIP_TO_IMAGE,
                                                                  FALSE, TRUE, NULL));
-      gimp_pickable_flush (GIMP_PICKABLE (subimage));
+      clay_pickable_flush (CLAY_PICKABLE (subimage));
     }
   else
     {
       drawable = drawables[0];
     }
-  width  = gimp_item_get_width  (GIMP_ITEM (drawable));
-  height = gimp_item_get_height (GIMP_ITEM (drawable));
+  width  = clay_item_get_width  (CLAY_ITEM (drawable));
+  height = clay_item_get_height (CLAY_ITEM (drawable));
 
   brush = file_gbr_drawable_to_brush (drawable,
                                       GEGL_RECTANGLE (0, 0, width, height),

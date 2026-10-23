@@ -18,5 +18,5 @@
 #pragma once
 
 
-void   dockable_menu_setup (GimpUIManager *manager,
+void   dockable_menu_setup (ClayUIManager *manager,
                             const gchar   *ui_path);

@@ -72,17 +72,17 @@ test_scripts = [
   'tests' / 'PDB' / 'edit' / 'edit.scm',
   'tests' / 'PDB' / 'edit' / 'edit-multi-layer.scm',
   'tests' / 'PDB' / 'edit' / 'edit-cut.scm',
-  # this is on old test script, that crashes GIMP
+  # this is on old test script, that crashes Clay
   # if the crash is fixed, don't install this script
   'tests' / 'PDB' / 'edit' / 'edit-crash.scm',
 
   'tests' / 'PDB' / 'file' / 'file.scm',
   'tests' / 'PDB' / 'file' / 'file-export.scm',
 
-  'tests' / 'PDB' / 'gimp' / 'gimp.scm',
-  'tests' / 'PDB' / 'gimp' / 'PDB.scm',
-  'tests' / 'PDB' / 'gimp' / 'refresh.scm',
-  'tests' / 'PDB' / 'gimp' / 'procedures.scm',
+  'tests' / 'PDB' / 'clay' / 'clay.scm',
+  'tests' / 'PDB' / 'clay' / 'PDB.scm',
+  'tests' / 'PDB' / 'clay' / 'refresh.scm',
+  'tests' / 'PDB' / 'clay' / 'procedures.scm',
 
   'tests' / 'PDB' / 'filter' / 'filter.scm',
   'tests' / 'PDB' / 'filter' / 'filter-ops.scm',
@@ -132,7 +132,7 @@ test_scripts = [
 
 install_data(
   test_framework_scripts,
-  install_dir: gimpdatadir / 'scripts',
+  install_dir: claydatadir / 'scripts',
 )
 
 # Install test scripts to shared /tests
@@ -140,7 +140,7 @@ install_data(
 
 install_data(
   test_scripts,
-  install_dir: gimpdatadir / 'tests',
+  install_dir: claydatadir / 'tests',
 )
 
 

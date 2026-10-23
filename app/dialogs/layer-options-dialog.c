@@ -20,56 +20,56 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "operations/layer-modes/gimp-layer-modes.h"
+#include "operations/layer-modes/clay-layer-modes.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpdrawable-filters.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimplink.h"
-#include "core/gimplinklayer.h"
-#include "core/gimprasterizable.h"
+#include "core/claycontext.h"
+#include "core/claydrawable-filters.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/claylink.h"
+#include "core/claylinklayer.h"
+#include "core/clayrasterizable.h"
 
-#include "path/gimppath.h"
-#include "path/gimpvectorlayer.h"
+#include "path/claypath.h"
+#include "path/clayvectorlayer.h"
 
-#include "text/gimptext.h"
-#include "text/gimptextlayer.h"
+#include "text/claytext.h"
+#include "text/claytextlayer.h"
 
-#include "widgets/gimpcontainercombobox.h"
-#include "widgets/gimpcontainerlistview.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimplayermodebox.h"
-#include "widgets/gimpopendialog.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/claycontainercombobox.h"
+#include "widgets/claycontainerlistview.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claylayermodebox.h"
+#include "widgets/clayopendialog.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "item-options-dialog.h"
 #include "layer-options-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _LayerOptionsDialog LayerOptionsDialog;
 
 struct _LayerOptionsDialog
 {
-  Gimp                     *gimp;
-  GimpLayer                *layer;
-  GimpLayerMode             mode;
-  GimpLayerColorSpace       blend_space;
-  GimpLayerColorSpace       composite_space;
-  GimpLayerCompositeMode    composite_mode;
+  Clay                     *clay;
+  ClayLayer                *layer;
+  ClayLayerMode             mode;
+  ClayLayerColorSpace       blend_space;
+  ClayLayerColorSpace       composite_space;
+  ClayLayerCompositeMode    composite_mode;
   gdouble                   opacity;
-  GimpFillType              fill_type;
+  ClayFillType              fill_type;
   gboolean                  lock_alpha;
   gboolean                  rename_text_layers;
-  GimpLayerOptionsCallback  callback;
+  ClayLayerOptionsCallback  callback;
   gpointer                  user_data;
 
   GtkWidget                *mode_box;
@@ -79,8 +79,8 @@ struct _LayerOptionsDialog
   GtkWidget                *size_se;
   GtkWidget                *offset_se;
 
-  GimpLink                 *link;
-  GimpPath                 *initial_path;
+  ClayLink                 *link;
+  ClayPath                 *initial_path;
 };
 
 
@@ -88,12 +88,12 @@ struct _LayerOptionsDialog
 
 static void   layer_options_dialog_free           (LayerOptionsDialog *private);
 static void   layer_options_dialog_callback       (GtkWidget          *dialog,
-                                                   GimpImage          *image,
-                                                   GimpItem           *item,
-                                                   GimpContext        *context,
+                                                   ClayImage          *image,
+                                                   ClayItem           *item,
+                                                   ClayContext        *context,
                                                    const gchar        *item_name,
                                                    gboolean            item_visible,
-                                                   GimpColorTag        item_color_tag,
+                                                   ClayColorTag        item_color_tag,
                                                    gboolean            item_lock_content,
                                                    gboolean            item_lock_position,
                                                    gboolean            item_lock_visibility,
@@ -108,16 +108,16 @@ static void   layer_options_dialog_rename_toggled (GtkWidget          *widget,
 
 static void   layer_options_file_set              (GtkFileChooserButton *widget,
                                                    LayerOptionsDialog   *private);
-static void   layer_options_dialog_path_selected  (GimpContainerView    *view,
+static void   layer_options_dialog_path_selected  (ClayContainerView    *view,
                                                    LayerOptionsDialog   *private);
 
 
 /*  public functions  */
 
 GtkWidget *
-layer_options_dialog_new (GimpImage                *image,
-                          GimpLayer                *layer,
-                          GimpContext              *context,
+layer_options_dialog_new (ClayImage                *image,
+                          ClayLayer                *layer,
+                          ClayContext              *context,
                           GtkWidget                *parent,
                           const gchar              *title,
                           const gchar              *role,
@@ -125,19 +125,19 @@ layer_options_dialog_new (GimpImage                *image,
                           const gchar              *desc,
                           const gchar              *help_id,
                           const gchar              *layer_name,
-                          GimpLayerMode             layer_mode,
-                          GimpLayerColorSpace       layer_blend_space,
-                          GimpLayerColorSpace       layer_composite_space,
-                          GimpLayerCompositeMode    layer_composite_mode,
+                          ClayLayerMode             layer_mode,
+                          ClayLayerColorSpace       layer_blend_space,
+                          ClayLayerColorSpace       layer_composite_space,
+                          ClayLayerCompositeMode    layer_composite_mode,
                           gdouble                   layer_opacity,
-                          GimpFillType              layer_fill_type,
+                          ClayFillType              layer_fill_type,
                           gboolean                  layer_visible,
-                          GimpColorTag              layer_color_tag,
+                          ClayColorTag              layer_color_tag,
                           gboolean                  layer_lock_content,
                           gboolean                  layer_lock_position,
                           gboolean                  layer_lock_visibility,
                           gboolean                  layer_lock_alpha,
-                          GimpLayerOptionsCallback  callback,
+                          ClayLayerOptionsCallback  callback,
                           gpointer                  user_data)
 {
   LayerOptionsDialog   *private;
@@ -151,19 +151,19 @@ layer_options_dialog_new (GimpImage                *image,
   GtkAdjustment        *adjustment;
   GtkWidget            *spinbutton;
   GtkWidget            *button;
-  GimpLayerModeContext  mode_context;
+  ClayLayerModeContext  mode_context;
   gdouble               xres;
   gdouble               yres;
   gint                  row = 0;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (layer == NULL || GIMP_IS_LAYER (layer), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (layer == NULL || CLAY_IS_LAYER (layer), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
 
   private = g_slice_new0 (LayerOptionsDialog);
 
-  private->gimp               = image->gimp;
+  private->clay               = image->clay;
   private->layer              = layer;
   private->mode               = layer_mode;
   private->blend_space        = layer_blend_space;
@@ -179,14 +179,14 @@ layer_options_dialog_new (GimpImage                *image,
   private->link               = NULL;
   private->initial_path       = NULL;
 
-  if (layer && gimp_item_is_text_layer (GIMP_ITEM (layer)))
-    private->rename_text_layers = gimp_rasterizable_get_auto_rename (GIMP_RASTERIZABLE (layer));
+  if (layer && clay_item_is_text_layer (CLAY_ITEM (layer)))
+    private->rename_text_layers = clay_rasterizable_get_auto_rename (CLAY_RASTERIZABLE (layer));
 
-  dialog = item_options_dialog_new (image, GIMP_ITEM (layer), context,
+  dialog = item_options_dialog_new (image, CLAY_ITEM (layer), context,
                                     parent, title, role,
                                     icon_name, desc, help_id,
                                     _("Layer _name:"),
-                                    GIMP_ICON_LOCK_CONTENT,
+                                    CLAY_ICON_LOCK_CONTENT,
                                     _("Lock _pixels"),
                                     _("Lock position and _size"),
                                     _("Lock visibility"),
@@ -202,14 +202,14 @@ layer_options_dialog_new (GimpImage                *image,
   g_object_weak_ref (G_OBJECT (dialog),
                      (GWeakNotify) layer_options_dialog_free, private);
 
-  if (! layer || gimp_viewable_get_children (GIMP_VIEWABLE (layer)) == NULL)
-    mode_context = GIMP_LAYER_MODE_CONTEXT_LAYER;
+  if (! layer || clay_viewable_get_children (CLAY_VIEWABLE (layer)) == NULL)
+    mode_context = CLAY_LAYER_MODE_CONTEXT_LAYER;
   else
-    mode_context = GIMP_LAYER_MODE_CONTEXT_GROUP;
+    mode_context = CLAY_LAYER_MODE_CONTEXT_GROUP;
 
-  private->mode_box = gimp_layer_mode_box_new (mode_context);
+  private->mode_box = clay_layer_mode_box_new (mode_context);
   item_options_dialog_add_widget (dialog, _("_Mode:"), private->mode_box);
-  gimp_layer_mode_box_set_mode (GIMP_LAYER_MODE_BOX (private->mode_box),
+  clay_layer_mode_box_set_mode (CLAY_LAYER_MODE_BOX (private->mode_box),
                                 private->mode);
 
   g_signal_connect (private->mode_box, "notify::layer-mode",
@@ -217,43 +217,43 @@ layer_options_dialog_new (GimpImage                *image,
                     private);
 
   space_model =
-    gimp_enum_store_new_with_values (GIMP_TYPE_LAYER_COLOR_SPACE,
+    clay_enum_store_new_with_values (CLAY_TYPE_LAYER_COLOR_SPACE,
                                      4,
-                                     GIMP_LAYER_COLOR_SPACE_AUTO,
-                                     GIMP_LAYER_COLOR_SPACE_RGB_LINEAR,
-                                     GIMP_LAYER_COLOR_SPACE_RGB_NON_LINEAR,
-                                     GIMP_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
+                                     CLAY_LAYER_COLOR_SPACE_AUTO,
+                                     CLAY_LAYER_COLOR_SPACE_RGB_LINEAR,
+                                     CLAY_LAYER_COLOR_SPACE_RGB_NON_LINEAR,
+                                     CLAY_LAYER_COLOR_SPACE_RGB_PERCEPTUAL);
 
   private->blend_space_combo = combo =
-    gimp_enum_combo_box_new_with_model (GIMP_ENUM_STORE (space_model));
+    clay_enum_combo_box_new_with_model (CLAY_ENUM_STORE (space_model));
   item_options_dialog_add_widget (dialog, _("_Blend space:"), combo);
-  gimp_enum_combo_box_set_icon_prefix (GIMP_ENUM_COMBO_BOX (combo),
-                                       "gimp-layer-color-space");
-  gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+  clay_enum_combo_box_set_icon_prefix (CLAY_ENUM_COMBO_BOX (combo),
+                                       "clay-layer-color-space");
+  clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                               private->blend_space,
-                              G_CALLBACK (gimp_int_combo_box_get_active),
+                              G_CALLBACK (clay_int_combo_box_get_active),
                               &private->blend_space, NULL);
 
   private->composite_space_combo = combo =
-    gimp_enum_combo_box_new_with_model (GIMP_ENUM_STORE (space_model));
+    clay_enum_combo_box_new_with_model (CLAY_ENUM_STORE (space_model));
   item_options_dialog_add_widget (dialog, _("Compos_ite space:"), combo);
-  gimp_enum_combo_box_set_icon_prefix (GIMP_ENUM_COMBO_BOX (combo),
-                                       "gimp-layer-color-space");
-  gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+  clay_enum_combo_box_set_icon_prefix (CLAY_ENUM_COMBO_BOX (combo),
+                                       "clay-layer-color-space");
+  clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                               private->composite_space,
-                              G_CALLBACK (gimp_int_combo_box_get_active),
+                              G_CALLBACK (clay_int_combo_box_get_active),
                               &private->composite_space, NULL);
 
   g_object_unref (space_model);
 
   private->composite_mode_combo = combo =
-    gimp_enum_combo_box_new (GIMP_TYPE_LAYER_COMPOSITE_MODE);
+    clay_enum_combo_box_new (CLAY_TYPE_LAYER_COMPOSITE_MODE);
   item_options_dialog_add_widget (dialog, _("Composite mo_de:"), combo);
-  gimp_enum_combo_box_set_icon_prefix (GIMP_ENUM_COMBO_BOX (combo),
-                                       "gimp-layer-composite");
-  gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+  clay_enum_combo_box_set_icon_prefix (CLAY_ENUM_COMBO_BOX (combo),
+                                       "clay-layer-composite");
+  clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                               private->composite_mode,
-                              G_CALLBACK (gimp_int_combo_box_get_active),
+                              G_CALLBACK (clay_int_combo_box_get_active),
                               &private->composite_mode, NULL);
 
   /*  set the sensitivity of above 3 menus  */
@@ -261,16 +261,16 @@ layer_options_dialog_new (GimpImage                *image,
 
   adjustment = gtk_adjustment_new (private->opacity, 0.0, 100.0,
                                    1.0, 10.0, 0.0);
-  scale = gimp_spin_scale_new (adjustment, NULL, 1);
+  scale = clay_spin_scale_new (adjustment, NULL, 1);
   item_options_dialog_add_widget (dialog, _("_Opacity:"), scale);
 
   g_signal_connect (adjustment, "value-changed",
-                    G_CALLBACK (gimp_double_adjustment_update),
+                    G_CALLBACK (clay_double_adjustment_update),
                     &private->opacity);
 
   grid = item_options_dialog_get_grid (dialog, &row);
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
   if (! layer)
     {
@@ -287,15 +287,15 @@ layer_options_dialog_new (GimpImage                *image,
 
       /*  The size sizeentry  */
       adjustment = gtk_adjustment_new (1, 1, 1, 1, 10, 0);
-      spinbutton = gimp_spin_button_new (adjustment, 1.0, 2);
+      spinbutton = clay_spin_button_new (adjustment, 1.0, 2);
       gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
       gtk_entry_set_width_chars (GTK_ENTRY (spinbutton), 10);
 
-      private->size_se = gimp_size_entry_new (1, gimp_unit_pixel (), "%a",
+      private->size_se = clay_size_entry_new (1, clay_unit_pixel (), "%a",
                                               TRUE, TRUE, FALSE, 10,
-                                              GIMP_SIZE_ENTRY_UPDATE_SIZE);
+                                              CLAY_SIZE_ENTRY_UPDATE_SIZE);
 
-      gimp_size_entry_add_field (GIMP_SIZE_ENTRY (private->size_se),
+      clay_size_entry_add_field (CLAY_SIZE_ENTRY (private->size_se),
                                  GTK_SPIN_BUTTON (spinbutton), NULL);
       gtk_grid_attach (GTK_GRID (private->size_se), spinbutton, 1, 0, 1, 1);
       gtk_widget_set_visible (spinbutton, TRUE);
@@ -303,35 +303,35 @@ layer_options_dialog_new (GimpImage                *image,
       gtk_grid_attach (GTK_GRID (grid), private->size_se, 1, row, 1, 2);
       gtk_widget_set_visible (private->size_se, TRUE);
 
-      gimp_size_entry_set_unit (GIMP_SIZE_ENTRY (private->size_se),
-                                gimp_unit_pixel ());
+      clay_size_entry_set_unit (CLAY_SIZE_ENTRY (private->size_se),
+                                clay_unit_pixel ());
 
-      gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (private->size_se), 0,
+      clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (private->size_se), 0,
                                       xres, FALSE);
-      gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (private->size_se), 1,
+      clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (private->size_se), 1,
                                       yres, FALSE);
 
-      gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (private->size_se), 0,
-                                             GIMP_MIN_IMAGE_SIZE,
-                                             GIMP_MAX_IMAGE_SIZE);
-      gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (private->size_se), 1,
-                                             GIMP_MIN_IMAGE_SIZE,
-                                             GIMP_MAX_IMAGE_SIZE);
+      clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (private->size_se), 0,
+                                             CLAY_MIN_IMAGE_SIZE,
+                                             CLAY_MAX_IMAGE_SIZE);
+      clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (private->size_se), 1,
+                                             CLAY_MIN_IMAGE_SIZE,
+                                             CLAY_MAX_IMAGE_SIZE);
 
-      gimp_size_entry_set_size (GIMP_SIZE_ENTRY (private->size_se), 0,
-                                0, gimp_image_get_width  (image));
-      gimp_size_entry_set_size (GIMP_SIZE_ENTRY (private->size_se), 1,
-                                0, gimp_image_get_height (image));
+      clay_size_entry_set_size (CLAY_SIZE_ENTRY (private->size_se), 0,
+                                0, clay_image_get_width  (image));
+      clay_size_entry_set_size (CLAY_SIZE_ENTRY (private->size_se), 1,
+                                0, clay_image_get_height (image));
 
-      gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->size_se), 0,
-                                  gimp_image_get_width  (image));
-      gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->size_se), 1,
-                                  gimp_image_get_height (image));
+      clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->size_se), 0,
+                                  clay_image_get_width  (image));
+      clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->size_se), 1,
+                                  clay_image_get_height (image));
 
       row += 2;
     }
 
-  if (! layer || ! gimp_item_is_vector_layer (GIMP_ITEM (layer)))
+  if (! layer || ! clay_item_is_vector_layer (CLAY_ITEM (layer)))
     {
       /*  The offset labels  */
       label = gtk_label_new (_("Offset X:"));
@@ -346,15 +346,15 @@ layer_options_dialog_new (GimpImage                *image,
 
       /*  The offset sizeentry  */
       adjustment = gtk_adjustment_new (0, 1, 1, 1, 10, 0);
-      spinbutton = gimp_spin_button_new (adjustment, 1.0, 2);
+      spinbutton = clay_spin_button_new (adjustment, 1.0, 2);
       gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
       gtk_entry_set_width_chars (GTK_ENTRY (spinbutton), 10);
 
-      private->offset_se = gimp_size_entry_new (1, gimp_unit_pixel (), "%a",
+      private->offset_se = clay_size_entry_new (1, clay_unit_pixel (), "%a",
                                                 TRUE, TRUE, FALSE, 10,
-                                                GIMP_SIZE_ENTRY_UPDATE_SIZE);
+                                                CLAY_SIZE_ENTRY_UPDATE_SIZE);
 
-      gimp_size_entry_add_field (GIMP_SIZE_ENTRY (private->offset_se),
+      clay_size_entry_add_field (CLAY_SIZE_ENTRY (private->offset_se),
                                  GTK_SPIN_BUTTON (spinbutton), NULL);
       gtk_grid_attach (GTK_GRID (private->offset_se), spinbutton, 1, 0, 1, 1);
       gtk_widget_set_visible (spinbutton, TRUE);
@@ -362,37 +362,37 @@ layer_options_dialog_new (GimpImage                *image,
       gtk_grid_attach (GTK_GRID (grid), private->offset_se, 1, row, 1, 2);
       gtk_widget_set_visible (private->offset_se, TRUE);
 
-      gimp_size_entry_set_unit (GIMP_SIZE_ENTRY (private->offset_se),
-                                gimp_unit_pixel ());
+      clay_size_entry_set_unit (CLAY_SIZE_ENTRY (private->offset_se),
+                                clay_unit_pixel ());
 
-      gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (private->offset_se), 0,
+      clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (private->offset_se), 0,
                                       xres, FALSE);
-      gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (private->offset_se), 1,
+      clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (private->offset_se), 1,
                                       yres, FALSE);
 
-      gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (private->offset_se), 0,
-                                             -GIMP_MAX_IMAGE_SIZE,
-                                             GIMP_MAX_IMAGE_SIZE);
-      gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (private->offset_se), 1,
-                                             -GIMP_MAX_IMAGE_SIZE,
-                                             GIMP_MAX_IMAGE_SIZE);
+      clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (private->offset_se), 0,
+                                             -CLAY_MAX_IMAGE_SIZE,
+                                             CLAY_MAX_IMAGE_SIZE);
+      clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (private->offset_se), 1,
+                                             -CLAY_MAX_IMAGE_SIZE,
+                                             CLAY_MAX_IMAGE_SIZE);
 
-      gimp_size_entry_set_size (GIMP_SIZE_ENTRY (private->offset_se), 0,
-                                0, gimp_image_get_width  (image));
-      gimp_size_entry_set_size (GIMP_SIZE_ENTRY (private->offset_se), 1,
-                                0, gimp_image_get_height (image));
+      clay_size_entry_set_size (CLAY_SIZE_ENTRY (private->offset_se), 0,
+                                0, clay_image_get_width  (image));
+      clay_size_entry_set_size (CLAY_SIZE_ENTRY (private->offset_se), 1,
+                                0, clay_image_get_height (image));
 
       if (layer)
         {
-          gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset_se), 0,
-                                      gimp_item_get_offset_x (GIMP_ITEM (layer)));
-          gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset_se), 1,
-                                      gimp_item_get_offset_y (GIMP_ITEM (layer)));
+          clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset_se), 0,
+                                      clay_item_get_offset_x (CLAY_ITEM (layer)));
+          clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset_se), 1,
+                                      clay_item_get_offset_y (CLAY_ITEM (layer)));
         }
       else
         {
-          gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset_se), 0, 0);
-          gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset_se), 1, 0);
+          clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset_se), 0, 0);
+          clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset_se), 1, 0);
         }
 
       row += 2;
@@ -402,38 +402,38 @@ layer_options_dialog_new (GimpImage                *image,
     {
       GtkWidget     *left_vbox = item_options_dialog_get_vbox (dialog);
       GtkWidget     *frame;
-      GimpContainer *filters;
+      ClayContainer *filters;
       GtkWidget     *view;
 
-      frame = gimp_frame_new (_("Active Filters"));
+      frame = clay_frame_new (_("Active Filters"));
       gtk_box_pack_start (GTK_BOX (left_vbox), frame, TRUE, TRUE, 0);
       gtk_widget_set_visible (frame, TRUE);
 
-      filters = gimp_drawable_get_filters (GIMP_DRAWABLE (layer));
+      filters = clay_drawable_get_filters (CLAY_DRAWABLE (layer));
 
-      view = gimp_container_list_view_new (filters, context,
-                                           GIMP_VIEW_SIZE_SMALL, 0);
+      view = clay_container_list_view_new (filters, context,
+                                           CLAY_VIEW_SIZE_SMALL, 0);
       gtk_container_add (GTK_CONTAINER (frame), view);
       gtk_widget_set_visible (view, TRUE);
 
-      if (gimp_item_is_link_layer (GIMP_ITEM (layer)))
+      if (clay_item_is_link_layer (CLAY_ITEM (layer)))
         {
           GtkWidget *open_dialog;
-          GimpLink  *link;
+          ClayLink  *link;
 
           /* File chooser dialog. */
-          open_dialog = gimp_open_dialog_new (private->gimp);
+          open_dialog = clay_open_dialog_new (private->clay);
           gtk_window_set_title (GTK_WINDOW (open_dialog),
                                 _("Select Linked Image"));
 
           /* File chooser button. */
           file_select = gtk_file_chooser_button_new_with_dialog (open_dialog);
-          link = gimp_link_layer_get_link (GIMP_LINK_LAYER (layer));
+          link = clay_link_layer_get_link (CLAY_LINK_LAYER (layer));
           gtk_file_chooser_set_file (GTK_FILE_CHOOSER (file_select),
-                                     gimp_link_get_file (link, NULL, NULL),
+                                     clay_link_get_file (link, NULL, NULL),
                                      NULL);
           gtk_widget_set_visible (file_select, TRUE);
-          gimp_grid_attach_aligned (GTK_GRID (grid), 0, row++,
+          clay_grid_attach_aligned (GTK_GRID (grid), 0, row++,
                                     _("_Linked image:"), 0.0, 0.5,
                                     file_select, 1);
 
@@ -441,11 +441,11 @@ layer_options_dialog_new (GimpImage                *image,
                             G_CALLBACK (layer_options_file_set),
                             private);
 
-          private->link = gimp_link_duplicate (link);
+          private->link = clay_link_duplicate (link);
 
           /* Absolute path checkbox. */
           button = gtk_check_button_new_with_mnemonic (_("S_tore with absolute path"));
-          gimp_grid_attach_aligned (GTK_GRID (grid), 0, row++,
+          clay_grid_attach_aligned (GTK_GRID (grid), 0, row++,
                                     NULL, 0.0, 0.5,
                                     button, 2);
           g_object_bind_property (G_OBJECT (private->link), "absolute-path",
@@ -454,16 +454,16 @@ layer_options_dialog_new (GimpImage                *image,
                                   G_BINDING_BIDIRECTIONAL);
           gtk_widget_set_visible (button, TRUE);
         }
-      else if (gimp_item_is_vector_layer (GIMP_ITEM (layer)))
+      else if (clay_item_is_vector_layer (CLAY_ITEM (layer)))
         {
-          combo = gimp_container_combo_box_new (gimp_image_get_paths (image),
-                                                context, GIMP_VIEW_SIZE_SMALL, 1);
-          gimp_container_view_set_1_selected (GIMP_CONTAINER_VIEW (combo),
-                                              GIMP_VIEWABLE (gimp_vector_layer_get_path (GIMP_VECTOR_LAYER (layer))));
+          combo = clay_container_combo_box_new (clay_image_get_paths (image),
+                                                context, CLAY_VIEW_SIZE_SMALL, 1);
+          clay_container_view_set_1_selected (CLAY_CONTAINER_VIEW (combo),
+                                              CLAY_VIEWABLE (clay_vector_layer_get_path (CLAY_VECTOR_LAYER (layer))));
           g_signal_connect (combo, "selection-changed",
                             G_CALLBACK (layer_options_dialog_path_selected),
                             private);
-          gimp_grid_attach_aligned (GTK_GRID (grid), 0, row++,
+          clay_grid_attach_aligned (GTK_GRID (grid), 0, row++,
                                     _("_Associated path:"), 0.0, 0.5,
                                     combo, 2);
           gtk_widget_set_visible (combo, TRUE);
@@ -472,13 +472,13 @@ layer_options_dialog_new (GimpImage                *image,
   else
     {
       /*  The fill type  */
-      combo = gimp_enum_combo_box_new (GIMP_TYPE_FILL_TYPE);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, row,
+      combo = clay_enum_combo_box_new (CLAY_TYPE_FILL_TYPE);
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, row,
                                 _("_Fill with:"), 0.0, 0.5,
                                 combo, 1);
-      gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                                   private->fill_type,
-                                  G_CALLBACK (gimp_int_combo_box_get_active),
+                                  G_CALLBACK (clay_int_combo_box_get_active),
                                   &private->fill_type, NULL);
     }
 
@@ -497,24 +497,24 @@ layer_options_dialog_new (GimpImage                *image,
                             G_BINDING_INVERT_BOOLEAN);
 
   button = item_options_dialog_add_switch (dialog,
-                                           GIMP_ICON_LOCK_ALPHA,
+                                           CLAY_ICON_LOCK_ALPHA,
                                            _("Lock _alpha"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
                                 private->lock_alpha);
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->lock_alpha);
 
   /*  For text layers add a toggle to control "auto-rename"  */
-  if (layer && gimp_item_is_text_layer (GIMP_ITEM (layer)))
+  if (layer && clay_item_is_text_layer (CLAY_ITEM (layer)))
     {
       button = item_options_dialog_add_switch (dialog,
-                                               GIMP_ICON_TOOL_TEXT,
+                                               CLAY_ICON_TOOL_TEXT,
                                                _("Set name from _text"));
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
                                     private->rename_text_layers);
       g_signal_connect (button, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &private->rename_text_layers);
 
       g_signal_connect (button, "toggled",
@@ -536,11 +536,11 @@ layer_options_dialog_free (LayerOptionsDialog *private)
    */
   if (private->initial_path)
     {
-      GimpLayer *layer = private->layer;
+      ClayLayer *layer = private->layer;
 
-      g_return_if_fail (GIMP_IS_VECTOR_LAYER (layer));
+      g_return_if_fail (CLAY_IS_VECTOR_LAYER (layer));
 
-      gimp_vector_layer_set_path (GIMP_VECTOR_LAYER (layer), private->initial_path, FALSE);
+      clay_vector_layer_set_path (CLAY_VECTOR_LAYER (layer), private->initial_path, FALSE);
       g_clear_object (&private->initial_path);
     }
   g_clear_object (&private->link);
@@ -550,19 +550,19 @@ layer_options_dialog_free (LayerOptionsDialog *private)
 
 static void
 layer_options_dialog_callback (GtkWidget    *dialog,
-                               GimpImage    *image,
-                               GimpItem     *item,
-                               GimpContext  *context,
+                               ClayImage    *image,
+                               ClayItem     *item,
+                               ClayContext  *context,
                                const gchar  *item_name,
                                gboolean      item_visible,
-                               GimpColorTag  item_color_tag,
+                               ClayColorTag  item_color_tag,
                                gboolean      item_lock_content,
                                gboolean      item_lock_position,
                                gboolean      item_lock_visibility,
                                gpointer      user_data)
 {
   LayerOptionsDialog *private  = user_data;
-  GimpPath           *path     = NULL;
+  ClayPath           *path     = NULL;
   gint                width    = 0;
   gint                height   = 0;
   gint                offset_x = 0;
@@ -571,33 +571,33 @@ layer_options_dialog_callback (GtkWidget    *dialog,
   if (private->size_se)
     {
       width =
-        RINT (gimp_size_entry_get_refval (GIMP_SIZE_ENTRY (private->size_se),
+        RINT (clay_size_entry_get_refval (CLAY_SIZE_ENTRY (private->size_se),
                                           0));
       height =
-        RINT (gimp_size_entry_get_refval (GIMP_SIZE_ENTRY (private->size_se),
+        RINT (clay_size_entry_get_refval (CLAY_SIZE_ENTRY (private->size_se),
                                           1));
     }
 
   if (private->offset_se)
     {
       offset_x =
-        RINT (gimp_size_entry_get_refval (GIMP_SIZE_ENTRY (private->offset_se),
+        RINT (clay_size_entry_get_refval (CLAY_SIZE_ENTRY (private->offset_se),
                                           0));
       offset_y =
-        RINT (gimp_size_entry_get_refval (GIMP_SIZE_ENTRY (private->offset_se),
+        RINT (clay_size_entry_get_refval (CLAY_SIZE_ENTRY (private->offset_se),
                                           1));
     }
 
-  if (gimp_item_is_vector_layer (item) && private->initial_path)
+  if (clay_item_is_vector_layer (item) && private->initial_path)
     {
-      path = gimp_vector_layer_get_path (GIMP_VECTOR_LAYER (item));
-      gimp_vector_layer_set_path (GIMP_VECTOR_LAYER (item), private->initial_path, FALSE);
+      path = clay_vector_layer_get_path (CLAY_VECTOR_LAYER (item));
+      clay_vector_layer_set_path (CLAY_VECTOR_LAYER (item), private->initial_path, FALSE);
       g_clear_object (&private->initial_path);
     }
 
   private->callback (dialog,
                      image,
-                     GIMP_LAYER (item),
+                     CLAY_LAYER (item),
                      context,
                      item_name,
                      private->mode,
@@ -627,13 +627,13 @@ layer_options_dialog_update_mode_sensitivity (LayerOptionsDialog *private)
 {
   gboolean mutable;
 
-  mutable = gimp_layer_mode_is_blend_space_mutable (private->mode);
+  mutable = clay_layer_mode_is_blend_space_mutable (private->mode);
   gtk_widget_set_sensitive (private->blend_space_combo, mutable);
 
-  mutable = gimp_layer_mode_is_composite_space_mutable (private->mode);
+  mutable = clay_layer_mode_is_composite_space_mutable (private->mode);
   gtk_widget_set_sensitive (private->composite_space_combo, mutable);
 
-  mutable = gimp_layer_mode_is_composite_mode_mutable (private->mode);
+  mutable = clay_layer_mode_is_composite_mode_mutable (private->mode);
   gtk_widget_set_sensitive (private->composite_mode_combo, mutable);
 }
 
@@ -642,14 +642,14 @@ layer_options_dialog_mode_notify (GtkWidget          *widget,
                                   const GParamSpec   *pspec,
                                   LayerOptionsDialog *private)
 {
-  private->mode = gimp_layer_mode_box_get_mode (GIMP_LAYER_MODE_BOX (widget));
+  private->mode = clay_layer_mode_box_get_mode (CLAY_LAYER_MODE_BOX (widget));
 
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->blend_space_combo),
-                                 GIMP_LAYER_COLOR_SPACE_AUTO);
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->composite_space_combo),
-                                 GIMP_LAYER_COLOR_SPACE_AUTO);
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->composite_mode_combo),
-                                 GIMP_LAYER_COMPOSITE_AUTO);
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->blend_space_combo),
+                                 CLAY_LAYER_COLOR_SPACE_AUTO);
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->composite_space_combo),
+                                 CLAY_LAYER_COLOR_SPACE_AUTO);
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->composite_mode_combo),
+                                 CLAY_LAYER_COMPOSITE_AUTO);
 
   layer_options_dialog_update_mode_sensitivity (private);
 }
@@ -659,16 +659,16 @@ layer_options_dialog_rename_toggled (GtkWidget          *widget,
                                      LayerOptionsDialog *private)
 {
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)) &&
-      gimp_item_is_text_layer (GIMP_ITEM (private->layer)))
+      clay_item_is_text_layer (CLAY_ITEM (private->layer)))
     {
-      GimpTextLayer *text_layer = GIMP_TEXT_LAYER (private->layer);
-      GimpText      *text       = gimp_text_layer_get_text (text_layer);
+      ClayTextLayer *text_layer = CLAY_TEXT_LAYER (private->layer);
+      ClayText      *text       = clay_text_layer_get_text (text_layer);
 
       if (text && text->text)
         {
           GtkWidget *dialog;
           GtkWidget *name_entry;
-          gchar     *name = gimp_utf8_strtrim (text->text, 30);
+          gchar     *name = clay_utf8_strtrim (text->text, 30);
 
           dialog = gtk_widget_get_toplevel (widget);
 
@@ -695,22 +695,22 @@ layer_options_file_set (GtkFileChooserButton *widget,
 
       if (private->layer)
         {
-          width  = gimp_item_get_width (GIMP_ITEM (private->layer));
-          height = gimp_item_get_height (GIMP_ITEM (private->layer));
+          width  = clay_item_get_width (CLAY_ITEM (private->layer));
+          height = clay_item_get_height (CLAY_ITEM (private->layer));
 
           if (width == 0 || height == 0)
             {
-              GimpImage *image = gimp_item_get_image (GIMP_ITEM (private->layer));
+              ClayImage *image = clay_item_get_image (CLAY_ITEM (private->layer));
 
-              width  = gimp_image_get_width (image);
-              height = gimp_image_get_height (image);
+              width  = clay_image_get_width (image);
+              height = clay_image_get_height (image);
             }
         }
 
-      gimp_link_set_file (private->link, file, width, height, TRUE, NULL, NULL);
-      if (gimp_link_is_broken (private->link))
+      clay_link_set_file (private->link, file, width, height, TRUE, NULL, NULL);
+      if (clay_link_is_broken (private->link))
         {
-          gimp_link_set_file (private->link, NULL, width, height, TRUE, NULL, NULL);
+          clay_link_set_file (private->link, NULL, width, height, TRUE, NULL, NULL);
           g_signal_handlers_block_by_func (widget,
                                            G_CALLBACK (layer_options_file_set),
                                            private);
@@ -724,33 +724,33 @@ layer_options_file_set (GtkFileChooserButton *widget,
 }
 
 static void
-layer_options_dialog_path_selected (GimpContainerView  *view,
+layer_options_dialog_path_selected (ClayContainerView  *view,
                                     LayerOptionsDialog *private)
 {
-  GimpViewable    *item     = gimp_container_view_get_1_selected (view);
-  GimpPath        *new_path = NULL;
-  GimpPath        *path;
-  GimpVectorLayer *layer;
+  ClayViewable    *item     = clay_container_view_get_1_selected (view);
+  ClayPath        *new_path = NULL;
+  ClayPath        *path;
+  ClayVectorLayer *layer;
 
-  g_return_if_fail (GIMP_IS_VECTOR_LAYER (private->layer));
+  g_return_if_fail (CLAY_IS_VECTOR_LAYER (private->layer));
 
-  layer = GIMP_VECTOR_LAYER (private->layer);
+  layer = CLAY_VECTOR_LAYER (private->layer);
 
   if (item)
-    new_path = GIMP_PATH (item);
+    new_path = CLAY_PATH (item);
 
-  path = gimp_vector_layer_get_path (GIMP_VECTOR_LAYER (private->layer));
+  path = clay_vector_layer_get_path (CLAY_VECTOR_LAYER (private->layer));
 
   if (new_path && new_path != path)
     {
-      g_return_if_fail (GIMP_IS_PATH (new_path));
-      gimp_vector_layer_set_path (layer, new_path, FALSE);
+      g_return_if_fail (CLAY_IS_PATH (new_path));
+      clay_vector_layer_set_path (layer, new_path, FALSE);
 
       if (private->initial_path == new_path)
         g_clear_object (&private->initial_path);
       else if (private->initial_path == NULL)
         private->initial_path = g_object_ref (path);
 
-      gimp_vector_layer_refresh (layer);
+      clay_vector_layer_refresh (layer);
     }
 }

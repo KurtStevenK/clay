@@ -28,242 +28,242 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpimage-colormap.h"
-#include "core/gimppalette.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/clayimage-colormap.h"
+#include "core/claypalette.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-palette_new_invoker (GimpProcedure         *procedure,
-                     Gimp                  *gimp,
-                     GimpContext           *context,
-                     GimpProgress          *progress,
-                     const GimpValueArray  *args,
+static ClayValueArray *
+palette_new_invoker (ClayProcedure         *procedure,
+                     Clay                  *clay,
+                     ClayContext           *context,
+                     ClayProgress          *progress,
+                     const ClayValueArray  *args,
                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpPalette *palette = NULL;
+  ClayPalette *palette = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      palette = (GimpPalette*) gimp_data_factory_data_new (gimp->palette_factory,
+      palette = (ClayPalette*) clay_data_factory_data_new (clay->palette_factory,
                                                            context, name);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), palette);
+    g_value_set_object (clay_value_array_index (return_vals, 1), palette);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_get_by_name_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_by_name_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpPalette *palette = NULL;
+  ClayPalette *palette = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      palette = GIMP_PALETTE (gimp_pdb_get_resource (gimp, GIMP_TYPE_PALETTE, name,
-                                                     GIMP_PDB_DATA_ACCESS_READ, error));
+      palette = CLAY_PALETTE (clay_pdb_get_resource (clay, CLAY_TYPE_PALETTE, name,
+                                                     CLAY_PDB_DATA_ACCESS_READ, error));
 
       /* Ignore "not found" error, just return NULL. */
       g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), palette);
+    g_value_set_object (clay_value_array_index (return_vals, 1), palette);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_get_color_count_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_color_count_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   gint num_colors = 0;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      num_colors = gimp_palette_get_n_colors (palette);
+      num_colors = clay_palette_get_n_colors (palette);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), num_colors);
+    g_value_set_int (clay_value_array_index (return_vals, 1), num_colors);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_get_colors_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_colors_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   GeglColor **colors = NULL;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GList *list = gimp_palette_get_colors (palette);
+      GList *list = clay_palette_get_colors (palette);
       gint   num_colors;
       gint   i;
 
-      num_colors = gimp_palette_get_n_colors (palette);
+      num_colors = clay_palette_get_n_colors (palette);
       colors     = g_new0 (GeglColor *, num_colors + 1);
 
       for (i = 0; i < num_colors; i++, list = g_list_next (list))
         {
-          GimpPaletteEntry *entry = list->data;
+          ClayPaletteEntry *entry = list->data;
 
           colors[i] = gegl_color_duplicate (entry->color);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), colors);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), colors);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_get_columns_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_columns_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   gint num_columns = 0;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      num_columns = gimp_palette_get_columns (palette);
+      num_columns = clay_palette_get_columns (palette);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), num_columns);
+    g_value_set_int (clay_value_array_index (return_vals, 1), num_columns);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_set_columns_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+palette_set_columns_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpPalette *palette;
+  ClayPalette *palette;
   gint columns;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  columns = g_value_get_int (gimp_value_array_index (args, 1));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  columns = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (palette)))
-        gimp_palette_set_columns (palette, columns);
+      if (clay_data_is_writable (CLAY_DATA (palette)))
+        clay_palette_set_columns (palette, columns);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-palette_add_entry_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+palette_add_entry_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   const gchar *entry_name;
   GeglColor *color;
   gint entry_num = 0;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  entry_name = g_value_get_string (gimp_value_array_index (args, 1));
-  color = g_value_get_object (gimp_value_array_index (args, 2));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  entry_name = g_value_get_string (clay_value_array_index (args, 1));
+  color = g_value_get_object (clay_value_array_index (args, 2));
 
   if (success)
     {
       /* Must check writeable here, because add_entry does not fail when not writeable. */
-      if (gimp_data_is_writable (GIMP_DATA (palette)))
+      if (clay_data_is_writable (CLAY_DATA (palette)))
         {
           /* -1 for the index means append. */
-          GimpPaletteEntry *entry = gimp_palette_add_entry (palette, -1, entry_name, color);
+          ClayPaletteEntry *entry = clay_palette_add_entry (palette, -1, entry_name, color);
 
-          entry_num = gimp_palette_get_entry_position (palette, entry);
+          entry_num = clay_palette_get_entry_position (palette, entry);
         }
       else
         {
@@ -271,44 +271,44 @@ palette_add_entry_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), entry_num);
+    g_value_set_int (clay_value_array_index (return_vals, 1), entry_num);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_delete_entry_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+palette_delete_entry_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpPalette *palette;
+  ClayPalette *palette;
   gint entry_num;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  entry_num = g_value_get_int (gimp_value_array_index (args, 1));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  entry_num = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (palette)))
+      if (clay_data_is_writable (CLAY_DATA (palette)))
         {
-          GimpPaletteEntry *entry = gimp_palette_get_entry (palette, entry_num);
+          ClayPaletteEntry *entry = clay_palette_get_entry (palette, entry_num);
 
           if (entry)
             {
-              GimpImage *image = gimp_data_get_image (GIMP_DATA (palette));
+              ClayImage *image = clay_data_get_image (CLAY_DATA (palette));
 
               if (image != NULL)
-                success = gimp_image_delete_colormap_entry (image, entry_num, TRUE);
+                success = clay_image_delete_colormap_entry (image, entry_num, TRUE);
               else
-                gimp_palette_delete_entry (palette, entry);
+                clay_palette_delete_entry (palette, entry);
             }
           else
             {
@@ -319,30 +319,30 @@ palette_delete_entry_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-palette_get_entry_color_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_entry_color_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   gint entry_num;
   GeglColor *color = NULL;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  entry_num = g_value_get_int (gimp_value_array_index (args, 1));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  entry_num = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPaletteEntry *entry = gimp_palette_get_entry (palette, entry_num);
+      ClayPaletteEntry *entry = clay_palette_get_entry (palette, entry_num);
 
       if (entry)
         color = gegl_color_duplicate (entry->color);
@@ -350,64 +350,64 @@ palette_get_entry_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), color);
+    g_value_take_object (clay_value_array_index (return_vals, 1), color);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_set_entry_color_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+palette_set_entry_color_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpPalette *palette;
+  ClayPalette *palette;
   gint entry_num;
   GeglColor *color;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  entry_num = g_value_get_int (gimp_value_array_index (args, 1));
-  color = g_value_get_object (gimp_value_array_index (args, 2));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  entry_num = g_value_get_int (clay_value_array_index (args, 1));
+  color = g_value_get_object (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (palette)))
-        success = gimp_palette_set_entry_color (palette, entry_num, color, TRUE);
+      if (clay_data_is_writable (CLAY_DATA (palette)))
+        success = clay_palette_set_entry_color (palette, entry_num, color, TRUE);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-palette_get_entry_name_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_entry_name_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   gint entry_num;
   gchar *entry_name = NULL;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  entry_num = g_value_get_int (gimp_value_array_index (args, 1));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  entry_num = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPaletteEntry *entry = gimp_palette_get_entry (palette, entry_num);
+      ClayPaletteEntry *entry = clay_palette_get_entry (palette, entry_num);
 
       if (entry)
         entry_name = g_strdup (entry->name);
@@ -415,99 +415,99 @@ palette_get_entry_name_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), entry_name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), entry_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_set_entry_name_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+palette_set_entry_name_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpPalette *palette;
+  ClayPalette *palette;
   gint entry_num;
   const gchar *entry_name;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  entry_num = g_value_get_int (gimp_value_array_index (args, 1));
-  entry_name = g_value_get_string (gimp_value_array_index (args, 2));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  entry_num = g_value_get_int (clay_value_array_index (args, 1));
+  entry_name = g_value_get_string (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (palette)))
-        success = gimp_palette_set_entry_name (palette, entry_num, entry_name);
+      if (clay_data_is_writable (CLAY_DATA (palette)))
+        success = clay_palette_set_entry_name (palette, entry_num, entry_name);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-palette_get_bytes_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+palette_get_bytes_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette;
+  ClayValueArray *return_vals;
+  ClayPalette *palette;
   const Babl *format;
   GBytes *colormap = NULL;
   gint num_colors = 0;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  format = g_value_get_boxed (gimp_value_array_index (args, 1));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  format = g_value_get_boxed (clay_value_array_index (args, 1));
 
   if (success)
     {
       guchar *colormap_data;
       gint    bpp = babl_format_get_bytes_per_pixel (format);
 
-      colormap_data = gimp_palette_get_colormap (palette, format, &num_colors);
+      colormap_data = clay_palette_get_colormap (palette, format, &num_colors);
       colormap = g_bytes_new_take (colormap_data, bpp * num_colors);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_boxed (gimp_value_array_index (return_vals, 1), colormap);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), num_colors);
+      g_value_take_boxed (clay_value_array_index (return_vals, 1), colormap);
+      g_value_set_int (clay_value_array_index (return_vals, 2), num_colors);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-palette_set_bytes_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+palette_set_bytes_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpPalette *palette;
+  ClayPalette *palette;
   const Babl *format;
   GBytes *colormap;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
-  format = g_value_get_boxed (gimp_value_array_index (args, 1));
-  colormap = g_value_get_boxed (gimp_value_array_index (args, 2));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
+  format = g_value_get_boxed (clay_value_array_index (args, 1));
+  colormap = g_value_get_boxed (clay_value_array_index (args, 2));
 
   if (success)
     {
@@ -523,7 +523,7 @@ palette_set_bytes_invoker (GimpProcedure         *procedure,
 
           data     = g_bytes_get_data (colormap, &n_bytes),
           n_colors = n_bytes / bpp;
-          gimp_palette_set_colormap (palette, format, (guchar *) data, n_colors, TRUE);
+          clay_palette_set_colormap (palette, format, (guchar *) data, n_colors, TRUE);
         }
       else
         {
@@ -531,439 +531,439 @@ palette_set_bytes_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_palette_procs (GimpPDB *pdb)
+register_palette_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-palette-new
+   * clay-palette-new
    */
-  procedure = gimp_procedure_new (palette_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-new");
+  clay_procedure_set_static_help (procedure,
                                   "Creates a new palette",
                                   "Creates a new palette. The new palette has no color entries. You must add color entries for a user to choose. The actual name might be different than the requested name, when the requested name is already in use.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The requested name of the new palette",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_palette ("palette",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_palette ("palette",
                                                             "palette",
                                                             "The palette",
                                                             FALSE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-by-name
+   * clay-palette-get-by-name
    */
-  procedure = gimp_procedure_new (palette_get_by_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-by-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_by_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-by-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the palette with the given name.",
                                   "Returns an existing palette having the given name. Returns %NULL when no palette exists of that name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The name of the palette",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_palette ("palette",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_palette ("palette",
                                                             "palette",
                                                             "The palette",
                                                             TRUE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-color-count
+   * clay-palette-get-color-count
    */
-  procedure = gimp_procedure_new (palette_get_color_count_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-color-count");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_color_count_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-color-count");
+  clay_procedure_set_static_help (procedure,
                                   "Get the count of colors in the palette.",
                                   "Returns the number of colors in the palette.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-colors",
                                                      "num colors",
                                                      "The number of colors in the palette",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-colors
+   * clay-palette-get-colors
    */
-  procedure = gimp_procedure_new (palette_get_colors_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-colors");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_colors_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-colors");
+  clay_procedure_set_static_help (procedure,
                                   "Gets colors in the palette.",
-                                  "Returns an array of colors in the palette. Free the returned array with 'gimp-color-array-free'.",
+                                  "Returns an array of colors in the palette. Free the returned array with 'clay-color-array-free'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("colors",
                                                        "colors",
                                                        "The colors in the palette",
-                                                       GIMP_TYPE_COLOR_ARRAY,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_TYPE_COLOR_ARRAY,
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-columns
+   * clay-palette-get-columns
    */
-  procedure = gimp_procedure_new (palette_get_columns_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-columns");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_columns_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-columns");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the number of columns used to display the palette",
                                   "Gets the preferred number of columns to display the palette.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-columns",
                                                      "num columns",
                                                      "The number of columns used to display this palette",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-set-columns
+   * clay-palette-set-columns
    */
-  procedure = gimp_procedure_new (palette_set_columns_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-set-columns");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_set_columns_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-set-columns");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the number of columns used to display the palette",
                                   "Set the number of colors shown per row when the palette is displayed. Returns an error when the palette is not editable. The maximum allowed value is 64.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sven Neumann <sven@gimp.org>",
                                          "Sven Neumann",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("columns",
                                                  "columns",
                                                  "The new number of columns",
                                                  0, 64, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-add-entry
+   * clay-palette-add-entry
    */
-  procedure = gimp_procedure_new (palette_add_entry_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-add-entry");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_add_entry_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-add-entry");
+  clay_procedure_set_static_help (procedure,
                                   "Appends an entry to the palette.",
                                   "Appends an entry to the palette. Neither color nor name must be unique within the palette. When name is the empty string, this sets the entry name to \"Untitled\". Returns the index of the entry. Returns an error when palette is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("entry-name",
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("entry-name",
                                                        "entry name",
                                                        "A name for the entry",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The color for the added entry.",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("entry-num",
                                                      "entry num",
                                                      "The index of the added entry",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-delete-entry
+   * clay-palette-delete-entry
    */
-  procedure = gimp_procedure_new (palette_delete_entry_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-delete-entry");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_delete_entry_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-delete-entry");
+  clay_procedure_set_static_help (procedure,
                                   "Deletes an entry from the palette.",
                                   "This function will fail and return %FALSE if the index is out or range or if the palette is not editable.\n"
                                   "Additionally if the palette belongs to an indexed image, it will only be possible to delete palette colors not in use in the image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("entry-num",
                                                  "entry num",
                                                  "The index of the entry to delete",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-entry-color
+   * clay-palette-get-entry-color
    */
-  procedure = gimp_procedure_new (palette_get_entry_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-entry-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_entry_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-entry-color");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the color of an entry in the palette.",
                                   "Returns the color of the entry at the given zero-based index into the palette. Returns %NULL when the index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("entry-num",
                                                  "entry num",
                                                  "The index of the entry to get the color of.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("color",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("color",
                                                           "color",
                                                           "The color at the index.",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-set-entry-color
+   * clay-palette-set-entry-color
    */
-  procedure = gimp_procedure_new (palette_set_entry_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-set-entry-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_set_entry_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-set-entry-color");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the color of an entry in the palette.",
                                   "Sets the color of the entry at the zero-based index into the palette. Returns an error when the index is out of range. Returns an error when the palette is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("entry-num",
                                                  "entry num",
                                                  "The entry to get",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The new color",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-entry-name
+   * clay-palette-get-entry-name
    */
-  procedure = gimp_procedure_new (palette_get_entry_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-entry-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_entry_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-entry-name");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the name of an entry in the palette.",
                                   "Gets the name of the entry at the zero-based index into the palette. Returns an error when the index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("entry-num",
                                                  "entry num",
                                                  "The entry to get",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("entry-name",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("entry-name",
                                                            "entry name",
                                                            "The name of the entry.",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-set-entry-name
+   * clay-palette-set-entry-name
    */
-  procedure = gimp_procedure_new (palette_set_entry_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-set-entry-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_set_entry_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-set-entry-name");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the name of an entry in the palette.",
                                   "Sets the name of the entry at the zero-based index into the palette. Returns an error if the index is out or range. Returns an error if the palette is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("entry-num",
                                                  "entry num",
                                                  "The entry to get",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("entry-name",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("entry-name",
                                                        "entry name",
                                                        "The new name",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-get-bytes
+   * clay-palette-get-bytes
    */
-  procedure = gimp_procedure_new (palette_get_bytes_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-get-bytes");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_get_bytes_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-get-bytes");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the palette's colormap",
                                   "This procedure returns a palette's colormap as a bytes array with all colors converted to a given Babl @format.\n"
                                   "The byte-size of the returned colormap depends on the number of colors and on the bytes-per-pixel size of @format. E.g. that the following equality is ensured:\n"
@@ -972,74 +972,74 @@ register_palette_procs (GimpPDB *pdb)
                                   "g_bytes_get_size (colormap) == num_colors * babl_format_get_bytes_per_pixel (format)\n"
                                   "```",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("format",
                                                    "format",
                                                    "The desired color format",
-                                                   GIMP_TYPE_BABL_FORMAT,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                   CLAY_TYPE_BABL_FORMAT,
+                                                   CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("colormap",
                                                        "colormap",
                                                        "The image's colormap.",
                                                        G_TYPE_BYTES,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-colors",
                                                      "num colors",
                                                      "The number of colors in the palette",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-palette-set-bytes
+   * clay-palette-set-bytes
    */
-  procedure = gimp_procedure_new (palette_set_bytes_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-palette-set-bytes");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (palette_set_bytes_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-palette-set-bytes");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the entries in the image's colormap.",
                                   "This procedure sets the entries in the specified palette in one go. The number of entries depens on the size of @colormap and the bytes-per-pixel size of @format.\n"
                                   "The procedure will fail if the size of @colormap is not an exact multiple of the number of bytes per pixel of @format.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2024");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("format",
                                                    "format",
                                                    "The desired color format",
-                                                   GIMP_TYPE_BABL_FORMAT,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                   CLAY_TYPE_BABL_FORMAT,
+                                                   CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boxed ("colormap",
                                                    "colormap",
                                                    "The new colormap values",
                                                    G_TYPE_BYTES,
-                                                   GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                   CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

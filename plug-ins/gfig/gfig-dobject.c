@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -26,8 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "gfig.h"
 #include "gfig-dialog.h"
@@ -43,7 +43,7 @@
 #include "gfig-spiral.h"
 #include "gfig-star.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static GfigObject *operation_obj = NULL;
 static GdkPoint   *move_all_pnt; /* Point moving all from */
@@ -349,7 +349,7 @@ get_nearest_objs (GFigObj  *obj,
 }
 
 void
-object_operation_start (GimpGfig *gfig,
+object_operation_start (ClayGfig *gfig,
                         GdkPoint *pnt,
                         gboolean  shift_down)
 {
@@ -719,7 +719,7 @@ draw_objects (GList    *objs,
 }
 
 void
-prepend_to_all_obj (GimpGfig *gfig,
+prepend_to_all_obj (ClayGfig *gfig,
                     GFigObj  *fobj,
                     GList    *nobj)
 {
@@ -742,7 +742,7 @@ scale_obj_points (DobjPoints *opnt,
 }
 
 void
-add_to_all_obj (GimpGfig   *gfig,
+add_to_all_obj (ClayGfig   *gfig,
                 GFigObj    *fobj,
                 GfigObject *obj)
 {
@@ -827,7 +827,7 @@ object_start (GdkPoint *pnt,
 }
 
 void
-object_end (GimpGfig *gfig,
+object_end (ClayGfig *gfig,
             GdkPoint *pnt,
             gboolean  shift_down)
 {
@@ -943,7 +943,7 @@ get_line (gchar *buf,
 }
 
 void
-clear_undo (GimpGfig *gfig)
+clear_undo (ClayGfig *gfig)
 {
   int      lv;
   GAction *action;
@@ -962,7 +962,7 @@ clear_undo (GimpGfig *gfig)
 }
 
 void
-setup_undo (GimpGfig *gfig)
+setup_undo (ClayGfig *gfig)
 {
   GAction *action;
 
@@ -1002,7 +1002,7 @@ setup_undo (GimpGfig *gfig)
 }
 
 void
-new_obj_2edit (GimpGfig *gfig,
+new_obj_2edit (ClayGfig *gfig,
                GFigObj  *obj)
 {
   GAction *action;

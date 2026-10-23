@@ -5,7 +5,7 @@
  *
  *    Simple hack to create brush subsampling kernels.  If you want to
  *    play with it, change some of the #defines at the top and copy
- *    the output to app/paint/gimpbrushcore-kernels.h.
+ *    the output to app/paint/claybrushcore-kernels.h.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ main (int    argc,
   int    i, j;
   double x, y;
 
-  printf ("/* gimpbrushcore-kernels.h\n"
+  printf ("/* claybrushcore-kernels.h\n"
           " *\n"
           " *   This file was generated using kernelgen as found in the tools dir.\n");
   printf (" *   (threshold = %g)\n", THRESHOLD);

@@ -21,7 +21,7 @@
 ; 1.00 - initial release
 ; 1.01 - fixed the problem with a remaining copy of the selection
 ; 1.02 - some code cleanup, no real changes
-; 1.03 - can't call gimp-drawable-edit-fill until layer is added to image!
+; 1.03 - can't call clay-drawable-edit-fill until layer is added to image!
 ; 1.04
 ; 1.05 - replaced deprecated function calls with new ones for 2.8
 ;
@@ -48,31 +48,31 @@
         (shadow-blur (max shadow-blur 0))
         (shadow-opacity (min shadow-opacity 100))
         (shadow-opacity (max shadow-opacity 0))
-        (type (car (gimp-drawable-type-with-alpha drawable)))
-        (image-width (car (gimp-image-get-width image)))
-        (image-height (car (gimp-image-get-height image)))
+        (type (car (clay-drawable-type-with-alpha drawable)))
+        (image-width (car (clay-image-get-width image)))
+        (image-height (car (clay-image-get-height image)))
         (from-selection 0)
         (active-selection 0)
         (shadow-layer 0)
         )
 
-  (gimp-context-push)
-  (gimp-context-set-defaults)
+  (clay-context-push)
+  (clay-context-set-defaults)
 
-  (gimp-image-set-selected-layers image (make-vector 1 drawable))
+  (clay-image-set-selected-layers image (make-vector 1 drawable))
 
-  (gimp-image-undo-group-start image)
+  (clay-image-undo-group-start image)
 
-  (gimp-layer-add-alpha drawable)
-  (if (= (car (gimp-selection-is-empty image)) TRUE)
+  (clay-layer-add-alpha drawable)
+  (if (= (car (clay-selection-is-empty image)) TRUE)
       (begin
-        (gimp-image-select-item image CHANNEL-OP-REPLACE drawable)
+        (clay-image-select-item image CHANNEL-OP-REPLACE drawable)
         (set! from-selection FALSE))
       (begin
         (set! from-selection TRUE)
-        (set! active-selection (car (gimp-selection-save image)))))
+        (set! active-selection (car (clay-selection-save image)))))
 
-  (let* ((selection-bounds (gimp-selection-bounds image))
+  (let* ((selection-bounds (clay-selection-bounds image))
          (select-offset-x (cadr selection-bounds))
          (select-offset-y (caddr selection-bounds))
          (select-width (- (cadr (cddr selection-bounds)) select-offset-x))
@@ -114,7 +114,7 @@
               (set! new-image-height
                     (+ (+ shadow-height shadow-offset-y) shadow-transl-y)))
 
-          (gimp-image-resize image
+          (clay-image-resize image
                              new-image-width
                              new-image-height
                              image-offset-x
@@ -122,47 +122,47 @@
         )
     )
 
-    (set! shadow-layer (car (gimp-layer-new image
+    (set! shadow-layer (car (clay-layer-new image
                                             "Drop Shadow"
                                             shadow-width
                                             shadow-height
                                             type
                                             shadow-opacity
                                             LAYER-MODE-NORMAL)))
-    (gimp-image-set-selected-layers image (make-vector 1 drawable))
-    (gimp-image-insert-layer image shadow-layer 0 -1)
-    (gimp-layer-set-offsets shadow-layer
+    (clay-image-set-selected-layers image (make-vector 1 drawable))
+    (clay-image-insert-layer image shadow-layer 0 -1)
+    (clay-layer-set-offsets shadow-layer
                             shadow-offset-x
                             shadow-offset-y))
 
-  (gimp-drawable-fill shadow-layer FILL-TRANSPARENT)
-  (gimp-context-set-background shadow-color)
-  (gimp-drawable-edit-fill shadow-layer FILL-BACKGROUND)
-  (gimp-selection-none image)
-  (gimp-layer-set-lock-alpha shadow-layer FALSE)
+  (clay-drawable-fill shadow-layer FILL-TRANSPARENT)
+  (clay-context-set-background shadow-color)
+  (clay-drawable-edit-fill shadow-layer FILL-BACKGROUND)
+  (clay-selection-none image)
+  (clay-layer-set-lock-alpha shadow-layer FALSE)
   (if (>= shadow-blur 1.0)
-    (gimp-drawable-merge-new-filter shadow-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 shadow-blur)
+    (clay-drawable-merge-new-filter shadow-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" (* 0.32 shadow-blur)
                                                                                                "std-dev-y" (* 0.32 shadow-blur)
                                                                                                "filter" "auto")
     )
-  (gimp-item-transform-translate shadow-layer shadow-transl-x shadow-transl-y)
+  (clay-item-transform-translate shadow-layer shadow-transl-x shadow-transl-y)
 
   (if (= from-selection TRUE)
       (begin
-        (gimp-image-select-item image CHANNEL-OP-REPLACE active-selection)
-        (gimp-drawable-edit-clear shadow-layer)
-        (gimp-image-remove-channel image active-selection)))
+        (clay-image-select-item image CHANNEL-OP-REPLACE active-selection)
+        (clay-drawable-edit-clear shadow-layer)
+        (clay-image-remove-channel image active-selection)))
 
   (if (and
-       (= (car (gimp-layer-is-floating-sel drawable)) 0)
+       (= (car (clay-layer-is-floating-sel drawable)) 0)
        (= from-selection FALSE))
-      (gimp-image-raise-item image drawable))
+      (clay-image-raise-item image drawable))
 
-  (gimp-image-set-selected-layers image (make-vector 1 drawable))
-  (gimp-image-undo-group-end image)
-  (gimp-displays-flush)
+  (clay-image-set-selected-layers image (make-vector 1 drawable))
+  (clay-image-undo-group-end image)
+  (clay-displays-flush)
 
-  (gimp-context-pop)
+  (clay-context-pop)
   )
 )
 

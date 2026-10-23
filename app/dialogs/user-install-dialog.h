@@ -18,4 +18,4 @@
 #pragma once
 
 
-gboolean  user_install_dialog_run (GimpUserInstall *install);
+gboolean  user_install_dialog_run (ClayUserInstall *install);

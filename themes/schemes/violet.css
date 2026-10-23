@@ -1,0 +1,29 @@
+/* Clay colour scheme "Violet": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(233,226,245);
+@define-color bg-color                   rgb(26,20,39);
+@define-color border-color               rgb(55,49,68);
+@define-color dimmed-fg-color            rgb(181,174,194);
+@define-color disabled-fg-color          rgb(140,133,152);
+@define-color disabled-button-color      rgb(92,86,105);
+@define-color hover-color                rgb(55,49,68);
+@define-color widget-bg-color            rgb(38,32,51);
+@define-color selected-color             rgb(67,61,80);
+@define-color extreme-bg-color           rgb(18,14,27);
+@define-color extreme-selected-color     rgb(55,49,68);
+@define-color strong-border-color        rgb(98,92,111);
+@define-color stronger-border-color      rgb(98,92,111);
+@define-color edge-border-color          rgb(98,92,111);
+@define-color scrollbar-slider-color     rgb(98,92,111);
+@define-color scrollbar-trough-color     rgb(18,14,27);
+@define-color ruler-color                rgba(55,49,68,0.3);
+@define-color accent-color               rgb(167,139,219);
+@define-color accent-hover-color         rgb(185,162,226);
+@define-color on-accent-color            rgb(26,20,39);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;

@@ -1,0 +1,33 @@
+/* Espresso theme, light colours colour scheme (generated palette; colours are plain @define-color
+ * values, edit them freely).
+ * Dark schemes colour the icons with the six Lane colours, light schemes use the accent. */
+
+@define-color fg-color                   rgb(36,23,15);
+@define-color bg-color                   rgb(227,210,186);
+@define-color border-color               rgb(200,184,162);
+@define-color dimmed-fg-color            rgb(84,70,58);
+@define-color disabled-fg-color          rgb(122,107,92);
+@define-color disabled-button-color      rgb(166,150,131);
+@define-color hover-color                rgb(204,188,165);
+@define-color widget-bg-color            rgb(217,201,177);
+@define-color selected-color             rgb(193,176,155);
+@define-color extreme-bg-color           rgb(241,232,220);
+@define-color extreme-selected-color     rgb(200,184,162);
+@define-color strong-border-color        rgb(160,145,126);
+@define-color stronger-border-color      rgb(160,145,126);
+@define-color edge-border-color          rgb(160,145,126);
+@define-color scrollbar-slider-color     rgb(160,145,126);
+@define-color scrollbar-trough-color     rgb(227,210,186);
+@define-color ruler-color                rgba(200,184,162,0.3);
+@define-color accent-color               rgb(90,58,34);
+@define-color accent-hover-color         rgb(120,93,74);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(132,54,26);
+@define-color good-color                 rgb(47,94,66);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");

@@ -41,16 +41,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpColorProfile *profile;
+  ClayColorProfile *profile;
 
-  profile = gimp_image_get_color_profile (image);
+  profile = clay_image_get_color_profile (image);
 
   if (profile)
     {
       const guint8 *data;
       gsize         length;
 
-      data = gimp_color_profile_get_icc_profile (profile, &length);
+      data = clay_color_profile_get_icc_profile (profile, &length);
 
       profile_data = g_bytes_new (data, length);
     }
@@ -65,7 +65,7 @@ sub image_get_effective_color_profile {
     $help = <<'HELP';
 This procedure returns the color profile that is actually used for
 this image, which is the profile returned by
-gimp_image_get_color_profile() if the image has a profile assigned, or
+clay_image_get_color_profile() if the image has a profile assigned, or
 a generated default RGB or grayscale profile, according to the image's type.
 HELP
 
@@ -86,16 +86,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpColorProfile *profile;
+  ClayColorProfile *profile;
 
-  profile = gimp_color_managed_get_color_profile (GIMP_COLOR_MANAGED (image));
+  profile = clay_color_managed_get_color_profile (CLAY_COLOR_MANAGED (image));
 
   if (profile)
     {
       const guint8 *data;
       gsize         length;
 
-      data = gimp_color_profile_get_icc_profile (profile, &length);
+      data = clay_color_profile_get_icc_profile (profile, &length);
 
       profile_data = g_bytes_new (data, length);
     }
@@ -131,15 +131,15 @@ HELP
 {
   if (color_profile && g_bytes_get_size (color_profile) > 0)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
+      profile = clay_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
                                                          g_bytes_get_size (color_profile),
                                                          error);
 
       if (profile)
         {
-          success = gimp_image_assign_color_profile (image, profile,
+          success = clay_image_assign_color_profile (image, profile,
                                                      progress, error);
           g_object_unref (profile);
         }
@@ -148,7 +148,7 @@ HELP
     }
   else
     {
-      success = gimp_image_assign_color_profile (image, NULL,
+      success = clay_image_assign_color_profile (image, NULL,
                                                  progress, error);
     }
 }
@@ -182,13 +182,13 @@ HELP
 {
   if (file)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_color_profile_new_from_file (file, error);
+      profile = clay_color_profile_new_from_file (file, error);
 
       if (profile)
         {
-          success = gimp_image_assign_color_profile (image, profile,
+          success = clay_image_assign_color_profile (image, profile,
                                                      progress, error);
           g_object_unref (profile);
         }
@@ -197,7 +197,7 @@ HELP
     }
   else
     {
-      success = gimp_image_assign_color_profile (image, NULL,
+      success = clay_image_assign_color_profile (image, NULL,
                                                  progress, error);
     }
 }
@@ -230,16 +230,16 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpColorProfile *profile;
+  ClayColorProfile *profile;
 
-  profile = gimp_image_get_simulation_profile (image);
+  profile = clay_image_get_simulation_profile (image);
 
   if (profile)
     {
       const guint8 *data;
       gsize         length;
 
-      data = gimp_color_profile_get_icc_profile (profile, &length);
+      data = clay_color_profile_get_icc_profile (profile, &length);
 
       profile_data = g_bytes_new (data, length);
     }
@@ -272,15 +272,15 @@ HELP
 {
   if (color_profile && g_bytes_get_size (color_profile) > 0)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
+      profile = clay_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
                                                          g_bytes_get_size (color_profile),
                                                          error);
 
       if (profile)
         {
-          gimp_image_set_simulation_profile (image, profile);
+          clay_image_set_simulation_profile (image, profile);
           g_object_unref (profile);
         }
       else
@@ -290,7 +290,7 @@ HELP
     }
   else
     {
-      gimp_image_set_simulation_profile (image, NULL);
+      clay_image_set_simulation_profile (image, NULL);
     }
 }
 CODE
@@ -320,13 +320,13 @@ HELP
 {
   if (file)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_color_profile_new_from_file (file, error);
+      profile = clay_color_profile_new_from_file (file, error);
 
       if (profile)
         {
-          gimp_image_set_simulation_profile (image, profile);
+          clay_image_set_simulation_profile (image, profile);
           g_object_unref (profile);
         }
       else
@@ -336,7 +336,7 @@ HELP
     }
   else
     {
-      gimp_image_set_simulation_profile (image, NULL);
+      clay_image_set_simulation_profile (image, NULL);
     }
 }
 CODE
@@ -358,14 +358,14 @@ HELP
     );
 
     @outargs = (
-        { name => 'intent', type => 'enum GimpColorRenderingIntent',
+        { name => 'intent', type => 'enum ClayColorRenderingIntent',
           desc => "The image's simulation rendering intent." }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  intent = gimp_image_get_simulation_intent (image);
+  intent = clay_image_get_simulation_intent (image);
 }
 CODE
     );
@@ -383,14 +383,14 @@ HELP
     @inargs = (
         { name => 'image', type => 'image',
           desc => 'The image' },
-        { name => 'intent', type => 'enum GimpColorRenderingIntent',
-          desc => 'A GimpColorRenderingIntent' }
+        { name => 'intent', type => 'enum ClayColorRenderingIntent',
+          desc => 'A ClayColorRenderingIntent' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  gimp_image_set_simulation_intent (image, intent);
+  clay_image_set_simulation_intent (image, intent);
 }
 CODE
     );
@@ -418,7 +418,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  bpc = gimp_image_get_simulation_bpc (image);
+  bpc = clay_image_get_simulation_bpc (image);
 }
 CODE
     );
@@ -443,7 +443,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_image_set_simulation_bpc (image, bpc);
+  clay_image_set_simulation_bpc (image, bpc);
 }
 CODE
     );
@@ -468,7 +468,7 @@ HELP
           desc => 'The image' },
         { name => 'color_profile', type => 'bytes', none_ok => 1,
           desc => 'The serialized color profile' },
-        { name => 'intent', type => 'enum GimpColorRenderingIntent',
+        { name => 'intent', type => 'enum ClayColorRenderingIntent',
           desc => 'Rendering intent' },
         { name => 'bpc', type => 'boolean',
           desc => 'Black point compensation' }
@@ -477,23 +477,23 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpColorProfile *profile;
+  ClayColorProfile *profile;
 
   if (color_profile && g_bytes_get_size (color_profile) > 0)
     {
-      profile = gimp_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
+      profile = clay_color_profile_new_from_icc_profile (g_bytes_get_data (color_profile, NULL),
                                                          g_bytes_get_size (color_profile),
                                                          error);
     }
   else
     {
-      profile = gimp_image_get_builtin_color_profile (image);
+      profile = clay_image_get_builtin_color_profile (image);
       g_object_ref (profile);
     }
 
   if (profile)
     {
-      success = gimp_image_convert_color_profile (image, profile,
+      success = clay_image_convert_color_profile (image, profile,
                                                   intent, bpc,
                                                   progress, error);
       g_object_unref (profile);
@@ -524,7 +524,7 @@ HELP
           desc => 'The image' },
         { name => 'file', type => 'file',
           desc => 'The file containing the new color profile' },
-        { name => 'intent', type => 'enum GimpColorRenderingIntent',
+        { name => 'intent', type => 'enum ClayColorRenderingIntent',
           desc => 'Rendering intent' },
         { name => 'bpc', type => 'boolean',
           desc => 'Black point compensation' }
@@ -535,13 +535,13 @@ HELP
 {
   if (file)
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile = gimp_color_profile_new_from_file (file, error);
+      profile = clay_color_profile_new_from_file (file, error);
 
       if (profile)
         {
-          success = gimp_image_convert_color_profile (image, profile,
+          success = clay_image_convert_color_profile (image, profile,
                                                       intent, bpc,
                                                       progress, error);
           g_object_unref (profile);
@@ -557,9 +557,9 @@ CODE
 }
 
 @headers = qw(<cairo.h>
-              "libgimpcolor/gimpcolor.h"
-              "core/gimpimage-color-profile.h"
-              "gimp-intl.h");
+              "libclaycolor/claycolor.h"
+              "core/clayimage-color-profile.h"
+              "clay-intl.h");
 
 @procs = qw(image_get_color_profile
             image_get_effective_color_profile
@@ -578,7 +578,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Image Color Profile';
-$doc_title = 'gimpimagecolorprofile';
+$doc_title = 'clayimagecolorprofile';
 $doc_short_desc = 'Operations on an image\'s color profile.';
 $doc_long_desc = 'Operations on an image\'s color profile.';
 

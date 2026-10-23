@@ -27,16 +27,16 @@ use lib $srcdir;
 require 'enums.pl';
 require 'util.pl';
 
-*enums = \%Gimp::CodeGen::enums::enums;
+*enums = \%Clay::CodeGen::enums::enums;
 
-*write_file = \&Gimp::CodeGen::util::write_file;
-*FILE_EXT   = \$Gimp::CodeGen::util::FILE_EXT;
+*write_file = \&Clay::CodeGen::util::write_file;
+*FILE_EXT   = \$Clay::CodeGen::util::FILE_EXT;
 
-my $enumfile = "$builddir/libgimp/gimpenums.h$FILE_EXT";
+my $enumfile = "$builddir/libclay/clayenums.h$FILE_EXT";
 open ENUMFILE, "> $enumfile" or die "Can't open $enumfile: $!\n";
 
 print ENUMFILE <<'LGPL';
-/* LIBGIMP - The GIMP Library
+/* LIBCLAY - The Clay Library
  * Copyright (C) 1995-2003 Peter Mattis and Spencer Kimball
  *
  * This library is free software: you can redistribute it and/or
@@ -58,7 +58,7 @@ print ENUMFILE <<'LGPL';
 
 LGPL
 
-my $guard = "__GIMP_ENUMS_H__";
+my $guard = "__CLAY_ENUMS_H__";
 print ENUMFILE <<HEADER;
 #ifndef $guard
 #define $guard
@@ -68,15 +68,15 @@ G_BEGIN_DECLS
 HEADER
 
 foreach (sort keys %enums) {
-    if (! ($enums{$_}->{header} =~ /libgimp/) &&
+    if (! ($enums{$_}->{header} =~ /libclay/) &&
 	! $enums{$_}->{external}) {
         my $gtype = $func = $_;
 
-	for ($gtype) { s/Gimp//; s/([A-Z][^A-Z]+|[A-Z]+(?=[A-Z]))/\U$1\E_/g; s/_$// }
-	for ($func) { s/Gimp//; s/([A-Z][^A-Z]+|[A-Z]+(?=[A-Z]))/\L$1\E_/g; s/_$// }
+	for ($gtype) { s/Clay//; s/([A-Z][^A-Z]+|[A-Z]+(?=[A-Z]))/\U$1\E_/g; s/_$// }
+	for ($func) { s/Clay//; s/([A-Z][^A-Z]+|[A-Z]+(?=[A-Z]))/\L$1\E_/g; s/_$// }
 
-	print ENUMFILE "\n#define GIMP_TYPE_$gtype (gimp_$func\_get_type ())\n\n";
-	print ENUMFILE "GType gimp_$func\_get_type (void);\n\n";
+	print ENUMFILE "\n#define CLAY_TYPE_$gtype (clay_$func\_get_type ())\n\n";
+	print ENUMFILE "GType clay_$func\_get_type (void);\n\n";
 
 	print ENUMFILE "/**\n";
 	print ENUMFILE " * $_:\n";
@@ -111,9 +111,9 @@ foreach (sort keys %enums) {
 
 print ENUMFILE <<HEADER;
 
-void           gimp_enums_init           (void);
+void           clay_enums_init           (void);
 
-const gchar ** gimp_enums_get_type_names (gint *n_type_names);
+const gchar ** clay_enums_get_type_names (gint *n_type_names);
 
 
 G_END_DECLS
@@ -122,27 +122,27 @@ G_END_DECLS
 HEADER
 
 close ENUMFILE;
-&write_file($enumfile, "$destdir/libgimp");
+&write_file($enumfile, "$destdir/libclay");
 
-$enumfile = "$builddir/libgimp/gimpenums.c.tail$FILE_EXT";
+$enumfile = "$builddir/libclay/clayenums.c.tail$FILE_EXT";
 open ENUMFILE, "> $enumfile" or die "Can't open $enumfile: $!\n";
 
 print ENUMFILE <<CODE;
 
-typedef GType (* GimpGetTypeFunc) (void);
+typedef GType (* ClayGetTypeFunc) (void);
 
-static const GimpGetTypeFunc get_type_funcs[] =
+static const ClayGetTypeFunc get_type_funcs[] =
 {
 CODE
 
 my $first = 1;
 foreach (sort {uc($a) cmp uc($b)} keys %enums) {
-    if (! ($_ =~ /GimpUnit/)) {
+    if (! ($_ =~ /ClayUnit/)) {
 	my $enum = $enums{$_};
 	my $func = $_;
 	my $gegl_enum = ($func =~ /Gegl/);
 
-	for ($func) { s/Gimp//; s/Gegl//; s/PDB/Pdb/;
+	for ($func) { s/Clay//; s/Gegl//; s/PDB/Pdb/;
 		      s/([A-Z][^A-Z]+|[A-Z]+(?=[A-Z]))/\L$1\E_/g; s/_$// }
 
 	print ENUMFILE ",\n" unless $first;
@@ -150,7 +150,7 @@ foreach (sort {uc($a) cmp uc($b)} keys %enums) {
 	if ($gegl_enum) {
 	    print ENUMFILE "  gegl_$func\_get_type";
 	} else {
-	    print ENUMFILE "  gimp_$func\_get_type";
+	    print ENUMFILE "  clay_$func\_get_type";
 	}
 
 	$first = 0;
@@ -167,7 +167,7 @@ CODE
 
 $first = 1;
 foreach (sort {uc($a) cmp uc($b)} keys %enums) {
-    if (! ($_ =~ /GimpUnit/)) {
+    if (! ($_ =~ /ClayUnit/)) {
 	my $enum = $enums{$_};
 	my $gtype = $_;
 
@@ -186,24 +186,24 @@ static gboolean enums_initialized = FALSE;
 
 #if 0
 /*  keep around as documentation how to do compat enums  */
-GType gimp_convert_dither_type_compat_get_type (void);
+GType clay_convert_dither_type_compat_get_type (void);
 #endif
 
 /**
- * gimp_enums_init:
+ * clay_enums_init:
  *
  * This function makes sure all the enum types are registered
  * with the #GType system. This is intended for use by language
- * bindings that need the symbols early, before gimp_main is run.
+ * bindings that need the symbols early, before clay_main is run.
  * It's not necessary for plug-ins to call this directly, because
  * the normal plug-in initialization code will handle it implicitly.
  *
  * Since: 2.4
  **/
 void
-gimp_enums_init (void)
+clay_enums_init (void)
 {
-  const GimpGetTypeFunc *funcs = get_type_funcs;
+  const ClayGetTypeFunc *funcs = get_type_funcs;
 #if 0
   GQuark                 quark;
 #endif
@@ -223,22 +223,22 @@ gimp_enums_init (void)
   /*  keep around as documentation how to do compat enums  */
 
   /*  keep compat enum code in sync with app/app.c (app_libs_init)  */
-  quark = g_quark_from_static_string ("gimp-compat-enum");
+  quark = g_quark_from_static_string ("clay-compat-enum");
 
-  g_type_set_qdata (GIMP_TYPE_CONVERT_DITHER_TYPE, quark,
-		    (gpointer) gimp_convert_dither_type_compat_get_type ());
+  g_type_set_qdata (CLAY_TYPE_CONVERT_DITHER_TYPE, quark,
+		    (gpointer) clay_convert_dither_type_compat_get_type ());
 #endif
 
-  gimp_base_compat_enums_init ();
+  clay_base_compat_enums_init ();
 
   enums_initialized = TRUE;
 }
 
 /**
- * gimp_enums_get_type_names:
+ * clay_enums_get_type_names:
  * \@n_type_names: (out): return location for the number of names
  *
- * This function gives access to the list of enums registered by libgimp.
+ * This function gives access to the list of enums registered by libclay.
  * The returned array is static and must not be modified.
  *
  * Returns: (array length=n_type_names) (transfer none): an array with type names
@@ -246,7 +246,7 @@ gimp_enums_init (void)
  * Since: 2.2
  **/
 const gchar **
-gimp_enums_get_type_names (gint *n_type_names)
+clay_enums_get_type_names (gint *n_type_names)
 {
   g_return_val_if_fail (n_type_names != NULL, NULL);
 
@@ -257,4 +257,4 @@ gimp_enums_get_type_names (gint *n_type_names)
 CODE
 
 close ENUMFILE;
-&write_file($enumfile, "$destdir/libgimp");
+&write_file($enumfile, "$destdir/libclay");

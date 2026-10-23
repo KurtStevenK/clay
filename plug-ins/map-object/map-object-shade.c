@@ -6,8 +6,8 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "map-object-apply.h"
 #include "map-object-main.h"
@@ -22,8 +22,8 @@ typedef struct
 {
   gdouble     u, v;
   gdouble     t;
-  GimpVector3 s;
-  GimpVector3 n;
+  ClayVector3 s;
+  ClayVector3 n;
   gint        face;
 } FaceIntersectInfo;
 
@@ -32,17 +32,17 @@ typedef struct
 /*****************/
 
 static void
-phong_shade (GimpVector3 *pos,
-             GimpVector3 *viewpoint,
-             GimpVector3 *normal,
+phong_shade (ClayVector3 *pos,
+             ClayVector3 *viewpoint,
+             ClayVector3 *normal,
              gdouble     *diff_col,
              gdouble     *spec_col,
              LightType    type)
 {
   gdouble       ambientcolor[4], diffusecolor[4], specularcolor[4];
   gdouble       NL, RV, dist;
-  GimpVector3   L, NN, V, N;
-  GimpVector3  *light;
+  ClayVector3   L, NN, V, N;
+  ClayVector3  *light;
 
   light = mapvals.lightsource.type == DIRECTIONAL_LIGHT
     ? &mapvals.lightsource.direction
@@ -61,28 +61,28 @@ phong_shade (GimpVector3 *pos,
   /* ====================================== */
 
   if (type == POINT_LIGHT)
-    gimp_vector3_sub (&L, light, pos);
+    clay_vector3_sub (&L, light, pos);
   else
     L = *light;
 
-  dist = gimp_vector3_length (&L);
+  dist = clay_vector3_length (&L);
 
   if (dist != 0.0)
-    gimp_vector3_mul (&L, 1.0 / dist);
+    clay_vector3_mul (&L, 1.0 / dist);
 
-  NL = 2.0 * gimp_vector3_inner_product (&N, &L);
+  NL = 2.0 * clay_vector3_inner_product (&N, &L);
 
   if (NL >= 0.0)
     {
       /* Compute (R*V)^alpha term of Phong's equation */
       /* ============================================ */
 
-      gimp_vector3_sub (&V, viewpoint, pos);
-      gimp_vector3_normalize (&V);
+      clay_vector3_sub (&V, viewpoint, pos);
+      clay_vector3_normalize (&V);
 
-      gimp_vector3_mul (&N, NL);
-      gimp_vector3_sub (&NN, &N, &L);
-      RV = gimp_vector3_inner_product (&NN, &V);
+      clay_vector3_mul (&N, NL);
+      clay_vector3_sub (&NN, &N, &L);
+      RV = clay_vector3_inner_product (&NN, &V);
       RV = 0.0 < RV ? pow (RV, mapvals.material.highlight) : 0.0;
 
       /* Compute diffuse and specular intensity contribution */
@@ -118,9 +118,9 @@ phong_shade (GimpVector3 *pos,
 }
 
 static gint
-plane_intersect (GimpVector3 *dir,
-                 GimpVector3 *viewp,
-                 GimpVector3 *ipos,
+plane_intersect (ClayVector3 *dir,
+                 ClayVector3 *viewp,
+                 ClayVector3 *ipos,
                  gdouble     *u,
                  gdouble     *v)
 {
@@ -197,11 +197,11 @@ plane_intersect (GimpVector3 *dir,
  *****************************************************************************/
 
 void
-get_ray_color_plane (GimpVector3 *pos,
+get_ray_color_plane (ClayVector3 *pos,
                      gdouble     *color)
 {
   static gint         inside = FALSE;
-  static GimpVector3  ray, spos;
+  static ClayVector3  ray, spos;
   static gdouble      vx, vy;
 
   /* Construct a line from our VP to the point */
@@ -210,8 +210,8 @@ get_ray_color_plane (GimpVector3 *pos,
   for (gint i = 0; i < 4; i++)
     color[i] = background[i];
 
-  gimp_vector3_sub (&ray, pos, &mapvals.viewpoint);
-  gimp_vector3_normalize (&ray);
+  clay_vector3_sub (&ray, pos, &mapvals.viewpoint);
+  clay_vector3_normalize (&ray);
 
   /* Check for intersection. This is a quasi ray-tracer. */
   /* =================================================== */
@@ -248,14 +248,14 @@ get_ray_color_plane (GimpVector3 *pos,
 /***********************************************************************/
 
 static void
-sphere_to_image (GimpVector3 *normal,
+sphere_to_image (ClayVector3 *normal,
                  gdouble     *u,
                  gdouble     *v)
 {
   static gdouble      alpha, fac;
-  static GimpVector3  cross_prod;
+  static ClayVector3  cross_prod;
 
-  alpha = acos (-gimp_vector3_inner_product (&mapvals.secondaxis, normal));
+  alpha = acos (-clay_vector3_inner_product (&mapvals.secondaxis, normal));
 
   *v = alpha / G_PI;
 
@@ -265,7 +265,7 @@ sphere_to_image (GimpVector3 *normal,
     }
   else
     {
-      fac = (gimp_vector3_inner_product (&mapvals.firstaxis, normal) /
+      fac = (clay_vector3_inner_product (&mapvals.firstaxis, normal) /
              sin (alpha));
 
       /* Make sure that we map to -1.0..1.0 (take care of rounding errors) */
@@ -275,10 +275,10 @@ sphere_to_image (GimpVector3 *normal,
 
       *u = acos (fac) / (2.0 * G_PI);
 
-      cross_prod = gimp_vector3_cross_product (&mapvals.secondaxis,
+      cross_prod = clay_vector3_cross_product (&mapvals.secondaxis,
                                                &mapvals.firstaxis);
 
-      if (gimp_vector3_inner_product (&cross_prod, normal) < 0.0)
+      if (clay_vector3_inner_product (&cross_prod, normal) < 0.0)
         *u = 1.0 - *u;
     }
 }
@@ -288,18 +288,18 @@ sphere_to_image (GimpVector3 *normal,
 /***************************************************/
 
 static gint
-sphere_intersect (GimpVector3 *dir,
-                  GimpVector3 *viewp,
-                  GimpVector3 *spos1,
-                  GimpVector3 *spos2)
+sphere_intersect (ClayVector3 *dir,
+                  ClayVector3 *viewp,
+                  ClayVector3 *spos1,
+                  ClayVector3 *spos2)
 {
   static gdouble      alpha, beta, tau, s1, s2, tmp;
-  static GimpVector3  t;
+  static ClayVector3  t;
 
-  gimp_vector3_sub (&t, &mapvals.position, viewp);
+  clay_vector3_sub (&t, &mapvals.position, viewp);
 
-  alpha = gimp_vector3_inner_product (dir, &t);
-  beta  = gimp_vector3_inner_product (&t, &t);
+  alpha = clay_vector3_inner_product (dir, &t);
+  beta  = clay_vector3_inner_product (&t, &t);
 
   tau = alpha * alpha - beta + mapvals.radius * mapvals.radius;
 
@@ -335,12 +335,12 @@ sphere_intersect (GimpVector3 *dir,
  *****************************************************************************/
 
 void
-get_ray_color_sphere (GimpVector3 *pos,
+get_ray_color_sphere (ClayVector3 *pos,
                       gdouble     *color)
 {
   static gdouble      color2[4];
   static gint         inside = FALSE;
-  static GimpVector3  normal, ray, spos1, spos2;
+  static ClayVector3  normal, ray, spos1, spos2;
   static gdouble      vx, vy;
 
   for (gint i = 0; i < 4; i++)
@@ -354,8 +354,8 @@ get_ray_color_sphere (GimpVector3 *pos,
   /* Construct a line from our VP to the point */
   /* ========================================= */
 
-  gimp_vector3_sub (&ray, pos, &mapvals.viewpoint);
-  gimp_vector3_normalize (&ray);
+  clay_vector3_sub (&ray, pos, &mapvals.viewpoint);
+  clay_vector3_normalize (&ray);
 
   /* Check for intersection. This is a quasi ray-tracer. */
   /* =================================================== */
@@ -365,8 +365,8 @@ get_ray_color_sphere (GimpVector3 *pos,
       /* Compute spherical to rectangular mapping */
       /* ======================================== */
 
-      gimp_vector3_sub (&normal, &spos1, &mapvals.position);
-      gimp_vector3_normalize (&normal);
+      clay_vector3_sub (&normal, &spos1, &mapvals.position);
+      clay_vector3_normalize (&normal);
       sphere_to_image (&normal, &vx, &vy);
       get_image_color (vx, vy, &inside, color);
 
@@ -389,15 +389,15 @@ get_ray_color_sphere (GimpVector3 *pos,
           for (gint i = 0; i < 4; i++)
             color[i] = CLAMP (color[i], 0.0, 1.0);
 
-          gimp_vector3_sub (&normal, &spos2, &mapvals.position);
-          gimp_vector3_normalize (&normal);
+          clay_vector3_sub (&normal, &spos2, &mapvals.position);
+          clay_vector3_normalize (&normal);
           sphere_to_image (&normal, &vx, &vy);
           get_image_color (vx, vy, &inside, color2);
 
           /* Make the normal point inwards */
           /* ============================= */
 
-          gimp_vector3_mul (&normal, -1.0);
+          clay_vector3_mul (&normal, -1.0);
 
           phong_shade (&spos2,
                        &mapvals.viewpoint,
@@ -446,9 +446,9 @@ get_ray_color_sphere (GimpVector3 *pos,
 void
 compute_bounding_box (void)
 {
-  GimpVector3  p1, p2;
+  ClayVector3  p1, p2;
   gdouble      t;
-  GimpVector3  dir;
+  ClayVector3  dir;
 
   p1 = mapvals.position;
   p1.x -= (mapvals.radius + 0.01);
@@ -458,8 +458,8 @@ compute_bounding_box (void)
   p2.x += (mapvals.radius + 0.01);
   p2.y += (mapvals.radius + 0.01);
 
-  gimp_vector3_sub (&dir, &p1, &mapvals.viewpoint);
-  gimp_vector3_normalize (&dir);
+  clay_vector3_sub (&dir, &p1, &mapvals.viewpoint);
+  clay_vector3_normalize (&dir);
 
   if (dir.z != 0.0)
     {
@@ -468,8 +468,8 @@ compute_bounding_box (void)
       p1.y = (mapvals.viewpoint.y + t * dir.y);
     }
 
-  gimp_vector3_sub (&dir, &p2, &mapvals.viewpoint);
-  gimp_vector3_normalize (&dir);
+  clay_vector3_sub (&dir, &p2, &mapvals.viewpoint);
+  clay_vector3_normalize (&dir);
 
   if (dir.z != 0.0)
     {
@@ -492,8 +492,8 @@ compute_bounding_box (void)
 /* ============================================================ */
 
 void
-vecmulmat (GimpVector3 *u,
-           GimpVector3 *v,
+vecmulmat (ClayVector3 *u,
+           ClayVector3 *v,
            gfloat       m[16])
 {
   gfloat v0=v->x, v1=v->y, v2=v->z;
@@ -506,7 +506,7 @@ vecmulmat (GimpVector3 *u,
 
 void
 rotatemat (gfloat       angle,
-           GimpVector3 *v,
+           ClayVector3 *v,
            gfloat       m[16])
 {
   /* This function contributed by Erich Boleyn (erich@uruk.org) */
@@ -655,8 +655,8 @@ static gboolean
 intersect_rect (gdouble            u,
                 gdouble            v,
                 gdouble            w,
-                GimpVector3        viewp,
-                GimpVector3        dir,
+                ClayVector3        viewp,
+                ClayVector3        dir,
                 FaceIntersectInfo *face_info)
 {
   gboolean result = FALSE;
@@ -685,20 +685,20 @@ intersect_rect (gdouble            u,
 }
 
 static gboolean
-intersect_box (GimpVector3        scale,
-               GimpVector3        viewp,
-               GimpVector3        dir,
+intersect_box (ClayVector3        scale,
+               ClayVector3        viewp,
+               ClayVector3        dir,
                FaceIntersectInfo *face_intersect)
 {
-  GimpVector3        v, d, tmp, axis[3];
+  ClayVector3        v, d, tmp, axis[3];
   FaceIntersectInfo  face_tmp;
   gboolean           result = FALSE;
   gfloat             m[16];
   gint               i = 0;
 
-  gimp_vector3_set (&axis[0], 1.0, 0.0, 0.0);
-  gimp_vector3_set (&axis[1], 0.0, 1.0, 0.0);
-  gimp_vector3_set (&axis[2], 0.0, 0.0, 1.0);
+  clay_vector3_set (&axis[0], 1.0, 0.0, 0.0);
+  clay_vector3_set (&axis[1], 0.0, 1.0, 0.0);
+  clay_vector3_set (&axis[2], 0.0, 0.0, 1.0);
 
   /* Front side */
   /* ========== */
@@ -707,7 +707,7 @@ intersect_box (GimpVector3        scale,
                       viewp, dir, &face_intersect[i]) == TRUE)
     {
       face_intersect[i].face = 0;
-      gimp_vector3_set (&face_intersect[i++].n, 0.0, 0.0, 1.0);
+      clay_vector3_set (&face_intersect[i++].n, 0.0, 0.0, 1.0);
       result = TRUE;
     }
 
@@ -719,7 +719,7 @@ intersect_box (GimpVector3        scale,
     {
       face_intersect[i].face = 1;
       face_intersect[i].u = 1.0 - face_intersect[i].u;
-      gimp_vector3_set (&face_intersect[i++].n, 0.0, 0.0, -1.0);
+      clay_vector3_set (&face_intersect[i++].n, 0.0, 0.0, -1.0);
       result = TRUE;
     }
 
@@ -744,7 +744,7 @@ intersect_box (GimpVector3        scale,
           vecmulmat(&tmp, &face_intersect[i].s, m);
           face_intersect[i].s = tmp;
 
-          gimp_vector3_set (&face_intersect[i++].n, 0.0, -1.0, 0.0);
+          clay_vector3_set (&face_intersect[i++].n, 0.0, -1.0, 0.0);
           result = TRUE;
         }
     }
@@ -773,7 +773,7 @@ intersect_box (GimpVector3        scale,
 
           face_intersect[i].v = 1.0 - face_intersect[i].v;
 
-          gimp_vector3_set (&face_intersect[i++].n, 0.0, 1.0, 0.0);
+          clay_vector3_set (&face_intersect[i++].n, 0.0, 1.0, 0.0);
 
           result = TRUE;
         }
@@ -800,7 +800,7 @@ intersect_box (GimpVector3        scale,
           vecmulmat (&tmp, &face_intersect[i].s, m);
           face_intersect[i].s = tmp;
 
-          gimp_vector3_set (&face_intersect[i++].n, 1.0, 0.0, 0.0);
+          clay_vector3_set (&face_intersect[i++].n, 1.0, 0.0, 0.0);
           result = TRUE;
         }
     }
@@ -827,7 +827,7 @@ intersect_box (GimpVector3        scale,
 
           face_intersect[i].u = 1.0 - face_intersect[i].u;
 
-          gimp_vector3_set (&face_intersect[i++].n, -1.0, 0.0, 0.0);
+          clay_vector3_set (&face_intersect[i++].n, -1.0, 0.0, 0.0);
           result = TRUE;
         }
     }
@@ -846,10 +846,10 @@ intersect_box (GimpVector3        scale,
 }
 
 void
-get_ray_color_box (GimpVector3 *pos,
+get_ray_color_box (ClayVector3 *pos,
                    gdouble     *color)
 {
-  GimpVector3        lvp, ldir, vp, p, dir, ns, nn;
+  ClayVector3        lvp, ldir, vp, p, dir, ns, nn;
   gdouble            color2[4];
   gfloat             m[16];
   gint               i;
@@ -876,8 +876,8 @@ get_ray_color_box (GimpVector3 *pos,
   /* Compute direction */
   /* ================= */
 
-  gimp_vector3_sub (&dir, &p, &vp);
-  gimp_vector3_normalize (&dir);
+  clay_vector3_sub (&dir, &p, &vp);
+  clay_vector3_normalize (&dir);
 
   /* Compute inverse of rotation matrix and apply it to   */
   /* the viewpoint and direction. This transforms the     */
@@ -950,7 +950,7 @@ get_ray_color_box (GimpVector3 *pos,
           /* Make the normal point inwards */
           /* ============================= */
 
-          gimp_vector3_mul (&face_intersect[1].n, -1.0);
+          clay_vector3_mul (&face_intersect[1].n, -1.0);
 
           phong_shade (&face_intersect[1].s,
                        &mapvals.viewpoint,
@@ -993,8 +993,8 @@ get_ray_color_box (GimpVector3 *pos,
 }
 
 static gboolean
-intersect_circle (GimpVector3        vp,
-                  GimpVector3        dir,
+intersect_circle (ClayVector3        vp,
+                  ClayVector3        dir,
                   gdouble            w,
                   FaceIntersectInfo *face_info)
 {
@@ -1027,8 +1027,8 @@ intersect_circle (GimpVector3        vp,
 }
 
 static gboolean
-intersect_cylinder (GimpVector3        vp,
-                    GimpVector3        dir,
+intersect_cylinder (ClayVector3        vp,
+                    ClayVector3        dir,
                     FaceIntersectInfo *face_intersect)
 {
   gdouble  a, b, c, d, e, f, tmp, l;
@@ -1070,7 +1070,7 @@ intersect_cylinder (GimpVector3        vp,
 
               face_intersect[i].n = face_intersect[i].s;
               face_intersect[i].n.y = 0.0;
-              gimp_vector3_normalize(&face_intersect[i].n);
+              clay_vector3_normalize(&face_intersect[i].n);
 
               l = mapvals.cylinder_length/2.0;
 
@@ -1098,7 +1098,7 @@ intersect_cylinder (GimpVector3        vp,
                         {
                           face_intersect[i].face = 2;
                           face_intersect[i].v = 1 - face_intersect[i].v;
-                          gimp_vector3_set(&face_intersect[i].n, 0.0, 1.0, 0.0);
+                          clay_vector3_set(&face_intersect[i].n, 0.0, 1.0, 0.0);
                         }
                     }
                   else
@@ -1108,7 +1108,7 @@ intersect_cylinder (GimpVector3        vp,
                       else
                         {
                           face_intersect[i].face = 1;
-                          gimp_vector3_set(&face_intersect[i].n, 0.0, -1.0, 0.0);
+                          clay_vector3_set(&face_intersect[i].n, 0.0, -1.0, 0.0);
                         }
                     }
                 }
@@ -1136,10 +1136,10 @@ get_cylinder_color (gint     face,
 }
 
 void
-get_ray_color_cylinder (GimpVector3 *pos,
+get_ray_color_cylinder (ClayVector3 *pos,
                         gdouble     *color)
 {
-  GimpVector3       lvp, ldir, vp, p, dir, ns, nn;
+  ClayVector3       lvp, ldir, vp, p, dir, ns, nn;
   gdouble           color2[4];
   gfloat            m[16];
   gint              i;
@@ -1161,8 +1161,8 @@ get_ray_color_cylinder (GimpVector3 *pos,
   /* Compute direction */
   /* ================= */
 
-  gimp_vector3_sub (&dir, &p, &vp);
-  gimp_vector3_normalize (&dir);
+  clay_vector3_sub (&dir, &p, &vp);
+  clay_vector3_normalize (&dir);
 
   /* Compute inverse of rotation matrix and apply it to   */
   /* the viewpoint and direction. This transforms the     */
@@ -1227,7 +1227,7 @@ get_ray_color_cylinder (GimpVector3 *pos,
           /* Make the normal point inwards */
           /* ============================= */
 
-          gimp_vector3_mul (&face_intersect[1].n, -1.0);
+          clay_vector3_mul (&face_intersect[1].n, -1.0);
 
           phong_shade (&face_intersect[1].s,
                        &mapvals.viewpoint,

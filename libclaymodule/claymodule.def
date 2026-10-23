@@ -1,0 +1,21 @@
+EXPORTS
+	clay_module_db_get_load_inhibit
+	clay_module_db_get_type
+	clay_module_db_get_verbose
+	clay_module_db_load
+	clay_module_db_new
+	clay_module_db_refresh
+	clay_module_db_set_load_inhibit
+	clay_module_db_set_verbose
+	clay_module_error_quark
+	clay_module_get_auto_load
+	clay_module_get_file
+	clay_module_get_info
+	clay_module_get_last_error
+	clay_module_get_state
+	clay_module_get_type
+	clay_module_is_loaded
+	clay_module_is_on_disk
+	clay_module_new
+	clay_module_query_module
+	clay_module_set_auto_load

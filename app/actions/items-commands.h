@@ -18,44 +18,44 @@
 #pragma once
 
 
-void   items_visible_cmd_callback          (GimpAction   *action,
+void   items_visible_cmd_callback          (ClayAction   *action,
                                             GVariant     *value,
-                                            GimpImage    *image,
+                                            ClayImage    *image,
                                             GList        *items);
-void   items_lock_content_cmd_callback     (GimpAction   *action,
+void   items_lock_content_cmd_callback     (ClayAction   *action,
                                             GVariant     *value,
-                                            GimpImage    *image,
+                                            ClayImage    *image,
                                             GList        *items);
-void   items_lock_position_cmd_callback    (GimpAction   *action,
+void   items_lock_position_cmd_callback    (ClayAction   *action,
                                             GVariant     *value,
-                                            GimpImage    *image,
+                                            ClayImage    *image,
                                             GList        *items);
 
-void   items_color_tag_cmd_callback        (GimpAction   *action,
-                                            GimpImage    *image,
+void   items_color_tag_cmd_callback        (ClayAction   *action,
+                                            ClayImage    *image,
                                             GList        *items,
-                                            GimpColorTag  color_tag);
+                                            ClayColorTag  color_tag);
 
-void   items_fill_cmd_callback             (GimpAction   *action,
-                                            GimpImage    *image,
+void   items_fill_cmd_callback             (ClayAction   *action,
+                                            ClayImage    *image,
                                             GList        *items,
                                             const gchar  *dialog_title,
                                             const gchar  *dialog_icon_name,
                                             const gchar  *dialog_help_id,
                                             gpointer      data);
-void   items_fill_last_vals_cmd_callback   (GimpAction   *action,
-                                            GimpImage    *image,
+void   items_fill_last_vals_cmd_callback   (ClayAction   *action,
+                                            ClayImage    *image,
                                             GList        *items,
                                             gpointer      data);
 
-void   items_stroke_cmd_callback           (GimpAction   *action,
-                                            GimpImage    *image,
+void   items_stroke_cmd_callback           (ClayAction   *action,
+                                            ClayImage    *image,
                                             GList        *items,
                                             const gchar  *dialog_title,
                                             const gchar  *dialog_icon_name,
                                             const gchar  *dialog_help_id,
                                             gpointer      data);
-void   items_stroke_last_vals_cmd_callback (GimpAction   *action,
-                                            GimpImage    *image,
+void   items_stroke_last_vals_cmd_callback (ClayAction   *action,
+                                            ClayImage    *image,
                                             GList        *items,
                                             gpointer      data);

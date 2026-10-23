@@ -32,16 +32,16 @@
 #include <gegl.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clayprogress.h"
 
 #include "file-remote.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef enum
@@ -52,7 +52,7 @@ typedef enum
 
 typedef struct
 {
-  GimpProgress *progress;
+  ClayProgress *progress;
   GCancellable *cancellable;
   gboolean      cancel;
   GMainLoop    *main_loop;
@@ -62,7 +62,7 @@ typedef struct
 typedef struct
 {
   RemoteCopyMode  mode;
-  GimpProgress   *progress;
+  ClayProgress   *progress;
   GCancellable   *cancellable;
   gboolean        cancel;
   gint64          last_time;
@@ -72,22 +72,22 @@ typedef struct
 static void       file_remote_mount_volume_ready (GFile           *file,
                                                   GAsyncResult    *result,
                                                   RemoteMount     *mount);
-static void       file_remote_mount_file_cancel  (GimpProgress    *progress,
+static void       file_remote_mount_file_cancel  (ClayProgress    *progress,
                                                   RemoteMount     *mount);
 
-static GFile    * file_remote_get_temp_file      (Gimp            *gimp,
+static GFile    * file_remote_get_temp_file      (Clay            *clay,
                                                   GFile           *file);
 #ifdef PLATFORM_OSX
-static void       file_remote_download_cancel    (GimpProgress         *progress,
+static void       file_remote_download_cancel    (ClayProgress         *progress,
                                                   NSURLSessionDataTask *task);
 #endif
-static gboolean   file_remote_copy_file          (Gimp            *gimp,
+static gboolean   file_remote_copy_file          (Clay            *clay,
                                                   GFile           *src_file,
                                                   GFile           *dest_file,
                                                   RemoteCopyMode   mode,
-                                                  GimpProgress    *progress,
+                                                  ClayProgress    *progress,
                                                   GError         **error);
-static void       file_remote_copy_file_cancel   (GimpProgress    *progress,
+static void       file_remote_copy_file_cancel   (ClayProgress    *progress,
                                                   RemoteProgress  *remote_progress);
 
 static void       file_remote_progress_callback  (goffset          current_num_bytes,
@@ -98,27 +98,27 @@ static void       file_remote_progress_callback  (goffset          current_num_b
 /*  public functions  */
 
 gboolean
-file_remote_mount_file (Gimp          *gimp,
+file_remote_mount_file (Clay          *clay,
                         GFile         *file,
-                        GimpProgress  *progress,
+                        ClayProgress  *progress,
                         GError       **error)
 {
   GMountOperation *operation;
   RemoteMount      mount = { 0, };
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (G_IS_FILE (file), FALSE);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), FALSE);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   mount.progress  = progress;
   mount.main_loop = g_main_loop_new (NULL, FALSE);
 
-  operation = gimp_get_mount_operation (gimp, progress);
+  operation = clay_get_mount_operation (clay, progress);
 
   if (progress)
     {
-      gimp_progress_start (progress, TRUE, _("Mounting remote volume"));
+      clay_progress_start (progress, TRUE, _("Mounting remote volume"));
 
       mount.cancellable = g_cancellable_new ();
 
@@ -143,7 +143,7 @@ file_remote_mount_file (Gimp          *gimp,
 
       g_object_unref (mount.cancellable);
 
-      gimp_progress_end (progress);
+      clay_progress_end (progress);
     }
 
   g_object_unref (operation);
@@ -166,21 +166,21 @@ file_remote_mount_file (Gimp          *gimp,
 }
 
 GFile *
-file_remote_download_image (Gimp          *gimp,
+file_remote_download_image (Clay          *clay,
                             GFile         *file,
-                            GimpProgress  *progress,
+                            ClayProgress  *progress,
                             GError       **error)
 {
   GFile *local_file;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (G_IS_FILE (file), NULL);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), NULL);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  local_file = file_remote_get_temp_file (gimp, file);
+  local_file = file_remote_get_temp_file (clay, file);
 
-  if (! file_remote_copy_file (gimp, file, local_file, DOWNLOAD,
+  if (! file_remote_copy_file (clay, file, local_file, DOWNLOAD,
                                progress, error))
     {
       g_object_unref (local_file);
@@ -191,37 +191,37 @@ file_remote_download_image (Gimp          *gimp,
 }
 
 GFile *
-file_remote_upload_image_prepare (Gimp          *gimp,
+file_remote_upload_image_prepare (Clay          *clay,
                                   GFile         *file,
-                                  GimpProgress  *progress,
+                                  ClayProgress  *progress,
                                   GError       **error)
 {
   GFile *local_file;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (G_IS_FILE (file), NULL);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), NULL);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
-  local_file = file_remote_get_temp_file (gimp, file);
+  local_file = file_remote_get_temp_file (clay, file);
 
   return local_file;
 }
 
 gboolean
-file_remote_upload_image_finish (Gimp          *gimp,
+file_remote_upload_image_finish (Clay          *clay,
                                  GFile         *file,
                                  GFile         *local_file,
-                                 GimpProgress  *progress,
+                                 ClayProgress  *progress,
                                  GError       **error)
 {
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (G_IS_FILE (file), FALSE);
   g_return_val_if_fail (G_IS_FILE (local_file), FALSE);
-  g_return_val_if_fail (progress == NULL || GIMP_IS_PROGRESS (progress), FALSE);
+  g_return_val_if_fail (progress == NULL || CLAY_IS_PROGRESS (progress), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (! file_remote_copy_file (gimp, local_file, file, UPLOAD,
+  if (! file_remote_copy_file (clay, local_file, file, UPLOAD,
                                progress, error))
     {
       return FALSE;
@@ -244,7 +244,7 @@ file_remote_mount_volume_ready (GFile        *file,
 }
 
 static void
-file_remote_mount_file_cancel (GimpProgress *progress,
+file_remote_mount_file_cancel (ClayProgress *progress,
                                RemoteMount  *mount)
 {
   mount->cancel = TRUE;
@@ -253,33 +253,33 @@ file_remote_mount_file_cancel (GimpProgress *progress,
 }
 
 static GFile *
-file_remote_get_temp_file (Gimp  *gimp,
+file_remote_get_temp_file (Clay  *clay,
                            GFile *file)
 {
   gchar *basename;
   GFile *temp_file = NULL;
 
-  basename = g_path_get_basename (gimp_file_get_utf8_name (file));
+  basename = g_path_get_basename (clay_file_get_utf8_name (file));
 
   if (basename)
     {
       const gchar *ext = strchr (basename, '.');
 
       if (ext && strlen (ext))
-        temp_file = gimp_get_temp_file (gimp, ext + 1, NULL);
+        temp_file = clay_get_temp_file (clay, ext + 1, NULL);
 
       g_free (basename);
     }
 
   if (! temp_file)
-    temp_file = gimp_get_temp_file (gimp, "xxx", NULL);
+    temp_file = clay_get_temp_file (clay, "xxx", NULL);
 
   return temp_file;
 }
 
 #ifdef PLATFORM_OSX
 static void
-file_remote_download_cancel (GimpProgress         *progress,
+file_remote_download_cancel (ClayProgress         *progress,
                              NSURLSessionDataTask *task)
 {
   [task cancel];
@@ -287,11 +287,11 @@ file_remote_download_cancel (GimpProgress         *progress,
 #endif
 
 static gboolean
-file_remote_copy_file (Gimp            *gimp,
+file_remote_copy_file (Clay            *clay,
                        GFile           *src_file,
                        GFile           *dest_file,
                        RemoteCopyMode   mode,
-                       GimpProgress    *progress,
+                       ClayProgress    *progress,
                        GError         **error)
 {
   RemoteProgress  remote_progress = { 0, };
@@ -300,7 +300,7 @@ file_remote_copy_file (Gimp            *gimp,
 
 #ifdef PLATFORM_OSX
   /* GIO has no working http(s) GVfs backend on macOS, which is the
-     same issue that used to break the update check (see: app/gimp-update.c) */
+     same issue that used to break the update check (see: app/clay-update.c) */
   if (mode == DOWNLOAD)
     {
       gchar *scheme = g_file_get_uri_scheme (src_file);
@@ -317,7 +317,7 @@ file_remote_copy_file (Gimp            *gimp,
           __block GError       *real_error = NULL;
 
           if (progress)
-            gimp_progress_start (progress, TRUE, _("Opening remote file"));
+            clay_progress_start (progress, TRUE, _("Opening remote file"));
 
           uri = g_file_get_uri (src_file);
 
@@ -359,8 +359,8 @@ file_remote_copy_file (Gimp            *gimp,
 
           if (progress)
             {
-              gimp_progress_set_value (progress, 1.0);
-              gimp_progress_end (progress);
+              clay_progress_set_value (progress, 1.0);
+              clay_progress_end (progress);
             }
 
           if (real_error)
@@ -380,7 +380,7 @@ file_remote_copy_file (Gimp            *gimp,
 
   if (progress)
     {
-      gimp_progress_start (progress, TRUE, _("Opening remote file"));
+      clay_progress_start (progress, TRUE, _("Opening remote file"));
 
       remote_progress.cancellable = g_cancellable_new ();
 
@@ -399,8 +399,8 @@ file_remote_copy_file (Gimp            *gimp,
 
       g_object_unref (remote_progress.cancellable);
 
-      gimp_progress_set_value (progress, 1.0);
-      gimp_progress_end (progress);
+      clay_progress_set_value (progress, 1.0);
+      clay_progress_end (progress);
     }
   else
     {
@@ -413,7 +413,7 @@ file_remote_copy_file (Gimp            *gimp,
 }
 
 static void
-file_remote_copy_file_cancel (GimpProgress   *progress,
+file_remote_copy_file_cancel (ClayProgress   *progress,
                               RemoteProgress *remote_progress)
 {
   remote_progress->cancel = TRUE;
@@ -454,14 +454,14 @@ file_remote_progress_callback (goffset  current_num_bytes,
           break;
 
         default:
-          gimp_assert_not_reached ();
+          clay_assert_not_reached ();
         }
 
-      gimp_progress_set_text (progress->progress, format, done, total);
+      clay_progress_set_text (progress->progress, format, done, total);
       g_free (total);
       g_free (done);
 
-      gimp_progress_set_value (progress->progress,
+      clay_progress_set_value (progress->progress,
                                (gdouble) current_num_bytes /
                                (gdouble) total_num_bytes);
     }
@@ -481,13 +481,13 @@ file_remote_progress_callback (goffset  current_num_bytes,
           break;
 
         default:
-          gimp_assert_not_reached ();
+          clay_assert_not_reached ();
         }
 
-      gimp_progress_set_text (progress->progress, format, done);
+      clay_progress_set_text (progress->progress, format, done);
       g_free (done);
 
-      gimp_progress_pulse (progress->progress);
+      clay_progress_pulse (progress->progress);
     }
 
   while (! progress->cancel && g_main_context_pending (NULL))

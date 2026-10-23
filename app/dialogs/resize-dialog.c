@@ -20,27 +20,27 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimptemplate.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/claytemplate.h"
 
-#include "widgets/gimpcontainercombobox.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpsizebox.h"
-#include "widgets/gimpviewabledialog.h"
-#include "widgets/gimpwidgets-constructors.h"
+#include "widgets/claycontainercombobox.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claysizebox.h"
+#include "widgets/clayviewabledialog.h"
+#include "widgets/claywidgets-constructors.h"
 
 #include "resize-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -51,23 +51,23 @@ typedef struct _ResizeDialog ResizeDialog;
 
 struct _ResizeDialog
 {
-  GimpViewable       *viewable;
-  GimpContext        *context;
-  GimpContext        *parent_context;
-  GimpFillType        fill_type;
-  GimpItemSet         layer_set;
+  ClayViewable       *viewable;
+  ClayContext        *context;
+  ClayContext        *parent_context;
+  ClayFillType        fill_type;
+  ClayItemSet         layer_set;
   gboolean            resize_text_layers;
-  GimpResizeCallback  callback;
+  ClayResizeCallback  callback;
   gpointer            user_data;
 
   gdouble             old_xres;
   gdouble             old_yres;
-  GimpUnit           *old_res_unit;
+  ClayUnit           *old_res_unit;
   gint                old_width;
   gint                old_height;
-  GimpUnit           *old_unit;
-  GimpFillType        old_fill_type;
-  GimpItemSet         old_layer_set;
+  ClayUnit           *old_unit;
+  ClayFillType        old_fill_type;
+  ClayItemSet         old_layer_set;
   gboolean            old_resize_text_layers;
 
   GtkWidget          *box;
@@ -80,7 +80,7 @@ struct _ResizeDialog
   GtkWidget          *ppi_box;
   GtkWidget          *ppi_image;
   GtkWidget          *ppi_template;
-  GimpTemplate       *template;
+  ClayTemplate       *template;
 };
 
 
@@ -92,7 +92,7 @@ static void   resize_dialog_response (GtkWidget    *dialog,
                                       ResizeDialog *private);
 static void   resize_dialog_reset    (ResizeDialog *private);
 
-static void   size_notify            (GimpSizeBox  *box,
+static void   size_notify            (ClaySizeBox  *box,
                                       GParamSpec   *pspec,
                                       ResizeDialog *private);
 static void   offset_update          (GtkWidget    *widget,
@@ -104,8 +104,8 @@ static void   offsets_changed        (GtkWidget    *area,
 static void   offset_center_clicked  (GtkWidget    *widget,
                                       ResizeDialog *private);
 
-static void   template_changed       (GimpContext  *context,
-                                      GimpTemplate *template,
+static void   template_changed       (ClayContext  *context,
+                                      ClayTemplate *template,
                                       ResizeDialog *private);
 
 static void   reset_template_clicked (GtkWidget    *button,
@@ -118,21 +118,21 @@ static void   check_fill_sensitivity (GtkWidget    *widget,
 /*  public function  */
 
 GtkWidget *
-resize_dialog_new (GimpViewable       *viewable,
-                   GimpContext        *context,
+resize_dialog_new (ClayViewable       *viewable,
+                   ClayContext        *context,
                    const gchar        *title,
                    const gchar        *role,
                    GtkWidget          *parent,
-                   GimpHelpFunc        help_func,
+                   ClayHelpFunc        help_func,
                    const gchar        *help_id,
-                   GimpUnit           *unit,
-                   GimpFillType        fill_type,
-                   GimpItemSet         layer_set,
+                   ClayUnit           *unit,
+                   ClayFillType        fill_type,
+                   ClayItemSet         layer_set,
                    gboolean            resize_text_layers,
-                   GimpResizeCallback  callback,
+                   ClayResizeCallback  callback,
                    gpointer            user_data)
 {
-  GimpSizeEntry *focused_entry;
+  ClaySizeEntry *focused_entry;
   ResizeDialog  *private;
   GtkWidget     *dialog;
   GtkWidget     *main_vbox;
@@ -153,34 +153,34 @@ resize_dialog_new (GimpViewable       *viewable,
   GtkAdjustment *adjustment;
   GdkPixbuf     *pixbuf;
   GtkSizeGroup  *size_group   = NULL;
-  GimpImage     *image        = NULL;
+  ClayImage     *image        = NULL;
   const gchar   *size_title   = NULL;
   const gchar   *layers_title = NULL;
   gint           width, height;
   gdouble        xres, yres;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE (viewable), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE (viewable), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (callback != NULL, NULL);
 
-  if (GIMP_IS_IMAGE (viewable))
+  if (CLAY_IS_IMAGE (viewable))
     {
-      image = GIMP_IMAGE (viewable);
+      image = CLAY_IMAGE (viewable);
 
-      width  = gimp_image_get_width (image);
-      height = gimp_image_get_height (image);
+      width  = clay_image_get_width (image);
+      height = clay_image_get_height (image);
 
       size_title   = _("Canvas Size");
       layers_title = _("Layers");
     }
-  else if (GIMP_IS_ITEM (viewable))
+  else if (CLAY_IS_ITEM (viewable))
     {
-      GimpItem *item = GIMP_ITEM (viewable);
+      ClayItem *item = CLAY_ITEM (viewable);
 
-      image = gimp_item_get_image (item);
+      image = clay_item_get_image (item);
 
-      width  = gimp_item_get_width  (item);
-      height = gimp_item_get_height (item);
+      width  = clay_item_get_width  (item);
+      height = clay_item_get_height (item);
 
       size_title   = _("Layer Size");
       layers_title = _("Fill With");
@@ -193,15 +193,15 @@ resize_dialog_new (GimpViewable       *viewable,
   private = g_slice_new0 (ResizeDialog);
 
   private->parent_context = context;
-  private->context        = gimp_context_new (context->gimp,
+  private->context        = clay_context_new (context->clay,
                                               "resize-dialog",
                                               context);
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
   private->old_xres     = xres;
   private->old_yres     = yres;
-  private->old_res_unit = gimp_image_get_unit (image);
+  private->old_res_unit = clay_image_get_unit (image);
 
   private->viewable           = viewable;
   private->fill_type          = fill_type;
@@ -217,10 +217,10 @@ resize_dialog_new (GimpViewable       *viewable,
   private->old_layer_set          = private->layer_set;
   private->old_resize_text_layers = private->resize_text_layers;
 
-  gimp_context_set_template (private->context, NULL);
+  clay_context_set_template (private->context, NULL);
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
-                                     title, role, GIMP_ICON_OBJECT_RESIZE, title,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
+                                     title, role, CLAY_ICON_OBJECT_RESIZE, title,
                                      parent,
                                      help_func, help_id,
 
@@ -230,7 +230,7 @@ resize_dialog_new (GimpViewable       *viewable,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             RESPONSE_RESET,
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
@@ -260,8 +260,8 @@ resize_dialog_new (GimpViewable       *viewable,
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
 
-  template_selector = g_object_new (GIMP_TYPE_CONTAINER_COMBO_BOX,
-                                    "container",         context->gimp->templates,
+  template_selector = g_object_new (CLAY_TYPE_CONTAINER_COMBO_BOX,
+                                    "container",         context->clay->templates,
                                     "context",           private->context,
                                     "view-size",         16,
                                     "view-border-width", 0,
@@ -280,10 +280,10 @@ resize_dialog_new (GimpViewable       *viewable,
                     private);
 
   /* reset template button */
-  button = gimp_icon_button_new (GIMP_ICON_RESET, NULL);
+  button = clay_icon_button_new (CLAY_ICON_RESET, NULL);
   gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
   gtk_image_set_from_icon_name (GTK_IMAGE (gtk_bin_get_child (GTK_BIN (button))),
-                                GIMP_ICON_RESET, GTK_ICON_SIZE_MENU);
+                                CLAY_ICON_RESET, GTK_ICON_SIZE_MENU);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
 
@@ -292,7 +292,7 @@ resize_dialog_new (GimpViewable       *viewable,
                     G_CALLBACK (reset_template_clicked),
                     private);
 
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Reset the template selection"),
                            NULL);
 
@@ -359,12 +359,12 @@ resize_dialog_new (GimpViewable       *viewable,
   gtk_widget_set_visible (center_right_vbox, TRUE);
 
   /* size select frame */
-  frame = gimp_frame_new (size_title);
+  frame = clay_frame_new (size_title);
   gtk_box_pack_start (GTK_BOX (center_left_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
   /* size box */
-  private->box = g_object_new (GIMP_TYPE_SIZE_BOX,
+  private->box = g_object_new (CLAY_TYPE_SIZE_BOX,
                                "width",           width,
                                "height",          height,
                                "unit",            unit,
@@ -377,7 +377,7 @@ resize_dialog_new (GimpViewable       *viewable,
   gtk_widget_set_visible (private->box, TRUE);
 
   /* offset frame */
-  frame = gimp_frame_new (_("Offset"));
+  frame = clay_frame_new (_("Offset"));
   gtk_box_pack_start (GTK_BOX (center_left_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -387,32 +387,32 @@ resize_dialog_new (GimpViewable       *viewable,
 
   /*  the offset sizeentry  */
   adjustment = gtk_adjustment_new (1, 1, 1, 1, 10, 0);
-  spinbutton = gimp_spin_button_new (adjustment, 1.0, 2);
+  spinbutton = clay_spin_button_new (adjustment, 1.0, 2);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
   gtk_entry_set_width_chars (GTK_ENTRY (spinbutton), SB_WIDTH);
 
-  private->offset = entry = gimp_size_entry_new (1, unit, "%n",
+  private->offset = entry = clay_size_entry_new (1, unit, "%n",
                                                  TRUE, FALSE, FALSE, SB_WIDTH,
-                                                 GIMP_SIZE_ENTRY_UPDATE_SIZE);
-  gimp_size_entry_add_field (GIMP_SIZE_ENTRY (entry),
+                                                 CLAY_SIZE_ENTRY_UPDATE_SIZE);
+  clay_size_entry_add_field (CLAY_SIZE_ENTRY (entry),
                              GTK_SPIN_BUTTON (spinbutton), NULL);
   gtk_grid_attach (GTK_GRID (entry), spinbutton, 1, 0, 1, 1);
   gtk_widget_set_visible (spinbutton, TRUE);
 
-  gimp_size_entry_attach_label (GIMP_SIZE_ENTRY (entry),
+  clay_size_entry_attach_label (CLAY_SIZE_ENTRY (entry),
                                 _("_X:"), 0, 0, 0.0);
-  gimp_size_entry_attach_label (GIMP_SIZE_ENTRY (entry),_("_Y:"), 1, 0, 0.0);
+  clay_size_entry_attach_label (CLAY_SIZE_ENTRY (entry),_("_Y:"), 1, 0, 0.0);
   gtk_box_pack_start (GTK_BOX (vbox), entry, FALSE, FALSE, 0);
   gtk_widget_set_visible (entry, TRUE);
 
-  gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (entry), 0, xres, FALSE);
-  gimp_size_entry_set_resolution (GIMP_SIZE_ENTRY (entry), 1, yres, FALSE);
+  clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (entry), 0, xres, FALSE);
+  clay_size_entry_set_resolution (CLAY_SIZE_ENTRY (entry), 1, yres, FALSE);
 
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (entry), 0, 0, 0);
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (entry), 1, 0, 0);
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (entry), 0, 0, 0);
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (entry), 1, 0, 0);
 
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (entry), 0, 0);
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (entry), 1, 0);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (entry), 0, 0);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (entry), 1, 0);
 
   g_signal_connect (entry, "value-changed",
                     G_CALLBACK (offset_update),
@@ -423,19 +423,19 @@ resize_dialog_new (GimpViewable       *viewable,
   gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
   gtk_box_pack_start (GTK_BOX (center_right_vbox), frame, FALSE, FALSE, 0);
   gtk_style_context_add_class (gtk_widget_get_style_context (frame),
-                               "gimp-offset-area-frame");
+                               "clay-offset-area-frame");
   gtk_widget_set_visible (frame, TRUE);
 
-  private->area = gimp_offset_area_new (width, height);
+  private->area = clay_offset_area_new (width, height);
   gtk_container_add (GTK_CONTAINER (frame), private->area);
   gtk_widget_set_visible (private->area, TRUE);
 
-  gimp_viewable_get_preview_size (viewable, 200, TRUE, TRUE, &width, &height);
-  pixbuf = gimp_viewable_get_pixbuf (viewable, context,
+  clay_viewable_get_preview_size (viewable, 200, TRUE, TRUE, &width, &height);
+  pixbuf = clay_viewable_get_pixbuf (viewable, context,
                                      width, height, 1, NULL);
 
   if (pixbuf)
-    gimp_offset_area_set_pixbuf (GIMP_OFFSET_AREA (private->area), pixbuf);
+    clay_offset_area_set_pixbuf (CLAY_OFFSET_AREA (private->area), pixbuf);
 
   g_signal_connect (private->area, "offsets-changed",
                     G_CALLBACK (offsets_changed),
@@ -454,7 +454,7 @@ resize_dialog_new (GimpViewable       *viewable,
                     G_CALLBACK (offset_center_clicked),
                     private);
 
-  frame = gimp_frame_new (layers_title);
+  frame = clay_frame_new (layers_title);
   gtk_box_pack_start (GTK_BOX (main_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -462,7 +462,7 @@ resize_dialog_new (GimpViewable       *viewable,
   gtk_container_add (GTK_CONTAINER (frame), vbox);
   gtk_widget_set_visible (vbox, TRUE);
 
-  if (GIMP_IS_IMAGE (viewable))
+  if (CLAY_IS_IMAGE (viewable))
     {
       GtkWidget *label;
 
@@ -480,15 +480,15 @@ resize_dialog_new (GimpViewable       *viewable,
       gtk_size_group_add_widget (size_group, label);
 
       private->layer_set_combo = combo =
-        gimp_enum_combo_box_new (GIMP_TYPE_ITEM_SET);
+        clay_enum_combo_box_new (CLAY_TYPE_ITEM_SET);
       gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
       gtk_widget_set_visible (combo, TRUE);
 
       gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo);
 
-      gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                                   private->layer_set,
-                                  G_CALLBACK (gimp_int_combo_box_get_active),
+                                  G_CALLBACK (clay_int_combo_box_get_active),
                                   &private->layer_set, NULL);
       g_signal_connect (combo, "changed", G_CALLBACK (check_fill_sensitivity),
                         private);
@@ -499,16 +499,16 @@ resize_dialog_new (GimpViewable       *viewable,
   gtk_widget_set_visible (hbox, TRUE);
 
   private->fill_type_combo = combo =
-    gimp_enum_combo_box_new (GIMP_TYPE_FILL_TYPE);
+    clay_enum_combo_box_new (CLAY_TYPE_FILL_TYPE);
   gtk_box_pack_end (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
   gtk_widget_set_visible (combo, TRUE);
 
-  gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+  clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                               private->fill_type,
-                              G_CALLBACK (gimp_int_combo_box_get_active),
+                              G_CALLBACK (clay_int_combo_box_get_active),
                               &private->fill_type, NULL);
 
-  if (GIMP_IS_IMAGE (viewable))
+  if (CLAY_IS_IMAGE (viewable))
     {
       GtkWidget *label;
 
@@ -529,12 +529,12 @@ resize_dialog_new (GimpViewable       *viewable,
       gtk_widget_set_visible (button, TRUE);
 
       g_signal_connect (button, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &private->resize_text_layers);
       g_signal_connect (button, "toggled", G_CALLBACK (check_fill_sensitivity),
                         private);
 
-      gimp_help_set_help_data (button,
+      clay_help_set_help_data (button,
                                _("Resizing text layers will make them uneditable"),
                                NULL);
 
@@ -544,9 +544,9 @@ resize_dialog_new (GimpViewable       *viewable,
     }
 
   /* Set focus to size entry for immediate editing */
-  focused_entry = gimp_size_box_get_size_entry (GIMP_SIZE_BOX (private->box));
-  gimp_size_entry_set_activates_default (focused_entry, TRUE);
-  gimp_size_entry_grab_focus (focused_entry);
+  focused_entry = clay_size_box_get_size_entry (CLAY_SIZE_BOX (private->box));
+  clay_size_entry_set_activates_default (focused_entry, TRUE);
+  clay_size_entry_grab_focus (focused_entry);
 
   return dialog;
 }
@@ -567,13 +567,13 @@ resize_dialog_response (GtkWidget    *dialog,
                         gint          response_id,
                         ResizeDialog *private)
 {
-  GimpSizeEntry *entry = GIMP_SIZE_ENTRY (private->offset);
-  GimpUnit      *unit;
+  ClaySizeEntry *entry = CLAY_SIZE_ENTRY (private->offset);
+  ClayUnit      *unit;
   gint           width;
   gint           height;
   gdouble        xres;
   gdouble        yres;
-  GimpUnit      *res_unit;
+  ClayUnit      *res_unit;
 
   switch (response_id)
     {
@@ -597,8 +597,8 @@ resize_dialog_response (GtkWidget    *dialog,
                          width,
                          height,
                          unit,
-                         gimp_size_entry_get_refval (entry, 0),
-                         gimp_size_entry_get_refval (entry, 1),
+                         clay_size_entry_get_refval (entry, 0),
+                         clay_size_entry_get_refval (entry, 1),
                          xres,
                          yres,
                          res_unit,
@@ -638,36 +638,36 @@ resize_dialog_reset (ResizeDialog *private)
                 NULL);
 
   if (private->layer_set_combo)
-    gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->layer_set_combo),
+    clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->layer_set_combo),
                                    private->old_layer_set);
 
-  gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (private->fill_type_combo),
+  clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (private->fill_type_combo),
                                  private->old_fill_type);
 
   if (private->text_layers_button)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (private->text_layers_button),
                                   private->old_resize_text_layers);
 
-  gimp_context_set_template (private->context, NULL);
+  clay_context_set_template (private->context, NULL);
 
-  gimp_size_entry_set_unit (GIMP_SIZE_ENTRY (private->offset),
+  clay_size_entry_set_unit (CLAY_SIZE_ENTRY (private->offset),
                             private->old_unit);
 }
 
 static void
-size_notify (GimpSizeBox  *box,
+size_notify (ClaySizeBox  *box,
              GParamSpec   *pspec,
              ResizeDialog *private)
 {
   gint  diff_x = box->width  - private->old_width;
   gint  diff_y = box->height - private->old_height;
 
-  gimp_offset_area_set_size (GIMP_OFFSET_AREA (private->area),
+  clay_offset_area_set_size (CLAY_OFFSET_AREA (private->area),
                              box->width, box->height);
 
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (private->offset), 0,
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (private->offset), 0,
                                          MIN (0, diff_x), MAX (0, diff_x));
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (private->offset), 1,
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (private->offset), 1,
                                          MIN (0, diff_y), MAX (0, diff_y));
 }
 
@@ -675,7 +675,7 @@ static gint
 resize_bound_off_x (ResizeDialog *private,
                     gint          offset_x)
 {
-  GimpSizeBox *box = GIMP_SIZE_BOX (private->box);
+  ClaySizeBox *box = CLAY_SIZE_BOX (private->box);
 
   if (private->old_width <= box->width)
     return CLAMP (offset_x, 0, (box->width - private->old_width));
@@ -687,7 +687,7 @@ static gint
 resize_bound_off_y (ResizeDialog *private,
                     gint          off_y)
 {
-  GimpSizeBox *box = GIMP_SIZE_BOX (private->box);
+  ClaySizeBox *box = CLAY_SIZE_BOX (private->box);
 
   if (private->old_height <= box->height)
     return CLAMP (off_y, 0, (box->height - private->old_height));
@@ -699,16 +699,16 @@ static void
 offset_update (GtkWidget    *widget,
                ResizeDialog *private)
 {
-  GimpSizeEntry *entry = GIMP_SIZE_ENTRY (private->offset);
+  ClaySizeEntry *entry = CLAY_SIZE_ENTRY (private->offset);
   gint           off_x;
   gint           off_y;
 
   off_x = resize_bound_off_x (private,
-                              RINT (gimp_size_entry_get_refval (entry, 0)));
+                              RINT (clay_size_entry_get_refval (entry, 0)));
   off_y = resize_bound_off_y (private,
-                              RINT (gimp_size_entry_get_refval (entry, 1)));
+                              RINT (clay_size_entry_get_refval (entry, 1)));
 
-  gimp_offset_area_set_offsets (GIMP_OFFSET_AREA (private->area), off_x, off_y);
+  clay_offset_area_set_offsets (CLAY_OFFSET_AREA (private->area), off_x, off_y);
 }
 
 static void
@@ -717,33 +717,33 @@ offsets_changed (GtkWidget    *area,
                  gint          off_y,
                  ResizeDialog *private)
 {
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset), 0, off_x);
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset), 1, off_y);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset), 0, off_x);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset), 1, off_y);
 }
 
 static void
 offset_center_clicked (GtkWidget    *widget,
                        ResizeDialog *private)
 {
-  GimpSizeBox *box = GIMP_SIZE_BOX (private->box);
+  ClaySizeBox *box = CLAY_SIZE_BOX (private->box);
   gint         off_x;
   gint         off_y;
 
   off_x = resize_bound_off_x (private, (box->width  - private->old_width)  / 2);
   off_y = resize_bound_off_y (private, (box->height - private->old_height) / 2);
 
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset), 0, off_x);
-  gimp_size_entry_set_refval (GIMP_SIZE_ENTRY (private->offset), 1, off_y);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset), 0, off_x);
+  clay_size_entry_set_refval (CLAY_SIZE_ENTRY (private->offset), 1, off_y);
 
   g_signal_emit_by_name (private->offset, "value-changed", 0);
 }
 
 static void
-template_changed (GimpContext  *context,
-                  GimpTemplate *template,
+template_changed (ClayContext  *context,
+                  ClayTemplate *template,
                   ResizeDialog *private)
 {
-  GimpUnit *unit = private->old_unit;
+  ClayUnit *unit = private->old_unit;
 
   private->template = template;
 
@@ -754,19 +754,19 @@ template_changed (GimpContext  *context,
     {
       gdouble   xres;
       gdouble   yres;
-      GimpUnit *res_unit;
+      ClayUnit *res_unit;
       gboolean  resolution_mismatch;
 
-      unit     = gimp_template_get_unit            (template);
-      xres     = gimp_template_get_resolution_x    (template);
-      yres     = gimp_template_get_resolution_y    (template);
-      res_unit = gimp_template_get_resolution_unit (template);
+      unit     = clay_template_get_unit            (template);
+      xres     = clay_template_get_resolution_x    (template);
+      yres     = clay_template_get_resolution_y    (template);
+      res_unit = clay_template_get_resolution_unit (template);
 
       resolution_mismatch = xres     != private->old_xres ||
                             yres     != private->old_yres ||
                             res_unit != private->old_res_unit;
 
-      if (resolution_mismatch && unit != gimp_unit_pixel ())
+      if (resolution_mismatch && unit != clay_unit_pixel ())
         {
           gchar *text;
 
@@ -789,7 +789,7 @@ template_changed (GimpContext  *context,
 
   ppi_select_toggled (NULL, private);
 
-  gimp_size_entry_set_unit (GIMP_SIZE_ENTRY (private->offset), unit);
+  clay_size_entry_set_unit (CLAY_SIZE_ENTRY (private->offset), unit);
 }
 
 static void
@@ -798,10 +798,10 @@ ppi_select_toggled (GtkWidget    *radio,
 {
   gint             width;
   gint             height;
-  GimpUnit        *unit;
+  ClayUnit        *unit;
   gdouble          xres;
   gdouble          yres;
-  GimpUnit        *res_unit;
+  ClayUnit        *res_unit;
   GtkToggleButton *image_button;
   gboolean         use_image_ppi;
 
@@ -817,15 +817,15 @@ ppi_select_toggled (GtkWidget    *radio,
 
   if (private->template != NULL)
     {
-      width    = gimp_template_get_width           (private->template);
-      height   = gimp_template_get_height          (private->template);
-      unit     = gimp_template_get_unit            (private->template);
-      xres     = gimp_template_get_resolution_x    (private->template);
-      yres     = gimp_template_get_resolution_y    (private->template);
-      res_unit = gimp_template_get_resolution_unit (private->template);
+      width    = clay_template_get_width           (private->template);
+      height   = clay_template_get_height          (private->template);
+      unit     = clay_template_get_unit            (private->template);
+      xres     = clay_template_get_resolution_x    (private->template);
+      yres     = clay_template_get_resolution_y    (private->template);
+      res_unit = clay_template_get_resolution_unit (private->template);
     }
 
-  if (private->template != NULL && unit != gimp_unit_pixel ())
+  if (private->template != NULL && unit != clay_unit_pixel ())
     {
       if (use_image_ppi)
         {
@@ -862,7 +862,7 @@ static void
 reset_template_clicked (GtkWidget    *button,
                         ResizeDialog *private)
 {
-  gimp_context_set_template (private->context, NULL);
+  clay_context_set_template (private->context, NULL);
 }
 
 static void
@@ -871,7 +871,7 @@ check_fill_sensitivity (GtkWidget    *widget,
 {
   gboolean sensitive = TRUE;
 
-  if (private->layer_set == GIMP_ITEM_SET_NONE &&
+  if (private->layer_set == CLAY_ITEM_SET_NONE &&
       ! private->resize_text_layers)
     sensitive = FALSE;
 

@@ -25,1028 +25,1028 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpbrush.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpgradient.h"
-#include "core/gimppalette.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppattern.h"
-#include "core/gimpresource.h"
-#include "text/gimpfont.h"
+#include "core/clay.h"
+#include "core/claybrush.h"
+#include "core/claydatafactory.h"
+#include "core/claygradient.h"
+#include "core/claypalette.h"
+#include "core/clayparamspecs.h"
+#include "core/claypattern.h"
+#include "core/clayresource.h"
+#include "text/clayfont.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-resources_loaded_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+resources_loaded_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *type_name;
   gboolean loaded = FALSE;
 
-  type_name = g_value_get_string (gimp_value_array_index (args, 0));
+  type_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (g_type_from_name (type_name) == GIMP_TYPE_FONT)
-        loaded = ! gimp->no_fonts;
+      if (g_type_from_name (type_name) == CLAY_TYPE_FONT)
+        loaded = ! clay->no_fonts;
       else
-        loaded = ! gimp->no_data;
+        loaded = ! clay->no_data;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), loaded);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), loaded);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_get_by_name_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+resource_get_by_name_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *type_name;
   const gchar *resource_name;
-  GimpResource *resource = NULL;
+  ClayResource *resource = NULL;
 
-  type_name = g_value_get_string (gimp_value_array_index (args, 0));
-  resource_name = g_value_get_string (gimp_value_array_index (args, 1));
+  type_name = g_value_get_string (clay_value_array_index (args, 0));
+  resource_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      resource = gimp_pdb_get_resource (gimp, g_type_from_name (type_name), resource_name,
-                                        GIMP_PDB_DATA_ACCESS_READ, error);
-      /* gimp_pdb_get_resource can return errors about writeable or renameable when not ACCESS_READ,
+      resource = clay_pdb_get_resource (clay, g_type_from_name (type_name), resource_name,
+                                        CLAY_PDB_DATA_ACCESS_READ, error);
+      /* clay_pdb_get_resource can return errors about writeable or renameable when not ACCESS_READ,
        * but only "not found" error for ACCESS_READ.
        * Ignore "not found" error, just return NULL.
        */
        g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), resource);
+    g_value_set_object (clay_value_array_index (return_vals, 1), resource);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_get_by_identifiers_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+resource_get_by_identifiers_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *type_name;
   const gchar *resource_name;
   const gchar *collection;
   gboolean is_internal;
-  GimpResource *resource = NULL;
+  ClayResource *resource = NULL;
 
-  type_name = g_value_get_string (gimp_value_array_index (args, 0));
-  resource_name = g_value_get_string (gimp_value_array_index (args, 1));
-  collection = g_value_get_string (gimp_value_array_index (args, 2));
-  is_internal = g_value_get_boolean (gimp_value_array_index (args, 3));
+  type_name = g_value_get_string (clay_value_array_index (args, 0));
+  resource_name = g_value_get_string (clay_value_array_index (args, 1));
+  collection = g_value_get_string (clay_value_array_index (args, 2));
+  is_internal = g_value_get_boolean (clay_value_array_index (args, 3));
 
   if (success)
     {
-      resource = gimp_pdb_get_resource_by_id (gimp, g_type_from_name (type_name),
+      resource = clay_pdb_get_resource_by_id (clay, g_type_from_name (type_name),
                                               resource_name, collection, is_internal,
-                                              GIMP_PDB_DATA_ACCESS_READ, error);
+                                              CLAY_PDB_DATA_ACCESS_READ, error);
 
       if (! resource)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), resource);
+    g_value_set_object (clay_value_array_index (return_vals, 1), resource);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_id_is_valid_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+resource_id_is_valid_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint resource_id;
   gboolean valid = FALSE;
 
-  resource_id = g_value_get_int (gimp_value_array_index (args, 0));
+  resource_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpData *data = gimp_data_get_by_id (resource_id);
+      ClayData *data = clay_data_get_by_id (resource_id);
 
-      valid = GIMP_IS_DATA (data);
+      valid = CLAY_IS_DATA (data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), valid);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), valid);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_id_is_brush_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+resource_id_is_brush_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint resource_id;
   gboolean brush = FALSE;
 
-  resource_id = g_value_get_int (gimp_value_array_index (args, 0));
+  resource_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpData *data = gimp_data_get_by_id (resource_id);
+      ClayData *data = clay_data_get_by_id (resource_id);
 
-      brush = GIMP_IS_BRUSH (data);
+      brush = CLAY_IS_BRUSH (data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), brush);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), brush);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_id_is_pattern_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+resource_id_is_pattern_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint resource_id;
   gboolean pattern = FALSE;
 
-  resource_id = g_value_get_int (gimp_value_array_index (args, 0));
+  resource_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpData *data = gimp_data_get_by_id (resource_id);
+      ClayData *data = clay_data_get_by_id (resource_id);
 
-      pattern = GIMP_IS_PATTERN (data);
+      pattern = CLAY_IS_PATTERN (data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), pattern);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), pattern);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_id_is_gradient_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+resource_id_is_gradient_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint resource_id;
   gboolean gradient = FALSE;
 
-  resource_id = g_value_get_int (gimp_value_array_index (args, 0));
+  resource_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpData *data = gimp_data_get_by_id (resource_id);
+      ClayData *data = clay_data_get_by_id (resource_id);
 
-      gradient = GIMP_IS_GRADIENT (data);
+      gradient = CLAY_IS_GRADIENT (data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), gradient);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), gradient);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_id_is_palette_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+resource_id_is_palette_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint resource_id;
   gboolean palette = FALSE;
 
-  resource_id = g_value_get_int (gimp_value_array_index (args, 0));
+  resource_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpData *data = gimp_data_get_by_id (resource_id);
+      ClayData *data = clay_data_get_by_id (resource_id);
 
-      palette = GIMP_IS_PALETTE (data);
+      palette = CLAY_IS_PALETTE (data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), palette);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), palette);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_id_is_font_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+resource_id_is_font_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint resource_id;
   gboolean font = FALSE;
 
-  resource_id = g_value_get_int (gimp_value_array_index (args, 0));
+  resource_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpData *data = gimp_data_get_by_id (resource_id);
+      ClayData *data = clay_data_get_by_id (resource_id);
 
-      font = GIMP_IS_FONT (data);
+      font = CLAY_IS_FONT (data);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), font);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), font);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_get_name_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+resource_get_name_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpResource *resource;
+  ClayValueArray *return_vals;
+  ClayResource *resource;
   gchar *name = NULL;
 
-  resource = g_value_get_object (gimp_value_array_index (args, 0));
+  resource = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      name = g_strdup (gimp_object_get_name (GIMP_OBJECT (resource)));
+      name = g_strdup (clay_object_get_name (CLAY_OBJECT (resource)));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_get_identifiers_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+resource_get_identifiers_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpResource *resource;
+  ClayValueArray *return_vals;
+  ClayResource *resource;
   gboolean is_internal = FALSE;
   gchar *name = NULL;
   gchar *collection_id = NULL;
 
-  resource = g_value_get_object (gimp_value_array_index (args, 0));
+  resource = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_data_get_identifiers (GIMP_DATA (resource), &name, &collection_id, &is_internal);
+      clay_data_get_identifiers (CLAY_DATA (resource), &name, &collection_id, &is_internal);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_boolean (gimp_value_array_index (return_vals, 1), is_internal);
-      g_value_take_string (gimp_value_array_index (return_vals, 2), name);
-      g_value_take_string (gimp_value_array_index (return_vals, 3), collection_id);
+      g_value_set_boolean (clay_value_array_index (return_vals, 1), is_internal);
+      g_value_take_string (clay_value_array_index (return_vals, 2), name);
+      g_value_take_string (clay_value_array_index (return_vals, 3), collection_id);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_is_editable_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+resource_is_editable_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpResource *resource;
+  ClayValueArray *return_vals;
+  ClayResource *resource;
   gboolean editable = FALSE;
 
-  resource = g_value_get_object (gimp_value_array_index (args, 0));
+  resource = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      editable = gimp_data_is_writable (GIMP_DATA (resource));
+      editable = clay_data_is_writable (CLAY_DATA (resource));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), editable);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), editable);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_duplicate_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+resource_duplicate_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpResource *resource;
-  GimpResource *resource_copy = NULL;
+  ClayValueArray *return_vals;
+  ClayResource *resource;
+  ClayResource *resource_copy = NULL;
 
-  resource = g_value_get_object (gimp_value_array_index (args, 0));
+  resource = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpDataFactory *factory;
+      ClayDataFactory *factory;
 
-      factory = gimp_get_data_factory (gimp, G_TYPE_FROM_INSTANCE (resource));
+      factory = clay_get_data_factory (clay, G_TYPE_FROM_INSTANCE (resource));
 
-      resource_copy = (GimpResource *)
-        gimp_data_factory_data_duplicate (factory, GIMP_DATA (resource));
+      resource_copy = (ClayResource *)
+        clay_data_factory_data_duplicate (factory, CLAY_DATA (resource));
 
       if (! resource_copy)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), resource_copy);
+    g_value_set_object (clay_value_array_index (return_vals, 1), resource_copy);
 
   return return_vals;
 }
 
-static GimpValueArray *
-resource_rename_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+resource_rename_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpResource *resource;
+  ClayResource *resource;
   const gchar *new_name;
 
-  resource = g_value_get_object (gimp_value_array_index (args, 0));
-  new_name = g_value_get_string (gimp_value_array_index (args, 1));
+  resource = g_value_get_object (clay_value_array_index (args, 0));
+  new_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      if (gimp_viewable_is_name_editable (GIMP_VIEWABLE (resource)))
+      if (clay_viewable_is_name_editable (CLAY_VIEWABLE (resource)))
         {
-          gimp_object_set_name (GIMP_OBJECT (resource), new_name);
+          clay_object_set_name (CLAY_OBJECT (resource), new_name);
         }
       else
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Resource '%s' is not renamable"),
-                      gimp_object_get_name (GIMP_OBJECT (resource)));
+                      clay_object_get_name (CLAY_OBJECT (resource)));
           success = FALSE;
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-resource_delete_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+resource_delete_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpResource *resource;
+  ClayResource *resource;
 
-  resource = g_value_get_object (gimp_value_array_index (args, 0));
+  resource = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpDataFactory *factory;
+      ClayDataFactory *factory;
 
-      factory = gimp_get_data_factory (gimp, G_TYPE_FROM_INSTANCE (resource));
+      factory = clay_get_data_factory (clay, G_TYPE_FROM_INSTANCE (resource));
 
-      if (gimp_data_is_deletable (GIMP_DATA (resource)))
-        success = gimp_data_factory_data_delete (factory, GIMP_DATA (resource),
+      if (clay_data_is_deletable (CLAY_DATA (resource)))
+        success = clay_data_factory_data_delete (factory, CLAY_DATA (resource),
                                                  TRUE, error);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_resource_procs (GimpPDB *pdb)
+register_resource_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-resources-loaded
+   * clay-resources-loaded
    */
-  procedure = gimp_procedure_new (resources_loaded_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resources-loaded");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resources_loaded_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resources-loaded");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether resource of a given type were loaded.",
                                   "Returns whether resources of a given type were loaded.\n"
-                                  "In particular, it would return FALSE if GIMP was started with `--no-data` or `--no-fonts` for fonts.",
+                                  "In particular, it would return FALSE if Clay was started with `--no-data` or `--no-fonts` for fonts.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2026");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("type-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("type-name",
                                                        "type name",
-                                                       "The name of the resource type e.g. GimpFont",
+                                                       "The name of the resource type e.g. ClayFont",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("loaded",
                                                          "loaded",
                                                          "Whether resources of @type_name were loaded",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-get-by-name
+   * clay-resource-get-by-name
    */
-  procedure = gimp_procedure_new (resource_get_by_name_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-get-by-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_get_by_name_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-get-by-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns a resource with the given name.",
                                   "Returns an existing resource having the given name. Returns %NULL when no resource exists of that name.\n"
-                                  "There may be many fonts having the same name. See 'gimp-font-get-by-name'.",
+                                  "There may be many fonts having the same name. See 'clay-font-get-by-name'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("type-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("type-name",
                                                        "type name",
-                                                       "The name of the resource type e.g. GimpFont",
+                                                       "The name of the resource type e.g. ClayFont",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("resource-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("resource-name",
                                                        "resource name",
                                                        "The name of the resource",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_resource ("resource",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_resource ("resource",
                                                              "resource",
                                                              "The resource",
-                                                             GIMP_TYPE_RESOURCE,
+                                                             CLAY_TYPE_RESOURCE,
                                                              TRUE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-get-by-identifiers
+   * clay-resource-get-by-identifiers
    */
-  procedure = gimp_procedure_new (resource_get_by_identifiers_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-get-by-identifiers");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_get_by_identifiers_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-get-by-identifiers");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the resource contained in a given file with a given name.",
                                   "Returns a resource specifically stored in a given file path, under a given name (a single path may be a collection containing several resources).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("type-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("type-name",
                                                        "type name",
                                                        "The name of the resource type",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("resource-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("resource-name",
                                                        "resource name",
                                                        "The name of the resource",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("collection",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("collection",
                                                        "collection",
                                                        "The collection identifier",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("is-internal",
                                                      "is internal",
                                                      "Whether this is the identifier for internal data",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_resource ("resource",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_resource ("resource",
                                                              "resource",
                                                              "The resource",
-                                                             GIMP_TYPE_RESOURCE,
+                                                             CLAY_TYPE_RESOURCE,
                                                              FALSE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-id-is-valid
+   * clay-resource-id-is-valid
    */
-  procedure = gimp_procedure_new (resource_id_is_valid_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-id-is-valid");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_id_is_valid_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-id-is-valid");
+  clay_procedure_set_static_help (procedure,
                                   "Returns TRUE if the resource ID is valid.",
                                   "This procedure checks if the given resource ID is valid and refers to an existing resource.\n"
                                   "\n"
-                                  "*Note*: in most use cases, you should not use this function. If you got a [class@Gimp.Resource] from the API, you should trust it is valid. This function is mostly for internal usage.",
+                                  "*Note*: in most use cases, you should not use this function. If you got a [class@Clay.Resource] from the API, you should trust it is valid. This function is mostly for internal usage.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("resource-id",
                                                  "resource id",
                                                  "The resource ID to check",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("valid",
                                                          "valid",
                                                          "Whether the resource ID is valid",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-id-is-brush
+   * clay-resource-id-is-brush
    */
-  procedure = gimp_procedure_new (resource_id_is_brush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-id-is-brush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_id_is_brush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-id-is-brush");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether the resource ID is a brush.",
                                   "This procedure returns TRUE if the specified resource ID is a brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("resource-id",
                                                  "resource id",
                                                  "The resource ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("brush",
                                                          "brush",
                                                          "TRUE if the resource ID is a brush, FALSE otherwise",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-id-is-pattern
+   * clay-resource-id-is-pattern
    */
-  procedure = gimp_procedure_new (resource_id_is_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-id-is-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_id_is_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-id-is-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether the resource ID is a pattern.",
                                   "This procedure returns TRUE if the specified resource ID is a pattern.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("resource-id",
                                                  "resource id",
                                                  "The resource ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("pattern",
                                                          "pattern",
                                                          "TRUE if the resource ID is a pattern, FALSE otherwise",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-id-is-gradient
+   * clay-resource-id-is-gradient
    */
-  procedure = gimp_procedure_new (resource_id_is_gradient_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-id-is-gradient");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_id_is_gradient_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-id-is-gradient");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether the resource ID is a gradient.",
                                   "This procedure returns TRUE if the specified resource ID is a gradient.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("resource-id",
                                                  "resource id",
                                                  "The resource ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("gradient",
                                                          "gradient",
                                                          "TRUE if the resource ID is a gradient, FALSE otherwise",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-id-is-palette
+   * clay-resource-id-is-palette
    */
-  procedure = gimp_procedure_new (resource_id_is_palette_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-id-is-palette");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_id_is_palette_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-id-is-palette");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether the resource ID is a palette.",
                                   "This procedure returns TRUE if the specified resource ID is a palette.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("resource-id",
                                                  "resource id",
                                                  "The resource ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("palette",
                                                          "palette",
                                                          "TRUE if the resource ID is a palette, FALSE otherwise",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-id-is-font
+   * clay-resource-id-is-font
    */
-  procedure = gimp_procedure_new (resource_id_is_font_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-id-is-font");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_id_is_font_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-id-is-font");
+  clay_procedure_set_static_help (procedure,
                                   "Returns whether the resource ID is a font.",
                                   "This procedure returns TRUE if the specified resource ID is a font.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("resource-id",
                                                  "resource id",
                                                  "The resource ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("font",
                                                          "font",
                                                          "TRUE if the resource ID is a font, FALSE otherwise",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-get-name
+   * clay-resource-get-name
    */
-  procedure = gimp_procedure_new (resource_get_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-get-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_get_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-get-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the resource's name.",
                                   "This procedure returns the resource's name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_resource ("resource",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_resource ("resource",
                                                          "resource",
                                                          "The resource",
-                                                         GIMP_TYPE_RESOURCE,
+                                                         CLAY_TYPE_RESOURCE,
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The resource's name",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-get-identifiers
+   * clay-resource-get-identifiers
    */
-  procedure = gimp_procedure_new (resource_get_identifiers_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-get-identifiers");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_get_identifiers_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-get-identifiers");
+  clay_procedure_set_static_help (procedure,
                                   "Returns a triplet identifying the resource.",
-                                  "This procedure returns 2 strings and a boolean. The first string is the resource name, similar to what you would obtain calling 'gimp-resource-get-name'. The second is an opaque identifier for the collection this resource belongs to.\n"
+                                  "This procedure returns 2 strings and a boolean. The first string is the resource name, similar to what you would obtain calling 'clay-resource-get-name'. The second is an opaque identifier for the collection this resource belongs to.\n"
                                   "\n"
-                                  "*Note*: as far as GIMP is concerned, a collection of resource usually corresponds to a single file on disk (which may or may not contain several resources). Therefore the identifier may be derived from the local file path. Nevertheless you should not use this string as such as this is not guaranteed to be always the case. You should consider it as an opaque identifier only to be used again through _'gimp-resource-get-by-identifier'.",
+                                  "*Note*: as far as Clay is concerned, a collection of resource usually corresponds to a single file on disk (which may or may not contain several resources). Therefore the identifier may be derived from the local file path. Nevertheless you should not use this string as such as this is not guaranteed to be always the case. You should consider it as an opaque identifier only to be used again through _'clay-resource-get-by-identifier'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_resource ("resource",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_resource ("resource",
                                                          "resource",
                                                          "The resource",
-                                                         GIMP_TYPE_RESOURCE,
+                                                         CLAY_TYPE_RESOURCE,
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("is-internal",
                                                          "is internal",
                                                          "Whether this is the identifier for internal data",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The resource's name",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("collection-id",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("collection-id",
                                                            "collection id",
                                                            "The resource's collection identifier",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-is-editable
+   * clay-resource-is-editable
    */
-  procedure = gimp_procedure_new (resource_is_editable_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-is-editable");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_is_editable_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-is-editable");
+  clay_procedure_set_static_help (procedure,
                                   "Whether the resource can be edited.",
                                   "Returns TRUE if you have permission to change the resource.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_resource ("resource",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_resource ("resource",
                                                          "resource",
                                                          "The resource",
-                                                         GIMP_TYPE_RESOURCE,
+                                                         CLAY_TYPE_RESOURCE,
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("editable",
                                                          "editable",
                                                          "TRUE if the resource can be edited",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-duplicate
+   * clay-resource-duplicate
    */
-  procedure = gimp_procedure_new (resource_duplicate_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-duplicate");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_duplicate_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-duplicate");
+  clay_procedure_set_static_help (procedure,
                                   "Duplicates a resource.",
                                   "Returns a copy having a different, unique ID.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_resource ("resource",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_resource ("resource",
                                                          "resource",
                                                          "The resource",
-                                                         GIMP_TYPE_RESOURCE,
+                                                         CLAY_TYPE_RESOURCE,
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_resource ("resource-copy",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_resource ("resource-copy",
                                                              "resource copy",
                                                              "A copy of the resource.",
-                                                             GIMP_TYPE_RESOURCE,
+                                                             CLAY_TYPE_RESOURCE,
                                                              FALSE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-rename
+   * clay-resource-rename
    */
-  procedure = gimp_procedure_new (resource_rename_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-rename");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_rename_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-rename");
+  clay_procedure_set_static_help (procedure,
                                   "Renames a resource. When the name is in use, renames to a unique name.",
-                                  "Renames a resource. When the proposed name is already used, GIMP generates a unique name.",
+                                  "Renames a resource. When the proposed name is already used, Clay generates a unique name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_resource ("resource",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_resource ("resource",
                                                          "resource",
                                                          "The resource",
-                                                         GIMP_TYPE_RESOURCE,
+                                                         CLAY_TYPE_RESOURCE,
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("new-name",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("new-name",
                                                        "new name",
                                                        "The proposed new name of the resource",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-resource-delete
+   * clay-resource-delete
    */
-  procedure = gimp_procedure_new (resource_delete_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-resource-delete");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (resource_delete_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-resource-delete");
+  clay_procedure_set_static_help (procedure,
                                   "Deletes a resource.",
                                   "Deletes a resource. Returns an error if the resource is not deletable. Deletes the resource's data. You should not use the resource afterwards.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_resource ("resource",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_resource ("resource",
                                                          "resource",
                                                          "The resource",
-                                                         GIMP_TYPE_RESOURCE,
+                                                         CLAY_TYPE_RESOURCE,
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

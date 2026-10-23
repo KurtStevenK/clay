@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   cursor_info_actions_setup  (GimpActionGroup *group);
-void   cursor_info_actions_update (GimpActionGroup *group,
+void   cursor_info_actions_setup  (ClayActionGroup *group);
+void   cursor_info_actions_update (ClayActionGroup *group,
                                    gpointer         data);

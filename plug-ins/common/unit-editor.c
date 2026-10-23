@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Copyright (C) 2000 Michael Natterer <mitch@gimp.org>
  *
@@ -23,16 +23,16 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
-#include "libgimpwidgets/gimpwidgets-private.h"
+#include "libclay/stdplugins-intl.h"
+#include "libclaywidgets/claywidgets-private.h"
 
 
 #define PLUG_IN_PROC     "plug-in-unit-editor"
 #define PLUG_IN_BINARY   "unit-editor"
-#define PLUG_IN_ROLE     "gimp-unit-editor"
+#define PLUG_IN_ROLE     "clay-unit-editor"
 
 enum
 {
@@ -55,12 +55,12 @@ typedef struct
 } UnitColumn;
 
 
-#define GIMP_UNIT_EDITOR_TYPE  (gimp_unit_editor_get_type ())
-G_DECLARE_FINAL_TYPE (GimpUnitEditor, gimp_unit_editor, GIMP, UNIT_EDITOR, GimpPlugIn)
+#define CLAY_UNIT_EDITOR_TYPE  (clay_unit_editor_get_type ())
+G_DECLARE_FINAL_TYPE (ClayUnitEditor, clay_unit_editor, CLAY, UNIT_EDITOR, ClayPlugIn)
 
-struct _GimpUnitEditor
+struct _ClayUnitEditor
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 
   GtkApplication *app;
 
@@ -69,16 +69,16 @@ struct _GimpUnitEditor
 };
 
 
-static GList          * editor_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * editor_create_procedure (GimpPlugIn           *plug_in,
+static GList          * editor_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * editor_create_procedure (ClayPlugIn           *plug_in,
                                                  const gchar          *name);
 
-static GimpValueArray * editor_run              (GimpProcedure        *procedure,
-                                                 GimpProcedureConfig  *config,
+static ClayValueArray * editor_run              (ClayProcedure        *procedure,
+                                                 ClayProcedureConfig  *config,
                                                  gpointer              run_data);
 
-static GimpUnit       * new_unit_dialog         (GtkWindow             *main_window,
-                                                 GimpUnit              *template);
+static ClayUnit       * new_unit_dialog         (GtkWindow             *main_window,
+                                                 ClayUnit              *template);
 static void     on_app_activate                 (GApplication          *gapp,
                                                  gpointer               user_data);
 
@@ -102,9 +102,9 @@ static void     saved_toggled_callback          (GtkCellRendererToggle *celltogg
 static void     unit_list_init                  (GtkTreeView           *tv);
 
 
-G_DEFINE_TYPE (GimpUnitEditor, gimp_unit_editor, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayUnitEditor, clay_unit_editor, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_UNIT_EDITOR_TYPE)
+CLAY_MAIN (CLAY_UNIT_EDITOR_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -136,9 +136,9 @@ static GActionEntry ACTIONS[] =
 
 
 static void
-gimp_unit_editor_class_init (GimpUnitEditorClass *klass)
+clay_unit_editor_class_init (ClayUnitEditorClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = editor_query_procedures;
   plug_in_class->create_procedure = editor_create_procedure;
@@ -146,49 +146,49 @@ gimp_unit_editor_class_init (GimpUnitEditorClass *klass)
 }
 
 static void
-gimp_unit_editor_init (GimpUnitEditor *self)
+clay_unit_editor_init (ClayUnitEditor *self)
 {
 }
 
 static GList *
-editor_query_procedures (GimpPlugIn *plug_in)
+editor_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-editor_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+editor_create_procedure (ClayPlugIn  *plug_in,
                          const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       editor_run, plug_in, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("U_nits"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_TOOL_MEASURE);
+      clay_procedure_set_menu_label (procedure, _("U_nits"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_TOOL_MEASURE);
 #ifndef PLATFORM_OSX
       /* on macOS, this is already available from the native menu. See: app/menus/menus.c */
-      gimp_procedure_add_menu_path (procedure, "<Image>/Edit/[Preferences]");
+      clay_procedure_add_menu_path (procedure, "<Image>/Edit/[Preferences]");
 #endif
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create or alter units used in Clay"),
                                         "The Clay unit editor",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Michael Natterer <mitch@gimp.org>",
                                       "Michael Natterer <mitch@gimp.org>",
                                       "2000");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                        "Run mode",
                                        "The run mode",
-                                       GIMP_TYPE_RUN_MODE,
-                                       GIMP_RUN_INTERACTIVE,
+                                       CLAY_TYPE_RUN_MODE,
+                                       CLAY_RUN_INTERACTIVE,
                                        G_PARAM_READWRITE);
     }
 
@@ -198,7 +198,7 @@ editor_create_procedure (GimpPlugIn  *plug_in,
 static void
 on_app_activate (GApplication *gapp, gpointer user_data)
 {
-  GimpUnitEditor    *self = GIMP_UNIT_EDITOR (user_data);
+  ClayUnitEditor    *self = CLAY_UNIT_EDITOR (user_data);
   GtkWidget         *action_container;
   GtkWidget         *vbox;
   GtkWidget         *button_box;
@@ -230,9 +230,9 @@ on_app_activate (GApplication *gapp, gpointer user_data)
   self->window = GTK_WINDOW (gtk_application_window_new (self->app));
   gtk_window_set_title (self->window, _("Unit Editor"));
   gtk_window_set_role (self->window, PLUG_IN_ROLE);
-  gimp_window_set_transient (self->window);
-  gimp_help_connect (GTK_WIDGET (self->window), NULL,
-                     gimp_standard_help_func, PLUG_IN_PROC,
+  clay_window_set_transient (self->window);
+  clay_help_connect (GTK_WIDGET (self->window), NULL,
+                     clay_standard_help_func, PLUG_IN_PROC,
                      self->window, NULL);
 
   /* Actions */
@@ -269,7 +269,7 @@ on_app_activate (GApplication *gapp, gpointer user_data)
   else
     gtk_container_add (GTK_CONTAINER (action_container), button);
 
-  if (gimp_show_help_button ())
+  if (clay_show_help_button ())
     {
       button = gtk_button_new_with_mnemonic (_("_Help"));
       g_signal_connect_swapped (button, "clicked",
@@ -308,14 +308,14 @@ on_app_activate (GApplication *gapp, gpointer user_data)
   gtk_widget_set_visible (button_box, TRUE);
   gtk_container_add (GTK_CONTAINER (vbox), button_box);
 
-  button = gtk_button_new_from_icon_name (GIMP_ICON_DOCUMENT_NEW,
+  button = gtk_button_new_from_icon_name (CLAY_ICON_DOCUMENT_NEW,
                                           GTK_ICON_SIZE_BUTTON);
   gtk_actionable_set_action_name (GTK_ACTIONABLE (button), "win.new-unit");
   gtk_widget_set_tooltip_text (button, _("Create a new unit from scratch"));
   gtk_widget_set_visible (button, TRUE);
   gtk_container_add (GTK_CONTAINER (button_box), button);
 
-  button = gtk_button_new_from_icon_name (GIMP_ICON_OBJECT_DUPLICATE,
+  button = gtk_button_new_from_icon_name (CLAY_ICON_OBJECT_DUPLICATE,
                                           GTK_ICON_SIZE_BUTTON);
   gtk_actionable_set_action_name (GTK_ACTIONABLE (button), "win.duplicate-unit");
   gtk_widget_set_tooltip_text (button, _("Create a new unit using the currently selected unit as template"));
@@ -353,7 +353,7 @@ on_app_activate (GApplication *gapp, gpointer user_data)
       button = gtk_widget_get_ancestor (col_widget, GTK_TYPE_BUTTON);
 
       if (button)
-        gimp_help_set_help_data (button,
+        clay_help_set_help_data (button,
                                  gettext (columns[SAVE].help), NULL);
     }
 
@@ -380,7 +380,7 @@ on_app_activate (GApplication *gapp, gpointer user_data)
           button = gtk_widget_get_ancestor (col_widget, GTK_TYPE_BUTTON);
 
           if (button)
-            gimp_help_set_help_data (button, gettext (columns[i].help), NULL);
+            clay_help_set_help_data (button, gettext (columns[i].help), NULL);
         }
     }
 
@@ -398,7 +398,7 @@ on_app_activate (GApplication *gapp, gpointer user_data)
 
 #if defined (G_OS_WIN32) || defined (PLATFORM_OSX)
   gtk_widget_realize (GTK_WIDGET (self->window));
-  gimp_widget_set_title_bar_theme (GTK_WIDGET (self->window));
+  clay_widget_set_title_bar_theme (GTK_WIDGET (self->window));
 #endif
 
   gtk_widget_set_visible (GTK_WIDGET (self->window), TRUE);
@@ -419,17 +419,17 @@ unit_editor_key_press_event (GtkWidget   *window,
 static void
 unit_editor_help_clicked (GtkWidget *window)
 {
-  gimp_standard_help_func (PLUG_IN_PROC, window);
+  clay_standard_help_func (PLUG_IN_PROC, window);
 }
 
-static GimpValueArray *
-editor_run (GimpProcedure        *procedure,
-            GimpProcedureConfig  *config,
+static ClayValueArray *
+editor_run (ClayProcedure        *procedure,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpUnitEditor *editor = GIMP_UNIT_EDITOR (run_data);
+  ClayUnitEditor *editor = CLAY_UNIT_EDITOR (run_data);
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
 #if GLIB_CHECK_VERSION(2,74,0)
   editor->app = gtk_application_new (NULL, G_APPLICATION_DEFAULT_FLAGS);
@@ -442,12 +442,12 @@ editor_run (GimpProcedure        *procedure,
 
   g_clear_object (&editor->app);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
-static GimpUnit *
+static ClayUnit *
 new_unit_dialog (GtkWindow *main_window,
-                 GimpUnit  *template)
+                 ClayUnit  *template)
 {
   GtkWidget     *dialog;
   GtkWidget     *grid;
@@ -460,18 +460,18 @@ new_unit_dialog (GtkWindow *main_window,
   GtkWidget     *symbol_entry;
   GtkWidget     *abbreviation_entry;
 
-  GimpUnit      *unit = NULL;
+  ClayUnit      *unit = NULL;
 
-  dialog = gimp_dialog_new (_("Add a New Unit"), PLUG_IN_ROLE,
+  dialog = clay_dialog_new (_("Add a New Unit"), PLUG_IN_ROLE,
                             GTK_WIDGET (main_window), GTK_DIALOG_MODAL,
-                            gimp_standard_help_func, PLUG_IN_PROC,
+                            clay_standard_help_func, PLUG_IN_PROC,
 
                             _("_Cancel"), GTK_RESPONSE_CANCEL,
                             _("_Add"),    GTK_RESPONSE_OK,
 
                             NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                             GTK_RESPONSE_OK,
                                             GTK_RESPONSE_CANCEL,
                                             -1);
@@ -485,63 +485,63 @@ new_unit_dialog (GtkWindow *main_window,
   gtk_widget_set_visible (grid, TRUE);
 
   entry = name_entry = gtk_entry_new ();
-  if (template != gimp_unit_pixel ())
+  if (template != clay_unit_pixel ())
     {
       gtk_entry_set_text (GTK_ENTRY (entry),
-                          gimp_unit_get_name (template));
+                          clay_unit_get_name (template));
     }
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 0,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 0,
                             _("_Name:"), 0.0, 0.5,
                             entry, 1);
 
-  gimp_help_set_help_data (entry, gettext (columns[NAME].help), NULL);
+  clay_help_set_help_data (entry, gettext (columns[NAME].help), NULL);
 
-  factor_adj = gtk_adjustment_new ((template != gimp_unit_pixel ()) ?
-                                   gimp_unit_get_factor (template) : 1.0,
-                                   GIMP_MIN_RESOLUTION, GIMP_MAX_RESOLUTION,
+  factor_adj = gtk_adjustment_new ((template != clay_unit_pixel ()) ?
+                                   clay_unit_get_factor (template) : 1.0,
+                                   CLAY_MIN_RESOLUTION, CLAY_MAX_RESOLUTION,
                                    0.01, 0.1, 0.0);
-  spinbutton = gimp_spin_button_new (factor_adj, 0.01, 5);
+  spinbutton = clay_spin_button_new (factor_adj, 0.01, 5);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 1,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 1,
                             _("_Factor:"), 0.0, 0.5,
                             spinbutton, 1);
 
-  gimp_help_set_help_data (spinbutton, gettext (columns[FACTOR].help), NULL);
+  clay_help_set_help_data (spinbutton, gettext (columns[FACTOR].help), NULL);
 
-  digits_adj = gtk_adjustment_new ((template != gimp_unit_pixel ()) ?
-                                   gimp_unit_get_digits (template) : 2.0,
+  digits_adj = gtk_adjustment_new ((template != clay_unit_pixel ()) ?
+                                   clay_unit_get_digits (template) : 2.0,
                                    0, 5, 1, 1, 0);
-  spinbutton = gimp_spin_button_new (digits_adj, 0, 0);
+  spinbutton = clay_spin_button_new (digits_adj, 0, 0);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinbutton), TRUE);
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 2,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 2,
                             _("_Digits:"), 0.0, 0.5,
                             spinbutton, 1);
 
-  gimp_help_set_help_data (spinbutton, gettext (columns[DIGITS].help), NULL);
+  clay_help_set_help_data (spinbutton, gettext (columns[DIGITS].help), NULL);
 
   entry = symbol_entry = gtk_entry_new ();
-  if (template != gimp_unit_pixel ())
+  if (template != clay_unit_pixel ())
     {
       gtk_entry_set_text (GTK_ENTRY (entry),
-                          gimp_unit_get_symbol (template));
+                          clay_unit_get_symbol (template));
     }
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 3,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 3,
                             _("_Symbol:"), 0.0, 0.5,
                             entry, 1);
 
-  gimp_help_set_help_data (entry, gettext (columns[SYMBOL].help), NULL);
+  clay_help_set_help_data (entry, gettext (columns[SYMBOL].help), NULL);
 
   entry = abbreviation_entry = gtk_entry_new ();
-  if (template != gimp_unit_pixel ())
+  if (template != clay_unit_pixel ())
     {
       gtk_entry_set_text (GTK_ENTRY (entry),
-                          gimp_unit_get_abbreviation (template));
+                          clay_unit_get_abbreviation (template));
     }
-  gimp_grid_attach_aligned (GTK_GRID (grid), 0, 4,
+  clay_grid_attach_aligned (GTK_GRID (grid), 0, 4,
                             _("_Abbreviation:"), 0.0, 0.5,
                             entry, 1);
 
-  gimp_help_set_help_data (entry, gettext (columns[ABBREVIATION].help), NULL);
+  clay_help_set_help_data (entry, gettext (columns[ABBREVIATION].help), NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
@@ -553,7 +553,7 @@ new_unit_dialog (GtkWindow *main_window,
       gchar   *symbol;
       gchar   *abbreviation;
 
-      if (gimp_dialog_run (GIMP_DIALOG (dialog)) != GTK_RESPONSE_OK)
+      if (clay_dialog_run (CLAY_DIALOG (dialog)) != GTK_RESPONSE_OK)
         break;
 
       name         = g_strdup (gtk_entry_get_text (GTK_ENTRY (name_entry)));
@@ -580,7 +580,7 @@ new_unit_dialog (GtkWindow *main_window,
 
 #if defined (G_OS_WIN32) || defined (PLATFORM_OSX)
           gtk_widget_realize (msg);
-          gimp_widget_set_title_bar_theme (msg);
+          clay_widget_set_title_bar_theme (msg);
 #endif
 
           gtk_dialog_run (GTK_DIALOG (msg));
@@ -589,7 +589,7 @@ new_unit_dialog (GtkWindow *main_window,
           continue;
         }
 
-      unit = gimp_unit_new (name, factor, digits, symbol, abbreviation);
+      unit = clay_unit_new (name, factor, digits, symbol, abbreviation);
 
       g_free (name);
       g_free (symbol);
@@ -608,10 +608,10 @@ new_unit_action (GSimpleAction *action,
                  GVariant      *param,
                  gpointer       user_data)
 {
-  GimpUnitEditor   *self = GIMP_UNIT_EDITOR (user_data);
-  GimpUnit         *unit;
+  ClayUnitEditor   *self = CLAY_UNIT_EDITOR (user_data);
+  ClayUnit         *unit;
 
-  unit = new_unit_dialog (self->window, gimp_unit_pixel ());
+  unit = new_unit_dialog (self->window, clay_unit_pixel ());
 
   if (unit != NULL)
     {
@@ -624,7 +624,7 @@ new_unit_action (GSimpleAction *action,
 
       if (gtk_tree_model_get_iter_first (model, &iter) &&
           gtk_tree_model_iter_nth_child (model, &iter,
-                                         NULL, gimp_unit_get_id (unit) - GIMP_UNIT_INCH))
+                                         NULL, clay_unit_get_id (unit) - CLAY_UNIT_INCH))
         {
           GtkTreeSelection *selection;
           GtkAdjustment *adj;
@@ -643,7 +643,7 @@ duplicate_unit_action (GSimpleAction *action,
                        GVariant      *param,
                        gpointer       user_data)
 {
-  GimpUnitEditor   *self = GIMP_UNIT_EDITOR (user_data);
+  ClayUnitEditor   *self = CLAY_UNIT_EDITOR (user_data);
   GtkTreeModel     *model;
   GtkTreeSelection *sel;
   GtkTreeIter       iter;
@@ -653,7 +653,7 @@ duplicate_unit_action (GSimpleAction *action,
 
   if (gtk_tree_selection_get_selected (sel, NULL, &iter))
     {
-      GimpUnit *unit;
+      ClayUnit *unit;
 
       gtk_tree_model_get (model, &iter,
                           UNIT,  &unit,
@@ -669,7 +669,7 @@ duplicate_unit_action (GSimpleAction *action,
 
           if (gtk_tree_model_get_iter_first (model, &iter) &&
               gtk_tree_model_iter_nth_child (model, &iter,
-                                             NULL, gimp_unit_get_id (unit) - GIMP_UNIT_INCH))
+                                             NULL, clay_unit_get_id (unit) - CLAY_UNIT_INCH))
             {
               GtkAdjustment *adj;
 
@@ -687,7 +687,7 @@ refresh_action (GSimpleAction *action,
                 GVariant      *param,
                 gpointer       user_data)
 {
-  GimpUnitEditor *self = GIMP_UNIT_EDITOR (user_data);
+  ClayUnitEditor *self = CLAY_UNIT_EDITOR (user_data);
 
   unit_list_init (GTK_TREE_VIEW (self->tv));
 }
@@ -700,7 +700,7 @@ saved_toggled_callback (GtkCellRendererToggle *celltoggle,
   GtkTreePath *path;
   GtkTreeIter  iter;
   gboolean     saved;
-  GimpUnit    *unit;
+  ClayUnit    *unit;
 
   path = gtk_tree_path_new_from_string (path_string);
 
@@ -716,9 +716,9 @@ saved_toggled_callback (GtkCellRendererToggle *celltoggle,
                       UNIT, &unit,
                       -1);
 
-  if (! gimp_unit_is_built_in (unit))
+  if (! clay_unit_is_built_in (unit))
     {
-      gimp_unit_set_deletion_flag (unit, saved);
+      clay_unit_set_deletion_flag (unit, saved);
       gtk_list_store_set (GTK_LIST_STORE (list_store), &iter,
                           SAVE, ! saved,
                           -1);
@@ -730,8 +730,8 @@ unit_list_init (GtkTreeView *tv)
 {
   GtkListStore *list_store;
   GtkTreeIter   iter;
-  GimpUnit     *unit = gimp_unit_get_by_id (GIMP_UNIT_INCH);
-  gint          i    = GIMP_UNIT_INCH + 1;
+  ClayUnit     *unit = clay_unit_get_by_id (CLAY_UNIT_INCH);
+  gint          i    = CLAY_UNIT_INCH + 1;
 
   list_store = GTK_LIST_STORE (gtk_tree_view_get_model (tv));
 
@@ -741,17 +741,17 @@ unit_list_init (GtkTreeView *tv)
     {
       gtk_list_store_append (list_store, &iter);
       gtk_list_store_set (list_store, &iter,
-                          SAVE,         ! gimp_unit_get_deletion_flag (unit),
-                          NAME,         gimp_unit_get_name (unit),
-                          FACTOR,       gimp_unit_get_factor (unit),
-                          DIGITS,       gimp_unit_get_digits (unit),
-                          SYMBOL,       gimp_unit_get_symbol (unit),
-                          ABBREVIATION, gimp_unit_get_abbreviation (unit),
+                          SAVE,         ! clay_unit_get_deletion_flag (unit),
+                          NAME,         clay_unit_get_name (unit),
+                          FACTOR,       clay_unit_get_factor (unit),
+                          DIGITS,       clay_unit_get_digits (unit),
+                          SYMBOL,       clay_unit_get_symbol (unit),
+                          ABBREVIATION, clay_unit_get_abbreviation (unit),
                           UNIT,         unit,
-                          USER_UNIT,    ! gimp_unit_is_built_in (unit),
+                          USER_UNIT,    ! clay_unit_is_built_in (unit),
                           -1);
 
-      unit = gimp_unit_get_by_id (i++);
+      unit = clay_unit_get_by_id (i++);
     }
 
   if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (list_store), &iter))

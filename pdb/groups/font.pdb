@@ -49,7 +49,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  font = GIMP_FONT (gimp_pdb_get_resource (gimp, GIMP_TYPE_FONT, name, GIMP_PDB_DATA_ACCESS_READ, error));
+  font = CLAY_FONT (clay_pdb_get_resource (clay, CLAY_TYPE_FONT, name, CLAY_PDB_DATA_ACCESS_READ, error));
   /* Ignore "not found" error, just return NULL. */
   g_clear_error (error);
 }
@@ -87,12 +87,12 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-    GimpContainer *fonts_container;
+    ClayContainer *fonts_container;
 
-    fonts_container = gimp_data_factory_get_container (gimp->font_factory);
+    fonts_container = clay_data_factory_get_container (clay->font_factory);
 
-    font = GIMP_FONT (gimp_container_search (fonts_container,
-                                             (GimpContainerSearchFunc) gimp_font_match_by_postscript_name,
+    font = CLAY_FONT (clay_container_search (fonts_container,
+                                             (ClayContainerSearchFunc) clay_font_match_by_postscript_name,
                                              (gpointer) psname));
     /* Ignore "not found" error, just return NULL. */
     g_clear_error (error);
@@ -114,7 +114,7 @@ HELP
 
     @inargs = (
       { name => 'font', type => 'font',
-        desc => 'GimpFont object' }
+        desc => 'ClayFont object' }
     );
 
     @outargs = (
@@ -125,17 +125,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-    lookup_name = g_strdup (gimp_font_get_lookup_name (font));
+    lookup_name = g_strdup (clay_font_get_lookup_name (font));
 }
 CODE
     );
 }
 
-@headers = qw("core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdatafactory.h"
-              "text/gimpfont.h"
-              "gimppdb-utils.h");
+@headers = qw("core/clay.h"
+              "core/claycontainer.h"
+              "core/claydatafactory.h"
+              "text/clayfont.h"
+              "claypdb-utils.h");
 
 @procs = qw(font_get_lookup_name font_get_by_name
             font_get_by_postscript_name);
@@ -143,7 +143,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Font';
-$doc_title = 'gimpfont';
+$doc_title = 'clayfont';
 $doc_short_desc = 'Installable object used by text tools.';
 $doc_long_desc = 'Installable object used by text tools.';
 

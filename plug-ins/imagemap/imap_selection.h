@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -47,7 +47,7 @@ typedef struct {
 } Selection_t;
 
 Selection_t *make_selection (ObjectList_t *list,
-                             GimpImap     *imap);
+                             ClayImap     *imap);
 void selection_toggle_visibility(Selection_t *selection);
 void selection_freeze(Selection_t *selection);
 void selection_thaw(Selection_t *selection);

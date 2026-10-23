@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   mypaint_brushes_actions_setup  (GimpActionGroup *group);
-void   mypaint_brushes_actions_update (GimpActionGroup *group,
+void   mypaint_brushes_actions_setup  (ClayActionGroup *group);
+void   mypaint_brushes_actions_update (ClayActionGroup *group,
                                        gpointer         data);

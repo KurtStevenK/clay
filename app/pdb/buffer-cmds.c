@@ -27,209 +27,209 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpbuffer.h"
-#include "core/gimpcontainer-filter.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpparamspecs.h"
-#include "gegl/gimp-babl-compat.h"
+#include "core/clay.h"
+#include "core/claybuffer.h"
+#include "core/claycontainer-filter.h"
+#include "core/claycontainer.h"
+#include "core/clayparamspecs.h"
+#include "gegl/clay-babl-compat.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-buffers_get_name_list_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+buffers_get_name_list_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *filter;
   gchar **buffer_list = NULL;
 
-  filter = g_value_get_string (gimp_value_array_index (args, 0));
+  filter = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      buffer_list = gimp_container_get_filtered_name_array (gimp->named_buffers,
+      buffer_list = clay_container_get_filtered_name_array (clay->named_buffers,
                                                             filter);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), buffer_list);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), buffer_list);
 
   return return_vals;
 }
 
-static GimpValueArray *
-buffer_rename_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+buffer_rename_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *buffer_name;
   const gchar *new_name;
   gchar *real_name = NULL;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
-  new_name = g_value_get_string (gimp_value_array_index (args, 1));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
+  new_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
         {
-          gimp_object_set_name (GIMP_OBJECT (buffer), new_name);
-          real_name = g_strdup (gimp_object_get_name (buffer));
+          clay_object_set_name (CLAY_OBJECT (buffer), new_name);
+          real_name = g_strdup (clay_object_get_name (buffer));
         }
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), real_name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), real_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-buffer_delete_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+buffer_delete_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
   const gchar *buffer_name;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
-        success = gimp_container_remove (gimp->named_buffers, GIMP_OBJECT (buffer));
+        success = clay_container_remove (clay->named_buffers, CLAY_OBJECT (buffer));
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-buffer_get_width_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+buffer_get_width_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *buffer_name;
   gint width = 0;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
-        width = gimp_buffer_get_width (buffer);
+        width = clay_buffer_get_width (buffer);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), width);
+    g_value_set_int (clay_value_array_index (return_vals, 1), width);
 
   return return_vals;
 }
 
-static GimpValueArray *
-buffer_get_height_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+buffer_get_height_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *buffer_name;
   gint height = 0;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
-        height = gimp_buffer_get_height (buffer);
+        height = clay_buffer_get_height (buffer);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), height);
+    g_value_set_int (clay_value_array_index (return_vals, 1), height);
 
   return return_vals;
 }
 
-static GimpValueArray *
-buffer_get_bytes_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+buffer_get_bytes_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *buffer_name;
   gint bytes = 0;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
         {
-          const Babl *format = gimp_buffer_get_format (buffer);
+          const Babl *format = clay_buffer_get_format (buffer);
 
           bytes = babl_format_get_bytes_per_pixel (format);
         }
@@ -237,264 +237,264 @@ buffer_get_bytes_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), bytes);
+    g_value_set_int (clay_value_array_index (return_vals, 1), bytes);
 
   return return_vals;
 }
 
-static GimpValueArray *
-buffer_get_image_type_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+buffer_get_image_type_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *buffer_name;
   gint image_type = 0;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
-        image_type = gimp_babl_format_get_image_type (gimp_buffer_get_format (buffer));
+        image_type = clay_babl_format_get_image_type (clay_buffer_get_format (buffer));
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), image_type);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), image_type);
 
   return return_vals;
 }
 
 void
-register_buffer_procs (GimpPDB *pdb)
+register_buffer_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-buffers-get-name-list
+   * clay-buffers-get-name-list
    */
-  procedure = gimp_procedure_new (buffers_get_name_list_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffers-get-name-list");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffers_get_name_list_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffers-get-name-list");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve a complete listing of the available buffers.",
                                   "This procedure returns a complete listing of available named buffers.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("filter",
                                                        "filter",
                                                        "An optional regular expression used to filter the list",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("buffer-list",
                                                        "buffer list",
                                                        "The list of buffer names",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-buffer-rename
+   * clay-buffer-rename
    */
-  procedure = gimp_procedure_new (buffer_rename_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffer-rename");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffer_rename_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffer-rename");
+  clay_procedure_set_static_help (procedure,
                                   "Renames a named buffer.",
                                   "This procedure renames a named buffer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The buffer name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("new-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("new-name",
                                                        "new name",
                                                        "The buffer's new name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("real-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("real-name",
                                                            "real name",
                                                            "The real name given to the buffer",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-buffer-delete
+   * clay-buffer-delete
    */
-  procedure = gimp_procedure_new (buffer_delete_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffer-delete");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffer_delete_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffer-delete");
+  clay_procedure_set_static_help (procedure,
                                   "Deletes a named buffer.",
                                   "This procedure deletes a named buffer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "David Gowers <neota@softhome.net>",
                                          "David Gowers <neota@softhome.net>",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The buffer name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-buffer-get-width
+   * clay-buffer-get-width
    */
-  procedure = gimp_procedure_new (buffer_get_width_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffer-get-width");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffer_get_width_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffer-get-width");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieves the specified buffer's width.",
                                   "This procedure retrieves the specified named buffer's width.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The buffer name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("width",
                                                      "width",
                                                      "The buffer width",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-buffer-get-height
+   * clay-buffer-get-height
    */
-  procedure = gimp_procedure_new (buffer_get_height_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffer-get-height");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffer_get_height_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffer-get-height");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieves the specified buffer's height.",
                                   "This procedure retrieves the specified named buffer's height.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The buffer name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("height",
                                                      "height",
                                                      "The buffer height",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-buffer-get-bytes
+   * clay-buffer-get-bytes
    */
-  procedure = gimp_procedure_new (buffer_get_bytes_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffer-get-bytes");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffer_get_bytes_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffer-get-bytes");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieves the specified buffer's bytes.",
                                   "This procedure retrieves the specified named buffer's bytes.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The buffer name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("bytes",
                                                      "bytes",
                                                      "The buffer bpp",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-buffer-get-image-type
+   * clay-buffer-get-image-type
    */
-  procedure = gimp_procedure_new (buffer_get_image_type_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-buffer-get-image-type");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (buffer_get_image_type_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-buffer-get-image-type");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieves the specified buffer's image type.",
                                   "This procedure retrieves the specified named buffer's image type.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The buffer name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("image-type",
                                                       "image type",
                                                       "The buffer image type",
-                                                      GIMP_TYPE_IMAGE_TYPE,
-                                                      GIMP_RGB_IMAGE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_IMAGE_TYPE,
+                                                      CLAY_RGB_IMAGE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

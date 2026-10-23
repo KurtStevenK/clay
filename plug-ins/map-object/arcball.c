@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "arcball.h"
 

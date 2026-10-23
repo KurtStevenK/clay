@@ -1,21 +1,21 @@
-/* A set of interface style definitions common to light and dark theme variants for GIMP 3.0
+/* A set of interface style definitions common to light and dark theme variants for Clay 3.0
  * The specific dark and light interface styles are defined in common-light.css, common-dark.css */
 
-/* The specific dark and light colors are defined in gimp-dark.css, gimp.css */
+/* The specific dark and light colors are defined in clay-dark.css, clay.css */
 
-/* Do not import this file directly from gimp.css or gimp-dark.css files, you will miss light/dark theme specific styles.
+/* Do not import this file directly from clay.css or clay-dark.css files, you will miss light/dark theme specific styles.
  * Do import matching common-[dark,light].css */
 
 
 /* Hint for debugging themes:
  * first enable the GTK inspector with
    gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
- * then (after restarting GIMP) call it up with ctrl+shift+i
- * or from GIMP's UI: File > Debug > Start GtkInspector
+ * then (after restarting Clay) call it up with ctrl+shift+i
+ * or from Clay's UI: File > Debug > Start GtkInspector
  */
 
 
-@import url("../System/gimp.css");
+@import url("../System/clay.css");
 
 * {
   /* Default text color; needed for e.g. the Prefs dialog title area,
@@ -89,13 +89,13 @@ treeview.view:selected {
 
 /* Define color for drag and drop borders
  * in Layer/Channel/Path dockables */
-GimpDock .view:drop(active) {
+ClayDock .view:drop(active) {
   border-bottom-color: @dimmed-fg-color;
   border-top-color: @dimmed-fg-color;
 }
 
 /* Widget for various previews and icon tabs  */
-GimpView {
+ClayView {
   background-color: @extreme-bg-color;
 }
 
@@ -111,20 +111,20 @@ GimpView {
  * Foreground color here is the text color, not the Wilber color.
  * background-color and background here are ignored.
  */
-GimpDisplayShell, GimpDock, .dialog-action-box, .dialog-vbox {
+ClayDisplayShell, ClayDock, .dialog-action-box, .dialog-vbox {
   color: @dimmed-fg-color;
 }
 
 /* Prevent system theme leak that adds a border around
  * the toolbox Wilber */
-GimpDock frame border {
+ClayDock frame border {
   background-image: none;
 }
 
 /* Foreground color for the big Wilber in the empty image window.
  * Again, background-color and background here are ignored.
  */
-#gimp-canvas {
+#clay-canvas {
   color: @dimmed-fg-color;
 }
 
@@ -179,29 +179,29 @@ combobox button:hover {
   background-color: @selected-color;
 }
 
-/* Define colors so the nib handle appears in Gimp Ink Options */
-GimpBlobEditor {
+/* Define colors so the nib handle appears in Clay Ink Options */
+ClayBlobEditor {
   color: @fg-color;
   background-color: @bg-color;
   border: 0.1em solid @fg-color;
 }
 
-/* Get rid of the outline around all tabs in the gimpcolordialog */
-GimpColorNotebook .frame {
+/* Get rid of the outline around all tabs in the claycolordialog */
+ClayColorNotebook .frame {
   border-color: @bg-color;
 }
 
 /* Color history buttons in the color chooser.
- * The selector GimpColorHistory button gets the color buttons
- * but not the + button; GimpColorSelection gets both.
+ * The selector ClayColorHistory button gets the color buttons
+ * but not the + button; ClayColorSelection gets both.
  */
-GimpColorSelection button {
+ClayColorSelection button {
   background: @widget-bg-color;
   border: 1px solid @stronger-border-color;
   color: @fg-color;
 }
 
-GimpColorSelection button:hover {
+ClayColorSelection button:hover {
   background: @hover-color;
 }
 
@@ -272,7 +272,7 @@ notebook header tabs tab > box > button
   background-color: transparent;
 }
 
-/* The background of many dialogs, e.g. Preferences and gimpcolordialog */
+/* The background of many dialogs, e.g. Preferences and claycolordialog */
 .vertical {
   color: @fg-color;
   background-color: @bg-color;
@@ -291,8 +291,8 @@ notebook header tabs tab > box > button
 }
 
 /* Text buttons, e.g. the main buttons at the bottoms of dialogs,
- * 0..100 and 0..255 at the top of gimpcolordialog,
- * where they're inside a GimpColorSelection
+ * 0..100 and 0..255 at the top of claycolordialog,
+ * where they're inside a ClayColorSelection
  */
 .text-button {
   color: @fg-color;
@@ -356,18 +356,18 @@ toolbar.flat {
 }
 
 /* Color the toolbox Wilber icon */
-GimpDock frame:first-child:not(label) {
+ClayDock frame:first-child:not(label) {
   color: @dimmed-fg-color;
 }
 /* Fix an issue with a few labels in the toolbox
  * having their colors overwritten with Wilber's
  */
-GimpDock frame:first-child label {
+ClayDock frame:first-child label {
   color: @fg-color;
 }
 
-/* Assign the highlight color for the active GimpDeviceStatus option */
-GimpDeviceStatus widget:selected, GimpDeviceStatus widget:selected box {
+/* Assign the highlight color for the active ClayDeviceStatus option */
+ClayDeviceStatus widget:selected, ClayDeviceStatus widget:selected box {
   background-color: @selected-color;
   padding:           4px;
   margin:           -4px;
@@ -433,27 +433,27 @@ scrolledwindow viewport grid, scrolledwindow viewport box {
 }
 
 /* Defining background color for About Dialog credits box */
-.gimp-about-dialog box box stack scrolledwindow viewport grid {
+.clay-about-dialog box box stack scrolledwindow viewport grid {
   background-color: @extreme-bg-color;
 }
 
 /* 9 button toggles on some transformation tools */
-GimpPivotSelector .toggle {
+ClayPivotSelector .toggle {
   margin-right: 0px;
 }
 
 /* Define background on items in Preferences header */
-GimpPrefsBox widget box label,
-GimpPrefsBox widget box image {
+ClayPrefsBox widget box label,
+ClayPrefsBox widget box image {
   background-color: transparent;
 }
 
-GimpRuler {
+ClayRuler {
   background-color: @ruler-color;
 }
 
 /* Make sure the sample point numbers are visible */
-GimpSamplePointEditor box.vertical {
+ClaySamplePointEditor box.vertical {
   background-color: transparent;
 }
 
@@ -510,7 +510,7 @@ iconview:selected {
   border: 2px solid @fg-color;
 }
 
-GimpContainerIconView scrolledwindow {
+ClayContainerIconView scrolledwindow {
   background-color: @extreme-bg-color;
 }
 
@@ -583,8 +583,8 @@ button.default {
  *   spinbutton button.down, spinbutton button.up can be styled separately,
  *   as can spinbutton entry.
  *
- * GimpSpinScale also has button.up, button.down and entry under it,
- *   plus GimpSpinScale entry progress.
+ * ClaySpinScale also has button.up, button.down and entry under it,
+ *   plus ClaySpinScale entry progress.
  *
  * Mostly the inherited values seem pretty good for both of these,
  * so they're not overridden.
@@ -613,12 +613,12 @@ spinbutton button:hover {
   background-color: @selected-color;
 }
 
-GimpSpinScale {
+ClaySpinScale {
   border-radius: 6px;
   box-shadow:    0px 0.5px @stronger-border-color;
 }
 
-GimpSpinScale entry {
+ClaySpinScale entry {
   background-color:   @extreme-bg-color;
   border-color:       @edge-border-color;
   border-radius:      5px 0px 0px 5px;
@@ -627,7 +627,7 @@ GimpSpinScale entry {
   padding:            0px;
 }
 
-GimpSpinScale entry progress {
+ClaySpinScale entry progress {
   background-color: @widget-bg-color;
   background-image: none;
   border-width:     0px;
@@ -635,7 +635,7 @@ GimpSpinScale entry progress {
   margin:           0px;
 }
 
-GimpSpinScale button {
+ClaySpinScale button {
   -gtk-icon-shadow: none;
   border-color:     @border-color;
   border-radius:    0px 0px 0px 0px;
@@ -644,7 +644,7 @@ GimpSpinScale button {
 }
 
 /* Round the right-side edge of the end button */
-GimpSpinScale button:nth-child(odd) {
+ClaySpinScale button:nth-child(odd) {
   border-left-width: 0px;
   border-radius:     0px 5px 5px 0px;
   margin-right:      0px;
@@ -779,12 +779,12 @@ border {
 dialog notebook.frame {
   border: 1px solid @border-color;
 }
-GimpColorNotebook notebook.frame {
+ClayColorNotebook notebook.frame {
   border-width: 0px;
 }
 
-/* The border around GimpOffsetArea frame in resize dialogs */
-.gimp-offset-area-frame {
+/* The border around ClayOffsetArea frame in resize dialogs */
+.clay-offset-area-frame {
   border: solid 2px @stronger-border-color;
   background-color: @widget-bg-color;
 }
@@ -1039,8 +1039,8 @@ progressbar progress,
 scale,
 scale trough,
 scale highlight,
-GimpSpinScale,
-GimpSpinScale entry,
+ClaySpinScale,
+ClaySpinScale entry,
 scrollbar,
 scrollbar slider,
 scrollbar trough,

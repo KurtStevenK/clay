@@ -1,0 +1,34 @@
+/* Nord theme, dim scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(236,239,244);
+@define-color bg-color                   rgb(59,66,82);
+@define-color border-color               rgb(84,90,105);
+@define-color dimmed-fg-color            rgb(192,196,204);
+@define-color disabled-fg-color          rgb(156,161,171);
+@define-color disabled-button-color      rgb(116,121,134);
+@define-color hover-color                rgb(84,90,105);
+@define-color widget-bg-color            rgb(70,76,92);
+@define-color selected-color             rgb(94,101,114);
+@define-color extreme-bg-color           rgb(41,46,57);
+@define-color extreme-selected-color     rgb(84,90,105);
+@define-color strong-border-color        rgb(121,127,139);
+@define-color stronger-border-color      rgb(121,127,139);
+@define-color edge-border-color          rgb(121,127,139);
+@define-color scrollbar-slider-color     rgb(121,127,139);
+@define-color scrollbar-trough-color     rgb(41,46,57);
+@define-color ruler-color                rgba(84,90,105,0.3);
+@define-color accent-color               rgb(143,188,187);
+@define-color accent-hover-color         rgb(165,201,201);
+@define-color on-accent-color            rgb(30,33,41);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Helvetica Neue", "Lucida Grande", sans-serif; }

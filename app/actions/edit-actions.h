@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   edit_actions_setup  (GimpActionGroup *group);
-void   edit_actions_update (GimpActionGroup *group,
+void   edit_actions_setup  (ClayActionGroup *group);
+void   edit_actions_update (ClayActionGroup *group,
                             gpointer         data);

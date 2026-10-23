@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * file-webp - WebP file format plug-in for the GIMP
+ * file-webp - WebP file format plug-in for the Clay
  * Copyright (C) 2015  Nathan Osman
  * Copyright (C) 2016  Ben Touchette
  *
@@ -23,8 +23,8 @@
 #define __WEBP_DIALOG_H__
 
 
-gboolean   save_dialog (GimpImage     *image,
-                        GimpProcedure *procedure,
+gboolean   save_dialog (ClayImage     *image,
+                        ClayProcedure *procedure,
                         GObject       *config);
 
 

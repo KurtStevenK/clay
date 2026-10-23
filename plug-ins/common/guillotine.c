@@ -23,9 +23,9 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC "plug-in-guillotine"
@@ -36,12 +36,12 @@ typedef struct _GuillotineClass GuillotineClass;
 
 struct _Guillotine
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GuillotineClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -50,29 +50,29 @@ struct _GuillotineClass
 
 GType                   guillotine_get_type         (void);
 
-static GList          * guillotine_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * guillotine_create_procedure (GimpPlugIn           *plug_in,
+static GList          * guillotine_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * guillotine_create_procedure (ClayPlugIn           *plug_in,
                                                      const gchar          *name);
 
-static GimpValueArray * guillotine_run              (GimpProcedure        *procedure,
-                                                     GimpRunMode           run_mode,
-                                                     GimpImage            *image,
-                                                     GimpDrawable        **drawables,
-                                                     GimpProcedureConfig  *config,
+static ClayValueArray * guillotine_run              (ClayProcedure        *procedure,
+                                                     ClayRunMode           run_mode,
+                                                     ClayImage            *image,
+                                                     ClayDrawable        **drawables,
+                                                     ClayProcedureConfig  *config,
                                                      gpointer              run_data);
-static GList          * guillotine                  (GimpImage            *image,
+static GList          * guillotine                  (ClayImage            *image,
                                                      gboolean              interactive);
 
 
-G_DEFINE_TYPE (Guillotine, guillotine, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Guillotine, guillotine, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GUILLOTINE_TYPE)
+CLAY_MAIN (GUILLOTINE_TYPE)
 DEFINE_STD_SET_I18N
 
 static void
 guillotine_class_init (GuillotineClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = guillotine_query_procedures;
   plug_in_class->create_procedure = guillotine_create_procedure;
@@ -85,33 +85,33 @@ guillotine_init (Guillotine *film)
 }
 
 static GList *
-guillotine_query_procedures (GimpPlugIn *plug_in)
+guillotine_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-guillotine_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+guillotine_create_procedure (ClayPlugIn  *plug_in,
                              const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             guillotine_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("Slice Using G_uides"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Image/[Crop]");
+      clay_procedure_set_menu_label (procedure, _("Slice Using G_uides"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Image/[Crop]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Slice the image into subimages "
                                           "using guides"),
                                         "This function takes an image and "
@@ -119,48 +119,48 @@ guillotine_create_procedure (GimpPlugIn  *plug_in,
                                         "new images. The original image is "
                                         "not modified.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Adam D. Moss (adam@foxbox.org)",
                                       "Adam D. Moss (adam@foxbox.org)",
                                       "1998");
 
-      gimp_procedure_add_core_object_array_return_value (procedure, "images",
+      clay_procedure_add_core_object_array_return_value (procedure, "images",
                                                          "Output images",
                                                          "Output images",
-                                                         GIMP_TYPE_IMAGE,
+                                                         CLAY_TYPE_IMAGE,
                                                          G_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-guillotine_run (GimpProcedure        *procedure,
-                GimpRunMode           run_mode,
-                GimpImage            *image,
-                GimpDrawable        **drawables,
-                GimpProcedureConfig  *config,
+static ClayValueArray *
+guillotine_run (ClayProcedure        *procedure,
+                ClayRunMode           run_mode,
+                ClayImage            *image,
+                ClayDrawable        **drawables,
+                ClayProcedureConfig  *config,
                 gpointer              run_data)
 {
-  GimpValueArray    *return_vals = NULL;
-  GimpPDBStatusType  status      = GIMP_PDB_SUCCESS;
+  ClayValueArray    *return_vals = NULL;
+  ClayPDBStatusType  status      = CLAY_PDB_SUCCESS;
 
-  return_vals = gimp_procedure_new_return_values (procedure, status,
+  return_vals = clay_procedure_new_return_values (procedure, status,
                                                   NULL);
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       GList      *image_list;
       GList      *list;
-      GimpImage **images;
+      ClayImage **images;
       gint        num_images;
       gint        i;
 
-      gimp_progress_init (_("Guillotine"));
+      clay_progress_init (_("Guillotine"));
 
-      image_list = guillotine (image, run_mode == GIMP_RUN_INTERACTIVE);
+      image_list = guillotine (image, run_mode == CLAY_RUN_INTERACTIVE);
 
       num_images = g_list_length (image_list);
-      images     = g_new0 (GimpImage *, num_images + 1);
+      images     = g_new0 (ClayImage *, num_images + 1);
 
       for (list = image_list, i = 0;
            list;
@@ -171,10 +171,10 @@ guillotine_run (GimpProcedure        *procedure,
 
       g_list_free (image_list);
 
-      GIMP_VALUES_TAKE_CORE_OBJECT_ARRAY (return_vals, 1, images);
+      CLAY_VALUES_TAKE_CORE_OBJECT_ARRAY (return_vals, 1, images);
 
-      if (run_mode == GIMP_RUN_INTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode == CLAY_RUN_INTERACTIVE)
+        clay_displays_flush ();
     }
 
   return return_vals;
@@ -189,7 +189,7 @@ guide_sort_func (gconstpointer a,
 }
 
 static GList *
-guillotine (GimpImage *image,
+guillotine (ClayImage *image,
             gboolean   interactive)
 {
   GList    *images = NULL;
@@ -200,8 +200,8 @@ guillotine (GimpImage *image,
   GList    *hguides, *hg;
   GList    *vguides, *vg;
 
-  image_width  = gimp_image_get_width (image);
-  image_height = gimp_image_get_height (image);
+  image_width  = clay_image_get_width (image);
+  image_height = clay_image_get_height (image);
 
   hguides = g_list_append (NULL,    GINT_TO_POINTER (0));
   hguides = g_list_append (hguides, GINT_TO_POINTER (image_height));
@@ -209,15 +209,15 @@ guillotine (GimpImage *image,
   vguides = g_list_append (NULL,    GINT_TO_POINTER (0));
   vguides = g_list_append (vguides, GINT_TO_POINTER (image_width));
 
-  for (guide = gimp_image_find_next_guide (image, 0);
+  for (guide = clay_image_find_next_guide (image, 0);
        guide > 0;
-       guide = gimp_image_find_next_guide (image, guide))
+       guide = clay_image_find_next_guide (image, guide))
     {
-      gint position = gimp_image_get_guide_position (image, guide);
+      gint position = clay_image_get_guide_position (image, guide);
 
-      switch (gimp_image_get_guide_orientation (image, guide))
+      switch (clay_image_get_guide_orientation (image, guide))
         {
-        case GIMP_ORIENTATION_HORIZONTAL:
+        case CLAY_ORIENTATION_HORIZONTAL:
           if (! g_list_find (hguides, GINT_TO_POINTER (position)))
             {
               hguides = g_list_insert_sorted (hguides,
@@ -227,7 +227,7 @@ guillotine (GimpImage *image,
             }
           break;
 
-        case GIMP_ORIENTATION_VERTICAL:
+        case CLAY_ORIENTATION_VERTICAL:
           if (! g_list_find (vguides, GINT_TO_POINTER (position)))
             {
               vguides = g_list_insert_sorted (vguides,
@@ -237,7 +237,7 @@ guillotine (GimpImage *image,
             }
           break;
 
-        case GIMP_ORIENTATION_UNKNOWN:
+        case CLAY_ORIENTATION_UNKNOWN:
           g_assert_not_reached ();
           break;
         }
@@ -251,7 +251,7 @@ guillotine (GimpImage *image,
       gchar *hformat;
       gchar *format;
 
-      file = gimp_image_get_file (image);
+      file = clay_image_get_file (image);
 
       if (! file)
         file = g_file_new_for_uri (_("Untitled"));
@@ -275,7 +275,7 @@ guillotine (GimpImage *image,
         {
           for (x = 0, vg = vguides; vg && vg->next; x++, vg = vg->next)
             {
-              GimpImage *new_image = gimp_image_duplicate (image);
+              ClayImage *new_image = clay_image_duplicate (image);
               GString   *new_uri;
               GFile     *new_file;
               gchar     *fileextension;
@@ -290,9 +290,9 @@ guillotine (GimpImage *image,
                   return images;
                 }
 
-              gimp_image_undo_disable (new_image);
+              clay_image_undo_disable (new_image);
 
-              gimp_image_crop (new_image,
+              clay_image_crop (new_image,
                                GPOINTER_TO_INT (vg->next->data) -
                                GPOINTER_TO_INT (vg->data),
                                GPOINTER_TO_INT (hg->next->data) -
@@ -326,16 +326,16 @@ guillotine (GimpImage *image,
               new_file = g_file_new_for_uri (new_uri->str);
               g_string_free (new_uri, TRUE);
 
-              gimp_image_set_file (new_image, new_file);
+              clay_image_set_file (new_image, new_file);
               g_object_unref (new_file);
 
-              while ((guide = gimp_image_find_next_guide (new_image, 0)))
-                gimp_image_delete_guide (new_image, guide);
+              while ((guide = clay_image_find_next_guide (new_image, 0)))
+                clay_image_delete_guide (new_image, guide);
 
-              gimp_image_undo_enable (new_image);
+              clay_image_undo_enable (new_image);
 
               if (interactive)
-                gimp_display_new (new_image);
+                clay_display_new (new_image);
 
               images = g_list_prepend (images, GINT_TO_POINTER (new_image));
             }

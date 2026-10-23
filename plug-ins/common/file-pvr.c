@@ -52,15 +52,15 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-pvr-load"
 #define PLUG_IN_BINARY "file-pvr"
-#define PLUG_IN_ROLE   "gimp-file-pvr"
+#define PLUG_IN_ROLE   "clay-file-pvr"
 
 
 #define MAX_TWIDDLE_SIZE 2048
@@ -100,12 +100,12 @@ typedef struct _PvrClass PvrClass;
 
 struct _Pvr
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PvrClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -115,21 +115,21 @@ struct _PvrClass
 GType                   pvr_get_type         (void);
 
 
-static GList          * pvr_query_procedures  (GimpPlugIn            *plug_in);
-static GimpProcedure  * pvr_create_procedure  (GimpPlugIn            *plug_in,
+static GList          * pvr_query_procedures  (ClayPlugIn            *plug_in);
+static ClayProcedure  * pvr_create_procedure  (ClayPlugIn            *plug_in,
                                                const gchar           *name);
 
-static GimpValueArray * pvr_load              (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
+static ClayValueArray * pvr_load              (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
                                                GFile                 *file,
-                                               GimpMetadata          *metadata,
-                                               GimpMetadataLoadFlags *flags,
-                                               GimpProcedureConfig   *config,
+                                               ClayMetadata          *metadata,
+                                               ClayMetadataLoadFlags *flags,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
 
-static GimpImage      * load_image            (GFile                 *file,
+static ClayImage      * load_image            (GFile                 *file,
                                                GObject               *config,
-                                               GimpRunMode            run_mode,
+                                               ClayRunMode            run_mode,
                                                FILE                  *fp,
                                                GError               **error);
 
@@ -140,7 +140,7 @@ static gboolean         pvr_decode_color      (gint                   pixel_mode
                                                guchar                *pixels,
                                                gint                   index);
 
-static gboolean         pvr_decode_rect       (GimpLayer             *layer,
+static gboolean         pvr_decode_rect       (ClayLayer             *layer,
                                                gint                   pixel_mode,
                                                gushort                width,
                                                gushort                height,
@@ -148,7 +148,7 @@ static gboolean         pvr_decode_rect       (GimpLayer             *layer,
                                                FILE                  *fp,
                                                GError               **error);
 
-static gboolean         pvr_decode_twiddle    (GimpLayer             *layer,
+static gboolean         pvr_decode_twiddle    (ClayLayer             *layer,
                                                gint                   pixel_mode,
                                                gushort                width,
                                                gushort                height,
@@ -158,7 +158,7 @@ static gboolean         pvr_decode_twiddle    (GimpLayer             *layer,
                                                guint32                data_size,
                                                GError               **error);
 
-static gboolean         pvr_decode_compressed (GimpLayer             *layer,
+static gboolean         pvr_decode_compressed (ClayLayer             *layer,
                                                gint                   pixel_mode,
                                                gushort                width,
                                                gushort                height,
@@ -169,16 +169,16 @@ static gboolean         pvr_decode_compressed (GimpLayer             *layer,
                                                guint32                data_size,
                                                GError               **error);
 
-G_DEFINE_TYPE (Pvr, pvr, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pvr, pvr, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PVR_TYPE)
+CLAY_MAIN (PVR_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 pvr_class_init (PvrClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pvr_query_procedures;
   plug_in_class->create_procedure = pvr_create_procedure;
@@ -191,7 +191,7 @@ pvr_init (Pvr *pvr)
 }
 
 static GList *
-pvr_query_procedures (GimpPlugIn *plug_in)
+pvr_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -200,50 +200,50 @@ pvr_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-pvr_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pvr_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            pvr_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("PVR Image"));
+      clay_procedure_set_menu_label (procedure, _("PVR Image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file in the PVR file format"),
                                         _("Load file in the PowerVR texture "
                                           "file format"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Per Hedbor",
                                       "Per Hedbor",
                                       "2000");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pvr");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,GBIX,0,string,PVRT");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-pvr_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+pvr_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   FILE           *fp;
   GError         *error = NULL;
 
@@ -255,9 +255,9 @@ pvr_load (GimpProcedure         *procedure,
     {
       g_set_error (&error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
@@ -265,28 +265,28 @@ pvr_load (GimpProcedure         *procedure,
   fclose (fp);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             FILE         *fp,
             GError      **error)
 {
-  GimpImage  *image       = NULL;
-  GimpLayer  *layer       = NULL;
+  ClayImage  *image       = NULL;
+  ClayLayer  *layer       = NULL;
   gboolean    has_alpha   = FALSE;
   gboolean    has_mipmaps = FALSE;
   gint        n_components;
@@ -309,7 +309,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read header from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -323,7 +323,7 @@ load_image (GFile        *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not read GBIX header from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           return NULL;
         }
 
@@ -333,7 +333,7 @@ load_image (GFile        *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Could not read GBIX header from '%s'"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
           return NULL;
         }
       file_size -= (global_header_size + 8);
@@ -352,7 +352,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read header from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -364,7 +364,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    _("Could not read header from '%s'"),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -386,7 +386,7 @@ load_image (GFile        *file,
       data_format == MODE_TWIDDLED_ALIAS_MIPMAP)
     has_mipmaps = TRUE;
 
-  image = gimp_image_new (width, height, GIMP_RGB);
+  image = clay_image_new (width, height, CLAY_RGB);
 
   /* Load layer(s) based on PVR texture mode */
   if (data_format == MODE_TWIDDLE            ||
@@ -439,11 +439,11 @@ load_image (GFile        *file,
               return image;
             }
 
-          layer = gimp_layer_new (image, layer_name, mipmap_width, mipmap_height,
-                                  (has_alpha ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE),
+          layer = clay_layer_new (image, layer_name, mipmap_width, mipmap_height,
+                                  (has_alpha ? CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE),
                                   100,
-                                  gimp_image_get_default_new_layer_mode (image));
-          gimp_image_insert_layer (image, layer, NULL, 0);
+                                  clay_image_get_default_new_layer_mode (image));
+          clay_image_insert_layer (image, layer, NULL, 0);
           g_free (layer_name);
 
           if (! pvr_decode_twiddle (layer, pixel_mode, mipmap_width,
@@ -468,10 +468,10 @@ load_image (GFile        *file,
     }
   else if (data_format == MODE_RECTANGLE)
     {
-      layer = gimp_layer_new (image, NULL, width, height,
-                              (has_alpha ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE),
-                              100, gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, 0);
+      layer = clay_layer_new (image, NULL, width, height,
+                              (has_alpha ? CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE),
+                              100, clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, 0);
 
       if (! pvr_decode_rect (layer, pixel_mode, width, height, n_components,
                              fp, error))
@@ -545,11 +545,11 @@ load_image (GFile        *file,
             layer_name = g_strdup_printf ("Mipmap (%dx%d)",
                                           mipmap_width, mipmap_height);
 
-          layer = gimp_layer_new (image, layer_name, mipmap_width, mipmap_height,
-                                  (has_alpha ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE),
+          layer = clay_layer_new (image, layer_name, mipmap_width, mipmap_height,
+                                  (has_alpha ? CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE),
                                   100,
-                                  gimp_image_get_default_new_layer_mode (image));
-          gimp_image_insert_layer (image, layer, NULL, 0);
+                                  clay_image_get_default_new_layer_mode (image));
+          clay_image_insert_layer (image, layer, NULL, 0);
           g_free (layer_name);
 
           fseek (fp, data_start, SEEK_SET);
@@ -663,8 +663,8 @@ pvr_decode_color (gint    pixel_mode,
         gdouble radius = color & 0xFF;
         gdouble arc    = color >> 8;
 
-        radius = gimp_deg_to_rad ((radius / 255) * 360);
-        arc    = gimp_deg_to_rad ((arc / 255) * 90);
+        radius = clay_deg_to_rad ((radius / 255) * 360);
+        arc    = clay_deg_to_rad ((arc / 255) * 90);
 
         xyz[0] = cos (radius) * cos (arc);
         xyz[1] = sin (radius) * cos (arc);
@@ -684,7 +684,7 @@ pvr_decode_color (gint    pixel_mode,
 }
 
 static gboolean
-pvr_decode_rect (GimpLayer  *layer,
+pvr_decode_rect (ClayLayer  *layer,
                  gint        pixel_mode,
                  gushort     width,
                  gushort     height,
@@ -718,7 +718,7 @@ pvr_decode_rect (GimpLayer  *layer,
       return FALSE;
     }
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
   for (gint index = 0; index < count; index += 2)
     {
       guint rgb = data[index] | (data[index + 1] << 8);
@@ -743,7 +743,7 @@ pvr_decode_rect (GimpLayer  *layer,
 }
 
 static gboolean
-pvr_decode_twiddle (GimpLayer  *layer,
+pvr_decode_twiddle (ClayLayer  *layer,
                     gint        pixel_mode,
                     gushort     width,
                     gushort     height,
@@ -782,7 +782,7 @@ pvr_decode_twiddle (GimpLayer  *layer,
       distance = width;
     }
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
   for (gint index = 0; index < end; index += distance)
     {
       gint base = 2 * index * distance; /* For non-square textures */
@@ -827,7 +827,7 @@ pvr_decode_twiddle (GimpLayer  *layer,
 }
 
 static gboolean
-pvr_decode_compressed (GimpLayer  *layer,
+pvr_decode_compressed (ClayLayer  *layer,
                        gint        pixel_mode,
                        gushort     width,
                        gushort     height,
@@ -850,7 +850,7 @@ pvr_decode_compressed (GimpLayer  *layer,
       (pixels = g_try_malloc0 (pixel_size)) == NULL)
     return FALSE;
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   /* Initialize twiddle look up table */
   pvr_create_twiddle (twiddle);

@@ -18,12 +18,12 @@
 #pragma once
 
 
-#define GIMP_TYPE_TEXT_BOX_MODE (gimp_text_box_mode_get_type ())
+#define CLAY_TYPE_TEXT_BOX_MODE (clay_text_box_mode_get_type ())
 
-GType gimp_text_box_mode_get_type (void);
+GType clay_text_box_mode_get_type (void);
 
 typedef enum
 {
-  GIMP_TEXT_BOX_DYNAMIC, /*< desc="Dynamic" >*/
-  GIMP_TEXT_BOX_FIXED    /*< desc="Fixed"   >*/
-} GimpTextBoxMode;
+  CLAY_TEXT_BOX_DYNAMIC, /*< desc="Dynamic" >*/
+  CLAY_TEXT_BOX_FIXED    /*< desc="Fixed"   >*/
+} ClayTextBoxMode;

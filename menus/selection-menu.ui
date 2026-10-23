@@ -4,7 +4,7 @@
   <menu id="/selection-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="select-action">Selection Editor Menu</attribute>
-      <attribute name="icon">gimp-selection</attribute>
+      <attribute name="icon">clay-selection</attribute>
 
       <item><attribute name="action">app.select-all</attribute></item>
       <item><attribute name="action">app.select-none</attribute></item>

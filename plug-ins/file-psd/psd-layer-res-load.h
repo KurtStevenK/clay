@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GIMP PSD Plug-in
+ * Clay PSD Plug-in
  * Copyright 2007 by John Marshall
  *
  * This program is free software: you can redistribute it and/or modify

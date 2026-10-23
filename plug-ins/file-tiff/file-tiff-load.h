@@ -1,4 +1,4 @@
-/* tiff loading for GIMP
+/* tiff loading for Clay
  *  -Peter Mattis
  *
  * The TIFF loading code has been completely revamped by Nick Lamb
@@ -39,20 +39,20 @@ typedef struct
   gint                    n_filtered_pages;
   gint                    n_reducedimage_pages;
   GtkWidget              *selector;
-  GimpPageSelectorTarget  target;
+  ClayPageSelectorTarget  target;
   gboolean                keep_composite_image;
   gboolean                keep_empty_space;
   gboolean                show_reduced;
 } TiffSelectedPages;
 
 
-GimpPDBStatusType load_image  (GimpProcedure        *procedure,
+ClayPDBStatusType load_image  (ClayProcedure        *procedure,
                                GFile                *file,
-                               GimpRunMode           run_mode,
-                               GimpImage           **image,
+                               ClayRunMode           run_mode,
+                               ClayImage           **image,
                                gboolean             *resolution_loaded,
                                gboolean             *profile_loaded,
-                               GimpProcedureConfig  *config,
+                               ClayProcedureConfig  *config,
                                GError              **error);
 
 

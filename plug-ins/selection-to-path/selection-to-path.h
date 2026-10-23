@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Plugin to convert a selection to a path.
  *
@@ -23,7 +23,7 @@
  */
 
 #include "gtk/gtk.h"
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 guchar          sel_pixel_value       (gint, gint);
 gint            sel_pixel_is_white    (gint, gint);

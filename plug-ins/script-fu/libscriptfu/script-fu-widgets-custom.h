@@ -20,7 +20,7 @@
 #ifndef __SCRIPT_FU_WIDGETS_CUSTOM_H__
 #define __SCRIPT_FU_WIDGETS_CUSTOM_H__
 
-void    script_fu_widgets_custom_add (GimpProcedureDialog *dialog,
+void    script_fu_widgets_custom_add (ClayProcedureDialog *dialog,
                                       SFScript            *script);
 
 void    script_fu_widgets_grab_focus_on_first_entry (GtkWidget *dialog);

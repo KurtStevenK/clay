@@ -18,24 +18,24 @@
 #pragma once
 
 
-void   debug_gtk_inspector_cmd_callback           (GimpAction *action,
+void   debug_gtk_inspector_cmd_callback           (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void   debug_mem_profile_cmd_callback             (GimpAction *action,
+void   debug_mem_profile_cmd_callback             (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void   debug_benchmark_projection_cmd_callback    (GimpAction *action,
+void   debug_benchmark_projection_cmd_callback    (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void   debug_show_image_graph_cmd_callback        (GimpAction *action,
+void   debug_show_image_graph_cmd_callback        (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void   debug_dump_menus_cmd_callback              (GimpAction *action,
+void   debug_dump_menus_cmd_callback              (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void   debug_dump_keyboard_shortcuts_cmd_callback (GimpAction *action,
+void   debug_dump_keyboard_shortcuts_cmd_callback (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);
-void   debug_dump_attached_data_cmd_callback      (GimpAction *action,
+void   debug_dump_attached_data_cmd_callback      (ClayAction *action,
                                                    GVariant   *value,
                                                    gpointer    data);

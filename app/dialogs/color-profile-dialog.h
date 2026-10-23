@@ -31,22 +31,22 @@ typedef enum
 } ColorProfileDialogType;
 
 
-typedef void (* GimpColorProfileCallback) (GtkWidget                *dialog,
-                                           GimpImage                *image,
-                                           GimpColorProfile         *new_profile,
+typedef void (* ClayColorProfileCallback) (GtkWidget                *dialog,
+                                           ClayImage                *image,
+                                           ClayColorProfile         *new_profile,
                                            GFile                    *new_file,
-                                           GimpColorRenderingIntent  intent,
+                                           ClayColorRenderingIntent  intent,
                                            gboolean                  bpc,
                                            gpointer                  user_data);
 
 
 GtkWidget * color_profile_dialog_new (ColorProfileDialogType    dialog_type,
-                                      GimpImage                *image,
-                                      GimpContext              *context,
+                                      ClayImage                *image,
+                                      ClayContext              *context,
                                       GtkWidget                *parent,
-                                      GimpColorProfile         *current_profile,
-                                      GimpColorProfile         *default_profile,
-                                      GimpColorRenderingIntent  intent,
+                                      ClayColorProfile         *current_profile,
+                                      ClayColorProfile         *default_profile,
+                                      ClayColorRenderingIntent  intent,
                                       gboolean                  bpc,
-                                      GimpColorProfileCallback  callback,
+                                      ClayColorProfileCallback  callback,
                                       gpointer                  user_data);

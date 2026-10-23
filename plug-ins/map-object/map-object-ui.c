@@ -4,8 +4,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "arcball.h"
 #include "map-object-ui.h"
@@ -15,7 +15,7 @@
 #include "map-object-preview.h"
 #include "map-object-main.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 GtkWidget          *previewarea       = NULL;
@@ -39,14 +39,14 @@ static gint preview_events             (GtkWidget           *area,
                                         GdkEvent            *event,
                                         gpointer             data);
 
-static void update_light_pos_entries   (GimpProcedureConfig *config);
+static void update_light_pos_entries   (ClayProcedureConfig *config);
 
-static void update_preview             (GimpProcedureConfig *config);
+static void update_preview             (ClayProcedureConfig *config);
 
 static void toggle_update              (GtkWidget           *widget,
                                         gpointer             data);
 
-static void lightmenu_callback         (GimpProcedureConfig *config);
+static void lightmenu_callback         (ClayProcedureConfig *config);
 
 static void preview_callback           (GtkWidget           *widget,
                                         gpointer             data);
@@ -57,7 +57,7 @@ static void preview_callback           (GtkWidget           *widget,
 /******************************************************/
 
 static void
-update_preview (GimpProcedureConfig *config)
+update_preview (ClayProcedureConfig *config)
 {
   copy_from_config (config);
 
@@ -68,7 +68,7 @@ update_preview (GimpProcedureConfig *config)
 }
 
 static void
-update_light_pos_entries (GimpProcedureConfig *config)
+update_light_pos_entries (ClayProcedureConfig *config)
 {
   g_object_set (config,
                 "light-position-x", mapvals.lightsource.position.x,
@@ -90,7 +90,7 @@ static void
 toggle_update (GtkWidget *widget,
                gpointer   data)
 {
-  gimp_toggle_button_update (widget, data);
+  clay_toggle_button_update (widget, data);
 
   compute_preview_image ();
   gtk_widget_queue_draw (previewarea);
@@ -101,11 +101,11 @@ toggle_update (GtkWidget *widget,
 /*****************************************/
 
 static void
-lightmenu_callback (GimpProcedureConfig *config)
+lightmenu_callback (ClayProcedureConfig *config)
 {
   gint light_type;
 
-  light_type = gimp_procedure_config_get_choice_id (config, "light-type");
+  light_type = clay_procedure_config_get_choice_id (config, "light-type");
 
   if (light_type == POINT_LIGHT)
     {
@@ -143,9 +143,9 @@ mapmenu_callback (GtkWidget *widget,
                   gpointer   data)
 {
   int map_type;
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
 
-  map_type = gimp_procedure_config_get_choice_id (config, "map-type");
+  map_type = clay_procedure_config_get_choice_id (config, "map-type");
 
   if (mapvals.livepreview)
     {
@@ -174,7 +174,7 @@ static void
 preview_callback (GtkWidget *widget,
                   gpointer   data)
 {
-  GimpProcedureConfig *config = (GimpProcedureConfig *) data;
+  ClayProcedureConfig *config = (ClayProcedureConfig *) data;
 
   copy_from_config (config);
   compute_preview_image ();
@@ -183,9 +183,9 @@ preview_callback (GtkWidget *widget,
 }
 
 static void
-zoomed_callback (GimpZoomModel *model)
+zoomed_callback (ClayZoomModel *model)
 {
-  mapvals.zoom = gimp_zoom_model_get_factor (model);
+  mapvals.zoom = clay_zoom_model_get_factor (model);
 
   compute_preview_image ();
 
@@ -202,7 +202,7 @@ preview_events (GtkWidget *area,
                 gpointer   data)
 {
   HVect __attribute__((unused))pos;
-  GimpProcedureConfig *config = GIMP_PROCEDURE_CONFIG (data);
+  ClayProcedureConfig *config = CLAY_PROCEDURE_CONFIG (data);
 /*  HMatrix RotMat;
   gdouble a,b,c; */
 
@@ -296,9 +296,9 @@ preview_events (GtkWidget *area,
 /********************************/
 
 gboolean
-main_dialog (GimpProcedure       *procedure,
-             GimpProcedureConfig *config,
-             GimpDrawable        *drawable)
+main_dialog (ClayProcedure       *procedure,
+             ClayProcedureConfig *config,
+             ClayDrawable        *drawable)
 {
   GtkWidget     *main_hbox;
   GtkWidget     *preview_box;
@@ -308,14 +308,14 @@ main_dialog (GimpProcedure       *procedure,
   GtkWidget     *toggle;
   GtkWidget     *scale;
   GtkWidget     *spin;
-  GimpZoomModel *model;
+  ClayZoomModel *model;
   GtkWidget     *map_combo;
   gboolean       run = FALSE;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  appwin = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  appwin = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Map to Object"));
 
   /* Create the Preview */
@@ -364,17 +364,17 @@ main_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (preview_callback),
                     config);
 
-  gimp_help_set_help_data (button, _("Recompute preview image"), NULL);
+  clay_help_set_help_data (button, _("Recompute preview image"), NULL);
 
-  model = gimp_zoom_model_new ();
-  gimp_zoom_model_set_range (model, 0.25, 1.0);
-  gimp_zoom_model_zoom (model, GIMP_ZOOM_TO, mapvals.zoom);
+  model = clay_zoom_model_new ();
+  clay_zoom_model_set_range (model, 0.25, 1.0);
+  clay_zoom_model_zoom (model, CLAY_ZOOM_TO, mapvals.zoom);
 
-  button = gimp_zoom_button_new (model, GIMP_ZOOM_IN, GTK_ICON_SIZE_MENU);
+  button = clay_zoom_button_new (model, CLAY_ZOOM_IN, GTK_ICON_SIZE_MENU);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
 
-  button = gimp_zoom_button_new (model, GIMP_ZOOM_OUT, GTK_ICON_SIZE_MENU);
+  button = clay_zoom_button_new (model, CLAY_ZOOM_OUT, GTK_ICON_SIZE_MENU);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
 
@@ -400,58 +400,58 @@ main_dialog (GimpProcedure       *procedure,
                     G_CALLBACK (toggle_update),
                     &mapvals.livepreview);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "options-tab", _("O_ptions"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "light-tab", _("Li_ght"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "viewpoint-tab", _("_Viewpoint"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "material-tab", _("_Material"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "orientation-tab", _("Orient_ation"),
                                    FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "sphere-tab", _("Sp_here"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "box-tab", _("_Box"), FALSE, TRUE);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "cylinder-tab", _("C_ylinder"), FALSE, TRUE);
 
   /* Options Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "general-options", _("General Options"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "general-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "general-box",
                                   "map-type",
                                   "transparent-background",
                                   "tiled",
                                   "new-image",
                                   "new-layer",
                                   NULL);
-  map_combo = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (appwin),
+  map_combo = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (appwin),
                                                 "map-type", G_TYPE_NONE);
   g_signal_connect (map_combo, "value-changed",
                     G_CALLBACK (mapmenu_callback),
                     config);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "options-frame",
                                     "general-options", FALSE,
                                     "general-box");
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "antialias-box",
                                   "depth",
                                   "threshold",
                                   NULL);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "depth", 1.0);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "antialias-frame",
                                     "antialiasing", FALSE,
                                     "antialias-box");
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "options-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "options-box",
                                   "options-frame",
                                   "antialias-frame",
                                   NULL);
@@ -464,11 +464,11 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Light Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "light-settings-label", _("Light Settings"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "light-settings-box",
                                   "light-type",
                                   "light-color",
@@ -476,54 +476,54 @@ main_dialog (GimpProcedure       *procedure,
   g_signal_connect (config, "notify::light-type",
                     G_CALLBACK (lightmenu_callback),
                     config);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "light-frame",
                                     "light-settings-label", FALSE,
                                     "light-settings-box");
 
   /* Depending on light settings, only one of these are visible */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "vector-label", _("Direction Vector"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "vector-box",
                                   "light-direction-x",
                                   "light-direction-y",
                                   "light-direction-z",
                                   NULL);
-  dirlightwid = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  dirlightwid = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                                   "vector-frame",
                                                   "vector-label", FALSE,
                                                   "vector-box");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "position-label", _("Position"),
                                    FALSE, FALSE);
 
-  spin = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (appwin),
+  spin = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (appwin),
                                            "light-position-x",
-                                           GIMP_TYPE_LABEL_SPIN);
-  gimp_label_spin_set_increments (GIMP_LABEL_SPIN (spin), 0.1, 0.1);
-  spin = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (appwin),
+                                           CLAY_TYPE_LABEL_SPIN);
+  clay_label_spin_set_increments (CLAY_LABEL_SPIN (spin), 0.1, 0.1);
+  spin = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (appwin),
                                            "light-position-y",
-                                           GIMP_TYPE_LABEL_SPIN);
-  gimp_label_spin_set_increments (GIMP_LABEL_SPIN (spin), 0.1, 0.1);
-  spin = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (appwin),
+                                           CLAY_TYPE_LABEL_SPIN);
+  clay_label_spin_set_increments (CLAY_LABEL_SPIN (spin), 0.1, 0.1);
+  spin = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (appwin),
                                            "light-position-z",
-                                           GIMP_TYPE_LABEL_SPIN);
-  gimp_label_spin_set_increments (GIMP_LABEL_SPIN (spin), 0.1, 0.1);
+                                           CLAY_TYPE_LABEL_SPIN);
+  clay_label_spin_set_increments (CLAY_LABEL_SPIN (spin), 0.1, 0.1);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "position-box",
                                   "light-position-x",
                                   "light-position-y",
                                   "light-position-z",
                                   NULL);
-  pointlightwid = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  pointlightwid = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                                     "position-frame",
                                                     "position-label", FALSE,
                                                     "position-box");
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin), "light-box",
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin), "light-box",
                                   "light-frame",
                                   "vector-frame",
                                   "position-frame",
@@ -552,10 +552,10 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Viewpoint Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "viewpoint-position-label", _("Viewpoint Position"),
                                    FALSE, FALSE);
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                          "viewpoint-position-box",
                                          "viewpoint-x",
                                          "viewpoint-y",
@@ -563,61 +563,61 @@ main_dialog (GimpProcedure       *procedure,
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
                                   GTK_ORIENTATION_HORIZONTAL);
-  viewpointlightwid = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  viewpointlightwid = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                                         "viewpoint-position-frame",
                                                         "viewpoint-position-label", FALSE,
                                                         "viewpoint-position-box");
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "first-axis-x", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "first-axis-y", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "first-axis-z", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "first-axis-label", _("First Axis"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "first-axis-box",
                                   "first-axis-x",
                                   "first-axis-y",
                                   "first-axis-z",
                                   NULL);
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                             "first-axis-frame",
                                             "first-axis-label", FALSE,
                                             "first-axis-box");
   gtk_widget_set_hexpand (frame, TRUE);
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "second-axis-x", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "second-axis-y", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "second-axis-z", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "second-axis-label", _("Second Axis"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "second-axis-box",
                                   "second-axis-x",
                                   "second-axis-y",
                                   "second-axis-z",
                                   NULL);
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                             "second-axis-frame",
                                             "second-axis-label", FALSE,
                                             "second-axis-box");
   gtk_widget_set_hexpand (frame, TRUE);
 
-  hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                          "axis-box",
                                          "first-axis-frame",
                                          "second-axis-frame",
                                          NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
                                   GTK_ORIENTATION_HORIZONTAL);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "viewpoint-box",
                                   "viewpoint-position-frame",
                                   "axis-box",
@@ -653,35 +653,35 @@ main_dialog (GimpProcedure       *procedure,
   lightmenu_callback (config);
 
   /* Material Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "intensity-label", _("Intensity Levels"),
                                    FALSE, FALSE);
   /* TODO: Restore icons */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "intensity-box",
                                   "ambient-intensity",
                                   "diffuse-intensity",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "intensity-frame",
                                     "intensity-label", FALSE,
                                     "intensity-box");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "reflexivity-label", _("Reflectivity"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "reflexivity-box",
                                   "diffuse-reflectivity",
                                   "specular-reflectivity",
                                   "highlight",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "reflexivity-frame",
                                     "reflexivity-label", FALSE,
                                     "reflexivity-box");
 
-   gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+   clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "material-box",
                                   "intensity-frame",
                                   "reflexivity-frame",
@@ -704,47 +704,47 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Orientation Tab */
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "position-x", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "position-y", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "position-z", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "orientation-position-label", _("Position"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "orientation-position-box",
                                   "position-x",
                                   "position-y",
                                   "position-z",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "orientation-position-frame",
                                     "orientation-position-label", FALSE,
                                     "orientation-position-box");
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "rotation-angle-x", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "rotation-angle-y", 1.0);
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                         "rotation-angle-z", 1.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "rotation-angle-label", _("Rotation"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "rotation-angle-box",
                                   "rotation-angle-x",
                                   "rotation-angle-y",
                                   "rotation-angle-z",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "rotation-angle-frame",
                                     "rotation-angle-label", FALSE,
                                     "rotation-angle-box");
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "orientation-box",
                                   "orientation-position-frame",
                                   "rotation-angle-frame",
@@ -770,10 +770,10 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Sphere Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "sphere-label", _("Size"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "sphere-frame",
                                     "sphere-label", FALSE,
                                     "sphere-radius");
@@ -783,10 +783,10 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Box Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "box-drawable-label", _("Map Images to Box Faces"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_flowbox (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_flowbox (CLAY_PROCEDURE_DIALOG (appwin),
                                       "box-drawable-box",
                                       "box-front-drawable",
                                       "box-back-drawable",
@@ -795,28 +795,28 @@ main_dialog (GimpProcedure       *procedure,
                                       "box-left-drawable",
                                       "box-right-drawable",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "box-drawable-frame",
                                     "box-drawable-label", FALSE,
                                     "box-drawable-box");
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                                 "x-scale", 1.0);
-  gimp_spin_scale_set_scale_limits (GIMP_SPIN_SCALE (scale), 0, 5.0);
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_spin_scale_set_scale_limits (CLAY_SPIN_SCALE (scale), 0, 5.0);
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                                 "y-scale", 1.0);
-  gimp_spin_scale_set_scale_limits (GIMP_SPIN_SCALE (scale), 0, 5.0);
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_spin_scale_set_scale_limits (CLAY_SPIN_SCALE (scale), 0, 5.0);
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                                 "z-scale", 1.0);
-  gimp_spin_scale_set_scale_limits (GIMP_SPIN_SCALE (scale), 0, 5.0);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_spin_scale_set_scale_limits (CLAY_SPIN_SCALE (scale), 0, 5.0);
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "box-scale-box",
                                   "x-scale",
                                   "y-scale",
                                   "z-scale",
                                   NULL);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "box-box",
                                   "box-drawable-frame",
                                   "box-scale-box",
@@ -851,35 +851,35 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   /* Cylinder Tab */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "cyl-drawable-label", _("Images for the Cap Faces"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                       "cyl-drawable-box",
                                       "cyl-top-drawable",
                                       "cyl-bottom-drawable",
                                       NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (appwin),
                                     "cyl-drawable-frame",
                                     "cyl-drawable-label", FALSE,
                                     "cyl-drawable-box");
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                                 "cylinder-radius", 1.0);
-  gimp_spin_scale_set_scale_limits (GIMP_SPIN_SCALE (scale), 0, 2.0);
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_spin_scale_set_scale_limits (CLAY_SPIN_SCALE (scale), 0, 2.0);
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (appwin),
                                                 "cylinder-length", 1.0);
-  gimp_spin_scale_set_scale_limits (GIMP_SPIN_SCALE (scale), 0, 2.0);
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_spin_scale_set_scale_limits (CLAY_SPIN_SCALE (scale), 0, 2.0);
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (appwin),
                                    "cyl-size-label", _("Size"),
                                    FALSE, FALSE);
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "cyl-size-box",
                                   "cylinder-radius",
                                   "cylinder-length",
                                   NULL);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                   "cylinder-box",
                                   "cyl-drawable-frame",
                                   "cyl-size-box",
@@ -899,7 +899,7 @@ main_dialog (GimpProcedure       *procedure,
                     config);
 
   options_note_book =
-    GTK_NOTEBOOK (gimp_procedure_dialog_fill_notebook (GIMP_PROCEDURE_DIALOG (appwin),
+    GTK_NOTEBOOK (clay_procedure_dialog_fill_notebook (CLAY_PROCEDURE_DIALOG (appwin),
                                                        "main-notebook",
                                                        "options-tab", "options-box",
                                                        "light-tab", "light-box",
@@ -919,7 +919,7 @@ main_dialog (GimpProcedure       *procedure,
   mapmenu_callback (map_combo, config);
 
   /* Create overall layout */
-  main_hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (appwin),
+  main_hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (appwin),
                                               "main-hbox",
                                               "main-notebook",
                                               NULL);
@@ -928,7 +928,7 @@ main_dialog (GimpProcedure       *procedure,
   gtk_box_pack_start (GTK_BOX (main_hbox), preview_box, FALSE, FALSE, 0);
   gtk_box_reorder_child (GTK_BOX (main_hbox), preview_box, 0);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (appwin), "main-hbox", NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (appwin), "main-hbox", NULL);
 
   gtk_widget_set_visible (appwin, TRUE);
 
@@ -946,7 +946,7 @@ main_dialog (GimpProcedure       *procedure,
 
   compute_preview_image ();
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (appwin));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (appwin));
 
   gtk_widget_destroy (appwin);
   if (preview_rgb_data)

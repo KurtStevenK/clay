@@ -25,20 +25,20 @@ foreach plugin : python_plugins
   name = plugin.get('name')
   srcs = plugin.get('srcs', [name + '.py'])
 
-  install_data(srcs, install_dir: gimpplugindir / 'plug-ins' / name,
+  install_data(srcs, install_dir: clayplugindir / 'plug-ins' / name,
                install_mode: 'rwxr-xr-x')
 endforeach
 
-#.interp file read by gimp_interpreter_db_load_interp_file in gimpinterpreterdb.c
+#.interp file read by clay_interpreter_db_load_interp_file in clayinterpreterdb.c
 if (platform_windows or platform_osx) and not meson.is_cross_build() and python.found()
   python_config = configuration_data()
   if platform_windows
-    # python.exe is needed for plug-ins error output if `gimp*.exe` is run from console
+    # python.exe is needed for plug-ins error output if `clay*.exe` is run from console
     python_config.set('PYTHON_EXE', 'python.exe')
 
-    # pythonw.exe is needed to run plug-ins silently if `gimp*.exe` is run from shortcut
-    install_data('pygimp_win.interp',
-      install_dir: gimpplugindir / 'interpreters',
+    # pythonw.exe is needed to run plug-ins silently if `clay*.exe` is run from shortcut
+    install_data('pyclay_win.interp',
+      install_dir: clayplugindir / 'interpreters',
     )
   elif platform_osx
     # python* is needed to run plug-ins with right build-time interpreter when non-relocatable
@@ -51,9 +51,9 @@ if (platform_windows or platform_osx) and not meson.is_cross_build() and python.
     endif
   endif
 
-  configure_file(input : 'pygimp.interp.in',
-                 output: 'pygimp.interp',
+  configure_file(input : 'pyclay.interp.in',
+                 output: 'pyclay.interp',
                  configuration: python_config,
                  install: true,
-                 install_dir: gimpplugindir / 'interpreters')
+                 install_dir: clayplugindir / 'interpreters')
 endif

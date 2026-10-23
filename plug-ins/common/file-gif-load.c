@@ -1,4 +1,4 @@
-/* GIF loading file filter for GIMP 2.x
+/* GIF loading file filter for Clay 2.x
  * +-------------------------------------------------------------------+
  * |  Copyright Adam D. Moss, Peter Mattis, Spencer Kimball            |
  * +-------------------------------------------------------------------+
@@ -30,7 +30,7 @@
  *     Also, fix a stupid old bug when clearing the code table between
  *     subimages.  (Enables us to deal better with errors when the stream is
  *     corrupted pretty early in a subimage.) [adam]
- *     Minor-version-bump to distinguish between gimp1.2/1.4 branches.
+ *     Minor-version-bump to distinguish between clay1.2/1.4 branches.
  *
  * 2000/03/31
  * 1.00.03 - Just mildly more useful comments/messages concerning frame
@@ -71,9 +71,9 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC           "file-gif-load"
@@ -91,12 +91,12 @@ typedef struct _GifClass GifClass;
 
 struct _Gif
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GifClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -105,46 +105,46 @@ struct _GifClass
 
 GType                   gif_get_type         (void);
 
-static GList          * gif_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * gif_create_procedure (GimpPlugIn            *plug_in,
+static GList          * gif_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * gif_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * gif_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * gif_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * gif_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * gif_load_thumb       (ClayProcedure         *procedure,
                                               GFile                 *file,
                                               gint                   size,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               gboolean               thumbnail,
                                               gboolean               is_jeff_image,
                                               GError               **error);
 
 
-G_DEFINE_TYPE (Gif, gif, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Gif, gif, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIF_TYPE)
+CLAY_MAIN (GIF_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static guchar        used_cmap[3][256];
 static guint         highest_used_index;
 static gboolean      promote_to_rgb   = FALSE;
-static guchar        gimp_cmap[768];
-static GimpParasite *comment_parasite = NULL;
+static guchar        clay_cmap[768];
+static ClayParasite *comment_parasite = NULL;
 
 
 static void
 gif_class_init (GifClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = gif_query_procedures;
   plug_in_class->create_procedure = gif_create_procedure;
@@ -157,7 +157,7 @@ gif_init (Gif *gif)
 }
 
 static GList *
-gif_query_procedures (GimpPlugIn *plug_in)
+gif_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -169,94 +169,94 @@ gif_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-gif_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+gif_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            gif_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("GIF image"));
+      clay_procedure_set_menu_label (procedure, _("GIF image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files of Compuserve GIF "
                                         "file format", NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball, Peter Mattis, "
                                       "Adam Moss, David Koblas",
                                       "Spencer Kimball, Peter Mattis, "
                                       "Adam Moss, David Koblas",
                                       "1995-2006");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/gif");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "gif");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,GIF8");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 gif_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads only the first frame of a "
                                         "GIF image, to be "
                                         "used as a thumbnail",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Sven Neumann",
                                       "Sven Neumann",
                                       "2006");
     }
   else if (! strcmp (name, LOAD_JIF_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 gif_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads only the first frame of a "
                                         "Jeff's Image Format image, to be "
                                         "used as a thumbnail",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alx Sa",
                                       "Alx Sa",
                                       "2025");
     }
   else if (! strcmp (name, LOAD_JIF_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            gif_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Jeff's Image Format"));
+      clay_procedure_set_menu_label (procedure, _("Jeff's Image Format"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files of Jeff's Image Format "
                                         "file format", NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alx Sa",
                                       "Alx Sa",
                                       "2025");
 
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,JIF99a");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_JIF_THUMB_PROC);
     }
 
@@ -264,30 +264,30 @@ gif_create_procedure (GimpPlugIn  *plug_in,
 }
 
 
-static GimpValueArray *
-gif_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+gif_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   gboolean        is_jeff = FALSE;
   GError         *error   = NULL;
 
   gegl_init (NULL, NULL);
 
   /* Unlikely, but check if we're loading a Jeff Image Format image */
-  is_jeff = (! strcmp (gimp_procedure_get_name (procedure), LOAD_JIF_PROC));
+  is_jeff = (! strcmp (clay_procedure_get_name (procedure), LOAD_JIF_PROC));
 
   image = load_image (file, FALSE, is_jeff, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   /* The GIF format only tells you how many bits per pixel are in the
@@ -297,7 +297,7 @@ gif_load (GimpProcedure         *procedure,
    *  without intermediate indexed->RGB->indexed pumps up the number
    *  of bits used, as we add an index each time for the transparent
    *  color.  Ouch.  We either do some heavier analysis at save-time,
-   *  or trim down the number of GIMP colors at load-time.  We do the
+   *  or trim down the number of Clay colors at load-time.  We do the
    *  latter for now.
    */
 #ifdef GIFDEBUG
@@ -305,55 +305,55 @@ gif_load (GimpProcedure         *procedure,
 #endif
 
   if (! promote_to_rgb)
-    gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"),
-                               gimp_cmap, highest_used_index * 3);
+    clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"),
+                               clay_cmap, highest_used_index * 3);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  *flags = GIMP_METADATA_LOAD_ALL;
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  *flags = CLAY_METADATA_LOAD_ALL;
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gif_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+gif_load_thumb (ClayProcedure       *procedure,
                 GFile               *file,
                 gint                 size,
-                GimpProcedureConfig *config,
+                ClayProcedureConfig *config,
                 gpointer             run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   gboolean        is_jeff = FALSE;
   GError         *error   = NULL;
 
   gegl_init (NULL, NULL);
 
   /* Unlikely, but check if we're loading a Jeff Image Format image */
-  is_jeff = (! strcmp (gimp_procedure_get_name (procedure), LOAD_JIF_THUMB_PROC));
+  is_jeff = (! strcmp (clay_procedure_get_name (procedure), LOAD_JIF_THUMB_PROC));
 
   image = load_image (file, TRUE, is_jeff, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   if (! promote_to_rgb)
-    gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), gimp_cmap, highest_used_index * 3);
+    clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), clay_cmap, highest_used_index * 3);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, gimp_image_get_width  (image));
-  GIMP_VALUES_SET_INT   (return_vals, 3, gimp_image_get_height (image));
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, clay_image_get_width  (image));
+  CLAY_VALUES_SET_INT   (return_vals, 3, clay_image_get_height (image));
 
-  gimp_value_array_truncate (return_vals, 4);
+  clay_value_array_truncate (return_vals, 4);
 
   return return_vals;
 }
@@ -408,7 +408,7 @@ static struct
 } Gif89 = { -1, -1, -1, 0, -1 };
 
 static void     read_error     (const gchar *error_type,
-                                GimpImage   *image,
+                                ClayImage   *image,
                                 GError     **error);
 static gboolean ReadColorMap   (FILE        *fd,
                                 gint         number,
@@ -438,7 +438,7 @@ static gboolean ReadImage      (FILE        *fd,
                                 guint        screenwidth,
                                 guint        screenheight,
                                 gboolean     is_jeff_image,
-                                GimpImage  **image,
+                                ClayImage  **image,
                                 GError     **error);
 
 static gboolean ReadJeffsImage (FILE        *fd,
@@ -447,10 +447,10 @@ static gboolean ReadJeffsImage (FILE        *fd,
                                 gint         len,
                                 gint         height,
                                 gboolean     alpha_frame,
-                                GimpImage  **image,
+                                ClayImage  **image,
                                 GError     **error);
 
-static GimpImage *
+static ClayImage *
 load_image (GFile     *file,
             gboolean   thumbnail,
             gboolean   is_jeff_image,
@@ -464,12 +464,12 @@ load_image (GFile     *file,
   gboolean   useGlobalColormap;
   gint       bitPixel;
   gint       imageCount     = 0;
-  GimpImage *image          = NULL;
+  ClayImage *image          = NULL;
   gboolean   status;
   gboolean   saved_parasite = FALSE;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fd = g_fopen (g_file_peek_path (file), "rb");
 
@@ -477,7 +477,7 @@ load_image (GFile     *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -492,7 +492,7 @@ load_image (GFile     *file,
     {
       if (strncmp ((gchar *) buf, "GIF", 3) != 0)
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("This is not a GIF file: incorrect magic code"));
           fclose (fd);
           return NULL;
@@ -501,7 +501,7 @@ load_image (GFile     *file,
       if ((strncmp ((gchar *) buf + 3, "87a", 3) != 0) &&
           (strncmp ((gchar *) buf + 3, "89a", 3) != 0))
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("Incorrect GIF version: not '87a' or '89a'"));
           fclose (fd);
           return NULL;
@@ -511,7 +511,7 @@ load_image (GFile     *file,
     {
       if (strncmp ((gchar *) buf, "JIF99a", 6) != 0)
        {
-         g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+         g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                       _("This is not a Jeff's Image Format file: "
                         "incorrect magic code"));
          fclose (fd);
@@ -649,21 +649,21 @@ load_image (GFile     *file,
               g_message (_("Non-square pixels. Image might look squashed if "
                            "Dot for Dot mode is enabled."));
 
-              gimp_image_get_resolution (image, &image_xres, &image_yres);
+              clay_image_get_resolution (image, &image_xres, &image_yres);
               if (ratio < 1)
                 image_xres = image_yres * (1 / ratio);
               else
                 image_yres = image_xres * ratio;
-              gimp_image_set_resolution (image, image_xres, image_yres);
+              clay_image_set_resolution (image, image_xres, image_yres);
             }
         }
 
       if (comment_parasite != NULL)
         {
           if (! thumbnail)
-            gimp_image_attach_parasite (image, comment_parasite);
+            clay_image_attach_parasite (image, comment_parasite);
 
-          gimp_parasite_free (comment_parasite);
+          clay_parasite_free (comment_parasite);
           comment_parasite = NULL;
         }
 
@@ -675,18 +675,18 @@ load_image (GFile     *file,
        * we know to export as an animation on overwrite */
       if (Gif89.num_loops > -1 && ! saved_parasite)
         {
-          GimpParasite *parasite;
+          ClayParasite *parasite;
           gchar        *str;
 
           str = g_strdup_printf ("%d", Gif89.num_loops);
-          parasite = gimp_parasite_new ("gif/animated",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("gif/animated",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (str) + 1,
                                         (gpointer) str);
           g_free (str);
 
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
           saved_parasite = TRUE;
         }
     }
@@ -697,11 +697,11 @@ load_image (GFile     *file,
 }
 
 static void
-read_error (const gchar *error_type, GimpImage *image, GError **error)
+read_error (const gchar *error_type, ClayImage *image, GError **error)
 {
   if (! image)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Error reading %s. %s"),
                    error_type, _("Image may be corrupt!"));
     }
@@ -814,10 +814,10 @@ DoExtension (FILE *fd,
             continue;
 
           if (comment_parasite)
-            gimp_parasite_free (comment_parasite);
+            clay_parasite_free (comment_parasite);
 
-          comment_parasite = gimp_parasite_new ("gimp-comment",
-                                                GIMP_PARASITE_PERSISTENT,
+          comment_parasite = clay_parasite_new ("clay-comment",
+                                                CLAY_PARASITE_PERSISTENT,
                                                 strlen (comment) + 1, comment);
         }
       return TRUE;
@@ -1146,12 +1146,12 @@ ReadImage (FILE        *fd,
            guint        screenwidth,
            guint        screenheight,
            gboolean     is_jeff_image,
-           GimpImage  **image,
+           ClayImage  **image,
            GError     **error)
 {
   static gint   frame_number = 1;
 
-  GimpLayer    *layer;
+  ClayLayer    *layer;
   GeglBuffer   *buffer;
   guchar       *dest, *temp;
   guchar        c;
@@ -1170,7 +1170,7 @@ ReadImage (FILE        *fd,
     {
       if (frame_number == 1)
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("%s. %s"),
                        _("Invalid frame dimensions"), _("Image may be corrupt!"));
         }
@@ -1212,16 +1212,16 @@ ReadImage (FILE        *fd,
           screenheight = height;
         }
 
-      *image = gimp_image_new (screenwidth, screenheight, GIMP_INDEXED);
+      *image = clay_image_new (screenwidth, screenheight, CLAY_INDEXED);
 
       for (i = 0, j = 0; i < ncols; i++)
         {
-          used_cmap[0][i] = gimp_cmap[j++] = cmap[0][i];
-          used_cmap[1][i] = gimp_cmap[j++] = cmap[1][i];
-          used_cmap[2][i] = gimp_cmap[j++] = cmap[2][i];
+          used_cmap[0][i] = clay_cmap[j++] = cmap[0][i];
+          used_cmap[1][i] = clay_cmap[j++] = cmap[1][i];
+          used_cmap[2][i] = clay_cmap[j++] = cmap[2][i];
         }
 
-      gimp_palette_set_colormap (gimp_image_get_palette (*image), babl_format ("R'G'B' u8"), gimp_cmap, ncols * 3);
+      clay_palette_set_colormap (clay_image_get_palette (*image), babl_format ("R'G'B' u8"), clay_cmap, ncols * 3);
 
       if (Gif89.delayTime < 0)
         framename = g_strdup (_("Background"));
@@ -1233,19 +1233,19 @@ ReadImage (FILE        *fd,
 
       if (Gif89.transparent == -1)
         {
-          layer = gimp_layer_new (*image, framename,
+          layer = clay_layer_new (*image, framename,
                                   len, height,
-                                  GIMP_INDEXED_IMAGE,
+                                  CLAY_INDEXED_IMAGE,
                                   100,
-                                  gimp_image_get_default_new_layer_mode (*image));
+                                  clay_image_get_default_new_layer_mode (*image));
         }
       else
         {
-          layer = gimp_layer_new (*image, framename,
+          layer = clay_layer_new (*image, framename,
                                   len, height,
-                                  GIMP_INDEXEDA_IMAGE,
+                                  CLAY_INDEXEDA_IMAGE,
                                   100,
-                                  gimp_image_get_default_new_layer_mode (*image));
+                                  clay_image_get_default_new_layer_mode (*image));
           alpha_frame = TRUE;
         }
 
@@ -1253,10 +1253,10 @@ ReadImage (FILE        *fd,
     }
   else /* NOT FIRST FRAME */
     {
-      gimp_progress_set_text_printf (_("Opening '%s' (frame %d)"),
-                                     gimp_file_get_utf8_name (file),
+      clay_progress_set_text_printf (_("Opening '%s' (frame %d)"),
+                                     clay_file_get_utf8_name (file),
                                      frame_number);
-      gimp_progress_pulse ();
+      clay_progress_pulse ();
 
        /* If the colormap is now different, we have to promote to RGB! */
       if (! promote_to_rgb)
@@ -1274,7 +1274,7 @@ ReadImage (FILE        *fd,
 #ifdef GIFDEBUG
                   g_print ("GIF: Promoting image to RGB...\n");
 #endif
-                  gimp_image_convert_rgb (*image);
+                  clay_image_convert_rgb (*image);
 
                   break;
                 }
@@ -1302,7 +1302,7 @@ ReadImage (FILE        *fd,
           g_free (framename_ptr);
           break;
         case 0x03:  /* Rarely-used, and unhandled by many
-                       loaders/players (including GIMP: we treat as
+                       loaders/players (including Clay: we treat as
                        'combine' mode). */
           framename_ptr = framename;
           framename = g_strconcat (framename, " (combine) (!)", NULL);
@@ -1327,20 +1327,20 @@ ReadImage (FILE        *fd,
         }
       previous_disposal = Gif89.disposal;
 
-      layer = gimp_layer_new (*image, framename,
+      layer = clay_layer_new (*image, framename,
                               len, height,
                               promote_to_rgb ?
-                              GIMP_RGBA_IMAGE : GIMP_INDEXEDA_IMAGE,
+                              CLAY_RGBA_IMAGE : CLAY_INDEXEDA_IMAGE,
                               100,
-                              gimp_image_get_default_new_layer_mode (*image));
+                              clay_image_get_default_new_layer_mode (*image));
       alpha_frame = TRUE;
       g_free (framename);
     }
 
   frame_number++;
 
-  gimp_image_insert_layer (*image, layer, NULL, 0);
-  gimp_item_transform_translate (GIMP_ITEM (layer), (gint) leftpos, (gint) toppos);
+  clay_image_insert_layer (*image, layer, NULL, 0);
+  clay_item_transform_translate (CLAY_ITEM (layer), (gint) leftpos, (gint) toppos);
 
   cur_progress = 0;
   max_progress = height;
@@ -1348,8 +1348,8 @@ ReadImage (FILE        *fd,
   if (len > (G_MAXSIZE / height / (alpha_frame ? (promote_to_rgb ? 4 : 2) : 1)))
     {
       g_message ("'%s' has a larger image size than Clay can handle.",
-                 gimp_file_get_utf8_name (file));
-      gimp_image_delete (*image);
+                 clay_file_get_utf8_name (file));
+      clay_image_delete (*image);
       *image = NULL;
       return FALSE;
     }
@@ -1363,11 +1363,11 @@ ReadImage (FILE        *fd,
     {
       /* I don't see how one would easily construct a GIF in which
          this could happen, but it's a mad mad world. */
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Can't handle non-alpha RGB frames.\n"
                      "Please file a bug report at "
-                     "https://gitlab.gnome.org/GNOME/gimp/issues"));
-      gimp_image_delete (*image);
+                     "https://github.com/KurtStevenK/clay/issues"));
+      clay_image_delete (*image);
       *image = NULL;
       return FALSE;
     }
@@ -1452,7 +1452,7 @@ ReadImage (FILE        *fd,
                 {
                   cur_progress++;
                   if ((cur_progress % 16) == 0)
-                    gimp_progress_update ((gdouble) cur_progress /
+                    clay_progress_update ((gdouble) cur_progress /
                                           (gdouble) max_progress);
                 }
             }
@@ -1472,7 +1472,7 @@ ReadImage (FILE        *fd,
    */
 
  fini:
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, len, height), 0,
                    NULL, dest, GEGL_AUTO_ROWSTRIDE);
@@ -1481,7 +1481,7 @@ ReadImage (FILE        *fd,
 
   g_object_unref (buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   {
     gboolean first = TRUE;
@@ -1510,7 +1510,7 @@ ReadJeffsImage (FILE       *fd,
                 gint        len,
                 gint        height,
                 gboolean    alpha_frame,
-                GimpImage **image,
+                ClayImage **image,
                 GError    **error)
 {
   guchar    block_size = 255;

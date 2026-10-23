@@ -25,21 +25,21 @@
 #include <gegl.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpthumb/gimpthumb.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaythumb/claythumb.h"
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimpimagefile.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/clayimagefile.h"
 
-#include "plug-in/gimppluginmanager-file.h"
+#include "plug-in/claypluginmanager-file.h"
 
 #include "file-utils.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 static gboolean
@@ -89,7 +89,7 @@ file_utils_filename_is_uri (const gchar  *filename,
 }
 
 GFile *
-file_utils_filename_to_file (Gimp         *gimp,
+file_utils_filename_to_file (Clay         *clay,
                              const gchar  *filename,
                              GError      **error)
 {
@@ -97,7 +97,7 @@ file_utils_filename_to_file (Gimp         *gimp,
   gchar  *absolute;
   GError *temp_error = NULL;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
   g_return_val_if_fail (filename != NULL, NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
@@ -116,8 +116,8 @@ file_utils_filename_to_file (Gimp         *gimp,
     }
 
   /*  check for prefixes like http or ftp  */
-  if (gimp_plug_in_manager_file_procedure_find_by_prefix (gimp->plug_in_manager,
-                                                          GIMP_FILE_PROCEDURE_GROUP_OPEN,
+  if (clay_plug_in_manager_file_procedure_find_by_prefix (clay->plug_in_manager,
+                                                          CLAY_FILE_PROCEDURE_GROUP_OPEN,
                                                           file))
     {
       if (g_utf8_validate (filename, -1, NULL))
@@ -170,7 +170,7 @@ file_utils_filename_to_file (Gimp         *gimp,
 GdkPixbuf *
 file_utils_load_thumbnail (GFile *file)
 {
-  GimpThumbnail *thumbnail = NULL;
+  ClayThumbnail *thumbnail = NULL;
   GdkPixbuf     *pixbuf    = NULL;
   gchar         *uri;
 
@@ -178,13 +178,13 @@ file_utils_load_thumbnail (GFile *file)
 
   uri = g_file_get_uri (file);
 
-  thumbnail = gimp_thumbnail_new ();
-  gimp_thumbnail_set_uri (thumbnail, uri);
+  thumbnail = clay_thumbnail_new ();
+  clay_thumbnail_set_uri (thumbnail, uri);
 
   g_free (uri);
 
-  pixbuf = gimp_thumbnail_load_thumb (thumbnail,
-                                      (GimpThumbSize) GIMP_THUMBNAIL_SIZE_NORMAL,
+  pixbuf = clay_thumbnail_load_thumb (thumbnail,
+                                      (ClayThumbSize) CLAY_THUMBNAIL_SIZE_NORMAL,
                                       NULL);
 
   if (pixbuf)
@@ -200,7 +200,7 @@ file_utils_load_thumbnail (GFile *file)
           gdk_pixbuf_composite_color (pixbuf, tmp,
                                       0, 0, width, height, 0, 0, 1.0, 1.0,
                                       GDK_INTERP_NEAREST, 255,
-                                      0, 0, GIMP_CHECK_SIZE_SM,
+                                      0, 0, CLAY_CHECK_SIZE_SM,
                                       0x66666666, 0x99999999);
 
           g_object_unref (pixbuf);
@@ -212,20 +212,20 @@ file_utils_load_thumbnail (GFile *file)
 }
 
 gboolean
-file_utils_save_thumbnail (GimpImage *image,
+file_utils_save_thumbnail (ClayImage *image,
                            GFile     *file)
 {
   GFile    *image_file;
   gboolean  success = FALSE;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), FALSE);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
   g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
-  image_file = gimp_image_get_file (image);
+  image_file = clay_image_get_file (image);
   if (! image_file)
-    image_file = gimp_image_get_exported_file (image);
+    image_file = clay_image_get_exported_file (image);
   if (! image_file)
-    image_file = gimp_image_get_imported_file (image);
+    image_file = clay_image_get_imported_file (image);
 
   if (image_file)
     {
@@ -234,10 +234,10 @@ file_utils_save_thumbnail (GimpImage *image,
 
       if (uri && image_uri && ! strcmp (uri, image_uri))
         {
-          GimpImagefile *imagefile;
+          ClayImagefile *imagefile;
 
-          imagefile = gimp_imagefile_new (image->gimp, file);
-          success = gimp_imagefile_save_thumbnail (imagefile, NULL, image,
+          imagefile = clay_imagefile_new (image->clay, file);
+          success = clay_imagefile_save_thumbnail (imagefile, NULL, image,
                                                    NULL);
           g_object_unref (imagefile);
         }

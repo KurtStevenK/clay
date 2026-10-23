@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,18 +25,18 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "ico.h"
 #include "ani.h"
 #include "ani-load.h"
 #include "ico-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /* Ported from James Huang's ani.c code, under the GPL license, version 3
  * or any later version of the license */
-GimpImage *
+ClayImage *
 ani_load_image (GFile    *file,
                 gboolean  load_thumb,
                 gint     *width,
@@ -44,8 +44,8 @@ ani_load_image (GFile    *file,
                 GError  **error)
 {
   FILE         *fp;
-  GimpImage    *image = NULL;
-  GimpParasite *parasite;
+  ClayImage    *image = NULL;
+  ClayParasite *parasite;
   gchar         id[4];
   guint32       size;
   guint8        padding;
@@ -56,8 +56,8 @@ ani_load_image (GFile    *file,
   gchar        *iart  = NULL;
   gchar        *str;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -65,7 +65,7 @@ ani_load_image (GFile    *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -218,31 +218,31 @@ ani_load_image (GFile    *file,
                 }
               else
                 {
-                  GimpImage    *temp_image = NULL;
-                  GimpLayer   **layers;
-                  GimpLayer    *new_layer;
+                  ClayImage    *temp_image = NULL;
+                  ClayLayer   **layers;
+                  ClayLayer    *new_layer;
 
                   temp_image = ico_load_image (file, &file_offset, frame + 1,
                                                error);
-                  layers = gimp_image_get_layers (temp_image);
+                  layers = clay_image_get_layers (temp_image);
                   if (layers)
                     {
                       for (gint i = 0; layers[i]; i++)
                         {
-                          new_layer = gimp_layer_new_from_drawable (GIMP_DRAWABLE (layers[i]),
+                          new_layer = clay_layer_new_from_drawable (CLAY_DRAWABLE (layers[i]),
                                                                     image);
-                          gimp_image_insert_layer (image, new_layer, NULL, frame);
+                          clay_image_insert_layer (image, new_layer, NULL, frame);
                           frame++;
                         }
                       g_free (layers);
                     }
-                  gimp_image_delete (temp_image);
+                  clay_image_delete (temp_image);
                 }
 
               /* Update position after reading icon data */
               fseek (fp, file_offset, SEEK_SET);
               if (header.frames > 0)
-                gimp_progress_update ((gdouble) frame /
+                clay_progress_update ((gdouble) frame /
                                       (gdouble) header.frames);
             }
         }
@@ -251,39 +251,39 @@ ani_load_image (GFile    *file,
 
   /* Saving header metadata */
   str = g_strdup_printf ("%d", header.jif_rate);
-  parasite = gimp_parasite_new ("ani-header",
-                                GIMP_PARASITE_PERSISTENT,
+  parasite = clay_parasite_new ("ani-header",
+                                CLAY_PARASITE_PERSISTENT,
                                 strlen (str) + 1, (gpointer) str);
   g_free (str);
-  gimp_image_attach_parasite (image, parasite);
-  gimp_parasite_free (parasite);
+  clay_image_attach_parasite (image, parasite);
+  clay_parasite_free (parasite);
 
   /* Saving INFO block */
   if (inam && strlen (inam) > 0)
     {
       str = g_strdup_printf ("%s", inam);
-      parasite = gimp_parasite_new ("ani-info-inam",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("ani-info-inam",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (str) + 1, (gpointer) str);
       g_free (str);
       g_free (inam);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
   if (iart && strlen (iart) > 0)
     {
       str = g_strdup_printf ("%s", iart);
-      parasite = gimp_parasite_new ("ani-info-iart",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("ani-info-iart",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (str) + 1, (gpointer) str);
       g_free (str);
       g_free (iart);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }

@@ -1,8 +1,8 @@
-# GIMP templates
+# Clay templates
 # 
 # A collection of image templates.
 
-(GimpTemplate "A0 (300 ppi)"
+(ClayTemplate "A0 (300 ppi)"
     (width 9933)
     (height 14043)
     (unit millimeters)
@@ -11,7 +11,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A1 (300 ppi)"
+(ClayTemplate "A1 (300 ppi)"
     (width 7016)
     (height 9933)
     (unit millimeters)
@@ -20,7 +20,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A2 (300 ppi)"
+(ClayTemplate "A2 (300 ppi)"
     (width 4960)
     (height 7016)
     (unit millimeters)
@@ -29,7 +29,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A3 (300 ppi)"
+(ClayTemplate "A3 (300 ppi)"
     (width 3508)
     (height 4960)
     (unit millimeters)
@@ -38,7 +38,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A4 (300 ppi)"
+(ClayTemplate "A4 (300 ppi)"
     (width 2480)
     (height 3508)
     (unit millimeters)
@@ -47,7 +47,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A5 (300 ppi)"
+(ClayTemplate "A5 (300 ppi)"
     (width 1748)
     (height 2480)
     (unit millimeters)
@@ -56,7 +56,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A6 (300 ppi)"
+(ClayTemplate "A6 (300 ppi)"
     (width 1240)
     (height 1748)
     (unit millimeters)
@@ -65,7 +65,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "A7 (300 ppi)"
+(ClayTemplate "A7 (300 ppi)"
     (width 874)
     (height 1240)
     (unit millimeters)
@@ -74,7 +74,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "B4 (300 ppi)"
+(ClayTemplate "B4 (300 ppi)"
     (width 2953)
     (height 4169)
     (unit millimeters)
@@ -83,7 +83,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "B5 (300 ppi)"
+(ClayTemplate "B5 (300 ppi)"
     (width 2079)
     (height 2953)
     (unit millimeters)
@@ -92,7 +92,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "B5-Japan (300 ppi)"
+(ClayTemplate "B5-Japan (300 ppi)"
     (width 2150)
     (height 3035)
     (unit millimeters)
@@ -101,7 +101,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "US Letter (300 ppi)"
+(ClayTemplate "US Letter (300 ppi)"
     (width 2550)
     (height 3300)
     (unit inches)
@@ -110,7 +110,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "US Legal (300 ppi)"
+(ClayTemplate "US Legal (300 ppi)"
     (width 2550)
     (height 4200)
     (unit inches)
@@ -119,8 +119,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "88.9×50.8 US Business Card"
-    (icon-name "gimp-business-card")
+(ClayTemplate "88.9×50.8 US Business Card"
+    (icon-name "clay-business-card")
     (width 1050)
     (height 600)
     (unit millimeters)
@@ -129,8 +129,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "85×55 Western Europe Business Card"
-    (icon-name "gimp-business-card")
+(ClayTemplate "85×55 Western Europe Business Card"
+    (icon-name "clay-business-card")
     (width 1004)
     (height 650)
     (unit millimeters)
@@ -139,8 +139,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "90×50 Eastern Europe Business Card"
-    (icon-name "gimp-business-card")
+(ClayTemplate "90×50 Eastern Europe Business Card"
+    (icon-name "clay-business-card")
     (width 1063)
     (height 591)
     (unit millimeters)
@@ -149,8 +149,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "90×55 Business Card (AU, IN etc.)"
-    (icon-name "gimp-business-card")
+(ClayTemplate "90×55 Business Card (AU, IN etc.)"
+    (icon-name "clay-business-card")
     (width 1063)
     (height 650)
     (unit millimeters)
@@ -159,8 +159,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Toilet paper (US, 300 ppi)"
-    (icon-name "gimp-toilet-paper")
+(ClayTemplate "Toilet paper (US, 300 ppi)"
+    (icon-name "clay-toilet-paper")
     (width 1350)
     (height 1350)
     (unit inches)
@@ -169,7 +169,7 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "CD cover (300 ppi)"
+(ClayTemplate "CD cover (300 ppi)"
     (icon-name "media-optical")
     (width 1417)
     (height 1417)
@@ -179,8 +179,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Web profile / avatar / icon 512×512"
-    (icon-name "gimp-web")
+(ClayTemplate "Web profile / avatar / icon 512×512"
+    (icon-name "clay-web")
     (width 512)
     (height 512)
     (unit pixels)
@@ -189,8 +189,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Web banner leaderboard 728×90"
-    (icon-name "gimp-web")
+(ClayTemplate "Web banner leaderboard 728×90"
+    (icon-name "clay-web")
     (width 728)
     (height 90)
     (unit pixels)
@@ -199,8 +199,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Web banner half page 300×600"
-    (icon-name "gimp-web")
+(ClayTemplate "Web banner half page 300×600"
+    (icon-name "clay-web")
     (width 300)
     (height 600)
     (unit pixels)
@@ -209,8 +209,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Web banner medium rectangle 300×250"
-    (icon-name "gimp-web")
+(ClayTemplate "Web banner medium rectangle 300×250"
+    (icon-name "clay-web")
     (width 300)
     (height 250)
     (unit pixels)
@@ -219,8 +219,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Web banner wide skyscraper 160×600"
-    (icon-name "gimp-web")
+(ClayTemplate "Web banner wide skyscraper 160×600"
+    (icon-name "clay-web")
     (width 160)
     (height 600)
     (unit pixels)
@@ -229,8 +229,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Web banner mobile leaderboard 320×50"
-    (icon-name "gimp-web")
+(ClayTemplate "Web banner mobile leaderboard 320×50"
+    (icon-name "clay-web")
     (width 320)
     (height 50)
     (unit pixels)
@@ -239,8 +239,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 4:3 - 1024×768 (XGA)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 4:3 - 1024×768 (XGA)"
+    (icon-name "clay-display")
     (width 1024)
     (height 768)
     (unit pixels)
@@ -249,8 +249,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 4:3 - 1152×864 (XGA+)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 4:3 - 1152×864 (XGA+)"
+    (icon-name "clay-display")
     (width 1152)
     (height 864)
     (unit pixels)
@@ -259,8 +259,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 4:3 - 1600×1200 (UXGA)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 4:3 - 1600×1200 (UXGA)"
+    (icon-name "clay-display")
     (width 1600)
     (height 1200)
     (unit pixels)
@@ -269,8 +269,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 4:3 - 2048×1536 (QXGA)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 4:3 - 2048×1536 (QXGA)"
+    (icon-name "clay-display")
     (width 2048)
     (height 1536)
     (unit pixels)
@@ -279,8 +279,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:10 - 1680×1050 (WSXGA+)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 16:10 - 1680×1050 (WSXGA+)"
+    (icon-name "clay-display")
     (width 1680)
     (height 1050)
     (unit pixels)
@@ -289,8 +289,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:10 - 1920×1200 (WUXGA)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 16:10 - 1920×1200 (WUXGA)"
+    (icon-name "clay-display")
     (width 1920)
     (height 1200)
     (unit pixels)
@@ -299,8 +299,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:10 - 2560×1600 (WQXGA)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 16:10 - 2560×1600 (WQXGA)"
+    (icon-name "clay-display")
     (width 2560)
     (height 1600)
     (unit pixels)
@@ -309,8 +309,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:10 - 3840×2400 (WQUXGA)"
-    (icon-name "gimp-display")
+(ClayTemplate "Display - 16:10 - 3840×2400 (WQUXGA)"
+    (icon-name "clay-display")
     (width 3840)
     (height 2400)
     (unit pixels)
@@ -319,8 +319,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:9 - 1280×720 (HD 720p)"
-    (icon-name "gimp-video")
+(ClayTemplate "Display - 16:9 - 1280×720 (HD 720p)"
+    (icon-name "clay-video")
     (width 1280)
     (height 720)
     (unit pixels)
@@ -329,8 +329,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:9 - 1920×1080 (Full HD 1080p)"
-    (icon-name "gimp-video")
+(ClayTemplate "Display - 16:9 - 1920×1080 (Full HD 1080p)"
+    (icon-name "clay-video")
     (width 1920)
     (height 1080)
     (unit pixels)
@@ -339,8 +339,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:9 - 3840×2160 (4K UHD)"
-    (icon-name "gimp-video")
+(ClayTemplate "Display - 16:9 - 3840×2160 (4K UHD)"
+    (icon-name "clay-video")
     (width 3840)
     (height 2160)
     (unit pixels)
@@ -349,8 +349,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 16:9 - 7680×4320 (8K UHD)"
-    (icon-name "gimp-video")
+(ClayTemplate "Display - 16:9 - 7680×4320 (8K UHD)"
+    (icon-name "clay-video")
     (width 7680)
     (height 4320)
     (unit pixels)
@@ -359,8 +359,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 17:9 - 2048×1080 (DCI 2K)"
-    (icon-name "gimp-video")
+(ClayTemplate "Display - 17:9 - 2048×1080 (DCI 2K)"
+    (icon-name "clay-video")
     (width 2048)
     (height 1080)
     (unit pixels)
@@ -369,8 +369,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Display - 17:9 - 4096×2160 (DCI 4K)"
-    (icon-name "gimp-video")
+(ClayTemplate "Display - 17:9 - 4096×2160 (DCI 4K)"
+    (icon-name "clay-video")
     (width 4096)
     (height 2160)
     (unit pixels)
@@ -379,8 +379,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Phone - 18.5:9 - 1440×2960"
-    (icon-name "gimp-smartphone")
+(ClayTemplate "Phone - 18.5:9 - 1440×2960"
+    (icon-name "clay-smartphone")
     (width 1440)
     (height 2960)
     (unit pixels)
@@ -389,8 +389,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Phone - 19:9 - 1440×3040"
-    (icon-name "gimp-smartphone")
+(ClayTemplate "Phone - 19:9 - 1440×3040"
+    (icon-name "clay-smartphone")
     (width 1440)
     (height 3040)
     (unit pixels)
@@ -399,8 +399,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Phone - 19.5:9 - 1440×3120"
-    (icon-name "gimp-smartphone")
+(ClayTemplate "Phone - 19.5:9 - 1440×3120"
+    (icon-name "clay-smartphone")
     (width 1440)
     (height 3120)
     (unit pixels)
@@ -409,8 +409,8 @@
     (resolution-unit inches)
     (image-type rgb)
     (fill-type background))
-(GimpTemplate "Phone - 20:9 - 1440×3200"
-    (icon-name "gimp-smartphone")
+(ClayTemplate "Phone - 20:9 - 1440×3200"
+    (icon-name "clay-smartphone")
     (width 1440)
     (height 3200)
     (unit pixels)

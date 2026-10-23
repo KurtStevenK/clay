@@ -25,35 +25,35 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "file-icns.h"
 #include "file-icns-data.h"
 #include "file-icns-load.h"
 #include "file-icns-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 GtkWidget *        icns_dialog_new       (IcnsSaveInfo         *info,
-                                          GimpImage            *image,
-                                          GimpProcedure        *procedure,
-                                          GimpProcedureConfig  *config);
+                                          ClayImage            *image,
+                                          ClayProcedure        *procedure,
+                                          ClayProcedureConfig  *config);
 
 static gboolean    icns_save_dialog      (IcnsSaveInfo         *info,
-                                          GimpImage            *image,
-                                          GimpProcedure        *procedure,
-                                          GimpProcedureConfig  *config);
+                                          ClayImage            *image,
+                                          ClayProcedure        *procedure,
+                                          ClayProcedureConfig  *config);
 
 void               icns_dialog_add_icon  (GtkWidget            *dialog,
-                                          GimpDrawable         *layer,
+                                          ClayDrawable         *layer,
                                           gint                  layer_num,
                                           gint                  duplicates[]);
 
-static GtkWidget * icns_preview_new      (GimpDrawable         *layer);
+static GtkWidget * icns_preview_new      (ClayDrawable         *layer);
 
 static GtkWidget * icns_create_icon_item (GtkWidget            *icon_preview,
-                                          GimpDrawable         *layer,
+                                          ClayDrawable         *layer,
                                           gint                  layer_num,
                                           IcnsSaveInfo         *info,
                                           gint                  duplicates[]);
@@ -65,9 +65,9 @@ static gboolean    icns_check_dimensions (gint                  width,
 static gboolean    icns_check_compat     (GtkWidget            *dialog,
                                           IcnsSaveInfo         *info);
 
-GimpPDBStatusType  icns_export_image     (GFile                *file,
+ClayPDBStatusType  icns_export_image     (GFile                *file,
                                           IcnsSaveInfo         *info,
-                                          GimpImage            *image,
+                                          ClayImage            *image,
                                           gboolean              include_color_profile,
                                           GError              **error);
 
@@ -81,7 +81,7 @@ static void        icns_save_info_free   (IcnsSaveInfo *info);
 /* Referenced from plug-ins/file-ico/ico-dialog.c */
 void
 icns_dialog_add_icon (GtkWidget    *dialog,
-                      GimpDrawable *layer,
+                      ClayDrawable *layer,
                       gint          layer_num,
                       gint          duplicates[])
 {
@@ -102,23 +102,23 @@ icns_dialog_add_icon (GtkWidget    *dialog,
 
   /* Let's make the vbox_item accessible through the layer ID */
   g_snprintf (key, sizeof (key), "layer_%i_hbox",
-              gimp_item_get_id (GIMP_ITEM (layer)));
+              clay_item_get_id (CLAY_ITEM (layer)));
   g_object_set_data (G_OBJECT (dialog), key, vbox_item);
 
   icns_check_compat (dialog, info);
 }
 
 static GtkWidget *
-icns_preview_new (GimpDrawable *layer)
+icns_preview_new (ClayDrawable *layer)
 {
   GtkWidget *image;
   GdkPixbuf *pixbuf;
-  gint       width  = gimp_drawable_get_width (layer);
-  gint       height = gimp_drawable_get_height (layer);
+  gint       width  = clay_drawable_get_width (layer);
+  gint       height = clay_drawable_get_height (layer);
 
-  pixbuf = gimp_drawable_get_thumbnail (layer,
+  pixbuf = clay_drawable_get_thumbnail (layer,
                                         MIN (width, 128), MIN (height, 128),
-                                        GIMP_PIXBUF_SMALL_CHECKS);
+                                        CLAY_PIXBUF_SMALL_CHECKS);
   image = gtk_image_new_from_pixbuf (pixbuf);
 
   g_object_unref (pixbuf);
@@ -185,7 +185,7 @@ icns_check_dimensions (gint width,
 
 static GtkWidget *
 icns_create_icon_item (GtkWidget    *icon_preview,
-                       GimpDrawable *layer,
+                       ClayDrawable *layer,
                        gint          layer_num,
                        IcnsSaveInfo *info,
                        gint          duplicates[])
@@ -196,8 +196,8 @@ icns_create_icon_item (GtkWidget    *icon_preview,
   GtkWidget *frame;
   gchar     *frame_header;
   gint       match  = -1;
-  gint       width  = gimp_drawable_get_width (layer);
-  gint       height = gimp_drawable_get_height (layer);
+  gint       width  = clay_drawable_get_width (layer);
+  gint       height = clay_drawable_get_height (layer);
 
   vbox_item = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 
@@ -211,7 +211,7 @@ icns_create_icon_item (GtkWidget    *icon_preview,
 
   frame_header = g_strdup_printf ("%dx%d", width, height);
 
-  frame = gimp_frame_new (frame_header);
+  frame = clay_frame_new (frame_header);
   gtk_box_pack_start (GTK_BOX (vbox_item), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
   g_free (frame_header);
@@ -225,8 +225,8 @@ icns_create_icon_item (GtkWidget    *icon_preview,
 
   gtk_size_group_add_widget (size, icon_preview);
 
-  match = icns_find_type (gimp_drawable_get_width (layer),
-                          gimp_drawable_get_height (layer));
+  match = icns_find_type (clay_drawable_get_width (layer),
+                          clay_drawable_get_height (layer));
 
   if (! icns_check_dimensions (width, height) ||
       (match != -1 && duplicates[match] != 0))
@@ -271,8 +271,8 @@ icns_check_compat (GtkWidget    *dialog,
 
   for (iter = info->layers; iter; iter = iter->next)
     {
-      gint width  = gimp_drawable_get_width (iter->data);
-      gint height = gimp_drawable_get_height (iter->data);
+      gint width  = clay_drawable_get_width (iter->data);
+      gint height = clay_drawable_get_height (iter->data);
 
       warn = ! icns_check_dimensions (width, height);
       if (warn)
@@ -290,9 +290,9 @@ icns_check_compat (GtkWidget    *dialog,
 
 GtkWidget *
 icns_dialog_new (IcnsSaveInfo        *info,
-                 GimpImage           *image,
-                 GimpProcedure       *procedure,
-                 GimpProcedureConfig *config)
+                 ClayImage           *image,
+                 ClayProcedure       *procedure,
+                 ClayProcedureConfig *config)
 {
   GtkWidget     *dialog;
   GtkWidget     *main_vbox;
@@ -302,7 +302,7 @@ icns_dialog_new (IcnsSaveInfo        *info,
   GtkWidget     *flowbox;
   GtkWidget     *warning;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
                                              config, image);
 
   g_object_set_data (G_OBJECT (dialog), "save_info", info);
@@ -313,8 +313,8 @@ icns_dialog_new (IcnsSaveInfo        *info,
                       main_vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (main_vbox, TRUE);
 
-  warning = g_object_new (GIMP_TYPE_HINT_BOX,
-                          "icon-name", GIMP_ICON_DIALOG_WARNING,
+  warning = g_object_new (CLAY_TYPE_HINT_BOX,
+                          "icon-name", CLAY_ICON_DIALOG_WARNING,
                           "hint",
                           _("Valid ICNS icons sizes are:\n "
                             "16x12, 16x16, 18x18, 24x24, 32x32, 36x36, 48x48,\n"
@@ -324,7 +324,7 @@ icns_dialog_new (IcnsSaveInfo        *info,
   gtk_box_pack_end (GTK_BOX (main_vbox), warning, FALSE, FALSE, 12);
   /* Don't show warning by default */
 
-  frame = gimp_frame_new (_("Export Icons"));
+  frame = clay_frame_new (_("Export Icons"));
   gtk_box_pack_start (GTK_BOX (main_vbox), frame, TRUE, TRUE, 4);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -354,9 +354,9 @@ icns_dialog_new (IcnsSaveInfo        *info,
 
 static gboolean
 icns_save_dialog (IcnsSaveInfo        *info,
-                  GimpImage           *image,
-                  GimpProcedure       *procedure,
-                  GimpProcedureConfig *config)
+                  ClayImage           *image,
+                  ClayProcedure       *procedure,
+                  ClayProcedureConfig *config)
 {
   GtkWidget *dialog;
   GList     *iter;
@@ -366,7 +366,7 @@ icns_save_dialog (IcnsSaveInfo        *info,
   gint       ordered[12] =
     {12, 16, 18, 24, 32, 36, 48, 64, 128, 256, 512, 1024};
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   for (i = 0; i < ICNS_TYPE_NUM; i++)
     duplicates[i] = 0;
@@ -381,8 +381,8 @@ icns_save_dialog (IcnsSaveInfo        *info,
            iter = g_list_next (iter))
         {
           /* Put the icons in order in dialog */
-          gint width  = gimp_drawable_get_width (iter->data);
-          gint height = gimp_drawable_get_height (iter->data);
+          gint width  = clay_drawable_get_width (iter->data);
+          gint height = clay_drawable_get_height (iter->data);
 
           if (height != ordered[i] || ! icns_check_dimensions (width, height))
             continue;
@@ -396,8 +396,8 @@ icns_save_dialog (IcnsSaveInfo        *info,
        iter;
        iter = g_list_next (iter), i++)
     {
-      if (! icns_check_dimensions (gimp_drawable_get_width (iter->data),
-                                   gimp_drawable_get_height (iter->data)))
+      if (! icns_check_dimensions (clay_drawable_get_width (iter->data),
+                                   clay_drawable_get_height (iter->data)))
         icns_dialog_add_icon (dialog, iter->data, i, duplicates);
     }
 
@@ -410,17 +410,17 @@ icns_save_dialog (IcnsSaveInfo        *info,
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  response = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  response = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
   return response;
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 icns_export_image (GFile        *file,
                    IcnsSaveInfo *info,
-                   GimpImage    *image,
+                   ClayImage    *image,
                    gboolean      include_color_profile,
                    GError      **error)
 {
@@ -440,8 +440,8 @@ icns_export_image (GFile        *file,
       icns_save_info_free (info);
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return GIMP_PDB_EXECUTION_ERROR;
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Write Header */
@@ -454,8 +454,8 @@ icns_export_image (GFile        *file,
        iter = g_list_next (iter), i++)
     {
       gint match  = -1;
-      gint width  = gimp_drawable_get_width (iter->data);
-      gint height = gimp_drawable_get_height (iter->data);
+      gint width  = clay_drawable_get_width (iter->data);
+      gint height = clay_drawable_get_height (iter->data);
 
       /* Don't export icons with invalid dimensions */
       if (! icns_check_dimensions (width, height))
@@ -495,7 +495,7 @@ icns_export_image (GFile        *file,
               fwrite (iconTypes[compat_id].type, sizeof (gchar), 4, fp);
               temp_size = width * height * 4;
 
-              buffer = gimp_drawable_get_buffer (iter->data);
+              buffer = clay_drawable_get_buffer (iter->data);
               pixels = g_malloc (temp_size);
               alpha  = g_malloc (width * height);
 
@@ -520,7 +520,7 @@ icns_export_image (GFile        *file,
                                g_file_error_from_errno (errno),
                                _("Error writing icns: %s"),
                                g_strerror (errno));
-                  return GIMP_PDB_EXECUTION_ERROR;
+                  return CLAY_PDB_EXECUTION_ERROR;
                 }
 
               file_size += macos_size + 8;
@@ -538,7 +538,7 @@ icns_export_image (GFile        *file,
                                g_file_error_from_errno (errno),
                                _("Error writing icns: %s"),
                                g_strerror (errno));
-                  return GIMP_PDB_EXECUTION_ERROR;
+                  return CLAY_PDB_EXECUTION_ERROR;
                 }
 
               file_size += (width * height) + 8;
@@ -549,38 +549,38 @@ icns_export_image (GFile        *file,
             }
           else
             {
-              GimpProcedure  *procedure;
-              GimpValueArray *return_vals;
-              GimpImage      *temp_image;
-              GimpLayer      *temp_layer;
+              ClayProcedure  *procedure;
+              ClayValueArray *return_vals;
+              ClayImage      *temp_image;
+              ClayLayer      *temp_layer;
               GFile          *temp_file = NULL;
               FILE           *temp_fp;
 
-              temp_file  = gimp_temp_file ("png");
+              temp_file  = clay_temp_file ("png");
 
-              /* TODO: Use GimpExportOptions for this when available */
-              temp_image = gimp_image_new (width, height,
-                                           gimp_image_get_base_type (image));
-              if (gimp_image_get_base_type (image) == GIMP_INDEXED)
-                gimp_image_set_palette (temp_image,
-                                        gimp_image_get_palette (image));
+              /* TODO: Use ClayExportOptions for this when available */
+              temp_image = clay_image_new (width, height,
+                                           clay_image_get_base_type (image));
+              if (clay_image_get_base_type (image) == CLAY_INDEXED)
+                clay_image_set_palette (temp_image,
+                                        clay_image_get_palette (image));
 
-              temp_layer = gimp_layer_new_from_drawable (GIMP_DRAWABLE (iter->data),
+              temp_layer = clay_layer_new_from_drawable (CLAY_DRAWABLE (iter->data),
                                                          temp_image);
-              gimp_image_insert_layer (temp_image, temp_layer, NULL, 0);
+              clay_image_insert_layer (temp_image, temp_layer, NULL, 0);
 
               if (include_color_profile &&
-                  gimp_image_get_color_profile (image))
+                  clay_image_get_color_profile (image))
                 {
-                  GimpColorProfile *profile;
+                  ClayColorProfile *profile;
 
-                  profile =  gimp_image_get_color_profile (image);
-                  gimp_image_set_color_profile (temp_image, profile);
+                  profile =  clay_image_get_color_profile (image);
+                  clay_image_set_color_profile (temp_image, profile);
                 }
 
-              procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-png-export");
-              return_vals = gimp_procedure_run (procedure,
-                                                "run-mode",              GIMP_RUN_NONINTERACTIVE,
+              procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-png-export");
+              return_vals = clay_procedure_run (procedure,
+                                                "run-mode",              CLAY_RUN_NONINTERACTIVE,
                                                 "image",                 temp_image,
                                                 "file",                  temp_file,
                                                 "interlaced",            FALSE,
@@ -593,17 +593,17 @@ icns_export_image (GFile        *file,
                                                 "optimize-palette",      FALSE,
                                                 "include-color-profile", include_color_profile,
                                                 NULL);
-              gimp_image_delete (temp_image);
+              clay_image_delete (temp_image);
 
-              if (GIMP_VALUES_GET_ENUM (return_vals, 0) != GIMP_PDB_SUCCESS)
+              if (CLAY_VALUES_GET_ENUM (return_vals, 0) != CLAY_PDB_SUCCESS)
                 {
                   icns_save_info_free (info);
                   g_set_error (error, 0, 0,
                                "Running procedure 'file-png-export' "
                                "for icns export failed: %s",
-                               gimp_pdb_get_last_error (gimp_get_pdb ()));
+                               clay_pdb_get_last_error (clay_get_pdb ()));
 
-                  return GIMP_PDB_EXECUTION_ERROR;
+                  return CLAY_PDB_EXECUTION_ERROR;
                 }
 
               temp_fp = g_fopen (g_file_peek_path (temp_file), "rb");
@@ -631,7 +631,7 @@ icns_export_image (GFile        *file,
                                    g_file_error_from_errno (errno),
                                    _("Error writing icns: %s"),
                                    g_strerror (errno));
-                      return GIMP_PDB_EXECUTION_ERROR;
+                      return CLAY_PDB_EXECUTION_ERROR;
                     }
                 }
               fclose (temp_fp);
@@ -641,7 +641,7 @@ icns_export_image (GFile        *file,
           duplicates[match] = 1;
         }
 
-      gimp_progress_update (i / info->num_icons);
+      clay_progress_update (i / info->num_icons);
     }
 
   /* Update header with full file size */
@@ -649,11 +649,11 @@ icns_export_image (GFile        *file,
   fseek (fp, 4L, SEEK_SET);
   fwrite (&file_size, sizeof (file_size), 1, fp);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   icns_save_info_free (info);
   fclose (fp);
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 static guchar *
@@ -757,11 +757,11 @@ icns_save_info_free (IcnsSaveInfo *info)
   memset (info, 0, sizeof (IcnsSaveInfo));
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 icns_save_image (GFile                *file,
-                 GimpImage            *image,
-                 GimpProcedure        *procedure,
-                 GimpProcedureConfig  *config,
+                 ClayImage            *image,
+                 ClayProcedure        *procedure,
+                 ClayProcedureConfig  *config,
                  gint32                run_mode,
                  GError              **error)
 {
@@ -770,14 +770,14 @@ icns_save_image (GFile                *file,
   gboolean      isValidLayers         = FALSE;
   gboolean      include_color_profile = FALSE;
 
-  info.layers    = gimp_image_list_layers (image);
+  info.layers    = clay_image_list_layers (image);
   info.num_icons = g_list_length (info.layers);
 
   /* Initial check if we have any valid layers to export */
   for (iter = info.layers; iter; iter = iter->next)
     {
-      gint width  = gimp_drawable_get_width (iter->data);
-      gint height = gimp_drawable_get_height (iter->data);
+      gint width  = clay_drawable_get_width (iter->data);
+      gint height = clay_drawable_get_height (iter->data);
 
       if (icns_check_dimensions (width, height))
         {
@@ -792,16 +792,16 @@ icns_save_image (GFile                *file,
                      "16x12, 16x16, 18x18, 24x24, 32x32, 36x36, 48x48, "
                      "64x64, 128x128, 256x256, 512x512, or 1024x1024."));
 
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       /* Allow user to override default values */
       if (! icns_save_dialog (&info, image, procedure, config))
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
     }
-  else if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  else if (run_mode == CLAY_RUN_NONINTERACTIVE)
     {
       if (! icns_check_compat (NULL, &info))
         {
@@ -810,7 +810,7 @@ icns_save_image (GFile                *file,
                          "16x12, 16x16, 18x18, 24x24, 32x32, 36x36, 48x48, "
                          "64x64, 128x128, 256x256, 512x512, or 1024x1024."));
 
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
@@ -818,8 +818,8 @@ icns_save_image (GFile                *file,
                 "include-color-profile", &include_color_profile,
                 NULL);
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   return icns_export_image (file, &info, image, include_color_profile, error);
 }

@@ -23,7 +23,7 @@ void        script_fu_arg_reset                   (SFArg         *arg,
                                                    gboolean       should_reset_ids);
 
 void        script_fu_arg_add_argument            (SFArg         *arg,
-                                                   GimpProcedure *procedure,
+                                                   ClayProcedure *procedure,
                                                    const gchar   *name,
                                                    const gchar   *nick);
 void        script_fu_arg_append_repr_from_gvalue (SFArg         *arg,

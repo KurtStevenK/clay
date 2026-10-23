@@ -19,8 +19,8 @@
 #define __SCRIPT_FU_TEXT_CONSOLE_H__
 
 
-GimpValueArray * script_fu_text_console_run (GimpProcedure        *procedure,
-                                             GimpProcedureConfig  *config);
+ClayValueArray * script_fu_text_console_run (ClayProcedure        *procedure,
+                                             ClayProcedureConfig  *config);
 
 
 #endif /*  __SCRIPT_FU_TEXT_CONSOLE_H__  */

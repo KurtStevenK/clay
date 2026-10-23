@@ -25,57 +25,57 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpconfig/gimpconfig.h"
+#include "libclayconfig/clayconfig.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp-edit.h"
-#include "core/gimp.h"
-#include "core/gimpbuffer.h"
-#include "core/gimpdrawable-edit.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpprogress.h"
+#include "core/clay-edit.h"
+#include "core/clay.h"
+#include "core/claybuffer.h"
+#include "core/claydrawable-edit.h"
+#include "core/claydrawable.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/clayparamspecs.h"
+#include "core/clayprogress.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimppdbcontext.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "claypdbcontext.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-edit_cut_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+edit_cut_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable **drawables;
+  ClayValueArray *return_vals;
+  ClayDrawable **drawables;
   gboolean non_empty = FALSE;
 
-  drawables = g_value_get_boxed (gimp_value_array_index (args, 0));
+  drawables = g_value_get_boxed (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpImage *image         = NULL;
+      ClayImage *image         = NULL;
       GList     *drawable_list = NULL;
       gint       i;
 
       for (i = 0; drawables[i] != NULL; i++)
         {
-          if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
-                                           GIMP_PDB_ITEM_CONTENT, error) ||
-              ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawables[i]), error))
+          if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
+                                           CLAY_PDB_ITEM_CONTENT, error) ||
+              ! clay_pdb_item_is_not_group (CLAY_ITEM (drawables[i]), error))
             {
               success = FALSE;
               break;
@@ -83,13 +83,13 @@ edit_cut_invoker (GimpProcedure         *procedure,
 
           if (! image)
             {
-              image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+              image = clay_item_get_image (CLAY_ITEM (drawables[i]));
             }
-          else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+          else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
             {
               success = FALSE;
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     _("All specified drawables must belong to the same image."));
               break;
             }
@@ -101,12 +101,12 @@ edit_cut_invoker (GimpProcedure         *procedure,
         {
           GError *my_error = NULL;
 
-          non_empty = gimp_edit_cut (image, drawable_list, context, &my_error) != NULL;
+          non_empty = clay_edit_cut (image, drawable_list, context, &my_error) != NULL;
 
           if (! non_empty)
             {
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     my_error->message);
               g_clear_error (&my_error);
             }
@@ -118,48 +118,48 @@ edit_cut_invoker (GimpProcedure         *procedure,
       g_list_free (drawable_list);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), non_empty);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), non_empty);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_copy_invoker (GimpProcedure         *procedure,
-                   Gimp                  *gimp,
-                   GimpContext           *context,
-                   GimpProgress          *progress,
-                   const GimpValueArray  *args,
+static ClayValueArray *
+edit_copy_invoker (ClayProcedure         *procedure,
+                   Clay                  *clay,
+                   ClayContext           *context,
+                   ClayProgress          *progress,
+                   const ClayValueArray  *args,
                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable **drawables;
+  ClayValueArray *return_vals;
+  ClayDrawable **drawables;
   gboolean non_empty = FALSE;
 
-  drawables = g_value_get_boxed (gimp_value_array_index (args, 0));
+  drawables = g_value_get_boxed (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpImage *image          = NULL;
+      ClayImage *image          = NULL;
       GList     *drawables_list = NULL;
       gint       i;
 
       for (i = 0; drawables[i] != NULL; i++)
         {
-          if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL, 0, error))
+          if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL, 0, error))
             {
               success = FALSE;
               break;
             }
           if (image == NULL)
             {
-              image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+              image = clay_item_get_image (CLAY_ITEM (drawables[i]));
             }
-          else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+          else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
             {
               success = FALSE;
               break;
@@ -171,12 +171,12 @@ edit_copy_invoker (GimpProcedure         *procedure,
         {
           GError *my_error = NULL;
 
-          non_empty = gimp_edit_copy (image, drawables_list, context, FALSE, &my_error) != NULL;
+          non_empty = clay_edit_copy (image, drawables_list, context, FALSE, &my_error) != NULL;
 
           if (! non_empty)
             {
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     my_error->message);
               g_clear_error (&my_error);
             }
@@ -187,79 +187,79 @@ edit_copy_invoker (GimpProcedure         *procedure,
       g_list_free (drawables_list);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), non_empty);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), non_empty);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_copy_visible_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+edit_copy_visible_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gboolean non_empty = FALSE;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       GError *my_error = NULL;
 
-      non_empty = gimp_edit_copy_visible (image, context, &my_error) != NULL;
+      non_empty = clay_edit_copy_visible (image, context, &my_error) != NULL;
 
       if (! non_empty)
         {
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 my_error->message);
           g_clear_error (&my_error);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), non_empty);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), non_empty);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_paste_invoker (GimpProcedure         *procedure,
-                    Gimp                  *gimp,
-                    GimpContext           *context,
-                    GimpProgress          *progress,
-                    const GimpValueArray  *args,
+static ClayValueArray *
+edit_paste_invoker (ClayProcedure         *procedure,
+                    Clay                  *clay,
+                    ClayContext           *context,
+                    ClayProgress          *progress,
+                    const ClayValueArray  *args,
                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable *drawable;
+  ClayValueArray *return_vals;
+  ClayDrawable *drawable;
   gboolean paste_into;
-  GimpDrawable **new_drawables = NULL;
+  ClayDrawable **new_drawables = NULL;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  paste_into = g_value_get_boolean (gimp_value_array_index (args, 1));
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  paste_into = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpObject *paste = gimp_get_clipboard_object (gimp);
+      ClayObject *paste = clay_get_clipboard_object (clay);
 
       if (paste &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
           GList *drawables = NULL;
           GList *list;
@@ -269,11 +269,11 @@ edit_paste_invoker (GimpProcedure         *procedure,
           if (drawable != NULL)
             drawables = g_list_prepend (drawables, drawable);
 
-          list = gimp_edit_paste (gimp_item_get_image (GIMP_ITEM (drawable)),
+          list = clay_edit_paste (clay_item_get_image (CLAY_ITEM (drawable)),
                                   drawables, paste,
                                   paste_into ?
-                                  GIMP_PASTE_TYPE_FLOATING_INTO :
-                                  GIMP_PASTE_TYPE_FLOATING,
+                                  CLAY_PASTE_TYPE_FLOATING_INTO :
+                                  CLAY_PASTE_TYPE_FLOATING,
                                   context, FALSE,
                                   -1, -1, -1, -1);
           g_list_free (drawables);
@@ -282,7 +282,7 @@ edit_paste_invoker (GimpProcedure         *procedure,
             success = FALSE;
 
           num_drawables = g_list_length (list);
-          new_drawables = g_new0 (GimpDrawable *, num_drawables + 1);
+          new_drawables = g_new0 (ClayDrawable *, num_drawables + 1);
 
           for (i = 0; i < num_drawables; i++, list = g_list_next (list))
             new_drawables[i] = g_object_ref (list->data);
@@ -293,74 +293,74 @@ edit_paste_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), new_drawables);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), new_drawables);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_paste_as_new_image_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+edit_paste_as_new_image_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image = NULL;
+  ClayValueArray *return_vals;
+  ClayImage *image = NULL;
 
-  GimpObject *paste = gimp_get_clipboard_object (gimp);
+  ClayObject *paste = clay_get_clipboard_object (clay);
 
   if (paste)
     {
-      image = gimp_edit_paste_as_new_image (gimp, paste, context);
+      image = clay_edit_paste_as_new_image (clay, paste, context);
 
       if (! image)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), image);
+    g_value_set_object (clay_value_array_index (return_vals, 1), image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_named_cut_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+edit_named_cut_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable **drawables;
+  ClayValueArray *return_vals;
+  ClayDrawable **drawables;
   const gchar *buffer_name;
   gchar *real_name = NULL;
 
-  drawables = g_value_get_boxed (gimp_value_array_index (args, 0));
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 1));
+  drawables = g_value_get_boxed (clay_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpImage *image         = NULL;
+      ClayImage *image         = NULL;
       GList     *drawable_list = NULL;
       gint       i;
 
       for (i = 0; drawables[i] != NULL; i++)
         {
-          if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
-                                           GIMP_PDB_ITEM_CONTENT, error) ||
-              ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawables[i]), error))
+          if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
+                                           CLAY_PDB_ITEM_CONTENT, error) ||
+              ! clay_pdb_item_is_not_group (CLAY_ITEM (drawables[i]), error))
             {
               success = FALSE;
               break;
@@ -368,13 +368,13 @@ edit_named_cut_invoker (GimpProcedure         *procedure,
 
           if (! image)
             {
-              image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+              image = clay_item_get_image (CLAY_ITEM (drawables[i]));
             }
-          else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+          else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
             {
               success = FALSE;
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     _("All specified drawables must belong to the same image."));
               break;
             }
@@ -386,7 +386,7 @@ edit_named_cut_invoker (GimpProcedure         *procedure,
         {
           GError *my_error = NULL;
 
-          real_name = (gchar *) gimp_edit_named_cut (image, buffer_name,
+          real_name = (gchar *) clay_edit_named_cut (image, buffer_name,
                                                      drawable_list, context, &my_error);
 
           if (real_name)
@@ -395,8 +395,8 @@ edit_named_cut_invoker (GimpProcedure         *procedure,
             }
           else
             {
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     my_error->message);
               g_clear_error (&my_error);
             }
@@ -408,41 +408,41 @@ edit_named_cut_invoker (GimpProcedure         *procedure,
       g_list_free (drawable_list);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), real_name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), real_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_named_copy_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+edit_named_copy_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable **drawables;
+  ClayValueArray *return_vals;
+  ClayDrawable **drawables;
   const gchar *buffer_name;
   gchar *real_name = NULL;
 
-  drawables = g_value_get_boxed (gimp_value_array_index (args, 0));
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 1));
+  drawables = g_value_get_boxed (clay_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpImage *image         = NULL;
+      ClayImage *image         = NULL;
       GList     *drawable_list = NULL;
       gint       i;
 
       for (i = 0; drawables[i] != NULL; i++)
         {
-          if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
+          if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
                                            0, error))
             {
               success = FALSE;
@@ -451,13 +451,13 @@ edit_named_copy_invoker (GimpProcedure         *procedure,
 
           if (! image)
             {
-              image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+              image = clay_item_get_image (CLAY_ITEM (drawables[i]));
             }
-          else if (image != gimp_item_get_image (GIMP_ITEM (drawables[i])))
+          else if (image != clay_item_get_image (CLAY_ITEM (drawables[i])))
             {
               success = FALSE;
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     _("All specified drawables must belong to the same image."));
               break;
             }
@@ -469,7 +469,7 @@ edit_named_copy_invoker (GimpProcedure         *procedure,
         {
           GError *my_error = NULL;
 
-          real_name = (gchar *) gimp_edit_named_copy (image, buffer_name,
+          real_name = (gchar *) clay_edit_named_copy (image, buffer_name,
                                                       drawable_list, context, &my_error);
 
           if (real_name)
@@ -478,8 +478,8 @@ edit_named_copy_invoker (GimpProcedure         *procedure,
             }
           else
             {
-              gimp_message_literal (gimp,
-                                    G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+              clay_message_literal (clay,
+                                    G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                     my_error->message);
               g_clear_error (&my_error);
             }
@@ -491,37 +491,37 @@ edit_named_copy_invoker (GimpProcedure         *procedure,
       g_list_free (drawable_list);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), real_name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), real_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_named_copy_visible_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+edit_named_copy_visible_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   const gchar *buffer_name;
   gchar *real_name = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
       GError *my_error = NULL;
 
-      real_name = (gchar *) gimp_edit_named_copy_visible (image, buffer_name,
+      real_name = (gchar *) clay_edit_named_copy_visible (image, buffer_name,
                                                           context, &my_error);
 
       if (real_name)
@@ -530,49 +530,49 @@ edit_named_copy_visible_invoker (GimpProcedure         *procedure,
         }
       else
         {
-          gimp_message_literal (gimp,
-                                G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+          clay_message_literal (clay,
+                                G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                                 my_error->message);
           g_clear_error (&my_error);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), real_name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), real_name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_named_paste_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+edit_named_paste_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable *drawable;
+  ClayValueArray *return_vals;
+  ClayDrawable *drawable;
   const gchar *buffer_name;
   gboolean paste_into;
-  GimpLayer *floating_sel = NULL;
+  ClayLayer *floating_sel = NULL;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 1));
-  paste_into = g_value_get_boolean (gimp_value_array_index (args, 2));
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 1));
+  paste_into = g_value_get_boolean (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
           GList *drawables = NULL;
           GList *layers;
@@ -580,11 +580,11 @@ edit_named_paste_invoker (GimpProcedure         *procedure,
           if (drawable != NULL)
             drawables = g_list_prepend (drawables, drawable);
 
-          layers = gimp_edit_paste (gimp_item_get_image (GIMP_ITEM (drawable)),
-                                    drawables, GIMP_OBJECT (buffer),
+          layers = clay_edit_paste (clay_item_get_image (CLAY_ITEM (drawable)),
+                                    drawables, CLAY_OBJECT (buffer),
                                     paste_into ?
-                                    GIMP_PASTE_TYPE_FLOATING_INTO :
-                                    GIMP_PASTE_TYPE_FLOATING,
+                                    CLAY_PASTE_TYPE_FLOATING_INTO :
+                                    CLAY_PASTE_TYPE_FLOATING,
                                     context, FALSE,
                                     -1, -1, -1, -1);
           g_list_free (drawables);
@@ -600,37 +600,37 @@ edit_named_paste_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), floating_sel);
+    g_value_set_object (clay_value_array_index (return_vals, 1), floating_sel);
 
   return return_vals;
 }
 
-static GimpValueArray *
-edit_named_paste_as_new_image_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+edit_named_paste_as_new_image_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *buffer_name;
-  GimpImage *image = NULL;
+  ClayImage *image = NULL;
 
-  buffer_name = g_value_get_string (gimp_value_array_index (args, 0));
+  buffer_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpBuffer *buffer = gimp_pdb_get_buffer (gimp, buffer_name, error);
+      ClayBuffer *buffer = clay_pdb_get_buffer (clay, buffer_name, error);
 
       if (buffer)
         {
-          image = gimp_edit_paste_as_new_image (gimp, GIMP_OBJECT (buffer), context);
+          image = clay_edit_paste_as_new_image (clay, CLAY_OBJECT (buffer), context);
 
           if (! image)
             success = FALSE;
@@ -639,349 +639,349 @@ edit_named_paste_as_new_image_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), image);
+    g_value_set_object (clay_value_array_index (return_vals, 1), image);
 
   return return_vals;
 }
 
 void
-register_edit_procs (GimpPDB *pdb)
+register_edit_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-edit-cut
+   * clay-edit-cut
    */
-  procedure = gimp_procedure_new (edit_cut_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-cut");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_cut_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-cut");
+  clay_procedure_set_static_help (procedure,
                                   "Cut from the specified drawables.",
-                                  "If there is a selection in the image, then the area specified by the selection is cut from the specified drawables and placed in an internal GIMP edit buffer. It can subsequently be retrieved using the 'gimp-edit-paste' command. If there is no selection and only one specified drawable, then the specified drawable will be removed and its contents stored in the internal GIMP edit buffer.\n"
+                                  "If there is a selection in the image, then the area specified by the selection is cut from the specified drawables and placed in an internal Clay edit buffer. It can subsequently be retrieved using the 'clay-edit-paste' command. If there is no selection and only one specified drawable, then the specified drawable will be removed and its contents stored in the internal Clay edit buffer.\n"
                                   "This procedure will return %FALSE if the selected area lies completely outside the bounds of the current drawables and there is nothing to cut from.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_core_object_array ("drawables",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_core_object_array ("drawables",
                                                                   "drawables",
                                                                   "The drawables to cut from",
-                                                                  GIMP_TYPE_DRAWABLE,
-                                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                  CLAY_TYPE_DRAWABLE,
+                                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("non-empty",
                                                          "non empty",
                                                          "TRUE if the cut was successful, FALSE if there was nothing to copy from",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-copy
+   * clay-edit-copy
    */
-  procedure = gimp_procedure_new (edit_copy_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-copy");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_copy_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-copy");
+  clay_procedure_set_static_help (procedure,
                                   "Copy from the specified drawables.",
-                                  "If there is a selection in the image, then the area specified by the selection is copied from the specified drawables and placed in an internal GIMP edit buffer. It can subsequently be retrieved using the 'gimp-edit-paste' command. If there is no selection, then the specified drawables' contents will be stored in the internal GIMP edit buffer.\n"
+                                  "If there is a selection in the image, then the area specified by the selection is copied from the specified drawables and placed in an internal Clay edit buffer. It can subsequently be retrieved using the 'clay-edit-paste' command. If there is no selection, then the specified drawables' contents will be stored in the internal Clay edit buffer.\n"
                                   "This procedure will return %FALSE if the selected area lies completely outside the bounds of the current drawables and there is nothing to copy from.\n"
                                   "All the drawables must belong to the same image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_core_object_array ("drawables",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_core_object_array ("drawables",
                                                                   "drawables",
                                                                   "Drawables to copy from",
-                                                                  GIMP_TYPE_DRAWABLE,
-                                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                                  CLAY_TYPE_DRAWABLE,
+                                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("non-empty",
                                                          "non empty",
                                                          "TRUE if the cut was successful, FALSE if there was nothing to copy from",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-copy-visible
+   * clay-edit-copy-visible
    */
-  procedure = gimp_procedure_new (edit_copy_visible_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-copy-visible");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_copy_visible_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-copy-visible");
+  clay_procedure_set_static_help (procedure,
                                   "Copy from the projection.",
-                                  "If there is a selection in the image, then the area specified by the selection is copied from the projection and placed in an internal GIMP edit buffer. It can subsequently be retrieved using the 'gimp-edit-paste' command. If there is no selection, then the projection's contents will be stored in the internal GIMP edit buffer.",
+                                  "If there is a selection in the image, then the area specified by the selection is copied from the projection and placed in an internal Clay edit buffer. It can subsequently be retrieved using the 'clay-edit-paste' command. If there is no selection, then the projection's contents will be stored in the internal Clay edit buffer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image to copy from",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("non-empty",
                                                          "non empty",
                                                          "TRUE if the copy was successful",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-paste
+   * clay-edit-paste
    */
-  procedure = gimp_procedure_new (edit_paste_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-paste");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_paste_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-paste");
+  clay_procedure_set_static_help (procedure,
                                   "Paste buffer to the specified drawable.",
-                                  "This procedure pastes a copy of the internal GIMP edit buffer to the specified drawable. The GIMP edit buffer will be empty unless a call was previously made to either [func@Gimp.edit_cut] or [func@Gimp.edit_copy]. The \"paste_into\" option specifies whether to clear the current image selection, or to paste the buffer \"behind\" the selection. This allows the selection to act as a mask for the pasted buffer. Anywhere that the selection mask is non-zero, the pasted buffer will show through. The pasted data may be a floating selection when relevant, layers otherwise. If the image has a floating selection at the time of pasting, the old floating selection will be anchored to its drawable before the new floating selection is added.\n"
-                                  "This procedure returns the new drawables (floating or not). If the result is a floating selection, it will already be attached to the specified drawable, and a subsequent call to [func@Gimp.floating_sel_attach] is not needed.",
+                                  "This procedure pastes a copy of the internal Clay edit buffer to the specified drawable. The Clay edit buffer will be empty unless a call was previously made to either [func@Clay.edit_cut] or [func@Clay.edit_copy]. The \"paste_into\" option specifies whether to clear the current image selection, or to paste the buffer \"behind\" the selection. This allows the selection to act as a mask for the pasted buffer. Anywhere that the selection mask is non-zero, the pasted buffer will show through. The pasted data may be a floating selection when relevant, layers otherwise. If the image has a floating selection at the time of pasting, the old floating selection will be anchored to its drawable before the new floating selection is added.\n"
+                                  "This procedure returns the new drawables (floating or not). If the result is a floating selection, it will already be attached to the specified drawable, and a subsequent call to [func@Clay.floating_sel_attach] is not needed.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The drawable to paste to",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("paste-into",
                                                      "paste into",
                                                      "Clear selection, or paste behind it?",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_core_object_array ("new-drawables",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_core_object_array ("new-drawables",
                                                                       "new drawables",
                                                                       "The list of pasted layers.",
-                                                                      GIMP_TYPE_DRAWABLE,
-                                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                      CLAY_TYPE_DRAWABLE,
+                                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-paste-as-new-image
+   * clay-edit-paste-as-new-image
    */
-  procedure = gimp_procedure_new (edit_paste_as_new_image_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-paste-as-new-image");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_paste_as_new_image_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-paste-as-new-image");
+  clay_procedure_set_static_help (procedure,
                                   "Paste buffer to a new image.",
-                                  "This procedure pastes a copy of the internal GIMP edit buffer to a new image. The GIMP edit buffer will be empty unless a call was previously made to either 'gimp-edit-cut' or 'gimp-edit-copy'. This procedure returns the new image or -1 if the edit buffer was empty.",
+                                  "This procedure pastes a copy of the internal Clay edit buffer to a new image. The Clay edit buffer will be empty unless a call was previously made to either 'clay-edit-cut' or 'clay-edit-copy'. This procedure returns the new image or -1 if the edit buffer was empty.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_image ("image",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_image ("image",
                                                           "image",
                                                           "The new image",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-named-cut
+   * clay-edit-named-cut
    */
-  procedure = gimp_procedure_new (edit_named_cut_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-named-cut");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_named_cut_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-named-cut");
+  clay_procedure_set_static_help (procedure,
                                   "Cut into a named buffer.",
-                                  "This procedure works like 'gimp-edit-cut', but additionally stores the cut buffer into a named buffer that will stay available for later pasting, regardless of any intermediate copy or cut operations.",
+                                  "This procedure works like 'clay-edit-cut', but additionally stores the cut buffer into a named buffer that will stay available for later pasting, regardless of any intermediate copy or cut operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_core_object_array ("drawables",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_core_object_array ("drawables",
                                                                   "drawables",
                                                                   "The drawables to cut from",
-                                                                  GIMP_TYPE_DRAWABLE,
-                                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+                                                                  CLAY_TYPE_DRAWABLE,
+                                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The name of the buffer to create",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("real-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("real-name",
                                                            "real name",
                                                            "The real name given to the buffer, or NULL if the cut failed",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-named-copy
+   * clay-edit-named-copy
    */
-  procedure = gimp_procedure_new (edit_named_copy_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-named-copy");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_named_copy_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-named-copy");
+  clay_procedure_set_static_help (procedure,
                                   "Copy into a named buffer.",
-                                  "This procedure works like 'gimp-edit-copy', but additionally stores the copied buffer into a named buffer that will stay available for later pasting, regardless of any intermediate copy or cut operations.",
+                                  "This procedure works like 'clay-edit-copy', but additionally stores the copied buffer into a named buffer that will stay available for later pasting, regardless of any intermediate copy or cut operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_core_object_array ("drawables",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_core_object_array ("drawables",
                                                                   "drawables",
                                                                   "The drawables to copy from",
-                                                                  GIMP_TYPE_DRAWABLE,
-                                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+                                                                  CLAY_TYPE_DRAWABLE,
+                                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The name of the buffer to create",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("real-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("real-name",
                                                            "real name",
                                                            "The real name given to the buffer, or NULL if the copy failed",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-named-copy-visible
+   * clay-edit-named-copy-visible
    */
-  procedure = gimp_procedure_new (edit_named_copy_visible_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-named-copy-visible");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_named_copy_visible_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-named-copy-visible");
+  clay_procedure_set_static_help (procedure,
                                   "Copy from the projection into a named buffer.",
-                                  "This procedure works like 'gimp-edit-copy-visible', but additionally stores the copied buffer into a named buffer that will stay available for later pasting, regardless of any intermediate copy or cut operations.",
+                                  "This procedure works like 'clay-edit-copy-visible', but additionally stores the copied buffer into a named buffer that will stay available for later pasting, regardless of any intermediate copy or cut operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image to copy from",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The name of the buffer to create",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("real-name",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("real-name",
                                                            "real name",
                                                            "The real name given to the buffer, or NULL if the copy failed",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-named-paste
+   * clay-edit-named-paste
    */
-  procedure = gimp_procedure_new (edit_named_paste_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-named-paste");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_named_paste_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-named-paste");
+  clay_procedure_set_static_help (procedure,
                                   "Paste named buffer to the specified drawable.",
-                                  "This procedure works like 'gimp-edit-paste' but pastes a named buffer instead of the global buffer.",
+                                  "This procedure works like 'clay-edit-paste' but pastes a named buffer instead of the global buffer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The drawable to paste to",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The name of the buffer to paste",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("paste-into",
                                                      "paste into",
                                                      "Clear selection, or paste behind it?",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_layer ("floating-sel",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_layer ("floating-sel",
                                                           "floating sel",
                                                           "The new floating selection",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-edit-named-paste-as-new-image
+   * clay-edit-named-paste-as-new-image
    */
-  procedure = gimp_procedure_new (edit_named_paste_as_new_image_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-edit-named-paste-as-new-image");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (edit_named_paste_as_new_image_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-edit-named-paste-as-new-image");
+  clay_procedure_set_static_help (procedure,
                                   "Paste named buffer to a new image.",
-                                  "This procedure works like 'gimp-edit-paste-as-new-image' but pastes a named buffer instead of the global buffer.",
+                                  "This procedure works like 'clay-edit-paste-as-new-image' but pastes a named buffer instead of the global buffer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("buffer-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("buffer-name",
                                                        "buffer name",
                                                        "The name of the buffer to paste",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_image ("image",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_image ("image",
                                                           "image",
                                                           "The new image",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

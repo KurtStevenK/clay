@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package Gimp::CodeGen::util;
+package Clay::CodeGen::util;
 
 use File::Basename 'basename';
 use File::Copy 'cp';

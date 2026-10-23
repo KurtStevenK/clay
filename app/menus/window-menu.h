@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   window_menu_setup (GimpUIManager *manager,
+void   window_menu_setup (ClayUIManager *manager,
                           const gchar   *group_name,
                           const gchar   *ui_path);

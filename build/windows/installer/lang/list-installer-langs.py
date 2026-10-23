@@ -9,7 +9,7 @@ from pathlib import Path
 MESON_BUILD_ROOT = Path(os.environ.get("MESON_BUILD_ROOT",".")).as_posix()
 MESON_SOURCE_ROOT = Path(os.environ.get("MESON_SOURCE_ROOT",sys.argv[2])).as_posix()
 
-## Get list of Inno and GIMP supported languages
+## Get list of Inno and Clay supported languages
 po_inno_files = sorted(glob.glob(os.path.join(MESON_SOURCE_ROOT,'po-windows-installer/*.po')))
 po_inno_array = [os.path.splitext(os.path.basename(f))[0] for f in po_inno_files]
 with open(os.path.join(MESON_SOURCE_ROOT,'build/windows/installer/lang/meson.build'), "r", encoding="utf-8") as meson_file:
@@ -19,7 +19,7 @@ meson_set = set(lang for lang in meson_langs if lang != "en")
 po_files = sorted(glob.glob(os.path.join(MESON_SOURCE_ROOT,'po/*.po')))
 po_array = [os.path.splitext(os.path.basename(f))[0] for f in po_files]
 
-## Get strings for GIMP and Inno supported languages
+## Get strings for Clay and Inno supported languages
 xml_file = os.path.join(MESON_SOURCE_ROOT, 'build/windows/installer/lang/iso_639_custom.xml')
 tree = ET.parse(xml_file)
 root = tree.getroot()

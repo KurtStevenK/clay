@@ -1,4 +1,4 @@
-/* borderaverage 0.01 - image processing plug-in for GIMP.
+/* borderaverage 0.01 - image processing plug-in for Clay.
  *
  * Copyright (C) 1998 Philipp Klaus (webmaster@access.ch)
  *
@@ -19,15 +19,15 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-borderaverage"
 #define PLUG_IN_BINARY "border-average"
-#define PLUG_IN_ROLE   "gimp-border-average"
+#define PLUG_IN_ROLE   "clay-border-average"
 
 
 typedef struct _BorderAverage      BorderAverage;
@@ -35,12 +35,12 @@ typedef struct _BorderAverageClass BorderAverageClass;
 
 struct _BorderAverage
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _BorderAverageClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -50,43 +50,43 @@ struct _BorderAverageClass
 
 GType                   border_average_get_type               (void);
 
-static GList          * border_average_query_procedures       (GimpPlugIn           *plug_in);
-static GimpProcedure  * border_average_create_procedure       (GimpPlugIn           *plug_in,
+static GList          * border_average_query_procedures       (ClayPlugIn           *plug_in);
+static ClayProcedure  * border_average_create_procedure       (ClayPlugIn           *plug_in,
                                                                const gchar          *name);
 
-static GimpValueArray * border_average_run                    (GimpProcedure        *procedure,
-                                                               GimpRunMode           run_mode,
-                                                               GimpImage            *image,
-                                                               GimpDrawable        **drawables,
-                                                               GimpProcedureConfig  *config,
+static ClayValueArray * border_average_run                    (ClayProcedure        *procedure,
+                                                               ClayRunMode           run_mode,
+                                                               ClayImage            *image,
+                                                               ClayDrawable        **drawables,
+                                                               ClayProcedureConfig  *config,
                                                                gpointer              run_data);
 
 
 static void      borderaverage        (GObject      *config,
                                        GeglBuffer   *buffer,
-                                       GimpDrawable *drawable,
+                                       ClayDrawable *drawable,
                                        GeglColor    *result);
 
-static gboolean  borderaverage_dialog (GimpProcedure *procedure,
+static gboolean  borderaverage_dialog (ClayProcedure *procedure,
                                        GObject       *config,
-                                       GimpImage     *image,
-                                       GimpDrawable  *drawable);
+                                       ClayImage     *image,
+                                       ClayDrawable  *drawable);
 
 static void      add_new_color        (const guchar *buffer,
                                        gint         *cube,
                                        gint          bucket_expo);
 
 
-G_DEFINE_TYPE (BorderAverage, border_average, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (BorderAverage, border_average, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (BORDER_AVERAGE_TYPE)
+CLAY_MAIN (BORDER_AVERAGE_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 border_average_class_init (BorderAverageClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = border_average_query_procedures;
   plug_in_class->create_procedure = border_average_create_procedure;
@@ -99,16 +99,16 @@ border_average_init (BorderAverage *film)
 }
 
 static GList *
-border_average_query_procedures (GimpPlugIn *plug_in)
+border_average_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-border_average_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+border_average_create_procedure (ClayPlugIn  *plug_in,
                                  const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
   GeglColor     *default_return_color;
 
   gegl_init (NULL, NULL);
@@ -116,39 +116,39 @@ border_average_create_procedure (GimpPlugIn  *plug_in,
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             border_average_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Border Average..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Info");
+      clay_procedure_set_menu_label (procedure, _("_Border Average..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Info");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Set foreground to the average color of the image border"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Philipp Klaus",
                                       "Internet Access AG",
                                       "1998");
 
-      gimp_procedure_add_int_argument (procedure, "thickness",
+      clay_procedure_add_int_argument (procedure, "thickness",
                                        _("_Thickness"),
                                        _("Border size to take in count"),
                                        0, G_MAXINT, 3,
                                        G_PARAM_READWRITE);
-      gimp_procedure_add_unit_aux_argument (procedure, "thickness-unit",
+      clay_procedure_add_unit_aux_argument (procedure, "thickness-unit",
                                             _("Thickness unit of measure"),
                                             _("Border size unit of measure"),
-                                            TRUE, TRUE, gimp_unit_pixel (),
-                                            GIMP_PARAM_READWRITE);
-      gimp_procedure_add_choice_argument (procedure, "bucket-exponent",
+                                            TRUE, TRUE, clay_unit_pixel (),
+                                            CLAY_PARAM_READWRITE);
+      clay_procedure_add_choice_argument (procedure, "bucket-exponent",
                                           _("Bucket si_ze"),
                                           _("Bits for bucket size"),
-                                          gimp_choice_new_with_values ("levels-1",   0, _("1"),   NULL,
+                                          clay_choice_new_with_values ("levels-1",   0, _("1"),   NULL,
                                                                        "levels-2",   1, _("2"),   NULL,
                                                                        "levels-4",   2, _("4"),   NULL,
                                                                        "levels-8",   3, _("8"),  NULL,
@@ -161,7 +161,7 @@ border_average_create_procedure (GimpPlugIn  *plug_in,
                                           "levels-16",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_color_return_value (procedure, "borderaverage",
+      clay_procedure_add_color_return_value (procedure, "borderaverage",
                                              _("The average color of the specified border."),
                                              _("The average color of the specified border."),
                                              TRUE, default_return_color,
@@ -173,32 +173,32 @@ border_average_create_procedure (GimpPlugIn  *plug_in,
 }
 
 
-static GimpValueArray *
-border_average_run (GimpProcedure        *procedure,
-                    GimpRunMode           run_mode,
-                    GimpImage            *image,
-                    GimpDrawable        **drawables,
-                    GimpProcedureConfig  *config,
+static ClayValueArray *
+border_average_run (ClayProcedure        *procedure,
+                    ClayRunMode           run_mode,
+                    ClayImage            *image,
+                    ClayDrawable        **drawables,
+                    ClayProcedureConfig  *config,
                     gpointer              run_data)
 {
-  GimpDrawable      *drawable;
-  GimpValueArray    *return_vals = NULL;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayDrawable      *drawable;
+  ClayValueArray    *return_vals = NULL;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
   GeglColor         *result_color;
   GeglBuffer        *buffer;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -207,38 +207,38 @@ border_average_run (GimpProcedure        *procedure,
     }
 
   result_color = gegl_color_new ("transparent");
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE &&
+  if (run_mode == CLAY_RUN_INTERACTIVE &&
       ! borderaverage_dialog (procedure, G_OBJECT (config), image, drawable))
     {
       g_object_unref (result_color);
-      return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL, NULL);
+      return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL, NULL);
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       /*  Make sure that the drawable is RGB color  */
-      if (gimp_drawable_is_rgb (drawable))
+      if (clay_drawable_is_rgb (drawable))
         {
-          gimp_progress_init ( _("Border Average"));
+          clay_progress_init ( _("Border Average"));
           borderaverage (G_OBJECT (config), buffer, drawable, result_color);
 
-          if (run_mode != GIMP_RUN_NONINTERACTIVE)
-            gimp_context_set_foreground (result_color);
+          if (run_mode != CLAY_RUN_NONINTERACTIVE)
+            clay_context_set_foreground (result_color);
         }
       else
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
   g_object_unref (buffer);
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, NULL);
+  return_vals = clay_procedure_new_return_values (procedure, status, NULL);
 
-  if (status == GIMP_PDB_SUCCESS)
-    GIMP_VALUES_SET_COLOR (return_vals, 1, result_color);
+  if (status == CLAY_PDB_SUCCESS)
+    CLAY_VALUES_SET_COLOR (return_vals, 1, result_color);
 
   return return_vals;
 }
@@ -247,7 +247,7 @@ border_average_run (GimpProcedure        *procedure,
 static void
 borderaverage (GObject      *config,
                GeglBuffer   *buffer,
-               GimpDrawable *drawable,
+               ClayDrawable *drawable,
                GeglColor    *result)
 {
   gint            x, y, width, height;
@@ -264,10 +264,10 @@ borderaverage (GObject      *config,
                 "thickness", &borderaverage_thickness,
                 NULL);
   borderaverage_bucket_exponent =
-    gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                          "bucket-exponent");
 
-  if (! gimp_drawable_mask_intersect (drawable, &x, &y, &width, &height))
+  if (! clay_drawable_mask_intersect (drawable, &x, &y, &width, &height))
     {
       gegl_color_set_rgba (result, 0.0, 0.0, 0.0, 1.0);
       return;
@@ -385,10 +385,10 @@ add_new_color (const guchar *buffer,
 }
 
 static gboolean
-borderaverage_dialog (GimpProcedure *procedure,
+borderaverage_dialog (ClayProcedure *procedure,
                       GObject       *config,
-                      GimpImage     *image,
-                      GimpDrawable  *drawable)
+                      ClayImage     *image,
+                      ClayDrawable  *drawable)
 {
   GtkWidget  *dialog;
   GtkWidget  *size_entry;
@@ -396,56 +396,56 @@ borderaverage_dialog (GimpProcedure *procedure,
   gdouble     xres, yres;
   GeglBuffer *buffer = NULL;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Border Average"));
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "border-size-label",
                                    _("Border Size"),
                                    FALSE, FALSE);
 
   /*  Get the image resolution  */
-  gimp_image_get_resolution (image, &xres, &yres);
-  size_entry = gimp_procedure_dialog_get_size_entry (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_image_get_resolution (image, &xres, &yres);
+  size_entry = clay_procedure_dialog_get_size_entry (CLAY_PROCEDURE_DIALOG (dialog),
                                                      "thickness", TRUE,
                                                      "thickness-unit", "%a",
-                                                     GIMP_SIZE_ENTRY_UPDATE_SIZE,
+                                                     CLAY_SIZE_ENTRY_UPDATE_SIZE,
                                                      xres);
 
   /*  set the size (in pixels) that will be treated as 0% and 100%  */
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
   if (buffer)
-    gimp_size_entry_set_size (GIMP_SIZE_ENTRY (size_entry), 0, 0.0,
+    clay_size_entry_set_size (CLAY_SIZE_ENTRY (size_entry), 0, 0.0,
                               MIN (gegl_buffer_get_width (buffer),
                                    gegl_buffer_get_height (buffer)));
-  gimp_size_entry_set_refval_boundaries (GIMP_SIZE_ENTRY (size_entry), 0, 1.0,
+  clay_size_entry_set_refval_boundaries (CLAY_SIZE_ENTRY (size_entry), 0, 1.0,
                                          MIN (gegl_buffer_get_width (buffer),
                                               gegl_buffer_get_height (buffer)) / 2);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "border-size-frame", "border-size-label",
                                     FALSE, "thickness");
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "bucket-size-label",
                                    _("Number of Colors"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "bucket-size-frame", "bucket-size-label",
                                     FALSE, "bucket-exponent");
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "border-size-frame",
                               "bucket-size-frame",
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

@@ -5,7 +5,7 @@
   <menu id="/gradients-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="gradients-action">Gradients Menu</attribute>
-      <attribute name="icon">gimp-tool-gradient</attribute>
+      <attribute name="icon">clay-tool-gradient</attribute>
 
       <item><attribute name="action">gradients.gradients-edit</attribute></item>
       <section>

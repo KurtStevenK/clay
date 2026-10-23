@@ -1,0 +1,33 @@
+/* Sunset theme, dim colours colour scheme (generated palette; colours are plain @define-color
+ * values, edit them freely).
+ * Dark schemes colour the icons with the six Lane colours, light schemes use the accent. */
+
+@define-color fg-color                   rgb(245,227,207);
+@define-color bg-color                   rgb(62,42,29);
+@define-color border-color               rgb(88,68,54);
+@define-color dimmed-fg-color            rgb(199,181,162);
+@define-color disabled-fg-color          rgb(163,144,127);
+@define-color disabled-button-color      rgb(121,101,86);
+@define-color hover-color                rgb(88,68,54);
+@define-color widget-bg-color            rgb(73,53,40);
+@define-color selected-color             rgb(99,79,65);
+@define-color extreme-bg-color           rgb(43,29,20);
+@define-color extreme-selected-color     rgb(88,68,54);
+@define-color strong-border-color        rgb(126,107,91);
+@define-color stronger-border-color      rgb(126,107,91);
+@define-color edge-border-color          rgb(126,107,91);
+@define-color scrollbar-slider-color     rgb(126,107,91);
+@define-color scrollbar-trough-color     rgb(43,29,20);
+@define-color ruler-color                rgba(88,68,54,0.3);
+@define-color accent-color               rgb(224,123,74);
+@define-color accent-hover-color         rgb(230,149,110);
+@define-color on-accent-color            rgb(31,21,14);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");

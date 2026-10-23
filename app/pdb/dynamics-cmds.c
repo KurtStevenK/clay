@@ -25,113 +25,113 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer-filter.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claycontainer-filter.h"
+#include "core/claycontainer.h"
+#include "core/claydatafactory.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-dynamics_refresh_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+dynamics_refresh_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
-  gimp_data_factory_data_refresh (gimp->dynamics_factory, context);
+  clay_data_factory_data_refresh (clay->dynamics_factory, context);
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-dynamics_get_name_list_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+dynamics_get_name_list_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *filter;
   gchar **dynamics_list = NULL;
 
-  filter = g_value_get_string (gimp_value_array_index (args, 0));
+  filter = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      dynamics_list = gimp_container_get_filtered_name_array (gimp_data_factory_get_container (gimp->dynamics_factory),
+      dynamics_list = clay_container_get_filtered_name_array (clay_data_factory_get_container (clay->dynamics_factory),
                                                               filter);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), dynamics_list);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), dynamics_list);
 
   return return_vals;
 }
 
 void
-register_dynamics_procs (GimpPDB *pdb)
+register_dynamics_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-dynamics-refresh
+   * clay-dynamics-refresh
    */
-  procedure = gimp_procedure_new (dynamics_refresh_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-dynamics-refresh");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (dynamics_refresh_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-dynamics-refresh");
+  clay_procedure_set_static_help (procedure,
                                   "Refresh current paint dynamics. This function always succeeds.",
                                   "This procedure retrieves all paint dynamics currently in the user's paint dynamics path and updates the paint dynamics dialogs accordingly.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-dynamics-get-name-list
+   * clay-dynamics-get-name-list
    */
-  procedure = gimp_procedure_new (dynamics_get_name_list_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-dynamics-get-name-list");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (dynamics_get_name_list_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-dynamics-get-name-list");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve the list of loaded paint dynamics.",
                                   "This procedure returns a list of the paint dynamics that are currently available.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("filter",
                                                        "filter",
                                                        "An optional regular expression used to filter the list",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("dynamics-list",
                                                        "dynamics list",
                                                        "The list of paint dynamics names",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

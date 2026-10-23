@@ -19,8 +19,8 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "print.h"
 #include "print-settings.h"
@@ -28,8 +28,8 @@
 #include "print-page-setup.h"
 #include "print-draw-page.h"
 
-#include "libgimp/stdplugins-intl.h"
-#include "libgimpwidgets/gimpwidgets-private.h"
+#include "libclay/stdplugins-intl.h"
+#include "libclaywidgets/claywidgets-private.h"
 
 
 #define PLUG_IN_BINARY       "print"
@@ -42,7 +42,7 @@
 #endif
 
 
-G_DEFINE_QUARK (gimp-plugin-print-error-quark, gimp_plugin_print_error)
+G_DEFINE_QUARK (clay-plugin-print-error-quark, clay_plugin_print_error)
 
 
 typedef struct _Print      Print;
@@ -50,12 +50,12 @@ typedef struct _PrintClass PrintClass;
 
 struct _Print
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PrintClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -64,34 +64,34 @@ struct _PrintClass
 
 GType                     print_get_type         (void);
 
-static GList            * print_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure    * print_create_procedure (GimpPlugIn           *plug_in,
+static GList            * print_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure    * print_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray   * print_run              (GimpProcedure        *procedure,
-                                                  GimpRunMode           run_mode,
-                                                  GimpImage            *image,
-                                                  GimpDrawable        **drawables,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray   * print_run              (ClayProcedure        *procedure,
+                                                  ClayRunMode           run_mode,
+                                                  ClayImage            *image,
+                                                  ClayDrawable        **drawables,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
-static GimpPDBStatusType  print_image            (GimpImage         *image,
+static ClayPDBStatusType  print_image            (ClayImage         *image,
                                                   gboolean           interactive,
                                                   GError           **error);
 #ifndef EMBED_PAGE_SETUP
-static GimpPDBStatusType  page_setup             (GimpImage         *image);
+static ClayPDBStatusType  page_setup             (ClayImage         *image);
 #endif
 
 static void        print_show_error         (const gchar       *message);
 static void        print_operation_set_name (GtkPrintOperation *operation,
-                                             GimpImage         *image);
+                                             ClayImage         *image);
 
 static void        begin_print              (GtkPrintOperation *operation,
                                              GtkPrintContext   *context,
                                              PrintData         *data);
 static void        end_print                (GtkPrintOperation *operation,
                                              GtkPrintContext   *context,
-                                             GimpLayer        **layer);
+                                             ClayLayer        **layer);
 static void        draw_page                (GtkPrintOperation *print,
                                              GtkPrintContext   *context,
                                              gint               page_nr,
@@ -104,8 +104,8 @@ static void        custom_widget_apply      (GtkPrintOperation *operation,
                                              PrintData         *data);
 
 #ifndef EMBED_PAGE_SETUP
-static gchar     * print_temp_proc_name     (GimpImage         *image);
-static gchar     * print_temp_proc_install  (GimpImage         *image);
+static gchar     * print_temp_proc_name     (ClayImage         *image);
+static gchar     * print_temp_proc_install  (ClayImage         *image);
 
 /*  Keep a reference to the current GtkPrintOperation
  *  for access by the temporary procedure.
@@ -114,16 +114,16 @@ static GtkPrintOperation *print_operation = NULL;
 #endif
 
 
-G_DEFINE_TYPE (Print, print, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Print, print, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PRINT_TYPE)
+CLAY_MAIN (PRINT_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 print_class_init (PrintClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = print_query_procedures;
   plug_in_class->create_procedure = print_create_procedure;
@@ -136,7 +136,7 @@ print_init (Print *print)
 }
 
 static GList *
-print_query_procedures (GimpPlugIn *plug_in)
+print_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -149,34 +149,34 @@ print_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-print_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+print_create_procedure (ClayPlugIn  *plug_in,
                         const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PRINT_PROC_NAME))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             print_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("_Print..."));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_DOCUMENT_PRINT);
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/[Send]");
+      clay_procedure_set_menu_label (procedure, _("_Print..."));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_DOCUMENT_PRINT);
+      clay_procedure_add_menu_path (procedure, "<Image>/File/[Send]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Print the image"),
                                         "Print the image using the "
                                         "GTK+ Print API.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Bill Skaggs, Sven Neumann, Stefan Röllin",
                                       "Bill Skaggs <weskaggs@primate.ucdavis.edu>",
                                       "2006 - 2008");
@@ -185,24 +185,24 @@ print_create_procedure (GimpPlugIn  *plug_in,
 #ifndef EMBED_PAGE_SETUP
   else if (! strcmp (name, PAGE_SETUP_PROC_NAME))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             print_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Page Set_up..."));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_DOCUMENT_PAGE_SETUP);
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/[Send]");
+      clay_procedure_set_menu_label (procedure, _("Page Set_up..."));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_DOCUMENT_PAGE_SETUP);
+      clay_procedure_add_menu_path (procedure, "<Image>/File/[Send]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Adjust page size and orientation "
                                           "for printing"),
                                         "Adjust page size and orientation "
                                         "for printing the image using the "
                                         "GTK+ Print API.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Bill Skaggs, Sven Neumann, Stefan Röllin",
                                       "Sven Neumann <sven@gimp.org>",
                                       "2008");
@@ -212,59 +212,59 @@ print_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-print_run (GimpProcedure        *procedure,
-           GimpRunMode           run_mode,
-           GimpImage            *image,
-           GimpDrawable        **drawables,
-           GimpProcedureConfig  *config,
+static ClayValueArray *
+print_run (ClayProcedure        *procedure,
+           ClayRunMode           run_mode,
+           ClayImage            *image,
+           ClayDrawable        **drawables,
+           ClayProcedureConfig  *config,
            gpointer              run_data)
 {
-  GimpPDBStatusType  status;
+  ClayPDBStatusType  status;
   GError            *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (strcmp (gimp_procedure_get_name (procedure),
+  if (strcmp (clay_procedure_get_name (procedure),
               PRINT_PROC_NAME) == 0)
     {
-      status = print_image (image, run_mode == GIMP_RUN_INTERACTIVE, &error);
+      status = print_image (image, run_mode == CLAY_RUN_INTERACTIVE, &error);
 
-      if (error && run_mode == GIMP_RUN_INTERACTIVE)
+      if (error && run_mode == CLAY_RUN_INTERACTIVE)
         {
           print_show_error (error->message);
         }
     }
 #ifndef EMBED_PAGE_SETUP
-  else if (strcmp (gimp_procedure_get_name (procedure),
+  else if (strcmp (clay_procedure_get_name (procedure),
                    PAGE_SETUP_PROC_NAME) == 0)
     {
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         {
           status = page_setup (image);
         }
       else
         {
-          status = GIMP_PDB_CALLING_ERROR;
+          status = CLAY_PDB_CALLING_ERROR;
         }
     }
 #endif
   else
     {
-      status = GIMP_PDB_CALLING_ERROR;
+      status = CLAY_PDB_CALLING_ERROR;
     }
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpPDBStatusType
-print_image (GimpImage *image,
+static ClayPDBStatusType
+print_image (ClayImage *image,
              gboolean   interactive,
              GError   **error)
 {
   GtkPrintOperation       *operation;
   GtkPrintOperationResult  result;
-  GimpLayer               *layer;
+  ClayLayer               *layer;
   PrintData                data;
   GtkWidget               *printwindow;
 #ifndef EMBED_PAGE_SETUP
@@ -272,7 +272,7 @@ print_image (GimpImage *image,
 #endif
 
   /*  create a print layer from the projection  */
-  layer = gimp_layer_new_from_visible (image, image, PRINT_PROC_NAME);
+  layer = clay_layer_new_from_visible (image, image, PRINT_PROC_NAME);
 
   operation = gtk_print_operation_new ();
 
@@ -283,9 +283,9 @@ print_image (GimpImage *image,
 
   /* fill in the PrintData struct */
   data.image           = image;
-  data.drawable        = GIMP_DRAWABLE (layer);
-  data.unit            = gimp_get_default_unit ();
-  data.image_unit      = gimp_image_get_unit (image);
+  data.drawable        = CLAY_DRAWABLE (layer);
+  data.unit            = clay_get_default_unit ();
+  data.image_unit      = clay_image_get_unit (image);
   data.offset_x        = 0;
   data.offset_y        = 0;
   data.center          = CENTER_BOTH;
@@ -295,7 +295,7 @@ print_image (GimpImage *image,
   data.layout_gui      = NULL;
   data.has_layout_gui  = FALSE;
 
-  gimp_image_get_resolution (image, &data.xres, &data.yres);
+  clay_image_get_resolution (image, &data.xres, &data.yres);
 
   print_settings_load (&data);
 
@@ -314,20 +314,20 @@ print_image (GimpImage *image,
 #ifndef EMBED_PAGE_SETUP
   print_operation = operation;
   temp_proc = print_temp_proc_install (image);
-  gimp_plug_in_persistent_enable (gimp_get_plug_in ());
+  clay_plug_in_persistent_enable (clay_get_plug_in ());
 #endif
 
   if (interactive)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
       printwindow = NULL;
 #if defined(PLATFORM_OSX)
       /* create top level window and make it transient to use correct monitor.
          Only works properly on macOS where the plug-in is fully rendered. */
       printwindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gimp_window_set_transient (GTK_WINDOW (printwindow));
+      clay_window_set_transient (GTK_WINDOW (printwindow));
       gtk_widget_set_visible (printwindow, TRUE);
-      gimp_widget_set_title_bar_theme (printwindow);
+      clay_widget_set_title_bar_theme (printwindow);
 #endif
 
       g_signal_connect_swapped (operation, "end-print",
@@ -368,7 +368,7 @@ print_image (GimpImage *image,
     }
 
 #ifndef EMBED_PAGE_SETUP
-  gimp_plug_in_remove_temp_procedure (gimp_get_plug_in (), temp_proc);
+  clay_plug_in_remove_temp_procedure (clay_get_plug_in (), temp_proc);
   g_free (temp_proc);
   print_operation = NULL;
 #endif
@@ -376,36 +376,36 @@ print_image (GimpImage *image,
   g_object_unref (operation);
   g_clear_object (&data.layout_gui);
 
-  if (gimp_item_is_valid (GIMP_ITEM (layer)))
-    gimp_item_delete (GIMP_ITEM (layer));
+  if (clay_item_is_valid (CLAY_ITEM (layer)))
+    clay_item_delete (CLAY_ITEM (layer));
 
   switch (result)
     {
     case GTK_PRINT_OPERATION_RESULT_APPLY:
     case GTK_PRINT_OPERATION_RESULT_IN_PROGRESS:
-      return GIMP_PDB_SUCCESS;
+      return CLAY_PDB_SUCCESS;
 
     case GTK_PRINT_OPERATION_RESULT_CANCEL:
-      return GIMP_PDB_CANCEL;
+      return CLAY_PDB_CANCEL;
 
     case GTK_PRINT_OPERATION_RESULT_ERROR:
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  return GIMP_PDB_EXECUTION_ERROR;
+  return CLAY_PDB_EXECUTION_ERROR;
 }
 
 #ifndef EMBED_PAGE_SETUP
-static GimpPDBStatusType
-page_setup (GimpImage *image)
+static ClayPDBStatusType
+page_setup (ClayImage *image)
 {
   GtkPrintOperation *operation;
-  GimpProcedure     *procedure;
-  GimpValueArray    *return_vals;
+  ClayProcedure     *procedure;
+  ClayValueArray    *return_vals;
   PrintData          data = { 0, };
   gchar             *name;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   operation = gtk_print_operation_new ();
 
@@ -426,20 +426,20 @@ page_setup (GimpImage *image)
   /* we don't want the core to show an error message if the
    * temporary procedure does not exist
    */
-  gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   /* Notify the Print plug-in if Page Setup was called from there */
-  procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), name);
+  procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), name);
   if (procedure)
     {
-      return_vals = gimp_procedure_run (procedure, "image", image, NULL);
-      gimp_value_array_unref (return_vals);
+      return_vals = clay_procedure_run (procedure, "image", image, NULL);
+      clay_value_array_unref (return_vals);
     }
 
   g_free (name);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 #endif
 
@@ -458,7 +458,7 @@ print_show_error (const gchar *message)
                                             "%s", message);
 
 #ifdef PLATFORM_OSX
-  gimp_widget_set_title_bar_theme (dialog);
+  clay_widget_set_title_bar_theme (dialog);
 #endif
 
   gtk_dialog_run (GTK_DIALOG (dialog));
@@ -467,9 +467,9 @@ print_show_error (const gchar *message)
 
 static void
 print_operation_set_name (GtkPrintOperation *operation,
-                          GimpImage         *image)
+                          ClayImage         *image)
 {
-  gchar *name = gimp_image_get_name (image);
+  gchar *name = clay_image_get_name (image);
 
   gtk_print_operation_set_job_name (operation, name);
 
@@ -505,7 +505,7 @@ begin_print (GtkPrintOperation *operation,
       data->has_layout_gui = TRUE;
 
 #ifdef PLATFORM_OSX
-      gimp_widget_set_title_bar_theme (dialog);
+      clay_widget_set_title_bar_theme (dialog);
 #endif
 
       if (gtk_dialog_run (GTK_DIALOG (dialog)) != GTK_RESPONSE_ACCEPT)
@@ -520,22 +520,22 @@ begin_print (GtkPrintOperation *operation,
 
   gtk_print_operation_set_use_full_page (operation, data->use_full_page);
 
-  gimp_progress_init (_("Printing"));
+  clay_progress_init (_("Printing"));
 }
 
 static void
 end_print (GtkPrintOperation *operation,
            GtkPrintContext   *context,
-           GimpLayer        **layer)
+           ClayLayer        **layer)
 {
   /* we don't need the print layer any longer, delete it */
-  if (gimp_item_is_valid (GIMP_ITEM (*layer)))
+  if (clay_item_is_valid (CLAY_ITEM (*layer)))
     {
-      gimp_item_delete (GIMP_ITEM (*layer));
+      clay_item_delete (CLAY_ITEM (*layer));
       *layer = NULL;
     }
 
-  gimp_progress_end ();
+  clay_progress_end ();
 
   /* generate events to solve the problems described in bug #466928 */
   g_timeout_add_seconds (1, (GSourceFunc) gtk_true, NULL);
@@ -551,7 +551,7 @@ draw_page (GtkPrintOperation *operation,
 
   if (print_draw_page (context, data, &error))
     {
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
     }
   else
     {
@@ -587,12 +587,12 @@ custom_widget_apply (GtkPrintOperation *operation,
 }
 
 #ifndef EMBED_PAGE_SETUP
-static GimpValueArray *
-print_temp_proc_run (GimpProcedure        *procedure,
-                     GimpProcedureConfig  *config,
+static ClayValueArray *
+print_temp_proc_run (ClayProcedure        *procedure,
+                     ClayProcedureConfig  *config,
                      gpointer              run_data)
 {
-  GimpImage *image;
+  ClayImage *image;
 
   g_object_get (config, "image", &image, NULL);
 
@@ -601,45 +601,45 @@ print_temp_proc_run (GimpProcedure        *procedure,
 
   g_object_unref (image);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gchar *
-print_temp_proc_name (GimpImage *image)
+print_temp_proc_name (ClayImage *image)
 {
   return g_strdup_printf (PRINT_TEMP_PROC_NAME "-%d",
-                          gimp_image_get_id (image));
+                          clay_image_get_id (image));
 }
 
 static gchar *
-print_temp_proc_install (GimpImage *image)
+print_temp_proc_install (ClayImage *image)
 {
-  GimpPlugIn    *plug_in = gimp_get_plug_in ();
+  ClayPlugIn    *plug_in = clay_get_plug_in ();
   gchar         *name    = print_temp_proc_name (image);
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
-  procedure = gimp_procedure_new (plug_in, name,
-                                  GIMP_PDB_PROC_TYPE_TEMPORARY,
+  procedure = clay_procedure_new (plug_in, name,
+                                  CLAY_PDB_PROC_TYPE_TEMPORARY,
                                   print_temp_proc_run, NULL, NULL);
 
-  gimp_procedure_set_documentation (procedure,
+  clay_procedure_set_documentation (procedure,
                                     "DON'T USE THIS ONE",
                                     "Temporary procedure to notify the "
                                     "Print plug-in about changes to the "
                                     "Page Setup.",
                                     NULL);
-  gimp_procedure_set_attribution (procedure,
+  clay_procedure_set_attribution (procedure,
                                   "Sven Neumann",
                                   "Sven Neumann",
                                   "2008");
 
-  gimp_procedure_add_image_argument (procedure, "image",
+  clay_procedure_add_image_argument (procedure, "image",
                                      "Image",
                                      "The image to notify about",
                                      FALSE,
                                      G_PARAM_READWRITE);
 
-  gimp_plug_in_add_temp_procedure (plug_in, procedure);
+  clay_plug_in_add_temp_procedure (plug_in, procedure);
   g_object_unref (procedure);
 
   return name;

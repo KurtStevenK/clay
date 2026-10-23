@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -24,15 +24,15 @@
 
 #include <stdio.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "imap_commands.h"
 #include "imap_main.h"
 #include "imap_menu.h"
 #include "imap_selection.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static void
@@ -308,7 +308,7 @@ render_comment (GtkTreeViewColumn *column, GtkCellRenderer *cell,
 
 Selection_t*
 make_selection (ObjectList_t *object_list,
-                GimpImap     *imap)
+                ClayImap     *imap)
 {
   Selection_t *data = g_new(Selection_t, 1);
   GtkWidget *swin, *frame, *hbox;
@@ -336,7 +336,7 @@ make_selection (ObjectList_t *object_list,
   gtk_box_pack_start (GTK_BOX (hbox), toolbar, TRUE, TRUE, 0);
 
   /* Create selection */
-  frame = gimp_frame_new (_("Selection"));
+  frame = clay_frame_new (_("Selection"));
   gtk_box_pack_start (GTK_BOX (hbox), frame, TRUE, TRUE, 0);
   gtk_widget_set_visible (frame, TRUE);
 

@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   palettes_actions_setup  (GimpActionGroup *group);
-void   palettes_actions_update (GimpActionGroup *group,
+void   palettes_actions_setup  (ClayActionGroup *group);
+void   palettes_actions_update (ClayActionGroup *group,
                                 gpointer         user_data);

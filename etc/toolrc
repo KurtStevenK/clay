@@ -1,185 +1,185 @@
-# GIMP toolrc
+# Clay toolrc
 
 (file-version 1)
 
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-move-tool")
+    (active-tool "clay-move-tool")
     (children
-        (GimpToolInfo "gimp-move-tool"
-            (icon-name "gimp-tool-move")
+        (ClayToolInfo "clay-move-tool"
+            (icon-name "clay-tool-move")
             (visible yes))
-        (GimpToolInfo "gimp-align-tool"
-            (icon-name "gimp-tool-align")
+        (ClayToolInfo "clay-align-tool"
+            (icon-name "clay-tool-align")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-rect-select-tool")
+    (active-tool "clay-rect-select-tool")
     (children
-        (GimpToolInfo "gimp-rect-select-tool"
-            (icon-name "gimp-tool-rect-select")
+        (ClayToolInfo "clay-rect-select-tool"
+            (icon-name "clay-tool-rect-select")
             (visible yes))
-        (GimpToolInfo "gimp-ellipse-select-tool"
-            (icon-name "gimp-tool-ellipse-select")
+        (ClayToolInfo "clay-ellipse-select-tool"
+            (icon-name "clay-tool-ellipse-select")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-free-select-tool")
+    (active-tool "clay-free-select-tool")
     (children
-        (GimpToolInfo "gimp-free-select-tool"
-            (icon-name "gimp-tool-free-select")
+        (ClayToolInfo "clay-free-select-tool"
+            (icon-name "clay-tool-free-select")
             (visible yes))
-        (GimpToolInfo "gimp-iscissors-tool"
-            (icon-name "gimp-tool-iscissors")
+        (ClayToolInfo "clay-iscissors-tool"
+            (icon-name "clay-tool-iscissors")
             (visible yes))
-        (GimpToolInfo "gimp-foreground-select-tool"
-            (icon-name "gimp-tool-foreground-select")
+        (ClayToolInfo "clay-foreground-select-tool"
+            (icon-name "clay-tool-foreground-select")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-fuzzy-select-tool")
+    (active-tool "clay-fuzzy-select-tool")
     (children
-        (GimpToolInfo "gimp-fuzzy-select-tool"
-            (icon-name "gimp-tool-fuzzy-select")
+        (ClayToolInfo "clay-fuzzy-select-tool"
+            (icon-name "clay-tool-fuzzy-select")
             (visible yes))
-        (GimpToolInfo "gimp-by-color-select-tool"
-            (icon-name "gimp-tool-by-color-select")
+        (ClayToolInfo "clay-by-color-select-tool"
+            (icon-name "clay-tool-by-color-select")
             (visible yes))))
-(GimpToolInfo "gimp-crop-tool"
-    (icon-name "gimp-tool-crop")
+(ClayToolInfo "clay-crop-tool"
+    (icon-name "clay-tool-crop")
     (visible yes))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-unified-transform-tool")
+    (active-tool "clay-unified-transform-tool")
     (children
-        (GimpToolInfo "gimp-unified-transform-tool"
-            (icon-name "gimp-tool-unified-transform")
+        (ClayToolInfo "clay-unified-transform-tool"
+            (icon-name "clay-tool-unified-transform")
             (visible yes))
-        (GimpToolInfo "gimp-rotate-tool"
-            (icon-name "gimp-tool-rotate")
+        (ClayToolInfo "clay-rotate-tool"
+            (icon-name "clay-tool-rotate")
             (visible yes))
-        (GimpToolInfo "gimp-scale-tool"
-            (icon-name "gimp-tool-scale")
+        (ClayToolInfo "clay-scale-tool"
+            (icon-name "clay-tool-scale")
             (visible yes))
-        (GimpToolInfo "gimp-shear-tool"
-            (icon-name "gimp-tool-shear")
+        (ClayToolInfo "clay-shear-tool"
+            (icon-name "clay-tool-shear")
             (visible yes))
-        (GimpToolInfo "gimp-flip-tool"
-            (icon-name "gimp-tool-flip")
+        (ClayToolInfo "clay-flip-tool"
+            (icon-name "clay-tool-flip")
             (visible yes))
-        (GimpToolInfo "gimp-perspective-tool"
-            (icon-name "gimp-tool-perspective")
+        (ClayToolInfo "clay-perspective-tool"
+            (icon-name "clay-tool-perspective")
             (visible yes))
-        (GimpToolInfo "gimp-transform-3d-tool"
-            (icon-name "gimp-tool-transform-3d")
+        (ClayToolInfo "clay-transform-3d-tool"
+            (icon-name "clay-tool-transform-3d")
             (visible yes))
-        (GimpToolInfo "gimp-handle-transform-tool"
-            (icon-name "gimp-tool-handle-transform")
+        (ClayToolInfo "clay-handle-transform-tool"
+            (icon-name "clay-tool-handle-transform")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-warp-tool")
+    (active-tool "clay-warp-tool")
     (children
-        (GimpToolInfo "gimp-warp-tool"
-            (icon-name "gimp-tool-warp")
+        (ClayToolInfo "clay-warp-tool"
+            (icon-name "clay-tool-warp")
             (visible yes))
-        (GimpToolInfo "gimp-cage-tool"
-            (icon-name "gimp-tool-cage")
+        (ClayToolInfo "clay-cage-tool"
+            (icon-name "clay-tool-cage")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-bucket-fill-tool")
+    (active-tool "clay-bucket-fill-tool")
     (children
-        (GimpToolInfo "gimp-bucket-fill-tool"
-            (icon-name "gimp-tool-bucket-fill")
+        (ClayToolInfo "clay-bucket-fill-tool"
+            (icon-name "clay-tool-bucket-fill")
             (visible yes))
-        (GimpToolInfo "gimp-gradient-tool"
-            (icon-name "gimp-tool-gradient")
+        (ClayToolInfo "clay-gradient-tool"
+            (icon-name "clay-tool-gradient")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-paintbrush-tool")
+    (active-tool "clay-paintbrush-tool")
     (children
-        (GimpToolInfo "gimp-paintbrush-tool"
-            (icon-name "gimp-tool-paintbrush")
+        (ClayToolInfo "clay-paintbrush-tool"
+            (icon-name "clay-tool-paintbrush")
             (visible yes))
-        (GimpToolInfo "gimp-pencil-tool"
-            (icon-name "gimp-tool-pencil")
+        (ClayToolInfo "clay-pencil-tool"
+            (icon-name "clay-tool-pencil")
             (visible yes))
-        (GimpToolInfo "gimp-airbrush-tool"
-            (icon-name "gimp-tool-airbrush")
+        (ClayToolInfo "clay-airbrush-tool"
+            (icon-name "clay-tool-airbrush")
             (visible yes))
-        (GimpToolInfo "gimp-ink-tool"
-            (icon-name "gimp-tool-ink")
+        (ClayToolInfo "clay-ink-tool"
+            (icon-name "clay-tool-ink")
             (visible yes))
-        (GimpToolInfo "gimp-mypaint-brush-tool"
-            (icon-name "gimp-tool-mypaint-brush")
+        (ClayToolInfo "clay-mypaint-brush-tool"
+            (icon-name "clay-tool-mypaint-brush")
             (visible yes))))
-(GimpToolInfo "gimp-eraser-tool"
-    (icon-name "gimp-tool-eraser")
+(ClayToolInfo "clay-eraser-tool"
+    (icon-name "clay-tool-eraser")
     (visible yes))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-clone-tool")
+    (active-tool "clay-clone-tool")
     (children
-        (GimpToolInfo "gimp-clone-tool"
-            (icon-name "gimp-tool-clone")
+        (ClayToolInfo "clay-clone-tool"
+            (icon-name "clay-tool-clone")
             (visible yes))
-        (GimpToolInfo "gimp-perspective-clone-tool"
-            (icon-name "gimp-tool-perspective-clone")
+        (ClayToolInfo "clay-perspective-clone-tool"
+            (icon-name "clay-tool-perspective-clone")
             (visible yes))
-        (GimpToolInfo "gimp-heal-tool"
-            (icon-name "gimp-tool-heal")
+        (ClayToolInfo "clay-heal-tool"
+            (icon-name "clay-tool-heal")
             (visible yes))))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-smudge-tool")
+    (active-tool "clay-smudge-tool")
     (children
-        (GimpToolInfo "gimp-smudge-tool"
-            (icon-name "gimp-tool-smudge")
+        (ClayToolInfo "clay-smudge-tool"
+            (icon-name "clay-tool-smudge")
             (visible yes))
-        (GimpToolInfo "gimp-convolve-tool"
-            (icon-name "gimp-tool-blur")
+        (ClayToolInfo "clay-convolve-tool"
+            (icon-name "clay-tool-blur")
             (visible yes))
-        (GimpToolInfo "gimp-dodge-burn-tool"
-            (icon-name "gimp-tool-dodge")
+        (ClayToolInfo "clay-dodge-burn-tool"
+            (icon-name "clay-tool-dodge")
             (visible yes))))
-(GimpToolInfo "gimp-path-tool"
-    (icon-name "gimp-tool-path")
+(ClayToolInfo "clay-path-tool"
+    (icon-name "clay-tool-path")
     (visible yes))
-(GimpToolInfo "gimp-text-tool"
-    (icon-name "gimp-tool-text")
+(ClayToolInfo "clay-text-tool"
+    (icon-name "clay-tool-text")
     (visible yes))
-(GimpToolGroup "tool group"
+(ClayToolGroup "tool group"
     (visible yes)
-    (active-tool "gimp-color-picker-tool")
+    (active-tool "clay-color-picker-tool")
     (children
-        (GimpToolInfo "gimp-color-picker-tool"
-            (icon-name "gimp-tool-color-picker")
+        (ClayToolInfo "clay-color-picker-tool"
+            (icon-name "clay-tool-color-picker")
             (visible yes))
-        (GimpToolInfo "gimp-measure-tool"
-            (icon-name "gimp-tool-measure")
+        (ClayToolInfo "clay-measure-tool"
+            (icon-name "clay-tool-measure")
             (visible yes))))
-(GimpToolInfo "gimp-zoom-tool"
-    (icon-name "gimp-tool-zoom")
+(ClayToolInfo "clay-zoom-tool"
+    (icon-name "clay-tool-zoom")
     (visible yes))
-(GimpToolInfo "gimp-brightness-contrast-tool"
-    (icon-name "gimp-tool-brightness-contrast")
+(ClayToolInfo "clay-brightness-contrast-tool"
+    (icon-name "clay-tool-brightness-contrast")
     (visible no))
-(GimpToolInfo "gimp-threshold-tool"
-    (icon-name "gimp-tool-threshold")
+(ClayToolInfo "clay-threshold-tool"
+    (icon-name "clay-tool-threshold")
     (visible no))
-(GimpToolInfo "gimp-levels-tool"
-    (icon-name "gimp-tool-levels")
+(ClayToolInfo "clay-levels-tool"
+    (icon-name "clay-tool-levels")
     (visible no))
-(GimpToolInfo "gimp-curves-tool"
-    (icon-name "gimp-tool-curves")
+(ClayToolInfo "clay-curves-tool"
+    (icon-name "clay-tool-curves")
     (visible no))
-(GimpToolInfo "gimp-offset-tool"
-    (icon-name "gimp-tool-offset")
+(ClayToolInfo "clay-offset-tool"
+    (icon-name "clay-tool-offset")
     (visible no))
-(GimpToolInfo "gimp-gegl-tool"
-    (icon-name "gimp-gegl")
+(ClayToolInfo "clay-gegl-tool"
+    (icon-name "clay-gegl")
     (visible no))
 
 # end of toolrc

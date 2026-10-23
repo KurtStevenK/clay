@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -28,10 +28,10 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include <libgimp/stdplugins-intl.h>
+#include <libclay/stdplugins-intl.h>
 
 #include "dds.h"
 #include "ddsread.h"
@@ -48,12 +48,12 @@ typedef struct _DdsClass DdsClass;
 
 struct _Dds
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _DdsClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -62,37 +62,37 @@ struct _DdsClass
 
 GType                   dds_get_type         (void);
 
-static GList          * dds_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * dds_create_procedure (GimpPlugIn            *plug_in,
+static GList          * dds_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * dds_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * dds_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * dds_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * dds_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * dds_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
 
-G_DEFINE_TYPE (Dds, dds, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Dds, dds, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (DDS_TYPE)
+CLAY_MAIN (DDS_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 dds_class_init (DdsClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = dds_query_procedures;
   plug_in_class->create_procedure = dds_create_procedure;
@@ -105,7 +105,7 @@ dds_init (Dds *dds)
 }
 
 static GList *
-dds_query_procedures (GimpPlugIn *plug_in)
+dds_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -115,42 +115,42 @@ dds_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-dds_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+dds_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            dds_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("DDS image"));
+      clay_procedure_set_menu_label (procedure, _("DDS image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in DDS image format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Shawn Kirst",
                                       "Shawn Kirst",
                                       "2008");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/vnd.ms-dds,image/x-dds,image/dds");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "dds");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,DDS");
 
-      gimp_procedure_add_boolean_argument (procedure, "load-mipmaps",
+      clay_procedure_add_boolean_argument (procedure, "load-mipmaps",
                                            _("Load _mipmaps"),
                                            _("Load mipmaps if present"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "flip-image",
+      clay_procedure_add_boolean_argument (procedure, "flip-image",
                                            _("Flip image _vertically"),
                                            _("Flip the image vertically on import"),
                                            FALSE,
@@ -158,40 +158,40 @@ dds_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      GimpChoice *choice;
+      ClayChoice *choice;
 
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, dds_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED, GRAY, RGB");
+      clay_procedure_set_image_types (procedure, "INDEXED, GRAY, RGB");
 
-      gimp_procedure_set_menu_label (procedure, _("DDS image"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("DDS image"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("DDS"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in DDS image format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Shawn Kirst",
                                       "Shawn Kirst",
                                       "2008");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/dds");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "dds");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS,
                                               NULL, NULL, NULL);
 
-      choice = gimp_choice_new_with_values ("none",   DDS_COMPRESS_NONE,   _("None"),                  NULL,
+      choice = clay_choice_new_with_values ("none",   DDS_COMPRESS_NONE,   _("None"),                  NULL,
                                             "bc1",    DDS_COMPRESS_BC1,    _("BC1 / DXT1"),            NULL,
                                             "bc2",    DDS_COMPRESS_BC2,    _("BC2 / DXT3"),            NULL,
                                             "bc3",    DDS_COMPRESS_BC3,    _("BC3 / DXT5"),            NULL,
@@ -204,22 +204,22 @@ dds_create_procedure (GimpPlugIn  *plug_in,
                                             "ycocg",  DDS_COMPRESS_YCOCG,  _("YCoCg (DXT5)"),          NULL,
                                             "ycocgs", DDS_COMPRESS_YCOCGS, _("YCoCg scaled (DXT5)"),   NULL,
                                             NULL);
-      gimp_choice_add_deprecated (choice, "bc3, ", DDS_COMPRESS_BC3, "bc3", NULL);
+      clay_choice_add_deprecated (choice, "bc3, ", DDS_COMPRESS_BC3, "bc3", NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "compression-format",
+      clay_procedure_add_choice_argument (procedure, "compression-format",
                                           _("Compressio_n"),
                                           _("Compression format"),
                                           choice,
                                           "none",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "perceptual-metric",
+      clay_procedure_add_boolean_argument (procedure, "perceptual-metric",
                                            _("Use percept_ual error metric"),
                                            _("Use a perceptual error metric during compression"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      choice = gimp_choice_new_with_values ("default", DDS_FORMAT_DEFAULT, _("Default"), NULL,
+      choice = clay_choice_new_with_values ("default", DDS_FORMAT_DEFAULT, _("Default"), NULL,
                                             "rgb8",    DDS_FORMAT_RGB8,    _("RGB8"),    NULL,
                                             "rgba8",   DDS_FORMAT_RGBA8,   _("RGBA8"),   NULL,
                                             "bgr8",    DDS_FORMAT_BGR8,    _("BGR8"),    NULL,
@@ -235,19 +235,19 @@ dds_create_procedure (GimpPlugIn  *plug_in,
                                             "aexp",    DDS_FORMAT_AEXP,    _("AEXP"),    NULL,
                                             "ycocg",   DDS_FORMAT_YCOCG,   _("YCOCG"),   NULL,
                                             NULL);
-      gimp_choice_add_deprecated (choice, "abgr8, ", DDS_FORMAT_ABGR8, "abgr8", NULL);
+      clay_choice_add_deprecated (choice, "abgr8, ", DDS_FORMAT_ABGR8, "abgr8", NULL);
 
-      gimp_procedure_add_choice_argument (procedure, "format",
+      clay_procedure_add_choice_argument (procedure, "format",
                                           _("_Format"),
                                           _("Pixel format"),
                                           choice,
                                           "default",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "save-type",
+      clay_procedure_add_choice_argument (procedure, "save-type",
                                           _("Sav_e type"),
                                           _("How to export the image"),
-                                          gimp_choice_new_with_values ("layer",  DDS_SAVE_SELECTED_LAYER, _("Selected layer"),     NULL,
+                                          clay_choice_new_with_values ("layer",  DDS_SAVE_SELECTED_LAYER, _("Selected layer"),     NULL,
                                                                        "canvas", DDS_SAVE_VISIBLE_LAYERS, _("All visible layers"), NULL,
                                                                        "cube",   DDS_SAVE_CUBEMAP,        _("As cube map"),        NULL,
                                                                        "volume", DDS_SAVE_VOLUMEMAP,      _("As volume map"),      NULL,
@@ -256,39 +256,39 @@ dds_create_procedure (GimpPlugIn  *plug_in,
                                           "layer",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "flip-image",
+      clay_procedure_add_boolean_argument (procedure, "flip-image",
                                            _("Flip image _vertically on export"),
                                            _("Flip the image vertically on export"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "transparent-color",
+      clay_procedure_add_boolean_argument (procedure, "transparent-color",
                                            _("Set _transparent color"),
                                            _("Make an indexed color transparent"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "transparent-index",
+      clay_procedure_add_int_argument (procedure, "transparent-index",
                                        _("Transparent inde_x"),
                                        _("Index of transparent color or -1 to disable "
                                          "(for indexed images only)."),
                                        0, 255, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "mipmaps",
+      clay_procedure_add_choice_argument (procedure, "mipmaps",
                                           _("_Mipmaps"),
                                           _("How to handle mipmaps"),
-                                          gimp_choice_new_with_values ("none",     DDS_MIPMAP_NONE,     _("No mipmaps"),           NULL,
+                                          clay_choice_new_with_values ("none",     DDS_MIPMAP_NONE,     _("No mipmaps"),           NULL,
                                                                        "generate", DDS_MIPMAP_GENERATE, _("Generate mipmaps"),     NULL,
                                                                        "existing", DDS_MIPMAP_EXISTING, _("Use existing mipmaps"), NULL,
                                                                        NULL),
                                           "none",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "mipmap-filter",
+      clay_procedure_add_choice_argument (procedure, "mipmap-filter",
                                           _("F_ilter"),
                                           _("Filtering to use when generating mipmaps"),
-                                          gimp_choice_new_with_values ("default",   DDS_MIPMAP_FILTER_DEFAULT,   _("Default"),     NULL,
+                                          clay_choice_new_with_values ("default",   DDS_MIPMAP_FILTER_DEFAULT,   _("Default"),     NULL,
                                                                        "nearest",   DDS_MIPMAP_FILTER_NEAREST,   _("Nearest"),     NULL,
                                                                        "box",       DDS_MIPMAP_FILTER_BOX,       _("Box"),         NULL,
                                                                        "triangle",  DDS_MIPMAP_FILTER_TRIANGLE,  _("Triangle"),    NULL,
@@ -302,10 +302,10 @@ dds_create_procedure (GimpPlugIn  *plug_in,
                                           "default",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "mipmap-wrap",
+      clay_procedure_add_choice_argument (procedure, "mipmap-wrap",
                                           _("_Wrap mode"),
                                           _("Wrap mode to use when generating mipmaps"),
-                                          gimp_choice_new_with_values ("default", DDS_MIPMAP_WRAP_DEFAULT, _("Default"), NULL,
+                                          clay_choice_new_with_values ("default", DDS_MIPMAP_WRAP_DEFAULT, _("Default"), NULL,
                                                                        "mirror",  DDS_MIPMAP_WRAP_MIRROR,  _("Mirror"),  NULL,
                                                                        "repeat",  DDS_MIPMAP_WRAP_REPEAT,  _("Repeat"),  NULL,
                                                                        "clamp",   DDS_MIPMAP_WRAP_CLAMP,   _("Clamp"),   NULL,
@@ -313,32 +313,32 @@ dds_create_procedure (GimpPlugIn  *plug_in,
                                           "default",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "gamma-correct",
+      clay_procedure_add_boolean_argument (procedure, "gamma-correct",
                                            _("Appl_y gamma correction"),
                                            _("Use gamma correct mipmap filtering"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "srgb",
+      clay_procedure_add_boolean_argument (procedure, "srgb",
                                            _("Use sRG_B colorspace"),
                                            _("Use sRGB colorspace for gamma correction"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "gamma",
+      clay_procedure_add_double_argument (procedure, "gamma",
                                           _("_Gamma"),
                                           _("Gamma value to use for gamma correction (e.g. 2.2)"),
                                           0.0, 10.0, 0.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "preserve-alpha-coverage",
+      clay_procedure_add_boolean_argument (procedure, "preserve-alpha-coverage",
                                            _("Preserve al_pha test coverage"),
                                            _("Preserve alpha test coverage for alpha "
                                              "channel maps"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "alpha-test-threshold",
+      clay_procedure_add_double_argument (procedure, "alpha-test-threshold",
                                           _("Alp_ha test threshold"),
                                           _("Alpha test threshold value for which alpha test "
                                             "coverage should be preserved"),
@@ -349,66 +349,66 @@ dds_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-dds_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+dds_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray      *return_vals;
-  GimpPDBStatusType    status;
-  GimpImage           *image;
+  ClayValueArray      *return_vals;
+  ClayPDBStatusType    status;
+  ClayImage           *image;
   GError              *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  status = read_dds (file, &image, run_mode == GIMP_RUN_INTERACTIVE,
+  status = read_dds (file, &image, run_mode == CLAY_RUN_INTERACTIVE,
                      procedure, config, &error);
 
-  if (status != GIMP_PDB_SUCCESS)
-    return gimp_procedure_new_return_values (procedure, status, error);
+  if (status != CLAY_PDB_SUCCESS)
+    return clay_procedure_new_return_values (procedure, status, error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-dds_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+dds_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
-  GimpLayer        **drawables;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
+  ClayLayer        **drawables;
   GError            *error  = NULL;
   gdouble            gamma;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
-    gimp_ui_init ("dds");
+  if (run_mode == CLAY_RUN_INTERACTIVE)
+    clay_ui_init ("dds");
 
-  export    = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_get_selected_layers (image);
+  export    = clay_export_options_get_image (options, &image);
+  drawables = clay_image_get_selected_layers (image);
 
   g_object_get (config,
                 "gamma", &gamma,
                 NULL);
 
-  /* gimp_gamma () got removed and was always returning 2.2 anyway.
+  /* clay_gamma () got removed and was always returning 2.2 anyway.
    * XXX Review this piece of code if we expect gamma value could be
    * parameterized.
    */
@@ -420,14 +420,14 @@ dds_export (GimpProcedure        *procedure,
   /* TODO: support multiple-layers selection, especially as DDS has
    * DDS_SAVE_SELECTED_LAYER option support.
    */
-  status = write_dds (file, image, GIMP_DRAWABLE (drawables[0]),
-                      run_mode == GIMP_RUN_INTERACTIVE,
+  status = write_dds (file, image, CLAY_DRAWABLE (drawables[0]),
+                      run_mode == CLAY_RUN_INTERACTIVE,
                       procedure, config,
-                      export == GIMP_EXPORT_EXPORT);
+                      export == CLAY_EXPORT_EXPORT);
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }

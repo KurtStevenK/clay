@@ -27,30 +27,30 @@
 #include <glib.h>
 #include <zlib.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpbrush.h"
-#include "core/gimpbrush-load.h"
-#include "core/gimpbrush-private.h"
-#include "core/gimpdrawable.h"
-#include "core/gimpextension.h"
-#include "core/gimpextensionmanager.h"
-#include "core/gimpextension-error.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer-new.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimptempbuf.h"
-#include "core/gimp-utils.h"
+#include "core/clay.h"
+#include "core/claybrush.h"
+#include "core/claybrush-load.h"
+#include "core/claybrush-private.h"
+#include "core/claydrawable.h"
+#include "core/clayextension.h"
+#include "core/clayextensionmanager.h"
+#include "core/clayextension-error.h"
+#include "core/clayimage.h"
+#include "core/claylayer-new.h"
+#include "core/clayparamspecs.h"
+#include "core/claytempbuf.h"
+#include "core/clay-utils.h"
 
-#include "pdb/gimpprocedure.h"
+#include "pdb/clayprocedure.h"
 
 #include "file-data-gex.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
@@ -143,7 +143,7 @@ file_gex_validate_path (const gchar  *path,
 
   if (g_path_is_absolute (path) || g_strcmp0 (dirname, "/") == 0)
     {
-      *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+      *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                             _("Absolute path are forbidden in Clay extension '%s': %s"),
                             file_name, path);
       g_free (dirname);
@@ -154,7 +154,7 @@ file_gex_validate_path (const gchar  *path,
     {
       if (first)
         {
-          *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+          *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                 _("File not allowed in root of Clay extension '%s': %s"),
                                 file_name, path);
           valid = FALSE;
@@ -165,7 +165,7 @@ file_gex_validate_path (const gchar  *path,
             {
               if (g_strcmp0 (path, *plugin_id) != 0)
                 {
-                  *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                  *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                         _("File not in Clay extension '%s' folder id '%s': %s"),
                                         file_name, *plugin_id, path);
                   valid = FALSE;
@@ -243,7 +243,7 @@ file_gex_validate (GFile        *file,
 
               while (archive_read_next_header (a, &entry) == ARCHIVE_OK &&
                      file_gex_validate_path (archive_entry_pathname (entry),
-                                             gimp_file_get_utf8_name (file),
+                                             clay_file_get_utf8_name (file),
                                              TRUE, &plugin_id, error))
                 {
                   if (plugin_id && ! appdata_path)
@@ -264,9 +264,9 @@ file_gex_validate (GFile        *file,
 
                               if (r == ARCHIVE_FATAL)
                                 {
-                                  *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                                  *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                                         _("Fatal error when uncompressing Clay extension '%s': %s"),
-                                                        gimp_file_get_utf8_name (file),
+                                                        clay_file_get_utf8_name (file),
                                                         archive_error_string (a));
                                   g_string_free (appstring, TRUE);
                                   break;
@@ -308,9 +308,9 @@ file_gex_validate (GFile        *file,
 
                           if (g_strcmp0 (as_component_get_id (*component), plugin_id) != 0)
                             {
-                              *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                              *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                                     _("Clay extension '%s' directory (%s) different from AppStream id: %s"),
-                                                    gimp_file_get_utf8_name (file),
+                                                    clay_file_get_utf8_name (file),
                                                     plugin_id, as_component_get_id (*component));
                               g_clear_object (metadata);
                             }
@@ -322,9 +322,9 @@ file_gex_validate (GFile        *file,
                     }
                   else
                     {
-                      *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                      *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                             _("Clay extension '%s' requires an AppStream file: %s"),
-                                            gimp_file_get_utf8_name (file),
+                                            clay_file_get_utf8_name (file),
                                             appdata_path);
                     }
                 }
@@ -337,9 +337,9 @@ file_gex_validate (GFile        *file,
             }
           else
             {
-              *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+              *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                     _("Invalid Clay extension '%s': %s"),
-                                    gimp_file_get_utf8_name (file),
+                                    clay_file_get_utf8_name (file),
                                     archive_error_string (a));
             }
 
@@ -350,7 +350,7 @@ file_gex_validate (GFile        *file,
         }
       else
         {
-          *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+          *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                 "%s: archive_read_new() failed.", G_STRFUNC);
         }
 
@@ -359,7 +359,7 @@ file_gex_validate (GFile        *file,
   else
     {
       g_prefix_error (error, _("Could not open '%s' for reading: "),
-                      gimp_file_get_utf8_name (file));
+                      clay_file_get_utf8_name (file));
     }
 
   return success;
@@ -371,7 +371,7 @@ file_gex_decompress (GFile   *file,
                      GError **error)
 {
   GInputStream *input;
-  GFile        *ext_dir = gimp_directory_file ("extensions", NULL);
+  GFile        *ext_dir = clay_directory_file ("extensions", NULL);
   gchar        *plugin_dir = NULL;
   gboolean      success = FALSE;
 
@@ -410,7 +410,7 @@ file_gex_decompress (GFile   *file,
                      /* Re-validate just in case the archive got swapped
                       * between validation and decompression. */
                      file_gex_validate_path (archive_entry_pathname (entry),
-                                             gimp_file_get_utf8_name (file),
+                                             clay_file_get_utf8_name (file),
                                              TRUE, &plugin_id, error))
                 {
                   gchar       *path;
@@ -425,9 +425,9 @@ file_gex_decompress (GFile   *file,
                   r = archive_write_header (ext, entry);
                   if (r < ARCHIVE_WARN)
                     {
-                      *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                      *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                             _("Fatal error when uncompressing Clay extension '%s': %s"),
-                                            gimp_file_get_utf8_name (file),
+                                            clay_file_get_utf8_name (file),
                                             archive_error_string (ext));
                       break;
                     }
@@ -443,9 +443,9 @@ file_gex_decompress (GFile   *file,
                             }
                           else if (r < ARCHIVE_WARN)
                             {
-                              *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                              *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                                     _("Fatal error when uncompressing Clay extension '%s': %s"),
-                                                    gimp_file_get_utf8_name (file),
+                                                    clay_file_get_utf8_name (file),
                                                     archive_error_string (a));
                               break;
                             }
@@ -454,15 +454,15 @@ file_gex_decompress (GFile   *file,
                           if (r == ARCHIVE_WARN)
                             {
                               g_printerr (_("Warning when uncompressing Clay extension '%s': %s\n"),
-                                          gimp_file_get_utf8_name (file),
+                                          clay_file_get_utf8_name (file),
                                           archive_error_string (ext));
                               break;
                             }
                           else if (r < ARCHIVE_OK)
                             {
-                              *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                              *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                                     _("Fatal error when uncompressing Clay extension '%s': %s"),
-                                                    gimp_file_get_utf8_name (file),
+                                                    clay_file_get_utf8_name (file),
                                                     archive_error_string (ext));
                               break;
                             }
@@ -474,9 +474,9 @@ file_gex_decompress (GFile   *file,
                   r = archive_write_finish_entry (ext);
                   if (r < ARCHIVE_OK)
                     {
-                      *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+                      *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                             _("Fatal error when uncompressing Clay extension '%s': %s"),
-                                            gimp_file_get_utf8_name (file),
+                                            clay_file_get_utf8_name (file),
                                             archive_error_string (ext));
                       break;
                     }
@@ -484,9 +484,9 @@ file_gex_decompress (GFile   *file,
             }
           else
             {
-              *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+              *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                     _("Invalid Clay extension '%s': %s"),
-                                    gimp_file_get_utf8_name (file),
+                                    clay_file_get_utf8_name (file),
                                     archive_error_string (a));
             }
 
@@ -500,7 +500,7 @@ file_gex_decompress (GFile   *file,
         }
       else
         {
-          *error = g_error_new (GIMP_EXTENSION_ERROR, GIMP_EXTENSION_FAILED,
+          *error = g_error_new (CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
                                 "%s: archive_read_new() failed.", G_STRFUNC);
         }
 
@@ -509,7 +509,7 @@ file_gex_decompress (GFile   *file,
   else
     {
       g_prefix_error (error, _("Could not open '%s' for reading: "),
-                      gimp_file_get_utf8_name (file));
+                      clay_file_get_utf8_name (file));
     }
 
   if (success)
@@ -522,24 +522,24 @@ file_gex_decompress (GFile   *file,
 
 /*  public functions  */
 
-GimpValueArray *
-file_gex_load_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+ClayValueArray *
+file_gex_load_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   GFile          *file;
   gchar          *ext_dir   = NULL;
   AsMetadata     *metadata  = NULL;
   AsComponent    *component = NULL;
   gboolean        success   = FALSE;
 
-  gimp_set_busy (gimp);
+  clay_set_busy (clay);
 
-  file = g_value_get_object (gimp_value_array_index (args, 1));
+  file = g_value_get_object (clay_value_array_index (args, 1));
 
   success = file_gex_validate (file, &metadata, &component, error);
   if (success)
@@ -551,11 +551,11 @@ file_gex_load_invoker (GimpProcedure         *procedure,
 
   if (ext_dir)
     {
-      GimpExtension *extension;
+      ClayExtension *extension;
       GError        *rm_error = NULL;
 
-      extension = gimp_extension_new (ext_dir, TRUE);
-      success   = gimp_extension_manager_install (gimp->extension_manager,
+      extension = clay_extension_new (ext_dir, TRUE);
+      success   = clay_extension_manager_install (clay->extension_manager,
                                                   extension, error);
 
       if (! success)
@@ -566,7 +566,7 @@ file_gex_load_invoker (GimpProcedure         *procedure,
 
           file = g_file_new_for_path (ext_dir);
 
-          if (! gimp_file_delete_recursive (file, &rm_error))
+          if (! clay_file_delete_recursive (file, &rm_error))
             {
               g_warning ("%s: %s\n", G_STRFUNC, rm_error->message);
               g_error_free (rm_error);
@@ -582,9 +582,9 @@ file_gex_load_invoker (GimpProcedure         *procedure,
       success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 
   return return_vals;
 }

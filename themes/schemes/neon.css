@@ -1,0 +1,37 @@
+/* Clay colour scheme "Neon": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(232,251,255);
+@define-color bg-color                   rgb(10,10,20);
+@define-color border-color               rgb(41,44,53);
+@define-color dimmed-fg-color            rgb(176,191,196);
+@define-color disabled-fg-color          rgb(132,143,149);
+@define-color disabled-button-color      rgb(81,87,95);
+@define-color hover-color                rgb(41,44,53);
+@define-color widget-bg-color            rgb(23,24,34);
+@define-color selected-color             rgb(54,58,67);
+@define-color extreme-bg-color           rgb(7,7,14);
+@define-color extreme-selected-color     rgb(41,44,53);
+@define-color strong-border-color        rgb(88,94,102);
+@define-color stronger-border-color      rgb(88,94,102);
+@define-color edge-border-color          rgb(88,94,102);
+@define-color scrollbar-slider-color     rgb(88,94,102);
+@define-color scrollbar-trough-color     rgb(7,7,14);
+@define-color ruler-color                rgba(41,44,53,0.3);
+@define-color accent-color               rgb(0,240,255);
+@define-color accent-hover-color         rgb(51,243,255);
+@define-color on-accent-color            rgb(10,10,20);
+@define-color destructive-color          rgb(255,43,107);
+@define-color good-color                 rgb(57,255,20);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+/* icon colours */
+@define-color lane-rust     rgb(255,106,0);
+@define-color lane-maroon   rgb(255,43,214);
+@define-color lane-mustard  rgb(255,240,0);
+@define-color lane-purple   rgb(176,38,255);
+@define-color lane-blue     rgb(0,240,255);
+@define-color lane-green    rgb(57,255,20);

@@ -49,7 +49,7 @@
 #include <sys/stat.h>
 #endif /* __APPLE__ */
 
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 #include <gtk/gtk.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -60,19 +60,19 @@
 
 #include <babl/babl.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpbase/gimpbase-private.h"
+#include "libclaybase/claybase.h"
+#include "libclaybase/claybase-private.h"
 
 #include "pdb/pdb-types.h"
 
-#include "config/gimpearlyrc.h"
-#include "config/gimpconfig-dump.h"
+#include "config/clayearlyrc.h"
+#include "config/clayconfig-dump.h"
 
-#include "core/gimp.h"
-#include "core/gimpbacktrace.h"
+#include "core/clay.h"
+#include "core/claybacktrace.h"
 
-#include "pdb/gimppdb.h"
-#include "pdb/gimpprocedure.h"
+#include "pdb/claypdb.h"
+#include "pdb/clayprocedure.h"
 #include "pdb/internal-procs.h"
 
 #include "about.h"
@@ -87,47 +87,47 @@
 #include <conio.h>
 #endif
 
-#include "gimp-log.h"
-#include "gimp-intl.h"
-#include "gimp-version.h"
+#include "clay-log.h"
+#include "clay-intl.h"
+#include "clay-version.h"
 
 
-static gboolean  gimp_option_fatal_warnings   (const gchar  *option_name,
+static gboolean  clay_option_fatal_warnings   (const gchar  *option_name,
                                                const gchar  *value,
                                                gpointer      data,
                                                GError      **error);
-static gboolean  gimp_option_stack_trace_mode (const gchar  *option_name,
+static gboolean  clay_option_stack_trace_mode (const gchar  *option_name,
                                                const gchar  *value,
                                                gpointer      data,
                                                GError      **error);
-static gboolean  gimp_option_pdb_compat_mode  (const gchar  *option_name,
+static gboolean  clay_option_pdb_compat_mode  (const gchar  *option_name,
                                                const gchar  *value,
                                                gpointer      data,
                                                GError      **error);
-static gboolean  gimp_option_dump_gimprc      (const gchar  *option_name,
+static gboolean  clay_option_dump_clayrc      (const gchar  *option_name,
                                                const gchar  *value,
                                                gpointer      data,
                                                GError      **error);
-static gboolean  gimp_option_dump_pdb_procedures_deprecated
+static gboolean  clay_option_dump_pdb_procedures_deprecated
                                               (const gchar  *option_name,
                                                const gchar  *value,
                                                gpointer      data,
                                                GError      **error);
 
-static void      gimp_show_version_and_exit   (void) G_GNUC_NORETURN;
-static void      gimp_show_license_and_exit   (void) G_GNUC_NORETURN;
+static void      clay_show_version_and_exit   (void) G_GNUC_NORETURN;
+static void      clay_show_license_and_exit   (void) G_GNUC_NORETURN;
 
-static void      gimp_init_i18n               (void);
-static void      gimp_init_malloc             (void);
+static void      clay_init_i18n               (void);
+static void      clay_init_malloc             (void);
 
-#if defined (G_OS_WIN32) && !defined (GIMP_CONSOLE_COMPILATION)
-static void      gimp_attach_console_window     (void);
+#if defined (G_OS_WIN32) && !defined (CLAY_CONSOLE_COMPILATION)
+static void      clay_attach_console_window     (void);
 #else
-#define gimp_attach_console_window() /* as nothing */
+#define clay_attach_console_window() /* as nothing */
 #endif
 
-static const gchar        *system_gimprc     = NULL;
-static const gchar        *user_gimprc       = NULL;
+static const gchar        *system_clayrc     = NULL;
+static const gchar        *user_clayrc       = NULL;
 static const gchar        *session_name      = NULL;
 static const gchar        *batch_interpreter = NULL;
 static const gchar       **batch_commands    = NULL;
@@ -149,28 +149,28 @@ static gboolean            use_cpu_accel     = TRUE;
 static gboolean            console_messages  = FALSE;
 static gboolean            use_debug_handler = FALSE;
 
-#if defined (GIMP_UNSTABLE) || ! defined (GIMP_RELEASE)
+#if defined (CLAY_UNSTABLE) || ! defined (CLAY_RELEASE)
 static gboolean            show_playground   = TRUE;
 static gboolean            show_debug_menu   = TRUE;
-static GimpStackTraceMode  stack_trace_mode  = GIMP_STACK_TRACE_QUERY;
-static GimpPDBCompatMode   pdb_compat_mode   = GIMP_PDB_COMPAT_WARN;
+static ClayStackTraceMode  stack_trace_mode  = CLAY_STACK_TRACE_QUERY;
+static ClayPDBCompatMode   pdb_compat_mode   = CLAY_PDB_COMPAT_WARN;
 #else
 static gboolean            show_playground   = FALSE;
 static gboolean            show_debug_menu   = FALSE;
-static GimpStackTraceMode  stack_trace_mode  = GIMP_STACK_TRACE_NEVER;
-static GimpPDBCompatMode   pdb_compat_mode   = GIMP_PDB_COMPAT_ON;
+static ClayStackTraceMode  stack_trace_mode  = CLAY_STACK_TRACE_NEVER;
+static ClayPDBCompatMode   pdb_compat_mode   = CLAY_PDB_COMPAT_ON;
 #endif
 
 
 static const GOptionEntry main_entries[] =
 {
   { "version", 'v', G_OPTION_FLAG_NO_ARG,
-    G_OPTION_ARG_CALLBACK, (GOptionArgFunc) gimp_show_version_and_exit,
+    G_OPTION_ARG_CALLBACK, (GOptionArgFunc) clay_show_version_and_exit,
     N_("Show version information and exit"), NULL
   },
   {
     "license", 0, G_OPTION_FLAG_NO_ARG,
-    G_OPTION_ARG_CALLBACK, (GOptionArgFunc) gimp_show_license_and_exit,
+    G_OPTION_ARG_CALLBACK, (GOptionArgFunc) clay_show_license_and_exit,
     N_("Show license information and exit"), NULL
   },
   {
@@ -190,8 +190,8 @@ static const GOptionEntry main_entries[] =
   },
   {
     "no-interface", 'i',
-#ifdef GIMP_CONSOLE_COMPILATION
-    /* The CLI option is not removed for gimp-console because it allows
+#ifdef CLAY_CONSOLE_COMPILATION
+    /* The CLI option is not removed for clay-console because it allows
      * to set the same options on either the GUI or the console
      * binaries, as a no-brainer. We in fact also use this in build
      * scripts which may make use of either one of the binaries to
@@ -237,14 +237,14 @@ static const GOptionEntry main_entries[] =
     N_("Use an alternate sessionrc file"), "<name>"
   },
   {
-    "gimprc", 'g', 0,
-    G_OPTION_ARG_FILENAME, &user_gimprc,
-    N_("Use an alternate user gimprc file"), "<filename>"
+    "clayrc", 'g', 0,
+    G_OPTION_ARG_FILENAME, &user_clayrc,
+    N_("Use an alternate user clayrc file"), "<filename>"
   },
   {
-    "system-gimprc", 0, 0,
-    G_OPTION_ARG_FILENAME, &system_gimprc,
-    N_("Use an alternate system gimprc file"), "<filename>"
+    "system-clayrc", 0, 0,
+    G_OPTION_ARG_FILENAME, &system_clayrc,
+    N_("Use an alternate system clayrc file"), "<filename>"
   },
   {
     "batch", 'b', 0,
@@ -268,13 +268,13 @@ static const GOptionEntry main_entries[] =
   },
   {
     "pdb-compat-mode", 0, 0,
-    G_OPTION_ARG_CALLBACK, gimp_option_pdb_compat_mode,
+    G_OPTION_ARG_CALLBACK, clay_option_pdb_compat_mode,
     /*  don't translate the mode names (off|on|warn)  */
     N_("PDB compatibility mode (off|on|warn)"), "<mode>"
   },
   {
     "stack-trace-mode", 0, 0,
-    G_OPTION_ARG_CALLBACK, gimp_option_stack_trace_mode,
+    G_OPTION_ARG_CALLBACK, clay_option_stack_trace_mode,
     /*  don't translate the mode names (never|query|always)  */
     N_("Debug in case of a crash (never|query|always)"), "<mode>"
   },
@@ -285,28 +285,28 @@ static const GOptionEntry main_entries[] =
   },
   {
     "g-fatal-warnings", 0, G_OPTION_FLAG_NO_ARG,
-    G_OPTION_ARG_CALLBACK, gimp_option_fatal_warnings,
+    G_OPTION_ARG_CALLBACK, clay_option_fatal_warnings,
     N_("Make all warnings fatal"), NULL
   },
   {
-    "dump-gimprc", 0, G_OPTION_FLAG_NO_ARG,
-    G_OPTION_ARG_CALLBACK, gimp_option_dump_gimprc,
-    N_("Output a gimprc file with default settings"), NULL
+    "dump-clayrc", 0, G_OPTION_FLAG_NO_ARG,
+    G_OPTION_ARG_CALLBACK, clay_option_dump_clayrc,
+    N_("Output a clayrc file with default settings"), NULL
   },
   {
-    "dump-gimprc-system", 0, G_OPTION_FLAG_NO_ARG | G_OPTION_FLAG_HIDDEN,
-    G_OPTION_ARG_CALLBACK, gimp_option_dump_gimprc,
+    "dump-clayrc-system", 0, G_OPTION_FLAG_NO_ARG | G_OPTION_FLAG_HIDDEN,
+    G_OPTION_ARG_CALLBACK, clay_option_dump_clayrc,
     NULL, NULL
   },
   {
-    "dump-gimprc-manpage", 0, G_OPTION_FLAG_NO_ARG | G_OPTION_FLAG_HIDDEN,
-    G_OPTION_ARG_CALLBACK, gimp_option_dump_gimprc,
+    "dump-clayrc-manpage", 0, G_OPTION_FLAG_NO_ARG | G_OPTION_FLAG_HIDDEN,
+    G_OPTION_ARG_CALLBACK, clay_option_dump_clayrc,
     NULL, NULL
   },
   {
     "dump-pdb-procedures-deprecated", 0,
     G_OPTION_FLAG_NO_ARG | G_OPTION_FLAG_HIDDEN,
-    G_OPTION_ARG_CALLBACK, gimp_option_dump_pdb_procedures_deprecated,
+    G_OPTION_ARG_CALLBACK, clay_option_dump_pdb_procedures_deprecated,
     N_("Output a sorted list of deprecated procedures in the PDB"), NULL
   },
   {
@@ -329,7 +329,7 @@ static const GOptionEntry main_entries[] =
 
 #if defined(ENABLE_RELOCATABLE_RESOURCES) && defined(_WIN32)
 static void
-gimp_windows_setenv ()
+clay_windows_setenv ()
 {
   wchar_t  w_exe_path[MAX_PATH];
   DWORD    exe_path_length;
@@ -377,25 +377,25 @@ gimp_windows_setenv ()
 
 #if defined(__APPLE__)
 static void
-gimp_macos_setenv (const char * progname)
+clay_macos_setenv (const char * progname)
 {
   gchar *tmp;
 #if defined(ENABLE_RELOCATABLE_RESOURCES)
   gchar *resolved_path;
-  /* on some OSX installations open file limit is 256 and GIMP needs more */
+  /* on some OSX installations open file limit is 256 and Clay needs more */
   struct rlimit limit;
 #endif
 
-  /* these need to be set regardless of whether GIMP is relocatable or not*/
+  /* these need to be set regardless of whether Clay is relocatable or not*/
   if (g_getenv ("HOME") != NULL)
     {
-      /* Use standard ~/Library/Caches/GIMP on macOS, not a subdirectory of the
-         config directory like in the past (~/Library/Application Support/GIMP).
+      /* Use standard ~/Library/Caches/Clay on macOS, not a subdirectory of the
+         config directory like in the past (~/Library/Application Support/Clay).
          Various libraries create their cache directory very early at startup,
-         before GIMP gets a chance to check if the config directory already exists,
+         before Clay gets a chance to check if the config directory already exists,
          so various dirs like e.g. "brushes" get skipped. See: #4958. */
       tmp = g_strdup_printf ("%s/Library/Caches/Clay/%s",
-                             g_getenv ("HOME"), GIMP_APP_VERSION);
+                             g_getenv ("HOME"), CLAY_APP_VERSION);
       g_setenv ("XDG_CACHE_HOME", tmp, TRUE);
       g_free (tmp);
     }
@@ -403,7 +403,7 @@ gimp_macos_setenv (const char * progname)
   g_setenv ("GTK_IM_MODULE", "quartz", TRUE);
 
 #if defined(ENABLE_RELOCATABLE_RESOURCES)
-  /* helper to set environment variables for GIMP to be relocatable.
+  /* helper to set environment variables for Clay to be relocatable.
    * Due to the changes on macOS 10.15, it is not recommended to set it in
    * a shell wrapper inside Contents/MacOS (like AppImage's AppRun) anymore.
    * LSEnvironment on Info.plist, limited to bundle scope, would not be enough.
@@ -413,7 +413,7 @@ gimp_macos_setenv (const char * progname)
   limit.rlim_max = 10000;
   setrlimit (RLIMIT_NOFILE, &limit);
   resolved_path = g_canonicalize_filename (progname, NULL);
-  if (resolved_path && ! g_getenv ("GIMP_NO_WRAPPER"))
+  if (resolved_path && ! g_getenv ("CLAY_NO_WRAPPER"))
     {
       gchar   *path;
       gchar   *bin_dir;
@@ -424,13 +424,13 @@ gimp_macos_setenv (const char * progname)
       struct   stat sb;
 
       bin_dir = g_path_get_dirname (resolved_path);
-      tmp = g_strdup_printf ("%s/lib", gimp_installation_directory());
+      tmp = g_strdup_printf ("%s/lib", clay_installation_directory());
       lib_dir = g_canonicalize_filename (tmp, NULL);
       g_free (tmp);
-      tmp = g_strdup_printf ("%s/share", gimp_installation_directory());
+      tmp = g_strdup_printf ("%s/share", clay_installation_directory());
       share_dir = g_canonicalize_filename (tmp, NULL);
       g_free (tmp);
-      tmp = g_strdup_printf ("%s/etc", gimp_installation_directory());
+      tmp = g_strdup_printf ("%s/etc", clay_installation_directory());
       etc_dir = g_canonicalize_filename (tmp, NULL);
       g_free (tmp);
 
@@ -441,7 +441,7 @@ gimp_macos_setenv (const char * progname)
         }
       else
         {
-          tmp = g_strdup_printf ("%s/share", gimp_installation_directory());
+          tmp = g_strdup_printf ("%s/share", clay_installation_directory());
           share_dir = g_canonicalize_filename (tmp, NULL);
           g_free (tmp);
           if (share_dir && !stat (share_dir, &sb) && S_ISDIR (sb.st_mode))
@@ -450,7 +450,7 @@ gimp_macos_setenv (const char * progname)
 
               g_print ("Clay is started in the build directory\n");
 
-              tmp = g_strdup_printf ("%s", gimp_installation_directory()); /* running in build dir */
+              tmp = g_strdup_printf ("%s", clay_installation_directory()); /* running in build dir */
               share_dir = g_canonicalize_filename (tmp, NULL);
               g_free (tmp);
             }
@@ -513,7 +513,7 @@ gimp_macos_setenv (const char * progname)
       tmp = g_strdup_printf ("%s/girepository-1.0", lib_dir);
       g_setenv ("GI_TYPELIB_PATH", tmp, TRUE);
       g_free (tmp);
-      tmp = g_strdup_printf ("%s/lib/Python.framework/Versions/%s", gimp_installation_directory(), PYTHON_VERSION);
+      tmp = g_strdup_printf ("%s/lib/Python.framework/Versions/%s", clay_installation_directory(), PYTHON_VERSION);
       if (tmp && !stat (tmp, &sb) && S_ISDIR (sb.st_mode))
         {
           g_setenv ("PYTHONHOME", tmp, TRUE);
@@ -571,47 +571,47 @@ setlocale_lc_numeric (void)
 }
 #endif /* PLATFORM_OSX */
 
-/* gimp_early_configuration () is executed as soon as we can read
- * the "gimprc" files, but before any library initialization takes
+/* clay_early_configuration () is executed as soon as we can read
+ * the "clayrc" files, but before any library initialization takes
  * place
  */
 static void
-gimp_early_configuration (void)
+clay_early_configuration (void)
 {
-  GFile       *system_gimprc_file = NULL;
-  GFile       *user_gimprc_file   = NULL;
-  GimpEarlyRc *earlyrc;
+  GFile       *system_clayrc_file = NULL;
+  GFile       *user_clayrc_file   = NULL;
+  ClayEarlyRc *earlyrc;
   gchar       *language;
 
-  if (system_gimprc)
-    system_gimprc_file = g_file_new_for_commandline_arg (system_gimprc);
+  if (system_clayrc)
+    system_clayrc_file = g_file_new_for_commandline_arg (system_clayrc);
 
-  if (user_gimprc)
-    user_gimprc_file = g_file_new_for_commandline_arg (user_gimprc);
+  if (user_clayrc)
+    user_clayrc_file = g_file_new_for_commandline_arg (user_clayrc);
 
-  /* GimpEarlyRc is responsible for reading "gimprc" files for the
+  /* ClayEarlyRc is responsible for reading "clayrc" files for the
    * sole purpose of getting some configuration data that is needed
    * in the early initialization phase
    */
-  earlyrc = gimp_early_rc_new (system_gimprc_file,
-                               user_gimprc_file,
+  earlyrc = clay_early_rc_new (system_clayrc_file,
+                               user_clayrc_file,
                                be_verbose);
 
-  /* Language needs to be determined first, before any GimpContext is
-   * instantiated (which happens when the Gimp object is created)
+  /* Language needs to be determined first, before any ClayContext is
+   * instantiated (which happens when the Clay object is created)
    * because its properties need to be properly localized in the
    * settings language (if different from system language). Otherwise we
    * end up with pieces of GUI always using the system language (cf. bug
    * 787457)
    */
-  language = gimp_early_rc_get_language (earlyrc);
+  language = clay_early_rc_get_language (earlyrc);
 
   /*  change the locale if a language if specified  */
   language_init (language, NULL);
   if (language)
     g_free (language);
 
-#if defined (G_OS_WIN32) && !defined (GIMP_CONSOLE_COMPILATION)
+#if defined (G_OS_WIN32) && !defined (CLAY_CONSOLE_COMPILATION)
 
 #if GTK_MAJOR_VERSION > 3
 #warning For GTK4 and above use the proper backend-specific API instead of the GDK_WIN32_TABLET_INPUT_API environment variable
@@ -625,14 +625,14 @@ gimp_early_configuration (void)
        (gtk_get_minor_version () == 24 &&
         gtk_get_micro_version () >= 30)))
     {
-      GimpWin32PointerInputAPI api = gimp_early_rc_get_win32_pointer_input_api (earlyrc);
+      ClayWin32PointerInputAPI api = clay_early_rc_get_win32_pointer_input_api (earlyrc);
 
       switch (api)
         {
-        case GIMP_WIN32_POINTER_INPUT_API_WINTAB:
+        case CLAY_WIN32_POINTER_INPUT_API_WINTAB:
           g_setenv ("GDK_WIN32_TABLET_INPUT_API", "wintab", TRUE);
           break;
-        case GIMP_WIN32_POINTER_INPUT_API_WINDOWS_INK:
+        case CLAY_WIN32_POINTER_INPUT_API_WINDOWS_INK:
           g_setenv ("GDK_WIN32_TABLET_INPUT_API", "winpointer", TRUE);
           break;
         }
@@ -642,18 +642,18 @@ gimp_early_configuration (void)
 
   g_object_unref (earlyrc);
 
-  g_clear_object (&system_gimprc_file);
-  g_clear_object (&user_gimprc_file);
+  g_clear_object (&system_clayrc_file);
+  g_clear_object (&user_clayrc_file);
 }
 
 static gboolean
-gimp_options_group_parse_hook (GOptionContext   *context,
+clay_options_group_parse_hook (GOptionContext   *context,
                                GOptionGroup     *group,
                                gpointer          data,
                                GError          **error)
 {
-  /*  early initialization from data stored in "gimprc" files  */
-  gimp_early_configuration ();
+  /*  early initialization from data stored in "clayrc" files  */
+  clay_early_configuration ();
 
   return TRUE;
 }
@@ -664,9 +664,9 @@ main (int    argc,
 {
   GOptionContext *context;
   const gchar    *abort_message;
-  GFile          *system_gimprc_file = NULL;
-  GFile          *user_gimprc_file   = NULL;
-  GOptionGroup   *gimp_group         = NULL;
+  GFile          *system_clayrc_file = NULL;
+  GFile          *user_clayrc_file   = NULL;
+  GOptionGroup   *clay_group         = NULL;
   gchar          *backtrace_file     = NULL;
   GError         *error              = NULL;
 #ifdef G_OS_WIN32
@@ -681,11 +681,11 @@ main (int    argc,
 
 #if defined(ENABLE_RELOCATABLE_RESOURCES) && defined(_WIN32)
   /* keep this always on top to ensure it is called before Glib initialization */
-  gimp_windows_setenv ();
+  clay_windows_setenv ();
 #endif
 
-#if defined(GIMP_UNSTABLE) || !defined(GIMP_RELEASE)
-  gimp_attach_console_window ();
+#if defined(CLAY_UNSTABLE) || !defined(CLAY_RELEASE)
+  clay_attach_console_window ();
 #endif
 
 #if defined(__APPLE__)
@@ -708,7 +708,7 @@ main (int    argc,
     }
 #endif
 
-  gimp_macos_setenv (argv[0]);
+  clay_macos_setenv (argv[0]);
 #endif
 
 #if defined (__GNUC__) && defined (_WIN64)
@@ -721,18 +721,18 @@ main (int    argc,
   argv = __argv;
 #endif
 
-  /* Initialize GimpBacktrace early on.  In particular, we want the
+  /* Initialize ClayBacktrace early on.  In particular, we want the
    * Windows backend to catch the SET_THREAD_NAME exceptions of newly
    * created threads.
    */
-  gimp_backtrace_init ();
+  clay_backtrace_init ();
 
   /* Start signal handlers early. */
-  gimp_init_signal_handlers (&backtrace_file);
+  clay_init_signal_handlers (&backtrace_file);
 
 #ifdef G_OS_WIN32
-  /* Make Inno aware of gimp process avoiding broken install/unninstall */
-  utf8_name = g_strdup_printf ("Clay-%s", GIMP_MUTEX_VERSION);
+  /* Make Inno aware of clay process avoiding broken install/unninstall */
+  utf8_name = g_strdup_printf ("Clay-%s", CLAY_MUTEX_VERSION);
   name      = g_utf8_to_utf16 (utf8_name, -1, NULL, NULL, NULL);
 
   CreateMutexW (NULL, FALSE, name);
@@ -756,11 +756,11 @@ main (int    argc,
 #endif
 
     /* On Windows, set DLL search path to $INSTALLDIR/bin so that .exe
-     * plug-ins processes in the plug-ins directory can find libgimp and
+     * plug-ins processes in the plug-ins directory can find libclay and
      * file library DLLs.
      */
     w_bin_dir = NULL;
-    install_dir = gimp_installation_directory ();
+    install_dir = clay_installation_directory ();
     bin_dir = g_build_filename (install_dir, "bin", NULL);
 
     w_bin_dir = g_utf8_to_utf16 (bin_dir, -1, NULL, NULL, NULL);
@@ -819,15 +819,15 @@ main (int    argc,
   }
 #endif
 
-  gimp_init_malloc ();
+  clay_init_malloc ();
 
-  gimp_env_init (FALSE);
+  clay_env_init (FALSE);
 
-  gimp_log_init ();
+  clay_log_init ();
 
-  gimp_init_i18n ();
+  clay_init_i18n ();
 
-  g_set_application_name (GIMP_NAME);
+  g_set_application_name (CLAY_NAME);
 
 #ifdef G_OS_WIN32
   argv = g_win32_get_command_line ();
@@ -835,7 +835,7 @@ main (int    argc,
   argv = g_strdupv (argv);
 #endif
 
-  g_set_prgname (GIMP_DESKTOP_NAME);
+  g_set_prgname (CLAY_DESKTOP_NAME);
 
   /* Check argv[] for "--verbose" first */
   for (i = 1; i < argc; i++)
@@ -865,38 +865,38 @@ main (int    argc,
         }
       else if ((strcmp (arg, "--version") == 0) || (strcmp (arg, "-v") == 0))
         {
-          gimp_show_version_and_exit ();
+          clay_show_version_and_exit ();
         }
-#if defined (G_OS_WIN32) && !defined (GIMP_CONSOLE_COMPILATION)
+#if defined (G_OS_WIN32) && !defined (CLAY_CONSOLE_COMPILATION)
       else if ((strcmp (arg, "--help") == 0) ||
                (strcmp (arg, "-?") == 0) ||
                (strncmp (arg, "--help-", 7) == 0))
         {
-          gimp_attach_console_window ();
+          clay_attach_console_window ();
         }
 #endif
     }
 
-#ifdef GIMP_CONSOLE_COMPILATION
+#ifdef CLAY_CONSOLE_COMPILATION
   no_interface = TRUE;
 #endif
 
   context = g_option_context_new (_("[FILE|URI...]"));
-  g_option_context_set_summary (context, GIMP_NAME);
+  g_option_context_set_summary (context, CLAY_NAME);
 
   g_option_context_add_main_entries (context, main_entries, GETTEXT_PACKAGE);
 
-  /* The GIMP option group is just an empty option group, created for
+  /* The Clay option group is just an empty option group, created for
    * the sole purpose of running a post-parse hook before any other of
    * dependent libraries are run. This makes it possible to apply
-   * options from configuration data obtained from "gimprc" files,
+   * options from configuration data obtained from "clayrc" files,
    * before other libraries have a chance to run some of their
    * initialization code.
    */
-  gimp_group = g_option_group_new ("gimp", "", "", NULL, NULL);
-  g_option_group_set_parse_hooks (gimp_group, NULL,
-                                  gimp_options_group_parse_hook);
-  g_option_context_add_group (context, gimp_group);
+  clay_group = g_option_group_new ("clay", "", "", NULL, NULL);
+  g_option_group_set_parse_hooks (clay_group, NULL,
+                                  clay_options_group_parse_hook);
+  g_option_context_add_group (context, clay_group);
 
   app_libs_init (context, no_interface);
 
@@ -904,7 +904,7 @@ main (int    argc,
     {
       if (error)
         {
-          gimp_attach_console_window ();
+          clay_attach_console_window ();
           g_print ("%s\n", error->message);
           g_error_free (error);
         }
@@ -921,7 +921,7 @@ main (int    argc,
 
 #if GLIB_CHECK_VERSION(2,72,0)
   /* g_set_prgname() can only be called several times since 2.72.0. */
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
   if (! no_interface)
     {
       GKeyFile *flatpak_keyfile;
@@ -968,31 +968,31 @@ main (int    argc,
 #endif
 
   if (no_interface || be_verbose || console_messages || batch_commands != NULL)
-    gimp_attach_console_window ();
+    clay_attach_console_window ();
 
   if (no_interface)
     new_instance = TRUE;
 
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
   if (! new_instance)
     {
       gboolean is_running = FALSE;
 
 #ifndef G_OS_WIN32
-      is_running = gimp_unique_open (filenames, as_new);
+      is_running = clay_unique_open (filenames, as_new);
 #else
       /* Windows Explorer spawns separate processes when multiple files are selected
          (except for the MSIX, where the it passes each filename as on Unix: 55c97120).
          The only realiable way to them communicate is a mutex early on main.c. See: #364 */
-      HANDLE primary_instance = CreateMutexW (NULL, FALSE, L"Local\\gimp_primary_instance_running");
+      HANDLE primary_instance = CreateMutexW (NULL, FALSE, L"Local\\clay_primary_instance_running");
       DWORD  primary_instance_error = primary_instance ? GetLastError () : 0;
 
       if (primary_instance && primary_instance_error == ERROR_ALREADY_EXISTS)
         {
-          /* another GIMP instance is already running */
+          /* another Clay instance is already running */
           for (gint retry = 0; retry < 20; retry++)
             {
-              is_running = gimp_unique_open (filenames, as_new);
+              is_running = clay_unique_open (filenames, as_new);
 
               if (is_running)
                 break;
@@ -1004,7 +1004,7 @@ main (int    argc,
         }
       else
         {
-          /* this is the primary GIMP instance */
+          /* this is the primary Clay instance */
           is_running = FALSE;
         }
 #endif
@@ -1018,7 +1018,7 @@ main (int    argc,
                      _("Another Clay instance is already running."));
 
           if (batch_commands &&
-              ! gimp_unique_batch_run (batch_interpreter, batch_commands))
+              ! clay_unique_batch_run (batch_interpreter, batch_commands))
             success = EXIT_FAILURE;
 
           gdk_notify_startup_complete ();
@@ -1032,16 +1032,16 @@ main (int    argc,
   if (abort_message)
     app_abort (no_interface, abort_message);
 
-  if (system_gimprc)
-    system_gimprc_file = g_file_new_for_commandline_arg (system_gimprc);
+  if (system_clayrc)
+    system_clayrc_file = g_file_new_for_commandline_arg (system_clayrc);
 
-  if (user_gimprc)
-    user_gimprc_file = g_file_new_for_commandline_arg (user_gimprc);
+  if (user_clayrc)
+    user_clayrc_file = g_file_new_for_commandline_arg (user_clayrc);
 
   retval = app_run (argv[0],
                     filenames,
-                    system_gimprc_file,
-                    user_gimprc_file,
+                    system_clayrc_file,
+                    user_clayrc_file,
                     session_name,
                     batch_interpreter,
                     batch_commands,
@@ -1062,12 +1062,12 @@ main (int    argc,
                     pdb_compat_mode,
                     backtrace_file);
 
-  gimp_env_exit (FALSE);
+  clay_env_exit (FALSE);
 
   g_free (backtrace_file);
 
-  g_clear_object (&system_gimprc_file);
-  g_clear_object (&user_gimprc_file);
+  g_clear_object (&system_clayrc_file);
+  g_clear_object (&user_clayrc_file);
 
   g_strfreev (argv);
 
@@ -1079,7 +1079,7 @@ main (int    argc,
 
 #ifdef G_OS_WIN32
 
-/* Provide WinMain in case we build GIMP as a subsystem:windows
+/* Provide WinMain in case we build Clay as a subsystem:windows
  * application. Well, we do. When built with mingw, though, user code
  * execution still starts in main() in that case. So WinMain() gets
  * used on MSVC builds only.
@@ -1094,7 +1094,7 @@ WinMain (HINSTANCE hInstance,
   return main (__argc, __argv);
 }
 
-#ifndef GIMP_CONSOLE_COMPILATION
+#ifndef CLAY_CONSOLE_COMPILATION
 
 static void
 wait_console_window (void)
@@ -1103,7 +1103,7 @@ wait_console_window (void)
 }
 
 static void
-gimp_attach_console_window (void)
+clay_attach_console_window (void)
 {
   /* If run on non-native shell, do nothing */
   if (g_getenv ("TERM") || g_getenv ("SHELL"))
@@ -1151,7 +1151,7 @@ gimp_attach_console_window (void)
 
 
 static gboolean
-gimp_option_fatal_warnings (const gchar  *option_name,
+clay_option_fatal_warnings (const gchar  *option_name,
                             const gchar  *value,
                             gpointer      data,
                             GError      **error)
@@ -1167,17 +1167,17 @@ gimp_option_fatal_warnings (const gchar  *option_name,
 }
 
 static gboolean
-gimp_option_stack_trace_mode (const gchar  *option_name,
+clay_option_stack_trace_mode (const gchar  *option_name,
                               const gchar  *value,
                               gpointer      data,
                               GError      **error)
 {
   if (strcmp (value, "never") == 0)
-    stack_trace_mode = GIMP_STACK_TRACE_NEVER;
+    stack_trace_mode = CLAY_STACK_TRACE_NEVER;
   else if (strcmp (value, "query") == 0)
-    stack_trace_mode = GIMP_STACK_TRACE_QUERY;
+    stack_trace_mode = CLAY_STACK_TRACE_QUERY;
   else if (strcmp (value, "always") == 0)
-    stack_trace_mode = GIMP_STACK_TRACE_ALWAYS;
+    stack_trace_mode = CLAY_STACK_TRACE_ALWAYS;
   else
     return FALSE;
 
@@ -1185,17 +1185,17 @@ gimp_option_stack_trace_mode (const gchar  *option_name,
 }
 
 static gboolean
-gimp_option_pdb_compat_mode (const gchar  *option_name,
+clay_option_pdb_compat_mode (const gchar  *option_name,
                              const gchar  *value,
                              gpointer      data,
                              GError      **error)
 {
   if (! strcmp (value, "off"))
-    pdb_compat_mode = GIMP_PDB_COMPAT_OFF;
+    pdb_compat_mode = CLAY_PDB_COMPAT_OFF;
   else if (! strcmp (value, "on"))
-    pdb_compat_mode = GIMP_PDB_COMPAT_ON;
+    pdb_compat_mode = CLAY_PDB_COMPAT_ON;
   else if (! strcmp (value, "warn"))
-    pdb_compat_mode = GIMP_PDB_COMPAT_WARN;
+    pdb_compat_mode = CLAY_PDB_COMPAT_WARN;
   else
     return FALSE;
 
@@ -1203,34 +1203,34 @@ gimp_option_pdb_compat_mode (const gchar  *option_name,
 }
 
 static gboolean
-gimp_option_dump_gimprc (const gchar  *option_name,
+clay_option_dump_clayrc (const gchar  *option_name,
                          const gchar  *value,
                          gpointer      data,
                          GError      **error)
 {
-  GimpConfigDumpFormat format = GIMP_CONFIG_DUMP_NONE;
+  ClayConfigDumpFormat format = CLAY_CONFIG_DUMP_NONE;
 
-  gimp_attach_console_window ();
+  clay_attach_console_window ();
 
-  if (strcmp (option_name, "--dump-gimprc") == 0)
-    format = GIMP_CONFIG_DUMP_GIMPRC;
-  if (strcmp (option_name, "--dump-gimprc-system") == 0)
-    format = GIMP_CONFIG_DUMP_GIMPRC_SYSTEM;
-  else if (strcmp (option_name, "--dump-gimprc-manpage") == 0)
-    format = GIMP_CONFIG_DUMP_GIMPRC_MANPAGE;
+  if (strcmp (option_name, "--dump-clayrc") == 0)
+    format = CLAY_CONFIG_DUMP_CLAYRC;
+  if (strcmp (option_name, "--dump-clayrc-system") == 0)
+    format = CLAY_CONFIG_DUMP_CLAYRC_SYSTEM;
+  else if (strcmp (option_name, "--dump-clayrc-manpage") == 0)
+    format = CLAY_CONFIG_DUMP_CLAYRC_MANPAGE;
 
   if (format)
     {
-      Gimp     *gimp;
+      Clay     *clay;
       gboolean  success;
 
       babl_init ();
-      gimp = g_object_new (GIMP_TYPE_GIMP, NULL);
-      gimp_load_config (gimp, NULL, NULL);
+      clay = g_object_new (CLAY_TYPE_CLAY, NULL);
+      clay_load_config (clay, NULL, NULL);
 
-      success = gimp_config_dump (G_OBJECT (gimp), format);
+      success = clay_config_dump (G_OBJECT (clay), format);
 
-      g_object_unref (gimp);
+      g_object_unref (clay);
 
       app_exit (success ? EXIT_SUCCESS : EXIT_FAILURE);
     }
@@ -1239,40 +1239,40 @@ gimp_option_dump_gimprc (const gchar  *option_name,
 }
 
 static gboolean
-gimp_option_dump_pdb_procedures_deprecated (const gchar  *option_name,
+clay_option_dump_pdb_procedures_deprecated (const gchar  *option_name,
                                             const gchar  *value,
                                             gpointer      data,
                                             GError      **error)
 {
-  Gimp  *gimp;
+  Clay  *clay;
   GList *deprecated_procs;
   GList *iter;
 
   babl_init ();
-  gimp = g_object_new (GIMP_TYPE_GIMP, NULL);
-  gimp_load_config (gimp, NULL, NULL);
+  clay = g_object_new (CLAY_TYPE_CLAY, NULL);
+  clay_load_config (clay, NULL, NULL);
 
   /* Make sure to turn on compatibility mode so deprecated procedures
    * are included
    */
-  gimp->pdb_compat_mode = GIMP_PDB_COMPAT_ON;
+  clay->pdb_compat_mode = CLAY_PDB_COMPAT_ON;
 
   /* Initialize the list of procedures */
-  internal_procs_init (gimp->pdb);
+  internal_procs_init (clay->pdb);
 
   /* Get deprecated procedures */
-  deprecated_procs = gimp_pdb_get_deprecated_procedures (gimp->pdb);
+  deprecated_procs = clay_pdb_get_deprecated_procedures (clay->pdb);
 
   for (iter = deprecated_procs; iter; iter = g_list_next (iter))
     {
-      GimpProcedure *procedure = GIMP_PROCEDURE (iter->data);
+      ClayProcedure *procedure = CLAY_PROCEDURE (iter->data);
 
-      g_print ("%s\n", gimp_object_get_name (procedure));
+      g_print ("%s\n", clay_object_get_name (procedure));
     }
 
   g_list_free (deprecated_procs);
 
-  g_object_unref (gimp);
+  g_object_unref (clay);
 
   app_exit (EXIT_SUCCESS);
 
@@ -1280,29 +1280,29 @@ gimp_option_dump_pdb_procedures_deprecated (const gchar  *option_name,
 }
 
 static void
-gimp_show_version_and_exit (void)
+clay_show_version_and_exit (void)
 {
-  gimp_attach_console_window ();
-  gimp_version_show (be_verbose);
+  clay_attach_console_window ();
+  clay_version_show (be_verbose);
 
   app_exit (EXIT_SUCCESS);
 }
 
 static void
-gimp_show_license_and_exit (void)
+clay_show_license_and_exit (void)
 {
-  gimp_attach_console_window ();
-  gimp_version_show (be_verbose);
+  clay_attach_console_window ();
+  clay_version_show (be_verbose);
 
-  g_print ("\n%s\n\n", GIMP_LICENSE);
+  g_print ("\n%s\n\n", CLAY_LICENSE);
 
   app_exit (EXIT_SUCCESS);
 }
 
 static void
-gimp_init_malloc (void)
+clay_init_malloc (void)
 {
-#ifdef GIMP_GLIB_MEM_PROFILER
+#ifdef CLAY_GLIB_MEM_PROFILER
   g_mem_set_vtable (glib_mem_profiler_table);
   g_atexit (g_mem_profile);
 #endif
@@ -1326,10 +1326,10 @@ gimp_init_malloc (void)
 }
 
 static void
-gimp_init_i18n (void)
+clay_init_i18n (void)
 {
   /*  We may change the locale later if the user specifies a language
-   *  in the gimprc file. Here we are just initializing the locale
+   *  in the clayrc file. Here we are just initializing the locale
    *  according to the environment variables and set up the paths to
    *  the message catalogs.
    */
@@ -1338,7 +1338,7 @@ gimp_init_i18n (void)
 
 #ifdef PLATFORM_OSX
   /* keep the monetary sign characters ASCII so GtkSpinButton accepts
-     the '-' (minus) character. See GNOME/gimp#13641 and GNOME/GTK!8802. */
+     the '-' (minus) character. See GNOME/clay#13641 and GNOME/GTK!8802. */
   setlocale (LC_MONETARY, "C");
 
   /* keep the decimal point as '.', otherwise the vector glyphs drawn by AppKit
@@ -1346,12 +1346,12 @@ gimp_init_i18n (void)
   setlocale_lc_numeric ();
 #endif
 
-  gimp_bind_text_domain (GETTEXT_PACKAGE"-libgimp", gimp_locale_directory ());
+  clay_bind_text_domain (GETTEXT_PACKAGE"-libclay", clay_locale_directory ());
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
-  bind_textdomain_codeset (GETTEXT_PACKAGE"-libgimp", "UTF-8");
+  bind_textdomain_codeset (GETTEXT_PACKAGE"-libclay", "UTF-8");
 #endif
 
-  gimp_bind_text_domain (GETTEXT_PACKAGE, gimp_locale_directory ());
+  clay_bind_text_domain (GETTEXT_PACKAGE, clay_locale_directory ());
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 #endif
@@ -1361,9 +1361,9 @@ gimp_init_i18n (void)
    * code is using. Let's make usre it's properly initialized.
    */
 #ifdef ENABLE_RELOCATABLE_RESOURCES
-  gimp_bind_text_domain ("iso_639_3", gimp_locale_directory ());
+  clay_bind_text_domain ("iso_639_3", clay_locale_directory ());
 #else
-  gimp_bind_text_domain ("iso_639_3", ISO_CODES_LOCALEDIR);
+  clay_bind_text_domain ("iso_639_3", ISO_CODES_LOCALEDIR);
 #endif
 
 #ifdef HAVE_BIND_TEXTDOMAIN_CODESET

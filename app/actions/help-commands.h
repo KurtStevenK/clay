@@ -18,12 +18,12 @@
 #pragma once
 
 
-void   help_help_cmd_callback         (GimpAction *action,
+void   help_help_cmd_callback         (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data);
-void   help_context_help_cmd_callback (GimpAction *action,
+void   help_context_help_cmd_callback (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data);
-void   help_online_cmd_callback       (GimpAction *action,
+void   help_online_cmd_callback       (ClayAction *action,
                                        GVariant   *value,
                                        gpointer    data);

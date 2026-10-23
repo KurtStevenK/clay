@@ -1,0 +1,14 @@
+# Lock icons used in:
+# - clayitemtreeview.c as button-icon-size (in our system theme
+#   ClayEditor-button-icon-size is set to "menu", i.e. 16px) column
+#   header image.
+# - clayitemtreeview.c as ClayCellRendererToggle (16px) and as
+#   button-icon-size image in a GtkToggleButton (16px).
+# - Various action icons (usually 16px).
+clay-lock
+clay-lock-multi
+clay-lock-alpha
+clay-lock-content
+clay-lock-path
+clay-lock-position
+clay-lock-visibility

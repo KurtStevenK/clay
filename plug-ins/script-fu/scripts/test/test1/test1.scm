@@ -1,8 +1,8 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; Basic test that a second .scm file is also queried.
 ; Expect "Test>Test SF interpreter 1" in the menus
-; Expect when chosen, message on GIMP message bar.
+; Expect when chosen, message on Clay message bar.
 
 ; Also tests that one .scm file can define two PDB procedures
 ; File is queried once, yielding two names.
@@ -10,12 +10,12 @@
 
 
 (define (script-fu-test1)
-  (gimp-message "Hello script-fu-test1")
+  (clay-message "Hello script-fu-test1")
 )
 
 (script-fu-register "script-fu-test1"
   "Test SF interpreter 01"
-  "Just gives a message from Gimp"
+  "Just gives a message from Clay"
   "lkk"
   "lkk"
   "2022"
@@ -28,12 +28,12 @@
 
 
 (define (script-fu-test2)
-  (gimp-message "Hello script-fu-test2")
+  (clay-message "Hello script-fu-test2")
 )
 
 (script-fu-register "script-fu-test2"
   "Test SF interpreter 02"
-  "Just gives a message from Gimp"
+  "Just gives a message from Clay"
   "lkk"
   "lkk"
   "2022"

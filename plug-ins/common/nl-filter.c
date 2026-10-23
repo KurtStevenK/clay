@@ -32,15 +32,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-nl-filter"
 #define PLUG_IN_BINARY "nl-filter"
-#define PLUG_IN_ROLE   "gimp-nl-filter"
+#define PLUG_IN_ROLE   "clay-nl-filter"
 
 
 typedef struct
@@ -63,12 +63,12 @@ typedef struct _NlfilterClass NlfilterClass;
 
 struct _Nlfilter
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _NlfilterClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -77,26 +77,26 @@ struct _NlfilterClass
 
 GType                   nlfilter_get_type         (void);
 
-static GList          * nlfilter_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * nlfilter_create_procedure (GimpPlugIn           *plug_in,
+static GList          * nlfilter_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * nlfilter_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * nlfilter_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * nlfilter_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
 static void             nlfilter                  (GObject          *config,
-                                                   GimpDrawable     *drawable,
-                                                   GimpPreview      *preview);
+                                                   ClayDrawable     *drawable,
+                                                   ClayPreview      *preview);
 static void             nlfilter_preview          (GtkWidget        *widget,
                                                    GObject          *config);
 
-static gboolean         nlfilter_dialog           (GimpProcedure    *procedure,
+static gboolean         nlfilter_dialog           (ClayProcedure    *procedure,
                                                    GObject          *config,
-                                                   GimpDrawable     *drawable);
+                                                   ClayDrawable     *drawable);
 
 static gint             nlfiltInit                (gdouble           alpha,
                                                    gdouble           radius,
@@ -111,16 +111,16 @@ static void             nlfiltRow                 (guchar           *srclast,
                                                    gint              filtno);
 
 
-G_DEFINE_TYPE (Nlfilter, nlfilter, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Nlfilter, nlfilter, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (NLFILTER_TYPE)
+CLAY_MAIN (NLFILTER_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 nlfilter_class_init (NlfilterClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = nlfilter_query_procedures;
   plug_in_class->create_procedure = nlfilter_create_procedure;
@@ -133,58 +133,58 @@ nlfilter_init (Nlfilter *nlfilter)
 }
 
 static GList *
-nlfilter_query_procedures (GimpPlugIn *plug_in)
+nlfilter_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-nlfilter_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+nlfilter_create_procedure (ClayPlugIn  *plug_in,
                                const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             nlfilter_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_NL Filter..."));
-      gimp_procedure_add_menu_path (procedure,"<Image>/Filters/Enhance");
+      clay_procedure_set_menu_label (procedure, _("_NL Filter..."));
+      clay_procedure_add_menu_path (procedure,"<Image>/Filters/Enhance");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Nonlinear swiss army knife filter"),
                                         _("This is the pnmnlfilt, in Clay's "
                                           "clothing. See the pnmnlfilt manpage "
                                           "for details."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Graeme W. Gill, Clay 0.99 plug-in "
                                       "by Eric L. Hernes",
                                       "Graeme W. Gill, Eric L. Hernes",
                                       "1997");
 
-      gimp_procedure_add_double_argument (procedure, "alpha",
+      clay_procedure_add_double_argument (procedure, "alpha",
                                           _("_Alpha"),
                                           _("The amount of the filter to apply"),
                                           0, 1, 0.3,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "radius",
+      clay_procedure_add_double_argument (procedure, "radius",
                                           _("Ra_dius"),
                                           _("The filter radius"),
                                           1.0 / 3.0, 1, 1.0 / 3.0,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "filter",
+      clay_procedure_add_choice_argument (procedure, "filter",
                                           _("_Filter"),
                                           _("The Filter to Run"),
-                                          gimp_choice_new_with_values ("alpha-trim",         filter_alpha_trim,   _("Alpha trimmed mean"), NULL,
+                                          clay_choice_new_with_values ("alpha-trim",         filter_alpha_trim,   _("Alpha trimmed mean"), NULL,
                                                                        "optimal-estimation", filter_opt_est,      _("Optimal estimation"), NULL,
                                                                        "edge-enhancement",   filter_edge_enhance, _("Edge enhancement"),   NULL,
                                                                        NULL),
@@ -195,28 +195,28 @@ nlfilter_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-nlfilter_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+nlfilter_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -224,17 +224,17 @@ nlfilter_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! nlfilter_dialog (procedure, G_OBJECT (config), drawable))
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CANCEL,
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! nlfilter_dialog (procedure, G_OBJECT (config), drawable))
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CANCEL,
                                              NULL);
 
   nlfilter (G_OBJECT (config), drawable, NULL);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
-    gimp_displays_flush ();
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
+    clay_displays_flush ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 /* pnmnlfilt.c - 4 in 1 (2 non-linear) filter
@@ -937,8 +937,8 @@ rectang_area (gdouble rx0, gdouble ry0, gdouble rx1, gdouble ry1, gdouble tx0,
 
 static void
 nlfilter (GObject      *config,
-          GimpDrawable *drawable,
-          GimpPreview  *preview)
+          ClayDrawable *drawable,
+          ClayPreview  *preview)
 {
   GeglBuffer *src_buffer;
   GeglBuffer *dest_buffer;
@@ -956,35 +956,35 @@ nlfilter (GObject      *config,
                 "alpha",  &alpha,
                 "radius", &radius,
                 NULL);
-  filter = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  filter = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "filter");
 
   if (preview)
     {
-      gimp_preview_get_position (preview, &x1, &y1);
-      gimp_preview_get_size (preview, &width, &height);
+      clay_preview_get_position (preview, &x1, &y1);
+      clay_preview_get_size (preview, &width, &height);
       y2 = y1 + height;
     }
   else
     {
-      if (! gimp_drawable_mask_intersect (drawable,
+      if (! clay_drawable_mask_intersect (drawable,
                                           &x1, &y1, &width, &height))
         return;
 
       y2 = y1 + height;
     }
 
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     format = babl_format ("R'G'B'A u8");
   else
     format = babl_format ("R'G'B' u8");
 
-  src_buffer = gimp_drawable_get_buffer (drawable);
+  src_buffer = clay_drawable_get_buffer (drawable);
 
   if (preview)
     dest_buffer = gegl_buffer_new (gegl_buffer_get_extent (src_buffer), format);
   else
-    dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+    dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
   bpp = babl_format_get_bytes_per_pixel (format);
 
@@ -1004,7 +1004,7 @@ nlfilter (GObject      *config,
   filtno = nlfiltInit (alpha, radius, filter);
 
   if (!preview)
-    gimp_progress_init (_("NL Filter"));
+    clay_progress_init (_("NL Filter"));
 
   /* first row */
   gegl_buffer_get (src_buffer, GEGL_RECTANGLE (x1, y1, width, 1), 1.0,
@@ -1020,7 +1020,7 @@ nlfilter (GObject      *config,
   for (y = y1; y < y2 - 1; y++)
     {
       if (((y % p_update) == 0) && !preview)
-        gimp_progress_update ((gdouble) y / (gdouble) height);
+        clay_progress_update ((gdouble) y / (gdouble) height);
 
       gegl_buffer_get (src_buffer, GEGL_RECTANGLE (x1, y + 1, width, 1), 1.0,
                        format, nextrow,
@@ -1058,7 +1058,7 @@ nlfilter (GObject      *config,
                        format, buf,
                        GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 
-      gimp_preview_draw_buffer (GIMP_PREVIEW (preview), buf, width * bpp);
+      clay_preview_draw_buffer (CLAY_PREVIEW (preview), buf, width * bpp);
 
       g_free (buf);
     }
@@ -1068,11 +1068,11 @@ nlfilter (GObject      *config,
 
   if (! preview)
     {
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
 
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, x1, y1, width, height);
-      gimp_displays_flush ();
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, x1, y1, width, height);
+      clay_displays_flush ();
     }
 }
 
@@ -1080,16 +1080,16 @@ static void
 nlfilter_preview (GtkWidget *widget,
                   GObject   *config)
 {
-  GimpPreview  *preview  = GIMP_PREVIEW (widget);
-  GimpDrawable *drawable = g_object_get_data (config, "drawable");
+  ClayPreview  *preview  = CLAY_PREVIEW (widget);
+  ClayDrawable *drawable = g_object_get_data (config, "drawable");
 
   nlfilter (config, drawable, preview);
 }
 
 static gboolean
-nlfilter_dialog (GimpProcedure *procedure,
+nlfilter_dialog (ClayProcedure *procedure,
                  GObject       *config,
-                 GimpDrawable  *drawable)
+                 ClayDrawable  *drawable)
 {
   GtkWidget *dialog;
   GtkWidget *preview;
@@ -1097,29 +1097,29 @@ nlfilter_dialog (GimpProcedure *procedure,
   GtkWidget *scale;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("NL Filter"));
 
-  frame = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                            "filter", GIMP_TYPE_INT_RADIO_FRAME);
+  frame = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                            "filter", CLAY_TYPE_INT_RADIO_FRAME);
   gtk_widget_set_margin_bottom (frame, 12);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "alpha", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "radius", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "nlfilter-vbox", "filter", "alpha",
                                   "radius", NULL);
 
-  preview = gimp_procedure_dialog_get_drawable_preview (GIMP_PROCEDURE_DIALOG (dialog),
+  preview = clay_procedure_dialog_get_drawable_preview (CLAY_PROCEDURE_DIALOG (dialog),
                                                         "preview", drawable);
   gtk_widget_set_margin_bottom (preview, 12);
 
@@ -1130,15 +1130,15 @@ nlfilter_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "preview", "nlfilter-vbox", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

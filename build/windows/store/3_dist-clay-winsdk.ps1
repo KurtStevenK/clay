@@ -1,0 +1,615 @@
+﻿#!/usr/bin/env pwsh
+
+# Parameters
+param ($revision = "$CLAY_CI_MS_STORE",
+       $wack = 'Non-WACK',
+       $build_dir,
+       $arm64_bundle = 'clay-clangarm64',
+       $x64_bundle = 'clay-clang64')
+
+# Ensure the script work properly
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $false #to ensure error catching as in pre-7.4 PS
+if (-not (Test-Path build\windows\store) -and -not (Test-Path 3_dist-clay-winsdk.ps1 -Type Leaf) -or $PSScriptRoot -notlike "*build\windows\store*")
+  {
+    Write-Host '(ERROR): Script called from wrong dir. Please, call this script from the root of clay source dir' -ForegroundColor Red
+    exit 1
+  }
+elseif (Test-Path 3_dist-clay-winsdk.ps1 -Type Leaf)
+  {
+    Set-Location ..\..\..
+  }
+if (-not $GITLAB_CI)
+  {
+    $PARENT_DIR = '..\'
+  }
+
+
+# 1. AUTODECTET LATEST WINDOWS SDK AND MSSTORE-CLI
+Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):msix_tlkt$([char]13)$([char]27)[0KChecking WinSDK and other tools installation"
+if ((Get-WmiObject -Class Win32_ComputerSystem).SystemType -like 'ARM64*')
+  {
+    $cpu_arch = 'arm64'
+  }
+else
+  {
+    $cpu_arch = 'x64'
+  }
+
+## Windows SDK
+$win_sdk_version = Get-ItemProperty Registry::'HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty ProductVersion
+if ("$win_sdk_version" -eq '')
+  {
+    $xmlObject = New-Object XML
+    $xmlObject.Load("$PWD\build\windows\store\AppxManifest.xml")
+    $nt_build_max = (($xmlObject.Package.Dependencies.TargetDeviceFamily.MaxVersionTested | Out-String).Trim()) -replace '..$',''
+    Write-Host "(ERROR): Windows SDK installation not found. Please, install it with: winget install Microsoft.WindowsSDK.${nt_build_max}" -ForegroundColor Red
+    exit 1
+  }
+$win_sdk_path = Get-ItemProperty Registry::'HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0' | Select-Object -ExpandProperty InstallationFolder
+$env:PATH = "${win_sdk_path}bin\${win_sdk_version}.0\$cpu_arch;${win_sdk_path}App Certification Kit;" + $env:PATH
+
+## msstore-cli (ONLY FOR RELEASES)
+if ("$CI_COMMIT_TAG" -eq (git describe --all | Foreach-Object {$_ -replace 'tags/',''}))
+  {
+    #.NET runtime required by msstore-cli
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $msstore_tag = (Invoke-RestMethod 'https://api.github.com/repos/microsoft/msstore-cli/releases/latest').tag_name
+    $dotnet_msstore = ((Invoke-RestMethod "https://raw.githubusercontent.com/microsoft/msstore-cli/refs/heads/rel/$msstore_tag/MSStore.API/MSStore.API.csproj").Project.PropertyGroup.TargetFramework | Out-String).Trim()
+    $powershell_tag = (Invoke-RestMethod 'https://api.github.com/repos/PowerShell/PowerShell/releases/latest').tag_name
+    #$dotnet_powershell = ((Invoke-RestMethod "https://raw.githubusercontent.com/PowerShell/PowerShell/refs/tags/$powershell_tag/PowerShell.Common.props").Project.PropertyGroup.TargetFramework | Out-String).Trim()
+    foreach ($dotnet in $dotnet_msstore)
+      {
+        $dotnet_major = ($dotnet | Out-String) -replace "`r`n",'' -replace 'net',''
+        $dotnet_tag = ((Invoke-RestMethod "https://api.github.com/repos/dotnet/runtime/releases").tag_name | Select-String "$dotnet_major" | Select-Object -First 1).ToString() -replace 'v',''
+        if (-not (Test-Path "$Env:ProgramFiles\dotnet\shared\Microsoft.NETCore.App\$dotnet_major*\"))
+          {
+            Write-Output "(INFO): downloading .NET v$dotnet_tag"
+            Invoke-WebRequest "https://aka.ms/dotnet/$dotnet_major/dotnet-runtime-win-$cpu_arch.zip" -UseBasicParsing -OutFile ${PARENT_DIR}dotnet-runtime-${dotnet_major}.zip
+            Expand-Archive ${PARENT_DIR}dotnet-runtime-${dotnet_major}.zip ${PARENT_DIR}dotnet-runtime -Force
+            $env:PATH = "$(Resolve-Path $PWD\${PARENT_DIR}dotnet-runtime);" + $env:PATH
+            $env:DOTNET_ROOT = "$(Resolve-Path $PWD\${PARENT_DIR}dotnet-runtime)"
+          }
+      }
+
+    #powershell (with bundled .NET runtime) required by msstore-cli. See: https://github.com/microsoft/msstore-cli/issues/70
+    if (-not (Test-Path Registry::'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\App Paths\pwsh.exe') -and $PSVersionTable.PSVersion.Major -lt 6)
+      {
+        Write-Output "(INFO): downloading PowerShell $powershell_tag"
+        Invoke-WebRequest "https://github.com/PowerShell/PowerShell/releases/download/$powershell_tag/PowerShell-$($powershell_tag -replace 'v','')-win-$cpu_arch.zip" -UseBasicParsing -OutFile ${PARENT_DIR}PowerShell.zip
+        Expand-Archive ${PARENT_DIR}PowerShell.zip ${PARENT_DIR}PowerShell -Force
+        $env:PATH = "$(Resolve-Path $PWD\${PARENT_DIR}PowerShell);" + $env:PATH
+      }
+
+    #msstore-cli itself
+    if (-not (Test-Path Registry::'HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\App Paths\MSStore.exe'))
+      {
+        Write-Output "(INFO): downloading MSStoreCLI $msstore_tag"
+        Invoke-WebRequest "https://github.com/microsoft/msstore-cli/releases/download/$msstore_tag/MSStoreCLI-win-$cpu_arch.zip" -UseBasicParsing -OutFile ${PARENT_DIR}MSStoreCLI.zip
+        Expand-Archive ${PARENT_DIR}MSStoreCLI.zip ${PARENT_DIR}MSStoreCLI -Force
+        $env:PATH = "$(Resolve-Path $PWD\${PARENT_DIR}MSStoreCLI);" + $env:PATH
+      }
+    $msstore_text = " | Installed MSStoreCLI: $(msstore --version)"
+  }
+Write-Output "(INFO): Installed WinSDK: ${win_sdk_version}${msstore_text}"
+Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):msix_tlkt$([char]13)$([char]27)[0K"
+
+
+# 2. GLOBAL VARIABLES
+Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):msix_info$([char]13)$([char]27)[0KGetting MSIX global info"
+if (-not $build_dir)
+  {
+    $build_dir = Get-ChildItem _build* | Select-Object -First 1
+  }
+$config_path = "$build_dir\config.h"
+if (-not (Test-Path "$config_path"))
+  {
+    Write-Host "(ERROR): config.h file not found. You can run 'build/windows/2_build-clay-msys2.ps1' or configure Clay to generate it." -ForegroundColor red
+    exit 1
+  }
+ForEach ($line in $(Select-String 'define' $config_path -AllMatches))
+  {
+    Invoke-Expression $($line -replace '^.*#' -replace 'define ','$' -replace ' ','=')
+  }
+
+## Get Identity Name (the dir shown in Explorer)
+if (-not $CLAY_RELEASE -or $CLAY_IS_RC_GIT)
+  {
+    $IDENTITY_NAME="Clay.CLAYInsider"
+  }
+elseif ($CLAY_RELEASE -and $CLAY_UNSTABLE -or $CLAY_RC_VERSION)
+  {
+    $IDENTITY_NAME="Clay.CLAYPreview"
+  }
+else
+  {
+    $IDENTITY_NAME="Clay.43237F745459"
+  }
+
+## Get custom Clay version (major.minor.micro+revision.0), a compliant way to publish to Partner Center:
+## https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/app-package-requirements)
+### Get Clay app version (major.minor)
+$major = ($CLAY_APP_VERSION.Split('.'))[0]
+$minor = ($CLAY_APP_VERSION.Split('.'))[-1]
+### Get Clay micro version
+$micro = ($CLAY_VERSION.Split('.'))[-1] -replace '(.+?)-.+','$1'
+if ($micro -ne '0')
+  {
+    $micro_digit = $micro
+  }
+### Get Clay revision
+if ($revision -match '[1-9]' -and $CI_PIPELINE_SOURCE -ne 'schedule')
+  {
+    $revision_text = ", revision: $revision"
+  }
+elseif ($CLAY_RC_VERSION)
+  {
+    $revision = $CLAY_RC_VERSION
+    $revision_text = ", RC: $revision"
+  }
+else
+  {
+    $wack = "$revision"
+    $revision = "0"
+  }
+$CUSTOM_CLAY_VERSION = "$CLAY_APP_VERSION.${micro_digit}${revision}.0"
+Write-Output "(INFO): Identity: $IDENTITY_NAME | Version: $CUSTOM_CLAY_VERSION (major: $major, minor: $minor, micro: ${micro}${revision_text})"
+
+## Autodetects what arch bundles will be packaged
+if (-not (Test-Path "$arm64_bundle") -and -not (Test-Path "$x64_bundle"))
+  {
+    Write-Host "(ERROR): No bundle found. You can tweak 'build/windows/2_build-clay-msys2.ps1' or configure Clay with '-Dms-store=true' to make one." -ForegroundColor red
+    exit 1
+  }
+elseif ((Test-Path "$arm64_bundle") -and -not (Test-Path "$x64_bundle"))
+  {
+    Write-Output "(INFO): Arch: arm64"
+    $supported_archs = "$arm64_bundle"
+  }
+elseif (-not (Test-Path "$arm64_bundle") -and (Test-Path "$x64_bundle"))
+  {
+    Write-Output "(INFO): Arch: x64"
+    $supported_archs = "$x64_bundle"
+  }
+elseif ((Test-Path "$arm64_bundle") -and (Test-Path "$x64_bundle"))
+  {
+    Write-Output "(INFO): Arch: arm64 and x64"
+    $supported_archs = "$arm64_bundle","$x64_bundle"
+    $temp_text='temporary '
+  }
+Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):msix_info$([char]13)$([char]27)[0K"
+
+
+foreach ($bundle in $supported_archs)
+  {
+    if (("$bundle" -like '*a64*') -or ("$bundle" -like '*aarch64*') -or ("$bundle" -like '*arm64*'))
+      {
+        $msix_arch = 'arm64'
+      }
+    else
+      {
+        $msix_arch = 'x64'
+      }
+    ## Create temporary dir
+    if (Test-Path $msix_arch)
+      {
+        Remove-Item $msix_arch/ -Recurse
+      }
+    New-Item $msix_arch -ItemType Directory | Out-Null
+    ### Prevent Git going crazy
+    $ig_content = "`n$msix_arch"
+    if (Test-Path .gitignore -Type Leaf)
+      {
+        if (-not (Test-Path .gitignore.bak -Type Leaf))
+          {
+            Copy-Item .gitignore .gitignore.bak
+          }
+        Add-Content .gitignore "$ig_content"
+      }
+    else
+      {
+        New-Item .gitignore | Out-Null
+        Set-Content .gitignore "$ig_content"
+      }
+
+
+    # 3. PREPARE MSIX "SOURCE"
+    Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):${msix_arch}_source[collapsed=true]$([char]13)$([char]27)[0KMaking assets for $msix_arch MSIX"
+    # (We test the existence of the icons here (and not on section 3.2.) to avoid creating AppxManifest.xml for nothing)
+    $icons_path = "$build_dir\build\windows\store\Assets"
+    if (-not (Test-Path "$icons_path"))
+      {
+        Write-Host "(ERROR): MS Store icons not found. You can tweak 'build/windows/2_build-clay-msys2.ps1' or configure Clay with '-Dms-store=true' to build them." -ForegroundColor red
+        exit 1
+      }
+
+    ## Get translations from merged appdata (for AppxManifest and MS Store listings)
+    ## NOTE: All the maintenance process is done only in 'iso_639_custom.xml' file
+    $xmlObject = New-Object XML
+    $xmlObject.Load("$PWD\build\windows\installer\lang\iso_639_custom.xml")
+    $ms_codes = @{ '' = 'en-US' }
+    $xmlObject.iso_639_entries.iso_639_entry | Foreach-Object { $ms_codes[$_.dl_code -replace '_','-' -replace '@latin','-Latn' -replace '@','-'] = $_.ms_code }
+    ### Get developer name, name, summary and description paragraphs ('p1', 'p2' etc) of each language
+    $xmlObject = New-Object XML
+    $xmlObject.Load("$(Resolve-Path $build_dir)\desktop\org.clay.Clay.appdata.xml")
+    $msix_langs = [ordered]@{}
+    $p_count = 0
+    foreach ($node in $xmlObject.component.SelectNodes('developer_name | name | summary | description/p'))
+      {
+        #(Write xml:lang like the $ms_codes keys. If not found, drop its script: newer gettext writes e.g. 'zh-Hans-CN' for zh_CN.po)
+        $lang = $node.GetAttribute('xml:lang') -replace '_','-' -replace '@latin','-Latn' -replace '@','-' | Foreach-Object { if ($ms_codes.Contains($_)) { $ms_codes[$_] } else { $ms_codes[$_ -replace '-[a-z]{4}(?=-|$)',''] } }
+        if ($lang)
+          {
+            #(Organize paragraphs of description)
+            $field = $node.LocalName
+            if ($field -eq 'p')
+              {
+                if ($lang -eq 'en-US') { $p_count++ }
+                $field = "p$p_count"
+              }
+            #(Skip languages not supported by MS Store, which have empty ms_code)
+            if (-not $msix_langs[$lang]) { $msix_langs[$lang] = @{} }
+            $msix_langs[$lang][$field] = ($node.InnerText).Trim() -replace '\s*\r?\n\s*', ' '
+          }
+      }
+
+    ## 3.1. CONFIGURE MANIFEST
+    Write-Output "(INFO): configuring AppxManifest.xml for $msix_arch"
+    Copy-Item build\windows\store\AppxManifest.xml $msix_arch
+    function conf_manifest ([string]$search, [string]$replace)
+    {
+      (Get-Content $msix_arch\AppxManifest.xml) | Foreach-Object {$_ -replace "$search","$replace"} |
+      Set-Content $msix_arch\AppxManifest.xml
+    }
+    ### Set msix_arch
+    conf_manifest 'neutral' "$msix_arch"
+    ### Set Identity Name
+    conf_manifest '@IDENTITY_NAME@' "$IDENTITY_NAME"
+    ### Set Display Name (the name shown in MS Store, on Start Menu etc)
+    if (-not $CLAY_RELEASE -or $CLAY_IS_RC_GIT)
+      {
+        $display_name='Clay (Insider)'
+      }
+    elseif (($CLAY_RELEASE -and $CLAY_UNSTABLE) -or $CLAY_RC_VERSION)
+      {
+        $display_name='Clay (Preview)'
+      }
+    else
+      {
+        $display_name='Clay'
+      }
+    conf_manifest '@DISPLAY_NAME@' "$display_name"
+    ### Set custom Clay version (major.minor.micro+revision.0)
+    conf_manifest '@CUSTOM_CLAY_VERSION@' "$CUSTOM_CLAY_VERSION"
+    #### Needed to differentiate on PowerShell etc
+    if ($CLAY_RELEASE -and -not $CLAY_IS_RC_GIT)
+      {
+        $mutex_suffix="-$CLAY_MUTEX_VERSION"
+      }
+    conf_manifest '@MUTEX_SUFFIX@' "$mutex_suffix"
+    ### List languages with translated Description (see section 3.2)
+    $manifest_langs = $msix_langs.Keys | Where-Object { $_ -ne 'en-US' -and $msix_langs[$_].name } | Sort-Object
+    conf_manifest '@LANGUAGES@' (($manifest_langs | Foreach-Object {'<Resource Language="' + $_ + '" />'}) -join ' ')
+    ### List supported filetypes
+    $file_types = Get-Content "$build_dir\plug-ins\file_associations.list" | Foreach-Object {"              <uap:FileType>." + $_} |
+                  Foreach-Object {$_ +  "</uap:FileType>"}                 | Where-Object {$_ -notmatch 'xcf'}
+    (Get-Content $msix_arch\AppxManifest.xml) | Foreach-Object {$_ -replace "@FILE_TYPES@","$file_types"}  |
+    Set-Content $msix_arch\AppxManifest.xml
+
+    ## 3.2. CREATE ASSETS (ICONS AND LANGS)
+    Write-Output "(INFO): generating resources*.pri from $icons_path"
+    ### Copy pre-generated icons to msix_arch\Assets
+    New-Item $msix_arch\Assets -ItemType Directory | Out-Null
+    Copy-Item "$icons_path\*.png" $msix_arch\Assets\ -Recurse
+    ### Generate temp .resw files with the translated Description to msix_arch\Strings
+    foreach ($lang in @('en-US') + @($manifest_langs))
+      {
+        New-Item $msix_arch\Strings\lang-$lang -ItemType Directory | Out-Null
+        Set-Content $msix_arch\Strings\lang-$lang\Resources.resw -Encoding UTF8 -Value (
+          '<?xml version="1.0" encoding="utf-8"?>',
+          '<root>',
+          '  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>',
+          '  <resheader name="version"><value>2.0</value></resheader>',
+          '  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>',
+          '  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>',
+          "  <data name=`"Description`" xml:space=`"preserve`"><value>$([Security.SecurityElement]::Escape($msix_langs[$lang].name))</value></data>",
+          '</root>')
+      }
+    ### Generate temp priconfig.xml then resources*.pri
+    Set-Location $msix_arch
+    makepri createconfig /cf priconfig.xml /dq lang-en-US /pv 10.0.0 | Out-File ..\winsdk.log; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+    #(Translations need to be on the main resources.pri since we don't make resource packages)
+    (Get-Content priconfig.xml -Raw) -replace '<autoResourcePackage qualifier="Language"\s*/>','' | Set-Content priconfig.xml -Encoding UTF8
+    Set-Location ..\
+    makepri new /pr $msix_arch /cf $msix_arch\priconfig.xml /of $msix_arch | Out-File winsdk.log -Append; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+    Remove-Item $msix_arch\priconfig.xml
+    Remove-Item $msix_arch\Strings -Recurse
+    Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):${msix_arch}_source$([char]13)$([char]27)[0K"
+
+
+    # 4. COPY Clay FILES
+    Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):${msix_arch}_files[collapsed=true]$([char]13)$([char]27)[0KPreparing Clay files in $msix_arch VFS"
+    $vfs = "$msix_arch\VFS\ProgramFilesX64\Clay"
+    ## Copy files into VFS folder (to support external 3P plug-ins)
+    Copy-Item "$bundle" "$vfs" -Recurse -Force
+
+    ## MSIX-specific adjustments (needed because we use the same clay-* bundle as base to both .exe and .msix)
+    ### Set revision on about dialog (this does the same as '-Drevision' build option)
+    if (-not $CLAY_RC_VERSION)
+      {
+        (Get-Content "$vfs\share\clay\*\clay-release") | Foreach-Object {$_ -replace "revision=0","revision=$revision"} |
+        Set-Content "$vfs\share\clay\*\clay-release"
+      }
+    ### Disable Update check (ONLY FOR RELEASES)
+    if ($CLAY_RELEASE -and -not $CLAY_IS_RC_GIT)
+      {
+        Add-Content "$vfs\share\clay\*\clay-release" 'check-update=false'
+      }
+
+    ## Parity adjustments (to make the .msix IDENTICAL TO THE .EXE INSTALLER, except for the adjustments above)
+    Get-ChildItem "$vfs" -Recurse -Include (".gitignore", "clay.cmd") | Remove-Item -Recurse
+    Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):${msix_arch}_files$([char]13)$([char]27)[0K"
+
+
+    # 5.A. MAKE .MSIX AND CORRESPONDING .APPXSYM
+    Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):${msix_arch}_making[collapsed=true]$([char]13)$([char]27)[0KPackaging ${temp_text}$msix_arch MSIX"
+    ## Make .appxsym for each msix_arch (ONLY FOR RELEASES)
+    $APPXSYM = "${IDENTITY_NAME}_${CUSTOM_CLAY_VERSION}_$msix_arch.appxsym"
+    if ($CI_COMMIT_TAG -match 'CLAY_[0-9]*_[0-9]*_[0-9]*' -or $CLAY_CI_MS_STORE -like 'MSIXUPLOAD*')
+      {
+        Write-Output "(INFO): making $APPXSYM"
+        Get-ChildItem $msix_arch -Filter *.pdb -Recurse | Compress-Archive -DestinationPath "$APPXSYM.zip"
+        Rename-Item "$APPXSYM.zip" "$APPXSYM"
+        #(To not ship .pdb we need an online symbol server pointed on _NT_SYMBOL_PATH)
+        #Get-ChildItem $msix_arch -Include *.pdb -Recurse -Force | Remove-Item -Recurse -Force
+      }
+
+    ## Make .msix from each msix_arch
+    $MSIX_ARTIFACT = $APPXSYM -replace '.appxsym','.msix'
+    Write-Output "(INFO): packaging $MSIX_ARTIFACT"
+    makeappx pack /d $msix_arch /p $MSIX_ARTIFACT /o | Out-File winsdk.log -Append; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+    Remove-Item $msix_arch/ -Recurse
+    Remove-Item .gitignore
+    if (Test-Path .gitignore.bak -Type Leaf)
+      {
+        Rename-Item .gitignore.bak .gitignore
+      }
+    Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):${msix_arch}_making$([char]13)$([char]27)[0K"
+  } #END of 'foreach ($bundle'
+
+
+# 5.B. MAKE .MSIXBUNDLE OR SUBSEQUENT .MSIXUPLOAD
+if (((Test-Path $arm64_bundle) -and (Test-Path $x64_bundle)) -and (Get-ChildItem *.msix -Recurse).Count -gt 1)
+  {
+    $MSIXBUNDLE = "${IDENTITY_NAME}_${CUSTOM_CLAY_VERSION}_neutral.msixbundle"
+    $MSIX_ARTIFACT = "$MSIXBUNDLE"
+    if ($CLAY_RELEASE -and -not $CLAY_IS_RC_GIT)
+      {
+        $MSIXUPLOAD = "${IDENTITY_NAME}_${CUSTOM_CLAY_VERSION}_x64_arm64_bundle.msixupload"
+        $MSIX_ARTIFACT = "$MSIXUPLOAD"
+      }
+    Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):msix_making[collapsed=true]$([char]13)$([char]27)[0KPackaging $MSIX_ARTIFACT"
+
+    ## Make .msixbundle with all archs
+    ## (This is needed not only for easier multi-arch testing but
+    ##  also to make sure against Partner Center getting confused)
+    New-Item _TempOutput -ItemType Directory | Out-Null
+    Move-Item *.msix _TempOutput/
+    makeappx bundle /bv "${CUSTOM_CLAY_VERSION}" /d _TempOutput /p $MSIXBUNDLE /o; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+    Remove-Item _TempOutput/ -Recurse
+
+    ## Make .msixupload (ONLY FOR RELEASES)
+    if ($CLAY_RELEASE -and -not $CLAY_IS_RC_GIT)
+      {
+        Write-Output "(INFO): creating $MSIXUPLOAD for submission"
+        Compress-Archive -Path "*.appxsym","*.msixbundle" -DestinationPath "$MSIXUPLOAD.zip"
+        Rename-Item "$MSIXUPLOAD.zip" "$MSIXUPLOAD"
+        Remove-Item *.appxsym -Force
+        Remove-Item *.msixbundle -Force
+      }
+    Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):msix_making$([char]13)$([char]27)[0K"
+  }
+
+
+# 6.A. CERTIFY .MSIX OR .MSIXBUNDLE WITH WACK (OPTIONAL)
+# (Partner Center does the same thing before publishing)
+if (-not $GITLAB_CI -and $wack -eq 'WACK')
+  {
+    Write-Output "(INFO): certifying $MSIX_ARTIFACT with WACK"
+    ## Prepare file naming
+    ## (appcert CLI does NOT allow relative paths)
+    $fullpath = $PWD
+    ## (appcert CLI does NOT allow more than one dot on xml name)
+    $xml_artifact = "$MSIX_ARTIFACT" -replace '.msix', '-report.xml' -replace 'bundle', ''
+
+    ## Generate detailed report
+    ## (appcert only works with admin rights so let's use sudo)
+    $nt_build = [System.Environment]::OSVersion.Version | Select-Object -ExpandProperty Build
+    if ($nt_build -lt '26052')
+      {
+        Write-Host "(ERROR): Certification from CLI requires 'sudo' (available only for build 10.0.26052.0 and above)" -ForegroundColor Red
+        exit 1
+      }
+    $sudo_mode = Get-ItemProperty Registry::'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo' | Select-Object -ExpandProperty Enabled
+    if ($sudo_mode -eq '0')
+      {
+        Write-Host "(ERROR): 'sudo' is disabled. Please enable it in Settings." -ForegroundColor Red
+        exit 1
+      }
+    elseif ($sudo_mode -ne '3')
+      {
+        Write-Host "(ERROR): 'sudo' is not in normal/inline mode. Please change it in Settings." -ForegroundColor Red
+        exit 1
+      }
+    sudo appcert test -appxpackagepath $fullpath\$MSIX_ARTIFACT -reportoutputpath $fullpath\$xml_artifact
+
+    ## Output overall result
+    if (Test-Path $xml_artifact -Type Leaf)
+      {
+        $xmlObject = New-Object XML
+        $xmlObject.Load("$xml_artifact")
+        $result = $xmlObject.REPORT.OVERALL_RESULT
+        if ($result -eq 'FAIL')
+          {
+            Write-Host "(ERROR): $MSIX_ARTIFACT not passed. See: $xml_artifact" -ForegroundColor Red
+            exit 1
+          }
+        elseif ($result -eq 'WARNING')
+          {
+            Write-Host "(WARNING): $MSIX_ARTIFACT passed partially. See: $xml_artifact" -ForegroundColor Yellow
+          }
+        #elseif ($result -eq 'PASS')
+          #{
+            # Output nothing
+          #}
+      }
+  }
+
+
+# 6.B. SIGN .MSIX OR .MSIXBUNDLE PACKAGE (NOT THE BINARIES)
+# (Partner Center does the same thing, for free, before publishing)
+if (-not $CLAY_RELEASE -or $CLAY_IS_RC_GIT)
+  {
+    Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):msix_trust${msix_arch}[collapsed=false]$([char]13)$([char]27)[0KSelf-signing $MSIX_ARTIFACT (for testing purposes)"
+    ## Check if certificate for nightly builds is fine
+    $sign_output = & signtool sign /debug /fd sha256 /a /f $(Resolve-Path build\windows\store\pseudo-clay*.pfx) /p eek $MSIX_ARTIFACT
+    if ($sign_output -like "*After expiry filter, 0 certs were left*")
+      {
+        Write-Output $sign_output
+        $pseudo_clay = "pseudo-clay_$(Get-Date -UFormat %s -Millisecond 0)"
+        New-SelfSignedCertificate -Type Custom -Subject "$(([xml](Get-Content build\windows\store\AppxManifest.xml)).Package.Identity.Publisher)" -KeyUsage DigitalSignature -FriendlyName "$pseudo_clay" -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}") | Out-Null
+        Export-PfxCertificate -Cert "Cert:\CurrentUser\My\$(Get-ChildItem Cert:\CurrentUser\My | Where-Object FriendlyName -EQ "$pseudo_clay" | Select-Object -ExpandProperty Thumbprint)" -FilePath "${pseudo_clay}.pfx" -Password (ConvertTo-SecureString -String eek -Force -AsPlainText) | Out-Null
+        Remove-Item "Cert:\CurrentUser\My\$(Get-ChildItem Cert:\CurrentUser\My | Where-Object FriendlyName -EQ "$pseudo_clay" | Select-Object -ExpandProperty Thumbprint)"
+        Write-Host "(ERROR): Self-signing certificate expired. Please commit the generated '${pseudo_clay}.pfx' on 'build\windows\store\'." -ForegroundColor red
+        $sha256_pfx = (Get-FileHash "${pseudo_clay}.pfx" -Algorithm SHA256 | Select-Object -ExpandProperty Hash).ToLower()
+        Write-Output "(INFO): ${pseudo_clay}.pfx SHA-256: $sha256_pfx"
+      }
+    else
+      {
+        Copy-Item build\windows\store\pseudo-clay*.pfx pseudo-clay.pfx -Recurse
+
+        ## Generate checksums
+        $sha256 = (Get-FileHash $MSIX_ARTIFACT -Algorithm SHA256 | Select-Object -ExpandProperty Hash).ToLower()
+        Write-Output "(INFO): $MSIX_ARTIFACT SHA-256: $sha256"
+        $sha512 = (Get-FileHash $MSIX_ARTIFACT -Algorithm SHA512 | Select-Object -ExpandProperty Hash).ToLower()
+        Write-Output "(INFO): $MSIX_ARTIFACT SHA-512: $sha512"
+        Write-Host "(INFO): Suceeded. To test this build, install it from the artifact with: Import-PfxCertificate -FilePath pseudo-clay.pfx -CertStoreLocation Cert:\LocalMachine\Root -Password (ConvertTo-SecureString eek -AsPlainText -Force); Add-AppxPackage -Path $MSIX_ARTIFACT" -ForegroundColor green
+      }
+
+    ## Check in advance if the CLIENT_SECRET we will use in the future tagged pipeline is fine
+    if ($CI_COMMIT_TAG)
+      {
+        $latest_msix_secret = New-Object -TypeName System.DateTime -ArgumentList 2026, 9, 20
+        Write-Output "(INFO): CLIENT_SECRET expire date is: $latest_msix_secret"
+        if ((Get-Date) -ge $latest_msix_secret)
+          {
+            $expired_secret = "$latest_msix_secret"
+            Write-Host "(ERROR): Submission secret for releases expired. Please follow https://developer.gimp.org/core/maintainer/accounts/msstore/ then commit its expire date on 'build\windows\store\*.ps1'." -ForegroundColor red
+          }
+      }
+    Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):msix_trust${msix_arch}$([char]13)$([char]27)[0K"
+  }
+
+
+if ($GITLAB_CI)
+  {
+    # GitLab doesn't support wildcards when using "expose_as" so let's move to a dir
+    $OUTPUT_DIR = "$PWD\build\windows\store\_Output"
+    New-Item $OUTPUT_DIR -ItemType Directory -Force | Out-Null
+    if (-not $CLAY_RELEASE -or $CLAY_IS_RC_GIT)
+      {
+        Move-Item pseudo-clay*.pfx $OUTPUT_DIR
+        New-Item $OUTPUT_DIR/IMPORTANT.txt | Out-Null
+        Set-Content $OUTPUT_DIR/IMPORTANT.txt "See the instructions on how install at the 'Automatic Development Builds' section of https://www.gimp.org/downloads/devel/#automatic-builds"
+      }
+    if ($sha256_pfx -or $expired_secret)
+      {
+        exit 1
+      }
+    Move-Item $MSIX_ARTIFACT $OUTPUT_DIR -Force
+  }
+
+
+# 7. SUBMIT .MSIXUPLOAD TO MS STORE (ONLY FOR RELEASES)
+if ("$CI_COMMIT_TAG" -eq (git describe --all | Foreach-Object {$_ -replace 'tags/',''}))
+  {
+    Write-Output "$([char]27)[0Ksection_start:$(Get-Date -UFormat %s -Millisecond 0):msix_submission[collapsed=true]$([char]13)$([char]27)[0KSubmitting $MSIX_ARTIFACT to Microsoft Store"
+    ## Needed credentials for submission
+    ### Connect with our Microsoft Entra credentials (stored on GitLab)
+    ### (The last one can be revoked at any time in MS Entra Admin center)
+    msstore reconfigure --tenantId $TENANT_ID --sellerId $SELLER_ID --clientId $CLIENT_ID --clientSecret $CLIENT_SECRET; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+    ### Set product_id (which is not confidential) needed by HTTP calls of some commands
+    if ($CLAY_UNSTABLE -or $CLAY_RC_VERSION)
+      {
+        $env:PRODUCT_ID="9NZVDVP54JMR"
+      }
+    else
+      {
+        $env:PRODUCT_ID="9PNSJCLXDZ0V"
+      }
+
+    ## Create submission and upload .msixupload file to it
+    msstore publish $OUTPUT_DIR\$MSIX_ARTIFACT -id $env:PRODUCT_ID -nc; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+
+    ## Update submission info (if PS6 or up. Check the section 1 of this script)
+    $msix_langs | ConvertTo-Json -Depth 3 | Set-Content "$env:TMP\clay-msix-langs.json" -Encoding UTF8
+    $env:CLAY_VERSION="$CLAY_VERSION"
+    pwsh -Command `
+      {
+        $jsonObject = msstore submission get $env:PRODUCT_ID | ConvertFrom-Json -AsHashtable; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+        ###Get changelog and others from Linux appdata
+        $xmlObject = New-Object XML
+        $xmlObject.Load("$PWD\desktop\org.clay.Clay.appdata.xml.in.in")
+        if ($xmlObject.component.releases.release[0].version -ne ("$env:CLAY_VERSION".ToLower() -replace '-','~'))
+          {
+            #This check is needed to ensure the right release notes etc when the submission is (rarely) done manually/locally
+            Write-Host "(WARNING): appdata does not match main meson file. Submission info can't be updated." -ForegroundColor yellow
+            exit 1
+          }
+        $msix_langs = Get-Content "$env:TMP\clay-msix-langs.json" -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
+        $p_count = @($msix_langs['en-US'].Keys -match '^p[0-9]+$').Count
+        $listings = @{}
+        foreach ($lang in $msix_langs.Keys)
+          {
+            $texts = $msix_langs[$lang]
+            if (-not (@($texts.Keys) -match '^(summary|p[0-9]+)$'))
+              {
+                continue
+              }
+            $listings[$lang.ToLower()] = @{
+              DevStudio = if ($texts.developer_name) { $texts.developer_name } else { $msix_langs['en-US'].developer_name }
+              ShortDescription = if ($texts.summary) { $texts.summary } else { $msix_langs['en-US'].summary }
+              Description = ((1..$p_count | ForEach-Object { if ($texts["p$_"]) { $texts["p$_"] } else { $msix_langs['en-US']["p$_"] } }) -join "`n`n") +
+                            "`n`n(NOTE: for Windows 11 users, like on the .exe installer package, some app data is preserved/persistent on %AppData%/Clay even after updates and uninstall, this allows preserving your plugins, custom brushes, etc)"
+            }
+          }
+        #NOTE: Submission API does not allow more than 1500 chars on ReleaseNotes so we skip some <p> or <li> when needed
+        $release_notes = ($xmlObject.component.releases.release[0].description.SelectNodes(".//p | .//li") | Where-Object { -not $_.HasAttribute('xml:lang') } | ForEach-Object -Begin {$len=0} -Process { $text = ($_.InnerText).Trim() -replace '\s*\r?\n\s*', ' '; $formatted = if ($_.Name -eq 'li') { "- $text" } else { $text }; if (($len + $formatted.Length + 1) -lt 1490) { $len += $formatted.Length + 1; $formatted } }) -join "`n"
+        foreach ($lang in $listings.Keys)
+          {
+            if (-not $jsonObject."Listings".ContainsKey($lang))
+              {
+                #New listings are copied from the en-us one
+                $jsonObject."Listings".$lang = $jsonObject."Listings"."en-us" | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable
+                #The API does not copy the images yet. See: https://github.com/microsoft/msstore-cli/issues/78
+                $new_listings += @($lang)
+              }
+            $jsonObject."Listings".$lang."BaseListing".'DevStudio' = $listings.$lang.DevStudio
+            $jsonObject."Listings".$lang."BaseListing".'ShortDescription' = $listings.$lang.ShortDescription
+            $jsonObject."Listings".$lang."BaseListing".'Description' = $listings.$lang.Description
+            $jsonObject."Listings".$lang."BaseListing".'ReleaseNotes' = $release_notes
+          }
+        ###Send submission info (from file since it can exceed the command line length limit)
+        $jsonObject | ConvertTo-Json -Depth 100 | Set-Content "$env:TMP\clay-msix-submission.json" -Encoding UTF8
+        msstore submission updateMetadata $env:PRODUCT_ID --payload "$env:TMP\clay-msix-submission.json"; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+        if ($new_listings)
+          {
+            Write-Host "(WARNING): New listings created for: $($new_listings -join ', '). Please, add their screenshots and logos manually on Partner Center." -ForegroundColor yellow
+          }
+      }
+    Remove-Item "$env:TMP\clay-msix-langs.json", "$env:TMP\clay-msix-submission.json" -ErrorAction SilentlyContinue
+
+    ## Start certification then publishing
+    msstore submission publish $env:PRODUCT_ID; if ("$LASTEXITCODE" -gt '0') { exit 1 }
+    Write-Output "$([char]27)[0Ksection_end:$(Get-Date -UFormat %s -Millisecond 0):msix_submission$([char]13)$([char]27)[0K"
+  }

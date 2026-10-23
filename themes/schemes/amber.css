@@ -1,0 +1,37 @@
+/* Clay colour scheme "Amber": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(255,176,0);
+@define-color bg-color                   rgb(18,10,0);
+@define-color border-color               rgb(51,33,0);
+@define-color dimmed-fg-color            rgb(196,134,0);
+@define-color disabled-fg-color          rgb(148,101,0);
+@define-color disabled-button-color      rgb(94,63,0);
+@define-color hover-color                rgb(51,33,0);
+@define-color widget-bg-color            rgb(32,20,0);
+@define-color selected-color             rgb(65,43,0);
+@define-color extreme-bg-color           rgb(13,7,0);
+@define-color extreme-selected-color     rgb(51,33,0);
+@define-color strong-border-color        rgb(101,68,0);
+@define-color stronger-border-color      rgb(101,68,0);
+@define-color edge-border-color          rgb(101,68,0);
+@define-color scrollbar-slider-color     rgb(101,68,0);
+@define-color scrollbar-trough-color     rgb(13,7,0);
+@define-color ruler-color                rgba(51,33,0,0.3);
+@define-color accent-color               rgb(255,176,0);
+@define-color accent-hover-color         rgb(255,192,51);
+@define-color on-accent-color            rgb(18,10,0);
+@define-color destructive-color          rgb(255,90,60);
+@define-color good-color                 rgb(200,230,106);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+/* icon colours */
+@define-color lane-rust     rgb(255,140,0);
+@define-color lane-maroon   rgb(255,158,94);
+@define-color lane-mustard  rgb(255,210,122);
+@define-color lane-purple   rgb(232,163,61);
+@define-color lane-blue     rgb(255,194,77);
+@define-color lane-green    rgb(255,176,0);

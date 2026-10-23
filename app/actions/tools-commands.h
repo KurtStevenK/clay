@@ -18,117 +18,117 @@
 #pragma once
 
 
-void   tools_swap_cmd_callback                      (GimpAction *action,
+void   tools_swap_cmd_callback                      (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_select_cmd_callback                    (GimpAction *action,
+void   tools_select_cmd_callback                    (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_color_average_radius_cmd_callback      (GimpAction *action,
+void   tools_color_average_radius_cmd_callback      (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_paintbrush_pixel_size_cmd_callback     (GimpAction *action,
+void   tools_paintbrush_pixel_size_cmd_callback     (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_paintbrush_size_cmd_callback           (GimpAction *action,
+void   tools_paintbrush_size_cmd_callback           (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_paintbrush_angle_cmd_callback          (GimpAction *action,
+void   tools_paintbrush_angle_cmd_callback          (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_paintbrush_aspect_ratio_cmd_callback   (GimpAction *action,
+void   tools_paintbrush_aspect_ratio_cmd_callback   (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_paintbrush_spacing_cmd_callback        (GimpAction *action,
+void   tools_paintbrush_spacing_cmd_callback        (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_paintbrush_hardness_cmd_callback       (GimpAction *action,
+void   tools_paintbrush_hardness_cmd_callback       (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_paintbrush_force_cmd_callback          (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-
-void   tools_ink_blob_pixel_size_cmd_callback       (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_ink_blob_size_cmd_callback             (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_ink_blob_aspect_cmd_callback           (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_ink_blob_angle_cmd_callback            (GimpAction *action,
+void   tools_paintbrush_force_cmd_callback          (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_airbrush_rate_cmd_callback             (GimpAction *action,
+void   tools_ink_blob_pixel_size_cmd_callback       (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_airbrush_flow_cmd_callback             (GimpAction *action,
+void   tools_ink_blob_size_cmd_callback             (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-
-void   tools_mybrush_radius_cmd_callback            (GimpAction *action,
+void   tools_ink_blob_aspect_cmd_callback           (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_mybrush_pixel_size_cmd_callback        (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_mybrush_hardness_cmd_callback          (GimpAction *action,
+void   tools_ink_blob_angle_cmd_callback            (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_fg_select_brush_size_cmd_callback      (GimpAction *action,
+void   tools_airbrush_rate_cmd_callback             (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_airbrush_flow_cmd_callback             (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_transform_preview_opacity_cmd_callback (GimpAction *action,
+void   tools_mybrush_radius_cmd_callback            (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_mybrush_pixel_size_cmd_callback        (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_mybrush_hardness_cmd_callback          (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_warp_effect_pixel_size_cmd_callback    (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_warp_effect_size_cmd_callback          (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_warp_effect_hardness_cmd_callback      (GimpAction *action,
+void   tools_fg_select_brush_size_cmd_callback      (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_opacity_cmd_callback                   (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_size_cmd_callback                      (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_aspect_cmd_callback                    (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_angle_cmd_callback                     (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_spacing_cmd_callback                   (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_hardness_cmd_callback                  (GimpAction *action,
-                                                     GVariant   *value,
-                                                     gpointer    data);
-void   tools_force_cmd_callback                     (GimpAction *action,
+void   tools_transform_preview_opacity_cmd_callback (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_paint_select_pixel_size_cmd_callback   (GimpAction *action,
+void   tools_warp_effect_pixel_size_cmd_callback    (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_warp_effect_size_cmd_callback          (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_warp_effect_hardness_cmd_callback      (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
 
-void   tools_object_1_cmd_callback                  (GimpAction *action,
+void   tools_opacity_cmd_callback                   (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);
-void   tools_object_2_cmd_callback                  (GimpAction *action,
+void   tools_size_cmd_callback                      (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_aspect_cmd_callback                    (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_angle_cmd_callback                     (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_spacing_cmd_callback                   (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_hardness_cmd_callback                  (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_force_cmd_callback                     (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+
+void   tools_paint_select_pixel_size_cmd_callback   (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+
+void   tools_object_1_cmd_callback                  (ClayAction *action,
+                                                     GVariant   *value,
+                                                     gpointer    data);
+void   tools_object_2_cmd_callback                  (ClayAction *action,
                                                      GVariant   *value,
                                                      gpointer    data);

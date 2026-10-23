@@ -21,12 +21,12 @@
 
 #include <gio/gio.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpbase/gimpbase-private.h"
+#include "libclaybase/claybase.h"
+#include "libclaybase/claybase-private.h"
 
 #include "core/core-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
 #include "errors.h"
 #include "signals.h"
@@ -39,18 +39,18 @@
 
 static LPTOP_LEVEL_EXCEPTION_FILTER g_prevExceptionFilter = NULL;
 
-static LONG WINAPI  gimp_sigfatal_handler (PEXCEPTION_POINTERS pExceptionInfo);
+static LONG WINAPI  clay_sigfatal_handler (PEXCEPTION_POINTERS pExceptionInfo);
 #endif
 
 #else
 
-static void         gimp_sigfatal_handler (gint sig_num) G_GNUC_NORETURN;
+static void         clay_sigfatal_handler (gint sig_num) G_GNUC_NORETURN;
 
 #endif
 
 
 void
-gimp_init_signal_handlers (gchar **backtrace_file)
+clay_init_signal_handlers (gchar **backtrace_file)
 {
   time_t   t;
 #if defined(G_OS_WIN32) && defined(ENABLE_RELOCATABLE_RESOURCES)
@@ -67,7 +67,7 @@ gimp_init_signal_handlers (gchar **backtrace_file)
 #ifdef G_OS_WIN32
 #ifdef ENABLE_RELOCATABLE_RESOURCES
   /* FIXME: https://github.com/jrfonseca/drmingw/issues/91 */
-  bin_dir = g_build_filename (gimp_installation_directory (), "bin", NULL);
+  bin_dir = g_build_filename (clay_installation_directory (), "bin", NULL);
   codeview_path_len = strlen (g_getenv ("_NT_SYMBOL_PATH") ? g_getenv ("_NT_SYMBOL_PATH") : "") + strlen (bin_dir) + 2;
   codeview_path = g_try_malloc (codeview_path_len);
   if (codeview_path == NULL)
@@ -87,10 +87,10 @@ gimp_init_signal_handlers (gchar **backtrace_file)
      directory) as backtraces correspond to the binaries on this
      system. */
   dir = g_build_filename (g_get_user_data_dir (),
-                          GIMPDIR, GIMP_USER_VERSION, "CrashLog",
+                          CLAYDIR, CLAY_USER_VERSION, "CrashLog",
                           NULL);
 #else
-  dir = g_build_filename (gimp_directory (), "CrashLog", NULL);
+  dir = g_build_filename (clay_directory (), "CrashLog", NULL);
 #endif
 
   time (&t);
@@ -116,7 +116,7 @@ gimp_init_signal_handlers (gchar **backtrace_file)
    * that ExcHnl's handler runs first since that's in FILO order.
    */
   if (! g_prevExceptionFilter)
-    g_prevExceptionFilter = SetUnhandledExceptionFilter (gimp_sigfatal_handler);
+    g_prevExceptionFilter = SetUnhandledExceptionFilter (clay_sigfatal_handler);
 
   ExcHndlInit ();
 
@@ -132,30 +132,30 @@ gimp_init_signal_handlers (gchar **backtrace_file)
 
   /* Handle fatal signals */
 
-  /* these are handled by gimp_terminate() */
-  gimp_signal_private (SIGHUP,  gimp_sigfatal_handler, 0);
-  gimp_signal_private (SIGINT,  gimp_sigfatal_handler, 0);
-  gimp_signal_private (SIGQUIT, gimp_sigfatal_handler, 0);
-  gimp_signal_private (SIGTERM, gimp_sigfatal_handler, 0);
+  /* these are handled by clay_terminate() */
+  clay_signal_private (SIGHUP,  clay_sigfatal_handler, 0);
+  clay_signal_private (SIGINT,  clay_sigfatal_handler, 0);
+  clay_signal_private (SIGQUIT, clay_sigfatal_handler, 0);
+  clay_signal_private (SIGTERM, clay_sigfatal_handler, 0);
 
-  /* these are handled by gimp_fatal_error() */
+  /* these are handled by clay_fatal_error() */
   /*
    * MacOS has it's own crash handlers which end up fighting the
-   * these Gimp supplied handlers and leading to very hard to
+   * these Clay supplied handlers and leading to very hard to
    * deal with hangs (just get a spin dump)
    */
 #ifndef PLATFORM_OSX
-  gimp_signal_private (SIGABRT, gimp_sigfatal_handler, 0);
-  gimp_signal_private (SIGBUS,  gimp_sigfatal_handler, 0);
-  gimp_signal_private (SIGSEGV, gimp_sigfatal_handler, 0);
-  gimp_signal_private (SIGFPE,  gimp_sigfatal_handler, 0);
+  clay_signal_private (SIGABRT, clay_sigfatal_handler, 0);
+  clay_signal_private (SIGBUS,  clay_sigfatal_handler, 0);
+  clay_signal_private (SIGSEGV, clay_sigfatal_handler, 0);
+  clay_signal_private (SIGFPE,  clay_sigfatal_handler, 0);
 #endif
 
   /* Ignore SIGPIPE because plug_in.c handles broken pipes */
-  gimp_signal_private (SIGPIPE, SIG_IGN, 0);
+  clay_signal_private (SIGPIPE, SIG_IGN, 0);
 
   /* Restart syscalls on SIGCHLD */
-  gimp_signal_private (SIGCHLD, SIG_DFL, SA_RESTART);
+  clay_signal_private (SIGCHLD, SIG_DFL, SA_RESTART);
 
 #endif /* G_OS_WIN32 */
 }
@@ -165,7 +165,7 @@ gimp_init_signal_handlers (gchar **backtrace_file)
 
 #ifdef HAVE_EXCHNDL
 static LONG WINAPI
-gimp_sigfatal_handler (PEXCEPTION_POINTERS pExceptionInfo)
+clay_sigfatal_handler (PEXCEPTION_POINTERS pExceptionInfo)
 {
   EXCEPTION_RECORD *er;
   int               fatal;
@@ -186,10 +186,10 @@ gimp_sigfatal_handler (PEXCEPTION_POINTERS pExceptionInfo)
       SetUnhandledExceptionFilter (g_prevExceptionFilter);
 
       /* Now process the exception. */
-      gimp_fatal_error ("unhandled exception");
+      clay_fatal_error ("unhandled exception");
     }
 
-  if (g_prevExceptionFilter && g_prevExceptionFilter != gimp_sigfatal_handler)
+  if (g_prevExceptionFilter && g_prevExceptionFilter != clay_sigfatal_handler)
     return g_prevExceptionFilter (pExceptionInfo);
   else
     return EXCEPTION_CONTINUE_SEARCH;
@@ -198,10 +198,10 @@ gimp_sigfatal_handler (PEXCEPTION_POINTERS pExceptionInfo)
 
 #else
 
-/* gimp core signal handler for fatal signals */
+/* clay core signal handler for fatal signals */
 
 static void
-gimp_sigfatal_handler (gint sig_num)
+clay_sigfatal_handler (gint sig_num)
 {
   switch (sig_num)
     {
@@ -209,7 +209,7 @@ gimp_sigfatal_handler (gint sig_num)
     case SIGINT:
     case SIGQUIT:
     case SIGTERM:
-      gimp_terminate (g_strsignal (sig_num));
+      clay_terminate (g_strsignal (sig_num));
       break;
 
     case SIGABRT:
@@ -217,7 +217,7 @@ gimp_sigfatal_handler (gint sig_num)
     case SIGSEGV:
     case SIGFPE:
     default:
-      gimp_fatal_error (g_strsignal (sig_num));
+      clay_fatal_error (g_strsignal (sig_num));
       break;
     }
 }

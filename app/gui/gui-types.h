@@ -22,4 +22,4 @@
 #include "menus/menus-types.h"
 
 
-typedef struct _GimpApp GimpApp;
+typedef struct _ClayApp ClayApp;

@@ -22,30 +22,30 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-new.h"
-#include "core/gimptemplate.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-new.h"
+#include "core/claytemplate.h"
 
-#include "widgets/gimpcontainercombobox.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
-#include "widgets/gimptemplateeditor.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claycontainercombobox.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
+#include "widgets/claytemplateeditor.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "image-new-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -58,8 +58,8 @@ typedef struct
   GtkWidget    *combo;
   GtkWidget    *editor;
 
-  GimpContext  *context;
-  GimpTemplate *template;
+  ClayContext  *context;
+  ClayTemplate *template;
 } ImageNewDialog;
 
 
@@ -69,8 +69,8 @@ static void   image_new_dialog_free      (ImageNewDialog *private);
 static void   image_new_dialog_response  (GtkWidget      *widget,
                                           gint            response_id,
                                           ImageNewDialog *private);
-static void   image_new_template_changed (GimpContext    *context,
-                                          GimpTemplate   *template,
+static void   image_new_template_changed (ClayContext    *context,
+                                          ClayTemplate   *template,
                                           ImageNewDialog *private);
 static void   image_new_confirm_dialog   (ImageNewDialog *private);
 static void   image_new_create_image     (ImageNewDialog *private);
@@ -79,28 +79,28 @@ static void   image_new_create_image     (ImageNewDialog *private);
 /*  public functions  */
 
 GtkWidget *
-image_new_dialog_new (GimpContext *context)
+image_new_dialog_new (ClayContext *context)
 {
   ImageNewDialog *private;
   GtkWidget      *dialog;
   GtkWidget      *main_vbox;
   GtkWidget      *hbox;
   GtkWidget      *label;
-  GimpSizeEntry  *entry;
+  ClaySizeEntry  *entry;
 
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
 
   private = g_slice_new0 (ImageNewDialog);
 
-  private->context  = gimp_context_new (context->gimp, "image-new-dialog",
+  private->context  = clay_context_new (context->clay, "image-new-dialog",
                                         context);
-  private->template = g_object_new (GIMP_TYPE_TEMPLATE, NULL);
+  private->template = g_object_new (CLAY_TYPE_TEMPLATE, NULL);
 
   private->dialog = dialog =
-    gimp_dialog_new (_("Create a New Image"),
-                     "gimp-image-new",
+    clay_dialog_new (_("Create a New Image"),
+                     "clay-image-new",
                      NULL, 0,
-                     gimp_standard_help_func, GIMP_HELP_FILE_NEW,
+                     clay_standard_help_func, CLAY_HELP_FILE_NEW,
 
                      _("_Reset"),  RESPONSE_RESET,
                      _("_Cancel"), GTK_RESPONSE_CANCEL,
@@ -109,7 +109,7 @@ image_new_dialog_new (GimpContext *context)
                      NULL);
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
@@ -118,7 +118,7 @@ image_new_dialog_new (GimpContext *context)
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 
   g_object_set_data_full (G_OBJECT (dialog),
-                          "gimp-image-new-dialog", private,
+                          "clay-image-new-dialog", private,
                           (GDestroyNotify) image_new_dialog_free);
 
   g_signal_connect_after (dialog, "response",
@@ -140,8 +140,8 @@ image_new_dialog_new (GimpContext *context)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
   gtk_widget_set_visible (label, TRUE);
 
-  private->combo = g_object_new (GIMP_TYPE_CONTAINER_COMBO_BOX,
-                                 "container",         context->gimp->templates,
+  private->combo = g_object_new (CLAY_TYPE_CONTAINER_COMBO_BOX,
+                                 "container",         context->clay->templates,
                                  "context",           private->context,
                                  "view-size",         16,
                                  "view-border-width", 0,
@@ -158,17 +158,17 @@ image_new_dialog_new (GimpContext *context)
                     private);
 
   /*  Template editor  */
-  private->editor = gimp_template_editor_new (private->template, context->gimp,
+  private->editor = clay_template_editor_new (private->template, context->clay,
                                               FALSE);
   gtk_box_pack_start (GTK_BOX (main_vbox), private->editor, FALSE, FALSE, 0);
   gtk_widget_set_visible (private->editor, TRUE);
 
-  entry = GIMP_SIZE_ENTRY (gimp_template_editor_get_size_se (GIMP_TEMPLATE_EDITOR (private->editor)));
-  gimp_size_entry_set_activates_default (entry, TRUE);
-  gimp_size_entry_grab_focus (entry);
+  entry = CLAY_SIZE_ENTRY (clay_template_editor_get_size_se (CLAY_TEMPLATE_EDITOR (private->editor)));
+  clay_size_entry_set_activates_default (entry, TRUE);
+  clay_size_entry_grab_focus (entry);
 
   image_new_template_changed (private->context,
-                              gimp_context_get_template (private->context),
+                              clay_context_get_template (private->context),
                               private);
 
   return dialog;
@@ -176,24 +176,24 @@ image_new_dialog_new (GimpContext *context)
 
 void
 image_new_dialog_set (GtkWidget    *dialog,
-                      GimpImage    *image,
-                      GimpTemplate *template)
+                      ClayImage    *image,
+                      ClayTemplate *template)
 {
   ImageNewDialog *private;
 
-  g_return_if_fail (GIMP_IS_DIALOG (dialog));
-  g_return_if_fail (image == NULL || GIMP_IS_IMAGE (image));
-  g_return_if_fail (template == NULL || GIMP_IS_TEMPLATE (template));
+  g_return_if_fail (CLAY_IS_DIALOG (dialog));
+  g_return_if_fail (image == NULL || CLAY_IS_IMAGE (image));
+  g_return_if_fail (template == NULL || CLAY_IS_TEMPLATE (template));
 
-  private = g_object_get_data (G_OBJECT (dialog), "gimp-image-new-dialog");
+  private = g_object_get_data (G_OBJECT (dialog), "clay-image-new-dialog");
 
   g_return_if_fail (private != NULL);
 
-  gimp_context_set_template (private->context, template);
+  clay_context_set_template (private->context, template);
 
   if (! template)
     {
-      template = gimp_image_new_get_last_template (private->context->gimp,
+      template = clay_image_new_get_last_template (private->context->clay,
                                                    image);
 
       image_new_template_changed (private->context, template, private);
@@ -222,14 +222,14 @@ image_new_dialog_response (GtkWidget      *dialog,
   switch (response_id)
     {
     case RESPONSE_RESET:
-      gimp_config_sync (G_OBJECT (private->context->gimp->config->default_image),
+      clay_config_sync (G_OBJECT (private->context->clay->config->default_image),
                         G_OBJECT (private->template), 0);
-      gimp_context_set_template (private->context, NULL);
+      clay_context_set_template (private->context, NULL);
       break;
 
     case GTK_RESPONSE_OK:
-      if (gimp_template_get_initial_size (private->template) >
-          GIMP_GUI_CONFIG (private->context->gimp->config)->max_new_image_size)
+      if (clay_template_get_initial_size (private->template) >
+          CLAY_GUI_CONFIG (private->context->clay->config)->max_new_image_size)
         image_new_confirm_dialog (private);
       else
         image_new_create_image (private);
@@ -242,11 +242,11 @@ image_new_dialog_response (GtkWidget      *dialog,
 }
 
 static void
-image_new_template_changed (GimpContext    *context,
-                            GimpTemplate   *template,
+image_new_template_changed (ClayContext    *context,
+                            ClayTemplate   *template,
                             ImageNewDialog *private)
 {
-  GimpTemplateEditor *editor;
+  ClayTemplateEditor *editor;
   GtkWidget          *chain;
   gdouble             xres, yres;
   gchar              *comment;
@@ -254,26 +254,26 @@ image_new_template_changed (GimpContext    *context,
   if (! template)
     return;
 
-  editor = GIMP_TEMPLATE_EDITOR (private->editor);
-  chain  = gimp_template_editor_get_resolution_chain (editor);
+  editor = CLAY_TEMPLATE_EDITOR (private->editor);
+  chain  = clay_template_editor_get_resolution_chain (editor);
 
-  xres = gimp_template_get_resolution_x (template);
-  yres = gimp_template_get_resolution_y (template);
+  xres = clay_template_get_resolution_x (template);
+  yres = clay_template_get_resolution_y (template);
 
-  gimp_chain_button_set_active (GIMP_CHAIN_BUTTON (chain),
-                                ABS (xres - yres) < GIMP_MIN_RESOLUTION);
+  clay_chain_button_set_active (CLAY_CHAIN_BUTTON (chain),
+                                ABS (xres - yres) < CLAY_MIN_RESOLUTION);
 
-  comment = (gchar *) gimp_template_get_comment (template);
+  comment = (gchar *) clay_template_get_comment (template);
 
   if (! comment || ! strlen (comment))
-    comment = g_strdup (gimp_template_get_comment (private->template));
+    comment = g_strdup (clay_template_get_comment (private->template));
   else
     comment = NULL;
 
   /*  make sure the resolution values are copied first (see bug #546924)  */
-  gimp_config_sync (G_OBJECT (template), G_OBJECT (private->template),
-                    GIMP_TEMPLATE_PARAM_COPY_FIRST);
-  gimp_config_sync (G_OBJECT (template), G_OBJECT (private->template), 0);
+  clay_config_sync (G_OBJECT (template), G_OBJECT (private->template),
+                    CLAY_TEMPLATE_PARAM_COPY_FIRST);
+  clay_config_sync (G_OBJECT (template), G_OBJECT (private->template), 0);
 
   if (comment)
     {
@@ -306,7 +306,7 @@ image_new_confirm_response (GtkWidget      *dialog,
 static void
 image_new_confirm_dialog (ImageNewDialog *private)
 {
-  GimpGuiConfig *config;
+  ClayGuiConfig *config;
   GtkWidget     *dialog;
   gchar         *size;
 
@@ -317,18 +317,18 @@ image_new_confirm_dialog (ImageNewDialog *private)
     }
 
   private->confirm_dialog =
-    dialog = gimp_message_dialog_new (_("Confirm Image Size"),
-                                      GIMP_ICON_DIALOG_WARNING,
+    dialog = clay_message_dialog_new (_("Confirm Image Size"),
+                                      CLAY_ICON_DIALOG_WARNING,
                                       private->dialog,
                                       GTK_DIALOG_DESTROY_WITH_PARENT,
-                                      gimp_standard_help_func, NULL,
+                                      clay_standard_help_func, NULL,
 
                                       _("_Cancel"), GTK_RESPONSE_CANCEL,
                                       _("_OK"),     GTK_RESPONSE_OK,
 
                                       NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (private->confirm_dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (private->confirm_dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -337,15 +337,15 @@ image_new_confirm_dialog (ImageNewDialog *private)
                     G_CALLBACK (image_new_confirm_response),
                     private);
 
-  size = g_format_size (gimp_template_get_initial_size (private->template));
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  size = g_format_size (clay_template_get_initial_size (private->template));
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("You are trying to create an image "
                                        "with a size of %s."), size);
   g_free (size);
 
-  config = GIMP_GUI_CONFIG (private->context->gimp->config);
+  config = CLAY_GUI_CONFIG (private->context->clay->config);
   size = g_format_size (config->max_new_image_size);
-  gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                               _("An image of the chosen size will use more "
                                 "memory than what is configured as "
                                 "\"Maximum new image size\" in the Preferences "
@@ -360,21 +360,21 @@ image_new_confirm_dialog (ImageNewDialog *private)
 static void
 image_new_create_image (ImageNewDialog *private)
 {
-  GimpTemplate *template = g_object_ref (private->template);
-  Gimp         *gimp     = private->context->gimp;
-  GimpImage    *image;
+  ClayTemplate *template = g_object_ref (private->template);
+  Clay         *clay     = private->context->clay;
+  ClayImage    *image;
 
   gtk_widget_set_visible (private->dialog, FALSE);
 
-  image = gimp_image_new_from_template (gimp, template,
-                                        gimp_get_user_context (gimp));
-  gimp_create_display (gimp, image, gimp_template_get_unit (template), 1.0,
-                       G_OBJECT (gimp_widget_get_monitor (private->dialog)));
+  image = clay_image_new_from_template (clay, template,
+                                        clay_get_user_context (clay));
+  clay_create_display (clay, image, clay_template_get_unit (template), 1.0,
+                       G_OBJECT (clay_widget_get_monitor (private->dialog)));
   g_object_unref (image);
 
   gtk_widget_destroy (private->dialog);
 
-  gimp_image_new_set_last_template (gimp, template);
+  clay_image_new_set_last_template (clay, template);
 
   g_object_unref (template);
 }

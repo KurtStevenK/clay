@@ -20,26 +20,26 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
 
-#include "path/gimppath.h"
+#include "path/claypath.h"
 
 #include "item-options-dialog.h"
 #include "path-options-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _PathOptionsDialog PathOptionsDialog;
 
 struct _PathOptionsDialog
 {
-  GimpPathOptionsCallback  callback;
+  ClayPathOptionsCallback  callback;
   gpointer                 user_data;
 };
 
@@ -48,12 +48,12 @@ struct _PathOptionsDialog
 
 static void  path_options_dialog_free     (PathOptionsDialog *private);
 static void  path_options_dialog_callback (GtkWidget         *dialog,
-                                           GimpImage         *image,
-                                           GimpItem          *item,
-                                           GimpContext       *context,
+                                           ClayImage         *image,
+                                           ClayItem          *item,
+                                           ClayContext       *context,
                                            const gchar       *item_name,
                                            gboolean           item_visible,
-                                           GimpColorTag       item_color_tag,
+                                           ClayColorTag       item_color_tag,
                                            gboolean           item_lock_content,
                                            gboolean           item_lock_position,
                                            gboolean           item_lock_visibility,
@@ -63,9 +63,9 @@ static void  path_options_dialog_callback (GtkWidget         *dialog,
 /*  public functions  */
 
 GtkWidget *
-path_options_dialog_new (GimpImage               *image,
-                         GimpPath                *path,
-                         GimpContext             *context,
+path_options_dialog_new (ClayImage               *image,
+                         ClayPath                *path,
+                         ClayContext             *context,
                          GtkWidget               *parent,
                          const gchar             *title,
                          const gchar             *role,
@@ -74,19 +74,19 @@ path_options_dialog_new (GimpImage               *image,
                          const gchar             *help_id,
                          const gchar             *path_name,
                          gboolean                 path_visible,
-                         GimpColorTag             path_color_tag,
+                         ClayColorTag             path_color_tag,
                          gboolean                 path_lock_content,
                          gboolean                 path_lock_position,
                          gboolean                 path_lock_visibility,
-                         GimpPathOptionsCallback  callback,
+                         ClayPathOptionsCallback  callback,
                          gpointer                 user_data)
 {
   PathOptionsDialog *private;
   GtkWidget         *dialog;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (path == NULL || GIMP_IS_PATH (path), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (path == NULL || CLAY_IS_PATH (path), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (title != NULL, NULL);
   g_return_val_if_fail (role != NULL, NULL);
@@ -100,11 +100,11 @@ path_options_dialog_new (GimpImage               *image,
   private->callback  = callback;
   private->user_data = user_data;
 
-  dialog = item_options_dialog_new (image, GIMP_ITEM (path), context,
+  dialog = item_options_dialog_new (image, CLAY_ITEM (path), context,
                                     parent, title, role,
                                     icon_name, desc, help_id,
                                     _("Path _name:"),
-                                    GIMP_ICON_LOCK_PATH,
+                                    CLAY_ICON_LOCK_PATH,
                                     _("Lock p_ath"),
                                     _("Lock path _position"),
                                     _("Lock path _visibility"),
@@ -134,12 +134,12 @@ path_options_dialog_free (PathOptionsDialog *private)
 
 static void
 path_options_dialog_callback (GtkWidget    *dialog,
-                              GimpImage    *image,
-                              GimpItem     *item,
-                              GimpContext  *context,
+                              ClayImage    *image,
+                              ClayItem     *item,
+                              ClayContext  *context,
                               const gchar  *item_name,
                               gboolean      item_visible,
-                              GimpColorTag  item_color_tag,
+                              ClayColorTag  item_color_tag,
                               gboolean      item_lock_content,
                               gboolean      item_lock_position,
                               gboolean      item_lock_visibility,
@@ -149,7 +149,7 @@ path_options_dialog_callback (GtkWidget    *dialog,
 
   private->callback (dialog,
                      image,
-                     GIMP_PATH (item),
+                     CLAY_PATH (item),
                      context,
                      item_name,
                      item_visible,

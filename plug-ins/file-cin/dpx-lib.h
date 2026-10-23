@@ -109,7 +109,7 @@ typedef struct {
   DpxMPIInformation         filmHeader;
 } DpxMainHeader;
 
-GimpImage * dpx_open (GFile   *file,
+ClayImage * dpx_open (GFile   *file,
                       GError **error);
 
 

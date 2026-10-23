@@ -51,14 +51,14 @@
           ; when user chose no env-map secondary image file
           (if (= (string-length env-map) 0)
             ; copy source image
-            (gimp-image-duplicate mask-img)
+            (clay-image-duplicate mask-img)
             ; else open chosen file
-            (gimp-file-load RUN-NONINTERACTIVE env-map)))
+            (clay-file-load RUN-NONINTERACTIVE env-map)))
         ; 2. copy source image, flattened
-        (copy-source-img (gimp-image-duplicate mask-img))
+        (copy-source-img (clay-image-duplicate mask-img))
         ; side effect on image, not use the returned layer
-        (flat-source-layer (gimp-image-flatten copy-source-img))
-        (copy-source-drawables (gimp-image-get-layers copy-source-img)))
+        (flat-source-layer (clay-image-flatten copy-source-img))
+        (copy-source-drawables (clay-image-get-layers copy-source-img)))
 
     ; call inner, passing adapted args
     (chrome-it-inner
@@ -69,7 +69,7 @@
 
     ; Cleanup adapted images
     ; Inner deletes banding-img
-    (gimp-image-delete copy-source-img))
+    (clay-image-delete copy-source-img))
 )
 
 
@@ -103,7 +103,7 @@
     (/ val 2.55))
 
   (define (highlights val)
-    ; The result is used as "gimp-drawable-color-balance" color parameter
+    ; The result is used as "clay-drawable-color-balance" color parameter
     ; and thus must be restricted to -100.0 <= highlights <= 100.0.
     (min (/ (* 1.108 val) 2.55) 100.0))
 
@@ -120,27 +120,27 @@
     (* (sqrt val) (* scale chrome-factor)))
 
   (define (copy-layer-chrome-it dest-image dest-drawable source-image source-drawable)
-    (gimp-selection-all dest-image)
-    (gimp-drawable-edit-clear dest-drawable)
-    (gimp-selection-none dest-image)
-    (gimp-selection-all source-image)
-    (gimp-edit-copy (vector source-drawable))
+    (clay-selection-all dest-image)
+    (clay-drawable-edit-clear dest-drawable)
+    (clay-selection-none dest-image)
+    (clay-selection-all source-image)
+    (clay-edit-copy (vector source-drawable))
     (let* (
-           (pasted (gimp-edit-paste dest-drawable #f))
+           (pasted (clay-edit-paste dest-drawable #f))
            (num-pasted (vector-length pasted))
            (floating-sel (vector-ref pasted (- num-pasted 1)))
           )
-     (gimp-floating-sel-anchor floating-sel)))
+     (clay-floating-sel-anchor floating-sel)))
 
   (let* (
-        (banding-layer (vector-ref (gimp-image-get-selected-drawables banding-img) 0))
-        (banding-height (gimp-drawable-get-height banding-layer))
-        (banding-width (gimp-drawable-get-width banding-layer))
-        (banding-type (gimp-drawable-type banding-layer))
+        (banding-layer (vector-ref (clay-image-get-selected-drawables banding-img) 0))
+        (banding-height (clay-drawable-get-height banding-layer))
+        (banding-width (clay-drawable-get-width banding-layer))
+        (banding-type (clay-drawable-type banding-layer))
         (mask-drawable (vector-ref mask-drawables 0))
-        (width (gimp-drawable-get-width mask-drawable))
-        (height (gimp-drawable-get-height mask-drawable))
-        (img (gimp-image-new width height GRAY))
+        (width (clay-drawable-get-width mask-drawable))
+        (height (clay-drawable-get-height mask-drawable))
+        (img (clay-image-new width height GRAY))
         (size (min width height))
         (offx1 (sota-scale size 0.33 chrome-factor))
         (offy1 (sota-scale size 0.25 chrome-factor))
@@ -148,165 +148,165 @@
         (offy2 (sota-scale size (- 0.25) chrome-factor))
         (feather (sota-scale size 0.5 chrome-factor))
         (brush-size (sota-scale size 0.5 chrome-factor))
-        (brush (gimp-brush-new "Chrome It"))
-        (mask (gimp-channel-new img "Chrome Stencil" width height 50 '(0 0 0)))
-        (bg-layer (gimp-layer-new img _"Background" width height GRAY-IMAGE 100 LAYER-MODE-NORMAL))
-        (layer1 (gimp-layer-new img _"Layer 1" banding-width banding-height banding-type 100 LAYER-MODE-NORMAL))
-        (layer2 (gimp-layer-new img _"Layer 2" width height GRAYA-IMAGE 100 LAYER-MODE-DIFFERENCE))
-        (layer3 (gimp-layer-new img _"Layer 3" width height GRAYA-IMAGE 100 LAYER-MODE-NORMAL))
-        (shadow (gimp-layer-new img _"Drop Shadow" width height GRAYA-IMAGE 100 LAYER-MODE-NORMAL))
+        (brush (clay-brush-new "Chrome It"))
+        (mask (clay-channel-new img "Chrome Stencil" width height 50 '(0 0 0)))
+        (bg-layer (clay-layer-new img _"Background" width height GRAY-IMAGE 100 LAYER-MODE-NORMAL))
+        (layer1 (clay-layer-new img _"Layer 1" banding-width banding-height banding-type 100 LAYER-MODE-NORMAL))
+        (layer2 (clay-layer-new img _"Layer 2" width height GRAYA-IMAGE 100 LAYER-MODE-DIFFERENCE))
+        (layer3 (clay-layer-new img _"Layer 3" width height GRAYA-IMAGE 100 LAYER-MODE-NORMAL))
+        (shadow (clay-layer-new img _"Drop Shadow" width height GRAYA-IMAGE 100 LAYER-MODE-NORMAL))
         (layer-mask 0)
-        (marble-pattern (gimp-pattern-get-by-name "Marble #1"))
+        (marble-pattern (clay-pattern-get-by-name "Marble #1"))
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
-    (gimp-image-undo-disable img)
+    (clay-image-undo-disable img)
 
-    (gimp-image-insert-channel img mask -1 0)
-    (gimp-image-insert-layer img bg-layer 0 0)
-    (gimp-image-insert-layer img shadow 0 0)
-    (gimp-image-insert-layer img layer3 0 0)
-    (gimp-image-insert-layer img layer2 0 0)
+    (clay-image-insert-channel img mask -1 0)
+    (clay-image-insert-layer img bg-layer 0 0)
+    (clay-image-insert-layer img shadow 0 0)
+    (clay-image-insert-layer img layer3 0 0)
+    (clay-image-insert-layer img layer2 0 0)
 
-    (gimp-edit-copy (vector mask-drawable))
+    (clay-edit-copy (vector mask-drawable))
 
     ; Clipboard is copy of mask-drawable.  Paste into mask, a channel, and anchor it.
     (let* (
-           (pasted (gimp-edit-paste mask #f))
+           (pasted (clay-edit-paste mask #f))
            (num-pasted (vector-length pasted))
            (floating-sel (vector-ref pasted (- num-pasted 1)))
           )
-     (gimp-floating-sel-anchor floating-sel)
+     (clay-floating-sel-anchor floating-sel)
     )
 
     ; carve-white is 0 or 1, not #f or #t
     (if (= carve-white TRUE)
-        (gimp-drawable-merge-new-filter mask "gegl:invert-gamma" 0 LAYER-MODE-REPLACE 1.0))
+        (clay-drawable-merge-new-filter mask "gegl:invert-gamma" 0 LAYER-MODE-REPLACE 1.0))
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-selection-none img)
-    (gimp-drawable-edit-fill layer2 FILL-BACKGROUND)
-    (gimp-drawable-edit-fill layer3 FILL-BACKGROUND)
-    (gimp-drawable-edit-clear shadow)
+    (clay-context-set-background '(255 255 255))
+    (clay-selection-none img)
+    (clay-drawable-edit-fill layer2 FILL-BACKGROUND)
+    (clay-drawable-edit-fill layer3 FILL-BACKGROUND)
+    (clay-drawable-edit-clear shadow)
 
-    (gimp-item-set-visible bg-layer #f)
-    (gimp-item-set-visible shadow #f)
+    (clay-item-set-visible bg-layer #f)
+    (clay-item-set-visible shadow #f)
 
-    (gimp-image-select-item img CHANNEL-OP-REPLACE mask)
-    (gimp-context-set-background '(0 0 0))
-    (gimp-selection-translate img offx1 offy1)
-    (gimp-selection-feather img feather)
-    (gimp-drawable-edit-fill layer2 FILL-BACKGROUND)
-    (gimp-selection-translate img (* 2 offx2) (* 2 offy2))
-    (gimp-drawable-edit-fill layer3 FILL-BACKGROUND)
-    (gimp-selection-none img)
-    (set! layer2 (gimp-image-merge-visible-layers img CLIP-TO-IMAGE))
-    (gimp-drawable-merge-new-filter layer2 "gegl:invert-gamma" 0 LAYER-MODE-REPLACE 1.0)
+    (clay-image-select-item img CHANNEL-OP-REPLACE mask)
+    (clay-context-set-background '(0 0 0))
+    (clay-selection-translate img offx1 offy1)
+    (clay-selection-feather img feather)
+    (clay-drawable-edit-fill layer2 FILL-BACKGROUND)
+    (clay-selection-translate img (* 2 offx2) (* 2 offy2))
+    (clay-drawable-edit-fill layer3 FILL-BACKGROUND)
+    (clay-selection-none img)
+    (set! layer2 (clay-image-merge-visible-layers img CLIP-TO-IMAGE))
+    (clay-drawable-merge-new-filter layer2 "gegl:invert-gamma" 0 LAYER-MODE-REPLACE 1.0)
 
-    (gimp-image-insert-layer img layer1 0 0)
+    (clay-image-insert-layer img layer1 0 0)
     (copy-layer-chrome-it img layer1 banding-img banding-layer)
-    (gimp-image-delete banding-img)
-    (gimp-layer-scale layer1 width height #f)
-    (gimp-drawable-merge-new-filter layer1 "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 3.2 "std-dev-y" 3.2 "filter" "auto")
-    (gimp-layer-set-opacity layer1 50)
-    (set! layer1 (gimp-image-merge-visible-layers img CLIP-TO-IMAGE))
-    (gimp-drawable-curves-spline layer1 HISTOGRAM-VALUE (spline-chrome-it))
+    (clay-image-delete banding-img)
+    (clay-layer-scale layer1 width height #f)
+    (clay-drawable-merge-new-filter layer1 "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 3.2 "std-dev-y" 3.2 "filter" "auto")
+    (clay-layer-set-opacity layer1 50)
+    (set! layer1 (clay-image-merge-visible-layers img CLIP-TO-IMAGE))
+    (clay-drawable-curves-spline layer1 HISTOGRAM-VALUE (spline-chrome-it))
 
-    (set! layer-mask (gimp-layer-create-mask layer1 ADD-MASK-BLACK))
-    (gimp-layer-add-mask layer1 layer-mask)
-    (gimp-image-select-item img CHANNEL-OP-REPLACE mask)
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-edit-fill layer-mask FILL-BACKGROUND)
+    (set! layer-mask (clay-layer-create-mask layer1 ADD-MASK-BLACK))
+    (clay-layer-add-mask layer1 layer-mask)
+    (clay-image-select-item img CHANNEL-OP-REPLACE mask)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-edit-fill layer-mask FILL-BACKGROUND)
 
-    (set! layer2 (gimp-layer-copy layer1))
-    (gimp-layer-add-alpha layer2)
-    (gimp-image-insert-layer img layer2 0 0)
+    (set! layer2 (clay-layer-copy layer1))
+    (clay-layer-add-alpha layer2)
+    (clay-image-insert-layer img layer2 0 0)
 
-    (gimp-brush-set-shape brush BRUSH-GENERATED-CIRCLE)
-    (gimp-brush-set-spikes brush 2)
-    (gimp-brush-set-hardness brush 1.0)
-    (gimp-brush-set-spacing brush 25)
-    (gimp-brush-set-aspect-ratio brush 1)
-    (gimp-brush-set-angle brush 0)
-    (cond (<= brush-size 17) (gimp-brush-set-radius brush (\ brush-size 2))
-	  (else gimp-brush-set-radius brush (\ 19 2)))
-    (gimp-context-set-brush brush)
+    (clay-brush-set-shape brush BRUSH-GENERATED-CIRCLE)
+    (clay-brush-set-spikes brush 2)
+    (clay-brush-set-hardness brush 1.0)
+    (clay-brush-set-spacing brush 25)
+    (clay-brush-set-aspect-ratio brush 1)
+    (clay-brush-set-angle brush 0)
+    (cond (<= brush-size 17) (clay-brush-set-radius brush (\ brush-size 2))
+	  (else clay-brush-set-radius brush (\ 19 2)))
+    (clay-context-set-brush brush)
 
-    (gimp-context-set-foreground '(255 255 255))
-    (gimp-drawable-edit-stroke-selection layer-mask)
+    (clay-context-set-foreground '(255 255 255))
+    (clay-drawable-edit-stroke-selection layer-mask)
 
-    (gimp-context-set-background '(0 0 0))
-    (gimp-selection-feather img (* feather 1.5))
-    (gimp-selection-translate img (* 2.5 offx1) (* 2.5 offy1))
-    (gimp-drawable-edit-fill shadow FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-selection-feather img (* feather 1.5))
+    (clay-selection-translate img (* 2.5 offx1) (* 2.5 offy1))
+    (clay-drawable-edit-fill shadow FILL-BACKGROUND)
 
-    (gimp-selection-all img)
-    (gimp-context-set-pattern marble-pattern)
-    (gimp-drawable-edit-fill bg-layer FILL-PATTERN)
-    (gimp-selection-none img)
+    (clay-selection-all img)
+    (clay-context-set-pattern marble-pattern)
+    (clay-drawable-edit-fill bg-layer FILL-PATTERN)
+    (clay-selection-none img)
 
-    (gimp-image-convert-rgb img)
+    (clay-image-convert-rgb img)
 
-    (gimp-drawable-merge-new-filter layer1 "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer1 "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-SHADOWS
                  "cyan-red"            (/ (shadows (rval hc)) 100.0)
                  "magenta-green"       (/ (shadows (gval hc)) 100.0)
                  "yellow-blue"         (/ (shadows (bval hc)) 100.0)
                  "preserve-luminosity" #t)
-    (gimp-drawable-merge-new-filter layer1 "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer1 "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-MIDTONES
                  "cyan-red"            (/ (midtones (rval hc)) 100.0)
                  "magenta-green"       (/ (midtones (gval hc)) 100.0)
                  "yellow-blue"         (/ (midtones (bval hc)) 100.0)
                  "preserve-luminosity" #t)
-    (gimp-drawable-merge-new-filter layer1 "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer1 "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-HIGHLIGHTS
                  "cyan-red"            (/ (highlights (rval hc)) 100.0)
                  "magenta-green"       (/ (highlights (gval hc)) 100.0)
                  "yellow-blue"         (/ (highlights (bval hc)) 100.0)
                  "preserve-luminosity" #t)
 
-    (gimp-drawable-merge-new-filter layer2 "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer2 "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-SHADOWS
                  "cyan-red"            (/ (shadows (rval cc)) 100.0)
                  "magenta-green"       (/ (shadows (gval cc)) 100.0)
                  "yellow-blue"         (/ (shadows (bval cc)) 100.0)
                  "preserve-luminosity" #t)
-    (gimp-drawable-merge-new-filter layer2 "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer2 "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-MIDTONES
                  "cyan-red"            (/ (midtones (rval cc)) 100.0)
                  "magenta-green"       (/ (midtones (gval cc)) 100.0)
                  "yellow-blue"         (/ (midtones (bval cc)) 100.0)
                  "preserve-luminosity" #t)
-    (gimp-drawable-merge-new-filter layer2 "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter layer2 "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-HIGHLIGHTS
                  "cyan-red"            (/ (highlights (rval cc)) 100.0)
                  "magenta-green"       (/ (highlights (gval cc)) 100.0)
                  "yellow-blue"         (/ (highlights (bval cc)) 100.0)
                  "preserve-luminosity" #t)
-    (gimp-drawable-merge-new-filter mask "gimp:hue-saturation" 0 LAYER-MODE-REPLACE 1.0
+    (clay-drawable-merge-new-filter mask "clay:hue-saturation" 0 LAYER-MODE-REPLACE 1.0
                  "range"      HUE-RANGE-ALL
                  "hue"        0.0
                  "saturation" (/ chrome-saturation 100.0)
                  "lightness"  (/ chrome-lightness 100.0)
                  "overlap"    0.0)
 
-    (gimp-item-set-visible shadow #t)
-    (gimp-item-set-visible bg-layer #t)
+    (clay-item-set-visible shadow #t)
+    (clay-item-set-visible bg-layer #t)
 
-    (gimp-item-set-name layer2 _"Chrome")
-    (gimp-item-set-name layer1 _"Highlight")
+    (clay-item-set-name layer2 _"Chrome")
+    (clay-item-set-name layer1 _"Highlight")
 
-    (gimp-image-remove-channel img mask)
+    (clay-image-remove-channel img mask)
 
-    (gimp-resource-delete brush)
+    (clay-resource-delete brush)
 
-    (gimp-display-new img)
-    (gimp-image-undo-enable img)
+    (clay-display-new img)
+    (clay-image-undo-enable img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 
@@ -328,7 +328,7 @@
   SF-ADJUSTMENT _"Chrome lightness"  '(-47 -100 100 1 10 0 0)
   SF-ADJUSTMENT _"Chrome factor"     '(0.75 0 1 0.1 0.2 2 0)
   SF-FILENAME   _"Environment map"
-                (string-append gimp-data-directory
+                (string-append clay-data-directory
                               "/scripts/images/beavis.jpg")
   SF-COLOR      _"Highlight balance"  '(211 95 0)
   SF-COLOR      _"Chrome balance"     "black"

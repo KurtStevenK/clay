@@ -19,15 +19,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-header-export"
 #define PLUG_IN_BINARY "file-header"
-#define PLUG_IN_ROLE   "gimp-file-header"
+#define PLUG_IN_ROLE   "clay-file-header"
 
 
 typedef struct _Header      Header;
@@ -35,12 +35,12 @@ typedef struct _HeaderClass HeaderClass;
 
 struct _Header
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _HeaderClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -49,22 +49,22 @@ struct _HeaderClass
 
 GType                   header_get_type         (void);
 
-static GList          * header_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * header_create_procedure (GimpPlugIn           *plug_in,
+static GList          * header_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * header_create_procedure (ClayPlugIn           *plug_in,
                                                  const gchar          *name);
 
-static GimpValueArray * header_export           (GimpProcedure        *procedure,
-                                                 GimpRunMode           run_mode,
-                                                 GimpImage            *image,
+static ClayValueArray * header_export           (ClayProcedure        *procedure,
+                                                 ClayRunMode           run_mode,
+                                                 ClayImage            *image,
                                                  GFile                *file,
-                                                 GimpExportOptions    *options,
-                                                 GimpMetadata         *metadata,
-                                                 GimpProcedureConfig  *config,
+                                                 ClayExportOptions    *options,
+                                                 ClayMetadata         *metadata,
+                                                 ClayProcedureConfig  *config,
                                                  gpointer              run_data);
 
 static gboolean         export_image            (GFile                *file,
-                                                 GimpImage            *image,
-                                                 GimpDrawable         *drawable,
+                                                 ClayImage            *image,
+                                                 ClayDrawable         *drawable,
                                                  GError              **error);
 
 static gboolean         print                   (GOutputStream        *output,
@@ -73,16 +73,16 @@ static gboolean         print                   (GOutputStream        *output,
                                                  ...) G_GNUC_PRINTF (3, 4);
 
 
-G_DEFINE_TYPE (Header, header, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Header, header, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (HEADER_TYPE)
+CLAY_MAIN (HEADER_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 header_class_init (HeaderClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = header_query_procedures;
   plug_in_class->create_procedure = header_create_procedure;
@@ -95,95 +95,95 @@ header_init (Header *header)
 }
 
 static GList *
-header_query_procedures (GimpPlugIn *plug_in)
+header_query_procedures (ClayPlugIn *plug_in)
 {
   return  g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-header_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+header_create_procedure (ClayPlugIn  *plug_in,
                          const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, header_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED, RGB");
+      clay_procedure_set_image_types (procedure, "INDEXED, RGB");
 
-      gimp_procedure_set_menu_label (procedure, _("C source code header"));
+      clay_procedure_set_menu_label (procedure, _("C source code header"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files as C unsigned character "
                                           "array"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Spencer Kimball & Peter Mattis",
                                       "Spencer Kimball & Peter Mattis",
                                       "1997");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-chdr");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "h");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-header_export (GimpProcedure        *procedure,
-               GimpRunMode           run_mode,
-               GimpImage            *image,
+static ClayValueArray *
+header_export (ClayProcedure        *procedure,
+               ClayRunMode           run_mode,
+               ClayImage            *image,
                GFile                *file,
-               GimpExportOptions    *options,
-               GimpMetadata         *metadata,
-               GimpProcedureConfig  *config,
+               ClayExportOptions    *options,
+               ClayMetadata         *metadata,
+               ClayProcedureConfig  *config,
                gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
   if (! export_image (file, image, drawables->data,
                       &error))
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GError       **error)
 {
   GeglBuffer    *buffer;
   const Babl    *format;
-  GimpImageType  drawable_type;
+  ClayImageType  drawable_type;
   GOutputStream *output;
   gint           x, y, b, c;
   const gchar   *backslash = "\\\\";
@@ -215,17 +215,17 @@ export_image (GFile         *file,
       return FALSE;
     }
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  drawable_type = gimp_drawable_type (drawable);
+  drawable_type = clay_drawable_type (drawable);
 
   if (! print (output, error,
                "/*  Clay header image file format (%s): %s  */\n\n",
-               GIMP_RGB_IMAGE == drawable_type ? "RGB" : "INDEXED",
-               gimp_file_get_utf8_name (file)) ||
+               CLAY_RGB_IMAGE == drawable_type ? "RGB" : "INDEXED",
+               clay_file_get_utf8_name (file)) ||
       ! print (output, error,
                "static unsigned int width = %d;\n", width) ||
       ! print (output, error,
@@ -238,7 +238,7 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       if (! print (output, error,
                    "#define HEADER_PIXEL(data,pixel) {\\\n"
                    "pixel[0] = (((data[0] - 33) << 2) | ((data[1] - 33) >> 4)); \\\n"
@@ -305,7 +305,7 @@ export_image (GFile         *file,
         goto fail;
       break;
 
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_INDEXED_IMAGE:
       if (! print (output, error,
                    "#define HEADER_PIXEL(data,pixel) {\\\n"
                    "pixel[0] = header_data_cmap[(unsigned char)data[0]][0]; \\\n"
@@ -317,7 +317,7 @@ export_image (GFile         *file,
         }
 
       /* save colormap */
-      cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+      cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
 
       if (! print (output, error,
                    "static unsigned char header_data_cmap[256][3] = {") ||

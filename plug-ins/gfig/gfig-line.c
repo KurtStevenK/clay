@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -24,14 +24,14 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "gfig.h"
 #include "gfig-dobject.h"
 #include "gfig-line.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static GfigObject *d_copy_line   (GfigObject *obj);
@@ -172,7 +172,7 @@ d_line_start (GdkPoint *pnt,
 }
 
 void
-d_line_end (GimpGfig *gfig,
+d_line_end (ClayGfig *gfig,
             GdkPoint *pnt,
             gboolean  shift_down)
 {

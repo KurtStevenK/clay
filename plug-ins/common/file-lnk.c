@@ -27,28 +27,28 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC       "file-lnk-load"
 #define PLUG_IN_BINARY  "file-lnk"
-#define PLUG_IN_ROLE    "gimp-file-lnk"
+#define PLUG_IN_ROLE    "clay-file-lnk"
 
 typedef struct _Lnk      Lnk;
 typedef struct _LnkClass LnkClass;
 
 struct _Lnk
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _LnkClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -58,34 +58,34 @@ struct _LnkClass
 GType                   lnk_get_type         (void);
 
 
-static GList          * lnk_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * lnk_create_procedure (GimpPlugIn            *plug_in,
+static GList          * lnk_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * lnk_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * lnk_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * lnk_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GObject               *config,
-                                              GimpRunMode            run_mode,
+                                              ClayRunMode            run_mode,
                                               GError               **error);
 
 
-G_DEFINE_TYPE (Lnk, lnk, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Lnk, lnk, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (LNK_TYPE)
+CLAY_MAIN (LNK_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 lnk_class_init (LnkClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = lnk_query_procedures;
   plug_in_class->create_procedure = lnk_create_procedure;
@@ -98,7 +98,7 @@ lnk_init (Lnk *lnk)
 }
 
 static GList *
-lnk_query_procedures (GimpPlugIn *plug_in)
+lnk_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -107,51 +107,51 @@ lnk_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-lnk_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+lnk_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            lnk_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Windows Shortcut"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Follows a link to an image in a "
                                           ".lnk file"),
                                         _("Opens a .lnk file and if it points "
                                           "to an image, it asks Clay to open "
                                           "the linked image."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2024");
 
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "lnk");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-lnk_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+lnk_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image = NULL;
+  ClayValueArray *return_vals;
+  ClayImage      *image = NULL;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -159,32 +159,32 @@ lnk_load (GimpProcedure         *procedure,
   /*  We handle PDB errors by forwarding them to the caller in
    *  our return values.
    */
-  gimp_plug_in_set_pdb_error_handler (gimp_procedure_get_plug_in (procedure),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_procedure_get_plug_in (procedure),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   image = load_image (file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage  *image = NULL;
+  ClayImage  *image = NULL;
   FILE       *fp;
   guint32     flags;
   gsize       base;
@@ -198,7 +198,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -267,12 +267,12 @@ load_image (GFile        *file,
         }
 
       file_name[link_size - 1] = '\0';
-      image = gimp_file_load (GIMP_RUN_NONINTERACTIVE,
+      image = clay_file_load (CLAY_RUN_NONINTERACTIVE,
                               g_file_new_for_path (file_name));
 
       if (! image)
         g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                     "%s", gimp_pdb_get_last_error (gimp_get_pdb ()));
+                     "%s", clay_pdb_get_last_error (clay_get_pdb ()));
 
     }
   fclose (fp);

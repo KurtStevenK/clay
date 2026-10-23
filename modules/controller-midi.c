@@ -38,14 +38,14 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmodule/gimpmodule.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymodule/claymodule.h"
+#include "libclaywidgets/claywidgets.h"
 
-#define GIMP_ENABLE_CONTROLLER_UNDER_CONSTRUCTION
-#include "libgimpwidgets/gimpcontroller.h"
+#define CLAY_ENABLE_CONTROLLER_UNDER_CONSTRUCTION
+#include "libclaywidgets/claycontroller.h"
 
-#include "libgimp/libgimp-intl.h"
+#include "libclay/libclay-intl.h"
 
 
 typedef struct
@@ -75,7 +75,7 @@ typedef struct _ControllerMidiClass ControllerMidiClass;
 
 struct _ControllerMidi
 {
-  GimpController  parent_instance;
+  ClayController  parent_instance;
 
   gchar          *device;
   gint            midi_channel;
@@ -100,7 +100,7 @@ struct _ControllerMidi
 
 struct _ControllerMidiClass
 {
-  GimpControllerClass  parent_class;
+  ClayControllerClass  parent_class;
 };
 
 
@@ -116,10 +116,10 @@ static void          midi_get_property        (GObject        *object,
                                                GValue         *value,
                                                GParamSpec     *pspec);
 
-static gint          midi_get_n_events        (GimpController *controller);
-static const gchar * midi_get_event_name      (GimpController *controller,
+static gint          midi_get_n_events        (ClayController *controller);
+static const gchar * midi_get_event_name      (ClayController *controller,
                                                gint            event_id);
-static const gchar * midi_get_event_blurb     (GimpController *controller,
+static const gchar * midi_get_event_blurb     (ClayController *controller,
                                                gint            event_id);
 
 static gboolean      midi_set_device          (ControllerMidi *controller,
@@ -158,9 +158,9 @@ struct _GAlsaSource
 };
 #endif /* HAVE_ALSA */
 
-static const GimpModuleInfo midi_info =
+static const ClayModuleInfo midi_info =
 {
-  GIMP_MODULE_ABI_VERSION,
+  CLAY_MODULE_ABI_VERSION,
   N_("MIDI event controller"),
   "Michael Natterer <mitch@gimp.org>",
   "v0.2",
@@ -170,19 +170,19 @@ static const GimpModuleInfo midi_info =
 
 
 G_DEFINE_DYNAMIC_TYPE (ControllerMidi, controller_midi,
-                       GIMP_TYPE_CONTROLLER)
+                       CLAY_TYPE_CONTROLLER)
 
 static MidiEvent midi_events[128 + 128 + 128];
 
 
-G_MODULE_EXPORT const GimpModuleInfo *
-gimp_module_query (GTypeModule *module)
+G_MODULE_EXPORT const ClayModuleInfo *
+clay_module_query (GTypeModule *module)
 {
   return &midi_info;
 }
 
 G_MODULE_EXPORT gboolean
-gimp_module_register (GTypeModule *module)
+clay_module_register (GTypeModule *module)
 {
   controller_midi_register_type (module);
 
@@ -192,7 +192,7 @@ gimp_module_register (GTypeModule *module)
 static void
 controller_midi_class_init (ControllerMidiClass *klass)
 {
-  GimpControllerClass *controller_class = GIMP_CONTROLLER_CLASS (klass);
+  ClayControllerClass *controller_class = CLAY_CONTROLLER_CLASS (klass);
   GObjectClass        *object_class     = G_OBJECT_CLASS (klass);
   gchar               *blurb;
 
@@ -212,7 +212,7 @@ controller_midi_class_init (ControllerMidiClass *klass)
                                                         _("Device:"),
                                                         blurb,
                                                         NULL,
-                                                        GIMP_CONFIG_PARAM_FLAGS));
+                                                        CLAY_CONFIG_PARAM_FLAGS));
 
   g_free (blurb);
 
@@ -221,11 +221,11 @@ controller_midi_class_init (ControllerMidiClass *klass)
                                                      _("Channel:"),
                                                      _("The MIDI channel to read events from. Set to -1 for reading from all MIDI channels."),
                                                      -1, 15, -1,
-                                                     GIMP_CONFIG_PARAM_FLAGS));
+                                                     CLAY_CONFIG_PARAM_FLAGS));
 
   controller_class->name            = _("MIDI");
-  controller_class->help_id         = "gimp-controller-midi";
-  controller_class->icon_name       = GIMP_ICON_CONTROLLER_MIDI;
+  controller_class->help_id         = "clay-controller-midi";
+  controller_class->icon_name       = CLAY_ICON_CONTROLLER_MIDI;
 
   controller_class->get_n_events    = midi_get_n_events;
   controller_class->get_event_name  = midi_get_event_name;
@@ -313,13 +313,13 @@ midi_get_property (GObject    *object,
 }
 
 static gint
-midi_get_n_events (GimpController *controller)
+midi_get_n_events (ClayController *controller)
 {
   return 128 + 128 + 128;
 }
 
 static const gchar *
-midi_get_event_name (GimpController *controller,
+midi_get_event_name (ClayController *controller,
                      gint            event_id)
 {
   if (event_id < (128 + 128 + 128))
@@ -344,7 +344,7 @@ midi_get_event_name (GimpController *controller,
 }
 
 static const gchar *
-midi_get_event_blurb (GimpController *controller,
+midi_get_event_blurb (ClayController *controller,
                       gint            event_id)
 {
   if (event_id <= 383)
@@ -518,16 +518,16 @@ midi_event (ControllerMidi *midi,
       midi->midi_channel == -1 ||
       channel == midi->midi_channel)
     {
-      GimpControllerEvent event = { 0, };
+      ClayControllerEvent event = { 0, };
 
-      event.any.type     = GIMP_CONTROLLER_EVENT_VALUE;
-      event.any.source   = GIMP_CONTROLLER (midi);
+      event.any.type     = CLAY_CONTROLLER_EVENT_VALUE;
+      event.any.source   = CLAY_CONTROLLER (midi);
       event.any.event_id = event_id;
 
       g_value_init (&event.value.value, G_TYPE_DOUBLE);
       g_value_set_double (&event.value.value, value);
 
-      gimp_controller_event (GIMP_CONTROLLER (midi), &event);
+      clay_controller_event (CLAY_CONTROLLER (midi), &event);
 
       g_value_unset (&event.value.value);
     }

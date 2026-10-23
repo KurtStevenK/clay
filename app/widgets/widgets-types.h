@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "libgimpwidgets/gimpwidgetstypes.h"
+#include "libclaywidgets/claywidgetstypes.h"
 
 #include "core/core-types.h"
 
@@ -26,319 +26,319 @@
 
 /*  input devices & controllers  */
 
-typedef struct _GimpControllerInfo           GimpControllerInfo;
-typedef struct _GimpControllerKeyboard       GimpControllerKeyboard;
-typedef struct _GimpControllerManager        GimpControllerManager;
-typedef struct _GimpControllerMouse          GimpControllerMouse;
-typedef struct _GimpControllerWheel          GimpControllerWheel;
-typedef struct _GimpDeviceInfo               GimpDeviceInfo;
-typedef struct _GimpDeviceManager            GimpDeviceManager;
+typedef struct _ClayControllerInfo           ClayControllerInfo;
+typedef struct _ClayControllerKeyboard       ClayControllerKeyboard;
+typedef struct _ClayControllerManager        ClayControllerManager;
+typedef struct _ClayControllerMouse          ClayControllerMouse;
+typedef struct _ClayControllerWheel          ClayControllerWheel;
+typedef struct _ClayDeviceInfo               ClayDeviceInfo;
+typedef struct _ClayDeviceManager            ClayDeviceManager;
 
 
 /*  docks  */
 
-typedef struct _GimpDock                     GimpDock;
-typedef struct _GimpDockColumns              GimpDockColumns;
-typedef struct _GimpDockContainer            GimpDockContainer; /* dummy typedef */
-typedef struct _GimpDockWindow               GimpDockWindow;
-typedef struct _GimpDockable                 GimpDockable;
-typedef struct _GimpDockbook                 GimpDockbook;
-typedef struct _GimpDocked                   GimpDocked; /* dummy typedef */
-typedef struct _GimpMenuDock                 GimpMenuDock;
-typedef struct _GimpPanedBox                 GimpPanedBox;
-typedef struct _GimpToolbox                  GimpToolbox;
+typedef struct _ClayDock                     ClayDock;
+typedef struct _ClayDockColumns              ClayDockColumns;
+typedef struct _ClayDockContainer            ClayDockContainer; /* dummy typedef */
+typedef struct _ClayDockWindow               ClayDockWindow;
+typedef struct _ClayDockable                 ClayDockable;
+typedef struct _ClayDockbook                 ClayDockbook;
+typedef struct _ClayDocked                   ClayDocked; /* dummy typedef */
+typedef struct _ClayMenuDock                 ClayMenuDock;
+typedef struct _ClayPanedBox                 ClayPanedBox;
+typedef struct _ClayToolbox                  ClayToolbox;
 
 
-/*  GimpEditor widgets  */
+/*  ClayEditor widgets  */
 
-typedef struct _GimpColorEditor              GimpColorEditor;
-typedef struct _GimpDeviceStatus             GimpDeviceStatus;
-typedef struct _GimpEditor                   GimpEditor;
-typedef struct _GimpErrorConsole             GimpErrorConsole;
-typedef struct _GimpToolOptionsEditor        GimpToolOptionsEditor;
-typedef struct _GimpDashboard                GimpDashboard;
-
-
-/*  GimpDataEditor widgets  */
-
-typedef struct _GimpBrushEditor              GimpBrushEditor;
-typedef struct _GimpDataEditor               GimpDataEditor;
-typedef struct _GimpDynamicsEditor           GimpDynamicsEditor;
-typedef struct _GimpGradientEditor           GimpGradientEditor;
-typedef struct _GimpPaletteEditor            GimpPaletteEditor;
-typedef struct _GimpToolPresetEditor         GimpToolPresetEditor;
+typedef struct _ClayColorEditor              ClayColorEditor;
+typedef struct _ClayDeviceStatus             ClayDeviceStatus;
+typedef struct _ClayEditor                   ClayEditor;
+typedef struct _ClayErrorConsole             ClayErrorConsole;
+typedef struct _ClayToolOptionsEditor        ClayToolOptionsEditor;
+typedef struct _ClayDashboard                ClayDashboard;
 
 
-/*  GimpImageEditor widgets  */
+/*  ClayDataEditor widgets  */
 
-typedef struct _GimpColormapEditor           GimpColormapEditor;
-typedef struct _GimpComponentEditor          GimpComponentEditor;
-typedef struct _GimpHistogramEditor          GimpHistogramEditor;
-typedef struct _GimpImageEditor              GimpImageEditor;
-typedef struct _GimpSamplePointEditor        GimpSamplePointEditor;
-typedef struct _GimpSelectionEditor          GimpSelectionEditor;
-typedef struct _GimpSymmetryEditor           GimpSymmetryEditor;
-typedef struct _GimpUndoEditor               GimpUndoEditor;
+typedef struct _ClayBrushEditor              ClayBrushEditor;
+typedef struct _ClayDataEditor               ClayDataEditor;
+typedef struct _ClayDynamicsEditor           ClayDynamicsEditor;
+typedef struct _ClayGradientEditor           ClayGradientEditor;
+typedef struct _ClayPaletteEditor            ClayPaletteEditor;
+typedef struct _ClayToolPresetEditor         ClayToolPresetEditor;
 
 
-/*  GimpContainerView and its implementors  */
+/*  ClayImageEditor widgets  */
 
-typedef struct _GimpChannelTreeView          GimpChannelTreeView;
-typedef struct _GimpContainerBox             GimpContainerBox;
-typedef struct _GimpContainerComboBox        GimpContainerComboBox;
-typedef struct _GimpContainerEntry           GimpContainerEntry;
-typedef struct _GimpContainerIconView        GimpContainerIconView;
-typedef struct _GimpContainerListView        GimpContainerListView;
-typedef struct _GimpContainerTreeStore       GimpContainerTreeStore;
-typedef struct _GimpContainerTreeView        GimpContainerTreeView;
-typedef struct _GimpContainerView            GimpContainerView; /* dummy typedef */
-typedef struct _GimpDrawableTreeView         GimpDrawableTreeView;
-typedef struct _GimpImageSaveView            GimpImageSaveView;
-typedef struct _GimpItemTreeView             GimpItemTreeView;
-typedef struct _GimpLayerTreeView            GimpLayerTreeView;
-typedef struct _GimpPathTreeView             GimpPathTreeView;
-
-typedef struct _GimpContainerPopup           GimpContainerPopup;
-typedef struct _GimpViewableButton           GimpViewableButton;
+typedef struct _ClayColormapEditor           ClayColormapEditor;
+typedef struct _ClayComponentEditor          ClayComponentEditor;
+typedef struct _ClayHistogramEditor          ClayHistogramEditor;
+typedef struct _ClayImageEditor              ClayImageEditor;
+typedef struct _ClaySamplePointEditor        ClaySamplePointEditor;
+typedef struct _ClaySelectionEditor          ClaySelectionEditor;
+typedef struct _ClaySymmetryEditor           ClaySymmetryEditor;
+typedef struct _ClayUndoEditor               ClayUndoEditor;
 
 
-/*  GimpContainerEditor widgets  */
+/*  ClayContainerView and its implementors  */
 
-typedef struct _GimpContainerEditor          GimpContainerEditor;
-typedef struct _GimpBufferView               GimpBufferView;
-typedef struct _GimpDocumentView             GimpDocumentView;
-typedef struct _GimpFontView                 GimpFontView;
-typedef struct _GimpImageView                GimpImageView;
-typedef struct _GimpTemplateView             GimpTemplateView;
-typedef struct _GimpToolEditor               GimpToolEditor;
+typedef struct _ClayChannelTreeView          ClayChannelTreeView;
+typedef struct _ClayContainerBox             ClayContainerBox;
+typedef struct _ClayContainerComboBox        ClayContainerComboBox;
+typedef struct _ClayContainerEntry           ClayContainerEntry;
+typedef struct _ClayContainerIconView        ClayContainerIconView;
+typedef struct _ClayContainerListView        ClayContainerListView;
+typedef struct _ClayContainerTreeStore       ClayContainerTreeStore;
+typedef struct _ClayContainerTreeView        ClayContainerTreeView;
+typedef struct _ClayContainerView            ClayContainerView; /* dummy typedef */
+typedef struct _ClayDrawableTreeView         ClayDrawableTreeView;
+typedef struct _ClayImageSaveView            ClayImageSaveView;
+typedef struct _ClayItemTreeView             ClayItemTreeView;
+typedef struct _ClayLayerTreeView            ClayLayerTreeView;
+typedef struct _ClayPathTreeView             ClayPathTreeView;
+
+typedef struct _ClayContainerPopup           ClayContainerPopup;
+typedef struct _ClayViewableButton           ClayViewableButton;
 
 
-/*  GimpDataFactoryView widgets  */
+/*  ClayContainerEditor widgets  */
 
-typedef struct _GimpBrushFactoryView         GimpBrushFactoryView;
-typedef struct _GimpDataFactoryView          GimpDataFactoryView;
-typedef struct _GimpDynamicsFactoryView      GimpDynamicsFactoryView;
-typedef struct _GimpFontFactoryView          GimpFontFactoryView;
-typedef struct _GimpPatternFactoryView       GimpPatternFactoryView;
-typedef struct _GimpToolPresetFactoryView    GimpToolPresetFactoryView;
+typedef struct _ClayContainerEditor          ClayContainerEditor;
+typedef struct _ClayBufferView               ClayBufferView;
+typedef struct _ClayDocumentView             ClayDocumentView;
+typedef struct _ClayFontView                 ClayFontView;
+typedef struct _ClayImageView                ClayImageView;
+typedef struct _ClayTemplateView             ClayTemplateView;
+typedef struct _ClayToolEditor               ClayToolEditor;
+
+
+/*  ClayDataFactoryView widgets  */
+
+typedef struct _ClayBrushFactoryView         ClayBrushFactoryView;
+typedef struct _ClayDataFactoryView          ClayDataFactoryView;
+typedef struct _ClayDynamicsFactoryView      ClayDynamicsFactoryView;
+typedef struct _ClayFontFactoryView          ClayFontFactoryView;
+typedef struct _ClayPatternFactoryView       ClayPatternFactoryView;
+typedef struct _ClayToolPresetFactoryView    ClayToolPresetFactoryView;
 
 
 /*  menus  */
 
-typedef struct _GimpAction                   GimpAction;
-typedef struct _GimpActionImpl               GimpActionImpl;
-typedef struct _GimpActionFactory            GimpActionFactory;
-typedef struct _GimpActionGroup              GimpActionGroup;
-typedef struct _GimpDoubleAction             GimpDoubleAction;
-typedef struct _GimpEnumAction               GimpEnumAction;
-typedef struct _GimpMenuFactory              GimpMenuFactory;
-typedef struct _GimpProcedureAction          GimpProcedureAction;
-typedef struct _GimpRadioAction              GimpRadioAction;
-typedef struct _GimpStringAction             GimpStringAction;
-typedef struct _GimpToggleAction             GimpToggleAction;
-typedef struct _GimpUIManager                GimpUIManager;
+typedef struct _ClayAction                   ClayAction;
+typedef struct _ClayActionImpl               ClayActionImpl;
+typedef struct _ClayActionFactory            ClayActionFactory;
+typedef struct _ClayActionGroup              ClayActionGroup;
+typedef struct _ClayDoubleAction             ClayDoubleAction;
+typedef struct _ClayEnumAction               ClayEnumAction;
+typedef struct _ClayMenuFactory              ClayMenuFactory;
+typedef struct _ClayProcedureAction          ClayProcedureAction;
+typedef struct _ClayRadioAction              ClayRadioAction;
+typedef struct _ClayStringAction             ClayStringAction;
+typedef struct _ClayToggleAction             ClayToggleAction;
+typedef struct _ClayUIManager                ClayUIManager;
 
 
 /*  file dialogs  */
 
-typedef struct _GimpExportDialog             GimpExportDialog;
-typedef struct _GimpFileDialog               GimpFileDialog;
-typedef struct _GimpOpenDialog               GimpOpenDialog;
-typedef struct _GimpSaveDialog               GimpSaveDialog;
+typedef struct _ClayExportDialog             ClayExportDialog;
+typedef struct _ClayFileDialog               ClayFileDialog;
+typedef struct _ClayOpenDialog               ClayOpenDialog;
+typedef struct _ClaySaveDialog               ClaySaveDialog;
 
 
 /*  misc dialogs  */
 
-typedef struct _GimpColorDialog              GimpColorDialog;
-typedef struct _GimpCriticalDialog           GimpCriticalDialog;
-typedef struct _GimpErrorDialog              GimpErrorDialog;
-typedef struct _GimpMessageDialog            GimpMessageDialog;
-typedef struct _GimpProgressDialog           GimpProgressDialog;
-typedef struct _GimpTextEditor               GimpTextEditor;
-typedef struct _GimpViewableDialog           GimpViewableDialog;
+typedef struct _ClayColorDialog              ClayColorDialog;
+typedef struct _ClayCriticalDialog           ClayCriticalDialog;
+typedef struct _ClayErrorDialog              ClayErrorDialog;
+typedef struct _ClayMessageDialog            ClayMessageDialog;
+typedef struct _ClayProgressDialog           ClayProgressDialog;
+typedef struct _ClayTextEditor               ClayTextEditor;
+typedef struct _ClayViewableDialog           ClayViewableDialog;
 
 
-/*  GimpPdbDialog widgets  */
+/*  ClayPdbDialog widgets  */
 
-typedef struct _GimpBrushSelect              GimpBrushSelect;
-typedef struct _GimpFontSelect               GimpFontSelect;
-typedef struct _GimpGradientSelect           GimpGradientSelect;
-typedef struct _GimpImageSelect              GimpImageSelect;
-typedef struct _GimpItemSelect               GimpItemSelect;
-typedef struct _GimpPaletteSelect            GimpPaletteSelect;
-typedef struct _GimpPatternSelect            GimpPatternSelect;
-typedef struct _GimpPickableSelect           GimpPickableSelect;
-typedef struct _GimpPdbDialog                GimpPdbDialog;
+typedef struct _ClayBrushSelect              ClayBrushSelect;
+typedef struct _ClayFontSelect               ClayFontSelect;
+typedef struct _ClayGradientSelect           ClayGradientSelect;
+typedef struct _ClayImageSelect              ClayImageSelect;
+typedef struct _ClayItemSelect               ClayItemSelect;
+typedef struct _ClayPaletteSelect            ClayPaletteSelect;
+typedef struct _ClayPatternSelect            ClayPatternSelect;
+typedef struct _ClayPickableSelect           ClayPickableSelect;
+typedef struct _ClayPdbDialog                ClayPdbDialog;
 
 
 /*  misc widgets  */
 
-typedef struct _GimpAccelLabel               GimpAccelLabel;
-typedef struct _GimpActionEditor             GimpActionEditor;
-typedef struct _GimpActionView               GimpActionView;
-typedef struct _GimpBlobEditor               GimpBlobEditor;
-typedef struct _GimpBufferSourceBox          GimpBufferSourceBox;
-typedef struct _GimpCircle                   GimpCircle;
-typedef struct _GimpColorBar                 GimpColorBar;
-typedef struct _GimpColorDisplayEditor       GimpColorDisplayEditor;
-typedef struct _GimpColorFrame               GimpColorFrame;
-typedef struct _GimpColorHistory             GimpColorHistory;
-typedef struct _GimpColormapSelection        GimpColormapSelection;
-typedef struct _GimpColorPanel               GimpColorPanel;
-typedef struct _GimpComboTagEntry            GimpComboTagEntry;
-typedef struct _GimpCompressionComboBox      GimpCompressionComboBox;
-typedef struct _GimpControllerEditor         GimpControllerEditor;
-typedef struct _GimpControllerList           GimpControllerList;
-typedef struct _GimpCurveView                GimpCurveView;
-typedef struct _GimpDashEditor               GimpDashEditor;
-typedef struct _GimpDeviceEditor             GimpDeviceEditor;
-typedef struct _GimpDeviceInfoEditor         GimpDeviceInfoEditor;
-typedef struct _GimpDial                     GimpDial;
-typedef struct _GimpDynamicsOutputEditor     GimpDynamicsOutputEditor;
-typedef struct _GimpExtensionDetails         GimpExtensionDetails;
-typedef struct _GimpExtensionList            GimpExtensionList;
-typedef struct _GimpFgBgEditor               GimpFgBgEditor;
-typedef struct _GimpFgBgView                 GimpFgBgView;
-typedef struct _GimpFileProcView             GimpFileProcView;
-typedef struct _GimpFillEditor               GimpFillEditor;
-typedef struct _GimpGridEditor               GimpGridEditor;
-typedef struct _GimpHandleBar                GimpHandleBar;
-typedef struct _GimpHighlightableButton      GimpHighlightableButton;
-typedef struct _GimpHistogramBox             GimpHistogramBox;
-typedef struct _GimpHistogramView            GimpHistogramView;
-typedef struct _GimpIconPicker               GimpIconPicker;
-typedef struct _GimpImageChooser             GimpImageChooser;
-typedef struct _GimpImageCommentEditor       GimpImageCommentEditor;
-typedef struct _GimpImageParasiteView        GimpImageParasiteView;
-typedef struct _GimpImageProfileView         GimpImageProfileView;
-typedef struct _GimpImagePropView            GimpImagePropView;
-typedef struct _GimpItemChooser              GimpItemChooser;
-typedef struct _GimpLanguageComboBox         GimpLanguageComboBox;
-typedef struct _GimpLanguageEntry            GimpLanguageEntry;
-typedef struct _GimpLanguageStore            GimpLanguageStore;
-typedef struct _GimpLayerModeBox             GimpLayerModeBox;
-typedef struct _GimpLayerModeComboBox        GimpLayerModeComboBox;
-typedef struct _GimpMessageBox               GimpMessageBox;
-typedef struct _GimpMenu                     GimpMenu;
-typedef struct _GimpMenuBar                  GimpMenuBar;
-typedef struct _GimpMenuModel                GimpMenuModel;
-typedef struct _GimpMenuShell                GimpMenuShell;
-typedef struct _GimpMeter                    GimpMeter;
-typedef struct _GimpModifiersEditor          GimpModifiersEditor;
-typedef struct _GimpOverlayBox               GimpOverlayBox;
-typedef struct _GimpPickableButton           GimpPickableButton;
-typedef struct _GimpPickableChooser          GimpPickableChooser;
-typedef struct _GimpPickablePopup            GimpPickablePopup;
-typedef struct _GimpPivotSelector            GimpPivotSelector;
-typedef struct _GimpPlugInView               GimpPlugInView;
-typedef struct _GimpPolar                    GimpPolar;
-typedef struct _GimpPopup                    GimpPopup;
-typedef struct _GimpPrefsBox                 GimpPrefsBox;
-typedef struct _GimpProgressBox              GimpProgressBox;
-typedef struct _GimpScaleButton              GimpScaleButton;
-typedef struct _GimpSettingsBox              GimpSettingsBox;
-typedef struct _GimpSettingsEditor           GimpSettingsEditor;
-typedef struct _GimpShortcutButton           GimpShortcutButton;
-typedef struct _GimpSizeBox                  GimpSizeBox;
-typedef struct _GimpStrokeEditor             GimpStrokeEditor;
-typedef struct _GimpTagEntry                 GimpTagEntry;
-typedef struct _GimpTagPopup                 GimpTagPopup;
-typedef struct _GimpTemplateEditor           GimpTemplateEditor;
-typedef struct _GimpTextStyleEditor          GimpTextStyleEditor;
-typedef struct _GimpThumbBox                 GimpThumbBox;
-typedef struct _GimpToolbar                  GimpToolbar;
-typedef struct _GimpToolButton               GimpToolButton;
-typedef struct _GimpToolPalette              GimpToolPalette;
-typedef struct _GimpTranslationStore         GimpTranslationStore;
-typedef struct _GimpWindow                   GimpWindow;
+typedef struct _ClayAccelLabel               ClayAccelLabel;
+typedef struct _ClayActionEditor             ClayActionEditor;
+typedef struct _ClayActionView               ClayActionView;
+typedef struct _ClayBlobEditor               ClayBlobEditor;
+typedef struct _ClayBufferSourceBox          ClayBufferSourceBox;
+typedef struct _ClayCircle                   ClayCircle;
+typedef struct _ClayColorBar                 ClayColorBar;
+typedef struct _ClayColorDisplayEditor       ClayColorDisplayEditor;
+typedef struct _ClayColorFrame               ClayColorFrame;
+typedef struct _ClayColorHistory             ClayColorHistory;
+typedef struct _ClayColormapSelection        ClayColormapSelection;
+typedef struct _ClayColorPanel               ClayColorPanel;
+typedef struct _ClayComboTagEntry            ClayComboTagEntry;
+typedef struct _ClayCompressionComboBox      ClayCompressionComboBox;
+typedef struct _ClayControllerEditor         ClayControllerEditor;
+typedef struct _ClayControllerList           ClayControllerList;
+typedef struct _ClayCurveView                ClayCurveView;
+typedef struct _ClayDashEditor               ClayDashEditor;
+typedef struct _ClayDeviceEditor             ClayDeviceEditor;
+typedef struct _ClayDeviceInfoEditor         ClayDeviceInfoEditor;
+typedef struct _ClayDial                     ClayDial;
+typedef struct _ClayDynamicsOutputEditor     ClayDynamicsOutputEditor;
+typedef struct _ClayExtensionDetails         ClayExtensionDetails;
+typedef struct _ClayExtensionList            ClayExtensionList;
+typedef struct _ClayFgBgEditor               ClayFgBgEditor;
+typedef struct _ClayFgBgView                 ClayFgBgView;
+typedef struct _ClayFileProcView             ClayFileProcView;
+typedef struct _ClayFillEditor               ClayFillEditor;
+typedef struct _ClayGridEditor               ClayGridEditor;
+typedef struct _ClayHandleBar                ClayHandleBar;
+typedef struct _ClayHighlightableButton      ClayHighlightableButton;
+typedef struct _ClayHistogramBox             ClayHistogramBox;
+typedef struct _ClayHistogramView            ClayHistogramView;
+typedef struct _ClayIconPicker               ClayIconPicker;
+typedef struct _ClayImageChooser             ClayImageChooser;
+typedef struct _ClayImageCommentEditor       ClayImageCommentEditor;
+typedef struct _ClayImageParasiteView        ClayImageParasiteView;
+typedef struct _ClayImageProfileView         ClayImageProfileView;
+typedef struct _ClayImagePropView            ClayImagePropView;
+typedef struct _ClayItemChooser              ClayItemChooser;
+typedef struct _ClayLanguageComboBox         ClayLanguageComboBox;
+typedef struct _ClayLanguageEntry            ClayLanguageEntry;
+typedef struct _ClayLanguageStore            ClayLanguageStore;
+typedef struct _ClayLayerModeBox             ClayLayerModeBox;
+typedef struct _ClayLayerModeComboBox        ClayLayerModeComboBox;
+typedef struct _ClayMessageBox               ClayMessageBox;
+typedef struct _ClayMenu                     ClayMenu;
+typedef struct _ClayMenuBar                  ClayMenuBar;
+typedef struct _ClayMenuModel                ClayMenuModel;
+typedef struct _ClayMenuShell                ClayMenuShell;
+typedef struct _ClayMeter                    ClayMeter;
+typedef struct _ClayModifiersEditor          ClayModifiersEditor;
+typedef struct _ClayOverlayBox               ClayOverlayBox;
+typedef struct _ClayPickableButton           ClayPickableButton;
+typedef struct _ClayPickableChooser          ClayPickableChooser;
+typedef struct _ClayPickablePopup            ClayPickablePopup;
+typedef struct _ClayPivotSelector            ClayPivotSelector;
+typedef struct _ClayPlugInView               ClayPlugInView;
+typedef struct _ClayPolar                    ClayPolar;
+typedef struct _ClayPopup                    ClayPopup;
+typedef struct _ClayPrefsBox                 ClayPrefsBox;
+typedef struct _ClayProgressBox              ClayProgressBox;
+typedef struct _ClayScaleButton              ClayScaleButton;
+typedef struct _ClaySettingsBox              ClaySettingsBox;
+typedef struct _ClaySettingsEditor           ClaySettingsEditor;
+typedef struct _ClayShortcutButton           ClayShortcutButton;
+typedef struct _ClaySizeBox                  ClaySizeBox;
+typedef struct _ClayStrokeEditor             ClayStrokeEditor;
+typedef struct _ClayTagEntry                 ClayTagEntry;
+typedef struct _ClayTagPopup                 ClayTagPopup;
+typedef struct _ClayTemplateEditor           ClayTemplateEditor;
+typedef struct _ClayTextStyleEditor          ClayTextStyleEditor;
+typedef struct _ClayThumbBox                 ClayThumbBox;
+typedef struct _ClayToolbar                  ClayToolbar;
+typedef struct _ClayToolButton               ClayToolButton;
+typedef struct _ClayToolPalette              ClayToolPalette;
+typedef struct _ClayTranslationStore         ClayTranslationStore;
+typedef struct _ClayWindow                   ClayWindow;
 
 
 /*  views  */
 
-typedef struct _GimpNavigationView           GimpNavigationView;
-typedef struct _GimpPaletteView              GimpPaletteView;
-typedef struct _GimpView                     GimpView;
+typedef struct _ClayNavigationView           ClayNavigationView;
+typedef struct _ClayPaletteView              ClayPaletteView;
+typedef struct _ClayView                     ClayView;
 
 
 /*  view renderers  */
 
-typedef struct _GimpViewRenderer             GimpViewRenderer;
-typedef struct _GimpViewRendererBrush        GimpViewRendererBrush;
-typedef struct _GimpViewRendererBuffer       GimpViewRendererBuffer;
-typedef struct _GimpViewRendererDrawable     GimpViewRendererDrawable;
-typedef struct _GimpViewRendererFont         GimpViewRendererFont;
-typedef struct _GimpViewRendererGradient     GimpViewRendererGradient;
-typedef struct _GimpViewRendererImage        GimpViewRendererImage;
-typedef struct _GimpViewRendererImagefile    GimpViewRendererImagefile;
-typedef struct _GimpViewRendererLayer        GimpViewRendererLayer;
-typedef struct _GimpViewRendererPalette      GimpViewRendererPalette;
-typedef struct _GimpViewRendererPath         GimpViewRendererPath;
+typedef struct _ClayViewRenderer             ClayViewRenderer;
+typedef struct _ClayViewRendererBrush        ClayViewRendererBrush;
+typedef struct _ClayViewRendererBuffer       ClayViewRendererBuffer;
+typedef struct _ClayViewRendererDrawable     ClayViewRendererDrawable;
+typedef struct _ClayViewRendererFont         ClayViewRendererFont;
+typedef struct _ClayViewRendererGradient     ClayViewRendererGradient;
+typedef struct _ClayViewRendererImage        ClayViewRendererImage;
+typedef struct _ClayViewRendererImagefile    ClayViewRendererImagefile;
+typedef struct _ClayViewRendererLayer        ClayViewRendererLayer;
+typedef struct _ClayViewRendererPalette      ClayViewRendererPalette;
+typedef struct _ClayViewRendererPath         ClayViewRendererPath;
 
 
 /*  cell renderers  */
 
-typedef struct _GimpCellRendererButton       GimpCellRendererButton;
-typedef struct _GimpCellRendererDashes       GimpCellRendererDashes;
-typedef struct _GimpCellRendererViewable     GimpCellRendererViewable;
+typedef struct _ClayCellRendererButton       ClayCellRendererButton;
+typedef struct _ClayCellRendererDashes       ClayCellRendererDashes;
+typedef struct _ClayCellRendererViewable     ClayCellRendererViewable;
 
 
 /*  list rows  */
 
-typedef struct _GimpRow                      GimpRow;
+typedef struct _ClayRow                      ClayRow;
 
 
 /*  misc objects  */
 
-typedef struct _GimpDialogFactory            GimpDialogFactory;
-typedef struct _GimpTextBuffer               GimpTextBuffer;
-typedef struct _GimpUIConfigurer             GimpUIConfigurer;
-typedef struct _GimpWindowStrategy           GimpWindowStrategy;
+typedef struct _ClayDialogFactory            ClayDialogFactory;
+typedef struct _ClayTextBuffer               ClayTextBuffer;
+typedef struct _ClayUIConfigurer             ClayUIConfigurer;
+typedef struct _ClayWindowStrategy           ClayWindowStrategy;
 
 
 /*  session management objects and structs  */
 
-typedef struct _GimpSessionInfo              GimpSessionInfo;
-typedef struct _GimpSessionInfoAux           GimpSessionInfoAux;
-typedef struct _GimpSessionInfoBook          GimpSessionInfoBook;
-typedef struct _GimpSessionInfoDock          GimpSessionInfoDock;
-typedef struct _GimpSessionInfoDockable      GimpSessionInfoDockable;
-typedef struct _GimpSessionManaged           GimpSessionManaged;
+typedef struct _ClaySessionInfo              ClaySessionInfo;
+typedef struct _ClaySessionInfoAux           ClaySessionInfoAux;
+typedef struct _ClaySessionInfoBook          ClaySessionInfoBook;
+typedef struct _ClaySessionInfoDock          ClaySessionInfoDock;
+typedef struct _ClaySessionInfoDockable      ClaySessionInfoDockable;
+typedef struct _ClaySessionManaged           ClaySessionManaged;
 
 
 /*  structs  */
 
-typedef struct _GimpActionEntry              GimpActionEntry;
-typedef struct _GimpDoubleActionEntry        GimpDoubleActionEntry;
-typedef struct _GimpEnumActionEntry          GimpEnumActionEntry;
-typedef struct _GimpProcedureActionEntry     GimpProcedureActionEntry;
-typedef struct _GimpRadioActionEntry         GimpRadioActionEntry;
-typedef struct _GimpStringActionEntry        GimpStringActionEntry;
-typedef struct _GimpToggleActionEntry        GimpToggleActionEntry;
+typedef struct _ClayActionEntry              ClayActionEntry;
+typedef struct _ClayDoubleActionEntry        ClayDoubleActionEntry;
+typedef struct _ClayEnumActionEntry          ClayEnumActionEntry;
+typedef struct _ClayProcedureActionEntry     ClayProcedureActionEntry;
+typedef struct _ClayRadioActionEntry         ClayRadioActionEntry;
+typedef struct _ClayStringActionEntry        ClayStringActionEntry;
+typedef struct _ClayToggleActionEntry        ClayToggleActionEntry;
 
-typedef struct _GimpDialogFactoryEntry       GimpDialogFactoryEntry;
+typedef struct _ClayDialogFactoryEntry       ClayDialogFactoryEntry;
 
-typedef struct _GimpDashboardLogParams       GimpDashboardLogParams;
+typedef struct _ClayDashboardLogParams       ClayDashboardLogParams;
 
 
 /*  function types  */
 
-typedef GtkWidget * (* GimpDialogRestoreFunc)        (GimpDialogFactory *factory,
+typedef GtkWidget * (* ClayDialogRestoreFunc)        (ClayDialogFactory *factory,
                                                       GdkMonitor        *monitor,
-                                                      GimpSessionInfo   *info);
-typedef void        (* GimpActionGroupSetupFunc)     (GimpActionGroup   *group);
-typedef void        (* GimpActionGroupUpdateFunc)    (GimpActionGroup   *group,
+                                                      ClaySessionInfo   *info);
+typedef void        (* ClayActionGroupSetupFunc)     (ClayActionGroup   *group);
+typedef void        (* ClayActionGroupUpdateFunc)    (ClayActionGroup   *group,
                                                       gpointer           data);
 
-typedef void        (* GimpUIManagerSetupFunc)       (GimpUIManager     *manager,
+typedef void        (* ClayUIManagerSetupFunc)       (ClayUIManager     *manager,
                                                       const gchar       *ui_path);
 
-typedef void        (* GimpMenuPositionFunc)         (GtkMenu           *menu,
+typedef void        (* ClayMenuPositionFunc)         (GtkMenu           *menu,
                                                       gint              *x,
                                                       gint              *y,
                                                       gpointer           data);
-typedef gboolean    (* GimpPanedBoxDroppedFunc)      (GtkWidget         *notebook,
+typedef gboolean    (* ClayPanedBoxDroppedFunc)      (GtkWidget         *notebook,
                                                       GtkWidget         *child,
                                                       gint               insert_index,
                                                       gpointer           data);
 
-typedef GtkWidget * (* GimpToolOptionsGUIFunc)       (GimpToolOptions   *tool_options);
+typedef GtkWidget * (* ClayToolOptionsGUIFunc)       (ClayToolOptions   *tool_options);

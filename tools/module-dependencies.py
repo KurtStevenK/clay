@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 """
-module-dependencies.py -- GIMP library and core module dependency constructor
+module-dependencies.py -- Clay library and core module dependency constructor
 Copyright (C) 2010  Martin Nordholts <martinn@src.gnome.org>
 
 This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
 This program uses graphviz (you need PyGraphViz) to construct a graph
-with dependencies between GIMP library and core modules. Run it from
+with dependencies between Clay library and core modules. Run it from
 the source root. Note that you'll either need the very latest
 PyGraphViz binding or use this hack in agraph.py:
 
@@ -46,27 +46,27 @@ import os, re, pygraphviz
 
 
 # First make a sanity check
-if not os.path.exists("app") or not os.path.exists("libgimp"):
+if not os.path.exists("app") or not os.path.exists("libclay"):
     print("Must be run in source root!")
     exit(-1);
 
 
-# This file lives in libgimp and is used by many low-level
+# This file lives in libclay and is used by many low-level
 # libs. Exclude it in the calculations so the graph become nicer
 ignored_interface_files = [
-    "libgimp/libgimp-intl.h",
+    "libclay/libclay-intl.h",
     ]
 
 # List of library modules
 libmodules = [
-    "libgimp",
-    "libgimpbase",
-    "libgimpcolor",
-    "libgimpconfig",
-    "libgimpmath",
-    "libgimpmodule",
-    "libgimpthumb",
-    "libgimpwidgets",
+    "libclay",
+    "libclaybase",
+    "libclaycolor",
+    "libclayconfig",
+    "libclaymath",
+    "libclaymodule",
+    "libclaythumb",
+    "libclaywidgets",
     ]
 
 # List of app modules
@@ -223,6 +223,6 @@ dependency_graph.tred()
 
 # Write result
 if True:
-    dependency_graph.draw("devel-docs/gimp-module-dependencies.svg", prog="dot")
+    dependency_graph.draw("devel-docs/clay-module-dependencies.svg", prog="dot")
 else:
-    dependency_graph.write("devel-docs/gimp-module-dependencies.dot")
+    dependency_graph.write("devel-docs/clay-module-dependencies.dot")

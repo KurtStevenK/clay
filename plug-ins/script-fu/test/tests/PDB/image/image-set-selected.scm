@@ -14,35 +14,35 @@
 
 ;             setup
 
-;(define testImage (car (gimp-image-new 21 22 RGB)))
+;(define testImage (car (clay-image-new 21 22 RGB)))
 
 ; Load test image that already has drawable
-(define testImage (testing:load-test-image "gimp-logo.png"))
+(define testImage (testing:load-test-image "clay-logo.png"))
 
-(define testLayers (car (gimp-image-get-layers testImage )))
+(define testLayers (car (clay-image-get-layers testImage )))
 ; assert testLayers is-a vector of length one
 (define testLayer (vector-ref testLayers 0))
 
 ; create test channel
 ; The test image has no channels (RGB are not considered channels.)
-(define testChannel (car (gimp-channel-new
+(define testChannel (car (clay-channel-new
             testImage      ; image
             "Test Channel" ; name
             23 24          ; width, height
             50.0           ; opacity
             "red" )))      ; compositing color
 ; a new channel is not in the image until added
-(gimp-image-insert-channel testImage testChannel)
+(clay-image-insert-channel testImage testChannel)
 ; get a vector that only has the new channel
-(define testChannels (car (gimp-image-get-channels testImage)))
+(define testChannels (car (clay-image-get-channels testImage)))
 
 ; create test path
-(define testPath (car (gimp-path-new
+(define testPath (car (clay-path-new
                         testImage
                         "Test Path")))
-(gimp-image-insert-path testImage testPath 0 0)
+(clay-image-insert-path testImage testPath 0 0)
 ; list of paths
-(define testPaths (car (gimp-image-get-paths testImage)))
+(define testPaths (car (clay-image-get-paths testImage)))
 
 
 
@@ -50,30 +50,30 @@
 ; when passed a non-empty list of objects
 
 ; layer
-(assert `(gimp-image-set-selected-layers
+(assert `(clay-image-set-selected-layers
             ,testImage
             ,testLayers ))
 ; effective: one layer is selected
-(assert `(= (vector-length (car (gimp-image-get-selected-layers ,testImage)))
+(assert `(= (vector-length (car (clay-image-get-selected-layers ,testImage)))
             1))
 ; effective: selected layer is the one we just selected
-(assert `(= (vector-ref (car (gimp-image-get-selected-layers ,testImage)) 0)
+(assert `(= (vector-ref (car (clay-image-get-selected-layers ,testImage)) 0)
             ,testLayer))
 
 
 
 ; channel
-(assert `(gimp-image-set-selected-channels
+(assert `(clay-image-set-selected-channels
             ,testImage
             ,testChannels ))
 ; effective: one channel is selected
-(assert `(= (vector-length (car (gimp-image-get-selected-channels ,testImage)))
+(assert `(= (vector-length (car (clay-image-get-selected-channels ,testImage)))
             1))
 ; effective: selected channel is the one we just selected
-(assert `(= (vector-ref (car (gimp-image-get-selected-channels ,testImage)) 0)
+(assert `(= (vector-ref (car (clay-image-get-selected-channels ,testImage)) 0)
             ,testChannel))
 ; !!! Selecting a channel deselects previously selected layer
-(assert `(= (vector-length (car (gimp-image-get-selected-layers ,testImage)))
+(assert `(= (vector-length (car (clay-image-get-selected-layers ,testImage)))
             0))
 
 
@@ -81,21 +81,21 @@
 
 ; Failed before #10188 fixed
 ; select a set of paths (but the set has one member)
-(assert `(gimp-image-set-selected-paths
+(assert `(clay-image-set-selected-paths
             ,testImage
             ,testPaths ))
 ; After selecting a set of paths of one member, the first selected path is that member
-(assert `(= (vector-ref (car (gimp-image-get-selected-paths ,testImage)) 0)
+(assert `(= (vector-ref (car (clay-image-get-selected-paths ,testImage)) 0)
             ,testPath))
 ; Selecting a path does not unselect a drawable i.e. previously selected channel
-(assert `(= (vector-ref (car (gimp-image-get-selected-channels ,testImage)) 0)
+(assert `(= (vector-ref (car (clay-image-get-selected-channels ,testImage)) 0)
             ,testChannel))
 
 ; TODO test multi-select, a set of two member path
 
 ; The generic getter get-selected-drawables
 ; Returns a homogeneous vector of previously selected channels.
-(assert `(= (vector-ref (car (gimp-image-get-selected-drawables ,testImage)) 0)
+(assert `(= (vector-ref (car (clay-image-get-selected-drawables ,testImage)) 0)
             ,testChannel))
 
 
@@ -104,15 +104,15 @@
 
 
 ; iError to pass empty vector to setter
-(assert-error `(gimp-image-set-selected-layers
+(assert-error `(clay-image-set-selected-layers
                   ,testImage
                   #() )
               "Invalid value for argument 1")
-(assert-error `(gimp-image-set-selected-channels
+(assert-error `(clay-image-set-selected-channels
                   ,testImage
                   #() )
               "Invalid value for argument 1")
-(assert-error `(gimp-image-set-selected-paths
+(assert-error `(clay-image-set-selected-paths
                   ,testImage
                   #() )
               "Invalid value for argument 1")

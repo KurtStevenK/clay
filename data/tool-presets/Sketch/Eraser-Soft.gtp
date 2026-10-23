@@ -1,9 +1,9 @@
-# GIMP tool preset file
+# Clay tool preset file
 
-(icon-name "gimp-tool-eraser")
+(icon-name "clay-tool-eraser")
 (name "Eraser Soft")
-(tool-options "GimpEraserOptions"
-    (tool "gimp-eraser-tool")
+(tool-options "ClayEraserOptions"
+    (tool "clay-eraser-tool")
     (brush "2. Hardness 050")
     (dynamics "Pressure Opacity")
     (brush-size 80.000000))
@@ -15,4 +15,4 @@
 (use-palette no)
 (use-font no)
 
-# end of GIMP tool preset file
+# end of Clay tool preset file

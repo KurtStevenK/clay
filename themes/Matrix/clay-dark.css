@@ -1,0 +1,40 @@
+/* Matrix theme, dark scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(0,255,65);
+@define-color bg-color                   rgb(0,0,0);
+@define-color border-color               rgb(0,36,9);
+@define-color dimmed-fg-color            rgb(0,191,49);
+@define-color disabled-fg-color          rgb(0,140,36);
+@define-color disabled-button-color      rgb(0,82,21);
+@define-color hover-color                rgb(0,36,9);
+@define-color widget-bg-color            rgb(0,15,4);
+@define-color selected-color             rgb(0,51,13);
+@define-color extreme-bg-color           rgb(0,0,0);
+@define-color extreme-selected-color     rgb(0,36,9);
+@define-color strong-border-color        rgb(0,89,23);
+@define-color stronger-border-color      rgb(0,89,23);
+@define-color edge-border-color          rgb(0,89,23);
+@define-color scrollbar-slider-color     rgb(0,89,23);
+@define-color scrollbar-trough-color     rgb(0,0,0);
+@define-color ruler-color                rgba(0,36,9,0.3);
+@define-color accent-color               rgb(0,255,65);
+@define-color accent-hover-color         rgb(51,255,103);
+@define-color on-accent-color            rgb(0,0,0);
+@define-color destructive-color          rgb(255,77,77);
+@define-color good-color                 rgb(57,255,20);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Courier New", "Menlo", "Monaco", monospace; }
+@define-color lane-rust rgb(124,252,0);
+@define-color lane-maroon rgb(51,255,153);
+@define-color lane-mustard rgb(182,255,176);
+@define-color lane-purple rgb(0,204,51);
+@define-color lane-blue rgb(57,255,20);
+@define-color lane-green rgb(0,255,65);

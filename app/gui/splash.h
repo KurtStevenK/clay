@@ -18,10 +18,10 @@
 #pragma once
 
 
-void   splash_create    (Gimp         *gimp,
+void   splash_create    (Clay         *clay,
                          gboolean      be_verbose,
                          GdkMonitor   *monitor,
-                         GimpApp      *app);
+                         ClayApp      *app);
 void   splash_destroy   (void);
 
 void   splash_update    (const gchar *label1,

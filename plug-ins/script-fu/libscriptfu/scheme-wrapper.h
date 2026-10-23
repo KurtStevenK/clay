@@ -27,7 +27,7 @@ typedef pointer (*TsWrapperFunc) (scheme*, pointer);
 void          tinyscheme_init         (GList        *path,
                                        gboolean      register_scripts);
 
-void          ts_set_run_mode         (GimpRunMode   run_mode);
+void          ts_set_run_mode         (ClayRunMode   run_mode);
 
 void          ts_set_print_flag       (gint          print_flag);
 void          ts_print_welcome        (void);

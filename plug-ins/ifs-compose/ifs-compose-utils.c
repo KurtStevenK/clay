@@ -25,7 +25,7 @@
 
 #include <gdk/gdk.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "ifs-compose.h"
 
@@ -974,7 +974,7 @@ ifs_render (AffElement     **elements,
   for (i = 0; i < nsteps; i++)
     {
       if (!preview && ((i % n) == 0))
-        gimp_progress_update ((gdouble) i / (gdouble) nsteps);
+        clay_progress_update ((gdouble) i / (gdouble) nsteps);
 
       p0 = g_random_int ();
       k = 0;
@@ -1091,7 +1091,7 @@ ifs_render (AffElement     **elements,
     } /* main iteration */
 
   if (!preview )
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 
   g_free (brush);
   g_free (prob);

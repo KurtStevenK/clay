@@ -22,7 +22,7 @@
 
 #include "string-port.h"
 
-/* Uses GLib types but not Gimp.
+/* Uses GLib types but not Clay.
  * No conditional compilation.
  */
 
@@ -322,7 +322,7 @@ output_port_expand_by_at_least (scheme *sc, port *p, size_t byte_count)
 
 /* Exported
  *
- * Naming follows gimp/glib convention: string_port_<method>
+ * Naming follows clay/glib convention: string_port_<method>
  */
 
 gint

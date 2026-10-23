@@ -26,11 +26,11 @@
            (extents     '()))
       (while (< count list-cnt)
         (set! font-object (vector-ref list count))
-        (set! font (car (gimp-resource-get-name font-object)))
+        (set! font (car (clay-resource-get-name font-object)))
 
         (if (= use-name TRUE)
             (set! text font))
-        (set! extents (gimp-text-get-extents-font     text
+        (set! extents (clay-text-get-extents-font     text
                                                       font-size
                                                       font-object))
         (set! width (car extents))
@@ -53,12 +53,12 @@
            (extents     '()))
       (while (< count list-cnt)
         (set! font-object (vector-ref list count))
-        (set! font (car (gimp-resource-get-name font-object)))
+        (set! font (car (clay-resource-get-name font-object)))
 
         (if (= use-name TRUE)
             (set! text font)
         )
-        (set! extents (gimp-text-get-extents-font     text
+        (set! extents (clay-text-get-extents-font     text
                                                       font-size
                                                       font-object))
         (set! height (cadr extents))
@@ -74,9 +74,9 @@
   )
 
   (let* (
-        ; gimp-fonts-get-list returns a one element list of results,
+        ; clay-fonts-get-list returns a one element list of results,
         ; the only element is itself a list of fonts, possibly empty.
-        (font-list   (car (gimp-fonts-get-list font-filter)))
+        (font-list   (car (clay-fonts-get-list font-filter)))
         (num-fonts   (vector-length font-list))
         (label-size  (/ font-size 2))
         (border      (+ border (* labels (/ label-size 2))))
@@ -86,9 +86,9 @@
         (width       (+ maxwidth (* 2 border)))
         (height      (+ (+ (* maxheight num-fonts) (* 2 border))
                         (* labels (* label-size num-fonts))))
-        (img         (car (gimp-image-new width height (if (= colors 0)
+        (img         (car (clay-image-new width height (if (= colors 0)
                                                            GRAY RGB))))
-        (drawable    (car (gimp-layer-new img "Background"
+        (drawable    (car (clay-layer-new img "Background"
                                           width height (if (= colors 0)
                                                          GRAY-IMAGE RGB-IMAGE)
                                           100 LAYER-MODE-NORMAL)))
@@ -97,35 +97,35 @@
         (font-object '())
         )
 
-    (gimp-context-push)
+    (clay-context-push)
 
-    (gimp-image-undo-disable img)
+    (clay-image-undo-disable img)
 
     (if (= colors 0)
         (begin
-          (gimp-context-set-background '(255 255 255))
-          (gimp-context-set-foreground '(0 0 0))))
+          (clay-context-set-background '(255 255 255))
+          (clay-context-set-foreground '(0 0 0))))
 
-    (gimp-image-insert-layer img drawable 0 0)
-    (gimp-drawable-edit-clear drawable)
+    (clay-image-insert-layer img drawable 0 0)
+    (clay-drawable-edit-clear drawable)
 
     (if (= labels TRUE)
         (begin
-          (set! drawable (car (gimp-layer-new img "Labels" width height
+          (set! drawable (car (clay-layer-new img "Labels" width height
                                               (if (= colors 0)
                                                   GRAYA-IMAGE RGBA-IMAGE)
                                               100 LAYER-MODE-NORMAL)))
-          (gimp-image-insert-layer img drawable 0 -1)))
-          (gimp-drawable-edit-clear drawable)
+          (clay-image-insert-layer img drawable 0 -1)))
+          (clay-drawable-edit-clear drawable)
 
     (while (< count num-fonts)
       (set! font-object (vector-ref font-list count))
-      (set! font (car (gimp-resource-get-name font-object)))
+      (set! font (car (clay-resource-get-name font-object)))
 
       (if (= use-name TRUE)
           (set! text font))
 
-      (gimp-text-font     img -1
+      (clay-text-font     img -1
                           border
                           y
                           text
@@ -136,7 +136,7 @@
 
       (if (= labels TRUE)
           (begin
-            (gimp-floating-sel-anchor (car (gimp-text-font     img drawable
+            (clay-floating-sel-anchor (car (clay-text-font     img drawable
                                                                (- border
                                                                   (/ label-size 2))
                                                                (- y
@@ -152,12 +152,12 @@
       (set! count (+ count 1))
     )
 
-    (gimp-image-set-selected-layers img (vector drawable))
+    (clay-image-set-selected-layers img (vector drawable))
 
-    (gimp-image-undo-enable img)
-    (gimp-display-new img)
+    (clay-image-undo-enable img)
+    (clay-display-new img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

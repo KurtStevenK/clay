@@ -124,7 +124,7 @@ CODE
 # Slurp in the PDB defs
 foreach $file (@groups) {
     print "Processing $srcdir/groups/$file.pdb...\n";
-    eval "package Gimp::CodeGen::Safe::$file; $evalcode;";
+    eval "package Clay::CodeGen::Safe::$file; $evalcode;";
     die $@ if $@;
 }
 
@@ -284,7 +284,7 @@ while (@ARGV) {
 
     if (exists $gen{$type}) {
 	require "$type.pl";
-	&{"Gimp::CodeGen::${type}::generate"}($gen{$type});
+	&{"Clay::CodeGen::${type}::generate"}($gen{$type});
 	print "done.\n";
 	$didstuff = 1;
     }

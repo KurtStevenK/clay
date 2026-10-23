@@ -8,7 +8,7 @@ case $(readlink /proc/$$/exe) in
 esac
 set -e
 if [ "$0" != 'build/linux/snap/1_build-deps-snapcraft.sh' ] && [ $(basename "$PWD") != 'snap' ]; then
-  printf '\033[31m(ERROR)\033[0m: Script called from wrong dir. Please, call this script from the root of gimp source dir\n'
+  printf '\033[31m(ERROR)\033[0m: Script called from wrong dir. Please, call this script from the root of clay source dir\n'
   exit 1
 elif [ "$(basename "$PWD")" = 'snap' ]; then
   cd ../../..
@@ -76,7 +76,7 @@ if [ "$GITLAB_CI" ]; then
   tar cf gegl-meson-log.tar /root/parts/gegl/build/meson-logs/meson-log.txt >/dev/null 2>&1
   printf "\e[0Ksection_end:`date +%s`:gegl_build\r\e[0K\n"
 
-  ## Save built deps for 'gimp-snap' job
+  ## Save built deps for 'clay-snap' job
   tar cf _install-$RUNNER.tar /root/stage/ >/dev/null 2>&1
   tar cf _build-$RUNNER.tar /root/parts/ >/dev/null 2>&1
 fi

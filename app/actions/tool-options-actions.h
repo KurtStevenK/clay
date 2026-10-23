@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   tool_options_actions_setup  (GimpActionGroup *group);
-void   tool_options_actions_update (GimpActionGroup *group,
+void   tool_options_actions_setup  (ClayActionGroup *group);
+void   tool_options_actions_update (ClayActionGroup *group,
                                     gpointer         data);

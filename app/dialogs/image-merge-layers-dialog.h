@@ -18,21 +18,21 @@
 #pragma once
 
 
-typedef void (* GimpMergeLayersCallback) (GtkWidget     *dialog,
-                                          GimpImage     *image,
-                                          GimpContext   *context,
-                                          GimpMergeType  merge_type,
+typedef void (* ClayMergeLayersCallback) (GtkWidget     *dialog,
+                                          ClayImage     *image,
+                                          ClayContext   *context,
+                                          ClayMergeType  merge_type,
                                           gboolean       merge_active_group,
                                           gboolean       discard_invisible,
                                           gpointer       user_data);
 
 
 GtkWidget *
-  image_merge_layers_dialog_new (GimpImage               *image,
-                                 GimpContext             *context,
+  image_merge_layers_dialog_new (ClayImage               *image,
+                                 ClayContext             *context,
                                  GtkWidget               *parent,
-                                 GimpMergeType            merge_type,
+                                 ClayMergeType            merge_type,
                                  gboolean                 merge_active_group,
                                  gboolean                 discard_invisible,
-                                 GimpMergeLayersCallback  callback,
+                                 ClayMergeLayersCallback  callback,
                                  gpointer                 user_data);

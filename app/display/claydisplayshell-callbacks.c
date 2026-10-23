@@ -1,0 +1,645 @@
+/* xyz.kainzmayer.ClayDesign
+ * Copyright (C) 1995 Spencer Kimball and Peter Mattis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "config.h"
+
+#include <gegl.h>
+#include <gtk/gtk.h>
+
+#include "libclaymath/claymath.h"
+#include "libclaywidgets/claywidgets.h"
+
+#include "display-types.h"
+
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/clayimage-quick-mask.h"
+
+#include "menus/menus.h"
+
+#include "widgets/claymenufactory.h"
+#include "widgets/clayuimanager.h"
+
+#include "claycanvasitem.h"
+#include "claydisplay.h"
+#include "claydisplayshell.h"
+#include "claydisplayshell-appearance.h"
+#include "claydisplayshell-callbacks.h"
+#include "claydisplayshell-draw.h"
+#include "claydisplayshell-render.h"
+#include "claydisplayshell-scale.h"
+#include "claydisplayshell-scroll.h"
+#include "claydisplayshell-scrollbars.h"
+#include "claydisplayshell-selection.h"
+#include "claydisplayshell-title.h"
+#include "claydisplayshell-transform.h"
+#include "clayimagewindow.h"
+#include "claynavigationeditor.h"
+
+#include "git-version.h"
+
+#include "clay-intl.h"
+
+
+/*  local function prototypes  */
+
+static void       clay_display_shell_vadjustment_changed      (GtkAdjustment    *adjustment,
+                                                               ClayDisplayShell *shell);
+static void       clay_display_shell_hadjustment_changed      (GtkAdjustment    *adjustment,
+                                                               ClayDisplayShell *shell);
+static gboolean   clay_display_shell_vscrollbar_change_value  (GtkRange         *range,
+                                                               GtkScrollType     scroll,
+                                                               gdouble           value,
+                                                               ClayDisplayShell *shell);
+
+static gboolean   clay_display_shell_hscrollbar_change_value  (GtkRange         *range,
+                                                               GtkScrollType     scroll,
+                                                               gdouble           value,
+                                                               ClayDisplayShell *shell);
+
+static void       clay_display_shell_canvas_draw_image        (ClayDisplayShell *shell,
+                                                               cairo_t          *cr);
+static void       clay_display_shell_canvas_draw_drop_zone    (ClayDisplayShell *shell,
+                                                               cairo_t          *cr);
+
+
+/*  public functions  */
+
+void
+clay_display_shell_canvas_realize (GtkWidget        *canvas,
+                                   ClayDisplayShell *shell)
+{
+  ClayCanvasPaddingMode  padding_mode;
+  GeglColor             *padding_color;
+  GtkAllocation          allocation;
+
+  gtk_widget_grab_focus (canvas);
+
+  clay_display_shell_get_padding (shell, &padding_mode, &padding_color);
+  clay_display_shell_set_padding (shell, padding_mode, padding_color);
+  g_clear_object (&padding_color);
+
+  gtk_widget_get_allocation (canvas, &allocation);
+
+  clay_display_shell_title_update (shell);
+
+  shell->disp_width  = allocation.width;
+  shell->disp_height = allocation.height;
+
+  clay_display_shell_render_set_scale (
+    shell,
+    gdk_window_get_scale_factor (
+      gtk_widget_get_window (gtk_widget_get_toplevel (canvas))));
+
+  /*  set up the scrollbar observers  */
+  g_signal_connect (shell->hsbdata, "value-changed",
+                    G_CALLBACK (clay_display_shell_hadjustment_changed),
+                    shell);
+  g_signal_connect (shell->vsbdata, "value-changed",
+                    G_CALLBACK (clay_display_shell_vadjustment_changed),
+                    shell);
+
+  g_signal_connect (shell->hsb, "change-value",
+                    G_CALLBACK (clay_display_shell_hscrollbar_change_value),
+                    shell);
+
+  g_signal_connect (shell->vsb, "change-value",
+                    G_CALLBACK (clay_display_shell_vscrollbar_change_value),
+                    shell);
+
+  /*  allow shrinking  */
+  gtk_widget_set_size_request (GTK_WIDGET (shell), 0, 0);
+}
+
+typedef struct
+{
+  ClayDisplayShell *shell;
+  gint              prev_width;
+  gint              prev_height;
+} TickClosure;
+
+static gboolean
+clay_display_shell_canvas_tick (GtkWidget     *widget,
+                                GdkFrameClock *frame_clock,
+                                TickClosure   *tick)
+{
+  ClayDisplayShell *shell = tick->shell;
+  GtkAllocation     allocation;
+
+  gtk_widget_get_allocation (widget, &allocation);
+
+  if ((tick->prev_width  != allocation.width) ||
+      (tick->prev_height != allocation.height))
+    {
+      if (shell->zoom_on_resize  &&
+          tick->prev_width  > 64 &&
+          tick->prev_height > 64 &&
+          allocation.width  > 64 &&
+          allocation.height > 64)
+        {
+          gdouble scale = clay_zoom_model_get_factor (shell->zoom);
+          gint    offset_x;
+          gint    offset_y;
+
+          /* FIXME: The code is a bit of a mess */
+
+          /*  multiply the zoom_factor with the ratio of the new and
+           *  old canvas diagonals
+           */
+          scale *= (sqrt (SQR (allocation.width) +
+                          SQR (allocation.height)) /
+                    sqrt (SQR (tick->prev_width) +
+                          SQR (tick->prev_height)));
+
+          offset_x = UNSCALEX (shell, shell->offset_x);
+          offset_y = UNSCALEY (shell, shell->offset_y);
+
+          clay_zoom_model_zoom (shell->zoom, CLAY_ZOOM_TO, scale);
+
+          shell->offset_x = SCALEX (shell, offset_x);
+          shell->offset_y = SCALEY (shell, offset_y);
+        }
+
+      /* When we size-allocate due to resize of the top level window,
+       * we want some additional logic. Don't apply it on
+       * zoom_on_resize though.
+       */
+      if (shell->size_allocate_from_configure_event &&
+          ! shell->zoom_on_resize)
+        {
+          gboolean center_horizontally;
+          gboolean center_vertically;
+          gint     target_offset_x;
+          gint     target_offset_y;
+          gint     sw;
+          gint     sh;
+
+          clay_display_shell_scale_get_image_size (shell, &sw, &sh);
+
+          center_horizontally = sw <= shell->disp_width;
+          center_vertically   = sh <= shell->disp_height;
+
+          if (! clay_display_shell_get_infinite_canvas (shell))
+            {
+              clay_display_shell_scroll_center_image (shell,
+                                                      center_horizontally,
+                                                      center_vertically);
+            }
+          else
+            {
+              clay_display_shell_scroll_center_content (shell,
+                                                        center_horizontally,
+                                                        center_vertically);
+            }
+
+          /* This is basically the best we can do before we get an
+           * API for storing the image offset at the start of an
+           * image window resize using the mouse
+           */
+          target_offset_x = shell->offset_x;
+          target_offset_y = shell->offset_y;
+
+          if (! center_horizontally)
+            {
+              target_offset_x = MAX (shell->offset_x, 0);
+            }
+
+          if (! center_vertically)
+            {
+              target_offset_y = MAX (shell->offset_y, 0);
+            }
+
+          clay_display_shell_scroll_set_offset (shell,
+                                                target_offset_x,
+                                                target_offset_y);
+        }
+
+      clay_display_shell_scroll_clamp_and_update (shell);
+      clay_display_shell_scaled (shell);
+
+      shell->size_allocate_from_configure_event = FALSE;
+    }
+
+  if (shell->size_allocate_center_image)
+    {
+      clay_display_shell_scroll_center_image (shell, TRUE, TRUE);
+
+      shell->size_allocate_center_image = FALSE;
+    }
+
+  /* undo size request from clay_display_shell_constructed() */
+  gtk_widget_set_size_request (widget, -1, -1);
+
+  return G_SOURCE_REMOVE;
+}
+
+void
+clay_display_shell_canvas_size_allocate (GtkWidget        *widget,
+                                         GtkAllocation    *allocation,
+                                         ClayDisplayShell *shell)
+{
+  TickClosure *tick;
+
+  /*  are we in destruction?  */
+  if (! shell->display || ! clay_display_get_shell (shell->display) || ! clay_display_get_image (shell->display))
+    return;
+
+  tick = g_new0 (TickClosure, 1);
+
+  tick->shell       = shell;
+  tick->prev_width  = shell->disp_width;
+  tick->prev_height = shell->disp_height;
+
+  if (shell->disp_width  != allocation->width ||
+      shell->disp_height != allocation->height)
+    {
+      g_clear_pointer (&shell->render_cache, cairo_surface_destroy);
+      clay_display_shell_render_invalidate_full (shell);
+
+      shell->disp_width  = allocation->width;
+      shell->disp_height = allocation->height;
+
+      /* The cached marching-ants segments/mask are sized to the canvas
+       * window, so they need to be regenerated on resize.
+       */
+      clay_display_shell_selection_undraw (shell);
+    }
+
+  gtk_widget_add_tick_callback (widget,
+                                (GtkTickCallback) clay_display_shell_canvas_tick,
+                                tick, (GDestroyNotify) g_free);
+}
+
+gboolean
+clay_display_shell_canvas_draw (GtkWidget        *widget,
+                                cairo_t          *cr,
+                                ClayDisplayShell *shell)
+{
+  /*  are we in destruction?  */
+  if (! shell->display || ! clay_display_get_shell (shell->display))
+    return TRUE;
+
+  /*  we will scroll around in the next tick anyway, so we just can as
+   *  well skip the drawing of this frame and wait for the next
+   */
+  if (shell->size_allocate_center_image)
+    return TRUE;
+
+  /*  ignore events on overlays  */
+  if (gtk_cairo_should_draw_window (cr, gtk_widget_get_window (widget)))
+    {
+      ClayImage *image = clay_display_get_image (shell->display);
+
+      /* If we are currently converting the image, it might be in inconsistent
+       * state and should not be redrawn.
+       */
+      if (image != NULL && ! clay_image_get_converting (image))
+        {
+          clay_display_shell_canvas_draw_image (shell, cr);
+        }
+      else if (image == NULL)
+        {
+          clay_display_shell_canvas_draw_drop_zone (shell, cr);
+        }
+    }
+
+  return FALSE;
+}
+
+gboolean
+clay_display_shell_origin_button_press (GtkWidget        *widget,
+                                        GdkEventButton   *event,
+                                        ClayDisplayShell *shell)
+{
+  if (! shell->display->clay->busy)
+    {
+      if (gdk_event_get_event_type ((GdkEvent *) event) == GDK_BUTTON_PRESS && event->button == 1)
+        {
+          gboolean unused;
+
+          g_signal_emit_by_name (shell, "popup-menu", &unused);
+        }
+    }
+
+  /* Return TRUE to stop signal emission so the button doesn't grab the
+   * pointer away from us.
+   */
+  return TRUE;
+}
+
+gboolean
+clay_display_shell_quick_mask_button_press (GtkWidget        *widget,
+                                            GdkEventButton   *bevent,
+                                            ClayDisplayShell *shell)
+{
+  if (! clay_display_get_image (shell->display))
+    return TRUE;
+
+  if (gdk_event_triggers_context_menu ((GdkEvent *) bevent))
+    {
+      ClayImageWindow *window = clay_display_shell_get_window (shell);
+
+      if (window)
+        {
+          Clay          *clay;
+          ClayUIManager *manager;
+
+          clay    = shell->display->clay;
+          manager = clay_menu_factory_get_manager (menus_get_global_menu_factory (clay), "<QuickMask>", clay);
+          clay_ui_manager_ui_popup_at_widget (manager,
+                                              "/quick-mask-popup",
+                                              NULL, NULL,
+                                              widget,
+                                              GDK_GRAVITY_EAST,
+                                              GDK_GRAVITY_SOUTH_WEST,
+                                              (GdkEvent *) bevent,
+                                              NULL, NULL);
+        }
+
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+void
+clay_display_shell_quick_mask_toggled (GtkWidget        *widget,
+                                       ClayDisplayShell *shell)
+{
+  ClayImage *image  = clay_display_get_image (shell->display);
+  gboolean   active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+
+  if (active != clay_image_get_quick_mask_state (image))
+    {
+      ClayImageWindow *window = clay_display_shell_get_window (shell);
+
+      if (window)
+        {
+          ClayUIManager *manager = menus_get_image_manager_singleton (shell->display->clay);
+
+          clay_ui_manager_toggle_action (manager,
+                                         "quick-mask", "quick-mask-toggle",
+                                         active);
+        }
+    }
+}
+
+gboolean
+clay_display_shell_navigation_button_press (GtkWidget        *widget,
+                                            GdkEventButton   *bevent,
+                                            ClayDisplayShell *shell)
+{
+  if (! clay_display_get_image (shell->display))
+    return TRUE;
+
+  if (gdk_event_get_event_type ((GdkEvent *) bevent) == GDK_BUTTON_PRESS && bevent->button == 1)
+    {
+      clay_navigation_editor_popup (shell, widget,
+                                    (GdkEvent *) bevent,
+                                    bevent->x, bevent->y);
+    }
+
+  return TRUE;
+}
+
+
+/*  private functions  */
+
+static void
+clay_display_shell_vadjustment_changed (GtkAdjustment    *adjustment,
+                                        ClayDisplayShell *shell)
+{
+  /*  If we are panning with mouse, scrollbars are to be ignored or
+   *  they will cause jitter in motion
+   */
+  if (shell->mod_action == CLAY_MODIFIER_ACTION_NONE)
+    clay_display_shell_scroll (shell,
+                               0,
+                               gtk_adjustment_get_value (adjustment) -
+                               shell->offset_y);
+}
+
+static void
+clay_display_shell_hadjustment_changed (GtkAdjustment    *adjustment,
+                                        ClayDisplayShell *shell)
+{
+  /* If we are panning with mouse, scrollbars are to be ignored or
+   * they will cause jitter in motion
+   */
+  if (shell->mod_action == CLAY_MODIFIER_ACTION_NONE)
+    clay_display_shell_scroll (shell,
+                               gtk_adjustment_get_value (adjustment) -
+                               shell->offset_x,
+                               0);
+}
+
+static gboolean
+clay_display_shell_hscrollbar_change_value (GtkRange         *range,
+                                            GtkScrollType     scroll,
+                                            gdouble           value,
+                                            ClayDisplayShell *shell)
+{
+  if (! shell->display)
+    return TRUE;
+
+  if ((scroll == GTK_SCROLL_JUMP)          ||
+      (scroll == GTK_SCROLL_PAGE_BACKWARD) ||
+      (scroll == GTK_SCROLL_PAGE_FORWARD))
+    return FALSE;
+
+  g_object_freeze_notify (G_OBJECT (shell->hsbdata));
+
+  clay_display_shell_scrollbars_setup_horizontal (shell, value);
+
+  g_object_thaw_notify (G_OBJECT (shell->hsbdata)); /* emits "changed" */
+
+  return FALSE;
+}
+
+static gboolean
+clay_display_shell_vscrollbar_change_value (GtkRange         *range,
+                                            GtkScrollType     scroll,
+                                            gdouble           value,
+                                            ClayDisplayShell *shell)
+{
+  if (! shell->display)
+    return TRUE;
+
+  if ((scroll == GTK_SCROLL_JUMP)          ||
+      (scroll == GTK_SCROLL_PAGE_BACKWARD) ||
+      (scroll == GTK_SCROLL_PAGE_FORWARD))
+    return FALSE;
+
+  g_object_freeze_notify (G_OBJECT (shell->vsbdata));
+
+  clay_display_shell_scrollbars_setup_vertical (shell, value);
+
+  g_object_thaw_notify (G_OBJECT (shell->vsbdata)); /* emits "changed" */
+
+  return FALSE;
+}
+
+static void
+clay_display_shell_canvas_draw_image (ClayDisplayShell *shell,
+                                      cairo_t          *cr)
+{
+  cairo_rectangle_list_t *clip_rectangles;
+  GeglRectangle           image_rect;
+  GeglRectangle           rotated_image_rect;
+  GeglRectangle           canvas_rect;
+  cairo_matrix_t          matrix;
+  gdouble                 x1, y1;
+  gdouble                 x2, y2;
+
+  clay_display_shell_scale_get_image_unrotated_bounding_box (
+    shell,
+    &image_rect.x,
+    &image_rect.y,
+    &image_rect.width,
+    &image_rect.height);
+
+  clay_display_shell_scale_get_image_unrotated_bounds (
+    shell,
+    &canvas_rect.x,
+    &canvas_rect.y,
+    &canvas_rect.width,
+    &canvas_rect.height);
+
+  /*  first, draw the background
+   */
+
+  clay_display_shell_draw_background (shell, cr);
+
+
+  /*  then, draw the exposed part of the region that is inside the
+   *  image
+   */
+
+  cairo_save (cr);
+  clip_rectangles = cairo_copy_clip_rectangle_list (cr);
+  cairo_get_matrix (cr, &matrix);
+
+  if (shell->rotate_transform)
+    cairo_transform (cr, shell->rotate_transform);
+
+  if (shell->show_all)
+    {
+      cairo_save (cr);
+
+      if (clay_display_shell_get_padding_in_show_all (shell))
+        {
+          cairo_rectangle (cr,
+                           canvas_rect.x,
+                           canvas_rect.y,
+                           canvas_rect.width,
+                           canvas_rect.height);
+          cairo_clip (cr);
+        }
+
+      clay_display_shell_draw_checkerboard (shell, cr);
+
+      cairo_restore (cr);
+    }
+
+  cairo_rectangle (cr,
+                   image_rect.x,
+                   image_rect.y,
+                   image_rect.width,
+                   image_rect.height);
+  cairo_clip (cr);
+
+  clay_display_shell_rotate_bounds (shell,
+                                    image_rect.x,
+                                    image_rect.y,
+                                    image_rect.x + image_rect.width,
+                                    image_rect.y + image_rect.height,
+                                    &x1, &y1, &x2, &y2);
+
+  rotated_image_rect.x      = floor (x1);
+  rotated_image_rect.y      = floor (y1);
+  rotated_image_rect.width  = ceil  (x2) - rotated_image_rect.x;
+  rotated_image_rect.height = ceil  (y2) - rotated_image_rect.y;
+
+  if (gdk_cairo_get_clip_rectangle (cr, NULL))
+    {
+      gint i;
+
+      if (! shell->show_all)
+        {
+          cairo_save (cr);
+          clay_display_shell_draw_checkerboard (shell, cr);
+          cairo_restore (cr);
+        }
+
+      if (shell->show_image)
+        {
+          cairo_set_matrix (cr, &matrix);
+
+          for (i = 0; i < clip_rectangles->num_rectangles; i++)
+            {
+              cairo_rectangle_t clip_rect = clip_rectangles->rectangles[i];
+              GeglRectangle     rect;
+
+              rect.x      = floor (clip_rect.x);
+              rect.y      = floor (clip_rect.y);
+              rect.width  = ceil  (clip_rect.x + clip_rect.width)  - rect.x;
+              rect.height = ceil  (clip_rect.y + clip_rect.height) - rect.y;
+
+              if (gegl_rectangle_intersect (&rect, &rect, &rotated_image_rect))
+                {
+                  clay_display_shell_draw_image (shell, cr,
+                                                 rect.x,     rect.y,
+                                                 rect.width, rect.height);
+                }
+            }
+        }
+    }
+
+  cairo_rectangle_list_destroy (clip_rectangles);
+  cairo_restore (cr);
+
+
+  /*  finally, draw all the remaining image window stuff on top
+   */
+
+  /* draw canvas items */
+  cairo_save (cr);
+
+  if (shell->rotate_transform)
+    cairo_transform (cr, shell->rotate_transform);
+
+  clay_canvas_item_draw (shell->canvas_item, cr);
+
+  cairo_restore (cr);
+
+  clay_canvas_item_draw (shell->unrotated_item, cr);
+
+  /* restart (and recalculate) the selection boundaries */
+  clay_display_shell_selection_draw (shell, cr);
+  clay_display_shell_selection_restart (shell);
+}
+
+static void
+clay_display_shell_canvas_draw_drop_zone (ClayDisplayShell *shell,
+                                          cairo_t          *cr)
+{
+  cairo_save (cr);
+
+  clay_display_shell_draw_background (shell, cr);
+
+  cairo_restore (cr);
+}

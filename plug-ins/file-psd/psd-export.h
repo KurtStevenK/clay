@@ -20,19 +20,19 @@
 
 
 gboolean export_image          (GFile          *file,
-                                GimpImage      *image,
-                                GimpProcedure  *procedure,
+                                ClayImage      *image,
+                                ClayProcedure  *procedure,
                                 GObject        *config,
                                 GError        **error);
 
 gboolean export_image_metadata (GFile          *file,
-                                GimpImage      *image,
+                                ClayImage      *image,
                                 gboolean        for_layers,
                                 gboolean        cmyk,
                                 GError        **error);
 
-gboolean save_dialog           (GimpImage      *image,
-                                GimpProcedure  *procedure,
+gboolean save_dialog           (ClayImage      *image,
+                                ClayProcedure  *procedure,
                                 GObject        *config);
 
 #endif /* __PSD_EXPORT_H__ */

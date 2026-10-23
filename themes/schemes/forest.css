@@ -1,0 +1,29 @@
+/* Clay colour scheme "Forest": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(225,235,221);
+@define-color bg-color                   rgb(19,31,25);
+@define-color border-color               rgb(48,60,52);
+@define-color dimmed-fg-color            rgb(174,184,172);
+@define-color disabled-fg-color          rgb(132,143,133);
+@define-color disabled-button-color      rgb(85,96,88);
+@define-color hover-color                rgb(48,60,52);
+@define-color widget-bg-color            rgb(31,43,37);
+@define-color selected-color             rgb(60,72,64);
+@define-color extreme-bg-color           rgb(13,22,18);
+@define-color extreme-selected-color     rgb(48,60,52);
+@define-color strong-border-color        rgb(91,102,94);
+@define-color stronger-border-color      rgb(91,102,94);
+@define-color edge-border-color          rgb(91,102,94);
+@define-color scrollbar-slider-color     rgb(91,102,94);
+@define-color scrollbar-trough-color     rgb(13,22,18);
+@define-color ruler-color                rgba(48,60,52,0.3);
+@define-color accent-color               rgb(111,191,138);
+@define-color accent-hover-color         rgb(140,204,161);
+@define-color on-accent-color            rgb(19,31,25);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;

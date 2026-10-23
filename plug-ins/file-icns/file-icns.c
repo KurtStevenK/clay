@@ -25,8 +25,8 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 /* #define ICNS_DBG */
 
@@ -34,7 +34,7 @@
 #include "file-icns-load.h"
 #include "file-icns-export.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define LOAD_PROC           "file-icns-load"
 #define LOAD_THUMB_PROC     "file-icns-load-thumb"
@@ -46,12 +46,12 @@ typedef struct _IcnsClass IcnsClass;
 
 struct _Icns
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _IcnsClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -60,41 +60,41 @@ struct _IcnsClass
 
 GType                   icns_get_type         (void);
 
-static GList          * icns_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * icns_create_procedure (GimpPlugIn            *plug_in,
+static GList          * icns_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * icns_create_procedure (ClayPlugIn            *plug_in,
                                                const gchar           *name);
 
-static GimpValueArray * icns_load             (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
+static ClayValueArray * icns_load             (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
                                                GFile                 *file,
-                                               GimpMetadata          *metadata,
-                                               GimpMetadataLoadFlags *flags,
-                                               GimpProcedureConfig   *config,
+                                               ClayMetadata          *metadata,
+                                               ClayMetadataLoadFlags *flags,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
-static GimpValueArray * icns_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * icns_load_thumb       (ClayProcedure         *procedure,
                                                GFile                 *file,
                                                gint                   size,
-                                               GimpProcedureConfig   *config,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
-static GimpValueArray * icns_export           (GimpProcedure         *procedure,
-                                               GimpRunMode            run_mode,
-                                               GimpImage             *image,
+static ClayValueArray * icns_export           (ClayProcedure         *procedure,
+                                               ClayRunMode            run_mode,
+                                               ClayImage             *image,
                                                GFile                 *file,
-                                               GimpExportOptions     *options,
-                                               GimpMetadata          *metadata,
-                                               GimpProcedureConfig   *config,
+                                               ClayExportOptions     *options,
+                                               ClayMetadata          *metadata,
+                                               ClayProcedureConfig   *config,
                                                gpointer               run_data);
 
 
-G_DEFINE_TYPE (Icns, icns, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Icns, icns, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (ICNS_TYPE)
+CLAY_MAIN (ICNS_TYPE)
 DEFINE_STD_SET_I18N
 
 static void
 icns_class_init (IcnsClass *klass)
 {
-  GimpPlugInClass *plug_in_class  = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class  = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = icns_query_procedures;
   plug_in_class->create_procedure = icns_create_procedure;
@@ -107,7 +107,7 @@ icns_init (Icns *icns)
 }
 
 static GList *
-icns_query_procedures (GimpPlugIn *plug_in)
+icns_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -118,96 +118,96 @@ icns_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-icns_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+icns_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            icns_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Icns"));
+      clay_procedure_set_menu_label (procedure, _("Icns"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in Apple Icon Image format"),
                                         _("Loads Apple Icon Image files."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Brion Vibber <brion@pobox.com>",
                                       "Brion Vibber <brion@pobox.com>",
                                       "2004");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-icns");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "icns");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,\x69\x63\x6E\x73");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 icns_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads a preview from an Apple Icon Image file",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Brion Vibber <brion@pobox.com>",
                                       "Brion Vibber <brion@pobox.com>",
                                       "2004");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, icns_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Apple Icon Image"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Apple Icon Image"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports files in Apple Icon Image file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Brion Vibber <brion@pobox.com>",
                                       "Brion Vibber <brion@pobox.com>",
                                       "2004");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "Apple Icon Image");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-icns");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "icns");
 
-      gimp_export_procedure_set_support_profile (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_profile (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-icns_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+icns_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error       = NULL;
 
   gegl_init (NULL, NULL);
@@ -215,30 +215,30 @@ icns_load (GimpProcedure         *procedure,
   image = icns_load_image (file, NULL, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-icns_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+icns_load_thumb (ClayProcedure       *procedure,
                  GFile               *file,
                  gint                 size,
-                 GimpProcedureConfig *config,
+                 ClayProcedureConfig *config,
                  gpointer             run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint            width;
   gint            height;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -250,41 +250,41 @@ icns_load_thumb (GimpProcedure       *procedure,
                                      &width, &height, 0, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, width);
-  GIMP_VALUES_SET_INT   (return_vals, 3, height);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, width);
+  CLAY_VALUES_SET_INT   (return_vals, 3, height);
 
-  gimp_value_array_truncate (return_vals, 4);
+  clay_value_array_truncate (return_vals, 4);
 
   return return_vals;
 }
 
-static GimpValueArray *
-icns_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+icns_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpPDBStatusType  status;
+  ClayPDBStatusType  status;
   GError            *error = NULL;
 
   gegl_init (NULL, NULL);
 
   status = icns_save_image (file, image, procedure, config, run_mode, &error);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 /* Buffer should point to *at least 5 byte buffer*! */

@@ -20,38 +20,38 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimptextbuffer.h"
-#include "widgets/gimptexteditor.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claytextbuffer.h"
+#include "widgets/claytexteditor.h"
+#include "widgets/clayuimanager.h"
 
 #include "text-editor-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
 static void   text_editor_load_response (GtkNativeDialog *dialog,
                                          gint             response_id,
-                                         GimpTextEditor  *editor);
+                                         ClayTextEditor  *editor);
 
 
 /*  public functions  */
 
 void
-text_editor_load_cmd_callback (GimpAction *action,
+text_editor_load_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpTextEditor *editor = GIMP_TEXT_EDITOR (data);
+  ClayTextEditor *editor = CLAY_TEXT_EDITOR (data);
 
   if (! editor->file_dialog)
     {
@@ -74,11 +74,11 @@ text_editor_load_cmd_callback (GimpAction *action,
 }
 
 void
-text_editor_clear_cmd_callback (GimpAction *action,
+text_editor_clear_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpTextEditor *editor = GIMP_TEXT_EDITOR (data);
+  ClayTextEditor *editor = CLAY_TEXT_EDITOR (data);
   GtkTextBuffer  *buffer;
 
   buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->view));
@@ -87,16 +87,16 @@ text_editor_clear_cmd_callback (GimpAction *action,
 }
 
 void
-text_editor_direction_cmd_callback (GimpAction *action,
+text_editor_direction_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpTextEditor    *editor = GIMP_TEXT_EDITOR (data);
-  GimpTextDirection  direction;
+  ClayTextEditor    *editor = CLAY_TEXT_EDITOR (data);
+  ClayTextDirection  direction;
 
-  direction = (GimpTextDirection) g_variant_get_int32 (value);
+  direction = (ClayTextDirection) g_variant_get_int32 (value);
 
-  gimp_text_editor_set_direction (editor, direction);
+  clay_text_editor_set_direction (editor, direction);
 }
 
 
@@ -105,7 +105,7 @@ text_editor_direction_cmd_callback (GimpAction *action,
 static void
 text_editor_load_response (GtkNativeDialog *dialog,
                            gint             response_id,
-                           GimpTextEditor  *editor)
+                           ClayTextEditor  *editor)
 {
   if (response_id == GTK_RESPONSE_ACCEPT)
     {
@@ -116,12 +116,12 @@ text_editor_load_response (GtkNativeDialog *dialog,
       buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->view));
       file   = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
 
-      if (! gimp_text_buffer_load (GIMP_TEXT_BUFFER (buffer), file, &error))
+      if (! clay_text_buffer_load (CLAY_TEXT_BUFFER (buffer), file, &error))
         {
-          gimp_message (editor->ui_manager->gimp, G_OBJECT (dialog),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (editor->ui_manager->clay, G_OBJECT (dialog),
+                        CLAY_MESSAGE_ERROR,
                         _("Could not open '%s' for reading: %s"),
-                        gimp_file_get_utf8_name (file),
+                        clay_file_get_utf8_name (file),
                         error->message);
           g_clear_error (&error);
           g_object_unref (file);

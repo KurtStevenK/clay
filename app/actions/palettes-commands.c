@@ -20,28 +20,28 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimppalette.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/claypalette.h"
 
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpdatafactoryview.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpview.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claydatafactoryview.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayview.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "dialogs/dialogs.h"
 
 #include "actions.h"
 #include "palettes-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
@@ -54,38 +54,38 @@ static void   palettes_merge_callback (GtkWidget   *widget,
 /*  public functions */
 
 void
-palettes_import_cmd_callback (GimpAction *action,
+palettes_import_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
   GtkWidget *widget;
   return_if_no_widget (widget, data);
 
-  gimp_dialog_factory_dialog_new (gimp_dialog_factory_get_singleton (),
-                                  gimp_widget_get_monitor (widget),
+  clay_dialog_factory_dialog_new (clay_dialog_factory_get_singleton (),
+                                  clay_widget_get_monitor (widget),
                                   NULL /*ui_manager*/,
                                   widget,
-                                  "gimp-palette-import-dialog", -1, TRUE);
+                                  "clay-palette-import-dialog", -1, TRUE);
 }
 
 void
-palettes_merge_cmd_callback (GimpAction *action,
+palettes_merge_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
   GtkWidget           *dialog;
 
-#define MERGE_DIALOG_KEY "gimp-palettes-merge-dialog"
+#define MERGE_DIALOG_KEY "clay-palettes-merge-dialog"
 
   dialog = dialogs_get_dialog (G_OBJECT (editor), MERGE_DIALOG_KEY);
 
   if (! dialog)
     {
-      dialog = gimp_query_string_box (_("Merge Palettes"),
+      dialog = clay_query_string_box (_("Merge Palettes"),
                                       GTK_WIDGET (editor),
-                                      gimp_standard_help_func,
-                                      GIMP_HELP_PALETTE_MERGE,
+                                      clay_standard_help_func,
+                                      CLAY_HELP_PALETTE_MERGE,
                                       _("Enter a name for the merged palette"),
                                       NULL,
                                       G_OBJECT (editor), "destroy",
@@ -106,42 +106,42 @@ palettes_merge_callback (GtkWidget   *widget,
                          const gchar *palette_name,
                          gpointer     data)
 {
-  GimpContainerEditor *editor = data;
-  GimpDataFactoryView *view   = data;
-  GimpDataFactory     *factory;
-  GimpContext         *context;
-  GimpPalette         *new_palette;
+  ClayContainerEditor *editor = data;
+  ClayDataFactoryView *view   = data;
+  ClayDataFactory     *factory;
+  ClayContext         *context;
+  ClayPalette         *new_palette;
   GList               *selected = NULL;
   GList               *list;
 
-  context = gimp_container_view_get_context (editor->view);
-  factory = gimp_data_factory_view_get_data_factory (view);
+  context = clay_container_view_get_context (editor->view);
+  factory = clay_data_factory_view_get_data_factory (view);
 
-  if (gimp_container_view_get_selected (editor->view, &selected) < 2)
+  if (clay_container_view_get_selected (editor->view, &selected) < 2)
     {
-      gimp_message_literal (context->gimp,
-                            G_OBJECT (editor), GIMP_MESSAGE_WARNING,
+      clay_message_literal (context->clay,
+                            G_OBJECT (editor), CLAY_MESSAGE_WARNING,
                             _("There must be at least two palettes selected "
                               "to merge."));
       g_list_free (selected);
       return;
     }
 
-  new_palette = GIMP_PALETTE (gimp_data_factory_data_new (factory, context,
+  new_palette = CLAY_PALETTE (clay_data_factory_data_new (factory, context,
                                                           palette_name));
 
   for (list = selected; list; list = g_list_next (list))
     {
-      GimpPalette *palette = list->data;
+      ClayPalette *palette = list->data;
       GList       *cols;
 
-      for (cols = gimp_palette_get_colors (palette);
+      for (cols = clay_palette_get_colors (palette);
            cols;
            cols = g_list_next (cols))
         {
-          GimpPaletteEntry *entry = cols->data;
+          ClayPaletteEntry *entry = cols->data;
 
-          gimp_palette_add_entry (new_palette, -1,
+          clay_palette_add_entry (new_palette, -1,
                                   entry->name,
                                   entry->color);
         }

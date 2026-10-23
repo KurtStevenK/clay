@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -30,8 +30,8 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h> /* for keyboard values */
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "imap_about.h"
 #include "imap_circle.h"
@@ -54,8 +54,8 @@
 #include "imap_statusbar.h"
 #include "imap_string.h"
 
-#include "libgimp/stdplugins-intl.h"
-#include "libgimpwidgets/gimpwidgets-private.h"
+#include "libclay/stdplugins-intl.h"
+#include "libclaywidgets/claywidgets-private.h"
 
 
 #define MAX_ZOOM_FACTOR 8
@@ -66,20 +66,20 @@
 
 GType                   imap_get_type         (void);
 
-static void             gimp_imap_finalize    (GObject              *object);
+static void             clay_imap_finalize    (GObject              *object);
 
-static GList          * imap_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * imap_create_procedure (GimpPlugIn           *plug_in,
+static GList          * imap_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * imap_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * imap_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * imap_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
-static gint             dialog                (GimpImap             *imap);
+static gint             dialog                (ClayImap             *imap);
 static gint             zoom_in               (gpointer              data);
 static gint             zoom_out              (gpointer              data);
 
@@ -91,9 +91,9 @@ static void             window_destroy        (GtkWidget            *widget,
 
 
 
-G_DEFINE_TYPE (GimpImap, gimp_imap, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayImap, clay_imap, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_TYPE_IMAP)
+CLAY_MAIN (CLAY_TYPE_IMAP)
 DEFINE_STD_SET_I18N
 
 
@@ -103,7 +103,7 @@ static PreferencesData_t _preferences = {CSIM, TRUE, FALSE, TRUE, TRUE, FALSE,
 FALSE, TRUE, DEFAULT_UNDO_LEVELS, DEFAULT_MRU_SIZE};
 static MRU_t *_mru;
 
-static GimpDrawable *_drawable;
+static ClayDrawable *_drawable;
 static GdkCursorType _cursor = GDK_TOP_LEFT_ARROW;
 static gboolean     _show_url = TRUE;
 static gchar       *_filename = NULL;
@@ -153,7 +153,7 @@ static const GActionEntry ACTIONS[] =
   { "edit-area-info", do_edit_selected_shape },
   { "edit-map-info", do_settings_dialog },
   { "grid-settings", do_grid_settings_dialog },
-  { "use-gimp-guides", do_use_gimp_guides_dialog },
+  { "use-clay-guides", do_use_clay_guides_dialog },
   { "create-guides", do_create_guides_dialog },
 
   { "contents", imap_help },
@@ -170,12 +170,12 @@ static const GActionEntry ACTIONS[] =
 };
 
 static void
-gimp_imap_class_init (GimpImapClass *klass)
+clay_imap_class_init (ClayImapClass *klass)
 {
-  GimpPlugInClass *plug_in_class  = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class  = CLAY_PLUG_IN_CLASS (klass);
   GObjectClass    *object_class   = G_OBJECT_CLASS (klass);
 
-  object_class->finalize          = gimp_imap_finalize;
+  object_class->finalize          = clay_imap_finalize;
 
   plug_in_class->query_procedures = imap_query_procedures;
   plug_in_class->create_procedure = imap_create_procedure;
@@ -183,50 +183,50 @@ gimp_imap_class_init (GimpImapClass *klass)
 }
 
 static void
-gimp_imap_init (GimpImap *imap)
+clay_imap_init (ClayImap *imap)
 {
 }
 
 static void
-gimp_imap_finalize (GObject *object)
+clay_imap_finalize (GObject *object)
 {
-  GimpImap *imap = GIMP_IMAP (object);
+  ClayImap *imap = CLAY_IMAP (object);
 
-  G_OBJECT_CLASS (gimp_imap_parent_class)->finalize (object);
+  G_OBJECT_CLASS (clay_imap_parent_class)->finalize (object);
 
   g_clear_object (&imap->builder);
 }
 
 static GList *
-imap_query_procedures (GimpPlugIn *plug_in)
+imap_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-imap_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+imap_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             imap_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Image Map..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Web");
+      clay_procedure_set_menu_label (procedure, _("_Image Map..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Web");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Create a clickable imagemap"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Maurits Rijk",
                                       "Maurits Rijk",
                                       "1998-2005");
@@ -235,19 +235,19 @@ imap_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-imap_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+imap_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpImap *imap;
+  ClayImap *imap;
 
   gegl_init (NULL, NULL);
 
-  imap            = GIMP_IMAP (gimp_procedure_get_plug_in (procedure));
+  imap            = CLAY_IMAP (clay_procedure_get_plug_in (procedure));
 #if GLIB_CHECK_VERSION(2,74,0)
   imap->app       = gtk_application_new (NULL, G_APPLICATION_DEFAULT_FLAGS);
 #else
@@ -255,18 +255,18 @@ imap_run (GimpProcedure        *procedure,
 #endif
   imap->success   = FALSE;
 
-  imap->builder = gtk_builder_new_from_resource ("/org/gimp/imagemap/imap-menu.ui");
+  imap->builder = gtk_builder_new_from_resource ("/org/clay/imagemap/imap-menu.ui");
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
-                   gimp_procedure_get_name (procedure));
+                   clay_procedure_get_name (procedure));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -274,16 +274,16 @@ imap_run (GimpProcedure        *procedure,
       _drawable = drawables[0];
     }
 
-  _image_name   = gimp_image_get_name (image);
-  _image_width  = gimp_image_get_width (image);
-  _image_height = gimp_image_get_height (image);
+  _image_name   = clay_image_get_name (image);
+  _image_width  = clay_image_get_width (image);
+  _image_height = clay_image_get_height (image);
 
-  _map_info.color = gimp_drawable_is_rgb (_drawable);
+  _map_info.color = clay_drawable_is_rgb (_drawable);
   imap->drawable  = _drawable;
 
-  if (run_mode != GIMP_RUN_INTERACTIVE)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_CALLING_ERROR,
+  if (run_mode != CLAY_RUN_INTERACTIVE)
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_CALLING_ERROR,
                                              NULL);
 
   g_signal_connect (imap->app, "activate", G_CALLBACK (on_app_activate), imap);
@@ -291,12 +291,12 @@ imap_run (GimpProcedure        *procedure,
   g_clear_object (&imap->app);
 
   if (! imap->success)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              NULL);
 
-  return gimp_procedure_new_return_values (procedure,
-                                           GIMP_PDB_SUCCESS,
+  return clay_procedure_new_return_values (procedure,
+                                           CLAY_PDB_SUCCESS,
                                            NULL);
 }
 
@@ -811,7 +811,7 @@ do_data_changed_dialog (void (*continue_cb)(gpointer),
 
 #if defined (G_OS_WIN32) || defined (PLATFORM_OSX)
   gtk_widget_realize (dialog);
-  gimp_widget_set_title_bar_theme (dialog);
+  clay_widget_set_title_bar_theme (dialog);
 #endif
 
   if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES)
@@ -861,11 +861,11 @@ do_close (GSimpleAction *action,
 static void
 really_quit (gpointer data)
 {
-  GimpImap *imap = NULL;
+  ClayImap *imap = NULL;
 
   if (data)
     {
-      imap = GIMP_IMAP (data);
+      imap = CLAY_IMAP (data);
       imap->success = TRUE;
     }
 
@@ -1095,7 +1095,7 @@ do_image_size_changed_dialog (void)
 
 #if defined (G_OS_WIN32) || defined (PLATFORM_OSX)
   gtk_widget_realize (dialog);
-  gimp_widget_set_title_bar_theme (dialog);
+  clay_widget_set_title_bar_theme (dialog);
 #endif
 
    if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES)
@@ -1112,7 +1112,7 @@ do_image_size_changed_dialog (void)
 static void
 really_load (gpointer data)
 {
-  GimpImap *imap = GIMP_IMAP (data);
+  ClayImap *imap = CLAY_IMAP (data);
   gchar    *filename = imap->tmp_filename;
   close_current (imap);
 
@@ -1155,7 +1155,7 @@ void
 load (const gchar *filename,
       gpointer     data)
 {
-  GimpImap *imap = GIMP_IMAP (data);
+  ClayImap *imap = CLAY_IMAP (data);
 
   g_strreplace (&imap->tmp_filename, filename);
   check_if_changed (really_load, imap);
@@ -1386,7 +1386,7 @@ imap_help (GSimpleAction *action,
            GVariant      *parameter,
            gpointer       user_data)
 {
-  gimp_standard_help_func ("plug-in-imagemap", NULL);
+  clay_standard_help_func ("plug-in-imagemap", NULL);
 }
 
 void
@@ -1478,11 +1478,11 @@ do_send_to_back (GSimpleAction *action,
 }
 
 void
-do_use_gimp_guides_dialog (GSimpleAction *action,
+do_use_clay_guides_dialog (GSimpleAction *action,
                            GVariant      *parameter,
                            gpointer       user_data)
 {
-  command_execute (gimp_guides_command_new (_shapes, _drawable));
+  command_execute (clay_guides_command_new (_shapes, _drawable));
 }
 
 void
@@ -1506,7 +1506,7 @@ factory_move_down(void)
 }
 
 static gint
-dialog (GimpImap *imap)
+dialog (ClayImap *imap)
 {
   GtkWidget  *hbox;
   GtkWidget  *menubar;
@@ -1515,7 +1515,7 @@ dialog (GimpImap *imap)
   GtkWidget  *main_vbox;
   GtkWidget  *tools;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   set_arrow_func (imap);
 
@@ -1525,12 +1525,12 @@ dialog (GimpImap *imap)
   gtk_window_set_resizable (GTK_WINDOW (imap->dlg), TRUE);
 
   main_set_title (NULL);
-  gimp_help_connect (imap->dlg, NULL, gimp_standard_help_func, PLUG_IN_PROC, NULL, NULL);
+  clay_help_connect (imap->dlg, NULL, clay_standard_help_func, PLUG_IN_PROC, NULL, NULL);
 
   gtk_window_set_position (GTK_WINDOW (imap->dlg), GTK_WIN_POS_MOUSE);
 
   gtk_window_set_application (GTK_WINDOW (_dlg), imap->app);
-  gimp_window_set_transient (GTK_WINDOW (imap->dlg));
+  clay_window_set_transient (GTK_WINDOW (imap->dlg));
 
   g_action_map_add_action_entries (G_ACTION_MAP (imap->app),
                                    ACTIONS, G_N_ELEMENTS (ACTIONS),
@@ -1565,33 +1565,33 @@ dialog (GimpImap *imap)
   toolbar = gtk_toolbar_new ();
 
 #ifdef HAVE_FLEX_BISON
-  add_tool_button (toolbar, "app.open", GIMP_ICON_DOCUMENT_OPEN,
+  add_tool_button (toolbar, "app.open", CLAY_ICON_DOCUMENT_OPEN,
                    _("Open"), _("Open"));
 #endif
-  add_tool_button (toolbar, "app.save", GIMP_ICON_DOCUMENT_SAVE,
+  add_tool_button (toolbar, "app.save", CLAY_ICON_DOCUMENT_SAVE,
                    _("Save"), _("Save"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.preferences", GIMP_ICON_PREFERENCES_SYSTEM,
+  add_tool_button (toolbar, "app.preferences", CLAY_ICON_PREFERENCES_SYSTEM,
                    _("Preferences"), _("Preferences"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.undo", GIMP_ICON_EDIT_UNDO,
+  add_tool_button (toolbar, "app.undo", CLAY_ICON_EDIT_UNDO,
                    _("Undo"), _("Undo"));
-  add_tool_button (toolbar, "app.redo", GIMP_ICON_EDIT_REDO,
+  add_tool_button (toolbar, "app.redo", CLAY_ICON_EDIT_REDO,
                    _("Redo"), _("Redo"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.cut", GIMP_ICON_EDIT_CUT,
+  add_tool_button (toolbar, "app.cut", CLAY_ICON_EDIT_CUT,
                    _("Cut"), _("Cut"));
-  add_tool_button (toolbar, "app.copy", GIMP_ICON_EDIT_COPY,
+  add_tool_button (toolbar, "app.copy", CLAY_ICON_EDIT_COPY,
                    _("Copy"), _("Copy"));
-  add_tool_button (toolbar, "app.paste", GIMP_ICON_EDIT_PASTE,
+  add_tool_button (toolbar, "app.paste", CLAY_ICON_EDIT_PASTE,
                    _("Paste"), _("Paste"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.zoom-in", GIMP_ICON_ZOOM_IN,
+  add_tool_button (toolbar, "app.zoom-in", CLAY_ICON_ZOOM_IN,
                    _("Zoom In"), _("Zoom In"));
-  add_tool_button (toolbar, "app.zoom-out", GIMP_ICON_ZOOM_OUT,
+  add_tool_button (toolbar, "app.zoom-out", CLAY_ICON_ZOOM_OUT,
                    _("Zoom Out"), _("Zoom Out"));
   add_tool_separator (toolbar, FALSE);
-  add_tool_button (toolbar, "app.edit-map-info", GIMP_ICON_DIALOG_INFORMATION,
+  add_tool_button (toolbar, "app.edit-map-info", CLAY_ICON_DIALOG_INFORMATION,
                    _("Edit Map Info"), _("Edit Map Info"));
   add_tool_separator (toolbar, FALSE);
   add_tool_button (toolbar, "app.move-to-front", IMAP_TO_FRONT,
@@ -1599,7 +1599,7 @@ dialog (GimpImap *imap)
   add_tool_button (toolbar, "app.send-to-back", IMAP_TO_BACK,
                    _("Move Area to Bottom"), _("Move Area to Bottom"));
   add_tool_separator (toolbar, FALSE);
-  imap->grid_toggle = add_toggle_button (toolbar, "app.grid", GIMP_ICON_GRID,
+  imap->grid_toggle = add_toggle_button (toolbar, "app.grid", CLAY_ICON_GRID,
                                          _("Grid"), _("Grid"));
   add_tool_separator (toolbar, FALSE);
 
@@ -1614,7 +1614,7 @@ dialog (GimpImap *imap)
 
   /* Pointer tools area */
   tools = gtk_toolbar_new ();
-  add_toggle_button (tools, "app.shape::arrow", GIMP_ICON_CURSOR,
+  add_toggle_button (tools, "app.shape::arrow", CLAY_ICON_CURSOR,
                      _("Arrow"), _("Select Existing Area"));
   add_toggle_button (tools, "app.shape::rectangle", IMAP_RECTANGLE,
                      _("Rectangle"), _("Define Rectangle area"));
@@ -1623,7 +1623,7 @@ dialog (GimpImap *imap)
   add_toggle_button (tools, "app.shape::polygon", IMAP_POLYGON,
                      _("Polygon"), _("Define Polygon area"));
   add_tool_separator (tools, FALSE);
-  add_tool_button (tools, "app.edit-area-info", GIMP_ICON_EDIT,
+  add_tool_button (tools, "app.edit-area-info", CLAY_ICON_EDIT,
                    _("Edit Area Info..."), _("Edit selected area info"));
 
   gtk_orientable_set_orientation (GTK_ORIENTABLE (tools),
@@ -1663,7 +1663,7 @@ dialog (GimpImap *imap)
 
 #if defined (G_OS_WIN32) || defined (PLATFORM_OSX)
   gtk_widget_realize (imap->dlg);
-  gimp_widget_set_title_bar_theme (imap->dlg);
+  clay_widget_set_title_bar_theme (imap->dlg);
 #endif
 
   gtk_widget_set_visible (imap->dlg, TRUE);
@@ -1682,7 +1682,7 @@ static void
 on_app_activate (GApplication *gapp,
                  gpointer      user_data)
 {
-  GimpImap *imap = GIMP_IMAP (user_data);
+  ClayImap *imap = CLAY_IMAP (user_data);
 
   dialog (imap);
 
@@ -1706,7 +1706,7 @@ window_destroy (GtkWidget *widget,
 {
   if (data)
     {
-      GimpImap *imap = GIMP_IMAP (data);
+      ClayImap *imap = CLAY_IMAP (data);
 
       gtk_application_remove_window (imap->app, GTK_WINDOW (imap->dlg));
     }

@@ -29,11 +29,11 @@
 ; get-layers returns (length #(layers))
 ; Calling another script requires a vector of layers (ever since multi-layer feature.)
 ; cdr is always a list i.e. (#(layers)), so we need cadr here.
-(define testDrawables (cadr (gimp-image-get-layers testImage)))
+(define testDrawables (cadr (clay-image-get-layers testImage)))
 (define testDrawable  (vector-ref testDrawables 0))
 
 ;(newline)
-;(display (gimp-image-get-layers testImage)) (newline)
+;(display (clay-image-get-layers testImage)) (newline)
 ;(display testDrawables) (newline)
 
 
@@ -68,7 +68,7 @@
 ; Expect an image with extra layers: "lighter mask" and "darker mask"
 
 
-; back to v3 binding so we don't need to unwrap calls to gimp-foo in this scope.
+; back to v3 binding so we don't need to unwrap calls to clay-foo in this scope.
 (script-fu-use-v3)
 
 
@@ -91,7 +91,7 @@
   ; Default for font in declared ScriptFu formal argument can be a simple string.
   ; Here requires a font object ID, not a string.
   ; FUTURE: enhance binding of font in libscriptfu/scheme-wrapper.c
-  (gimp-font-get-by-name "Sans-serif")  ; font
+  (clay-font-get-by-name "Sans-serif")  ; font
   32            ; size
   "red")        ; A string CSS name suffices to denote a color
 ; expect the same image as when tested interactively, "Hello world" on transparent.
@@ -104,7 +104,7 @@
 
 (test! "script-fu-test-sphere-v3")
 
-; test the binding of all possible types to GIMP
+; test the binding of all possible types to Clay
 
 ; Sphere v3 registers as a filter, but is actually a renderer.
 ; It does not use passed image and drawables.
@@ -119,41 +119,41 @@
 (script-fu-test-sphere-v3
   RUN-NONINTERACTIVE           ; run_mode       see above interprocess
   testImage                    ; unused          Image
-  1                            ; num-drawables   int size of GimpObjectArray
-  testDrawables                ; unused          GimpObjectArray, Scheme vector of int ID
+  1                            ; num-drawables   int size of ClayObjectArray
+  testDrawables                ; unused          ClayObjectArray, Scheme vector of int ID
   ; radius is actually dimension of the square rendered image
   300                          ; radius          int
   45                           ; light           float
   #t                           ; shadow          boolean
   "blue"                       ; bg-color
   "green"                      ; sphere-color
-  (gimp-brush-get-by-name
+  (clay-brush-get-by-name
     "2. Hardness 100")         ; brush
   "foo"                        ; text             string
   "bar \n zed"                 ; multi-text       string
-  (gimp-pattern-get-by-name
+  (clay-pattern-get-by-name
     "Maple Leaves")            ; pattern
-  (gimp-gradient-get-by-name
+  (clay-gradient-get-by-name
     "Deep Sea")                ; gradient
   #f                           ; gradient-reverse  boolean
-  (gimp-font-get-by-name
+  (clay-font-get-by-name
     "Sans-serif")              ; font
   32                           ; font size         int
-  (gimp-palette-get-by-name
+  (clay-palette-get-by-name
     "Gold")                    ; unused-palette
   (string-append
-    gimp-data-directory
+    clay-data-directory
     "/scripts/images/beavis.jpg") ;unused-filename
   ; A script can define symbols for enum constants, but here we haven't.
   ; Such defined symbols are an enum private to the script.
   ; The GUI fakes enum names i.e. choices.
   ; The default choice "Horizontal" of the GUI is not a symbol we can use here.
   0                            ; orientation            script local enum
-  INTERPOLATION-LINEAR         ; unused-interpolation   GIMP enum
+  INTERPOLATION-LINEAR         ; unused-interpolation   Clay enum
   "not used"                   ; unused-dirname
   testImage                    ; unused-image
   testDrawable                 ; unused-layer
-  ; GimpObject passed as int ID, zero suffices when not used.
+  ; ClayObject passed as int ID, zero suffices when not used.
   0                            ; unused-channel
   testDrawable                 ; unused-drawable
   )

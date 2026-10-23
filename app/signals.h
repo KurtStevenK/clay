@@ -17,9 +17,9 @@
 
 #pragma once
 
-#ifndef GIMP_APP_GLUE_COMPILATION
+#ifndef CLAY_APP_GLUE_COMPILATION
 #signal You must not #include "signals.h" from an app/ subdir
 #endif
 
 
-void   gimp_init_signal_handlers (gchar **backtrace_file);
+void   clay_init_signal_handlers (gchar **backtrace_file);

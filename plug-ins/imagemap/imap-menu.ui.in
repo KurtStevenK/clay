@@ -196,8 +196,8 @@
       </section>
       <section>
         <item>
-          <attribute name="label" translatable="yes">Use GIMP Guides...</attribute>
-          <attribute name="action">app.use-gimp-guides</attribute>
+          <attribute name="label" translatable="yes">Use Clay Guides...</attribute>
+          <attribute name="action">app.use-clay-guides</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Create Guides...</attribute>

@@ -20,12 +20,12 @@
 #pragma once
 
 
-GimpPDBStatusType   file_save (Gimp                 *gimp,
-                               GimpImage            *image,
-                               GimpProgress         *progress,
+ClayPDBStatusType   file_save (Clay                 *clay,
+                               ClayImage            *image,
+                               ClayProgress         *progress,
                                GFile                *file,
-                               GimpPlugInProcedure  *file_proc,
-                               GimpRunMode           run_mode,
+                               ClayPlugInProcedure  *file_proc,
+                               ClayRunMode           run_mode,
                                gboolean              change_saved_state,
                                gboolean              export_backward,
                                gboolean              export_forward,

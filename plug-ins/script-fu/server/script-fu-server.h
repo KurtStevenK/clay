@@ -19,8 +19,8 @@
 #define __SCRIPT_FU_SERVER_H__
 
 
-GimpValueArray * script_fu_server_run      (GimpProcedure        *procedure,
-                                            GimpProcedureConfig  *config);
+ClayValueArray * script_fu_server_run      (ClayProcedure        *procedure,
+                                            ClayProcedureConfig  *config);
 
 
 #endif /*  __SCRIPT_FU_SERVER__  */

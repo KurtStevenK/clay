@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -26,8 +26,8 @@
 
 #include <stdlib.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "gfig.h"
 #include "gfig-dobject.h"
@@ -35,7 +35,7 @@
 #include "gfig-spiral.h"
 #include "gfig-dialog.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static void        d_draw_spiral   (GfigObject *obj,
                                     cairo_t    *cr);
@@ -308,7 +308,7 @@ d_spiral_start (GdkPoint *pnt,
 }
 
 void
-d_spiral_end (GimpGfig *gfig,
+d_spiral_end (ClayGfig *gfig,
               GdkPoint *pnt,
               gboolean  shift_down)
 {

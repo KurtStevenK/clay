@@ -25,69 +25,69 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimpunit.h"
+#include "core/clay.h"
+#include "core/clayparamspecs.h"
+#include "core/clayunit.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-unit_new_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+unit_new_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
   gdouble factor;
   gint digits;
   const gchar *symbol;
   const gchar *abbreviation;
-  GimpUnit *unit = NULL;
+  ClayUnit *unit = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
-  factor = g_value_get_double (gimp_value_array_index (args, 1));
-  digits = g_value_get_int (gimp_value_array_index (args, 2));
-  symbol = g_value_get_string (gimp_value_array_index (args, 3));
-  abbreviation = g_value_get_string (gimp_value_array_index (args, 4));
+  name = g_value_get_string (clay_value_array_index (args, 0));
+  factor = g_value_get_double (clay_value_array_index (args, 1));
+  digits = g_value_get_int (clay_value_array_index (args, 2));
+  symbol = g_value_get_string (clay_value_array_index (args, 3));
+  abbreviation = g_value_get_string (clay_value_array_index (args, 4));
 
   if (success)
     {
-      unit = _gimp_unit_new (gimp, name, factor, digits,
+      unit = _clay_unit_new (clay, name, factor, digits,
                              symbol, abbreviation);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), unit);
+    g_value_set_object (clay_value_array_index (return_vals, 1), unit);
 
   return return_vals;
 }
 
-static GimpValueArray *
-unit_get_data_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+unit_get_data_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint unit_id;
   gchar *name = NULL;
   gdouble factor = 0.0;
@@ -95,271 +95,271 @@ unit_get_data_invoker (GimpProcedure         *procedure,
   gchar *symbol = NULL;
   gchar *abbreviation = NULL;
 
-  unit_id = g_value_get_int (gimp_value_array_index (args, 0));
+  unit_id = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
       if (unit_id >= 0)
         {
-          GimpUnit *unit = gimp_unit_get_by_id (unit_id);
+          ClayUnit *unit = clay_unit_get_by_id (unit_id);
 
           if (unit != NULL)
             {
-              name         = g_strdup (gimp_unit_get_name (unit));
-              factor       = gimp_unit_get_factor (unit);
-              digits       = gimp_unit_get_digits (unit);
-              symbol       = g_strdup (gimp_unit_get_symbol (unit));
-              abbreviation = g_strdup (gimp_unit_get_abbreviation (unit));
+              name         = g_strdup (clay_unit_get_name (unit));
+              factor       = clay_unit_get_factor (unit);
+              digits       = clay_unit_get_digits (unit);
+              symbol       = g_strdup (clay_unit_get_symbol (unit));
+              abbreviation = g_strdup (clay_unit_get_abbreviation (unit));
             }
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_take_string (gimp_value_array_index (return_vals, 1), name);
-      g_value_set_double (gimp_value_array_index (return_vals, 2), factor);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), digits);
-      g_value_take_string (gimp_value_array_index (return_vals, 4), symbol);
-      g_value_take_string (gimp_value_array_index (return_vals, 5), abbreviation);
+      g_value_take_string (clay_value_array_index (return_vals, 1), name);
+      g_value_set_double (clay_value_array_index (return_vals, 2), factor);
+      g_value_set_int (clay_value_array_index (return_vals, 3), digits);
+      g_value_take_string (clay_value_array_index (return_vals, 4), symbol);
+      g_value_take_string (clay_value_array_index (return_vals, 5), abbreviation);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-unit_get_deletion_flag_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+unit_get_deletion_flag_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpUnit *unit;
+  ClayValueArray *return_vals;
+  ClayUnit *unit;
   gboolean deletion_flag = FALSE;
 
-  unit = g_value_get_object (gimp_value_array_index (args, 0));
+  unit = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      deletion_flag = gimp_unit_get_deletion_flag (unit);
+      deletion_flag = clay_unit_get_deletion_flag (unit);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), deletion_flag);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), deletion_flag);
 
   return return_vals;
 }
 
-static GimpValueArray *
-unit_set_deletion_flag_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+unit_set_deletion_flag_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpUnit *unit;
+  ClayUnit *unit;
   gboolean deletion_flag;
 
-  unit = g_value_get_object (gimp_value_array_index (args, 0));
-  deletion_flag = g_value_get_boolean (gimp_value_array_index (args, 1));
+  unit = g_value_get_object (clay_value_array_index (args, 0));
+  deletion_flag = g_value_get_boolean (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_unit_set_deletion_flag (unit, deletion_flag);
+      clay_unit_set_deletion_flag (unit, deletion_flag);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_unit_procs (GimpPDB *pdb)
+register_unit_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-unit-new
+   * clay-unit-new
    */
-  procedure = gimp_procedure_new (unit_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-unit-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (unit_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-unit-new");
+  clay_procedure_set_static_help (procedure,
                                   "Creates a new unit.",
-                                  "This procedure creates a new unit and returns it. Note that the new unit will have it's deletion flag set to TRUE, so you will have to set it to FALSE with 'gimp-unit-set-deletion-flag' to make it persistent.",
+                                  "This procedure creates a new unit and returns it. Note that the new unit will have it's deletion flag set to TRUE, so you will have to set it to FALSE with 'clay-unit-set-deletion-flag' to make it persistent.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The new unit's name",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("factor",
                                                     "factor",
                                                     "The new unit's factor",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("digits",
                                                  "digits",
                                                  "The new unit's digits",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("symbol",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("symbol",
                                                        "symbol",
                                                        "The new unit's symbol",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("abbreviation",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("abbreviation",
                                                        "abbreviation",
                                                        "The new unit's abbreviation",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_unit ("unit",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_unit ("unit",
                                                          "unit",
                                                          "The new unit",
                                                          FALSE,
                                                          FALSE,
-                                                         gimp_unit_inch (),
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         clay_unit_inch (),
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-unit-get-data
+   * clay-unit-get-data
    */
-  procedure = gimp_procedure_new (unit_get_data_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-unit-get-data");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (unit_get_data_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-unit-get-data");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the various data pertaining to a given unit ID.",
                                   "This procedure returns all properties making up an unit. It is only meant for internal usage to query non built-in units and it is a programming error to use it directly, in particular for any of the built-in units.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("unit-id",
                                                  "unit id",
                                                  "The unit's integer ID",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The unit's name",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("factor",
                                                         "factor",
                                                         "The unit's factor",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("digits",
                                                      "digits",
                                                      "The unit's number of digits",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("symbol",
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("symbol",
                                                            "symbol",
                                                            "The unit's symbol",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("abbreviation",
+                                                           CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("abbreviation",
                                                            "abbreviation",
                                                            "The unit's abbreviation",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-unit-get-deletion-flag
+   * clay-unit-get-deletion-flag
    */
-  procedure = gimp_procedure_new (unit_get_deletion_flag_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-unit-get-deletion-flag");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (unit_get_deletion_flag_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-unit-get-deletion-flag");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the deletion flag of the unit.",
-                                  "This procedure returns the deletion flag of the unit. If this value is TRUE the unit's definition will not be saved in the user's unitrc file on gimp exit.",
+                                  "This procedure returns the deletion flag of the unit. If this value is TRUE the unit's definition will not be saved in the user's unitrc file on clay exit.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_unit ("unit",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_unit ("unit",
                                                      "unit",
                                                      "The unit",
                                                      FALSE,
                                                      FALSE,
-                                                     gimp_unit_inch (),
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     clay_unit_inch (),
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("deletion-flag",
                                                          "deletion flag",
                                                          "The unit's deletion flag",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-unit-set-deletion-flag
+   * clay-unit-set-deletion-flag
    */
-  procedure = gimp_procedure_new (unit_set_deletion_flag_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-unit-set-deletion-flag");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (unit_set_deletion_flag_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-unit-set-deletion-flag");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the deletion flag of a unit.",
-                                  "This procedure sets the unit's deletion flag. If the deletion flag of a unit is TRUE on gimp exit, this unit's definition will not be saved in the user's unitrc.",
+                                  "This procedure sets the unit's deletion flag. If the deletion flag of a unit is TRUE on clay exit, this unit's definition will not be saved in the user's unitrc.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_unit ("unit",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_unit ("unit",
                                                      "unit",
                                                      "The unit",
                                                      FALSE,
                                                      FALSE,
-                                                     gimp_unit_inch (),
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                     clay_unit_inch (),
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("deletion-flag",
                                                      "deletion flag",
                                                      "The new deletion flag of the unit",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

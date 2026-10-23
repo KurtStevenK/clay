@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -22,11 +22,11 @@
 #define __MISC_H__
 
 
-void  decode_ycocg          (GimpDrawable *drawable);
+void  decode_ycocg          (ClayDrawable *drawable);
 
-void  decode_ycocg_scaled   (GimpDrawable *drawable);
+void  decode_ycocg_scaled   (ClayDrawable *drawable);
 
-void  decode_alpha_exponent (GimpDrawable *drawable);
+void  decode_alpha_exponent (ClayDrawable *drawable);
 
 void  encode_ycocg          (guchar *dst,
                              gint    r,

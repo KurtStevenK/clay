@@ -32,7 +32,7 @@ method.
 
 The arguments are kept as simple as necessary for the basic case. All
 vector attributes, however, can be modified with the appropriate
-`gimp_vector_layer_set_*()` procedures.
+`clay_vector_layer_set_*()` procedures.
 HELP
 
     &alxsa_pdb_misc('2025', '3.2');
@@ -46,7 +46,7 @@ HELP
 
     @outargs = (
         { name => 'layer', type => 'vector_layer',
-          desc => 'The new vector layer. The object belongs to libgimp and you should not free it.' }
+          desc => 'The new vector layer. The object belongs to libclay and you should not free it.' }
     );
 
     %invoke = (
@@ -54,7 +54,7 @@ HELP
 {
   if (path == NULL)
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                    _("Failed to create vector layer"));
 
       success = FALSE;
@@ -62,11 +62,11 @@ HELP
 
   if (success)
     {
-      layer = GIMP_VECTOR_LAYER (gimp_vector_layer_new (image, path, context));
+      layer = CLAY_VECTOR_LAYER (clay_vector_layer_new (image, path, context));
 
       if (! layer)
         {
-          g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_INVALID_ARGUMENT,
+          g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_INVALID_ARGUMENT,
                        _("Failed to create vector layer"));
 
           success = FALSE;
@@ -94,7 +94,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_vector_layer_refresh (layer);
+  clay_vector_layer_refresh (layer);
 }
 CODE
     );
@@ -122,7 +122,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  path = gimp_vector_layer_get_path (layer);
+  path = clay_vector_layer_get_path (layer);
 
   if (! path)
     success = FALSE;
@@ -153,9 +153,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -187,9 +187,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -212,7 +212,7 @@ This procedure returns the color of the stroke in a vector layer.
 
 
 Note that there won't be both a stroke color and pattern, so either this
-procedure or [method@Gimp.VectorLayer.get_stroke_pattern] will return
+procedure or [method@Clay.VectorLayer.get_stroke_pattern] will return
 %NULL at any given time.
 HELP
 
@@ -231,19 +231,19 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
     {
-      GimpCustomStyle style = gimp_fill_options_get_custom_style (GIMP_FILL_OPTIONS (options->stroke_options));
+      ClayCustomStyle style = clay_fill_options_get_custom_style (CLAY_FILL_OPTIONS (options->stroke_options));
 
-      if (style == GIMP_CUSTOM_STYLE_SOLID_COLOR ||
-          ! gimp_context_get_pattern (GIMP_CONTEXT (options->stroke_options)))
-        color = gegl_color_duplicate (gimp_context_get_foreground (GIMP_CONTEXT (options->stroke_options)));
+      if (style == CLAY_CUSTOM_STYLE_SOLID_COLOR ||
+          ! clay_context_get_pattern (CLAY_CONTEXT (options->stroke_options)))
+        color = gegl_color_duplicate (clay_context_get_foreground (CLAY_CONTEXT (options->stroke_options)));
       else
         success = FALSE;
     }
@@ -260,7 +260,7 @@ This procedure returns the pattern of the fill in a vector layer.
 
 
 Note that there won't be both a stroke color and pattern, so either this
-procedure or [method@Gimp.VectorLayer.get_stroke_color] will return
+procedure or [method@Clay.VectorLayer.get_stroke_color] will return
 %NULL at any given time.
 HELP
 
@@ -279,18 +279,18 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
     {
-      GimpCustomStyle style = gimp_fill_options_get_custom_style (GIMP_FILL_OPTIONS (options->stroke_options));
+      ClayCustomStyle style = clay_fill_options_get_custom_style (CLAY_FILL_OPTIONS (options->stroke_options));
 
-      if (style == GIMP_CUSTOM_STYLE_PATTERN)
-        pattern = gimp_context_get_pattern (GIMP_CONTEXT (options->stroke_options));
+      if (style == CLAY_CUSTOM_STYLE_PATTERN)
+        pattern = clay_context_get_pattern (CLAY_CONTEXT (options->stroke_options));
 
       if (pattern == NULL)
         success = FALSE;
@@ -322,14 +322,14 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    width = gimp_stroke_options_get_width (options->stroke_options);
+    width = clay_stroke_options_get_width (options->stroke_options);
 }
 CODE
     );
@@ -357,14 +357,14 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    unit = gimp_stroke_options_get_unit (options->stroke_options);
+    unit = clay_stroke_options_get_unit (options->stroke_options);
 }
 CODE
     );
@@ -385,21 +385,21 @@ HELP
     );
 
     @outargs = (
-        { name => 'cap_style', type => 'enum GimpCapStyle',
+        { name => 'cap_style', type => 'enum ClayCapStyle',
           desc => 'The stroke cap style.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    cap_style = gimp_stroke_options_get_cap_style (options->stroke_options);
+    cap_style = clay_stroke_options_get_cap_style (options->stroke_options);
 }
 CODE
     );
@@ -420,21 +420,21 @@ HELP
     );
 
     @outargs = (
-        { name => 'join_style', type => 'enum GimpJoinStyle',
+        { name => 'join_style', type => 'enum ClayJoinStyle',
           desc => 'The stroke join style.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    join_style = gimp_stroke_options_get_join_style (options->stroke_options);
+    join_style = clay_stroke_options_get_join_style (options->stroke_options);
 }
 CODE
     );
@@ -462,14 +462,14 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    miter = gimp_stroke_options_get_miter_limit (options->stroke_options);
+    miter = clay_stroke_options_get_miter_limit (options->stroke_options);
 }
 CODE
     );
@@ -497,14 +497,14 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    dash_offset = gimp_stroke_options_get_dash_offset (options->stroke_options);
+    dash_offset = clay_stroke_options_get_dash_offset (options->stroke_options);
 }
 CODE
     );
@@ -533,18 +533,18 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
     {
       GArray *pattern =
-        gimp_stroke_options_get_dash_info (options->stroke_options);
+        clay_stroke_options_get_dash_info (options->stroke_options);
 
-      dashes = gimp_dash_pattern_to_double_array (pattern, &num_dashes);
+      dashes = clay_dash_pattern_to_double_array (pattern, &num_dashes);
     }
 }
 CODE
@@ -570,14 +570,14 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    gimp_context_set_foreground (GIMP_CONTEXT (options->stroke_options),
+    clay_context_set_foreground (CLAY_CONTEXT (options->stroke_options),
                                  color);
 }
 CODE
@@ -603,9 +603,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -637,9 +637,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -664,16 +664,16 @@ HELP
     @inargs = (
         { name => 'layer', type => 'vector_layer',
           desc => 'The vector layer.' },
-        { name => 'cap_style', type => 'enum GimpCapStyle',
+        { name => 'cap_style', type => 'enum ClayCapStyle',
           desc => 'The stroke cap style.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -698,16 +698,16 @@ HELP
     @inargs = (
         { name => 'layer', type => 'vector_layer',
           desc => 'The vector layer.' },
-        { name => 'join_style', type => 'enum GimpJoinStyle',
+        { name => 'join_style', type => 'enum ClayJoinStyle',
           desc => 'The stroke join style.' }
     );
 
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -739,9 +739,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -773,9 +773,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -808,10 +808,10 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
   GArray                 *pattern = NULL;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -819,15 +819,15 @@ HELP
     {
       if (num_dashes > 0)
         {
-          pattern = gimp_dash_pattern_from_double_array (num_dashes, dashes);
+          pattern = clay_dash_pattern_from_double_array (num_dashes, dashes);
 
           if (! pattern)
             success = FALSE;
         }
 
       if (success)
-        gimp_stroke_options_take_dash_pattern (options->stroke_options,
-                                               GIMP_DASH_CUSTOM, pattern);
+        clay_stroke_options_take_dash_pattern (options->stroke_options,
+                                               CLAY_DASH_CUSTOM, pattern);
     }
 }
 CODE
@@ -856,9 +856,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -890,9 +890,9 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
@@ -913,7 +913,7 @@ This procedure returns the color of the fill in a vector layer.
 
 
 Note that there won't be both a fill color and pattern, so either this
-procedure or [method@Gimp.VectorLayer.get_fill_pattern] will return
+procedure or [method@Clay.VectorLayer.get_fill_pattern] will return
 %NULL at any given time.
 HELP
 
@@ -932,20 +932,20 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
     {
-      GimpCustomStyle style = gimp_fill_options_get_custom_style (options->fill_options);
+      ClayCustomStyle style = clay_fill_options_get_custom_style (options->fill_options);
 
-      if (style == GIMP_CUSTOM_STYLE_SOLID_COLOR ||
-          ! gimp_context_get_pattern (GIMP_CONTEXT (options->fill_options)))
+      if (style == CLAY_CUSTOM_STYLE_SOLID_COLOR ||
+          ! clay_context_get_pattern (CLAY_CONTEXT (options->fill_options)))
         color =
-          gegl_color_duplicate (gimp_context_get_foreground (GIMP_CONTEXT (options->fill_options)));
+          gegl_color_duplicate (clay_context_get_foreground (CLAY_CONTEXT (options->fill_options)));
       else
         success = FALSE;
     }
@@ -962,7 +962,7 @@ This procedure returns the pattern of the fill in a vector layer.
 
 
 Note that there won't be both a fill color and pattern, so either this
-procedure or [method@Gimp.VectorLayer.get_fill_color] will return
+procedure or [method@Clay.VectorLayer.get_fill_color] will return
 %NULL at any given time.
 HELP
 
@@ -981,18 +981,18 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
     {
-      GimpCustomStyle style = gimp_fill_options_get_custom_style (options->fill_options);
+      ClayCustomStyle style = clay_fill_options_get_custom_style (options->fill_options);
 
-      if (style == GIMP_CUSTOM_STYLE_PATTERN)
-        pattern = gimp_context_get_pattern (GIMP_CONTEXT (options->fill_options));
+      if (style == CLAY_CUSTOM_STYLE_PATTERN)
+        pattern = clay_context_get_pattern (CLAY_CONTEXT (options->fill_options));
 
       if (pattern == NULL)
         success = FALSE;
@@ -1021,30 +1021,30 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  GimpVectorLayerOptions *options;
+  ClayVectorLayerOptions *options;
 
-  options = gimp_vector_layer_get_options (layer);
+  options = clay_vector_layer_get_options (layer);
   if (! options)
     success = FALSE;
 
   if (success)
-    gimp_context_set_foreground (GIMP_CONTEXT (options->fill_options),
+    clay_context_set_foreground (CLAY_CONTEXT (options->fill_options),
                                  color);
 }
 CODE
     );
 }
 
-@headers = qw("libgimpbase/gimpbase.h"
-              "core/gimpcontext.h"
-              "core/gimpdashpattern.h"
-              "core/gimprasterizable.h"
-              "core/gimpstrokeoptions.h"
-              "path/gimpvectorlayer.h"
-              "path/gimpvectorlayeroptions.h"
-              "gimppdb-utils.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+@headers = qw("libclaybase/claybase.h"
+              "core/claycontext.h"
+              "core/claydashpattern.h"
+              "core/clayrasterizable.h"
+              "core/claystrokeoptions.h"
+              "path/clayvectorlayer.h"
+              "path/clayvectorlayeroptions.h"
+              "claypdb-utils.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(vector_layer_new
             vector_layer_refresh
@@ -1077,7 +1077,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Vector layer procedures';
-$doc_title = 'gimpvectorlayer';
+$doc_title = 'clayvectorlayer';
 $doc_short_desc = 'Functions for querying and manipulating vector layers.';
 $doc_long_desc = 'Functions for querying and manipulating vector layers.';
 

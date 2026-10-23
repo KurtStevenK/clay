@@ -26,40 +26,40 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpviewabledialog.h"
-#include "widgets/gimpwidgets-constructors.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayviewabledialog.h"
+#include "widgets/claywidgets-constructors.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "color-profile-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct
 {
   ColorProfileDialogType    dialog_type;
-  GimpImage                *image;
-  GimpColorProfile         *current_profile;
-  GimpColorProfile         *default_profile;
-  GimpColorRenderingIntent  intent;
+  ClayImage                *image;
+  ClayColorProfile         *current_profile;
+  ClayColorProfile         *default_profile;
+  ClayColorRenderingIntent  intent;
   gboolean                  bpc;
-  GimpColorProfileCallback  callback;
+  ClayColorProfileCallback  callback;
   gpointer                  user_data;
 
-  GimpColorConfig          *config;
+  ClayColorConfig          *config;
   GtkWidget                *dialog;
   GtkWidget                *main_vbox;
   GtkWidget                *combo;
@@ -81,14 +81,14 @@ static void        color_profile_dest_changed    (GtkWidget     *combo,
 
 GtkWidget *
 color_profile_dialog_new (ColorProfileDialogType    dialog_type,
-                          GimpImage                *image,
-                          GimpContext              *context,
+                          ClayImage                *image,
+                          ClayContext              *context,
                           GtkWidget                *parent,
-                          GimpColorProfile         *current_profile,
-                          GimpColorProfile         *default_profile,
-                          GimpColorRenderingIntent  intent,
+                          ClayColorProfile         *current_profile,
+                          ClayColorProfile         *default_profile,
+                          ClayColorRenderingIntent  intent,
                           gboolean                  bpc,
-                          GimpColorProfileCallback  callback,
+                          ClayColorProfileCallback  callback,
                           gpointer                  user_data)
 {
   ProfileDialog *private;
@@ -99,13 +99,13 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
   GtkWidget     *label;
   const gchar   *dest_label;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (current_profile == NULL ||
-                        GIMP_IS_COLOR_PROFILE (current_profile), NULL);
+                        CLAY_IS_COLOR_PROFILE (current_profile), NULL);
   g_return_val_if_fail (default_profile == NULL ||
-                        GIMP_IS_COLOR_PROFILE (default_profile), NULL);
+                        CLAY_IS_COLOR_PROFILE (default_profile), NULL);
   g_return_val_if_fail (callback != NULL, NULL);
 
   private = g_slice_new0 (ProfileDialog);
@@ -118,20 +118,20 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
   private->bpc             = bpc;
   private->callback        = callback;
   private->user_data       = user_data;
-  private->config          = image->gimp->config->color_management;
+  private->config          = image->clay->config->color_management;
 
   switch (dialog_type)
     {
     case COLOR_PROFILE_DIALOG_ASSIGN_PROFILE:
       dialog =
-        gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+        clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                   _("Assign ICC Color Profile"),
-                                  "gimp-image-color-profile-assign",
+                                  "clay-image-color-profile-assign",
                                   NULL,
                                   _("Assign a color profile to the image"),
                                   parent,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_IMAGE_COLOR_PROFILE_ASSIGN,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_IMAGE_COLOR_PROFILE_ASSIGN,
 
                                   _("_Cancel"), GTK_RESPONSE_CANCEL,
                                   _("_Assign"), GTK_RESPONSE_OK,
@@ -142,14 +142,14 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
 
     case COLOR_PROFILE_DIALOG_CONVERT_TO_PROFILE:
       dialog =
-        gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+        clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                   _("Convert to ICC Color Profile"),
-                                  "gimp-image-color-profile-convert",
+                                  "clay-image-color-profile-convert",
                                   NULL,
                                   _("Convert the image to a color profile"),
                                   parent,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_IMAGE_COLOR_PROFILE_CONVERT,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_IMAGE_COLOR_PROFILE_CONVERT,
 
                                   _("_Cancel"),  GTK_RESPONSE_CANCEL,
                                   _("C_onvert"), GTK_RESPONSE_OK,
@@ -160,14 +160,14 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
 
     case COLOR_PROFILE_DIALOG_CONVERT_TO_RGB:
       dialog =
-        gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+        clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                   _("RGB Conversion"),
-                                  "gimp-image-convert-rgb",
-                                  GIMP_ICON_CONVERT_RGB,
+                                  "clay-image-convert-rgb",
+                                  CLAY_ICON_CONVERT_RGB,
                                   _("Convert Image to RGB"),
                                   parent,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_IMAGE_CONVERT_RGB,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_IMAGE_CONVERT_RGB,
 
                                   _("_Cancel"),  GTK_RESPONSE_CANCEL,
                                   _("C_onvert"), GTK_RESPONSE_OK,
@@ -178,14 +178,14 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
 
     case COLOR_PROFILE_DIALOG_CONVERT_TO_GRAY:
       dialog =
-        gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+        clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                   _("Grayscale Conversion"),
-                                  "gimp-image-convert-gray",
-                                  GIMP_ICON_CONVERT_GRAYSCALE,
+                                  "clay-image-convert-gray",
+                                  CLAY_ICON_CONVERT_GRAYSCALE,
                                   _("Convert Image to Grayscale"),
                                   parent,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_IMAGE_CONVERT_GRAYSCALE,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_IMAGE_CONVERT_GRAYSCALE,
 
                                   _("_Cancel"),  GTK_RESPONSE_CANCEL,
                                   _("C_onvert"), GTK_RESPONSE_OK,
@@ -196,14 +196,14 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
 
     case COLOR_PROFILE_DIALOG_SELECT_SOFTPROOF_PROFILE:
       dialog =
-        gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+        clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                                   _("Soft-Proof Profile"),
-                                  "gimp-select-softproof-profile",
-                                  GIMP_ICON_DOCUMENT_PRINT,
+                                  "clay-select-softproof-profile",
+                                  CLAY_ICON_DOCUMENT_PRINT,
                                   _("Select Soft-Proof Profile"),
                                   parent,
-                                  gimp_standard_help_func,
-                                  GIMP_HELP_VIEW_COLOR_MANAGEMENT,
+                                  clay_standard_help_func,
+                                  CLAY_HELP_VIEW_COLOR_MANAGEMENT,
 
                                   _("_Cancel"), GTK_RESPONSE_CANCEL,
                                   _("_Select"), GTK_RESPONSE_OK,
@@ -218,7 +218,7 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
 
   private->dialog = dialog;
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -238,15 +238,15 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
                       private->main_vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (private->main_vbox, TRUE);
 
-  frame = gimp_frame_new (_("Current Color Profile"));
+  frame = clay_frame_new (_("Current Color Profile"));
   gtk_box_pack_start (GTK_BOX (private->main_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
-  label = gimp_color_profile_label_new (private->current_profile);
+  label = clay_color_profile_label_new (private->current_profile);
   gtk_container_add (GTK_CONTAINER (frame), label);
   gtk_widget_set_visible (label, TRUE);
 
-  frame = gimp_frame_new (dest_label);
+  frame = clay_frame_new (dest_label);
   gtk_box_pack_start (GTK_BOX (private->main_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -262,7 +262,7 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
   gtk_box_pack_start (GTK_BOX (vbox), expander, FALSE, FALSE, 0);
   gtk_widget_set_visible (expander, TRUE);
 
-  private->dest_view = gimp_color_profile_view_new ();
+  private->dest_view = clay_color_profile_view_new ();
   gtk_container_add (GTK_CONTAINER (expander), private->dest_view);
   gtk_widget_set_visible (private->dest_view, TRUE);
 
@@ -291,13 +291,13 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
       gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
       gtk_widget_set_visible (label, TRUE);
 
-      combo = gimp_enum_combo_box_new (GIMP_TYPE_COLOR_RENDERING_INTENT);
+      combo = clay_enum_combo_box_new (CLAY_TYPE_COLOR_RENDERING_INTENT);
       gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
       gtk_widget_set_visible (combo, TRUE);
 
-      gimp_int_combo_box_connect (GIMP_INT_COMBO_BOX (combo),
+      clay_int_combo_box_connect (CLAY_INT_COMBO_BOX (combo),
                                   private->intent,
-                                  G_CALLBACK (gimp_int_combo_box_get_active),
+                                  G_CALLBACK (clay_int_combo_box_get_active),
                                   &private->intent, NULL);
 
       gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo);
@@ -309,7 +309,7 @@ color_profile_dialog_new (ColorProfileDialogType    dialog_type,
       gtk_widget_set_visible (toggle, TRUE);
 
       g_signal_connect (toggle, "toggled",
-                        G_CALLBACK (gimp_toggle_button_update),
+                        G_CALLBACK (clay_toggle_button_update),
                         &private->bpc);
     }
 
@@ -333,69 +333,69 @@ color_profile_combo_box_new (ProfileDialog *private)
   GtkWidget    *chooser;
   GFile        *history;
 
-  history = gimp_directory_file ("profilerc", NULL);
-  store = gimp_color_profile_store_new (history);
+  history = clay_directory_file ("profilerc", NULL);
+  store = clay_color_profile_store_new (history);
   g_object_unref (history);
 
   if (private->default_profile)
     {
-      GimpImageBaseType  base_type;
-      GimpPrecision      precision;
+      ClayImageBaseType  base_type;
+      ClayPrecision      precision;
       GError            *error = NULL;
 
       switch (private->dialog_type)
         {
         case COLOR_PROFILE_DIALOG_ASSIGN_PROFILE:
         case COLOR_PROFILE_DIALOG_CONVERT_TO_PROFILE:
-          base_type = gimp_image_get_base_type (private->image);
+          base_type = clay_image_get_base_type (private->image);
           break;
 
         case COLOR_PROFILE_DIALOG_CONVERT_TO_RGB:
-          base_type = GIMP_RGB;
+          base_type = CLAY_RGB;
           break;
 
         case COLOR_PROFILE_DIALOG_CONVERT_TO_GRAY:
-          base_type = GIMP_GRAY;
+          base_type = CLAY_GRAY;
           break;
 
         default:
           g_return_val_if_reached (NULL);
         }
 
-      precision = gimp_image_get_precision (private->image);
+      precision = clay_image_get_precision (private->image);
 
-      if (! gimp_color_profile_store_add_defaults (GIMP_COLOR_PROFILE_STORE (store),
+      if (! clay_color_profile_store_add_defaults (CLAY_COLOR_PROFILE_STORE (store),
                                                    private->config,
                                                    base_type,
                                                    precision,
                                                    &error))
         {
-          gimp_message (private->image->gimp, G_OBJECT (private->dialog),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (private->image->clay, G_OBJECT (private->dialog),
+                        CLAY_MESSAGE_ERROR,
                         "%s", error->message);
           g_clear_error (&error);
         }
     }
   else
     {
-      gimp_color_profile_store_add_file (GIMP_COLOR_PROFILE_STORE (store),
+      clay_color_profile_store_add_file (CLAY_COLOR_PROFILE_STORE (store),
                                          NULL, NULL);
     }
 
   chooser =
-    gimp_color_profile_chooser_dialog_new (_("Select Destination Profile"),
+    clay_color_profile_chooser_dialog_new (_("Select Destination Profile"),
                                            NULL,
                                            GTK_FILE_CHOOSER_ACTION_OPEN);
 
-  gimp_color_profile_chooser_dialog_connect_path (chooser,
-                                                  G_OBJECT (private->image->gimp->config),
+  clay_color_profile_chooser_dialog_connect_path (chooser,
+                                                  G_OBJECT (private->image->clay->config),
                                                   "color-profile-path");
 
-  combo = gimp_color_profile_combo_box_new_with_model (chooser,
+  combo = clay_color_profile_combo_box_new_with_model (chooser,
                                                        GTK_TREE_MODEL (store));
   g_object_unref (store);
 
-  gimp_color_profile_combo_box_set_active_file (GIMP_COLOR_PROFILE_COMBO_BOX (combo),
+  clay_color_profile_combo_box_set_active_file (CLAY_COLOR_PROFILE_COMBO_BOX (combo),
                                                 NULL, NULL);
 
   return combo;
@@ -408,22 +408,22 @@ color_profile_dialog_response (GtkWidget     *dialog,
 {
   if (response_id == GTK_RESPONSE_OK)
     {
-      GimpColorProfile *profile = NULL;
+      ClayColorProfile *profile = NULL;
       GFile            *file;
 
-      file = gimp_color_profile_combo_box_get_active_file (GIMP_COLOR_PROFILE_COMBO_BOX (private->combo));
+      file = clay_color_profile_combo_box_get_active_file (CLAY_COLOR_PROFILE_COMBO_BOX (private->combo));
 
       if (file)
         {
           GError *error = NULL;
 
-          profile = gimp_color_profile_new_from_file (file, &error);
+          profile = clay_color_profile_new_from_file (file, &error);
           g_object_unref (file);
 
           if (! profile)
             {
-              gimp_message (private->image->gimp, G_OBJECT (dialog),
-                            GIMP_MESSAGE_ERROR,
+              clay_message (private->image->clay, G_OBJECT (dialog),
+                            CLAY_MESSAGE_ERROR,
                             "%s", error->message);
               g_clear_error (&error);
 
@@ -456,21 +456,21 @@ static void
 color_profile_dest_changed (GtkWidget     *combo,
                             ProfileDialog *private)
 {
-  GimpColorProfile *dest_profile = NULL;
+  ClayColorProfile *dest_profile = NULL;
   GFile            *file;
 
-  file = gimp_color_profile_combo_box_get_active_file (GIMP_COLOR_PROFILE_COMBO_BOX (combo));
+  file = clay_color_profile_combo_box_get_active_file (CLAY_COLOR_PROFILE_COMBO_BOX (combo));
 
   if (file)
     {
       GError *error = NULL;
 
-      dest_profile = gimp_color_profile_new_from_file (file, &error);
+      dest_profile = clay_color_profile_new_from_file (file, &error);
       g_object_unref (file);
 
       if (! dest_profile)
         {
-          gimp_color_profile_view_set_error (GIMP_COLOR_PROFILE_VIEW (private->dest_view),
+          clay_color_profile_view_set_error (CLAY_COLOR_PROFILE_VIEW (private->dest_view),
                                              error->message);
           g_clear_error (&error);
         }
@@ -481,13 +481,13 @@ color_profile_dest_changed (GtkWidget     *combo,
     }
   else
     {
-      gimp_color_profile_view_set_error (GIMP_COLOR_PROFILE_VIEW (private->dest_view),
+      clay_color_profile_view_set_error (CLAY_COLOR_PROFILE_VIEW (private->dest_view),
                                          C_("profile", "None"));
     }
 
   if (dest_profile)
     {
-      gimp_color_profile_view_set_profile (GIMP_COLOR_PROFILE_VIEW (private->dest_view),
+      clay_color_profile_view_set_profile (CLAY_COLOR_PROFILE_VIEW (private->dest_view),
                                            dest_profile);
       g_object_unref (dest_profile);
     }

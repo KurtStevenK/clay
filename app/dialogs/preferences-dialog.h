@@ -18,4 +18,4 @@
 #pragma once
 
 
-GtkWidget * preferences_dialog_create (Gimp *gimp);
+GtkWidget * preferences_dialog_create (Clay *clay);

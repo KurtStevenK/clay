@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Turn the bundle made by 2_bundle-gimp-uni_base.py (meson -Ddmg=true
+# Turn the bundle made by 2_bundle-clay-uni_base.py (meson -Ddmg=true
 # -Drelocatable-bundle=yes, then 'meson install') into a signed, notarized
-# Clay DMG on a developer Mac. Unlike 3_dist-gimp-apple.sh this does not
+# Clay DMG on a developer Mac. Unlike 3_dist-clay-apple.sh this does not
 # need GitLab CI: it signs with the Developer ID in the login keychain and
 # reads notarization credentials from .env.local.
 #
@@ -41,8 +41,8 @@ config_value()
 {
   sed -n "s/^#define $1 \"\(.*\)\"/\1/p" "$BUILD_DIR/config.h"
 }
-GIMP_VERSION=$(config_value GIMP_VERSION)
-GIMP_APP_VERSION=$(config_value GIMP_APP_VERSION)
+CLAY_VERSION=$(config_value CLAY_VERSION)
+CLAY_APP_VERSION=$(config_value CLAY_APP_VERSION)
 
 if [ -n "${CODESIGN_IDENTITY:-}" ]; then
   SIGN_ID="$CODESIGN_IDENTITY"
@@ -53,7 +53,7 @@ if [ -z "$SIGN_ID" ]; then
   printf '\033[31m(ERROR)\033[0m: No "Developer ID Application" identity in the keychain\n'
   exit 1
 fi
-printf "(INFO): Clay $GIMP_VERSION | bundle: $APP | identity: $SIGN_ID\n"
+printf "(INFO): Clay $CLAY_VERSION | bundle: $APP | identity: $SIGN_ID\n"
 
 
 # 1. PREPARE BUNDLE
@@ -68,13 +68,13 @@ rm -rf "$C"/lib/Python.framework/Versions/*/lib/python*/test
 ## Info.plist (CFBundleExecutable can not be a symlink)
 cp build/macos/Info.plist "$C/Info.plist"
 python3 - "$C/Info.plist" "$BUILD_DIR/plug-ins/file_associations_mac.list" po/LINGUAS \
-          "$BUNDLE_IDENTIFIER" "$BUNDLE_NAME" "$GIMP_VERSION" "$GIMP_APP_VERSION" <<'EOF'
+          "$BUNDLE_IDENTIFIER" "$BUNDLE_NAME" "$CLAY_VERSION" "$CLAY_APP_VERSION" <<'EOF'
 import sys
 plist, file_types, linguas, identifier, name, version, app_version = sys.argv[1:8]
 text = open(plist).read()
-text = text.replace("<string>gimp-%GIMP_APP_VERSION%</string>", f"<string>clay-{app_version}</string>")
+text = text.replace("<string>clay-%CLAY_APP_VERSION%</string>", f"<string>clay-{app_version}</string>")
 text = text.replace("%BUNDLE_IDENTIFIER%", identifier).replace("%BUNDLE_NAME%", name)
-text = text.replace("%GIMP_VERSION%", version)
+text = text.replace("%CLAY_VERSION%", version)
 text = text.replace("%FILE_TYPES%", open(file_types).read().replace("\n", ""))
 langs = [l.split()[0].replace("_", "-") for l in open(linguas) if l.strip() and not l.startswith("#")]
 text = text.replace("%LOCALIZATIONS%", "".join(f"<string>{l}</string>" for l in dict.fromkeys(langs)))
@@ -127,16 +127,16 @@ codesign --verify --deep --strict "$APP"
 
 # 3. CREATE DMG
 mkdir -p "$DIST_DIR"
-DMG="$DIST_DIR/Clay-$GIMP_VERSION-macOS-$(uname -m).dmg"
-VOLNAME="$BUNDLE_NAME $GIMP_APP_VERSION"
+DMG="$DIST_DIR/Clay-$CLAY_VERSION-macOS-$(uname -m).dmg"
+VOLNAME="$BUNDLE_NAME $CLAY_APP_VERSION"
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 mkdir "$STAGE/dmg"
 ditto "$APP" "$STAGE/dmg/$BUNDLE_NAME.app"
 ln -s /Applications "$STAGE/dmg/Applications"
 
-## Background and icon layout (ported from 3_dist-gimp-apple.sh, needs no Finder)
-BG_PATH="$BUILD_DIR/gimp-data/images/logo/gimp-dmg.png"
+## Background and icon layout (ported from 3_dist-clay-apple.sh, needs no Finder)
+BG_PATH="$BUILD_DIR/clay-data/images/logo/clay-dmg.png"
 if [ -f "$BG_PATH" ]; then
   cp "$BG_PATH" "$STAGE/dmg/.background.png"
   python3 -m venv "$STAGE/venv"

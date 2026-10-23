@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -25,13 +25,13 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "imap_icons.h"
 #include "imap_statusbar.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 StatusBar_t*
 make_statusbar(GtkWidget *main_vbox, GtkWidget *window)

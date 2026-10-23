@@ -1,12 +1,12 @@
 #ifndef __FRACTALEXPLORER_DIALOGS_H__
 #define __FRACTALEXPLORER_DIALOGS_H__
 
-gint        explorer_dialog            (GimpProcedure       *procedure,
-                                        GimpProcedureConfig *config);
-void        dialog_update_preview      (GimpProcedureConfig *config);
+gint        explorer_dialog            (ClayProcedure       *procedure,
+                                        ClayProcedureConfig *config);
+void        dialog_update_preview      (ClayProcedureConfig *config);
 
-void        set_cmap_preview           (GimpProcedureConfig *config);
-void        make_color_map             (GimpProcedureConfig *config);
+void        set_cmap_preview           (ClayProcedureConfig *config);
+void        make_color_map             (ClayProcedureConfig *config);
 
 gchar     * get_line                   (gchar               *buf,
                                         gint                 s,

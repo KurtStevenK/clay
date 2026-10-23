@@ -18,12 +18,12 @@
 #pragma once
 
 
-void   window_close_cmd_callback          (GimpAction *action,
+void   window_close_cmd_callback          (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   window_open_display_cmd_callback   (GimpAction *action,
+void   window_open_display_cmd_callback   (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);
-void   window_move_to_screen_cmd_callback (GimpAction *action,
+void   window_move_to_screen_cmd_callback (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data);

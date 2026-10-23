@@ -10,7 +10,7 @@ Clay is a free image editor for Windows, Linux, and macOS. Mobile editions for i
 
 ## License
 
-Clay is free software under the GNU General Public License, version 3 or any later version. See [COPYING](COPYING) and [LICENSE](LICENSE). The libraries under `libgimp` are under the GNU Lesser General Public License. Some icons and the splash artwork keep their own notices.
+Clay is free software under the GNU General Public License, version 3 or any later version. See [COPYING](COPYING) and [LICENSE](LICENSE). The libraries under `libclay` are under the GNU Lesser General Public License. Some icons and the splash artwork keep their own notices.
 
 This program is a fork of the GNU Image Manipulation Program. Publishing this source is allowed. Distributing a binary requires offering this source under the same license, which this public repository does.
 
@@ -18,9 +18,9 @@ Copyright in the program belongs to its contributors. Clay Design maintains this
 
 If you have a concern about attribution, a contribution, or the license, write immediately: [open an issue](https://github.com/KurtStevenK/clay/issues). We will cooperate to align with the law and respect everybody's contribution.
 
-GIMP and the Wilber mascot are names of the upstream project. This fork is Clay. It is not affiliated with the GIMP project; see [NOTICE](NOTICE).
+Clay and the Wilber mascot are names of the upstream project. This fork is Clay. It is not affiliated with the Clay project; see [NOTICE](NOTICE).
 
-Clay keeps GIMP's plug-in interface (`libgimp`, the PDB procedure names, the `Gimp-3.0` introspection namespace and the `gimp-3.0` pkg-config files), so GIMP plug-ins and scripts keep working and Clay can still take upstream fixes. Everything users see is named Clay.
+Clay keeps Clay's plug-in interface (`libclay`, the PDB procedure names, the `Clay-3.0` introspection namespace and the `clay-3.0` pkg-config files), so Clay plug-ins and scripts keep working and Clay can still take upstream fixes. Everything users see is named Clay.
 
 ## Verify downloads
 

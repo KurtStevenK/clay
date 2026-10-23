@@ -25,54 +25,54 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs/dialogs-types.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpdisplayshell-scale.h"
-#include "display/gimpdisplayshell-transform.h"
-#include "display/gimpimagewindow.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/claydisplayshell-scale.h"
+#include "display/claydisplayshell-transform.h"
+#include "display/clayimagewindow.h"
 
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdock.h"
-#include "widgets/gimpdockable.h"
-#include "widgets/gimpdockbook.h"
-#include "widgets/gimpdockcontainer.h"
-#include "widgets/gimpdocked.h"
-#include "widgets/gimpdockwindow.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpsessioninfo.h"
-#include "widgets/gimptoolbox.h"
-#include "widgets/gimptooloptionseditor.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydock.h"
+#include "widgets/claydockable.h"
+#include "widgets/claydockbook.h"
+#include "widgets/claydockcontainer.h"
+#include "widgets/claydocked.h"
+#include "widgets/claydockwindow.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claysessioninfo.h"
+#include "widgets/claytoolbox.h"
+#include "widgets/claytooloptionseditor.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "core/gimp.h"
-#include "core/gimpchannel.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimptoolinfo.h"
-#include "core/gimptooloptions.h"
+#include "core/clay.h"
+#include "core/claychannel.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/claytoolinfo.h"
+#include "core/claytooloptions.h"
 
-#include "gimpcoreapp.h"
+#include "claycoreapp.h"
 
-#include "gimp-app-test-utils.h"
+#include "clay-app-test-utils.h"
 #include "tests.h"
 
 
 #define ADD_TEST(function) \
-  g_test_add_data_func ("/gimp-single-window-mode/" #function, gimp, function);
+  g_test_add_data_func ("/clay-single-window-mode/" #function, clay, function);
 
 
 /* Put this in the code below when you want the test to pause so you
  * can do measurements of widgets on the screen for example
  */
-#define GIMP_PAUSE (g_usleep (20 * 1000 * 1000))
+#define CLAY_PAUSE (g_usleep (20 * 1000 * 1000))
 
 
 /**
@@ -85,8 +85,8 @@
 static void
 new_dockable_not_in_new_window (gconstpointer data)
 {
-  Gimp              *gimp             = GIMP (data);
-  GimpDialogFactory *factory          = gimp_dialog_factory_get_singleton ();
+  Clay              *clay             = Clay (data);
+  ClayDialogFactory *factory          = clay_dialog_factory_get_singleton ();
   gint               dialogs_before   = 0;
   gint               toplevels_before = 0;
   gint               dialogs_after    = 0;
@@ -94,10 +94,10 @@ new_dockable_not_in_new_window (gconstpointer data)
   GList             *dialogs;
   GList             *iter;
 
-  gimp_test_run_mainloop_until_idle ();
+  clay_test_run_mainloop_until_idle ();
 
   /* Count dialogs before we create the dockable */
-  dialogs        = gimp_dialog_factory_get_open_dialogs (factory);
+  dialogs        = clay_dialog_factory_get_open_dialogs (factory);
   dialogs_before = g_list_length (dialogs);
   for (iter = dialogs; iter; iter = g_list_next (iter))
     {
@@ -106,13 +106,13 @@ new_dockable_not_in_new_window (gconstpointer data)
     }
 
   /* Create a dockable */
-  gimp_ui_manager_activate_action (gimp_test_utils_get_ui_manager (gimp),
+  clay_ui_manager_activate_action (clay_test_utils_get_ui_manager (clay),
                                    "dialogs",
                                    "dialogs-undo-history");
-  gimp_test_run_mainloop_until_idle ();
+  clay_test_run_mainloop_until_idle ();
 
   /* Count dialogs after we created the dockable */
-  dialogs       = gimp_dialog_factory_get_open_dialogs (factory);
+  dialogs       = clay_dialog_factory_get_open_dialogs (factory);
   dialogs_after = g_list_length (dialogs);
   for (iter = dialogs; iter; iter = g_list_next (iter))
     {
@@ -128,28 +128,28 @@ new_dockable_not_in_new_window (gconstpointer data)
 
 int main(int argc, char **argv)
 {
-  Gimp  *gimp   = NULL;
+  Clay  *clay   = NULL;
   gint   result = -1;
 
-  gimp_test_bail_if_no_display ();
+  clay_test_bail_if_no_display ();
   gtk_test_init (&argc, &argv, NULL);
 
-  gimp_test_utils_setup_menus_path ();
+  clay_test_utils_setup_menus_path ();
 
-  /* Launch GIMP in single-window mode */
-  g_setenv ("GIMP_TESTING_SESSIONRC_NAME", "sessionrc-2-8-single-window", TRUE /*overwrite*/);
-  gimp = gimp_init_for_gui_testing (TRUE /*show_gui*/);
-  gimp_test_run_mainloop_until_idle ();
+  /* Launch Clay in single-window mode */
+  g_setenv ("CLAY_TESTING_SESSIONRC_NAME", "sessionrc-2-8-single-window", TRUE /*overwrite*/);
+  clay = clay_init_for_gui_testing (TRUE /*show_gui*/);
+  clay_test_run_mainloop_until_idle ();
 
   ADD_TEST (new_dockable_not_in_new_window);
 
   /* Run the tests and return status */
-  g_application_run (gimp->app, 0, NULL);
-  result = gimp_core_app_get_exit_status (GIMP_CORE_APP (gimp->app));
+  g_application_run (clay->app, 0, NULL);
+  result = clay_core_app_get_exit_status (CLAY_CORE_APP (clay->app));
 
   /* Exit properly so we don't break script-fu plug-in wire */
-  g_application_quit (G_APPLICATION (gimp->app));
-  g_clear_object (&gimp->app);
+  g_application_quit (G_APPLICATION (clay->app));
+  g_clear_object (&clay->app);
 
   return result;
 }

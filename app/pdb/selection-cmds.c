@@ -25,51 +25,51 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpmath/gimpmath.h"
+#include "libclaymath/claymath.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpchannel.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppickable.h"
-#include "core/gimpselection.h"
+#include "core/claychannel.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/clayparamspecs.h"
+#include "core/claypickable.h"
+#include "core/clayselection.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-selection_bounds_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+selection_bounds_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gboolean non_empty = FALSE;
   gint x1 = 0;
   gint y1 = 0;
   gint x2 = 0;
   gint y2 = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       gint x, y, w, h;
 
-      non_empty = gimp_item_bounds (GIMP_ITEM (gimp_image_get_mask (image)),
+      non_empty = clay_item_bounds (CLAY_ITEM (clay_image_get_mask (image)),
                                     &x, &y, &w, &h);
 
       x1 = x;
@@ -78,137 +78,137 @@ selection_bounds_invoker (GimpProcedure         *procedure,
       y2 = y + h;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_boolean (gimp_value_array_index (return_vals, 1), non_empty);
-      g_value_set_int (gimp_value_array_index (return_vals, 2), x1);
-      g_value_set_int (gimp_value_array_index (return_vals, 3), y1);
-      g_value_set_int (gimp_value_array_index (return_vals, 4), x2);
-      g_value_set_int (gimp_value_array_index (return_vals, 5), y2);
+      g_value_set_boolean (clay_value_array_index (return_vals, 1), non_empty);
+      g_value_set_int (clay_value_array_index (return_vals, 2), x1);
+      g_value_set_int (clay_value_array_index (return_vals, 3), y1);
+      g_value_set_int (clay_value_array_index (return_vals, 4), x2);
+      g_value_set_int (clay_value_array_index (return_vals, 5), y2);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-selection_value_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+selection_value_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint x;
   gint y;
   gint value = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  x = g_value_get_int (gimp_value_array_index (args, 1));
-  y = g_value_get_int (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  x = g_value_get_int (clay_value_array_index (args, 1));
+  y = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
       gdouble val;
 
-      val= gimp_pickable_get_opacity_at (GIMP_PICKABLE (gimp_image_get_mask (image)),
+      val= clay_pickable_get_opacity_at (CLAY_PICKABLE (clay_image_get_mask (image)),
                                          x, y);
 
       value = ROUND (CLAMP (val, 0.0, 1.0) * 255.0);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), value);
+    g_value_set_int (clay_value_array_index (return_vals, 1), value);
 
   return return_vals;
 }
 
-static GimpValueArray *
-selection_is_empty_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+selection_is_empty_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gboolean is_empty = FALSE;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      is_empty = gimp_channel_is_empty (gimp_image_get_mask (image));
+      is_empty = clay_channel_is_empty (clay_image_get_mask (image));
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), is_empty);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), is_empty);
 
   return return_vals;
 }
 
-static GimpValueArray *
-selection_translate_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+selection_translate_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint offx;
   gint offy;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  offx = g_value_get_int (gimp_value_array_index (args, 1));
-  offy = g_value_get_int (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  offx = g_value_get_int (clay_value_array_index (args, 1));
+  offy = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      gimp_item_translate (GIMP_ITEM (gimp_image_get_mask (image)),
+      clay_item_translate (CLAY_ITEM (clay_image_get_mask (image)),
                            offx, offy, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_float_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+selection_float_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpDrawable **drawables;
+  ClayValueArray *return_vals;
+  ClayDrawable **drawables;
   gint offx;
   gint offy;
-  GimpLayer *layer = NULL;
+  ClayLayer *layer = NULL;
 
-  drawables = g_value_get_boxed (gimp_value_array_index (args, 0));
-  offx = g_value_get_int (gimp_value_array_index (args, 1));
-  offy = g_value_get_int (gimp_value_array_index (args, 2));
+  drawables = g_value_get_boxed (clay_value_array_index (args, 0));
+  offx = g_value_get_int (clay_value_array_index (args, 1));
+  offy = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpImage *image = NULL;
+      ClayImage *image = NULL;
       gint       i;
 
       if (drawables == NULL || drawables[0] == NULL)
@@ -219,17 +219,17 @@ selection_float_invoker (GimpProcedure         *procedure,
         {
           for (i = 0; drawables[i] != NULL; i++)
             {
-              if (! gimp_pdb_item_is_attached (GIMP_ITEM (drawables[i]), NULL,
-                                               GIMP_PDB_ITEM_CONTENT, error)     ||
-                  ! gimp_pdb_item_is_not_group (GIMP_ITEM (drawables[i]), error) ||
-                  (image && image != gimp_item_get_image (GIMP_ITEM (drawables[i]))))
+              if (! clay_pdb_item_is_attached (CLAY_ITEM (drawables[i]), NULL,
+                                               CLAY_PDB_ITEM_CONTENT, error)     ||
+                  ! clay_pdb_item_is_not_group (CLAY_ITEM (drawables[i]), error) ||
+                  (image && image != clay_item_get_image (CLAY_ITEM (drawables[i]))))
                 {
                   success = FALSE;
                   break;
                 }
               else
                 {
-                  image = gimp_item_get_image (GIMP_ITEM (drawables[i]));
+                  image = clay_item_get_image (CLAY_ITEM (drawables[i]));
                 }
             }
         }
@@ -241,7 +241,7 @@ selection_float_invoker (GimpProcedure         *procedure,
           for (i = 0; drawables[i] != NULL; i++)
             drawable_list = g_list_prepend (drawable_list, (gpointer) drawables[i]);
 
-          layer = gimp_selection_float (GIMP_SELECTION (gimp_image_get_mask (image)),
+          layer = clay_selection_float (CLAY_SELECTION (clay_image_get_mask (image)),
                                         drawable_list, context, TRUE, offx, offy,
                                         error);
           g_list_free (drawable_list);
@@ -250,731 +250,731 @@ selection_float_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), layer);
+    g_value_set_object (clay_value_array_index (return_vals, 1), layer);
 
   return return_vals;
 }
 
-static GimpValueArray *
-selection_invert_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+selection_invert_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_channel_invert (gimp_image_get_mask (image), TRUE);
+      clay_channel_invert (clay_image_get_mask (image), TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_sharpen_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+selection_sharpen_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_channel_sharpen (gimp_image_get_mask (image), TRUE);
+      clay_channel_sharpen (clay_image_get_mask (image), TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_all_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+selection_all_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_channel_all (gimp_image_get_mask (image), TRUE);
+      clay_channel_all (clay_image_get_mask (image), TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_none_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+selection_none_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_channel_clear (gimp_image_get_mask (image), NULL, TRUE);
+      clay_channel_clear (clay_image_get_mask (image), NULL, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_feather_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+selection_feather_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gdouble radius;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  radius = g_value_get_double (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  radius = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
       /* FIXME: "edge-lock" hardcoded to  TRUE */
-      gimp_channel_feather (gimp_image_get_mask (image),
+      clay_channel_feather (clay_image_get_mask (image),
                             radius, radius, TRUE, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_border_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+selection_border_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint radius;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  radius = g_value_get_int (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  radius = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
       /* FIXME: "style" and "edge-lock" hardcoded to SMOOTH and TRUE, respectively. */
-      gimp_channel_border (gimp_image_get_mask (image),
+      clay_channel_border (clay_image_get_mask (image),
                            radius, radius,
-                           GIMP_CHANNEL_BORDER_STYLE_SMOOTH,
+                           CLAY_CHANNEL_BORDER_STYLE_SMOOTH,
                            TRUE, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_grow_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+selection_grow_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint steps;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  steps = g_value_get_int (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  steps = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_channel_grow (gimp_image_get_mask (image),
+      clay_channel_grow (clay_image_get_mask (image),
                          steps, steps, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_shrink_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+selection_shrink_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint steps;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  steps = g_value_get_int (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  steps = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      gimp_channel_shrink (gimp_image_get_mask (image),
+      clay_channel_shrink (clay_image_get_mask (image),
                            steps, steps, FALSE, TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_flood_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+selection_flood_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_channel_flood (gimp_image_get_mask (image), TRUE);
+      clay_channel_flood (clay_image_get_mask (image), TRUE);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-selection_save_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+selection_save_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
-  GimpChannel *channel = NULL;
+  ClayValueArray *return_vals;
+  ClayImage *image;
+  ClayChannel *channel = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      channel = GIMP_CHANNEL (gimp_item_duplicate (GIMP_ITEM (gimp_image_get_mask (image)),
-                                                   GIMP_TYPE_CHANNEL));
+      channel = CLAY_CHANNEL (clay_item_duplicate (CLAY_ITEM (clay_image_get_mask (image)),
+                                                   CLAY_TYPE_CHANNEL));
 
       if (channel)
         {
           /*  saved selections are not visible by default  */
-          gimp_item_set_visible (GIMP_ITEM (channel), FALSE, FALSE);
+          clay_item_set_visible (CLAY_ITEM (channel), FALSE, FALSE);
 
-          gimp_image_add_channel (image, channel,
-                                  GIMP_IMAGE_ACTIVE_PARENT, -1, TRUE);
+          clay_image_add_channel (image, channel,
+                                  CLAY_IMAGE_ACTIVE_PARENT, -1, TRUE);
         }
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), channel);
+    g_value_set_object (clay_value_array_index (return_vals, 1), channel);
 
   return return_vals;
 }
 
 void
-register_selection_procs (GimpPDB *pdb)
+register_selection_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-selection-bounds
+   * clay-selection-bounds
    */
-  procedure = gimp_procedure_new (selection_bounds_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-bounds");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_bounds_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-bounds");
+  clay_procedure_set_static_help (procedure,
                                   "Find the bounding box of the current selection.",
                                   "This procedure returns whether there is a selection for the specified image. If there is one, the upper left and lower right corners of the bounding box are returned. These coordinates are relative to the image. Please note that the pixel specified by the lower right coordinate of the bounding box is not part of the selection. The selection ends at the upper left corner of this pixel. This means the width of the selection can be calculated as (x2 - x1), its height as (y2 - y1).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("non-empty",
                                                          "non empty",
                                                          "TRUE if there is a selection",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("x1",
                                                      "x1",
                                                      "x coordinate of upper left corner of selection bounds",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("y1",
                                                      "y1",
                                                      "y coordinate of upper left corner of selection bounds",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("x2",
                                                      "x2",
                                                      "x coordinate of lower right corner of selection bounds",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("y2",
                                                      "y2",
                                                      "y coordinate of lower right corner of selection bounds",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-value
+   * clay-selection-value
    */
-  procedure = gimp_procedure_new (selection_value_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-value");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_value_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-value");
+  clay_procedure_set_static_help (procedure,
                                   "Find the value of the selection at the specified coordinates.",
                                   "This procedure returns the value of the selection at the specified coordinates. If the coordinates lie out of bounds, 0 is returned.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("x",
                                                  "x",
                                                  "x coordinate of value",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("y",
                                                  "y",
                                                  "y coordinate of value",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("value",
                                                      "value",
                                                      "Value of the selection",
                                                      0, 255, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-is-empty
+   * clay-selection-is-empty
    */
-  procedure = gimp_procedure_new (selection_is_empty_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-is-empty");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_is_empty_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-is-empty");
+  clay_procedure_set_static_help (procedure,
                                   "Determine whether the selection is empty.",
                                   "This procedure returns TRUE if the selection for the specified image is empty.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("is-empty",
                                                          "is empty",
                                                          "Is the selection empty?",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-translate
+   * clay-selection-translate
    */
-  procedure = gimp_procedure_new (selection_translate_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-translate");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_translate_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-translate");
+  clay_procedure_set_static_help (procedure,
                                   "Translate the selection by the specified offsets.",
                                   "This procedure actually translates the selection for the specified image by the specified offsets. Regions that are translated from beyond the bounds of the image are set to empty. Valid regions of the selection which are translated beyond the bounds of the image because of this call are lost.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("offx",
                                                  "offx",
                                                  "x offset for translation",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("offy",
                                                  "offy",
                                                  "y offset for translation",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-float
+   * clay-selection-float
    */
-  procedure = gimp_procedure_new (selection_float_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-float");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_float_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-float");
+  clay_procedure_set_static_help (procedure,
                                   "Float the selection from the specified drawable with initial offsets as specified.",
                                   "This procedure determines the region of the specified drawable that lies beneath the current selection. The region is then cut from the drawable and the resulting data is made into a new layer which is instantiated as a floating selection. The offsets allow initial positioning of the new floating selection.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_core_object_array ("drawables",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_core_object_array ("drawables",
                                                                   "drawables",
                                                                   "The drawables from which to float selection",
-                                                                  GIMP_TYPE_DRAWABLE,
-                                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                                  CLAY_TYPE_DRAWABLE,
+                                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("offx",
                                                  "offx",
                                                  "x offset for translation",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("offy",
                                                  "offy",
                                                  "y offset for translation",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_layer ("layer",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_layer ("layer",
                                                           "layer",
                                                           "The floated layer",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-invert
+   * clay-selection-invert
    */
-  procedure = gimp_procedure_new (selection_invert_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-invert");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_invert_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-invert");
+  clay_procedure_set_static_help (procedure,
                                   "Invert the selection mask.",
                                   "This procedure inverts the selection mask. For every pixel in the selection channel, its new value is calculated as (255 - old-value).",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-sharpen
+   * clay-selection-sharpen
    */
-  procedure = gimp_procedure_new (selection_sharpen_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-sharpen");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_sharpen_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-sharpen");
+  clay_procedure_set_static_help (procedure,
                                   "Sharpen the selection mask.",
                                   "This procedure sharpens the selection mask. For every pixel in the selection channel, if the value is > 127, the new pixel is assigned a value of 255. This removes any \"anti-aliasing\" that might exist in the selection mask's boundary.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-all
+   * clay-selection-all
    */
-  procedure = gimp_procedure_new (selection_all_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-all");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_all_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-all");
+  clay_procedure_set_static_help (procedure,
                                   "Select all of the image.",
                                   "This procedure sets the selection mask to completely encompass the image. Every pixel in the selection channel is set to 255.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-none
+   * clay-selection-none
    */
-  procedure = gimp_procedure_new (selection_none_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-none");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_none_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-none");
+  clay_procedure_set_static_help (procedure,
                                   "Deselect the entire image.",
                                   "This procedure deselects the entire image. Every pixel in the selection channel is set to 0.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-feather
+   * clay-selection-feather
    */
-  procedure = gimp_procedure_new (selection_feather_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-feather");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_feather_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-feather");
+  clay_procedure_set_static_help (procedure,
                                   "Feather the image's selection",
                                   "This procedure feathers the selection. Feathering is implemented using a gaussian blur.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("radius",
                                                     "radius",
                                                     "Radius of feather (in pixels)",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-border
+   * clay-selection-border
    */
-  procedure = gimp_procedure_new (selection_border_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-border");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_border_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-border");
+  clay_procedure_set_static_help (procedure,
                                   "Border the image's selection",
                                   "This procedure borders the selection. Bordering creates a new selection which is defined along the boundary of the previous selection at every point within the specified radius.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("radius",
                                                  "radius",
                                                  "Radius of border (in pixels)",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-grow
+   * clay-selection-grow
    */
-  procedure = gimp_procedure_new (selection_grow_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-grow");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_grow_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-grow");
+  clay_procedure_set_static_help (procedure,
                                   "Grow the image's selection",
                                   "This procedure grows the selection. Growing involves expanding the boundary in all directions by the specified pixel amount.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("steps",
                                                  "steps",
                                                  "Steps of grow (in pixels)",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-shrink
+   * clay-selection-shrink
    */
-  procedure = gimp_procedure_new (selection_shrink_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-shrink");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_shrink_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-shrink");
+  clay_procedure_set_static_help (procedure,
                                   "Shrink the image's selection",
                                   "This procedure shrinks the selection. Shrinking involves trimming the existing selection boundary on all sides by the specified number of pixels.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("steps",
                                                  "steps",
                                                  "Steps of shrink (in pixels)",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-flood
+   * clay-selection-flood
    */
-  procedure = gimp_procedure_new (selection_flood_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-flood");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_flood_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-flood");
+  clay_procedure_set_static_help (procedure,
                                   "Remove holes from the image's selection",
                                   "This procedure removes holes from the selection, that can come from selecting a patchy area with the Fuzzy Select Tool. In technical terms this procedure floods the selection. See the Algorithms page in the developer wiki for details.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ell",
                                          "Ell",
                                          "2016");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-selection-save
+   * clay-selection-save
    */
-  procedure = gimp_procedure_new (selection_save_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-selection-save");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (selection_save_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-selection-save");
+  clay_procedure_set_static_help (procedure,
                                   "Copy the selection mask to a new channel.",
                                   "This procedure copies the selection mask and stores the content in a new channel. The new channel is automatically inserted into the image's list of channels.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_channel ("channel",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_channel ("channel",
                                                             "channel",
                                                             "The new channel",
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

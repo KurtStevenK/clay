@@ -19,9 +19,9 @@
 
   (let* (
         (theImage inImage)
-        (theLayer (vector-ref (car (gimp-image-get-selected-drawables theImage)) 0))
-        (theHeight (car (gimp-drawable-get-height theLayer)))
-        (theWidth (car (gimp-drawable-get-width theLayer)))
+        (theLayer (vector-ref (car (clay-image-get-selected-drawables theImage)) 0))
+        (theHeight (car (clay-drawable-get-height theLayer)))
+        (theWidth (car (clay-drawable-get-width theLayer)))
         (horizontalRadius (* 0.32 inRadius))
         (verticalRadius (* 0.32 inRadius))
         )
@@ -35,41 +35,41 @@
 
     (define (pasteat xoff yoff)
       (let* (
-             (pasted (car (gimp-edit-paste theLayer FALSE)))
+             (pasted (car (clay-edit-paste theLayer FALSE)))
              (num-pasted (vector-length pasted))
              (floating-sel (vector-ref pasted (- num-pasted 1)))
             )
-        (gimp-layer-set-offsets floating-sel (* xoff theWidth) (* yoff theHeight) )
-        (gimp-floating-sel-anchor floating-sel)
+        (clay-layer-set-offsets floating-sel (* xoff theWidth) (* yoff theHeight) )
+        (clay-floating-sel-anchor floating-sel)
       )
     )
 
-    (gimp-context-push)
-    (gimp-context-set-feather FALSE)
-    (gimp-image-undo-group-start theImage)
+    (clay-context-push)
+    (clay-context-set-feather FALSE)
+    (clay-image-undo-group-start theImage)
 
-    (gimp-layer-resize theLayer (* 3 theWidth) (* 3 theHeight) 0 0)
+    (clay-layer-resize theLayer (* 3 theWidth) (* 3 theHeight) 0 0)
 
-    (gimp-image-select-rectangle theImage CHANNEL-OP-REPLACE 0 0 theWidth theHeight)
-    (gimp-edit-cut (vector theLayer))
+    (clay-image-select-rectangle theImage CHANNEL-OP-REPLACE 0 0 theWidth theHeight)
+    (clay-edit-cut (vector theLayer))
 
-    (gimp-selection-none theImage)
-    (gimp-layer-set-offsets theLayer theWidth theHeight)
+    (clay-selection-none theImage)
+    (clay-layer-set-offsets theLayer theWidth theHeight)
 
     (pasteat 1 1) (pasteat 1 2) (pasteat 1 3)
     (pasteat 2 1) (pasteat 2 2) (pasteat 2 3)
     (pasteat 3 1) (pasteat 3 2) (pasteat 3 3)
 
-    (gimp-selection-none theImage)
-    (gimp-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
+    (clay-selection-none theImage)
+    (clay-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
                                     "std-dev-x" horizontalRadius "std-dev-y" verticalRadius "filter" "auto")
 
-    (gimp-layer-resize theLayer
+    (clay-layer-resize theLayer
                        theWidth theHeight (- 0 theWidth) (- 0 theHeight))
-    (gimp-layer-set-offsets theLayer 0 0)
-    (gimp-image-undo-group-end theImage)
-    (gimp-displays-flush)
-    (gimp-context-pop)
+    (clay-layer-set-offsets theLayer 0 0)
+    (clay-image-undo-group-end theImage)
+    (clay-displays-flush)
+    (clay-context-pop)
   )
 )
 

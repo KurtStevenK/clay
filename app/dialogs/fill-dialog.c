@@ -23,20 +23,20 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimpdrawable.h"
-#include "core/gimpfilloptions.h"
+#include "core/claydrawable.h"
+#include "core/clayfilloptions.h"
 
-#include "widgets/gimpfilleditor.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/clayfilleditor.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "fill-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define RESPONSE_RESET 1
@@ -48,9 +48,9 @@ struct _FillDialog
 {
   GList            *items;
   GList            *drawables;
-  GimpContext      *context;
-  GimpFillOptions  *options;
-  GimpFillCallback  callback;
+  ClayContext      *context;
+  ClayFillOptions  *options;
+  ClayFillCallback  callback;
   gpointer          user_data;
 };
 
@@ -68,13 +68,13 @@ static void  fill_dialog_response (GtkWidget  *dialog,
 GtkWidget *
 fill_dialog_new (GList            *items,
                  GList            *drawables,
-                 GimpContext      *context,
+                 ClayContext      *context,
                  const gchar      *title,
                  const gchar      *icon_name,
                  const gchar      *help_id,
                  GtkWidget        *parent,
-                 GimpFillOptions  *options,
-                 GimpFillCallback  callback,
+                 ClayFillOptions  *options,
+                 ClayFillCallback  callback,
                  gpointer          user_data)
 {
   FillDialog *private;
@@ -84,8 +84,8 @@ fill_dialog_new (GList            *items,
 
   g_return_val_if_fail (items, NULL);
   g_return_val_if_fail (drawables, NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
-  g_return_val_if_fail (GIMP_IS_FILL_OPTIONS (options), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_FILL_OPTIONS (options), NULL);
   g_return_val_if_fail (icon_name != NULL, NULL);
   g_return_val_if_fail (help_id != NULL, NULL);
   g_return_val_if_fail (parent == NULL || GTK_IS_WIDGET (parent), NULL);
@@ -96,19 +96,19 @@ fill_dialog_new (GList            *items,
   private->items     = g_list_copy (items);
   private->drawables = g_list_copy (drawables);
   private->context   = context;
-  private->options   = gimp_fill_options_new (context->gimp, context, TRUE);
+  private->options   = clay_fill_options_new (context->clay, context, TRUE);
   private->callback  = callback;
   private->user_data = user_data;
 
-  gimp_config_sync (G_OBJECT (options),
+  clay_config_sync (G_OBJECT (options),
                     G_OBJECT (private->options), 0);
 
-  dialog = gimp_viewable_dialog_new (g_list_copy (items), context,
-                                     title, "gimp-fill-options",
+  dialog = clay_viewable_dialog_new (g_list_copy (items), context,
+                                     title, "clay-fill-options",
                                      icon_name,
                                      _("Choose Fill Style"),
                                      parent,
-                                     gimp_standard_help_func,
+                                     clay_standard_help_func,
                                      help_id,
 
                                      _("_Reset"),  RESPONSE_RESET,
@@ -117,7 +117,7 @@ fill_dialog_new (GList            *items,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
@@ -138,7 +138,7 @@ fill_dialog_new (GList            *items,
                       main_vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (main_vbox, TRUE);
 
-  fill_editor = gimp_fill_editor_new (private->options, FALSE, FALSE);
+  fill_editor = clay_fill_editor_new (private->options, FALSE, FALSE);
   gtk_box_pack_start (GTK_BOX (main_vbox), fill_editor, FALSE, FALSE, 0);
   gtk_widget_set_visible (fill_editor, TRUE);
 
@@ -166,7 +166,7 @@ fill_dialog_response (GtkWidget  *dialog,
   switch (response_id)
     {
     case RESPONSE_RESET:
-      gimp_config_reset (GIMP_CONFIG (private->options));
+      clay_config_reset (CLAY_CONFIG (private->options));
       break;
 
     case GTK_RESPONSE_OK:

@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,8 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <png.h>
 
@@ -38,7 +38,7 @@
 #include "ico-export.h"
 #include "ico-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static gint     ico_write_int8         (FILE    *fp,
@@ -65,11 +65,11 @@ static void     ico_set_byte_in_data   (guint8 *data,
                                         gint    byte_num,
                                         gint    byte_val);
 
-static gint     ico_get_layer_num_colors  (GimpLayer            *layer,
+static gint     ico_get_layer_num_colors  (ClayLayer            *layer,
                                            gboolean             *uses_alpha_levels);
-static void     ico_image_get_reduced_buf (GimpDrawable         *layer,
+static void     ico_image_get_reduced_buf (ClayDrawable         *layer,
                                            gint                  bpp,
-                                           GimpPalette         **cmap_out,
+                                           ClayPalette         **cmap_out,
                                            guchar              **buf_out);
 
 static gint
@@ -154,7 +154,7 @@ ico_write_int8 (FILE     *fp,
 }
 
 gboolean
-ico_save_init (GimpImage    *image,
+ico_save_init (ClayImage    *image,
                gint32        run_mode,
                IcoSaveInfo  *info,
                gint          n_hot_spot_x,
@@ -168,7 +168,7 @@ ico_save_init (GimpImage    *image,
   gint       i;
   gboolean   uses_alpha_values = FALSE;
 
-  info->layers         = gimp_image_list_layers (image);
+  info->layers         = clay_image_list_layers (image);
   info->num_icons      = g_list_length (info->layers);
   info->depths         = g_new (gint, info->num_icons);
   info->default_depths = g_new (gint, info->num_icons);
@@ -176,7 +176,7 @@ ico_save_init (GimpImage    *image,
   info->hot_spot_x     = g_new0 (gint, info->num_icons);
   info->hot_spot_y     = g_new0 (gint, info->num_icons);
 
-  if (run_mode == GIMP_RUN_NONINTERACTIVE &&
+  if (run_mode == CLAY_RUN_NONINTERACTIVE &&
       info->is_cursor                     &&
       (n_hot_spot_x != info->num_icons ||
        n_hot_spot_y != info->num_icons))
@@ -261,8 +261,8 @@ ico_save_init (GimpImage    *image,
         }
 
       /* vista icons */
-      if (gimp_drawable_get_width  (iter->data) > 255 ||
-          gimp_drawable_get_height (iter->data) > 255)
+      if (clay_drawable_get_width  (iter->data) > 255 ||
+          clay_drawable_get_height (iter->data) > 255)
         {
           info->compress[i] = TRUE;
         }
@@ -280,9 +280,9 @@ ico_save_init (GimpImage    *image,
 }
 
 gboolean
-ico_save_dialog (GimpImage           *image,
-                 GimpProcedure       *procedure,
-                 GimpProcedureConfig *config,
+ico_save_dialog (ClayImage           *image,
+                 ClayProcedure       *procedure,
+                 ClayProcedureConfig *config,
                  IcoSaveInfo         *info,
                  AniFileHeader       *ani_header,
                  AniSaveInfo         *ani_info)
@@ -292,7 +292,7 @@ ico_save_dialog (GimpImage           *image,
   gint           i;
   gboolean       response;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   dialog = ico_dialog_new (image, procedure, config, info, ani_header,
                            ani_info);
@@ -302,10 +302,10 @@ ico_save_dialog (GimpImage           *image,
     {
       if (info->is_cursor)
         {
-          GimpParasite *parasite = NULL;
+          ClayParasite *parasite = NULL;
 
           /* Loading hot spots for cursors if applicable */
-          parasite = gimp_item_get_parasite (GIMP_ITEM (iter->data), "cur-hot-spot");
+          parasite = clay_item_get_parasite (CLAY_ITEM (iter->data), "cur-hot-spot");
 
           if (parasite)
             {
@@ -313,7 +313,7 @@ ico_save_dialog (GimpImage           *image,
               guint32  parasite_size;
               gint x, y;
 
-              parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+              parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
               parasite_data = g_strndup (parasite_data, parasite_size);
 
 #ifndef _UCRT
@@ -326,12 +326,12 @@ ico_save_dialog (GimpImage           *image,
                   info->hot_spot_y[i] = y;
                 }
 
-              gimp_parasite_free (parasite);
+              clay_parasite_free (parasite);
               g_free (parasite_data);
             }
         }
 
-      /* if (gimp_layer_get_visible(layers[i])) */
+      /* if (clay_layer_get_visible(layers[i])) */
       ico_dialog_add_icon (dialog, iter->data, i);
     }
 
@@ -343,7 +343,7 @@ ico_save_dialog (GimpImage           *image,
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  response = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  response = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -417,7 +417,7 @@ ico_set_byte_in_data (guint8 *data,
 
 /* Create a colormap from the given buffer data */
 static guint32 *
-ico_create_palette (GimpPalette *reduced_cmap,
+ico_create_palette (ClayPalette *reduced_cmap,
                     gint         num_colors,
                     gint        *black_slot)
 {
@@ -427,7 +427,7 @@ ico_create_palette (GimpPalette *reduced_cmap,
   gint        i;
 
   if (reduced_cmap)
-    num_colors_used = gimp_palette_get_color_count (reduced_cmap);
+    num_colors_used = clay_palette_get_color_count (reduced_cmap);
 
   g_return_val_if_fail (num_colors_used <= num_colors, NULL);
 
@@ -441,7 +441,7 @@ ico_create_palette (GimpPalette *reduced_cmap,
       GeglColor *color;
       guchar     rgb[3];
 
-      color = gimp_palette_get_entry_color (reduced_cmap, i);
+      color = clay_palette_get_entry_color (reduced_cmap, i);
       gegl_color_get_pixel (color, format, rgb);
 
       palette[i * 4 + 2] = rgb[0];
@@ -527,7 +527,7 @@ ico_get_palette_index (GHashTable *hash,
 }
 
 static gint
-ico_get_layer_num_colors (GimpLayer *layer,
+ico_get_layer_num_colors (ClayLayer *layer,
                           gboolean  *uses_alpha_levels)
 {
   gint        w, h;
@@ -539,7 +539,7 @@ ico_get_layer_num_colors (GimpLayer *layer,
   guint32    *colors;
   guint32    *c;
   GHashTable *hash;
-  GeglBuffer *buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  GeglBuffer *buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
   const Babl *format;
 
   w = gegl_buffer_get_width  (buffer);
@@ -547,29 +547,29 @@ ico_get_layer_num_colors (GimpLayer *layer,
 
   num_pixels = w * h;
 
-  switch (gimp_drawable_type (GIMP_DRAWABLE (layer)))
+  switch (clay_drawable_type (CLAY_DRAWABLE (layer)))
     {
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       format = babl_format ("R'G'B' u8");
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       format = babl_format ("R'G'B'A u8");
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       format = babl_format ("Y' u8");
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       format = babl_format ("Y'A u8");
       break;
 
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       format = gegl_buffer_get_format (buffer);
       /* It is possible to count the colors of indexed image more easily
-       * with gimp_image_get_palette(), but counting only the colors
+       * with clay_image_get_palette(), but counting only the colors
        * actually used will allow more efficient bpp if possible. */
       break;
 
@@ -642,7 +642,7 @@ ico_get_layer_num_colors (GimpLayer *layer,
   num_colors = g_hash_table_size (hash);
 
   /* Icons with 1 bit masks are converted to
-   * full transparency when loaded in GIMP.
+   * full transparency when loaded in Clay.
    * If the layer is not semi-transparent, we
    * can subtract the "mask color" out to fix
    * the default depth value for 1/4/8 bpp icons.
@@ -659,7 +659,7 @@ ico_get_layer_num_colors (GimpLayer *layer,
 }
 
 gboolean
-ico_cmap_contains_black (GimpPalette *cmap)
+ico_cmap_contains_black (ClayPalette *cmap)
 {
   const Babl *format;
   gint        num_colors;
@@ -667,11 +667,11 @@ ico_cmap_contains_black (GimpPalette *cmap)
   gboolean    success = FALSE;
 
   format     = babl_format ("R'G'B' u8");
-  num_colors = gimp_palette_get_color_count (cmap);
+  num_colors = clay_palette_get_color_count (cmap);
 
   for (i = 0; i < num_colors; i++)
     {
-      GeglColor *color = gimp_palette_get_entry_color (cmap, i);
+      GeglColor *color = clay_palette_get_entry_color (cmap, i);
       guchar     rgb[3];
 
       gegl_color_get_pixel (color, format, rgb);
@@ -689,42 +689,42 @@ ico_cmap_contains_black (GimpPalette *cmap)
 }
 
 static void
-ico_image_get_reduced_buf (GimpDrawable *layer,
+ico_image_get_reduced_buf (ClayDrawable *layer,
                            gint          bpp,
-                           GimpPalette **cmap_out,
+                           ClayPalette **cmap_out,
                            guchar      **buf_out)
 {
-  GimpImage   *tmp_image;
-  GimpLayer   *tmp_layer;
+  ClayImage   *tmp_image;
+  ClayLayer   *tmp_layer;
   gint         w, h;
   guchar      *buf;
-  GimpPalette *palette = NULL;
-  GeglBuffer  *buffer  = gimp_drawable_get_buffer (layer);
+  ClayPalette *palette = NULL;
+  GeglBuffer  *buffer  = clay_drawable_get_buffer (layer);
   const Babl  *format;
 
   w = gegl_buffer_get_width  (buffer);
   h = gegl_buffer_get_height (buffer);
 
-  switch (gimp_drawable_type (layer))
+  switch (clay_drawable_type (layer))
     {
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       format = babl_format ("R'G'B' u8");
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       format = babl_format ("R'G'B'A u8");
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       format = babl_format ("Y' u8");
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       format = babl_format ("Y'A u8");
       break;
 
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       format = gegl_buffer_get_format (buffer);
       break;
 
@@ -736,25 +736,25 @@ ico_image_get_reduced_buf (GimpDrawable *layer,
 
   if (bpp <= 8 || bpp == 24 || babl_format_get_bytes_per_pixel (format) != 4)
     {
-      GimpImage   *image = gimp_item_get_image (GIMP_ITEM (layer));
+      ClayImage   *image = clay_item_get_image (CLAY_ITEM (layer));
       GeglBuffer  *tmp;
       gint         num_colors;
       gint         entry_num;
       GeglColor  **colors;
 
-      tmp_image = gimp_image_new (w, h, gimp_image_get_base_type (image));
-      gimp_image_undo_disable (tmp_image);
+      tmp_image = clay_image_new (w, h, clay_image_get_base_type (image));
+      clay_image_undo_disable (tmp_image);
 
-      if (gimp_drawable_is_indexed (layer))
-        gimp_image_set_palette (tmp_image, gimp_image_get_palette (image));
+      if (clay_drawable_is_indexed (layer))
+        clay_image_set_palette (tmp_image, clay_image_get_palette (image));
 
-      tmp_layer = gimp_layer_new (tmp_image, "tmp", w, h,
-                                  gimp_drawable_type (layer),
+      tmp_layer = clay_layer_new (tmp_image, "tmp", w, h,
+                                  clay_drawable_type (layer),
                                   100,
-                                  gimp_image_get_default_new_layer_mode (tmp_image));
-      gimp_image_insert_layer (tmp_image, tmp_layer, NULL, 0);
+                                  clay_image_get_default_new_layer_mode (tmp_image));
+      clay_image_insert_layer (tmp_image, tmp_layer, NULL, 0);
 
-      tmp = gimp_drawable_get_buffer (GIMP_DRAWABLE (tmp_layer));
+      tmp = clay_drawable_get_buffer (CLAY_DRAWABLE (tmp_layer));
 
       gegl_buffer_get (buffer, GEGL_RECTANGLE (0, 0, w, h), 1.0,
                        format, buf,
@@ -764,79 +764,79 @@ ico_image_get_reduced_buf (GimpDrawable *layer,
 
       g_object_unref (tmp);
 
-      if (! gimp_drawable_is_rgb (GIMP_DRAWABLE (tmp_layer)))
-        gimp_image_convert_rgb (tmp_image);
+      if (! clay_drawable_is_rgb (CLAY_DRAWABLE (tmp_layer)))
+        clay_image_convert_rgb (tmp_image);
 
       if (bpp <= 8)
         {
-          gimp_image_convert_indexed (tmp_image,
-                                      GIMP_CONVERT_DITHER_FS,
-                                      GIMP_CONVERT_PALETTE_GENERATE,
+          clay_image_convert_indexed (tmp_image,
+                                      CLAY_CONVERT_DITHER_FS,
+                                      CLAY_CONVERT_PALETTE_GENERATE,
                                       1 << bpp, TRUE, FALSE, "dummy");
 
-          palette = gimp_image_get_palette (tmp_image);
+          palette = clay_image_get_palette (tmp_image);
 
-          if (gimp_palette_get_color_count (palette) == (1 << bpp) &&
+          if (clay_palette_get_color_count (palette) == (1 << bpp) &&
               ! ico_cmap_contains_black (palette))
             {
               /* Windows icons with color maps need the color black.
                * We need to eliminate one more color to make room for black.
                */
 
-              if (gimp_drawable_is_indexed (layer))
+              if (clay_drawable_is_indexed (layer))
                 {
-                  gimp_image_set_palette (tmp_image, gimp_image_get_palette (image));
+                  clay_image_set_palette (tmp_image, clay_image_get_palette (image));
                 }
-              else if (gimp_drawable_is_gray (layer))
+              else if (clay_drawable_is_gray (layer))
                 {
-                  gimp_image_convert_grayscale (tmp_image);
+                  clay_image_convert_grayscale (tmp_image);
                 }
               else
                 {
-                  gimp_image_convert_rgb (tmp_image);
+                  clay_image_convert_rgb (tmp_image);
                 }
 
-              tmp = gimp_drawable_get_buffer (GIMP_DRAWABLE (tmp_layer));
+              tmp = clay_drawable_get_buffer (CLAY_DRAWABLE (tmp_layer));
 
               gegl_buffer_set (tmp, GEGL_RECTANGLE (0, 0, w, h), 0,
                                format, buf, GEGL_AUTO_ROWSTRIDE);
 
               g_object_unref (tmp);
 
-              if (! gimp_drawable_is_rgb (layer))
-                gimp_image_convert_rgb (tmp_image);
+              if (! clay_drawable_is_rgb (layer))
+                clay_image_convert_rgb (tmp_image);
 
-              gimp_image_convert_indexed (tmp_image,
-                                          GIMP_CONVERT_DITHER_FS,
-                                          GIMP_CONVERT_PALETTE_GENERATE,
+              clay_image_convert_indexed (tmp_image,
+                                          CLAY_CONVERT_DITHER_FS,
+                                          CLAY_CONVERT_PALETTE_GENERATE,
                                           (1<<bpp) - 1, TRUE, FALSE, "dummy");
-              palette = gimp_image_get_palette (tmp_image);
+              palette = clay_image_get_palette (tmp_image);
             }
 
           /* Copy the palette over now - otherwise, it goes away when we
            * convert the image to RGB */
-          *cmap_out  = gimp_palette_new ("ICO");
-          num_colors = gimp_palette_get_color_count (palette);
-          colors     = gimp_palette_get_colors (palette);
+          *cmap_out  = clay_palette_new ("ICO");
+          num_colors = clay_palette_get_color_count (palette);
+          colors     = clay_palette_get_colors (palette);
 
           for (gint i = 0; i < num_colors; i++)
-            gimp_palette_add_entry (*cmap_out, NULL,  colors[i], &entry_num);
-          gimp_color_array_free (colors);
+            clay_palette_add_entry (*cmap_out, NULL,  colors[i], &entry_num);
+          clay_color_array_free (colors);
 
-          gimp_image_convert_rgb (tmp_image);
+          clay_image_convert_rgb (tmp_image);
         }
       else if (bpp == 24)
         {
-          gimp_drawable_merge_new_filter (GIMP_DRAWABLE (tmp_layer),
-                                          "gimp:threshold-alpha", NULL,
-                                          GIMP_LAYER_MODE_REPLACE, 1.0,
+          clay_drawable_merge_new_filter (CLAY_DRAWABLE (tmp_layer),
+                                          "clay:threshold-alpha", NULL,
+                                          CLAY_LAYER_MODE_REPLACE, 1.0,
                                           "value", ICO_ALPHA_THRESHOLD / 255.0,
                                           NULL);
         }
 
-      gimp_layer_add_alpha (tmp_layer);
+      clay_layer_add_alpha (tmp_layer);
 
-      tmp = gimp_drawable_get_buffer (GIMP_DRAWABLE (tmp_layer));
+      tmp = clay_drawable_get_buffer (CLAY_DRAWABLE (tmp_layer));
 
       gegl_buffer_get (tmp, GEGL_RECTANGLE (0, 0, w, h), 1.0,
                        NULL, buf,
@@ -844,7 +844,7 @@ ico_image_get_reduced_buf (GimpDrawable *layer,
 
       g_object_unref (tmp);
 
-      gimp_image_delete (tmp_image);
+      clay_image_delete (tmp_image);
     }
   else
     {
@@ -860,7 +860,7 @@ ico_image_get_reduced_buf (GimpDrawable *layer,
 
 static gboolean
 ico_write_png (FILE         *fp,
-               GimpDrawable *layer,
+               ClayDrawable *layer,
                gint32        depth)
 {
   png_structp   png_ptr;
@@ -868,15 +868,15 @@ ico_write_png (FILE         *fp,
   png_byte    **row_pointers;
   gint          i, rowstride;
   gint          width, height;
-  GimpPalette  *palette;
+  ClayPalette  *palette;
   guchar       *buf;
 
   row_pointers = NULL;
   palette = NULL;
   buf = NULL;
 
-  width = gimp_drawable_get_width (layer);
-  height = gimp_drawable_get_height (layer);
+  width = clay_drawable_get_width (layer);
+  height = clay_drawable_get_height (layer);
 
   png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if ( !png_ptr )
@@ -930,7 +930,7 @@ ico_write_png (FILE         *fp,
 
 static gboolean
 ico_write_icon (FILE         *fp,
-                GimpDrawable *layer,
+                ClayDrawable *layer,
                 gint32        depth)
 {
   IcoFileDataHeader  header;
@@ -939,7 +939,7 @@ ico_write_icon (FILE         *fp,
   gint               width, height;
   guchar            *buf = NULL, *pixel;
   guint32           *buf32;
-  GimpPalette       *reduced_palette;
+  ClayPalette       *reduced_palette;
   GHashTable        *color_to_slot = NULL;
   guchar            *xor_map, *and_map;
 
@@ -951,8 +951,8 @@ ico_write_icon (FILE         *fp,
   D(("Creating data structures for icon %i ------------------------\n",
      num_icon));
 
-  width = gimp_drawable_get_width (layer);
-  height = gimp_drawable_get_height (layer);
+  width = clay_drawable_get_width (layer);
+  height = clay_drawable_get_height (layer);
 
   header.header_size    = 40;
   header.width          = width;
@@ -979,7 +979,7 @@ ico_write_icon (FILE         *fp,
   /* Set up colormap and and_map when necessary: */
   if (header.bpp <= 8)
     {
-      gint num_colors_used = gimp_palette_get_color_count (reduced_palette);
+      gint num_colors_used = clay_palette_get_color_count (reduced_palette);
 
       /* Create a colormap */
       palette32 = ico_create_palette (reduced_palette, num_colors, &black_index);
@@ -1163,18 +1163,18 @@ ico_save_info_free (IcoSaveInfo *info)
   memset (info, 0, sizeof (IcoSaveInfo));
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 ico_export_image (GFile                *file,
-                  GimpImage            *image,
-                  GimpProcedure        *procedure,
-                  GimpProcedureConfig  *config,
+                  ClayImage            *image,
+                  ClayProcedure        *procedure,
+                  ClayProcedureConfig  *config,
                   gint32                run_mode,
                   GError              **error)
 {
   IcoSaveInfo info;
 
   D(("*** Exporting Microsoft icon file %s\n",
-     gimp_file_get_utf8_name (file)));
+     clay_file_get_utf8_name (file)));
 
   info.is_cursor = FALSE;
 
@@ -1184,11 +1184,11 @@ ico_export_image (GFile                *file,
                             0, 0, error, &info);
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 cur_export_image (GFile                *file,
-                  GimpImage            *image,
-                  GimpProcedure        *procedure,
-                  GimpProcedureConfig  *config,
+                  ClayImage            *image,
+                  ClayProcedure        *procedure,
+                  ClayProcedureConfig  *config,
                   gint32                run_mode,
                   gsize                *n_hot_spot_x,
                   const gint32         *hot_spot_x,
@@ -1201,7 +1201,7 @@ cur_export_image (GFile                *file,
   IcoSaveInfo info;
 
   D(("*** Exporting Microsoft cursor file %s\n",
-     gimp_file_get_utf8_name (file)));
+     clay_file_get_utf8_name (file)));
 
   info.is_cursor = TRUE;
 
@@ -1212,12 +1212,12 @@ cur_export_image (GFile                *file,
                             0, 0, error, &info);
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 shared_save_image (GFile                *file,
                    FILE                 *fp_ani,
-                   GimpImage            *image,
-                   GimpProcedure        *procedure,
-                   GimpProcedureConfig  *config,
+                   ClayImage            *image,
+                   ClayProcedure        *procedure,
+                   ClayProcedureConfig  *config,
                    gint32                run_mode,
                    gsize                *n_hot_spot_x,
                    const gint32         *hot_spot_x,
@@ -1247,23 +1247,23 @@ shared_save_image (GFile                *file,
                        hot_spot_y,
                        error))
     {
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! fp_ani)
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! fp_ani)
     {
       /* Allow user to override default values */
       if (! ico_save_dialog (image, procedure, config, info,
                              NULL, NULL))
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
     }
 
   num_icons = fp_ani ? 1 : info->num_icons;
 
   if (! fp_ani)
     {
-      gimp_progress_init_printf (_("Exporting '%s'"),
-                                 gimp_file_get_utf8_name (file));
+      clay_progress_init_printf (_("Exporting '%s'"),
+                                 clay_file_get_utf8_name (file));
       fp = g_fopen (g_file_peek_path (file), "wb");
     }
   else
@@ -1275,8 +1275,8 @@ shared_save_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return GIMP_PDB_EXECUTION_ERROR;
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   header.reserved      = 0;
@@ -1286,7 +1286,7 @@ shared_save_image (GFile                *file,
     {
       ico_save_info_free (info);
       fclose (fp);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Sort bpp ascending, size descending within each tier.  This matches
@@ -1298,8 +1298,8 @@ shared_save_image (GFile                *file,
        iter = g_list_next (iter), i++)
     {
       order[i].index  = i;
-      order[i].width  = gimp_drawable_get_width (iter->data);
-      order[i].height = gimp_drawable_get_height (iter->data);
+      order[i].width  = clay_drawable_get_width (iter->data);
+      order[i].height = clay_drawable_get_height (iter->data);
       order[i].depth  = info->depths[i];
     }
 
@@ -1315,7 +1315,7 @@ shared_save_image (GFile                *file,
       g_free (entries);
       g_free (order);
       fclose (fp);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   for (i = 0; i < num_icons; i++)
@@ -1324,7 +1324,7 @@ shared_save_image (GFile                *file,
       gsize offset    = ftell (fp) - file_offset;
 
       if (! fp_ani)
-        gimp_progress_update ((gdouble) i / (gdouble) num_icons);
+        clay_progress_update ((gdouble) i / (gdouble) num_icons);
 
       iter = g_list_nth (info->layers, layer_idx);
 
@@ -1351,7 +1351,7 @@ shared_save_image (GFile                *file,
           g_free (entries);
           g_free (order);
           fclose (fp);
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       entries[i].size   = GUINT32_TO_LE (ftell (fp) - file_offset - offset);
@@ -1366,11 +1366,11 @@ shared_save_image (GFile                *file,
       ico_save_info_free (info);
       g_free (entries);
       fclose (fp);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   if (! fp_ani)
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 
   /* Updating parasite hot spots if needed */
   if (info->is_cursor)
@@ -1380,16 +1380,16 @@ shared_save_image (GFile                *file,
            iter = g_list_next (iter), i++)
         {
           gchar        *str;
-          GimpParasite *parasite;
+          ClayParasite *parasite;
 
           str = g_strdup_printf ("%d %d",
                                  info->hot_spot_x[i], info->hot_spot_y[i]);
-          parasite = gimp_parasite_new ("cur-hot-spot",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("cur-hot-spot",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (str) + 1, (gpointer) str);
           g_free (str);
-          gimp_item_attach_parasite (GIMP_ITEM (iter->data), parasite);
-          gimp_parasite_free (parasite);
+          clay_item_attach_parasite (CLAY_ITEM (iter->data), parasite);
+          clay_parasite_free (parasite);
         }
     }
 
@@ -1418,5 +1418,5 @@ shared_save_image (GFile                *file,
     }
   g_free (entries);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }

@@ -4,22 +4,22 @@ modules_deps = [
 ]
 
 color_selector_libs = [
-  libgimpbase,
-  libgimpcolor,
-  libgimpconfig,
-  libgimpmodule,
-  libgimpwidgets,
+  libclaybase,
+  libclaycolor,
+  libclayconfig,
+  libclaymodule,
+  libclaywidgets,
 ]
 controller_libs = [
-  libgimpmodule,
-  libgimpwidgets,
+  libclaymodule,
+  libclaywidgets,
 ]
 display_filter_libs = [
-  libgimpbase,
-  libgimpcolor,
-  libgimpconfig,
-  libgimpmodule,
-  libgimpwidgets,
+  libclaybase,
+  libclaycolor,
+  libclayconfig,
+  libclaymodule,
+  libclaywidgets,
 ]
 
 # Name, Sources, deps, link.
@@ -32,7 +32,7 @@ modules = [
     'link': color_selector_libs,
   }, {
     'name': 'color-selector-wheel',
-    'srcs': [ 'color-selector-wheel.c', 'gimpcolorwheel.c', ],
+    'srcs': [ 'color-selector-wheel.c', 'claycolorwheel.c', ],
     'link': color_selector_libs,
   }, {
     'name': 'display-filter-clip-warning',
@@ -55,7 +55,7 @@ modules = [
 if have_linuxinput
   modules += {
     'name': 'controller-linux-input',
-    'srcs': [ 'controller-linux-input.c', 'gimpinputdevicestore-gudev.c', ],
+    'srcs': [ 'controller-linux-input.c', 'clayinputdevicestore-gudev.c', ],
     'deps': gudev,
     'link': controller_libs,
   }
@@ -64,7 +64,7 @@ endif
 if directx.found()
   modules += {
     'name': 'controller-dx-dinput',
-    'srcs': [ 'controller-dx-dinput.c', 'gimpinputdevicestore-dx.c', ],
+    'srcs': [ 'controller-dx-dinput.c', 'clayinputdevicestore-dx.c', ],
     'deps': directx,
     'link': [ controller_libs, ],
     'link-args': [ '-lrpcrt4', ],
@@ -94,6 +94,6 @@ foreach module : modules
     link_with: link,
     link_args: link_args,
     install: true,
-    install_dir: gimpplugindir / 'modules',
+    install_dir: clayplugindir / 'modules',
   )
 endforeach

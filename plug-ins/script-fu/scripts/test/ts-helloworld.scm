@@ -1,11 +1,11 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 
 ; "Hello, World" Test v1.00 February 29, 2004
 ; by Kevin Cozens <kcozens@interlog.com>
 ;
 ; Creates an image with the text "Hello, World!"
 ; This was the first TinyScheme based script ever created and run for the
-; 2.x version of GIMP.
+; 2.x version of Clay.
 
 ; xyz.kainzmayer.ClayDesign
 ; Copyright (C) 1995 Spencer Kimball and Peter Mattis
@@ -30,24 +30,24 @@
   (let* (
         (width 10)
         (height 10)
-        (img (gimp-image-new width height RGB))
+        (img (clay-image-new width height RGB))
         (text-layer)
         )
 
-    (gimp-context-push)
+    (clay-context-push)
 
-    (gimp-image-undo-disable img)
-    (gimp-context-set-foreground color)
+    (clay-image-undo-disable img)
+    (clay-context-set-foreground color)
 
-    (set! text-layer (gimp-text-font img -1 0 0 text 10 TRUE size font))
-    (set! width (gimp-drawable-get-width text-layer))
-    (set! height (gimp-drawable-get-height text-layer))
-    (gimp-image-resize img width height 0 0)
+    (set! text-layer (clay-text-font img -1 0 0 text 10 TRUE size font))
+    (set! width (clay-drawable-get-width text-layer))
+    (set! height (clay-drawable-get-height text-layer))
+    (clay-image-resize img width height 0 0)
 
-    (gimp-image-undo-enable img)
-    (gimp-display-new img)
+    (clay-image-undo-enable img)
+    (clay-display-new img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

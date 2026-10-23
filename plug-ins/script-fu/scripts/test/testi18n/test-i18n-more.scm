@@ -1,4 +1,4 @@
-#!/usr/bin/env gimp-script-fu-interpreter-3.0
+#!/usr/bin/env clay-script-fu-interpreter-3.0
 ;!# Close comment started on first line. Needed by gettext.
 
 ; An independently interpreted Scheme plugin

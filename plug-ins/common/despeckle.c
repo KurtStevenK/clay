@@ -24,12 +24,12 @@
 
 #include <stdlib.h>
 
-#include "libgimpcolor/gimpcolor-private.h"
+#include "libclaycolor/claycolor-private.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 /*
@@ -73,12 +73,12 @@ typedef struct _DespeckleClass DespeckleClass;
 
 struct _Despeckle
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _DespeckleClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -87,18 +87,18 @@ struct _DespeckleClass
 
 GType                   despeckle_get_type         (void);
 
-static GList          * despeckle_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * despeckle_create_procedure (GimpPlugIn           *plug_in,
+static GList          * despeckle_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * despeckle_create_procedure (ClayPlugIn           *plug_in,
                                                     const gchar          *name);
 
-static GimpValueArray * despeckle_run              (GimpProcedure        *procedure,
-                                                    GimpRunMode           run_mode,
-                                                    GimpImage            *image,
-                                                    GimpDrawable        **drawables,
-                                                    GimpProcedureConfig  *config,
+static ClayValueArray * despeckle_run              (ClayProcedure        *procedure,
+                                                    ClayRunMode           run_mode,
+                                                    ClayImage            *image,
+                                                    ClayDrawable        **drawables,
+                                                    ClayProcedureConfig  *config,
                                                     gpointer              run_data);
 
-static gboolean         despeckle                  (GimpDrawable         *drawable,
+static gboolean         despeckle                  (ClayDrawable         *drawable,
                                                     GObject              *config,
                                                     GError              **error);
 static void             despeckle_median           (GObject              *config,
@@ -109,17 +109,17 @@ static void             despeckle_median           (GObject              *config
                                                     gint                  bpp,
                                                     gboolean              preview);
 
-static gboolean         despeckle_dialog           (GimpProcedure        *procedure,
+static gboolean         despeckle_dialog           (ClayProcedure        *procedure,
                                                     GObject              *config,
-                                                    GimpDrawable         *drawable);
+                                                    ClayDrawable         *drawable);
 
 static void             preview_update             (GtkWidget            *preview,
                                                     GObject              *config);
 
 
-G_DEFINE_TYPE (Despeckle, despeckle, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Despeckle, despeckle, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (DESPECKLE_TYPE)
+CLAY_MAIN (DESPECKLE_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -134,7 +134,7 @@ static DespeckleHistogram  histogram;
 static void
 despeckle_class_init (DespeckleClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = despeckle_query_procedures;
   plug_in_class->create_procedure = despeckle_create_procedure;
@@ -147,52 +147,52 @@ despeckle_init (Despeckle *despeckle)
 }
 
 static GList *
-despeckle_query_procedures (GimpPlugIn *plug_in)
+despeckle_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-despeckle_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+despeckle_create_procedure (ClayPlugIn  *plug_in,
                             const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             despeckle_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*, GRAY*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*, GRAY*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("Des_peckle..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Filters/Enhance");
+      clay_procedure_set_menu_label (procedure, _("Des_peckle..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Filters/Enhance");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Remove speckle noise from the "
                                           "image"),
                                         _("This plug-in selectively performs "
                                           "a median or adaptive box filter on "
                                           "an image."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Michael Sweet <mike@easysw.com>",
                                       "Copyright 1997-1998 by Michael Sweet",
                                       PLUG_IN_VERSION);
 
-      gimp_procedure_add_int_argument (procedure, "radius",
+      clay_procedure_add_int_argument (procedure, "radius",
                                        _("R_adius"),
                                        _("Filter box radius"),
                                        1, MAX_RADIUS, 3,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "type",
+      clay_procedure_add_choice_argument (procedure, "type",
                                           _("_Filter type"),
                                           _("Filter type"),
-                                          gimp_choice_new_with_values ("median",             0,                 _("Median"),             NULL,
+                                          clay_choice_new_with_values ("median",             0,                 _("Median"),             NULL,
                                                                        "adaptive",           FILTER_ADAPTIVE,   _("Adaptive"),           NULL,
                                                                        "recursive-median",   FILTER_RECURSIVE, _("Recursive-Median"),   NULL,
                                                                        "recursive-adaptive", 3,                 _("Recursive-Adaptive"), NULL,
@@ -200,13 +200,13 @@ despeckle_create_procedure (GimpPlugIn  *plug_in,
                                           "adaptive",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "black",
+      clay_procedure_add_int_argument (procedure, "black",
                                        _("_Black level"),
                                        _("Black level"),
                                        -1, 255, 7,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "white",
+      clay_procedure_add_int_argument (procedure, "white",
                                        _("_White level"),
                                        _("White level"),
                                        0, 256, 248,
@@ -216,27 +216,27 @@ despeckle_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-despeckle_run (GimpProcedure        *procedure,
-               GimpRunMode           run_mode,
-               GimpImage            *image,
-               GimpDrawable        **drawables,
-               GimpProcedureConfig  *config,
+static ClayValueArray *
+despeckle_run (ClayProcedure        *procedure,
+               ClayRunMode           run_mode,
+               ClayImage            *image,
+               ClayDrawable        **drawables,
+               ClayProcedureConfig  *config,
                gpointer              run_data)
 {
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   GError       *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -244,18 +244,18 @@ despeckle_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (! gimp_drawable_is_rgb (drawable) && ! gimp_drawable_is_gray (drawable))
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR, NULL);
+  if (! clay_drawable_is_rgb (drawable) && ! clay_drawable_is_gray (drawable))
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! despeckle_dialog (procedure, G_OBJECT (config), drawable))
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL, NULL);
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! despeckle_dialog (procedure, G_OBJECT (config), drawable))
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL, NULL);
 
   if (! despeckle (drawable, G_OBJECT (config), &error))
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static inline guchar
@@ -270,7 +270,7 @@ pixel_luminance (const guchar *p,
 
     case 3:
     case 4:
-      return GIMP_RGB_LUMINANCE (p[0], p[1], p[2]);
+      return CLAY_RGB_LUMINANCE (p[0], p[1], p[2]);
 
     default:
       return 0; /* should not be reached */
@@ -308,18 +308,18 @@ pixel_copy (guchar       *dest,
  */
 
 static const Babl *
-get_u8_format (GimpDrawable *drawable)
+get_u8_format (ClayDrawable *drawable)
 {
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         return babl_format ("R'G'B'A u8");
       else
         return babl_format ("R'G'B' u8");
     }
   else
     {
-      if (gimp_drawable_has_alpha (drawable))
+      if (clay_drawable_has_alpha (drawable))
         return babl_format ("Y'A u8");
       else
         return babl_format ("Y' u8");
@@ -327,7 +327,7 @@ get_u8_format (GimpDrawable *drawable)
 }
 
 static gboolean
-despeckle (GimpDrawable *drawable,
+despeckle (ClayDrawable *drawable,
            GObject      *config,
            GError      **error)
 {
@@ -341,20 +341,20 @@ despeckle (GimpDrawable *drawable,
   gint        width, height;
   gsize       bufsize = 0;
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &x, &y, &width, &height))
     return TRUE;
 
   format  = get_u8_format (drawable);
   img_bpp = babl_format_get_bytes_per_pixel (format);
 
-  src_buffer  = gimp_drawable_get_buffer (drawable);
-  dest_buffer = gimp_drawable_get_shadow_buffer (drawable);
+  src_buffer  = clay_drawable_get_buffer (drawable);
+  dest_buffer = clay_drawable_get_shadow_buffer (drawable);
 
   if (! g_size_checked_mul (&bufsize, width,   height) ||
       ! g_size_checked_mul (&bufsize, bufsize, img_bpp))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       return FALSE;
@@ -365,7 +365,7 @@ despeckle (GimpDrawable *drawable,
 
   if (src == NULL || dst == NULL)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("There was not enough memory to complete the operation."));
       g_free (src);
 
@@ -386,8 +386,8 @@ despeckle (GimpDrawable *drawable,
   g_object_unref (src_buffer);
   g_object_unref (dest_buffer);
 
-  gimp_drawable_merge_shadow (drawable, TRUE);
-  gimp_drawable_update (drawable, x, y, width, height);
+  clay_drawable_merge_shadow (drawable, TRUE);
+  clay_drawable_update (drawable, x, y, width, height);
 
   g_free (dst);
   g_free (src);
@@ -396,9 +396,9 @@ despeckle (GimpDrawable *drawable,
 }
 
 static gboolean
-despeckle_dialog (GimpProcedure *procedure,
+despeckle_dialog (ClayProcedure *procedure,
                   GObject       *config,
-                  GimpDrawable  *drawable)
+                  ClayDrawable  *drawable)
 {
   GtkWidget *dialog;
   GtkWidget *preview;
@@ -407,41 +407,41 @@ despeckle_dialog (GimpProcedure *procedure,
   GtkWidget *combo;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Despeckle"));
 
-  combo = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  combo = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                             "type", G_TYPE_NONE);
   gtk_widget_set_margin_bottom (combo, 12);
 
   /*
    * Box size (diameter) control...
    */
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "radius", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
   /*
    * Black level control...
    */
-  scale = gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  scale = clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "black", 1.0);
   gtk_widget_set_margin_bottom (scale, 12);
   /*
    * White level control...
    */
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "white", 1.0);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "despeckle-vbox",
                                          "type", "radius", "black", "white",
                                          NULL);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 
-  preview = gimp_procedure_dialog_get_drawable_preview (GIMP_PROCEDURE_DIALOG (dialog),
+  preview = clay_procedure_dialog_get_drawable_preview (CLAY_PROCEDURE_DIALOG (dialog),
                                                         "preview", drawable);
   gtk_widget_set_margin_bottom (preview, 12);
 
@@ -452,15 +452,15 @@ despeckle_dialog (GimpProcedure *procedure,
                     config);
 
   g_signal_connect_swapped (config, "notify",
-                            G_CALLBACK (gimp_preview_invalidate),
+                            G_CALLBACK (clay_preview_invalidate),
                             preview);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "preview", "despeckle-vbox",
                               NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -471,8 +471,8 @@ static void
 preview_update (GtkWidget *widget,
                 GObject   *config)
 {
-  GimpPreview  *preview  = GIMP_PREVIEW (widget);
-  GimpDrawable *drawable = g_object_get_data (config, "drawable");
+  ClayPreview  *preview  = CLAY_PREVIEW (widget);
+  ClayDrawable *drawable = g_object_get_data (config, "drawable");
   gsize         bufsize  = 0;
   GeglBuffer   *src_buffer;
   const Babl   *format;
@@ -485,10 +485,10 @@ preview_update (GtkWidget *widget,
   format  = get_u8_format (drawable);
   img_bpp = babl_format_get_bytes_per_pixel (format);
 
-  gimp_preview_get_size (preview, &width, &height);
-  gimp_preview_get_position (preview, &x1, &y1);
+  clay_preview_get_size (preview, &width, &height);
+  clay_preview_get_position (preview, &x1, &y1);
 
-  src_buffer = gimp_drawable_get_buffer (drawable);
+  src_buffer = clay_drawable_get_buffer (drawable);
 
   if (! g_size_checked_mul (&bufsize, width,   height) ||
       ! g_size_checked_mul (&bufsize, bufsize, img_bpp))
@@ -510,7 +510,7 @@ preview_update (GtkWidget *widget,
   despeckle_median (config,
                     src, dst, width, height, img_bpp, TRUE);
 
-  gimp_preview_draw_buffer (preview, dst, width * img_bpp);
+  clay_preview_draw_buffer (preview, dst, width * img_bpp);
 
   g_object_unref (src_buffer);
 
@@ -781,7 +781,7 @@ despeckle_median (GObject  *config,
                 "black",  &black_level,
                 "white",  &white_level,
                 NULL);
-  filter_type = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  filter_type = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                      "type");
 
   memset (&histogram, 0, sizeof(histogram));
@@ -789,7 +789,7 @@ despeckle_median (GObject  *config,
   max_progress = width * height;
 
   if (! preview)
-    gimp_progress_init (_("Despeckle"));
+    clay_progress_init (_("Despeckle"));
 
   adapt_radius = radius;
   for (y = 0; y < height; y++)
@@ -864,9 +864,9 @@ despeckle_median (GObject  *config,
       progress += width;
 
       if (! preview && y % 32 == 0)
-        gimp_progress_update ((gdouble) progress / (gdouble) max_progress);
+        clay_progress_update ((gdouble) progress / (gdouble) max_progress);
     }
 
   if (! preview)
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 }

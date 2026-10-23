@@ -1,0 +1,34 @@
+/* Ubuntu theme, dim scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(242,230,239);
+@define-color bg-color                   rgb(44,0,30);
+@define-color border-color               rgb(72,32,59);
+@define-color dimmed-fg-color            rgb(192,172,187);
+@define-color disabled-fg-color          rgb(153,127,145);
+@define-color disabled-button-color      rgb(107,74,97);
+@define-color hover-color                rgb(72,32,59);
+@define-color widget-bg-color            rgb(56,14,43);
+@define-color selected-color             rgb(84,46,72);
+@define-color extreme-bg-color           rgb(31,0,21);
+@define-color extreme-selected-color     rgb(72,32,59);
+@define-color strong-border-color        rgb(113,80,103);
+@define-color stronger-border-color      rgb(113,80,103);
+@define-color edge-border-color          rgb(113,80,103);
+@define-color scrollbar-slider-color     rgb(113,80,103);
+@define-color scrollbar-trough-color     rgb(31,0,21);
+@define-color ruler-color                rgba(72,32,59,0.3);
+@define-color accent-color               rgb(233,84,32);
+@define-color accent-hover-color         rgb(237,118,77);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(255,123,99);
+@define-color good-color                 rgb(87,227,137);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif; }

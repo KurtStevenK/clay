@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -230,7 +230,7 @@ typedef struct
       guint magic2;  /* FOURCC "-DDS" */
       guint version;
       guint extra_fourcc;
-    } gimp_dds_special;
+    } clay_dds_special;
     guchar pad[4 * 11];
   } reserved;
   dds_pixel_format_t pixelfmt;
@@ -473,7 +473,7 @@ typedef enum _D3DFORMAT
   D3DFMT_A2B10G10R10_XR_BIAS  = 119,
   D3DFMT_BINARYBUFFER         = 199,
 
-  /* Unofficial formats added by GIMP */
+  /* Unofficial formats added by Clay */
   D3DFMT_B8G8R8               = 220,
 } D3DFORMAT;
 

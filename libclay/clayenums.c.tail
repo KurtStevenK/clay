@@ -1,0 +1,217 @@
+
+typedef GType (* ClayGetTypeFunc) (void);
+
+static const ClayGetTypeFunc get_type_funcs[] =
+{
+  clay_add_mask_type_get_type,
+  clay_brush_application_mode_get_type,
+  clay_brush_generated_shape_get_type,
+  clay_cap_style_get_type,
+  clay_channel_ops_get_type,
+  clay_channel_type_get_type,
+  clay_clone_type_get_type,
+  clay_color_management_mode_get_type,
+  clay_color_rendering_intent_get_type,
+  clay_color_tag_get_type,
+  clay_component_type_get_type,
+  clay_convert_dither_type_get_type,
+  clay_convert_palette_type_get_type,
+  clay_convolve_type_get_type,
+  clay_curve_point_type_get_type,
+  clay_curve_type_get_type,
+  clay_desaturate_mode_get_type,
+  clay_dodge_burn_type_get_type,
+  clay_export_capabilities_get_type,
+  clay_file_chooser_action_get_type,
+  clay_fill_type_get_type,
+  clay_foreground_extract_mode_get_type,
+  clay_gradient_blend_color_space_get_type,
+  clay_gradient_segment_color_get_type,
+  clay_gradient_segment_type_get_type,
+  clay_gradient_type_get_type,
+  clay_grid_style_get_type,
+  clay_histogram_channel_get_type,
+  clay_hue_range_get_type,
+  clay_icon_type_get_type,
+  clay_image_base_type_get_type,
+  clay_image_type_get_type,
+  clay_ink_blob_type_get_type,
+  clay_interpolation_type_get_type,
+  clay_join_style_get_type,
+  clay_layer_color_space_get_type,
+  clay_layer_composite_mode_get_type,
+  clay_layer_mode_get_type,
+  clay_mask_apply_mode_get_type,
+  clay_merge_type_get_type,
+  clay_message_handler_type_get_type,
+  clay_offset_type_get_type,
+  clay_orientation_type_get_type,
+  clay_paint_application_mode_get_type,
+  clay_path_stroke_type_get_type,
+  clay_pdb_error_handler_get_type,
+  clay_pdb_proc_type_get_type,
+  clay_pdb_status_type_get_type,
+  clay_precision_get_type,
+  clay_progress_command_get_type,
+  clay_repeat_mode_get_type,
+  clay_rotation_type_get_type,
+  clay_run_mode_get_type,
+  clay_select_criterion_get_type,
+  clay_size_type_get_type,
+  clay_stack_trace_mode_get_type,
+  clay_stroke_method_get_type,
+  clay_text_direction_get_type,
+  clay_text_hint_style_get_type,
+  clay_text_justification_get_type,
+  clay_text_outline_get_type,
+  clay_text_outline_direction_get_type,
+  clay_transfer_mode_get_type,
+  clay_transform_direction_get_type,
+  clay_transform_resize_get_type,
+  clay_trc_type_get_type,
+  gegl_distance_metric_get_type
+};
+
+static const gchar * const type_names[] =
+{
+  "ClayAddMaskType",
+  "ClayBrushApplicationMode",
+  "ClayBrushGeneratedShape",
+  "ClayCapStyle",
+  "ClayChannelOps",
+  "ClayChannelType",
+  "ClayCloneType",
+  "ClayColorManagementMode",
+  "ClayColorRenderingIntent",
+  "ClayColorTag",
+  "ClayComponentType",
+  "ClayConvertDitherType",
+  "ClayConvertPaletteType",
+  "ClayConvolveType",
+  "ClayCurvePointType",
+  "ClayCurveType",
+  "ClayDesaturateMode",
+  "ClayDodgeBurnType",
+  "ClayExportCapabilities",
+  "ClayFileChooserAction",
+  "ClayFillType",
+  "ClayForegroundExtractMode",
+  "ClayGradientBlendColorSpace",
+  "ClayGradientSegmentColor",
+  "ClayGradientSegmentType",
+  "ClayGradientType",
+  "ClayGridStyle",
+  "ClayHistogramChannel",
+  "ClayHueRange",
+  "ClayIconType",
+  "ClayImageBaseType",
+  "ClayImageType",
+  "ClayInkBlobType",
+  "ClayInterpolationType",
+  "ClayJoinStyle",
+  "ClayLayerColorSpace",
+  "ClayLayerCompositeMode",
+  "ClayLayerMode",
+  "ClayMaskApplyMode",
+  "ClayMergeType",
+  "ClayMessageHandlerType",
+  "ClayOffsetType",
+  "ClayOrientationType",
+  "ClayPaintApplicationMode",
+  "ClayPathStrokeType",
+  "ClayPDBErrorHandler",
+  "ClayPDBProcType",
+  "ClayPDBStatusType",
+  "ClayPrecision",
+  "ClayProgressCommand",
+  "ClayRepeatMode",
+  "ClayRotationType",
+  "ClayRunMode",
+  "ClaySelectCriterion",
+  "ClaySizeType",
+  "ClayStackTraceMode",
+  "ClayStrokeMethod",
+  "ClayTextDirection",
+  "ClayTextHintStyle",
+  "ClayTextJustification",
+  "ClayTextOutline",
+  "ClayTextOutlineDirection",
+  "ClayTransferMode",
+  "ClayTransformDirection",
+  "ClayTransformResize",
+  "ClayTRCType",
+  "GeglDistanceMetric"
+};
+
+static gboolean enums_initialized = FALSE;
+
+#if 0
+/*  keep around as documentation how to do compat enums  */
+GType clay_convert_dither_type_compat_get_type (void);
+#endif
+
+/**
+ * clay_enums_init:
+ *
+ * This function makes sure all the enum types are registered
+ * with the #GType system. This is intended for use by language
+ * bindings that need the symbols early, before clay_main is run.
+ * It's not necessary for plug-ins to call this directly, because
+ * the normal plug-in initialization code will handle it implicitly.
+ *
+ * Since: 2.4
+ **/
+void
+clay_enums_init (void)
+{
+  const ClayGetTypeFunc *funcs = get_type_funcs;
+#if 0
+  GQuark                 quark;
+#endif
+  gint                   i;
+
+  if (enums_initialized)
+    return;
+
+  for (i = 0; i < G_N_ELEMENTS (get_type_funcs); i++, funcs++)
+    {
+      GType type = (*funcs) ();
+
+      g_type_class_ref (type);
+    }
+
+#if 0
+  /*  keep around as documentation how to do compat enums  */
+
+  /*  keep compat enum code in sync with app/app.c (app_libs_init)  */
+  quark = g_quark_from_static_string ("clay-compat-enum");
+
+  g_type_set_qdata (CLAY_TYPE_CONVERT_DITHER_TYPE, quark,
+		    (gpointer) clay_convert_dither_type_compat_get_type ());
+#endif
+
+  clay_base_compat_enums_init ();
+
+  enums_initialized = TRUE;
+}
+
+/**
+ * clay_enums_get_type_names:
+ * @n_type_names: (out): return location for the number of names
+ *
+ * This function gives access to the list of enums registered by libclay.
+ * The returned array is static and must not be modified.
+ *
+ * Returns: (array length=n_type_names) (transfer none): an array with type names
+ *
+ * Since: 2.2
+ **/
+const gchar **
+clay_enums_get_type_names (gint *n_type_names)
+{
+  g_return_val_if_fail (n_type_names != NULL, NULL);
+
+  *n_type_names = G_N_ELEMENTS (type_names);
+
+  return (const gchar **) type_names;
+}

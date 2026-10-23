@@ -22,8 +22,8 @@
 
   (let* (
         (theImage inImage)
-        (theHeight (gimp-image-get-height theImage))
-        (theWidth  (gimp-image-get-width theImage))
+        (theHeight (clay-image-get-height theImage))
+        (theWidth  (clay-image-get-width theImage))
         (theNumber inNumber)
         (theSize (min theWidth theHeight))
         (theStain 0)
@@ -31,27 +31,27 @@
         (theSpread 0)
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
-    (gimp-image-undo-group-start theImage)
+    (clay-image-undo-group-start theImage)
 
     (while (> theNumber 0)
       (set! theNumber (- theNumber 1))
-      (set! theStain (gimp-layer-new theImage _"Stain" theSize theSize
+      (set! theStain (clay-layer-new theImage _"Stain" theSize theSize
                                      RGBA-IMAGE 100
                                      ; inDark is [0, 1] not [#f, #t]
                                      (if (= inDark TRUE)
                                         LAYER-MODE-DARKEN-ONLY
                                         LAYER-MODE-NORMAL)))
 
-      (gimp-image-insert-layer theImage theStain 0 0)
-      (gimp-selection-all theImage)
-      (gimp-drawable-edit-clear theStain)
+      (clay-image-insert-layer theImage theStain 0 0)
+      (clay-selection-all theImage)
+      (clay-drawable-edit-clear theStain)
 
       (let ((blobSize (/ (random (- theSize 40)) (+ (random 3) 1))))
         (if (< blobSize 32) (set! blobSize 32))
-        (gimp-image-select-ellipse theImage
+        (clay-image-select-ellipse theImage
 				   CHANNEL-OP-REPLACE
 				   (/ (- theSize blobSize) 2)
 				   (/ (- theSize blobSize) 2)
@@ -95,30 +95,30 @@
       (script-fu-use-v3)
 
 
-      (gimp-context-set-gradient inGradient)
+      (clay-context-set-gradient inGradient)
 
       ; only fill if there is a selection
       ; First element of returned list is a boolean.
-      (if (car (gimp-selection-bounds theImage))
-        (gimp-drawable-edit-gradient-fill theStain
+      (if (car (clay-selection-bounds theImage))
+        (clay-drawable-edit-gradient-fill theStain
             GRADIENT-SHAPEBURST-DIMPLED 0
             #f 1 0
             #t
             0 0 0 0)
       )
 
-      (gimp-layer-set-offsets theStain
+      (clay-layer-set-offsets theStain
                               (- (random theWidth) (/ theSize 2))
                               (- (random theHeight) (/ theSize 2)))
     )
 
-    (gimp-selection-none theImage)
+    (clay-selection-none theImage)
 
-    (gimp-image-undo-group-end theImage)
+    (clay-image-undo-group-end theImage)
 
-    (gimp-displays-flush)
+    (clay-displays-flush)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

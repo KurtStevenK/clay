@@ -1,15 +1,15 @@
 
-gimpdbusservice_gen = gnome.gdbus_codegen(
-  'gimpdbusservice-generated',
+claydbusservice_gen = gnome.gdbus_codegen(
+  'claydbusservice-generated',
   'dbus-service.xml',
   interface_prefix: 'xyz.kainzmayer.ClayDesign.',
-  namespace: 'GimpDBusService',
+  namespace: 'ClayDBusService',
 )
 
 libappgui_sources = [
-  'gimpapp.c',
-  'gimpdbusservice.c',
-  'gimpuiconfigurer.c',
+  'clayapp.c',
+  'claydbusservice.c',
+  'clayuiconfigurer.c',
   'gui-message.c',
   'gui-unique.c',
   'gui-vtable.c',
@@ -19,7 +19,7 @@ libappgui_sources = [
   'session.c',
   'splash.c',
   'themes.c',
-  gimpdbusservice_gen,
+  claydbusservice_gen,
 ]
 
 # Workaround for generated header included in other directories.
@@ -29,7 +29,7 @@ configInclude = include_directories('.')
 libappgui = static_library('appgui',
   libappgui_sources,
   include_directories: [ rootInclude, rootAppInclude, ],
-  c_args: '-DG_LOG_DOMAIN="Gimp-GUI"',
+  c_args: '-DG_LOG_DOMAIN="Clay-GUI"',
   dependencies: [
     cairo, gegl, gdk_pixbuf, gexiv2, gio_specific, gtk3
   ],

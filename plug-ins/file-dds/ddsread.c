@@ -1,5 +1,5 @@
 /*
- * DDS GIMP plugin
+ * DDS Clay plugin
  *
  * Copyright (C) 2004-2012 Shawn Kirst <skirst@gmail.com>,
  * with parts (C) 2003 Arne Reuter <homepage@arnereuter.de> where specified.
@@ -38,10 +38,10 @@
 #include <gtk/gtk.h>
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include <libgimp/stdplugins-intl.h>
+#include <libclay/stdplugins-intl.h>
 
 #include "dds.h"
 #include "ddsread.h"
@@ -56,17 +56,17 @@
  * Struct containing all info needed to parse the file.
  * This can be thought of as a version-agnostic header,
  * holding all relevant data from the two headers
- * plus some GIMP-specific information.
+ * plus some Clay-specific information.
  */
 typedef struct
 {
   fmt_read_info_t       read_info;
   gchar                 fourcc[4];
-  gchar                 gimp_fourcc[4];
+  gchar                 clay_fourcc[4];
   guint                 flags;
   guint                 fmt_flags;
   guint                 bpp;
-  guint                 gimp_bpp;
+  guint                 clay_bpp;
   DXGI_FORMAT           dxgi_format;
   D3DFORMAT             d3d9_format;
   DDS_COMPRESSION_TYPE  comp_format;
@@ -79,7 +79,7 @@ typedef struct
   guint                 volume_slices;
   guint                 array_items;
   guint                 cubemap_faces;
-  guint                 gimp_version;
+  guint                 clay_version;
   guchar               *palette;
 } dds_load_info_t;
 
@@ -95,7 +95,7 @@ static gboolean      validate_dx10_header (dds_header_dx10_t    *dx10hdr,
                                            GError              **error);
 static gboolean      load_layer           (FILE                 *fp,
                                            dds_load_info_t      *load_info,
-                                           GimpImage            *image,
+                                           ClayImage            *image,
                                            guint                 level,
                                            gchar                *prefix,
                                            guint                *layer_index,
@@ -104,7 +104,7 @@ static gboolean      load_layer           (FILE                 *fp,
                                            GError              **error);
 static gboolean      load_mipmaps         (FILE                 *fp,
                                            dds_load_info_t      *load_info,
-                                           GimpImage            *image,
+                                           ClayImage            *image,
                                            gchar                *prefix,
                                            guint                *layer_index,
                                            guchar               *pixels,
@@ -113,27 +113,27 @@ static gboolean      load_mipmaps         (FILE                 *fp,
                                            GError              **error);
 static gboolean      load_face            (FILE                 *fp,
                                            dds_load_info_t      *load_info,
-                                           GimpImage            *image,
+                                           ClayImage            *image,
                                            gchar                *prefix,
                                            guint                *layer_index,
                                            guchar               *pixels,
                                            guchar               *buf,
                                            gboolean              read_mipmaps,
                                            GError              **error);
-static gboolean      load_dialog          (GimpProcedure        *procedure,
-                                           GimpProcedureConfig  *config);
+static gboolean      load_dialog          (ClayProcedure        *procedure,
+                                           ClayProcedureConfig  *config);
 
 
 /* Read DDS file */
-GimpPDBStatusType
+ClayPDBStatusType
 read_dds (GFile                *file,
-          GimpImage           **ret_image,
+          ClayImage           **ret_image,
           gboolean              interactive,
-          GimpProcedure        *procedure,
-          GimpProcedureConfig  *config,
+          ClayProcedure        *procedure,
+          ClayProcedureConfig  *config,
           GError              **error)
 {
-  GimpImage         *image       = NULL;
+  ClayImage         *image       = NULL;
   guint              layer_index = 0;
   guchar            *buf, *pixels;
   FILE              *fp;
@@ -142,18 +142,18 @@ read_dds (GFile                *file,
   dds_header_dx10_t  dx10hdr;
   dds_load_info_t    load_info;
   GList             *layers;
-  GimpImageBaseType  type;
-  GimpPrecision      precision = GIMP_PRECISION_U8_NON_LINEAR;
+  ClayImageBaseType  type;
+  ClayPrecision      precision = CLAY_PRECISION_U8_NON_LINEAR;
   gboolean           read_mipmaps;
   gboolean           flip_import;
   gint               i;
 
   if (interactive)
     {
-      gimp_ui_init ("dds");
+      clay_ui_init ("dds");
 
       if (! load_dialog (procedure, config))
-        return GIMP_PDB_CANCEL;
+        return CLAY_PDB_CANCEL;
     }
 
   g_object_get (config,
@@ -167,8 +167,8 @@ read_dds (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
-      return GIMP_PDB_EXECUTION_ERROR;
+                   clay_file_get_utf8_name (file), g_strerror (errno));
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Get total file size to compare against header info later */
@@ -176,7 +176,7 @@ read_dds (GFile                *file,
   file_size = ftell (fp);
   fseek (fp, 0L, SEEK_SET);
 
-  gimp_progress_init_printf (_("Loading: %s"), gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Loading: %s"), clay_file_get_utf8_name (file));
 
   /* Read standard header */
   memset (&hdr, 0, sizeof (dds_header_t));
@@ -186,7 +186,7 @@ read_dds (GFile                *file,
   if (! validate_header (&hdr, error))
     {
       fclose (fp);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Initialize load_info with data from header */
@@ -196,8 +196,8 @@ read_dds (GFile                *file,
   load_info.fmt_flags     = hdr.pixelfmt.flags;
   load_info.width         = hdr.width;
   load_info.height        = hdr.height;
-  load_info.gimp_version  = hdr.reserved.gimp_dds_special.version;
-  PUTL32 (load_info.gimp_fourcc, hdr.reserved.gimp_dds_special.extra_fourcc);
+  load_info.clay_version  = hdr.reserved.clay_dds_special.version;
+  PUTL32 (load_info.clay_fourcc, hdr.reserved.clay_dds_special.extra_fourcc);
 
   /* Get D3DFORMAT directly from FourCC if present there,
    * otherwise find it based on provided bpp, masks, and flags */
@@ -221,7 +221,7 @@ read_dds (GFile                *file,
       if (! validate_dx10_header (&dx10hdr, &load_info, error))
         {
           fclose (fp);
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
       load_info.array_items = dx10hdr.arraySize;
     }
@@ -264,7 +264,7 @@ read_dds (GFile                *file,
                    hdr.pixelfmt.rmask, hdr.pixelfmt.gmask,
                    hdr.pixelfmt.bmask, hdr.pixelfmt.amask,
                    hdr.pixelfmt.flags);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* If compressed, determine the format used */
@@ -406,9 +406,9 @@ read_dds (GFile                *file,
                                 load_info.pitch))
         {
           fclose (fp);
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("Image size is too big to handle."));
-          return GIMP_PDB_EXECUTION_ERROR;
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if (load_info.linear_size != hdr.pitch_or_linsize)
@@ -441,76 +441,76 @@ read_dds (GFile                *file,
       load_info.linear_size = load_info.pitch * hdr.height;
     }
 
-  /* Determine bytes-per-pixel and GIMP type needed */
+  /* Determine bytes-per-pixel and Clay type needed */
   if (load_info.fmt_flags & DDPF_FOURCC)
     {
       /* Compressed */
       switch (load_info.comp_format)
         {
         case DDS_COMPRESS_BC4:
-          load_info.bpp = load_info.gimp_bpp = 1;  /* Gray */
-          type = GIMP_GRAY;
+          load_info.bpp = load_info.clay_bpp = 1;  /* Gray */
+          type = CLAY_GRAY;
           break;
         case DDS_COMPRESS_BC5:
-          load_info.bpp = load_info.gimp_bpp = 3;  /* RGB */
-          type = GIMP_RGB;
+          load_info.bpp = load_info.clay_bpp = 3;  /* RGB */
+          type = CLAY_RGB;
           break;
         default:
-          load_info.bpp = load_info.gimp_bpp = 4;  /* RGBA */
-          type = GIMP_RGB;
+          load_info.bpp = load_info.clay_bpp = 4;  /* RGBA */
+          type = CLAY_RGB;
           break;
         }
 
-      precision = GIMP_PRECISION_U8_NON_LINEAR;
+      precision = CLAY_PRECISION_U8_NON_LINEAR;
     }
   else
     {
       /* Uncompressed */
       load_info.bpp = hdr.pixelfmt.bpp >> 3;
-      type = load_info.read_info.gimp_type;
+      type = load_info.read_info.clay_type;
 
-      /* Set up GIMP bytes-per-pixel */
-      if (load_info.read_info.gimp_type == GIMP_INDEXED)
+      /* Set up Clay bytes-per-pixel */
+      if (load_info.read_info.clay_type == CLAY_INDEXED)
         {
-          load_info.gimp_bpp = 1;
+          load_info.clay_bpp = 1;
 
           if (load_info.read_info.use_alpha)
-            load_info.gimp_bpp += 1;
+            load_info.clay_bpp += 1;
         }
       else
         {
-          if (load_info.read_info.gimp_type == GIMP_RGB)
-            load_info.gimp_bpp = 3;
-          else  /* load_info.read_info.gimp_type == GIMP_GRAY */
-            load_info.gimp_bpp = 1;
+          if (load_info.read_info.clay_type == CLAY_RGB)
+            load_info.clay_bpp = 3;
+          else  /* load_info.read_info.clay_type == CLAY_GRAY */
+            load_info.clay_bpp = 1;
 
           if (load_info.read_info.use_alpha)
-            load_info.gimp_bpp += 1;
+            load_info.clay_bpp += 1;
 
           if (load_info.read_info.output_bit_depth == 16)
-            load_info.gimp_bpp *= 2;
+            load_info.clay_bpp *= 2;
           else if (load_info.read_info.output_bit_depth == 32)
-            load_info.gimp_bpp *= 4;
+            load_info.clay_bpp *= 4;
         }
 
       /* Set up canvas precision */
       if (load_info.read_info.output_bit_depth == 8)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
         }
       else if (load_info.read_info.output_bit_depth == 16)
         {
           if (load_info.read_info.is_float)
-            precision = GIMP_PRECISION_HALF_LINEAR;
+            precision = CLAY_PRECISION_HALF_LINEAR;
           else
-            precision = GIMP_PRECISION_U16_NON_LINEAR;
+            precision = CLAY_PRECISION_U16_NON_LINEAR;
         }
       else if (load_info.read_info.output_bit_depth == 32)
         {
           if (load_info.read_info.is_float)
-            precision = GIMP_PRECISION_FLOAT_LINEAR;
+            precision = CLAY_PRECISION_FLOAT_LINEAR;
           else
-            precision = GIMP_PRECISION_U32_NON_LINEAR;
+            precision = CLAY_PRECISION_U32_NON_LINEAR;
         }
     }
 
@@ -521,11 +521,11 @@ read_dds (GFile                *file,
       fclose (fp);
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Invalid or corrupted DDS header."));
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  /* Generate GIMP image with set precision */
-  image = gimp_image_new_with_precision (load_info.width,
+  /* Generate Clay image with set precision */
+  image = clay_image_new_with_precision (load_info.width,
                                          load_info.height,
                                          type, precision);
 
@@ -534,14 +534,14 @@ read_dds (GFile                *file,
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_NOMEM,
                    _("Could not allocate a new image."));
       fclose (fp);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   /* Read palette for indexed DDS */
   if (load_info.fmt_flags & DDPF_PALETTEINDEXED8)
     {
       const Babl  *format  = babl_format ("R'G'B' u8");
-      GimpPalette *palette = gimp_image_get_palette (image);
+      ClayPalette *palette = clay_image_get_palette (image);
       GeglColor   *color   = gegl_color_new (NULL);
 
       load_info.palette = g_malloc (256 * 4);
@@ -550,8 +550,8 @@ read_dds (GFile                *file,
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Error reading palette."));
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
       for (i = 0; i < 1024; i += 4)
         {
@@ -562,15 +562,15 @@ read_dds (GFile                *file,
            * our own palette colors are opaque?
            */
           gegl_color_set_pixel (color, format, &load_info.palette[i]);
-          gimp_palette_add_entry (palette, NULL, color, &entry_num);
+          clay_palette_add_entry (palette, NULL, color, &entry_num);
         }
 
       g_object_unref (color);
     }
 
-  load_info.tile_height = gimp_tile_height ();
+  load_info.tile_height = clay_tile_height ();
 
-  pixels = g_new (guchar, load_info.tile_height * load_info.width * load_info.gimp_bpp);
+  pixels = g_new (guchar, load_info.tile_height * load_info.width * load_info.clay_bpp);
   buf    = g_malloc (load_info.linear_size + 1);
 
   if (load_info.cubemap_faces)  /* Cubemap texture */
@@ -580,8 +580,8 @@ read_dds (GFile                *file,
                        &layer_index, pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((load_info.cubemap_faces & DDSCAPS2_CUBEMAP_NEGATIVEX) &&
@@ -589,8 +589,8 @@ read_dds (GFile                *file,
                        &layer_index, pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((load_info.cubemap_faces & DDSCAPS2_CUBEMAP_POSITIVEY) &&
@@ -598,8 +598,8 @@ read_dds (GFile                *file,
                        &layer_index, pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((load_info.cubemap_faces & DDSCAPS2_CUBEMAP_NEGATIVEY) &&
@@ -607,8 +607,8 @@ read_dds (GFile                *file,
                        &layer_index, pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((load_info.cubemap_faces & DDSCAPS2_CUBEMAP_POSITIVEZ) &&
@@ -616,8 +616,8 @@ read_dds (GFile                *file,
                        &layer_index, pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if ((load_info.cubemap_faces & DDSCAPS2_CUBEMAP_NEGATIVEZ) &&
@@ -625,8 +625,8 @@ read_dds (GFile                *file,
                        &layer_index, pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
     }
   else if (load_info.volume_slices > 0)  /* Volume texture */
@@ -643,8 +643,8 @@ read_dds (GFile                *file,
             {
               g_free (plane);
               fclose (fp);
-              gimp_image_delete (image);
-              return GIMP_PDB_EXECUTION_ERROR;
+              clay_image_delete (image);
+              return CLAY_PDB_EXECUTION_ERROR;
             }
 
           g_free (plane);
@@ -668,8 +668,8 @@ read_dds (GFile                *file,
                     {
                       g_free (plane);
                       fclose (fp);
-                      gimp_image_delete (image);
-                      return GIMP_PDB_EXECUTION_ERROR;
+                      clay_image_delete (image);
+                      return CLAY_PDB_EXECUTION_ERROR;
                     }
 
                   g_free (plane);
@@ -690,16 +690,16 @@ read_dds (GFile                *file,
                             pixels, buf, error))
             {
               fclose (fp);
-              gimp_image_delete (image);
-              return GIMP_PDB_EXECUTION_ERROR;
+              clay_image_delete (image);
+              return CLAY_PDB_EXECUTION_ERROR;
             }
 
           if (! load_mipmaps (fp, &load_info, image, elem, &layer_index,
                               pixels, buf, read_mipmaps, error))
             {
               fclose (fp);
-              gimp_image_delete (image);
-              return GIMP_PDB_EXECUTION_ERROR;
+              clay_image_delete (image);
+              return CLAY_PDB_EXECUTION_ERROR;
             }
 
           g_free (elem);
@@ -711,20 +711,20 @@ read_dds (GFile                *file,
                         pixels, buf, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
 
       if (! load_mipmaps (fp, &load_info, image, "", &layer_index,
                           pixels, buf, read_mipmaps, error))
         {
           fclose (fp);
-          gimp_image_delete (image);
-          return GIMP_PDB_EXECUTION_ERROR;
+          clay_image_delete (image);
+          return CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   if (load_info.fmt_flags & DDPF_PALETTEINDEXED8)
     g_free (load_info.palette);
@@ -733,7 +733,7 @@ read_dds (GFile                *file,
   g_free (pixels);
   fclose (fp);
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
 
   if (! layers)
     {
@@ -745,13 +745,13 @@ read_dds (GFile                *file,
        */
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                    "Oops! NULL image read! Please report this!");
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
-  gimp_image_take_selected_layers (image, layers);
+  clay_image_take_selected_layers (image, layers);
 
   if (flip_import)
-    gimp_image_flip (image, GIMP_ORIENTATION_VERTICAL);
+    clay_image_flip (image, CLAY_ORIENTATION_VERTICAL);
 
   /* Store original format to use as a default for export */
   if (load_info.comp_format ||
@@ -759,7 +759,7 @@ read_dds (GFile                *file,
       load_info.dxgi_format ||
       load_info.mipmaps)
     {
-      GimpParasite *parasite = NULL;
+      ClayParasite *parasite = NULL;
       gchar        *import_settings;
 
       /* Save parasite version, compression format, pixel format,
@@ -771,19 +771,19 @@ read_dds (GFile                *file,
                                          load_info.flags,
                                          load_info.mipmaps);
 
-      parasite = gimp_parasite_new ("dds-import-settings",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("dds-import-settings",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (import_settings) + 1,
                                     (gpointer) import_settings);
       g_free (import_settings);
 
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
   *ret_image = image;
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 /*
@@ -823,14 +823,14 @@ read_header (dds_header_t *hdr,
   hdr->caps.caps1         = GETL32 (buf + 108);
   hdr->caps.caps2         = GETL32 (buf + 112);
 
-  /* GIMP-DDS special info */
+  /* Clay-DDS special info */
   if (GETL32 (buf + 32) == FOURCC ('G','I','M','P') &&
       GETL32 (buf + 36) == FOURCC ('-','D','D','S'))
     {
-      hdr->reserved.gimp_dds_special.magic1       = GETL32 (buf + 32);
-      hdr->reserved.gimp_dds_special.magic2       = GETL32 (buf + 36);
-      hdr->reserved.gimp_dds_special.version      = GETL32 (buf + 40);
-      hdr->reserved.gimp_dds_special.extra_fourcc = GETL32 (buf + 44);
+      hdr->reserved.clay_dds_special.magic1       = GETL32 (buf + 32);
+      hdr->reserved.clay_dds_special.magic2       = GETL32 (buf + 36);
+      hdr->reserved.clay_dds_special.version      = GETL32 (buf + 40);
+      hdr->reserved.clay_dds_special.extra_fourcc = GETL32 (buf + 44);
     }
 
   return TRUE;
@@ -994,10 +994,10 @@ validate_header (dds_header_t  *hdr,
         }
     }
 
-  if (hdr->width  > GIMP_MAX_IMAGE_SIZE || hdr->width  == 0 ||
-      hdr->height > GIMP_MAX_IMAGE_SIZE || hdr->height == 0)
+  if (hdr->width  > CLAY_MAX_IMAGE_SIZE || hdr->width  == 0 ||
+      hdr->height > CLAY_MAX_IMAGE_SIZE || hdr->height == 0)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Invalid image dimensions (%d x %d). "
                      "Image may be corrupt."),
                    hdr->width, hdr->height);
@@ -1101,7 +1101,7 @@ premultiplied_variant (const Babl* format)
 static gboolean
 load_layer (FILE             *fp,
             dds_load_info_t  *load_info,
-            GimpImage        *image,
+            ClayImage        *image,
             guint             level,
             gchar            *prefix,
             guint            *layer_index,
@@ -1112,12 +1112,12 @@ load_layer (FILE             *fp,
   GeglBuffer    *buffer;
   const Babl    *bablfmt  = NULL;
   gchar         *babl_str = "";
-  GimpImageType  type     = GIMP_RGBA_IMAGE;
+  ClayImageType  type     = CLAY_RGBA_IMAGE;
   guint          width    = load_info->width  >> level;
   guint          height   = load_info->height >> level;
   guint          size     = width * height * load_info->bpp;
   gchar         *layer_name;
-  GimpLayer     *layer;
+  ClayLayer     *layer;
   guint          layerw;
   gsize          file_size;
   gsize          current_position;
@@ -1138,15 +1138,15 @@ load_layer (FILE             *fp,
       switch (load_info->comp_format)
         {
         case DDS_COMPRESS_BC4:
-          type = GIMP_GRAY_IMAGE;
+          type = CLAY_GRAY_IMAGE;
           babl_str = "Y'";
           break;
         case DDS_COMPRESS_BC5:
-          type = GIMP_RGB_IMAGE;
+          type = CLAY_RGB_IMAGE;
           babl_str = "R'G'B'";
           break;
         default:
-          type = GIMP_RGBA_IMAGE;
+          type = CLAY_RGBA_IMAGE;
           babl_str = "R'G'B'A";
           break;
         }
@@ -1166,36 +1166,36 @@ load_layer (FILE             *fp,
   else  /* Uncompressed */
     {
       /* Set Babl format */
-      if (load_info->read_info.gimp_type == GIMP_INDEXED)
+      if (load_info->read_info.clay_type == CLAY_INDEXED)
         {
           if (load_info->read_info.use_alpha)
-            type = GIMP_INDEXEDA_IMAGE;
+            type = CLAY_INDEXEDA_IMAGE;
           else
-            type = GIMP_INDEXED_IMAGE;
+            type = CLAY_INDEXED_IMAGE;
         }
-      else if (load_info->read_info.gimp_type == GIMP_RGB)
+      else if (load_info->read_info.clay_type == CLAY_RGB)
         {
           if (load_info->read_info.use_alpha)
             {
-              type = GIMP_RGBA_IMAGE;
+              type = CLAY_RGBA_IMAGE;
               babl_str = "R'G'B'A";
             }
           else
             {
-              type = GIMP_RGB_IMAGE;
+              type = CLAY_RGB_IMAGE;
               babl_str = "R'G'B'";
             }
         }
-      else  /* load_info->read_info.gimp_type == GIMP_GRAY */
+      else  /* load_info->read_info.clay_type == CLAY_GRAY */
         {
           if (load_info->read_info.use_alpha)
             {
-              type = GIMP_GRAYA_IMAGE;
+              type = CLAY_GRAYA_IMAGE;
               babl_str = "Y'A";
             }
           else
             {
-              type = GIMP_GRAY_IMAGE;
+              type = CLAY_GRAY_IMAGE;
               babl_str = "Y'";
             }
         }
@@ -1221,7 +1221,7 @@ load_layer (FILE             *fp,
         }
     }
 
-  if (! (load_info->read_info.gimp_type == GIMP_INDEXED))
+  if (! (load_info->read_info.clay_type == CLAY_INDEXED))
     bablfmt = babl_format (babl_str);
 
   g_free (babl_str);
@@ -1229,19 +1229,19 @@ load_layer (FILE             *fp,
   layer_name = (level) ? g_strdup_printf ("mipmap %d %s", level, prefix) :
                          g_strdup_printf ("main surface %s", prefix);
 
-  layer = gimp_layer_new (image, layer_name, width, height, type, 100,
-                          gimp_image_get_default_new_layer_mode (image));
+  layer = clay_layer_new (image, layer_name, width, height, type, 100,
+                          clay_image_get_default_new_layer_mode (image));
   g_free (layer_name);
 
-  gimp_image_insert_layer (image, layer, NULL, *layer_index);
+  clay_image_insert_layer (image, layer, NULL, *layer_index);
 
-  if (type == GIMP_INDEXED_IMAGE || type == GIMP_INDEXEDA_IMAGE)
-    bablfmt = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+  if (type == CLAY_INDEXED_IMAGE || type == CLAY_INDEXEDA_IMAGE)
+    bablfmt = clay_drawable_get_format (CLAY_DRAWABLE (layer));
 
   if ((*layer_index)++)
-    gimp_item_set_visible (GIMP_ITEM (layer), FALSE);
+    clay_item_set_visible (CLAY_ITEM (layer), FALSE);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   layerw = gegl_buffer_get_width (buffer);
 
@@ -1285,8 +1285,8 @@ load_layer (FILE             *fp,
       guchar  *pbuf        = buf;
 
       /* Prior plug-in versions (3.9.91 and earlier) wrote the R and G channels reversed for RGB10A2. */
-      if ((load_info->gimp_version > 0)       &&
-          (load_info->gimp_version <= 199003) &&
+      if ((load_info->clay_version > 0)       &&
+          (load_info->clay_version <= 199003) &&
           (load_info->d3d9_format == D3DFMT_A2R10G10B10))
         {
           g_printerr ("Switching incorrect red and green channels in RGB10A2 DDS "
@@ -1341,7 +1341,7 @@ load_layer (FILE             *fp,
               gegl_buffer_set (buffer, GEGL_RECTANGLE (0, y - n, layerw, n), 0,
                                bablfmt, pixels, GEGL_AUTO_ROWSTRIDE);
               n = 0;
-              gimp_progress_update ((gdouble) y / (gdouble) load_info->height);
+              clay_progress_update ((gdouble) y / (gdouble) load_info->height);
             }
 
           if (load_info->flags & DDSD_PITCH)
@@ -1364,7 +1364,7 @@ load_layer (FILE             *fp,
 
           for (x = 0; x < layerw; ++x)
             {
-              guint   pos       = (n * layerw + x) * load_info->gimp_bpp;
+              guint   pos       = (n * layerw + x) * load_info->clay_bpp;
               guint   buf_reads = 0;
               guchar  read_buf;
               guint32 ch_registers[4];
@@ -1441,7 +1441,7 @@ load_layer (FILE             *fp,
                 ch_registers[3] = G_MAXUINT32;
 
               /* Output converted values to canvas pixels */
-              if (load_info->read_info.gimp_type == GIMP_RGB)
+              if (load_info->read_info.clay_type == CLAY_RGB)
                 {
                   if (load_info->read_info.output_bit_depth == 8)
                     {
@@ -1475,7 +1475,7 @@ load_layer (FILE             *fp,
                         pixel32[3] = (guint64) ch_registers[3] + sign_add[3];
                     }
                 }
-              else if (load_info->read_info.gimp_type == GIMP_GRAY)
+              else if (load_info->read_info.clay_type == CLAY_GRAY)
                 {
                   if (load_info->read_info.output_bit_depth == 8)
                     {
@@ -1502,7 +1502,7 @@ load_layer (FILE             *fp,
                         pixel32[1] = (guint64) ch_registers[3] + sign_add[3];
                     }
                 }
-              else  /* load_info->read_info.gimp_type == GIMP_INDEXED */
+              else  /* load_info->read_info.clay_type == CLAY_INDEXED */
                 {
                   pixels[pos] = ch_registers[0] & 0xFF;
                   if (load_info->read_info.use_alpha)
@@ -1518,11 +1518,11 @@ load_layer (FILE             *fp,
     {
       guchar *dst;
 
-      dst = g_malloc ((gsize) width * height * load_info->gimp_bpp);
-      memset (dst, 0, (gsize) width * height * load_info->gimp_bpp);
+      dst = g_malloc ((gsize) width * height * load_info->clay_bpp);
+      memset (dst, 0, (gsize) width * height * load_info->clay_bpp);
 
       /* Initialize alpha to all 1s instead of all 0s */
-      if (load_info->gimp_bpp == 4)
+      if (load_info->clay_bpp == 4)
         {
           guchar *dst_line;
 
@@ -1538,11 +1538,11 @@ load_layer (FILE             *fp,
         }
 
       dxt_decompress (dst, buf, load_info->comp_format, size, width, height,
-                      load_info->gimp_bpp, load_info->fmt_flags & DDPF_NORMAL);
+                      load_info->clay_bpp, load_info->fmt_flags & DDPF_NORMAL);
 
       /* Prior plug-in versions (before 3.9.90) wrote the R and G channels reversed for BC5. */
-      if ((load_info->gimp_version > 0)       &&
-          (load_info->gimp_version <= 199002) &&
+      if ((load_info->clay_version > 0)       &&
+          (load_info->clay_version <= 199002) &&
           (load_info->comp_format == DDS_COMPRESS_BC5))
         {
           g_printerr ("Switching incorrect red and green channels in BC5 DDS "
@@ -1553,8 +1553,8 @@ load_layer (FILE             *fp,
               for (x = 0; x < width; ++x)
                 {
                   guchar tmpG;
-                  guint  pix_width = width * load_info->gimp_bpp;
-                  guint  x_width   = x * load_info->gimp_bpp;
+                  guint  pix_width = width * load_info->clay_bpp;
+                  guint  x_width   = x * load_info->clay_bpp;
 
                   tmpG = dst[y * pix_width + x_width];
                   dst[y * pix_width + x_width] = dst[y * pix_width + x_width + 1];
@@ -1570,12 +1570,12 @@ load_layer (FILE             *fp,
               gegl_buffer_set (buffer, GEGL_RECTANGLE (0, y - n, layerw, n), 0,
                                bablfmt, pixels, GEGL_AUTO_ROWSTRIDE);
               n = 0;
-              gimp_progress_update ((gdouble) y / (gdouble) load_info->height);
+              clay_progress_update ((gdouble) y / (gdouble) load_info->height);
             }
 
-          memcpy (pixels + n * layerw * load_info->gimp_bpp,
-                  dst + y * layerw * load_info->gimp_bpp,
-                  width * load_info->gimp_bpp);
+          memcpy (pixels + n * layerw * load_info->clay_bpp,
+                  dst + y * layerw * load_info->clay_bpp,
+                  width * load_info->clay_bpp);
         }
 
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, y - n, layerw, n), 0,
@@ -1588,19 +1588,19 @@ load_layer (FILE             *fp,
 
   g_object_unref (buffer);
 
-  /* Decode files with GIMP-specific encodings */
-  if (load_info->gimp_version > 0)
+  /* Decode files with Clay-specific encodings */
+  if (load_info->clay_version > 0)
     {
-      switch (GETL32 (load_info->gimp_fourcc))
+      switch (GETL32 (load_info->clay_fourcc))
         {
         case FOURCC ('A','E','X','P'):
-          decode_alpha_exponent (GIMP_DRAWABLE (layer));
+          decode_alpha_exponent (CLAY_DRAWABLE (layer));
           break;
         case FOURCC ('Y','C','G','1'):
-          decode_ycocg (GIMP_DRAWABLE (layer));
+          decode_ycocg (CLAY_DRAWABLE (layer));
           break;
         case FOURCC ('Y','C','G','2'):
-          decode_ycocg_scaled (GIMP_DRAWABLE (layer));
+          decode_ycocg_scaled (CLAY_DRAWABLE (layer));
           break;
         default:
           break;
@@ -1613,7 +1613,7 @@ load_layer (FILE             *fp,
 static gboolean
 load_mipmaps (FILE             *fp,
               dds_load_info_t  *load_info,
-              GimpImage        *image,
+              ClayImage        *image,
               gchar            *prefix,
               guint            *layer_index,
               guchar           *pixels,
@@ -1661,7 +1661,7 @@ load_mipmaps (FILE             *fp,
 static gboolean
 load_face (FILE             *fp,
            dds_load_info_t  *load_info,
-           GimpImage        *image,
+           ClayImage        *image,
            gchar            *prefix,
            guint            *layer_index,
            guchar           *pixels,
@@ -1678,18 +1678,18 @@ load_face (FILE             *fp,
 }
 
 static gboolean
-load_dialog (GimpProcedure       *procedure,
-             GimpProcedureConfig *config)
+load_dialog (ClayProcedure       *procedure,
+             ClayProcedureConfig *config)
 {
   GtkWidget *dialog;
   GtkWidget *vbox;
   gboolean   run;
 
-  dialog = gimp_procedure_dialog_new (procedure,
+  dialog = clay_procedure_dialog_new (procedure,
                                       config,
                                       _("Open DDS"));
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "dds-read-box",
                                          "load-mipmaps",
                                          "flip-image",
@@ -1697,11 +1697,11 @@ load_dialog (GimpProcedure       *procedure,
   gtk_box_set_spacing (GTK_BOX (vbox), 8);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 8);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "dds-read-box", NULL);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

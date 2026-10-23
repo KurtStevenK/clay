@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   error_console_actions_setup  (GimpActionGroup *group);
-void   error_console_actions_update (GimpActionGroup *group,
+void   error_console_actions_setup  (ClayActionGroup *group);
+void   error_console_actions_update (ClayActionGroup *group,
                                      gpointer         data);

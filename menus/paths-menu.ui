@@ -4,7 +4,7 @@
   <menu id="/paths-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="paths-action">Paths Menu</attribute>
-      <attribute name="icon">gimp-paths</attribute>
+      <attribute name="icon">clay-paths</attribute>
 
       <item><attribute name="action">app.paths-edit</attribute></item>
       <item><attribute name="action">app.paths-edit-attributes</attribute></item>

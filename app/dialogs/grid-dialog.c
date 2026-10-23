@@ -22,29 +22,29 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-grid.h"
-#include "core/gimpimage-undo.h"
-#include "core/gimpimage-undo-push.h"
-#include "core/gimpgrid.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-grid.h"
+#include "core/clayimage-undo.h"
+#include "core/clayimage-undo-push.h"
+#include "core/claygrid.h"
 
-#include "widgets/gimpgrideditor.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpviewabledialog.h"
+#include "widgets/claygrideditor.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayviewabledialog.h"
 
 #include "grid-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define GRID_RESPONSE_RESET 1
@@ -54,9 +54,9 @@ typedef struct _GridDialog GridDialog;
 
 struct _GridDialog
 {
-  GimpImage *image;
-  GimpGrid  *grid;
-  GimpGrid  *grid_backup;
+  ClayImage *image;
+  ClayGrid  *grid;
+  ClayGrid  *grid_backup;
 };
 
 
@@ -71,8 +71,8 @@ static void   grid_dialog_response (GtkWidget  *dialog,
 /*  public function  */
 
 GtkWidget *
-grid_dialog_new (GimpImage   *image,
-                 GimpContext *context,
+grid_dialog_new (ClayImage   *image,
+                 ClayContext *context,
                  GtkWidget   *parent)
 {
   GridDialog *private;
@@ -81,22 +81,22 @@ grid_dialog_new (GimpImage   *image,
   gdouble     xres;
   gdouble     yres;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (parent == NULL || GTK_IS_WIDGET (parent), NULL);
 
   private = g_slice_new0 (GridDialog);
 
   private->image       = image;
-  private->grid        = gimp_image_get_grid (image);
-  private->grid_backup = gimp_config_duplicate (GIMP_CONFIG (private->grid));
+  private->grid        = clay_image_get_grid (image);
+  private->grid_backup = clay_config_duplicate (CLAY_CONFIG (private->grid));
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
-                                     _("Configure Grid"), "gimp-grid-configure",
-                                     GIMP_ICON_GRID, _("Configure Image Grid"),
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
+                                     _("Configure Grid"), "clay-grid-configure",
+                                     CLAY_ICON_GRID, _("Configure Image Grid"),
                                      parent,
-                                     gimp_standard_help_func,
-                                     GIMP_HELP_IMAGE_GRID,
+                                     clay_standard_help_func,
+                                     CLAY_HELP_IMAGE_GRID,
 
                                      _("_Reset"),  GRID_RESPONSE_RESET,
                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
@@ -104,7 +104,7 @@ grid_dialog_new (GimpImage   *image,
 
                                      NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GRID_RESPONSE_RESET,
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
@@ -119,9 +119,9 @@ grid_dialog_new (GimpImage   *image,
                     G_CALLBACK (grid_dialog_response),
                     private);
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
-  editor = gimp_grid_editor_new (private->grid, context, xres, yres);
+  editor = clay_grid_editor_new (private->grid, context, xres, yres);
   gtk_container_set_border_width (GTK_CONTAINER (editor), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       editor, TRUE, TRUE, 0);
@@ -150,24 +150,24 @@ grid_dialog_response (GtkWidget  *dialog,
   switch (response_id)
     {
     case GRID_RESPONSE_RESET:
-      gimp_config_sync (G_OBJECT (private->image->gimp->config->default_grid),
+      clay_config_sync (G_OBJECT (private->image->clay->config->default_grid),
                         G_OBJECT (private->grid), 0);
       break;
 
     case GTK_RESPONSE_OK:
-      if (! gimp_config_is_equal_to (GIMP_CONFIG (private->grid_backup),
-                                     GIMP_CONFIG (private->grid)))
+      if (! clay_config_is_equal_to (CLAY_CONFIG (private->grid_backup),
+                                     CLAY_CONFIG (private->grid)))
         {
-          gimp_image_undo_push_image_grid (private->image, _("Grid"),
+          clay_image_undo_push_image_grid (private->image, _("Grid"),
                                            private->grid_backup);
-          gimp_image_flush (private->image);
+          clay_image_flush (private->image);
         }
 
       gtk_widget_destroy (dialog);
       break;
 
     default:
-      gimp_image_set_grid (private->image, private->grid_backup, FALSE);
+      clay_image_set_grid (private->image, private->grid_backup, FALSE);
       gtk_widget_destroy (dialog);
     }
 }

@@ -10721,8 +10721,8 @@ msgstr "Helle Farben"
 
 #: app/config/config-enums.c:347
 msgctxt "theme-scheme"
-msgid "Middle Gray"
-msgstr "Mittelgrau"
+msgid "Dim Colors"
+msgstr "Gedämpfte Farben"
 
 #: app/config/config-enums.c:348
 msgctxt "theme-scheme"
@@ -32672,3 +32672,103 @@ msgstr "Journal-Menü"
 
 #~ msgid "Whether data is being read from the swap"
 #~ msgstr "Gibt an, ob Daten aus dem Auslagerungsspeicher gelesen werden"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Brown"
+msgstr "Braun"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Parchment"
+msgstr "Pergament"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Cappuccino"
+msgstr "Cappuccino"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Espresso"
+msgstr "Espresso"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Midnight"
+msgstr "Mitternacht"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Forest"
+msgstr "Wald"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Rose"
+msgstr "Rosé"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Sunset"
+msgstr "Sonnenuntergang"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Violet"
+msgstr "Violett"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Neon"
+msgstr "Neon"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Matrix"
+msgstr "Matrix"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Ubuntu"
+msgstr "Ubuntu"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Dracula"
+msgstr "Dracula"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Nord"
+msgstr "Nord"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Solarized"
+msgstr "Solarized"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Gruvbox"
+msgstr "Gruvbox"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Ocean"
+msgstr "Ozean"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Sakura"
+msgstr "Sakura"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Amber"
+msgstr "Bernstein"
+
+#: app/config/config-enums.c
+msgctxt "theme-scheme"
+msgid "Sepia"
+msgstr "Sepia"

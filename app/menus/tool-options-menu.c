@@ -20,39 +20,39 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "menus-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimplist.h"
-#include "core/gimptoolinfo.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claylist.h"
+#include "core/claytoolinfo.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayuimanager.h"
 
 #include "tool-options-menu.h"
 
 
 /*  local function prototypes  */
 
-static void   tool_options_menu_update         (GimpUIManager *manager,
+static void   tool_options_menu_update         (ClayUIManager *manager,
                                                 gpointer       update_data,
                                                 const gchar   *ui_path);
-static void   tool_options_menu_update_after   (GimpUIManager *manager,
+static void   tool_options_menu_update_after   (ClayUIManager *manager,
                                                 gpointer       update_data,
                                                 const gchar   *ui_path);
-static void   tool_options_menu_update_presets (GimpUIManager *manager,
+static void   tool_options_menu_update_presets (ClayUIManager *manager,
                                                 const gchar   *menu_path,
                                                 const gchar   *which_action,
-                                                GimpContainer *presets);
+                                                ClayContainer *presets);
 
 
 /*  public functions  */
 
 void
-tool_options_menu_setup (GimpUIManager *manager,
+tool_options_menu_setup (ClayUIManager *manager,
                          const gchar   *ui_path)
 {
   g_signal_connect (manager, "update",
@@ -69,7 +69,7 @@ tool_options_menu_setup (GimpUIManager *manager,
 /*  private functions  */
 
 static void
-tool_options_menu_update (GimpUIManager *manager,
+tool_options_menu_update (ClayUIManager *manager,
                           gpointer       update_data,
                           const gchar   *ui_path)
 {
@@ -77,15 +77,15 @@ tool_options_menu_update (GimpUIManager *manager,
 }
 
 static void
-tool_options_menu_update_after (GimpUIManager *manager,
+tool_options_menu_update_after (ClayUIManager *manager,
                                 gpointer       update_data,
                                 const gchar   *ui_path)
 {
-  GimpContext  *context;
-  GimpToolInfo *tool_info;
+  ClayContext  *context;
+  ClayToolInfo *tool_info;
 
-  context   = gimp_get_user_context (manager->gimp);
-  tool_info = gimp_context_get_tool (context);
+  context   = clay_get_user_context (manager->clay);
+  tool_info = clay_context_get_tool (context);
 
   if (! tool_info->presets)
     return;
@@ -104,19 +104,19 @@ tool_options_menu_update_after (GimpUIManager *manager,
 }
 
 static void
-tool_options_menu_update_presets (GimpUIManager *manager,
+tool_options_menu_update_presets (ClayUIManager *manager,
                                   const gchar   *menu_path,
                                   const gchar   *which_action,
-                                  GimpContainer *presets)
+                                  ClayContainer *presets)
 {
   gchar *action_prefix;
   gint   n_children;
   gint   i;
 
   action_prefix = g_strdup_printf ("tool-options-%s-preset-", which_action);
-  gimp_ui_manager_remove_uis (manager, action_prefix);
+  clay_ui_manager_remove_uis (manager, action_prefix);
 
-  n_children = gimp_container_get_n_children (presets);
+  n_children = clay_container_get_n_children (presets);
   for (i = 0; i < n_children; i++)
     {
       gchar *action_name;
@@ -125,7 +125,7 @@ tool_options_menu_update_presets (GimpUIManager *manager,
       action_name = g_strdup_printf ("%s%03d", action_prefix, i);
       path        = g_strdup_printf ("/Tool Options Menu/%s", menu_path);
 
-      gimp_ui_manager_add_ui (manager, path, action_name, FALSE);
+      clay_ui_manager_add_ui (manager, path, action_name, FALSE);
 
       g_free (action_name);
       g_free (path);

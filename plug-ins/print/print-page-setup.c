@@ -17,8 +17,8 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "print.h"
 #include "print-page-setup.h"
@@ -54,7 +54,7 @@ print_page_setup_dialog (GtkPrintOperation *operation)
 
 void
 print_page_setup_load (GtkPrintOperation *operation,
-                       GimpImage         *image)
+                       ClayImage         *image)
 {
   GKeyFile *key_file;
 
@@ -85,7 +85,7 @@ print_page_setup_load (GtkPrintOperation *operation,
 
 void
 print_page_setup_save (GtkPrintOperation *operation,
-                       GimpImage         *image)
+                       ClayImage         *image)
 {
   GtkPageSetup *setup;
   GKeyFile     *key_file;

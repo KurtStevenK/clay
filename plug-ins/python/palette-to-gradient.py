@@ -14,8 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 from gi.repository import GObject
 from gi.repository import GLib
 from gi.repository import Gio
@@ -30,7 +30,7 @@ def make_gradient(palette, num_segments, num_colors):
     # name the gradient same as the source palette
     # For now, the name of a resource is the same as the ID
     palette_name = palette.get_name()
-    gradient = Gimp.Gradient.new(palette_name)
+    gradient = Clay.Gradient.new(palette_name)
     # assert gradient is valid but is has only one segment
     assert gradient.get_number_of_segments() == 1
 
@@ -50,21 +50,21 @@ def make_gradient(palette, num_segments, num_colors):
         gradient.segment_set_right_color(color_number, color_right)
 
     # Side effects on the context. Probably not what most would expect.
-    Gimp.context_set_gradient(gradient)
+    Clay.context_set_gradient(gradient)
     return gradient
 
 def run(procedure, config, data):
     # Get the parameters
     run_mode = config.get_property("run-mode")
 
-    if run_mode == Gimp.RunMode.INTERACTIVE:
-        gi.require_version('GimpUi', '3.0')
-        from gi.repository import GimpUi
+    if run_mode == Clay.RunMode.INTERACTIVE:
+        gi.require_version('ClayUi', '3.0')
+        from gi.repository import ClayUi
         gi.require_version('Gtk', '3.0')
         from gi.repository import Gtk
 
-        GimpUi.init(procedure.get_name())
-        dialog = GimpUi.ProcedureDialog(procedure=procedure, config=config)
+        ClayUi.init(procedure.get_name())
+        dialog = ClayUi.ProcedureDialog(procedure=procedure, config=config)
 
         # Add palette button
         config.set_property("palette", None)
@@ -72,7 +72,7 @@ def run(procedure, config, data):
 
         if not dialog.run():
             dialog.destroy()
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
+            return procedure.new_return_values(Clay.PDBStatusType.CANCEL, GLib.Error())
 
         dialog.destroy()
 
@@ -80,9 +80,9 @@ def run(procedure, config, data):
     if palette is None or not palette.is_valid():
         if palette is not None:
           sys.stderr.write(f'Invalid palette id: {palette.get_id()}\n')
-          sys.stderr.write('This should not happen. Please report to GIMP project.\n')
+          sys.stderr.write('This should not happen. Please report to Clay project.\n')
           sys.stderr.write('Falling back to context palette instead.\n')
-        palette = Gimp.context_get_palette()
+        palette = Clay.context_get_palette()
         config.set_property("palette", palette)
 
     num_colors = palette.get_color_count()
@@ -97,9 +97,9 @@ def run(procedure, config, data):
     # Unfortunately even though the argument is (nullable), pygobject
     # looks like it may have a bug. So workaround is to just set a
     # generic GLib.Error() since anyway the error won't be process with
-    # GIMP_PDB_SUCCESS status.
+    # CLAY_PDB_SUCCESS status.
     # See pygobject#351
-    retval = procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+    retval = procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
 
     # XXX: I don't try to get the GValue with retval.index(1) because it
     # actually return a string (cf. pygobject#353). Just create a new
@@ -107,24 +107,24 @@ def run(procedure, config, data):
     # This comment dates from when resources are strings:
     # value = GObject.Value(GObject.TYPE_STRING, gradient)
 
-    value = GObject.Value(Gimp.Gradient, gradient)
+    value = GObject.Value(Clay.Gradient, gradient)
     retval.remove(1)
     retval.insert(1, value)
 
     return retval
 
-class PaletteToGradient (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class PaletteToGradient (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return ['python-fu-palette-to-gradient',
                 'python-fu-palette-to-gradient-repeating']
 
     def do_create_procedure(self, name):
-        procedure = Gimp.Procedure.new(self, name,
-                                       Gimp.PDBProcType.PLUGIN,
+        procedure = Clay.Procedure.new(self, name,
+                                       Clay.PDBProcType.PLUGIN,
                                        run, None)
         if name == 'python-fu-palette-to-gradient':
             procedure.set_menu_label(_("Palette to _Gradient"))
@@ -144,8 +144,8 @@ class PaletteToGradient (Gimp.PlugIn):
                                       "Carol Spears", "2006")
 
             procedure.add_enum_argument ("run-mode", _("Run mode"),
-                                         _("The run mode"), Gimp.RunMode,
-                                         Gimp.RunMode.NONINTERACTIVE,
+                                         _("The run mode"), Clay.RunMode,
+                                         Clay.RunMode.NONINTERACTIVE,
                                          GObject.ParamFlags.READWRITE)
             procedure.add_palette_argument ("palette", _("_Palette"),
                                             _("Palette"), True,
@@ -159,4 +159,4 @@ class PaletteToGradient (Gimp.PlugIn):
 
         return procedure
 
-Gimp.main(PaletteToGradient.__gtype__, sys.argv)
+Clay.main(PaletteToGradient.__gtype__, sys.argv)

@@ -1,0 +1,34 @@
+/* Dracula theme, light scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(31,31,31);
+@define-color bg-color                   rgb(255,251,235);
+@define-color border-color               rgb(224,220,206);
+@define-color dimmed-fg-color            rgb(87,86,82);
+@define-color disabled-fg-color          rgb(132,130,123);
+@define-color disabled-button-color      rgb(183,181,170);
+@define-color hover-color                rgb(228,225,211);
+@define-color widget-bg-color            rgb(244,240,225);
+@define-color selected-color             rgb(215,211,198);
+@define-color extreme-bg-color           rgb(255,253,245);
+@define-color extreme-selected-color     rgb(224,220,206);
+@define-color strong-border-color        rgb(177,174,164);
+@define-color stronger-border-color      rgb(177,174,164);
+@define-color edge-border-color          rgb(177,174,164);
+@define-color scrollbar-slider-color     rgb(177,174,164);
+@define-color scrollbar-trough-color     rgb(255,251,235);
+@define-color ruler-color                rgba(224,220,206,0.3);
+@define-color accent-color               rgb(100,74,201);
+@define-color accent-hover-color         rgb(128,107,211);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(196,43,28);
+@define-color good-color                 rgb(31,122,63);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Menlo", "Monaco", "Courier New", monospace; }

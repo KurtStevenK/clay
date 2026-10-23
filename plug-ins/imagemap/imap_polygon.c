@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "imap_commands.h"
 #include "imap_icons.h"
@@ -37,7 +37,7 @@
 #include "imap_polygon.h"
 #include "imap_ui_grid.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define MAX_POLYGON_POINTS 99
 
@@ -715,7 +715,7 @@ polygon_near_edge(Object_t *obj, gint x, gint y)
 
 static void
 polygon_handle_popup (GdkEventButton *event,
-                      GimpImap       *imap,
+                      ClayImap       *imap,
                       gboolean        near_sash,
                       gboolean        near_edge)
 {
@@ -742,7 +742,7 @@ polygon_do_popup (Object_t       *obj,
 {
   gint       x   = get_real_coord ((gint) event->x);
   gint       y   = get_real_coord ((gint) event->y);
-  GimpImap *imap = GIMP_IMAP (data);
+  ClayImap *imap = CLAY_IMAP (data);
 
   _current_obj = obj;
 

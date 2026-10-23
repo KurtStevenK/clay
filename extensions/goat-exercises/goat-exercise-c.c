@@ -19,12 +19,12 @@
 
 #include "config.h"
 
-#define GIMP_DISABLE_COMPAR_CRUFT
+#define CLAY_DISABLE_COMPAR_CRUFT
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_BINARY "goat-exercise-c"
@@ -32,7 +32,7 @@
 #define PLUG_IN_PROC   "plug-in-goat-exercise-c"
 #define PLUG_IN_ROLE   "goat-exercise-c"
 
-#define GOAT_URI       "https://gitlab.gnome.org/GNOME/gimp/blob/master/extensions/goat-exercises/goat-exercise-c.c"
+#define GOAT_URI       "https://github.com/KurtStevenK/clay/blob/master/extensions/goat-exercises/goat-exercise-c.c"
 
 
 typedef struct _Goat      Goat;
@@ -40,12 +40,12 @@ typedef struct _GoatClass GoatClass;
 
 struct _Goat
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _GoatClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -57,27 +57,27 @@ struct _GoatClass
 
 GType                   goat_get_type         (void);
 
-static GList          * goat_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * goat_create_procedure (GimpPlugIn           *plug_in,
+static GList          * goat_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * goat_create_procedure (ClayPlugIn           *plug_in,
                                                const gchar          *name);
 
-static GimpValueArray * goat_run              (GimpProcedure        *procedure,
-                                               GimpRunMode           run_mode,
-                                               GimpImage            *image,
-                                               GimpDrawable        **drawables,
-                                               GimpProcedureConfig  *config,
+static ClayValueArray * goat_run              (ClayProcedure        *procedure,
+                                               ClayRunMode           run_mode,
+                                               ClayImage            *image,
+                                               ClayDrawable        **drawables,
+                                               ClayProcedureConfig  *config,
                                                gpointer              run_data);
 
 
-G_DEFINE_TYPE (Goat, goat, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Goat, goat, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GOAT_TYPE)
+CLAY_MAIN (GOAT_TYPE)
 
 
 static void
 goat_class_init (GoatClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = goat_query_procedures;
   plug_in_class->create_procedure = goat_create_procedure;
@@ -89,37 +89,37 @@ goat_init (Goat *goat)
 }
 
 static GList *
-goat_query_procedures (GimpPlugIn *plug_in)
+goat_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-goat_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+goat_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             goat_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("Plug-In Example in _C"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_GEGL);
-      gimp_procedure_add_menu_path (procedure,
+      clay_procedure_set_menu_label (procedure, _("Plug-In Example in _C"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_GEGL);
+      clay_procedure_add_menu_path (procedure,
                                     "<Image>/Filters/Development/Plug-In Examples/");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Plug-in example in C"),
                                         _("Plug-in example in C"),
                                         PLUG_IN_PROC);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Øyvind Kolås <pippin@gimp.org>",
                                       "Øyvind Kolås <pippin@gimp.org>",
                                       "21 march 2012");
@@ -128,28 +128,28 @@ goat_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-goat_run (GimpProcedure        *procedure,
-          GimpRunMode           run_mode,
-          GimpImage            *image,
-          GimpDrawable        **drawables,
-          GimpProcedureConfig  *config,
+static ClayValueArray *
+goat_run (ClayProcedure        *procedure,
+          ClayRunMode           run_mode,
+          ClayImage            *image,
+          ClayDrawable        **drawables,
+          ClayProcedureConfig  *config,
           gpointer              run_data)
 {
-  GimpDrawable      *drawable;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
+  ClayDrawable      *drawable;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
   gint               x, y, width, height;
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -158,7 +158,7 @@ goat_run (GimpProcedure        *procedure,
     }
 
   /* In interactive mode, display a dialog to advertise the exercise. */
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       GtkTextBuffer    *buffer;
       GtkWidget        *dialog;
@@ -174,17 +174,17 @@ goat_run (GimpProcedure        *procedure,
       gssize            read;
       gint              response;
 
-      gimp_ui_init (PLUG_IN_BINARY);
-      dialog = gimp_dialog_new (_("Plug-In Example in C"), PLUG_IN_ROLE,
+      clay_ui_init (PLUG_IN_BINARY);
+      dialog = clay_dialog_new (_("Plug-In Example in C"), PLUG_IN_ROLE,
                                 NULL, GTK_DIALOG_USE_HEADER_BAR,
-                                gimp_standard_help_func, PLUG_IN_PROC,
+                                clay_standard_help_func, PLUG_IN_PROC,
 
                                 _("_Cancel"), GTK_RESPONSE_CANCEL,
                                 _("_Source"), GTK_RESPONSE_APPLY,
                                 _("_Run"),    GTK_RESPONSE_OK,
 
                                 NULL);
-      gimp_window_set_transient (GTK_WINDOW (dialog));
+      clay_window_set_transient (GTK_WINDOW (dialog));
 #ifndef __APPLE__
       geometry.min_aspect = 0.5;
 #else
@@ -217,8 +217,8 @@ goat_run (GimpProcedure        *procedure,
       gtk_widget_set_vexpand (GTK_WIDGET (scrolled), TRUE);
       gtk_widget_set_visible (scrolled, TRUE);
 
-      path = g_build_filename (gimp_plug_in_directory (), "extensions",
-                               "org.gimp.extension.goat-exercises", PLUG_IN_SOURCE,
+      path = g_build_filename (clay_plug_in_directory (), "extensions",
+                               "org.clay.extension.goat-exercises", PLUG_IN_SOURCE,
                                NULL);
       file = g_file_new_for_path (path);
       g_free (path);
@@ -242,7 +242,7 @@ goat_run (GimpProcedure        *procedure,
       gtk_container_add (GTK_CONTAINER (scrolled), widget);
       gtk_widget_set_visible (widget, TRUE);
 
-      while ((response = gimp_dialog_run (GIMP_DIALOG (dialog))))
+      while ((response = clay_dialog_run (CLAY_DIALOG (dialog))))
         {
           if (response == GTK_RESPONSE_OK)
             {
@@ -258,31 +258,31 @@ goat_run (GimpProcedure        *procedure,
           else /* CANCEL, CLOSE, DELETE_EVENT */
             {
               gtk_widget_destroy (dialog);
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_CANCEL,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_CANCEL,
                                                        NULL);
             }
         }
     }
 
-  if (gimp_drawable_mask_intersect (drawable, &x, &y, &width, &height))
+  if (clay_drawable_mask_intersect (drawable, &x, &y, &width, &height))
     {
       GeglBuffer *buffer;
       GeglBuffer *shadow_buffer;
 
       gegl_init (NULL, NULL);
 
-      buffer        = gimp_drawable_get_buffer (drawable);
-      shadow_buffer = gimp_drawable_get_shadow_buffer (drawable);
+      buffer        = clay_drawable_get_buffer (drawable);
+      shadow_buffer = clay_drawable_get_shadow_buffer (drawable);
 
       gegl_render_op (buffer, shadow_buffer, "gegl:invert", NULL);
 
       g_object_unref (shadow_buffer); /* flushes the shadow tiles */
       g_object_unref (buffer);
 
-      gimp_drawable_merge_shadow (drawable, TRUE);
-      gimp_drawable_update (drawable, x, y, width, height);
-      gimp_displays_flush ();
+      clay_drawable_merge_shadow (drawable, TRUE);
+      clay_drawable_update (drawable, x, y, width, height);
+      clay_displays_flush ();
 
       gegl_exit ();
 #if 0
@@ -290,11 +290,11 @@ goat_run (GimpProcedure        *procedure,
        * plug-in process. Below is a variant using drawable filters. The
        * operation rendering is done core process side.
        */
-      gimp_drawable_merge_new_filter (drawable, "gegl:invert", NULL,
-                                      GIMP_LAYER_MODE_REPLACE, 1.0,
+      clay_drawable_merge_new_filter (drawable, "gegl:invert", NULL,
+                                      CLAY_LAYER_MODE_REPLACE, 1.0,
                                       NULL);
 #endif
     }
 
-  return gimp_procedure_new_return_values (procedure, status, NULL);
+  return clay_procedure_new_return_values (procedure, status, NULL);
 }

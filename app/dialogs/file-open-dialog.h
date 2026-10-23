@@ -18,4 +18,4 @@
 #pragma once
 
 
-GtkWidget * file_open_dialog_new (Gimp *gimp);
+GtkWidget * file_open_dialog_new (Clay *clay);

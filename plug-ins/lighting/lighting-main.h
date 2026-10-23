@@ -6,7 +6,7 @@
 
 #define PLUG_IN_PROC   "plug-in-lighting"
 #define PLUG_IN_BINARY "lighting"
-#define PLUG_IN_ROLE   "gimp-lighting"
+#define PLUG_IN_ROLE   "clay-lighting"
 
 #define TILE_CACHE_SIZE 16
 #define NUM_LIGHTS      6
@@ -49,8 +49,8 @@ typedef struct
 typedef struct
 {
   LightType    type;
-  GimpVector3  position;
-  GimpVector3  direction;
+  ClayVector3  position;
+  ClayVector3  direction;
   gdouble      color[4];
   gdouble      intensity;
   gboolean     active;
@@ -62,13 +62,13 @@ typedef struct
   gint32       bumpmap_id;
   gint32       envmap_id;
 
-  GimpProcedureConfig *config;
+  ClayProcedureConfig *config;
 
   /* Render variables */
   /* ================ */
 
-  GimpVector3      viewpoint;
-  GimpVector3      planenormal;
+  ClayVector3      viewpoint;
+  ClayVector3      planenormal;
   LightSettings    lightsource[NUM_LIGHTS];
   MaterialSettings material;
 

@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,17 +22,17 @@
 #define __ICO_EXPORT_H__
 
 
-GimpPDBStatusType ico_export_image        (GFile                *file,
-                                           GimpImage            *image,
-                                           GimpProcedure        *procedure,
-                                           GimpProcedureConfig  *config,
+ClayPDBStatusType ico_export_image        (GFile                *file,
+                                           ClayImage            *image,
+                                           ClayProcedure        *procedure,
+                                           ClayProcedureConfig  *config,
                                            gint32                run_mode,
                                            GError              **error);
 
-GimpPDBStatusType cur_export_image        (GFile                *file,
-                                           GimpImage            *image,
-                                           GimpProcedure        *procedure,
-                                           GimpProcedureConfig  *config,
+ClayPDBStatusType cur_export_image        (GFile                *file,
+                                           ClayImage            *image,
+                                           ClayProcedure        *procedure,
+                                           ClayProcedureConfig  *config,
                                            gint32                run_mode,
                                            gsize                *n_hot_spot_x,
                                            const gint32         *hot_spot_x,
@@ -42,9 +42,9 @@ GimpPDBStatusType cur_export_image        (GFile                *file,
                                            gint32              **new_hot_spot_y,
                                            GError              **error);
 
-gboolean          ico_cmap_contains_black (GimpPalette         *cmap);
+gboolean          ico_cmap_contains_black (ClayPalette         *cmap);
 
-gboolean          ico_save_init           (GimpImage           *image,
+gboolean          ico_save_init           (ClayImage           *image,
                                            gint32               run_mode,
                                            IcoSaveInfo         *info,
                                            gint                 n_hot_spot_x,
@@ -53,20 +53,20 @@ gboolean          ico_save_init           (GimpImage           *image,
                                            const gint32        *hot_spot_y,
                                            GError             **error);
 
-gboolean          ico_save_dialog         (GimpImage           *image,
-                                           GimpProcedure       *procedure,
-                                           GimpProcedureConfig *config,
+gboolean          ico_save_dialog         (ClayImage           *image,
+                                           ClayProcedure       *procedure,
+                                           ClayProcedureConfig *config,
                                            IcoSaveInfo         *info,
                                            AniFileHeader       *ani_header,
                                            AniSaveInfo         *ani_info);
 
 void              ico_save_info_free      (IcoSaveInfo         *info);
 
-GimpPDBStatusType shared_save_image       (GFile               *file,
+ClayPDBStatusType shared_save_image       (GFile               *file,
                                            FILE                *fp_ani,
-                                           GimpImage           *image,
-                                           GimpProcedure       *procedure,
-                                           GimpProcedureConfig *config,
+                                           ClayImage           *image,
+                                           ClayProcedure       *procedure,
+                                           ClayProcedureConfig *config,
                                            gint32               run_mode,
                                            gsize               *n_hot_spot_x,
                                            const gint32        *hot_spot_x,

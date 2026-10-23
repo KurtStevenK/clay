@@ -23,7 +23,7 @@
 
 #include <gio/gio.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "plug-in-types.h"
 
@@ -59,7 +59,7 @@ plug_in_menu_path_map (const gchar *menu_path,
   g_return_val_if_fail (menu_path != NULL, NULL);
 
   if (menu_label)
-    stripped_label = gimp_strip_uline (menu_label);
+    stripped_label = clay_strip_uline (menu_label);
 
   for (mapping = menu_path_mappings; mapping->orig_path; mapping++)
     {
@@ -86,7 +86,7 @@ plug_in_menu_path_map (const gchar *menu_path,
           else
             mapped_path = g_strdup (mapping->mapped_path);
 
-#if GIMP_UNSTABLE
+#if CLAY_UNSTABLE
           {
             gchar *orig;
             gchar *mapped;

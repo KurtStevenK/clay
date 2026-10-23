@@ -26,22 +26,22 @@
 #include <AppKit/AppKit.h>
 #endif
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "menus-types.h"
 
 #include "actions/actions.h"
 
-#include "config/gimpconfig-file.h"
-#include "config/gimpguiconfig.h"
+#include "config/clayconfig-file.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactionfactory.h"
-#include "widgets/gimpdashboard.h"
-#include "widgets/gimpmenufactory.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactionfactory.h"
+#include "widgets/claydashboard.h"
+#include "widgets/claymenufactory.h"
+#include "widgets/clayuimanager.h"
 
 #include "dockable-menu.h"
 #include "image-menu.h"
@@ -50,7 +50,7 @@
 #include "shortcuts-rc.h"
 #include "tool-options-menu.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
@@ -65,7 +65,7 @@ static gboolean menurc_deleted = FALSE;
    used by menus_quartz_app_menu() and menus_quartz_get_settings_label */
 #define QUARTZ_APP_MENU_SETTINGS_INDEX 3
 
-static Gimp    *unique_gimp        = NULL;
+static Clay    *unique_clay        = NULL;
 static gboolean app_menu_added     = FALSE;
 #endif
 
@@ -73,18 +73,18 @@ static gboolean app_menu_added     = FALSE;
 /*  public functions  */
 
 void
-menus_init (Gimp *gimp)
+menus_init (Clay *clay)
 {
-  GimpMenuFactory *global_menu_factory = NULL;
+  ClayMenuFactory *global_menu_factory = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   /* We need to make sure the property is installed before using it */
   g_type_class_ref (GTK_TYPE_MENU);
 
-  global_menu_factory = menus_get_global_menu_factory (gimp);
+  global_menu_factory = menus_get_global_menu_factory (clay);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Image>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Image>",
                                       "file",
                                       "context",
                                       "debug",
@@ -108,14 +108,14 @@ menus_init (Gimp *gimp)
                                       "image-menu", image_menu_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<QuickMask>",
+  clay_menu_factory_manager_register (global_menu_factory, "<QuickMask>",
                                       "quick-mask",
                                       NULL,
                                       "/quick-mask-popup",
                                       "quick-mask-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<AppMenu>",
+  clay_menu_factory_manager_register (global_menu_factory, "<AppMenu>",
                                       "file",
                                       "dialogs",
                                       NULL,
@@ -123,7 +123,7 @@ menus_init (Gimp *gimp)
                                       "app-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Toolbox>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Toolbox>",
                                       "file",
                                       "context",
                                       "help",
@@ -144,7 +144,7 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Dock>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Dock>",
                                       "file",
                                       "context",
                                       "edit",
@@ -164,7 +164,7 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Layers>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Layers>",
                                       "layers",
                                       "plug-in",
                                       "filters",
@@ -173,7 +173,7 @@ menus_init (Gimp *gimp)
                                       "layers-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Channels>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Channels>",
                                       "channels",
                                       "plug-in",
                                       "filters",
@@ -182,7 +182,7 @@ menus_init (Gimp *gimp)
                                       "channels-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Paths>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Paths>",
                                       "paths",
                                       "plug-in",
                                       NULL,
@@ -190,7 +190,7 @@ menus_init (Gimp *gimp)
                                       "paths-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<ToolPath>",
+  clay_menu_factory_manager_register (global_menu_factory, "<ToolPath>",
                                       "tool-path",
                                       NULL,
                                       "/tool-path-popup",
@@ -198,7 +198,7 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Colormap>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Colormap>",
                                       "colormap",
                                       "plug-in",
                                       NULL,
@@ -206,7 +206,7 @@ menus_init (Gimp *gimp)
                                       "colormap-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Dockable>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Dockable>",
                                       "dockable",
                                       "dock",
                                       NULL,
@@ -214,7 +214,7 @@ menus_init (Gimp *gimp)
                                       "dockable-menu", dockable_menu_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Brushes>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Brushes>",
                                       "brushes",
                                       "plug-in",
                                       NULL,
@@ -222,7 +222,7 @@ menus_init (Gimp *gimp)
                                       "brushes-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Dynamics>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Dynamics>",
                                       "dynamics",
                                       "plug-in",
                                       NULL,
@@ -230,7 +230,7 @@ menus_init (Gimp *gimp)
                                       "dynamics-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<MyPaintBrushes>",
+  clay_menu_factory_manager_register (global_menu_factory, "<MyPaintBrushes>",
                                       "mypaint-brushes",
                                       "plug-in",
                                       NULL,
@@ -238,7 +238,7 @@ menus_init (Gimp *gimp)
                                       "mypaint-brushes-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Patterns>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Patterns>",
                                       "patterns",
                                       "plug-in",
                                       NULL,
@@ -246,7 +246,7 @@ menus_init (Gimp *gimp)
                                       "patterns-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Gradients>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Gradients>",
                                       "gradients",
                                       "plug-in",
                                       NULL,
@@ -254,7 +254,7 @@ menus_init (Gimp *gimp)
                                       "gradients-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Palettes>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Palettes>",
                                       "palettes",
                                       "plug-in",
                                       NULL,
@@ -263,7 +263,7 @@ menus_init (Gimp *gimp)
                                       NULL);
 
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<ToolPresets>",
+  clay_menu_factory_manager_register (global_menu_factory, "<ToolPresets>",
                                       "tool-presets",
                                       "plug-in",
                                       NULL,
@@ -271,7 +271,7 @@ menus_init (Gimp *gimp)
                                       "tool-presets-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Fonts>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Fonts>",
                                       "fonts",
                                       "plug-in",
                                       NULL,
@@ -279,7 +279,7 @@ menus_init (Gimp *gimp)
                                       "fonts-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Buffers>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Buffers>",
                                       "buffers",
                                       "plug-in",
                                       NULL,
@@ -287,63 +287,63 @@ menus_init (Gimp *gimp)
                                       "buffers-menu", plug_in_menus_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Documents>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Documents>",
                                       "documents",
                                       NULL,
                                       "/documents-popup",
                                       "documents-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Templates>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Templates>",
                                       "templates",
                                       NULL,
                                       "/templates-popup",
                                       "templates-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Images>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Images>",
                                       "images",
                                       NULL,
                                       "/images-popup",
                                       "images-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<BrushEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<BrushEditor>",
                                       "brush-editor",
                                       NULL,
                                       "/brush-editor-popup",
                                       "brush-editor-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<DynamicsEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<DynamicsEditor>",
                                       "dynamics-editor",
                                       NULL,
                                       "/dynamics-editor-popup",
                                       "dynamics-editor-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<GradientEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<GradientEditor>",
                                       "gradient-editor",
                                       NULL,
                                       "/gradient-editor-popup",
                                       "gradient-editor-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<PaletteEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<PaletteEditor>",
                                       "palette-editor",
                                       NULL,
                                       "/palette-editor-popup",
                                       "palette-editor-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<ToolPresetEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<ToolPresetEditor>",
                                       "tool-preset-editor",
                                       NULL,
                                       "/tool-preset-editor-popup",
                                       "tool-preset-editor-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Selection>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Selection>",
                                       "select",
                                       "paths",
                                       NULL,
@@ -351,26 +351,26 @@ menus_init (Gimp *gimp)
                                       "selection-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<NavigationEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<NavigationEditor>",
                                       "view",
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Undo>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Undo>",
                                       "edit",
                                       NULL,
                                       "/undo-popup",
                                       "undo-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<ErrorConsole>",
+  clay_menu_factory_manager_register (global_menu_factory, "<ErrorConsole>",
                                       "error-console",
                                       NULL,
                                       "/error-console-popup",
                                       "error-console-menu", NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<ToolOptions>",
+  clay_menu_factory_manager_register (global_menu_factory, "<ToolOptions>",
                                       "tool-options",
                                       NULL,
                                       "/tool-options-popup",
@@ -378,7 +378,7 @@ menus_init (Gimp *gimp)
                                       tool_options_menu_setup,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<TextEditor>",
+  clay_menu_factory_manager_register (global_menu_factory, "<TextEditor>",
                                       "text-editor",
                                       NULL,
                                       "/text-editor-toolbar",
@@ -386,7 +386,7 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<TextTool>",
+  clay_menu_factory_manager_register (global_menu_factory, "<TextTool>",
                                       "text-tool",
                                       NULL,
                                       "/text-tool-popup",
@@ -394,7 +394,7 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<CursorInfo>",
+  clay_menu_factory_manager_register (global_menu_factory, "<CursorInfo>",
                                       "cursor-info",
                                       NULL,
                                       "/cursor-info-popup",
@@ -402,7 +402,7 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<SamplePoints>",
+  clay_menu_factory_manager_register (global_menu_factory, "<SamplePoints>",
                                       "sample-points",
                                       NULL,
                                       "/sample-points-popup",
@@ -410,38 +410,38 @@ menus_init (Gimp *gimp)
                                       NULL,
                                       NULL);
 
-  gimp_menu_factory_manager_register (global_menu_factory, "<Dashboard>",
+  clay_menu_factory_manager_register (global_menu_factory, "<Dashboard>",
                                       "dashboard",
                                       NULL,
                                       "/dashboard-popup",
-                                      "dashboard-menu", gimp_dashboard_menu_setup,
+                                      "dashboard-menu", clay_dashboard_menu_setup,
                                        NULL);
 }
 
 void
-menus_exit (Gimp *gimp)
+menus_exit (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
-  g_return_if_fail (menus_get_global_menu_factory (gimp) != NULL);
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+  g_return_if_fail (menus_get_global_menu_factory (clay) != NULL);
 
-  g_object_unref (menus_get_global_menu_factory (gimp));
+  g_object_unref (menus_get_global_menu_factory (clay));
 }
 
 void
-menus_restore (Gimp *gimp)
+menus_restore (Clay *clay)
 {
   GFile  *file;
   GError *error = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  file = gimp_directory_file ("shortcutsrc", NULL);
+  file = clay_directory_file ("shortcutsrc", NULL);
 
-  if (gimp->be_verbose)
-    g_print ("Parsing '%s'\n", gimp_file_get_utf8_name (file));
+  if (clay->be_verbose)
+    g_print ("Parsing '%s'\n", clay_file_get_utf8_name (file));
 
   if (g_file_query_exists (file, NULL) &&
-      ! shortcuts_rc_parse (GTK_APPLICATION (gimp->app), file, &error))
+      ! shortcuts_rc_parse (GTK_APPLICATION (clay->app), file, &error))
     g_printerr ("Failed reading '%s': %s\n",
                 g_file_peek_path (file), error->message);
 
@@ -449,23 +449,23 @@ menus_restore (Gimp *gimp)
 }
 
 void
-menus_save (Gimp     *gimp,
+menus_save (Clay     *clay,
             gboolean  always_save)
 {
   GFile  *file;
   GError *error = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   if (menurc_deleted && ! always_save)
     return;
 
-  file = gimp_directory_file ("shortcutsrc", NULL);
+  file = clay_directory_file ("shortcutsrc", NULL);
 
-  if (gimp->be_verbose)
-    g_print ("Writing '%s'\n", gimp_file_get_utf8_name (file));
+  if (clay->be_verbose)
+    g_print ("Writing '%s'\n", clay_file_get_utf8_name (file));
 
-  if (! shortcuts_rc_write (GTK_APPLICATION (gimp->app), file, &error))
+  if (! shortcuts_rc_write (GTK_APPLICATION (clay->app), file, &error))
     g_printerr ("Failed writing to '%s': %s\n",
                 g_file_peek_path (file), error->message);
 
@@ -476,24 +476,24 @@ menus_save (Gimp     *gimp,
 }
 
 gboolean
-menus_clear (Gimp    *gimp,
+menus_clear (Clay    *clay,
              GError **error)
 {
   GFile    *file;
   gboolean  success  = TRUE;
   GError   *my_error = NULL;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  file = gimp_directory_file ("shortcutsrc", NULL);
+  file = clay_directory_file ("shortcutsrc", NULL);
 
   if (! g_file_delete (file, NULL, &my_error) &&
       my_error->code != G_IO_ERROR_NOT_FOUND)
     {
       g_set_error (error, my_error->domain, my_error->code,
                    _("Deleting \"%s\" failed: %s"),
-                   gimp_file_get_utf8_name (file), my_error->message);
+                   clay_file_get_utf8_name (file), my_error->message);
       success = FALSE;
     }
   else
@@ -508,34 +508,34 @@ menus_clear (Gimp    *gimp,
 }
 
 void
-menus_remove (Gimp *gimp)
+menus_remove (Clay *clay)
 {
   gchar **actions;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  actions = g_action_group_list_actions (G_ACTION_GROUP (gimp->app));
+  actions = g_action_group_list_actions (G_ACTION_GROUP (clay->app));
   for (gint i = 0; actions[i] != NULL; i++)
     {
-      GimpAction *action;
+      ClayAction *action;
 
-      action = (GimpAction *) g_action_map_lookup_action (G_ACTION_MAP (gimp->app),
+      action = (ClayAction *) g_action_map_lookup_action (G_ACTION_MAP (clay->app),
                                                           actions[i]);
-      gimp_action_set_accels (action, (const gchar *[]) { NULL });
+      clay_action_set_accels (action, (const gchar *[]) { NULL });
     }
   g_strfreev (actions);
 }
 
-GimpMenuFactory *
-menus_get_global_menu_factory (Gimp *gimp)
+ClayMenuFactory *
+menus_get_global_menu_factory (Clay *clay)
 {
-  static GimpMenuFactory *global_menu_factory = NULL;
+  static ClayMenuFactory *global_menu_factory = NULL;
   static gboolean         created             = FALSE;
 
   if (global_menu_factory == NULL && ! created)
     {
       g_set_weak_pointer (&global_menu_factory,
-                          gimp_menu_factory_new (gimp, global_action_factory));
+                          clay_menu_factory_new (clay, global_action_factory));
 
       created = TRUE;
     }
@@ -543,15 +543,15 @@ menus_get_global_menu_factory (Gimp *gimp)
   return global_menu_factory;
 }
 
-GimpUIManager *
-menus_get_image_manager_singleton (Gimp *gimp)
+ClayUIManager *
+menus_get_image_manager_singleton (Clay *clay)
 {
-  static GimpUIManager *image_ui_manager = NULL;
+  static ClayUIManager *image_ui_manager = NULL;
 
   if (image_ui_manager == NULL)
     {
-      image_ui_manager = gimp_menu_factory_get_manager (menus_get_global_menu_factory (gimp),
-                                                        "<Image>", gimp);
+      image_ui_manager = clay_menu_factory_get_manager (menus_get_global_menu_factory (clay),
+                                                        "<Image>", clay);
       image_ui_manager->store_action_paths = TRUE;
     }
 
@@ -559,69 +559,69 @@ menus_get_image_manager_singleton (Gimp *gimp)
 }
 
 #ifdef PLATFORM_OSX
-@interface GimpappMenuHandler : NSObject
+@interface ClayappMenuHandler : NSObject
 @end
 
-@implementation GimpappMenuHandler
-+ (void) gimpShowAbout:(id) sender
+@implementation ClayappMenuHandler
++ (void) clayShowAbout:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-about");
+  clay_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-about");
 }
 
-+ (void) gimpShowWelcomeDialog:(id) sender
++ (void) clayShowWelcomeDialog:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-welcome");
+  clay_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-welcome");
 }
 
-+ (void) gimpShowPreferences:(id) sender
++ (void) clayShowPreferences:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-preferences");
+  clay_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-preferences");
 }
 
-+ (void) gimpShowInputDevices:(id) sender
++ (void) clayShowInputDevices:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-input-devices");
+  clay_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-input-devices");
 }
 
-+ (void) gimpShowKeyboardShortcuts:(id) sender
++ (void) clayShowKeyboardShortcuts:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-keyboard-shortcuts");
+  clay_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-keyboard-shortcuts");
 }
 
-+ (void) gimpShowModules:(id) sender
++ (void) clayShowModules:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-module-dialog");
+  clay_ui_manager_activate_action (ui_manager, "dialogs", "dialogs-module-dialog");
 }
 
-+ (void) gimpShowUnits:(id) sender
++ (void) clayShowUnits:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "plug-in", "plug-in-unit-editor");
+  clay_ui_manager_activate_action (ui_manager, "plug-in", "plug-in-unit-editor");
 }
 
-+ (void) gimpQuit:(id) sender
++ (void) clayQuit:(id) sender
 {
-  GimpUIManager *ui_manager = menus_get_image_manager_singleton (unique_gimp);
+  ClayUIManager *ui_manager = menus_get_image_manager_singleton (unique_clay);
 
-  gimp_ui_manager_activate_action (ui_manager, "file", "file-quit");
+  clay_ui_manager_activate_action (ui_manager, "file", "file-quit");
 }
 @end
 
 void
-menus_quartz_app_menu (Gimp *gimp)
+menus_quartz_app_menu (Clay *clay)
 {
   NSMenu     *main_menu;
   NSMenuItem *app_menu_item;
@@ -629,9 +629,9 @@ menus_quartz_app_menu (Gimp *gimp)
   NSInteger   last_index;
   NSMenuItem *item;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  unique_gimp = gimp;
+  unique_clay = clay;
 
   main_menu     = [NSApp mainMenu];
   app_menu_item = [main_menu itemAtIndex:0];
@@ -645,7 +645,7 @@ menus_quartz_app_menu (Gimp *gimp)
 
   [app_menu setTitle:@"Clay"];
 
-  /* customize the GIMP Mac menu only once: otherwise every new image window
+  /* customize the Clay Mac menu only once: otherwise every new image window
      (on multi-window mode) duplicates the entries we insert here. */
   if (! app_menu_added)
     {
@@ -653,54 +653,54 @@ menus_quartz_app_menu (Gimp *gimp)
 
       /* About */
       item = [app_menu itemAtIndex:0];
-      [item setTarget:[GimpappMenuHandler class]];
-      [item setAction:@selector (gimpShowAbout:)];
+      [item setTarget:[ClayappMenuHandler class]];
+      [item setAction:@selector (clayShowAbout:)];
 
       /* Welcome Dialog */
       item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:C_("dialogs-action", "Welcome Dialog")]
-                                        action:@selector (gimpShowWelcomeDialog:)
+                                        action:@selector (clayShowWelcomeDialog:)
                                  keyEquivalent:@""];
-      [item setTarget:[GimpappMenuHandler class]];
+      [item setTarget:[ClayappMenuHandler class]];
       [app_menu insertItem:item atIndex:1];
 
       /* Settings (this will be later picked by menus_quartz_get_settings_label() */
       item = [app_menu itemAtIndex:QUARTZ_APP_MENU_SETTINGS_INDEX];
-      [item setTarget:[GimpappMenuHandler class]];
-      [item setAction:@selector (gimpShowPreferences:)];
+      [item setTarget:[ClayappMenuHandler class]];
+      [item setAction:@selector (clayShowPreferences:)];
 
       /* Input Devices */
       item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:_("Input Devices")]
-                                        action:@selector (gimpShowInputDevices:)
+                                        action:@selector (clayShowInputDevices:)
                                  keyEquivalent:@""];
-      [item setTarget:[GimpappMenuHandler class]];
+      [item setTarget:[ClayappMenuHandler class]];
       [app_menu insertItem:item atIndex:4];
 
       /* Keyboard Shortcuts */
       item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:_("Keyboard Shortcuts")]
-                                        action:@selector (gimpShowKeyboardShortcuts:)
+                                        action:@selector (clayShowKeyboardShortcuts:)
                                  keyEquivalent:@""];
-      [item setTarget:[GimpappMenuHandler class]];
+      [item setTarget:[ClayappMenuHandler class]];
       [app_menu insertItem:item atIndex:5];
 
       /* Modules */
       item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:_("Modules")]
-                                        action:@selector (gimpShowModules:)
+                                        action:@selector (clayShowModules:)
                                  keyEquivalent:@""];
-      [item setTarget:[GimpappMenuHandler class]];
+      [item setTarget:[ClayappMenuHandler class]];
       [app_menu insertItem:item atIndex:6];
 
       /* Units */
       item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:_("Units")]
-                                        action:@selector (gimpShowUnits:)
+                                        action:@selector (clayShowUnits:)
                                  keyEquivalent:@""];
-      [item setTarget:[GimpappMenuHandler class]];
+      [item setTarget:[ClayappMenuHandler class]];
       [app_menu insertItem:item atIndex:7];
 
       /* Quit */
       last_index = [app_menu numberOfItems] - 1;
       item       = [app_menu itemAtIndex:last_index];
-      [item setTarget:[GimpappMenuHandler class]];
-      [item setAction:@selector (gimpQuit:)];
+      [item setTarget:[ClayappMenuHandler class]];
+      [item setAction:@selector (clayQuit:)];
     }
 
   /* Help and Windows */

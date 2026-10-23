@@ -23,146 +23,146 @@
  */
 
 /**
- * GimpBucketFillArea:
- * @GIMP_BUCKET_FILL_SELECTION:      Fill whole selection
- * @GIMP_BUCKET_FILL_SIMILAR_COLORS: Fill similar colors
- * @GIMP_BUCKET_FILL_LINE_ART:       Fill by line art detection
+ * ClayBucketFillArea:
+ * @CLAY_BUCKET_FILL_SELECTION:      Fill whole selection
+ * @CLAY_BUCKET_FILL_SIMILAR_COLORS: Fill similar colors
+ * @CLAY_BUCKET_FILL_LINE_ART:       Fill by line art detection
  *
  * Bucket fill area.
  */
-#define GIMP_TYPE_BUCKET_FILL_AREA (gimp_bucket_fill_area_get_type ())
+#define CLAY_TYPE_BUCKET_FILL_AREA (clay_bucket_fill_area_get_type ())
 
-GType gimp_bucket_fill_area_get_type (void);
+GType clay_bucket_fill_area_get_type (void);
 
 typedef enum
 {
-  GIMP_BUCKET_FILL_SELECTION,       /*< desc="Fill whole selection" >*/
-  GIMP_BUCKET_FILL_SIMILAR_COLORS,  /*< desc="Fill similar colors" >*/
-  GIMP_BUCKET_FILL_LINE_ART         /*< desc="Fill by line art detection" >*/
-} GimpBucketFillArea;
+  CLAY_BUCKET_FILL_SELECTION,       /*< desc="Fill whole selection" >*/
+  CLAY_BUCKET_FILL_SIMILAR_COLORS,  /*< desc="Fill similar colors" >*/
+  CLAY_BUCKET_FILL_LINE_ART         /*< desc="Fill by line art detection" >*/
+} ClayBucketFillArea;
 
 
 /**
- * GimpLineArtSource:
- * @GIMP_LINE_ART_SOURCE_SAMPLE_MERGED: All visible layers
- * @GIMP_LINE_ART_SOURCE_ACTIVE_LAYER:  Active layer
- * @GIMP_LINE_ART_SOURCE_LOWER_LAYER:   Layer below the active one
- * @GIMP_LINE_ART_SOURCE_UPPER_LAYER:   Layer above the active one
+ * ClayLineArtSource:
+ * @CLAY_LINE_ART_SOURCE_SAMPLE_MERGED: All visible layers
+ * @CLAY_LINE_ART_SOURCE_ACTIVE_LAYER:  Active layer
+ * @CLAY_LINE_ART_SOURCE_LOWER_LAYER:   Layer below the active one
+ * @CLAY_LINE_ART_SOURCE_UPPER_LAYER:   Layer above the active one
  *
  * Bucket fill area.
  */
-#define GIMP_TYPE_LINE_ART_SOURCE (gimp_line_art_source_get_type ())
+#define CLAY_TYPE_LINE_ART_SOURCE (clay_line_art_source_get_type ())
 
-GType gimp_line_art_source_get_type (void);
-
-typedef enum
-{
-  GIMP_LINE_ART_SOURCE_SAMPLE_MERGED, /*< desc="All visible layers" >*/
-  GIMP_LINE_ART_SOURCE_ACTIVE_LAYER,  /*< desc="Selected layer" >*/
-  GIMP_LINE_ART_SOURCE_LOWER_LAYER,   /*< desc="Layer below the selected one" >*/
-  GIMP_LINE_ART_SOURCE_UPPER_LAYER    /*< desc="Layer above the selected one" >*/
-} GimpLineArtSource;
-
-
-#define GIMP_TYPE_RECT_SELECT_MODE (gimp_rect_select_mode_get_type ())
-
-GType gimp_rect_select_mode_get_type (void);
+GType clay_line_art_source_get_type (void);
 
 typedef enum
 {
-  GIMP_RECT_SELECT_MODE_FREE,        /*< desc="Free select"        >*/
-  GIMP_RECT_SELECT_MODE_FIXED_SIZE,  /*< desc="Fixed size"         >*/
-  GIMP_RECT_SELECT_MODE_FIXED_RATIO  /*< desc="Fixed aspect ratio" >*/
-} GimpRectSelectMode;
+  CLAY_LINE_ART_SOURCE_SAMPLE_MERGED, /*< desc="All visible layers" >*/
+  CLAY_LINE_ART_SOURCE_ACTIVE_LAYER,  /*< desc="Selected layer" >*/
+  CLAY_LINE_ART_SOURCE_LOWER_LAYER,   /*< desc="Layer below the selected one" >*/
+  CLAY_LINE_ART_SOURCE_UPPER_LAYER    /*< desc="Layer above the selected one" >*/
+} ClayLineArtSource;
 
 
-#define GIMP_TYPE_TRANSFORM_TYPE (gimp_transform_type_get_type ())
+#define CLAY_TYPE_RECT_SELECT_MODE (clay_rect_select_mode_get_type ())
 
-GType gimp_transform_type_get_type (void);
-
-typedef enum
-{
-  GIMP_TRANSFORM_TYPE_LAYER,     /*< desc="Layer"     >*/
-  GIMP_TRANSFORM_TYPE_SELECTION, /*< desc="Selection" >*/
-  GIMP_TRANSFORM_TYPE_PATH,      /*< desc="Path"      >*/
-  GIMP_TRANSFORM_TYPE_IMAGE      /*< desc="Image"     >*/
-} GimpTransformType;
-
-
-#define GIMP_TYPE_TOOL_ACTION (gimp_tool_action_get_type ())
-
-GType gimp_tool_action_get_type (void);
+GType clay_rect_select_mode_get_type (void);
 
 typedef enum
 {
-  GIMP_TOOL_ACTION_PAUSE,
-  GIMP_TOOL_ACTION_RESUME,
-  GIMP_TOOL_ACTION_HALT,
-  GIMP_TOOL_ACTION_COMMIT
-} GimpToolAction;
+  CLAY_RECT_SELECT_MODE_FREE,        /*< desc="Free select"        >*/
+  CLAY_RECT_SELECT_MODE_FIXED_SIZE,  /*< desc="Fixed size"         >*/
+  CLAY_RECT_SELECT_MODE_FIXED_RATIO  /*< desc="Fixed aspect ratio" >*/
+} ClayRectSelectMode;
 
 
-#define GIMP_TYPE_TOOL_ACTIVE_MODIFIERS (gimp_tool_active_modifiers_get_type ())
+#define CLAY_TYPE_TRANSFORM_TYPE (clay_transform_type_get_type ())
 
-GType gimp_tool_active_modifiers_get_type (void);
-
-typedef enum
-{
-  GIMP_TOOL_ACTIVE_MODIFIERS_OFF,
-  GIMP_TOOL_ACTIVE_MODIFIERS_SAME,
-  GIMP_TOOL_ACTIVE_MODIFIERS_SEPARATE,
-} GimpToolActiveModifiers;
-
-
-#define GIMP_TYPE_MATTING_DRAW_MODE (gimp_matting_draw_mode_get_type ())
-
-GType gimp_matting_draw_mode_get_type (void);
+GType clay_transform_type_get_type (void);
 
 typedef enum
 {
- GIMP_MATTING_DRAW_MODE_FOREGROUND,   /*< desc="Draw foreground" >*/
- GIMP_MATTING_DRAW_MODE_BACKGROUND,   /*< desc="Draw background" >*/
- GIMP_MATTING_DRAW_MODE_UNKNOWN,      /*< desc="Draw unknown" >*/
-} GimpMattingDrawMode;
+  CLAY_TRANSFORM_TYPE_LAYER,     /*< desc="Layer"     >*/
+  CLAY_TRANSFORM_TYPE_SELECTION, /*< desc="Selection" >*/
+  CLAY_TRANSFORM_TYPE_PATH,      /*< desc="Path"      >*/
+  CLAY_TRANSFORM_TYPE_IMAGE      /*< desc="Image"     >*/
+} ClayTransformType;
 
 
-#define GIMP_TYPE_MATTING_PREVIEW_MODE (gimp_matting_preview_mode_get_type ())
+#define CLAY_TYPE_TOOL_ACTION (clay_tool_action_get_type ())
 
-GType gimp_matting_preview_mode_get_type (void);
-
-typedef enum
-{
- GIMP_MATTING_PREVIEW_MODE_ON_COLOR,        /*< desc="Color" >*/
- GIMP_MATTING_PREVIEW_MODE_GRAYSCALE,       /*< desc="Grayscale" >*/
-} GimpMattingPreviewMode;
-
-
-#define GIMP_TYPE_TRANSFORM_3D_LENS_MODE (gimp_transform_3d_lens_mode_get_type ())
-
-GType gimp_transform_3d_lens_mode_get_type (void);
-
-typedef enum /*< lowercase_name=gimp_transform_3d_lens_mode >*/
-{
-  GIMP_TRANSFORM_3D_LENS_MODE_FOCAL_LENGTH, /*< desc="Focal length" >*/
-  GIMP_TRANSFORM_3D_LENS_MODE_FOV_IMAGE,    /*< desc="Field of view (relative to image)", abbrev="FOV (image)" >*/
-  GIMP_TRANSFORM_3D_LENS_MODE_FOV_ITEM,     /*< desc="Field of view (relative to item)", abbrev="FOV (item)" >*/
-} Gimp3DTransformLensMode;
-
-
-#define GIMP_TYPE_WARP_BEHAVIOR (gimp_warp_behavior_get_type ())
-
-GType gimp_warp_behavior_get_type (void);
+GType clay_tool_action_get_type (void);
 
 typedef enum
 {
-  GIMP_WARP_BEHAVIOR_MOVE,      /*< desc="Move pixels" >*/
-  GIMP_WARP_BEHAVIOR_GROW,      /*< desc="Grow area" >*/
-  GIMP_WARP_BEHAVIOR_SHRINK,    /*< desc="Shrink area" >*/
-  GIMP_WARP_BEHAVIOR_SWIRL_CW,  /*< desc="Swirl clockwise" >*/
-  GIMP_WARP_BEHAVIOR_SWIRL_CCW, /*< desc="Swirl counter-clockwise" >*/
-  GIMP_WARP_BEHAVIOR_ERASE,     /*< desc="Erase warping" >*/
-  GIMP_WARP_BEHAVIOR_SMOOTH     /*< desc="Smooth warping" >*/
-} GimpWarpBehavior;
+  CLAY_TOOL_ACTION_PAUSE,
+  CLAY_TOOL_ACTION_RESUME,
+  CLAY_TOOL_ACTION_HALT,
+  CLAY_TOOL_ACTION_COMMIT
+} ClayToolAction;
+
+
+#define CLAY_TYPE_TOOL_ACTIVE_MODIFIERS (clay_tool_active_modifiers_get_type ())
+
+GType clay_tool_active_modifiers_get_type (void);
+
+typedef enum
+{
+  CLAY_TOOL_ACTIVE_MODIFIERS_OFF,
+  CLAY_TOOL_ACTIVE_MODIFIERS_SAME,
+  CLAY_TOOL_ACTIVE_MODIFIERS_SEPARATE,
+} ClayToolActiveModifiers;
+
+
+#define CLAY_TYPE_MATTING_DRAW_MODE (clay_matting_draw_mode_get_type ())
+
+GType clay_matting_draw_mode_get_type (void);
+
+typedef enum
+{
+ CLAY_MATTING_DRAW_MODE_FOREGROUND,   /*< desc="Draw foreground" >*/
+ CLAY_MATTING_DRAW_MODE_BACKGROUND,   /*< desc="Draw background" >*/
+ CLAY_MATTING_DRAW_MODE_UNKNOWN,      /*< desc="Draw unknown" >*/
+} ClayMattingDrawMode;
+
+
+#define CLAY_TYPE_MATTING_PREVIEW_MODE (clay_matting_preview_mode_get_type ())
+
+GType clay_matting_preview_mode_get_type (void);
+
+typedef enum
+{
+ CLAY_MATTING_PREVIEW_MODE_ON_COLOR,        /*< desc="Color" >*/
+ CLAY_MATTING_PREVIEW_MODE_GRAYSCALE,       /*< desc="Grayscale" >*/
+} ClayMattingPreviewMode;
+
+
+#define CLAY_TYPE_TRANSFORM_3D_LENS_MODE (clay_transform_3d_lens_mode_get_type ())
+
+GType clay_transform_3d_lens_mode_get_type (void);
+
+typedef enum /*< lowercase_name=clay_transform_3d_lens_mode >*/
+{
+  CLAY_TRANSFORM_3D_LENS_MODE_FOCAL_LENGTH, /*< desc="Focal length" >*/
+  CLAY_TRANSFORM_3D_LENS_MODE_FOV_IMAGE,    /*< desc="Field of view (relative to image)", abbrev="FOV (image)" >*/
+  CLAY_TRANSFORM_3D_LENS_MODE_FOV_ITEM,     /*< desc="Field of view (relative to item)", abbrev="FOV (item)" >*/
+} Clay3DTransformLensMode;
+
+
+#define CLAY_TYPE_WARP_BEHAVIOR (clay_warp_behavior_get_type ())
+
+GType clay_warp_behavior_get_type (void);
+
+typedef enum
+{
+  CLAY_WARP_BEHAVIOR_MOVE,      /*< desc="Move pixels" >*/
+  CLAY_WARP_BEHAVIOR_GROW,      /*< desc="Grow area" >*/
+  CLAY_WARP_BEHAVIOR_SHRINK,    /*< desc="Shrink area" >*/
+  CLAY_WARP_BEHAVIOR_SWIRL_CW,  /*< desc="Swirl clockwise" >*/
+  CLAY_WARP_BEHAVIOR_SWIRL_CCW, /*< desc="Swirl counter-clockwise" >*/
+  CLAY_WARP_BEHAVIOR_ERASE,     /*< desc="Erase warping" >*/
+  CLAY_WARP_BEHAVIOR_SMOOTH     /*< desc="Smooth warping" >*/
+} ClayWarpBehavior;
 
 
 /*
@@ -178,22 +178,22 @@ typedef enum /*< skip >*/
   SELECTION_ANCHOR
 } SelectFunction;
 
-/*  Modes of GimpEditSelectionTool  */
+/*  Modes of ClayEditSelectionTool  */
 typedef enum /*< skip >*/
 {
-  GIMP_TRANSLATE_MODE_PATH,
-  GIMP_TRANSLATE_MODE_CHANNEL,
-  GIMP_TRANSLATE_MODE_LAYER_MASK,
-  GIMP_TRANSLATE_MODE_MASK,
-  GIMP_TRANSLATE_MODE_MASK_TO_LAYER,
-  GIMP_TRANSLATE_MODE_MASK_COPY_TO_LAYER,
-  GIMP_TRANSLATE_MODE_LAYER,
-  GIMP_TRANSLATE_MODE_FLOATING_SEL
-} GimpTranslateMode;
+  CLAY_TRANSLATE_MODE_PATH,
+  CLAY_TRANSLATE_MODE_CHANNEL,
+  CLAY_TRANSLATE_MODE_LAYER_MASK,
+  CLAY_TRANSLATE_MODE_MASK,
+  CLAY_TRANSLATE_MODE_MASK_TO_LAYER,
+  CLAY_TRANSLATE_MODE_MASK_COPY_TO_LAYER,
+  CLAY_TRANSLATE_MODE_LAYER,
+  CLAY_TRANSLATE_MODE_FLOATING_SEL
+} ClayTranslateMode;
 
 /*  Motion event report modes  */
 typedef enum /*< skip >*/
 {
-  GIMP_MOTION_MODE_EXACT,
-  GIMP_MOTION_MODE_COMPRESS
-} GimpMotionMode;
+  CLAY_MOTION_MODE_EXACT,
+  CLAY_MOTION_MODE_COMPRESS
+} ClayMotionMode;

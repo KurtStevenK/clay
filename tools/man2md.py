@@ -30,7 +30,7 @@ try:
   metadata = (f"Title: {os.path.splitext(os.path.basename(md_file))[0]} Man Page\n"
                "Date: 2015-08-17T11:31:37-05:00\n"
               f"Modified: {datetime.datetime.now().isoformat()}\n"
-              "Authors: GIMP Team\n"
+              "Authors: Clay Team\n"
               "Status: hidden\n")
   content = f"{metadata}\n\n" + content
 

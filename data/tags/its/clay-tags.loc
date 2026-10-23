@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<locatingRules>
+  <locatingRule name="ClayTags" pattern="*.xml">
+    <documentRule localName="tags" target="clay-tags.its"/>
+  </locatingRule>
+</locatingRules>

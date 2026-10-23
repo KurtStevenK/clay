@@ -19,7 +19,7 @@
 /* Minor changes to support file magic */
 /* 4 Oct 1997 -- Risacher */
 
-/* compressor plug-in for GIMP           */
+/* compressor plug-in for Clay           */
 /* based on gz.c which in turn is        */
 /* loosely based on url.c by             */
 /* Josh MacDonald, jmacd@cs.berkeley.edu */
@@ -30,7 +30,7 @@
 /* LZMA compression code is based on code by Lasse Collin which was
  * placed in the public-domain. */
 
-/* This is reads and writes compressed image files for GIMP
+/* This is reads and writes compressed image files for Clay
  *
  * It should work with file names of the form
  * filename.foo.[gz|bz2] where foo is some already-recognized extension
@@ -88,9 +88,9 @@
 #define _O_BINARY 0
 #endif
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -142,12 +142,12 @@ typedef struct _CompressorClass CompressorClass;
 
 struct _Compressor
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _CompressorClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -156,35 +156,35 @@ struct _CompressorClass
 
 GType                   compressor_get_type         (void);
 
-static GList          * compressor_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * compressor_create_procedure (GimpPlugIn            *plug_in,
+static GList          * compressor_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * compressor_create_procedure (ClayPlugIn            *plug_in,
                                                      const gchar           *name);
 
-static GimpValueArray * compressor_export           (GimpProcedure         *procedure,
-                                                     GimpRunMode            run_mode,
-                                                     GimpImage             *image,
+static ClayValueArray * compressor_export           (ClayProcedure         *procedure,
+                                                     ClayRunMode            run_mode,
+                                                     ClayImage             *image,
                                                      GFile                 *file,
-                                                     GimpExportOptions     *options,
-                                                     GimpMetadata          *metadata,
-                                                     GimpProcedureConfig   *config,
+                                                     ClayExportOptions     *options,
+                                                     ClayMetadata          *metadata,
+                                                     ClayProcedureConfig   *config,
                                                      gpointer               run_data);
-static GimpValueArray * compressor_load             (GimpProcedure         *procedure,
-                                                     GimpRunMode            run_mode,
+static ClayValueArray * compressor_load             (ClayProcedure         *procedure,
+                                                     ClayRunMode            run_mode,
                                                      GFile                 *file,
-                                                     GimpMetadata          *metadata,
-                                                     GimpMetadataLoadFlags *flags,
-                                                     GimpProcedureConfig   *config,
+                                                     ClayMetadata          *metadata,
+                                                     ClayMetadataLoadFlags *flags,
+                                                     ClayProcedureConfig   *config,
                                                      gpointer              run_data);
 
-static GimpImage         * load_image               (const CompressorEntry *compressor,
+static ClayImage         * load_image               (const CompressorEntry *compressor,
                                                      GFile                 *file,
                                                      gint32                 run_mode,
-                                                     GimpPDBStatusType     *status,
+                                                     ClayPDBStatusType     *status,
                                                      GError               **error);
-static GimpPDBStatusType   export_image             (const CompressorEntry *compressor,
+static ClayPDBStatusType   export_image             (const CompressorEntry *compressor,
                                                      GFile                 *file,
-                                                     GimpImage             *image,
-                                                     GimpExportOptions     *options,
+                                                     ClayImage             *image,
+                                                     ClayExportOptions     *options,
                                                      gint                   n_drawables,
                                                      GList                 *drawables,
                                                      gint32                 run_mode,
@@ -218,9 +218,9 @@ static gboolean            zip_load                 (GFile                 *infi
 static goffset             get_file_info            (GFile                 *file);
 
 
-G_DEFINE_TYPE (Compressor, compressor, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Compressor, compressor, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (COMPRESSOR_TYPE)
+CLAY_MAIN (COMPRESSOR_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -307,7 +307,7 @@ static const CompressorEntry compressors[] =
 static void
 compressor_class_init (CompressorClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = compressor_query_procedures;
   plug_in_class->create_procedure = compressor_create_procedure;
@@ -320,7 +320,7 @@ compressor_init (Compressor *compressor)
 }
 
 static GList *
-compressor_query_procedures (GimpPlugIn *plug_in)
+compressor_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
   gint   i;
@@ -337,11 +337,11 @@ compressor_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-compressor_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+compressor_create_procedure (ClayPlugIn  *plug_in,
                              const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
   gint           i;
 
   for (i = 0; i < G_N_ELEMENTS (compressors); i++)
@@ -350,29 +350,29 @@ compressor_create_procedure (GimpPlugIn  *plug_in,
 
       if (! strcmp (name, compressor->load_proc))
         {
-          procedure = gimp_load_procedure_new (plug_in, name,
-                                               GIMP_PDB_PROC_TYPE_PLUGIN,
+          procedure = clay_load_procedure_new (plug_in, name,
+                                               CLAY_PDB_PROC_TYPE_PLUGIN,
                                                compressor_load,
                                                (gpointer) compressor, NULL);
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             _(compressor->load_blurb),
                                             _(compressor->load_help),
                                             name);
 
-          gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                           compressor->magic);
         }
       else if (compressor->save_proc && ! strcmp (name, compressor->save_proc))
         {
-          procedure = gimp_export_procedure_new (plug_in, name,
-                                                 GIMP_PDB_PROC_TYPE_PLUGIN,
+          procedure = clay_export_procedure_new (plug_in, name,
+                                                 CLAY_PDB_PROC_TYPE_PLUGIN,
                                                  FALSE, compressor_export,
                                                  (gpointer) compressor, NULL);
 
-          gimp_procedure_set_image_types (procedure, "RGB*, GRAY*, INDEXED*");
+          clay_procedure_set_image_types (procedure, "RGB*, GRAY*, INDEXED*");
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             _(compressor->save_blurb),
                                             _(compressor->save_help),
                                             name);
@@ -380,19 +380,19 @@ compressor_create_procedure (GimpPlugIn  *plug_in,
 
       if (procedure)
         {
-          gimp_procedure_set_menu_label (procedure, _(compressor->file_type));
+          clay_procedure_set_menu_label (procedure, _(compressor->file_type));
 
-          gimp_procedure_set_attribution (procedure,
+          clay_procedure_set_attribution (procedure,
                                           "Daniel Risacher",
                                           "Daniel Risacher, Spencer Kimball "
                                           "and Peter Mattis",
                                           "1995-1997");
 
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               compressor->mime_type);
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               compressor->extensions);
-          gimp_file_procedure_set_meta (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_meta (CLAY_FILE_PROCEDURE (procedure),
                                         TRUE, compressor->generic_extension + 1);
 
           return procedure;
@@ -402,71 +402,71 @@ compressor_create_procedure (GimpPlugIn  *plug_in,
   return NULL;
 }
 
-static GimpValueArray *
-compressor_load (GimpProcedure         *procedure,
-                 GimpRunMode            run_mode,
+static ClayValueArray *
+compressor_load (ClayProcedure         *procedure,
+                 ClayRunMode            run_mode,
                  GFile                 *file,
-                 GimpMetadata          *metadata,
-                 GimpMetadataLoadFlags *flags,
-                 GimpProcedureConfig   *config,
+                 ClayMetadata          *metadata,
+                 ClayMetadataLoadFlags *flags,
+                 ClayProcedureConfig   *config,
                  gpointer               run_data)
 {
   const CompressorEntry *compressor = run_data;
-  GimpValueArray        *return_vals;
-  GimpPDBStatusType      status;
-  GimpImage             *image;
+  ClayValueArray        *return_vals;
+  ClayPDBStatusType      status;
+  ClayImage             *image;
   GError                *error = NULL;
 
   /*  We handle PDB errors by forwarding them to the caller in
    *  our return values.
    */
-  gimp_plug_in_set_pdb_error_handler (gimp_procedure_get_plug_in (procedure),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_procedure_get_plug_in (procedure),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   image = load_image (compressor, file, run_mode, &status, &error);
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, error);
+  return_vals = clay_procedure_new_return_values (procedure, status, error);
 
-  if (image && status == GIMP_PDB_SUCCESS)
-    GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  if (image && status == CLAY_PDB_SUCCESS)
+    CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-compressor_export (GimpProcedure        *procedure,
-                   GimpRunMode           run_mode,
-                   GimpImage            *image,
+static ClayValueArray *
+compressor_export (ClayProcedure        *procedure,
+                   ClayRunMode           run_mode,
+                   ClayImage            *image,
                    GFile                *file,
-                   GimpExportOptions    *options,
-                   GimpMetadata         *metadata,
-                   GimpProcedureConfig  *config,
+                   ClayExportOptions    *options,
+                   ClayMetadata         *metadata,
+                   ClayProcedureConfig  *config,
                    gpointer              run_data)
 {
   const CompressorEntry *compressor  = run_data;
-  GimpPDBStatusType      status;
-  GList                 *drawables   = gimp_image_list_layers (image);
+  ClayPDBStatusType      status;
+  GList                 *drawables   = clay_image_list_layers (image);
   gint                   n_drawables = g_list_length (drawables);
   GError                *error       = NULL;
 
   /*  We handle PDB errors by forwarding them to the caller in
    *  our return values.
    */
-  gimp_plug_in_set_pdb_error_handler (gimp_procedure_get_plug_in (procedure),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_procedure_get_plug_in (procedure),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   status = export_image (compressor, file, image, options, n_drawables,
                          drawables, run_mode, &error);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 export_image (const CompressorEntry  *compressor,
               GFile                  *file,
-              GimpImage              *image,
-              GimpExportOptions      *options,
+              ClayImage              *image,
+              ClayExportOptions      *options,
               gint                    n_drawables,
               GList                  *drawables,
               gint32                  run_mode,
@@ -485,57 +485,57 @@ export_image (const CompressorEntry  *compressor,
 
   /* get a temp name with the right extension and save into it. */
 
-  tmp_file = gimp_temp_file (ext + 1);
+  tmp_file = clay_temp_file (ext + 1);
   if (tmp_file == NULL)
     {
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   "%s", gimp_pdb_get_last_error (gimp_get_pdb ()));
-      return gimp_pdb_get_last_status (gimp_get_pdb ());
+                   "%s", clay_pdb_get_last_error (clay_get_pdb ()));
+      return clay_pdb_get_last_status (clay_get_pdb ());
     }
 
-  if (! (gimp_file_save (run_mode, image, tmp_file, options) &&
+  if (! (clay_file_save (run_mode, image, tmp_file, options) &&
          valid_file (tmp_file)))
     {
       g_file_delete (tmp_file, NULL, NULL);
       g_object_unref (tmp_file);
 
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   "%s", gimp_pdb_get_last_error (gimp_get_pdb ()));
+                   "%s", clay_pdb_get_last_error (clay_get_pdb ()));
 
-      return gimp_pdb_get_last_status (gimp_get_pdb ());
+      return clay_pdb_get_last_status (clay_get_pdb ());
     }
 
-  gimp_progress_init_printf (_("Compressing '%s'"),
-                             gimp_file_get_utf8_name  (file));
+  clay_progress_init_printf (_("Compressing '%s'"),
+                             clay_file_get_utf8_name  (file));
 
   if (! compressor->save_fn (tmp_file, file))
     {
       g_file_delete (tmp_file, NULL, NULL);
       g_object_unref (tmp_file);
 
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   g_file_delete (tmp_file, NULL, NULL);
   g_object_unref (tmp_file);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   /* ask the core to save a thumbnail for compressed XCF files */
   if (strcmp (ext, ".xcf") == 0)
-    gimp_file_create_thumbnail (image, file);
+    clay_file_create_thumbnail (image, file);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (const CompressorEntry  *compressor,
             GFile                  *file,
             gint32                  run_mode,
-            GimpPDBStatusType      *status,
+            ClayPDBStatusType      *status,
             GError                **error)
 {
-  GimpImage   *image;
+  ClayImage   *image;
   const gchar *ext;
   GFile       *tmp_file;
 
@@ -549,25 +549,25 @@ load_image (const CompressorEntry  *compressor,
     }
 
   /* find a temp name */
-  tmp_file = gimp_temp_file (ext + 1);
+  tmp_file = clay_temp_file (ext + 1);
   if (tmp_file == NULL)
     {
-      *status = gimp_pdb_get_last_status (gimp_get_pdb ());
+      *status = clay_pdb_get_last_status (clay_get_pdb ());
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   "%s", gimp_pdb_get_last_error (gimp_get_pdb ()));
+                   "%s", clay_pdb_get_last_error (clay_get_pdb ()));
       return NULL;
     }
 
   if (! compressor->load_fn (file, tmp_file, error))
     {
       g_object_unref (tmp_file);
-      *status = GIMP_PDB_EXECUTION_ERROR;
+      *status = CLAY_PDB_EXECUTION_ERROR;
       return NULL;
     }
 
   /* now that we uncompressed it, load the temp file */
 
-  image = gimp_file_load (run_mode, tmp_file);
+  image = clay_file_load (run_mode, tmp_file);
 
   g_file_delete (tmp_file, NULL, NULL);
   g_object_unref (tmp_file);
@@ -576,13 +576,13 @@ load_image (const CompressorEntry  *compressor,
     {
       GFile *xcf_file;
 
-      *status = GIMP_PDB_SUCCESS;
+      *status = CLAY_PDB_SUCCESS;
 
-      if ((xcf_file = gimp_image_get_xcf_file (image)))
+      if ((xcf_file = clay_image_get_xcf_file (image)))
         /* Replace the temporary file with the actual source file, but
          * only if the inner format was actually XCF.
          */
-        gimp_image_set_file (image, file);
+        clay_image_set_file (image, file);
 
       g_clear_object (&xcf_file);
     }
@@ -591,10 +591,10 @@ load_image (const CompressorEntry  *compressor,
       /* Forward the return status of the underlining plug-in for the
        * given format.
        */
-      *status = gimp_pdb_get_last_status (gimp_get_pdb ());
+      *status = clay_pdb_get_last_status (clay_get_pdb ());
 
       g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                   "%s", gimp_pdb_get_last_error (gimp_get_pdb ()));
+                   "%s", clay_pdb_get_last_error (clay_get_pdb ()));
     }
 
   return image;
@@ -768,7 +768,7 @@ gzip_export (GFile *infile,
       if (gzwrite (out, buf, len) != len)
         break;
 
-      gimp_progress_update ((tot += len) * 1.0 / file_size);
+      clay_progress_update ((tot += len) * 1.0 / file_size);
     }
 
  out:
@@ -903,7 +903,7 @@ bzip2_export (GFile *infile,
       if (BZ2_bzwrite (out, buf, len) != len)
         break;
 
-      gimp_progress_update ((tot += len) * 1.0 / file_size);
+      clay_progress_update ((tot += len) * 1.0 / file_size);
     }
 
  out:
@@ -1076,7 +1076,7 @@ xz_export (GFile *infile,
           if (feof (in))
             action = LZMA_FINISH;
 
-          gimp_progress_update ((tot += strm.avail_in) * 1.0 / file_size);
+          clay_progress_update ((tot += strm.avail_in) * 1.0 / file_size);
         }
 
       status = lzma_code (&strm, action);
@@ -1151,7 +1151,7 @@ zip_load (GFile   *infile,
 
   if ((a = archive_read_new ()))
     {
-      const gchar *name = gimp_file_get_utf8_name (infile);
+      const gchar *name = clay_file_get_utf8_name (infile);
 
       archive_read_support_format_all (a);
 

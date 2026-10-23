@@ -6,7 +6,7 @@ import filecmp
 import shutil
 from datetime import datetime
 
-# This is a wrapper to the tools/gimp-mkenums perl script which:
+# This is a wrapper to the tools/clay-mkenums perl script which:
 # * sets a few common values;
 # * updates the ${filebase}enums.c directly in the source directory in
 #   order for it to be versioned.
@@ -36,16 +36,16 @@ postincludes = sys.argv[7]
 dtail = sys.argv[8] if len(sys.argv) >= 9 else None
 
 if not dtail:
-  dtail = "    { 0, NULL, NULL }\n  };\n\n  static GType type = 0;\n\n  if (G_UNLIKELY (! type))\n    {\n      type = g_@type@_register_static (\"@EnumName@\", values);\n      gimp_type_set_translation_context (type, \"@enumnick@\");\n      gimp_@type@_set_value_descriptions (type, descs);\n    }\n\n  return type;\n}\n"
+  dtail = "    { 0, NULL, NULL }\n  };\n\n  static GType type = 0;\n\n  if (G_UNLIKELY (! type))\n    {\n      type = g_@type@_register_static (\"@EnumName@\", values);\n      clay_type_set_translation_context (type, \"@enumnick@\");\n      clay_@type@_set_value_descriptions (type, descs);\n    }\n\n  return type;\n}\n"
 
 args = [
-  PERL, os.path.join(top_srcdir, 'tools', 'gimp-mkenums'),
+  PERL, os.path.join(top_srcdir, 'tools', 'clay-mkenums'),
   '--fhead', f'#include "stamp-{filebase}enums.h"\n' f'#include "config.h"\n' f'{preincludes}' f'#include "{filebase}enums.h"\n' f'{postincludes}',
   '--fprod', '\n/* enumerations from "@basename@" */',
   '--vhead', 'GType\n' '@enum_name@_get_type (void)\n' '{\n' '  static const G@Type@Value values[] =\n' '  {',
   '--vprod', '    { @VALUENAME@, "@VALUENAME@", "@valuenick@" },',
   '--vtail', '    { 0, NULL, NULL }\n  };\n',
-  '--dhead', '  static const Gimp@Type@Desc descs[] =\n  {',
+  '--dhead', '  static const Clay@Type@Desc descs[] =\n  {',
   '--dprod', '    { @VALUENAME@, @valuedesc@, @valuehelp@ },' '@if (\'@valueabbrev@\' ne \'NULL\')@\n' '    /* Translators: this is an abbreviated version of @valueudesc@.\n' '       Keep it short. */\n' '    { @VALUENAME@, @valueabbrev@, NULL },@endif@',
   '--dtail', dtail,
   os.path.join(f"{filebase}enums.h")

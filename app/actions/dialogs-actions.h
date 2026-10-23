@@ -18,16 +18,16 @@
 #pragma once
 
 /*  this check is needed for the extern declaration below to be correct  */
-#ifndef __GIMP_ACTION_GROUP_H__
-#error "widgets/gimpactiongroup.h must be included prior to dialogs-actions.h"
+#ifndef __CLAY_ACTION_GROUP_H__
+#error "widgets/clayactiongroup.h must be included prior to dialogs-actions.h"
 #endif
 
-extern const GimpStringActionEntry dialogs_dockable_actions[];
+extern const ClayStringActionEntry dialogs_dockable_actions[];
 extern gint                        n_dialogs_dockable_actions;
 
 
-void       dialogs_actions_setup          (GimpActionGroup *group);
-void       dialogs_actions_update         (GimpActionGroup *group,
+void       dialogs_actions_setup          (ClayActionGroup *group);
+void       dialogs_actions_update         (ClayActionGroup *group,
                                            gpointer         data);
 
-gboolean   dialogs_actions_toolbox_exists (Gimp            *gimp);
+gboolean   dialogs_actions_toolbox_exists (Clay            *clay);

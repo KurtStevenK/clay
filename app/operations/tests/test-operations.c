@@ -23,9 +23,9 @@
 #include <gegl.h>
 #include <gegl-plugin.h>
 
-#include "libgimpmath/gimpmath.h"
+#include "libclaymath/claymath.h"
 
-#include "app/operations/gimp-operations.h"
+#include "app/operations/clay-operations.h"
 
 
 #define DATA_DIR   "data"
@@ -392,10 +392,10 @@ main (gint     argc,
   gint  result;
 
   gegl_init (&argc, &argv);
-  gimp_operations_init ();
+  clay_operations_init ();
   g_test_init (&argc, &argv, NULL);
 
-  g_test_add_func ("/gimp-operations", test_operations);
+  g_test_add_func ("/clay-operations", test_operations);
 
   result = g_test_run ();
 

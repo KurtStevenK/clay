@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -36,7 +36,7 @@ void d_poly_object_class_init (void);
 
 void d_poly_start             (GdkPoint   *pnt,
                                gboolean    shift_down);
-void d_poly_end               (GimpGfig   *gfig,
+void d_poly_end               (ClayGfig   *gfig,
                                GdkPoint   *pnt,
                                gboolean    shift_down);
 

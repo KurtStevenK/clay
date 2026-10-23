@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
 #include "imap_browse.h"
 #include "imap_commands.h"
@@ -36,7 +36,7 @@
 #include "imap_main.h"
 #include "imap_ui_grid.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static gboolean callback_lock;
 
@@ -249,7 +249,7 @@ create_link_tab (AreaInfoDialog_t *dialog,
    gtk_grid_set_row_spacing (GTK_GRID (grid), 6);
    gtk_widget_set_visible (grid, TRUE);
 
-   frame = gimp_frame_new (_("Link Type"));
+   frame = clay_frame_new (_("Link Type"));
    gtk_grid_attach (GTK_GRID (grid), frame, 0, 0, 2, 1);
    gtk_widget_set_visible (frame, TRUE);
 
@@ -335,7 +335,7 @@ create_link_tab (AreaInfoDialog_t *dialog,
    label = create_label_in_grid (grid, 15, 0, _("Ta_b Index: (optional)"));
    dialog->tabindex = create_entry_in_grid (grid, label, 16, 0);
 
-   append_page (notebook, grid, GIMP_ICON_WEB, _("_Link"));
+   append_page (notebook, grid, CLAY_ICON_WEB, _("_Link"));
 }
 
 static void
@@ -369,7 +369,7 @@ create_info_tab(AreaInfoDialog_t *dialog, GtkWidget *notebook)
    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
    gtk_widget_set_visible(vbox, TRUE);
 
-   frame = gimp_frame_new(_("Dimensions"));
+   frame = clay_frame_new(_("Dimensions"));
    gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 0);
    gtk_widget_set_visible(frame, TRUE);
 

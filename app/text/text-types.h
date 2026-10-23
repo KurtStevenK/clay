@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GimpText
+ * ClayText
  * Copyright (C) 2002-2003  Sven Neumann <sven@gimp.org>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,10 +25,10 @@
 #include "text/text-enums.h"
 
 
-typedef struct _GimpFont        GimpFont;
-typedef struct _GimpFontFactory GimpFontFactory;
-typedef struct _GimpFontList    GimpFontList;
-typedef struct _GimpText        GimpText;
-typedef struct _GimpTextLayer   GimpTextLayer;
-typedef struct _GimpTextLayout  GimpTextLayout;
-typedef struct _GimpTextUndo    GimpTextUndo;
+typedef struct _ClayFont        ClayFont;
+typedef struct _ClayFontFactory ClayFontFactory;
+typedef struct _ClayFontList    ClayFontList;
+typedef struct _ClayText        ClayText;
+typedef struct _ClayTextLayer   ClayTextLayer;
+typedef struct _ClayTextLayout  ClayTextLayout;
+typedef struct _ClayTextUndo    ClayTextUndo;

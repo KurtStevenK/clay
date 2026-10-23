@@ -17,11 +17,11 @@
 
 #pragma once
 
-#include "libgimpbase/gimpbasetypes.h"
-#include "libgimpmath/gimpmathtypes.h"
-#include "libgimpcolor/gimpcolortypes.h"
-#include "libgimpmodule/gimpmoduletypes.h"
-#include "libgimpthumb/gimpthumb-types.h"
+#include "libclaybase/claybasetypes.h"
+#include "libclaymath/claymathtypes.h"
+#include "libclaycolor/claycolortypes.h"
+#include "libclaymodule/claymoduletypes.h"
+#include "libclaythumb/claythumb-types.h"
 
 #include "config/config-types.h"
 
@@ -46,202 +46,202 @@
 
 /*  defines  */
 
-#define GIMP_COORDS_MIN_PRESSURE      0.0
-#define GIMP_COORDS_MAX_PRESSURE      1.0
-#define GIMP_COORDS_DEFAULT_PRESSURE  1.0
+#define CLAY_COORDS_MIN_PRESSURE      0.0
+#define CLAY_COORDS_MAX_PRESSURE      1.0
+#define CLAY_COORDS_DEFAULT_PRESSURE  1.0
 
-#define GIMP_COORDS_MIN_TILT         -1.0
-#define GIMP_COORDS_MAX_TILT          1.0
-#define GIMP_COORDS_DEFAULT_TILT      0.0
+#define CLAY_COORDS_MIN_TILT         -1.0
+#define CLAY_COORDS_MAX_TILT          1.0
+#define CLAY_COORDS_DEFAULT_TILT      0.0
 
-#define GIMP_COORDS_MIN_WHEEL         0.0
-#define GIMP_COORDS_MAX_WHEEL         1.0
-#define GIMP_COORDS_DEFAULT_WHEEL     0.5
+#define CLAY_COORDS_MIN_WHEEL         0.0
+#define CLAY_COORDS_MAX_WHEEL         1.0
+#define CLAY_COORDS_DEFAULT_WHEEL     0.5
 
-#define GIMP_COORDS_DEFAULT_DISTANCE  0.0
-#define GIMP_COORDS_DEFAULT_ROTATION  0.0
-#define GIMP_COORDS_DEFAULT_SLIDER    0.0
+#define CLAY_COORDS_DEFAULT_DISTANCE  0.0
+#define CLAY_COORDS_DEFAULT_ROTATION  0.0
+#define CLAY_COORDS_DEFAULT_SLIDER    0.0
 
-#define GIMP_COORDS_DEFAULT_VELOCITY  0.0
+#define CLAY_COORDS_DEFAULT_VELOCITY  0.0
 
-#define GIMP_COORDS_DEFAULT_DIRECTION 0.0
+#define CLAY_COORDS_DEFAULT_DIRECTION 0.0
 
-#define GIMP_COORDS_DEFAULT_XSCALE    1.0
-#define GIMP_COORDS_DEFAULT_YSCALE    1.0
+#define CLAY_COORDS_DEFAULT_XSCALE    1.0
+#define CLAY_COORDS_DEFAULT_YSCALE    1.0
 
-#define GIMP_COORDS_DEFAULT_VALUES    { 0.0, 0.0, \
-                                        GIMP_COORDS_DEFAULT_PRESSURE, \
-                                        GIMP_COORDS_DEFAULT_TILT,     \
-                                        GIMP_COORDS_DEFAULT_TILT,     \
-                                        GIMP_COORDS_DEFAULT_WHEEL,    \
-                                        GIMP_COORDS_DEFAULT_DISTANCE, \
-                                        GIMP_COORDS_DEFAULT_ROTATION, \
-                                        GIMP_COORDS_DEFAULT_SLIDER,   \
-                                        GIMP_COORDS_DEFAULT_VELOCITY, \
-                                        GIMP_COORDS_DEFAULT_DIRECTION,\
-                                        GIMP_COORDS_DEFAULT_XSCALE,   \
-                                        GIMP_COORDS_DEFAULT_YSCALE }
+#define CLAY_COORDS_DEFAULT_VALUES    { 0.0, 0.0, \
+                                        CLAY_COORDS_DEFAULT_PRESSURE, \
+                                        CLAY_COORDS_DEFAULT_TILT,     \
+                                        CLAY_COORDS_DEFAULT_TILT,     \
+                                        CLAY_COORDS_DEFAULT_WHEEL,    \
+                                        CLAY_COORDS_DEFAULT_DISTANCE, \
+                                        CLAY_COORDS_DEFAULT_ROTATION, \
+                                        CLAY_COORDS_DEFAULT_SLIDER,   \
+                                        CLAY_COORDS_DEFAULT_VELOCITY, \
+                                        CLAY_COORDS_DEFAULT_DIRECTION,\
+                                        CLAY_COORDS_DEFAULT_XSCALE,   \
+                                        CLAY_COORDS_DEFAULT_YSCALE }
 
 
 /*  base classes  */
 
-typedef struct _GimpObject                      GimpObject;
-typedef struct _GimpViewable                    GimpViewable;
-typedef struct _GimpFilter                      GimpFilter;
-typedef struct _GimpItem                        GimpItem;
-typedef struct _GimpAuxItem                     GimpAuxItem;
-typedef struct _GimpLink                        GimpLink;
+typedef struct _ClayObject                      ClayObject;
+typedef struct _ClayViewable                    ClayViewable;
+typedef struct _ClayFilter                      ClayFilter;
+typedef struct _ClayItem                        ClayItem;
+typedef struct _ClayAuxItem                     ClayAuxItem;
+typedef struct _ClayLink                        ClayLink;
 
-typedef struct _Gimp                            Gimp;
-typedef struct _GimpImage                       GimpImage;
+typedef struct _Clay                            Clay;
+typedef struct _ClayImage                       ClayImage;
 
-typedef struct _GimpDisplay                     GimpDisplay;
+typedef struct _ClayDisplay                     ClayDisplay;
 
 
 /*  containers  */
 
-typedef struct _GimpContainer                   GimpContainer;
-typedef struct _GimpList                        GimpList;
-typedef struct _GimpDocumentList                GimpDocumentList;
-typedef struct _GimpDrawableStack               GimpDrawableStack;
-typedef struct _GimpFilteredContainer           GimpFilteredContainer;
-typedef struct _GimpFilterStack                 GimpFilterStack;
-typedef struct _GimpItemList                    GimpItemList;
-typedef struct _GimpItemStack                   GimpItemStack;
-typedef struct _GimpLayerStack                  GimpLayerStack;
-typedef struct _GimpTaggedContainer             GimpTaggedContainer;
-typedef struct _GimpTreeProxy                   GimpTreeProxy;
+typedef struct _ClayContainer                   ClayContainer;
+typedef struct _ClayList                        ClayList;
+typedef struct _ClayDocumentList                ClayDocumentList;
+typedef struct _ClayDrawableStack               ClayDrawableStack;
+typedef struct _ClayFilteredContainer           ClayFilteredContainer;
+typedef struct _ClayFilterStack                 ClayFilterStack;
+typedef struct _ClayItemList                    ClayItemList;
+typedef struct _ClayItemStack                   ClayItemStack;
+typedef struct _ClayLayerStack                  ClayLayerStack;
+typedef struct _ClayTaggedContainer             ClayTaggedContainer;
+typedef struct _ClayTreeProxy                   ClayTreeProxy;
 
 
 /*  not really a container  */
 
-typedef struct _GimpItemTree                    GimpItemTree;
+typedef struct _ClayItemTree                    ClayItemTree;
 
 
 /*  context objects  */
 
-typedef struct _GimpContext                     GimpContext;
-typedef struct _GimpFillOptions                 GimpFillOptions;
-typedef struct _GimpStrokeOptions               GimpStrokeOptions;
-typedef struct _GimpToolOptions                 GimpToolOptions;
+typedef struct _ClayContext                     ClayContext;
+typedef struct _ClayFillOptions                 ClayFillOptions;
+typedef struct _ClayStrokeOptions               ClayStrokeOptions;
+typedef struct _ClayToolOptions                 ClayToolOptions;
 
 
 /*  info objects  */
 
-typedef struct _GimpPaintInfo                   GimpPaintInfo;
-typedef struct _GimpToolGroup                   GimpToolGroup;
-typedef struct _GimpToolInfo                    GimpToolInfo;
-typedef struct _GimpToolItem                    GimpToolItem;
+typedef struct _ClayPaintInfo                   ClayPaintInfo;
+typedef struct _ClayToolGroup                   ClayToolGroup;
+typedef struct _ClayToolInfo                    ClayToolInfo;
+typedef struct _ClayToolItem                    ClayToolItem;
 
 
 /*  data objects  */
 
-typedef struct _GimpDataFactory                 GimpDataFactory;
-typedef struct _GimpDataLoaderFactory           GimpDataLoaderFactory;
-typedef struct _GimpResource                    GimpResource;
-typedef struct _GimpData                        GimpData;
-typedef struct _GimpBrush                       GimpBrush;
-typedef struct _GimpBrushCache                  GimpBrushCache;
-typedef struct _GimpBrushClipboard              GimpBrushClipboard;
-typedef struct _GimpBrushGenerated              GimpBrushGenerated;
-typedef struct _GimpBrushPipe                   GimpBrushPipe;
-typedef struct _GimpCurve                       GimpCurve;
-typedef struct _GimpDynamics                    GimpDynamics;
-typedef struct _GimpDynamicsOutput              GimpDynamicsOutput;
-typedef struct _GimpGradient                    GimpGradient;
-typedef struct _GimpMybrush                     GimpMybrush;
-typedef struct _GimpPadActions                  GimpPadActions;
-typedef struct _GimpPalette                     GimpPalette;
-typedef struct _GimpPaletteMru                  GimpPaletteMru;
-typedef struct _GimpPattern                     GimpPattern;
-typedef struct _GimpPatternClipboard            GimpPatternClipboard;
-typedef struct _GimpToolPreset                  GimpToolPreset;
-typedef struct _GimpTagCache                    GimpTagCache;
+typedef struct _ClayDataFactory                 ClayDataFactory;
+typedef struct _ClayDataLoaderFactory           ClayDataLoaderFactory;
+typedef struct _ClayResource                    ClayResource;
+typedef struct _ClayData                        ClayData;
+typedef struct _ClayBrush                       ClayBrush;
+typedef struct _ClayBrushCache                  ClayBrushCache;
+typedef struct _ClayBrushClipboard              ClayBrushClipboard;
+typedef struct _ClayBrushGenerated              ClayBrushGenerated;
+typedef struct _ClayBrushPipe                   ClayBrushPipe;
+typedef struct _ClayCurve                       ClayCurve;
+typedef struct _ClayDynamics                    ClayDynamics;
+typedef struct _ClayDynamicsOutput              ClayDynamicsOutput;
+typedef struct _ClayGradient                    ClayGradient;
+typedef struct _ClayMybrush                     ClayMybrush;
+typedef struct _ClayPadActions                  ClayPadActions;
+typedef struct _ClayPalette                     ClayPalette;
+typedef struct _ClayPaletteMru                  ClayPaletteMru;
+typedef struct _ClayPattern                     ClayPattern;
+typedef struct _ClayPatternClipboard            ClayPatternClipboard;
+typedef struct _ClayToolPreset                  ClayToolPreset;
+typedef struct _ClayTagCache                    ClayTagCache;
 
 
 /*  drawable objects  */
 
-typedef struct _GimpDrawable                    GimpDrawable;
-typedef struct _GimpDrawableFilterMask          GimpDrawableFilterMask;
-typedef struct _GimpRasterizable                GimpRasterizable;
-typedef struct _GimpChannel                     GimpChannel;
-typedef struct _GimpLayerMask                   GimpLayerMask;
-typedef struct _GimpSelection                   GimpSelection;
-typedef struct _GimpLayer                       GimpLayer;
-typedef struct _GimpGroupLayer                  GimpGroupLayer;
-typedef struct _GimpLinkLayer                   GimpLinkLayer;
+typedef struct _ClayDrawable                    ClayDrawable;
+typedef struct _ClayDrawableFilterMask          ClayDrawableFilterMask;
+typedef struct _ClayRasterizable                ClayRasterizable;
+typedef struct _ClayChannel                     ClayChannel;
+typedef struct _ClayLayerMask                   ClayLayerMask;
+typedef struct _ClaySelection                   ClaySelection;
+typedef struct _ClayLayer                       ClayLayer;
+typedef struct _ClayGroupLayer                  ClayGroupLayer;
+typedef struct _ClayLinkLayer                   ClayLinkLayer;
 
 
 /*  auxiliary image items  */
 
-typedef struct _GimpGuide                       GimpGuide;
-typedef struct _GimpSamplePoint                 GimpSamplePoint;
+typedef struct _ClayGuide                       ClayGuide;
+typedef struct _ClaySamplePoint                 ClaySamplePoint;
 
 
 /*  undo objects  */
 
-typedef struct _GimpUndo                        GimpUndo;
-typedef struct _GimpUndoStack                   GimpUndoStack;
-typedef struct _GimpUndoAccumulator             GimpUndoAccumulator;
+typedef struct _ClayUndo                        ClayUndo;
+typedef struct _ClayUndoStack                   ClayUndoStack;
+typedef struct _ClayUndoAccumulator             ClayUndoAccumulator;
 
 
 /* Symmetry transformations */
 
-typedef struct _GimpSymmetry                    GimpSymmetry;
-typedef struct _GimpMirror                      GimpMirror;
-typedef struct _GimpTiling                      GimpTiling;
-typedef struct _GimpMandala                     GimpMandala;
+typedef struct _ClaySymmetry                    ClaySymmetry;
+typedef struct _ClayMirror                      ClayMirror;
+typedef struct _ClayTiling                      ClayTiling;
+typedef struct _ClayMandala                     ClayMandala;
 
 
 /*  misc objects  */
 
-typedef struct _GimpAsync                       GimpAsync;
-typedef struct _GimpAsyncSet                    GimpAsyncSet;
-typedef struct _GimpBuffer                      GimpBuffer;
-typedef struct _GimpDrawableFilter              GimpDrawableFilter;
-typedef struct _GimpEnvironTable                GimpEnvironTable;
-typedef struct _GimpExtension                   GimpExtension;
-typedef struct _GimpExtensionManager            GimpExtensionManager;
-typedef struct _GimpHistogram                   GimpHistogram;
-typedef struct _GimpIdTable                     GimpIdTable;
-typedef struct _GimpImagefile                   GimpImagefile;
-typedef struct _GimpImageProxy                  GimpImageProxy;
-typedef struct _GimpInterpreterDB               GimpInterpreterDB;
-typedef struct _GimpLineArt                     GimpLineArt;
-typedef struct _GimpObjectQueue                 GimpObjectQueue;
-typedef struct _GimpParasiteList                GimpParasiteList;
-typedef struct _GimpPdbProgress                 GimpPdbProgress;
-typedef struct _GimpProjection                  GimpProjection;
-typedef struct _GimpSettings                    GimpSettings;
-typedef struct _GimpSubProgress                 GimpSubProgress;
-typedef struct _GimpTag                         GimpTag;
-typedef struct _GimpTreeHandler                 GimpTreeHandler;
-typedef struct _GimpTriviallyCancelableWaitable GimpTriviallyCancelableWaitable;
-typedef struct _GimpUncancelableWaitable        GimpUncancelableWaitable;
+typedef struct _ClayAsync                       ClayAsync;
+typedef struct _ClayAsyncSet                    ClayAsyncSet;
+typedef struct _ClayBuffer                      ClayBuffer;
+typedef struct _ClayDrawableFilter              ClayDrawableFilter;
+typedef struct _ClayEnvironTable                ClayEnvironTable;
+typedef struct _ClayExtension                   ClayExtension;
+typedef struct _ClayExtensionManager            ClayExtensionManager;
+typedef struct _ClayHistogram                   ClayHistogram;
+typedef struct _ClayIdTable                     ClayIdTable;
+typedef struct _ClayImagefile                   ClayImagefile;
+typedef struct _ClayImageProxy                  ClayImageProxy;
+typedef struct _ClayInterpreterDB               ClayInterpreterDB;
+typedef struct _ClayLineArt                     ClayLineArt;
+typedef struct _ClayObjectQueue                 ClayObjectQueue;
+typedef struct _ClayParasiteList                ClayParasiteList;
+typedef struct _ClayPdbProgress                 ClayPdbProgress;
+typedef struct _ClayProjection                  ClayProjection;
+typedef struct _ClaySettings                    ClaySettings;
+typedef struct _ClaySubProgress                 ClaySubProgress;
+typedef struct _ClayTag                         ClayTag;
+typedef struct _ClayTreeHandler                 ClayTreeHandler;
+typedef struct _ClayTriviallyCancelableWaitable ClayTriviallyCancelableWaitable;
+typedef struct _ClayUncancelableWaitable        ClayUncancelableWaitable;
 
 
 /*  interfaces  */
 
-typedef struct _GimpCancelable                  GimpCancelable;  /* dummy typedef */
-typedef struct _GimpPickable                    GimpPickable;    /* dummy typedef */
-typedef struct _GimpProgress                    GimpProgress;    /* dummy typedef */
-typedef struct _GimpProjectable                 GimpProjectable; /* dummy typedef */
-typedef struct _GimpSavable                     GimpSavable;     /* dummy typedef */
-typedef struct _GimpTagged                      GimpTagged;      /* dummy typedef */
-typedef struct _GimpWaitable                    GimpWaitable;    /* dummy typedef */
+typedef struct _ClayCancelable                  ClayCancelable;  /* dummy typedef */
+typedef struct _ClayPickable                    ClayPickable;    /* dummy typedef */
+typedef struct _ClayProgress                    ClayProgress;    /* dummy typedef */
+typedef struct _ClayProjectable                 ClayProjectable; /* dummy typedef */
+typedef struct _ClaySavable                     ClaySavable;     /* dummy typedef */
+typedef struct _ClayTagged                      ClayTagged;      /* dummy typedef */
+typedef struct _ClayWaitable                    ClayWaitable;    /* dummy typedef */
 
 
 /*  non-object types  */
 
-typedef struct _GimpBacktrace                   GimpBacktrace;
-typedef struct _GimpBoundSeg                    GimpBoundSeg;
-typedef struct _GimpChunkIterator               GimpChunkIterator;
-typedef struct _GimpCoords                      GimpCoords;
-typedef struct _GimpGradientSegment             GimpGradientSegment;
-typedef struct _GimpPaletteEntry                GimpPaletteEntry;
-typedef struct _GimpScanConvert                 GimpScanConvert;
-typedef struct _GimpTempBuf                     GimpTempBuf;
-typedef         guint32                         GimpTattoo;
+typedef struct _ClayBacktrace                   ClayBacktrace;
+typedef struct _ClayBoundSeg                    ClayBoundSeg;
+typedef struct _ClayChunkIterator               ClayChunkIterator;
+typedef struct _ClayCoords                      ClayCoords;
+typedef struct _ClayGradientSegment             ClayGradientSegment;
+typedef struct _ClayPaletteEntry                ClayPaletteEntry;
+typedef struct _ClayScanConvert                 ClayScanConvert;
+typedef struct _ClayTempBuf                     ClayTempBuf;
+typedef         guint32                         ClayTattoo;
 
 /* The following hack is made so that we can reuse the definition
  * the cairo definition of cairo_path_t without having to translate
@@ -251,35 +251,35 @@ typedef         guint32                         GimpTattoo;
  * including this file we only use the "real" definition when cairo.h
  * already has been included and use something else.
  *
- * Note that if you really want to work with GimpBezierDesc (except just
+ * Note that if you really want to work with ClayBezierDesc (except just
  * passing pointers to it around) you also need to include <cairo.h>.
  */
 #ifdef CAIRO_VERSION
-typedef cairo_path_t GimpBezierDesc;
+typedef cairo_path_t ClayBezierDesc;
 #else
-typedef void * GimpBezierDesc;
+typedef void * ClayBezierDesc;
 #endif
 
 
 /*  functions  */
 
-typedef void     (* GimpInitStatusFunc)    (const gchar *text1,
+typedef void     (* ClayInitStatusFunc)    (const gchar *text1,
                                             const gchar *text2,
                                             gdouble      percentage);
 
-typedef gboolean (* GimpObjectFilterFunc)  (GimpObject  *object,
+typedef gboolean (* ClayObjectFilterFunc)  (ClayObject  *object,
                                             gpointer     user_data);
 
-typedef gint64   (* GimpMemsizeFunc)       (gpointer     instance,
+typedef gint64   (* ClayMemsizeFunc)       (gpointer     instance,
                                             gint64      *gui_size);
 
-typedef void     (* GimpRunAsyncFunc)      (GimpAsync   *async,
+typedef void     (* ClayRunAsyncFunc)      (ClayAsync   *async,
                                             gpointer     user_data);
 
 
 /*  structs  */
 
-struct _GimpCoords
+struct _ClayCoords
 {
   /* axes as reported by the device */
   gdouble  x;
@@ -305,9 +305,9 @@ struct _GimpCoords
 
 /*  temp hack as replacement for GdkSegment  */
 
-typedef struct _GimpSegment GimpSegment;
+typedef struct _ClaySegment ClaySegment;
 
-struct _GimpSegment
+struct _ClaySegment
 {
   gint x1;
   gint y1;
@@ -316,7 +316,7 @@ struct _GimpSegment
 };
 
 
-#include "gegl/gimp-gegl-types.h"
+#include "gegl/clay-gegl-types.h"
 #include "paint/paint-types.h"
 #include "text/text-types.h"
 #include "path/path-types.h"

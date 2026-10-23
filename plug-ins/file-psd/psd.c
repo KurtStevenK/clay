@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GIMP PSD Plug-in
+ * Clay PSD Plug-in
  * Copyright 2007 by John Marshall
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,15 +22,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "psd.h"
 #include "psd-load.h"
 #include "psd-export.h"
 #include "psd-thumb-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 typedef struct _Psd      Psd;
@@ -38,12 +38,12 @@ typedef struct _PsdClass PsdClass;
 
 struct _Psd
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PsdClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -52,52 +52,52 @@ struct _PsdClass
 
 GType                   psd_get_type         (void);
 
-static GList          * psd_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * psd_create_procedure (GimpPlugIn            *plug_in,
+static GList          * psd_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * psd_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * psd_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * psd_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer              run_data);
-static GimpValueArray * psd_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * psd_load_thumb       (ClayProcedure         *procedure,
                                               GFile                 *file,
                                               gint                   size,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * psd_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * psd_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * psd_load_metadata    (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * psd_load_metadata    (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * psd_export_metadata  (GimpProcedure         *procedure,
-                                              GimpProcedureConfig   *config,
+static ClayValueArray * psd_export_metadata  (ClayProcedure         *procedure,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
 
-G_DEFINE_TYPE (Psd, psd, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Psd, psd, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PSD_TYPE)
+CLAY_MAIN (PSD_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 psd_class_init (PsdClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = psd_query_procedures;
   plug_in_class->create_procedure = psd_create_procedure;
@@ -110,7 +110,7 @@ psd_init (Psd *psd)
 }
 
 static GList *
-psd_query_procedures (GimpPlugIn *plug_in)
+psd_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -125,86 +125,86 @@ psd_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-psd_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+psd_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            psd_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Photoshop image"));
+      clay_procedure_set_menu_label (procedure, _("Photoshop image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads images from the Photoshop "
                                           "PSD and PSB file formats"),
                                         _("This plug-in loads images in Adobe "
                                           "Photoshop (TM) native PSD and PSB format."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "John Marshall",
                                       "John Marshall",
                                       "2007");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-psd");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "psd, psb");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,8BPS");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_MERGED_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            psd_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Photoshop image (merged)"));
+      clay_procedure_set_menu_label (procedure, _("Photoshop image (merged)"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads images from the Photoshop "
                                           "PSD and PSB file formats"),
                                         _("This plug-in loads the merged image "
                                           "data in Adobe Photoshop (TM) native "
                                           "PSD and PSB format."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Ell",
                                       "Ell",
                                       "2018");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-psd");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "psd, psb");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,8BPS");
-      gimp_file_procedure_set_priority (GIMP_FILE_PROCEDURE (procedure), +1);
+      clay_file_procedure_set_priority (CLAY_FILE_PROCEDURE (procedure), +1);
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 psd_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads thumbnails from the "
                                           "Photoshop PSD file format"),
                                         _("This plug-in loads thumbnail images "
                                           "from Adobe Photoshop (TM) native "
                                           "PSD format files."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "John Marshall",
                                       "John Marshall",
                                       "2007");
@@ -212,19 +212,19 @@ psd_create_procedure (GimpPlugIn  *plug_in,
   else if (! strcmp (name, EXPORT_PROC) ||
            ! strcmp (name, EXPORT_PSB_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              TRUE, psd_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
       if (! strcmp (name, EXPORT_PROC))
         {
-          gimp_procedure_set_menu_label (procedure, _("Photoshop image"));
-          gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+          clay_procedure_set_menu_label (procedure, _("Photoshop image"));
+          clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                                _("Photoshop image"));
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             _("Exports files in the Photoshop (TM) "
                                               "PSD file format"),
                                             _("This plug-in exports files of Adobe "
@@ -234,18 +234,18 @@ psd_create_procedure (GimpPlugIn  *plug_in,
                                               "layers, layer masks, aux channels "
                                               "and guides."),
                                             name);
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               "image/x-psd");
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               "psd");
         }
       else
         {
-          gimp_procedure_set_menu_label (procedure, _("Photoshop Large image"));
-          gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+          clay_procedure_set_menu_label (procedure, _("Photoshop Large image"));
+          clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                                _("Photoshop Large image"));
 
-          gimp_procedure_set_documentation (procedure,
+          clay_procedure_set_documentation (procedure,
                                             _("Exports files in the Photoshop (TM) "
                                               "Large PSB file format"),
                                             _("This plug-in exports files of Adobe "
@@ -255,54 +255,54 @@ psd_create_procedure (GimpPlugIn  *plug_in,
                                               "layers, layer masks, aux channels "
                                               "and guides."),
                                             name);
-          gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                               "image/x-psb");
-          gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+          clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                               "psb");
         }
 
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Monigotes",
                                       "Monigotes",
                                       "2000");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS  |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYER_MASKS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS  |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYER_MASKS,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "clippingpath",
+      clay_procedure_add_boolean_argument (procedure, "clippingpath",
                                            _("Assign a Clipping _Path"),
                                            _("Select a path to be the "
                                            "clipping path"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "clippingpathname",
+      clay_procedure_add_string_argument (procedure, "clippingpathname",
                                           _("Clipping Path _Name"),
                                           _("Clipping path name\n"
                                             "(ignored if no clipping path)"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_double_argument (procedure, "clippingpathflatness",
+      clay_procedure_add_double_argument (procedure, "clippingpathflatness",
                                           _("Path _Flatness"),
                                           _("Clipping path flatness in device pixels\n"
                                             "(ignored if no clipping path)"),
                                           0.0, 100.0, 0.2,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "cmyk",
+      clay_procedure_add_boolean_argument (procedure, "cmyk",
                                            _("Export as _CMYK"),
                                            _("Export a CMYK PSD image using the soft-proofing color profile"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "duotone",
+      clay_procedure_add_boolean_argument (procedure, "duotone",
                                            _("Export as _Duotone"),
                                            _("Export as a Duotone PSD file if Duotone color space information "
                                            "was attached to the image when originally imported."),
@@ -312,43 +312,43 @@ psd_create_procedure (GimpPlugIn  *plug_in,
       /* TODO: Remove condition when PSB metadata is supported by Exiv2 */
       if (! strcmp (name, EXPORT_PROC))
         {
-          gimp_export_procedure_set_support_exif      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-          gimp_export_procedure_set_support_iptc      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-          gimp_export_procedure_set_support_xmp       (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-          gimp_export_procedure_set_support_profile   (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-          gimp_export_procedure_set_support_thumbnail (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+          clay_export_procedure_set_support_exif      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+          clay_export_procedure_set_support_iptc      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+          clay_export_procedure_set_support_xmp       (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+          clay_export_procedure_set_support_profile   (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+          clay_export_procedure_set_support_thumbnail (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
         }
     }
   else if (! strcmp (name, LOAD_METADATA_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            psd_load_metadata, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads Photoshop-format metadata "
                                         "from other file formats.",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "John Marshall",
                                       "John Marshall",
                                       "2007");
-      gimp_procedure_add_int_argument (procedure, "size",
+      clay_procedure_add_int_argument (procedure, "size",
                                        "Metadata size",
                                        NULL,
                                        0, G_MAXINT, 0,
                                        G_PARAM_READWRITE);
-      gimp_procedure_add_image_argument (procedure, "image",
+      clay_procedure_add_image_argument (procedure, "image",
                                          "image", "The image",
                                          FALSE,
-                                         GIMP_PARAM_READWRITE);
-      gimp_procedure_add_boolean_argument (procedure, "metadata-type",
+                                         CLAY_PARAM_READWRITE);
+      clay_procedure_add_boolean_argument (procedure, "metadata-type",
                                            "Metadata type",
                                            "If the metadata contains image or "
                                            "layer PSD resources.",
                                            FALSE,
                                            G_PARAM_READWRITE);
-      gimp_procedure_add_boolean_argument (procedure, "cmyk",
+      clay_procedure_add_boolean_argument (procedure, "cmyk",
                                            "CMYK",
                                            "If the layer metadata needs to be "
                                            "converted from CMYK colorspace.",
@@ -357,35 +357,35 @@ psd_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_METADATA_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       psd_export_metadata, NULL, NULL);
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports Photoshop-format metadata "
                                         "to other file formats.",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Frank Teklote",
                                       "Frank Teklote",
                                       "2026");
-      gimp_procedure_add_file_argument (procedure, "file",
+      clay_procedure_add_file_argument (procedure, "file",
                                         "File",
                                         "Output file for exported metadata",
-                                        GIMP_FILE_CHOOSER_ACTION_SAVE,
+                                        CLAY_FILE_CHOOSER_ACTION_SAVE,
                                         FALSE, NULL,
                                         G_PARAM_READWRITE);
-      gimp_procedure_add_image_argument (procedure, "image",
+      clay_procedure_add_image_argument (procedure, "image",
                                          "image",
                                          "The image",
                                          FALSE,
                                          G_PARAM_READWRITE);
-      gimp_procedure_add_boolean_argument (procedure, "metadata-type",
+      clay_procedure_add_boolean_argument (procedure, "metadata-type",
                                            "Metadata type",
                                            "Whether the metadata contains "
                                            "image or layer PSD resources.",
                                            FALSE,
                                            G_PARAM_READWRITE);
-      gimp_procedure_add_boolean_argument (procedure, "cmyk",
+      clay_procedure_add_boolean_argument (procedure, "cmyk",
                                            "Export as CMYK",
                                            "Export a CMYK PSD metadata using the "
                                            "soft-proofing color profile",
@@ -396,20 +396,20 @@ psd_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-psd_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+psd_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean        resolution_loaded = FALSE;
   gboolean        profile_loaded    = FALSE;
-  GimpImage      *image;
-  GimpParasite   *parasite = NULL;
+  ClayImage      *image;
+  ClayParasite   *parasite = NULL;
   GError         *error = NULL;
   PSDSupport      unsupported_features;
 
@@ -417,16 +417,16 @@ psd_load (GimpProcedure         *procedure,
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
-      gimp_ui_init (PLUG_IN_BINARY);
+    case CLAY_RUN_INTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
+      clay_ui_init (PLUG_IN_BINARY);
       break;
     default:
       break;
     }
 
   image = load_image (file,
-                      strcmp (gimp_procedure_get_name (procedure),
+                      strcmp (clay_procedure_get_name (procedure),
                               LOAD_MERGED_PROC) == 0,
                       &resolution_loaded,
                       &profile_loaded,
@@ -434,14 +434,14 @@ psd_load (GimpProcedure         *procedure,
                       &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   /* If image was Duotone, notify user of compatibility */
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      parasite = gimp_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
+      parasite = clay_image_get_parasite (image, PSD_PARASITE_DUOTONE_DATA);
       if (parasite)
         unsupported_features.duotone_mode = TRUE;
 
@@ -450,35 +450,35 @@ psd_load (GimpProcedure         *procedure,
         load_dialog (_("Import PSD"), &unsupported_features);
 
       if (parasite)
-        gimp_parasite_free (parasite);
+        clay_parasite_free (parasite);
     }
 
   if (resolution_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_RESOLUTION;
+    *flags &= ~CLAY_METADATA_LOAD_RESOLUTION;
 
   if (profile_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_COLORSPACE;
+    *flags &= ~CLAY_METADATA_LOAD_COLORSPACE;
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-psd_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+psd_load_thumb (ClayProcedure       *procedure,
                 GFile               *file,
                 gint                 size,
-                GimpProcedureConfig *config,
+                ClayProcedureConfig *config,
                 gpointer             run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint            width  = 0;
   gint            height = 0;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -486,80 +486,80 @@ psd_load_thumb (GimpProcedure       *procedure,
   image = load_thumbnail_image (file, &width, &height, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, width);
-  GIMP_VALUES_SET_INT   (return_vals, 3, height);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, width);
+  CLAY_VALUES_SET_INT   (return_vals, 3, height);
 
-  gimp_value_array_truncate (return_vals, 4);
+  clay_value_array_truncate (return_vals, 4);
 
   return return_vals;
 }
 
-static GimpValueArray *
-psd_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+psd_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        return gimp_procedure_new_return_values (procedure, GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure, CLAY_PDB_CANCEL,
                                                  NULL);
     }
 
-  export    = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export    = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
   if (export_image (file, image, procedure, G_OBJECT (config), &error))
     {
       if (metadata)
-        gimp_metadata_set_bits_per_sample (metadata, 8);
+        clay_metadata_set_bits_per_sample (metadata, 8);
     }
   else
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpValueArray *
-psd_load_metadata (GimpProcedure         *procedure,
-                   GimpRunMode            run_mode,
+static ClayValueArray *
+psd_load_metadata (ClayProcedure         *procedure,
+                   ClayRunMode            run_mode,
                    GFile                 *file,
-                   GimpMetadata          *metadata,
-                   GimpMetadataLoadFlags *flags,
-                   GimpProcedureConfig   *config,
+                   ClayMetadata          *metadata,
+                   ClayMetadataLoadFlags *flags,
+                   ClayProcedureConfig   *config,
                    gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   gint            data_length;
   PSDSupport      unsupported_features;
   gboolean        is_layer = FALSE;
@@ -594,8 +594,8 @@ psd_load_metadata (GimpProcedure         *procedure,
 
       switch (run_mode)
         {
-        case GIMP_RUN_INTERACTIVE:
-          gimp_ui_init (PLUG_IN_BINARY);
+        case CLAY_RUN_INTERACTIVE:
+          clay_ui_init (PLUG_IN_BINARY);
           load_dialog (_("Import PSD metadata"), &unsupported_features);
           break;
         default:
@@ -608,31 +608,31 @@ psd_load_metadata (GimpProcedure         *procedure,
     }
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   g_object_unref (image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-psd_export_metadata (GimpProcedure       *procedure,
-                     GimpProcedureConfig *config,
+static ClayValueArray *
+psd_export_metadata (ClayProcedure       *procedure,
+                     ClayProcedureConfig *config,
                      gpointer             run_data)
 {
   GFile             *file     = NULL;
-  GimpImage         *image    = NULL;
+  ClayImage         *image    = NULL;
   gboolean           is_layer = FALSE;
   gboolean           cmyk     = FALSE;
-  GimpPDBStatusType  status   = GIMP_PDB_EXECUTION_ERROR;
+  ClayPDBStatusType  status   = CLAY_PDB_EXECUTION_ERROR;
   GError            *error    = NULL;
 
   gegl_init (NULL, NULL);
@@ -645,7 +645,7 @@ psd_export_metadata (GimpProcedure       *procedure,
                 NULL);
 
   if (export_image_metadata (file, image, is_layer, cmyk, &error))
-    status = GIMP_PDB_SUCCESS;
+    status = CLAY_PDB_SUCCESS;
 
   if (file)
     g_object_unref (file);
@@ -653,5 +653,5 @@ psd_export_metadata (GimpProcedure       *procedure,
   if (image)
     g_object_unref (image);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }

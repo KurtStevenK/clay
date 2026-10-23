@@ -31,7 +31,7 @@ libscriptfuconsole = static_library('scriptfu-console',
     '-DG_LOG_DOMAIN="scriptfu-console"',
   ],
   dependencies: [
-    libgimpui_dep,
+    libclayui_dep,
     math,
   ],
   link_with: libscriptfu,

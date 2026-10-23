@@ -24,25 +24,25 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpextensionmanager.h"
-#include "core/gimpextension.h"
+#include "core/clay.h"
+#include "core/clayextensionmanager.h"
+#include "core/clayextension.h"
 
-#include "widgets/gimpextensiondetails.h"
-#include "widgets/gimpextensionlist.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpprefsbox.h"
+#include "widgets/clayextensiondetails.h"
+#include "widgets/clayextensionlist.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayprefsbox.h"
 
 #include "extensions-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
-#define GIMP_EXTENSION_LIST_STACK_CHILD    "extension-list"
-#define GIMP_EXTENSION_DETAILS_STACK_CHILD "extension-details"
+#define CLAY_EXTENSION_LIST_STACK_CHILD    "extension-list"
+#define CLAY_EXTENSION_DETAILS_STACK_CHILD "extension-details"
 
 static void extensions_dialog_response            (GtkWidget            *widget,
                                                    gint                  response_id,
@@ -53,8 +53,8 @@ static void extensions_dialog_search_icon_pressed (GtkEntry             *entry,
                                                    GtkEntryIconPosition  icon_pos,
                                                    GdkEvent             *event,
                                                    gpointer              user_data);
-static void extensions_dialog_extension_activated (GimpExtensionList    *list,
-                                                   GimpExtension        *extension,
+static void extensions_dialog_extension_activated (ClayExtensionList    *list,
+                                                   ClayExtension        *extension,
                                                    GtkStack             *stack);
 static void extensions_dialog_back_button_clicked (GtkButton            *button,
                                                    GtkStack             *stack);
@@ -62,7 +62,7 @@ static void extensions_dialog_back_button_clicked (GtkButton            *button,
 /*  public function  */
 
 GtkWidget *
-extensions_dialog_new (Gimp *gimp)
+extensions_dialog_new (Clay *clay)
 {
   GtkWidget   *dialog;
   GtkWidget   *stack;
@@ -73,9 +73,9 @@ extensions_dialog_new (Gimp *gimp)
   GtkWidget   *widget;
   GtkTreeIter  top_iter;
 
-  dialog = gimp_dialog_new (C_("Clay extensions", "Extensions"), "gimp-extensions",
+  dialog = clay_dialog_new (C_("Clay extensions", "Extensions"), "clay-extensions",
                             NULL, 0, NULL,
-                            GIMP_HELP_EXTENSIONS_DIALOG,
+                            CLAY_HELP_EXTENSIONS_DIALOG,
                             _("_OK"), GTK_RESPONSE_OK,
                             NULL);
 
@@ -90,7 +90,7 @@ extensions_dialog_new (Gimp *gimp)
 
   stack = gtk_stack_new ();
   gtk_stack_set_transition_type (GTK_STACK (stack),
-                                 gimp_widget_animation_enabled ()        ?
+                                 clay_widget_animation_enabled ()        ?
                                    GTK_STACK_TRANSITION_TYPE_SLIDE_RIGHT :
                                    GTK_STACK_TRANSITION_TYPE_NONE);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
@@ -99,58 +99,58 @@ extensions_dialog_new (Gimp *gimp)
 
   /* The extension lists. */
 
-  stacked = gimp_prefs_box_new ();
+  stacked = clay_prefs_box_new ();
   gtk_container_set_border_width (GTK_CONTAINER (stacked), 12);
   gtk_stack_add_named (GTK_STACK (stack), stacked,
-                       GIMP_EXTENSION_LIST_STACK_CHILD);
+                       CLAY_EXTENSION_LIST_STACK_CHILD);
   gtk_widget_set_visible (stacked, TRUE);
 
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (stacked),
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (stacked),
                                   "system-software-install",
-                                  /*"gimp-extensions-installed",*/
+                                  /*"clay-extensions-installed",*/
                                   _("Installed Extensions"),
                                   _("Installed Extensions"),
-                                  GIMP_HELP_EXTENSIONS_INSTALLED,
+                                  CLAY_HELP_EXTENSIONS_INSTALLED,
                                   NULL,
                                   &top_iter);
 
-  list = gimp_extension_list_new (gimp->extension_manager);
+  list = clay_extension_list_new (clay->extension_manager);
   g_signal_connect (list, "extension-activated",
                     G_CALLBACK (extensions_dialog_extension_activated),
                     stack);
-  gimp_extension_list_show_user (GIMP_EXTENSION_LIST (list));
+  clay_extension_list_show_user (CLAY_EXTENSION_LIST (list));
   gtk_box_pack_start (GTK_BOX (vbox), list, TRUE, TRUE, 1);
   gtk_widget_set_visible (list, TRUE);
 
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (stacked),
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (stacked),
                                   "system-software-install",
                                   _("System Extensions"),
                                   _("System Extensions"),
-                                  GIMP_HELP_EXTENSIONS_SYSTEM,
+                                  CLAY_HELP_EXTENSIONS_SYSTEM,
                                   NULL,
                                   &top_iter);
 
-  list = gimp_extension_list_new (gimp->extension_manager);
+  list = clay_extension_list_new (clay->extension_manager);
   g_signal_connect (list, "extension-activated",
                     G_CALLBACK (extensions_dialog_extension_activated),
                     stack);
-  gimp_extension_list_show_system (GIMP_EXTENSION_LIST (list));
+  clay_extension_list_show_system (CLAY_EXTENSION_LIST (list));
   gtk_box_pack_start (GTK_BOX (vbox), list, TRUE, TRUE, 1);
   gtk_widget_set_visible (list, TRUE);
 
-  vbox = gimp_prefs_box_add_page (GIMP_PREFS_BOX (stacked),
+  vbox = clay_prefs_box_add_page (CLAY_PREFS_BOX (stacked),
                                   "system-software-install",
                                   _("Install Extensions"),
                                   _("Install Extensions"),
-                                  GIMP_HELP_EXTENSIONS_INSTALL,
+                                  CLAY_HELP_EXTENSIONS_INSTALL,
                                   NULL,
                                   &top_iter);
 
-  list = gimp_extension_list_new (gimp->extension_manager);
+  list = clay_extension_list_new (clay->extension_manager);
   g_signal_connect (list, "extension-activated",
                     G_CALLBACK (extensions_dialog_extension_activated),
                     stack);
-  gimp_extension_list_show_search (GIMP_EXTENSION_LIST (list), NULL);
+  clay_extension_list_show_search (CLAY_EXTENSION_LIST (list), NULL);
   gtk_box_pack_end (GTK_BOX (vbox), list, TRUE, TRUE, 1);
   gtk_widget_set_visible (list, TRUE);
 
@@ -187,13 +187,13 @@ extensions_dialog_new (Gimp *gimp)
 
   /* The extension details. */
 
-  stacked = gimp_extension_details_new ();
+  stacked = clay_extension_details_new ();
   gtk_stack_add_named (GTK_STACK (stack), stacked,
-                       GIMP_EXTENSION_DETAILS_STACK_CHILD);
+                       CLAY_EXTENSION_DETAILS_STACK_CHILD);
   gtk_widget_set_visible (stacked, TRUE);
 
   gtk_stack_set_visible_child_name (GTK_STACK (stack),
-                                    GIMP_EXTENSION_LIST_STACK_CHILD);
+                                    CLAY_EXTENSION_LIST_STACK_CHILD);
   return dialog;
 }
 
@@ -209,9 +209,9 @@ static void
 extensions_dialog_search_activate (GtkEntry *entry,
                                    gpointer  user_data)
 {
-  GimpExtensionList *list = user_data;
+  ClayExtensionList *list = user_data;
 
-  gimp_extension_list_show_search  (list, gtk_entry_get_text (entry));
+  clay_extension_list_show_search  (list, gtk_entry_get_text (entry));
 }
 
 static void
@@ -224,8 +224,8 @@ extensions_dialog_search_icon_pressed (GtkEntry             *entry,
 }
 
 static void
-extensions_dialog_extension_activated (GimpExtensionList *list,
-                                       GimpExtension     *extension,
+extensions_dialog_extension_activated (ClayExtensionList *list,
+                                       ClayExtension     *extension,
                                        GtkStack          *stack)
 {
   GtkWidget *dialog = gtk_widget_get_toplevel (GTK_WIDGET (stack));
@@ -253,12 +253,12 @@ extensions_dialog_extension_activated (GimpExtensionList *list,
     }
 
   /* Show the details of the extension. */
-  widget = gtk_stack_get_child_by_name (stack, GIMP_EXTENSION_DETAILS_STACK_CHILD);
-  gimp_extension_details_set (GIMP_EXTENSION_DETAILS (widget),
+  widget = gtk_stack_get_child_by_name (stack, CLAY_EXTENSION_DETAILS_STACK_CHILD);
+  clay_extension_details_set (CLAY_EXTENSION_DETAILS (widget),
                               extension);
 
   gtk_stack_set_visible_child_name (stack,
-                                    GIMP_EXTENSION_DETAILS_STACK_CHILD);
+                                    CLAY_EXTENSION_DETAILS_STACK_CHILD);
 }
 
 static void
@@ -266,6 +266,6 @@ extensions_dialog_back_button_clicked (GtkButton *button,
                                        GtkStack  *stack)
 {
   gtk_stack_set_visible_child_name (stack,
-                                    GIMP_EXTENSION_LIST_STACK_CHILD);
+                                    CLAY_EXTENSION_LIST_STACK_CHILD);
   gtk_widget_destroy (GTK_WIDGET (button));
 }

@@ -23,7 +23,7 @@
 #define LOAD_PROC      "file-bmp-load"
 #define EXPORT_PROC    "file-bmp-export"
 #define PLUG_IN_BINARY "file-bmp"
-#define PLUG_IN_ROLE   "gimp-file-bmp"
+#define PLUG_IN_ROLE   "clay-file-bmp"
 
 #define MAXCOLORS 256
 

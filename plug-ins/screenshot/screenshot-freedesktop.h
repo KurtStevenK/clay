@@ -23,8 +23,8 @@ gboolean               screenshot_freedesktop_available        (void);
 
 ScreenshotCapabilities screenshot_freedesktop_get_capabilities (void);
 
-GimpPDBStatusType      screenshot_freedesktop_shoot            (GdkMonitor        *monitor,
-                                                                GimpImage        **image,
+ClayPDBStatusType      screenshot_freedesktop_shoot            (GdkMonitor        *monitor,
+                                                                ClayImage        **image,
                                                                 GError           **error);
 
 

@@ -7,14 +7,14 @@
 
 ;             setup
 
-(define testImage (gimp-image-new 21 22 RGB))
+(define testImage (clay-image-new 21 22 RGB))
 
 
 
 
 (test! "new image has PRECISION-U8-NON-LINEAR")
 
-(assert `(= (gimp-image-get-precision ,testImage)
+(assert `(= (clay-image-get-precision ,testImage)
             PRECISION-U8-NON-LINEAR ))
 
 
@@ -22,20 +22,20 @@
 (test! "Convert precision")
 
 ; method convert-precision yields true, with side effect on image
-(assert `(gimp-image-convert-precision
+(assert `(clay-image-convert-precision
                 ,testImage
                 PRECISION-U8-LINEAR))
 
 
 ; Effective: converted image is the precision
-(assert `(= (gimp-image-get-precision ,testImage)
+(assert `(= (clay-image-get-precision ,testImage)
             PRECISION-U8-LINEAR))
 
 ; converting to the same precision yields error message
-(assert-error `(gimp-image-convert-precision
+(assert-error `(clay-image-convert-precision
                   ,testImage
                   PRECISION-U8-LINEAR)
-              "Procedure execution of gimp-image-convert-precision failed on invalid input arguments: ")
+              "Procedure execution of clay-image-convert-precision failed on invalid input arguments: ")
               ; "Image '[Untitled]' (2) must not be of precision 'u8-linear'"
 
 
@@ -46,10 +46,10 @@
 
 (test! "New with precision")
 
-(define testImageWithPrecision (gimp-image-new-with-precision 21 22 RGB PRECISION-U8-PERCEPTUAL))
+(define testImageWithPrecision (clay-image-new-with-precision 21 22 RGB PRECISION-U8-PERCEPTUAL))
 
 ; Effective: image has given precision
-(assert `(= (gimp-image-get-precision ,testImageWithPrecision)
+(assert `(= (clay-image-get-precision ,testImageWithPrecision)
             PRECISION-U8-PERCEPTUAL))
 
 
@@ -58,7 +58,7 @@
 (test! "conversions to all the precisions")
 
 (define (testConvertPrecision precision)
-  (assert `(gimp-image-convert-precision
+  (assert `(clay-image-convert-precision
                 ,testImage
                 ,precision)))
 

@@ -27,33 +27,33 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <libilbm/ilbm.h>
 #include <libilbm/ilbmimage.h>
 #include <libilbm/interleave.h>
 #include <libilbm/byterun.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC       "file-iff-load"
 #define LOAD_THUMB_PROC "file-iff-load-thumb"
 #define PLUG_IN_BINARY  "file-iff"
-#define PLUG_IN_ROLE    "gimp-file-iff"
+#define PLUG_IN_ROLE    "clay-file-iff"
 
 typedef struct _Iff      Iff;
 typedef struct _IffClass IffClass;
 
 struct _Iff
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _IffClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -63,27 +63,27 @@ struct _IffClass
 GType                   iff_get_type         (void);
 
 
-static GList          * iff_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * iff_create_procedure (GimpPlugIn            *plug_in,
+static GList          * iff_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * iff_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * iff_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * iff_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * iff_load_thumb       (GimpProcedure         *procedure,
+static ClayValueArray * iff_load_thumb       (ClayProcedure         *procedure,
                                               GFile                 *file,
                                               gint                   size,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GObject               *config,
                                               gboolean               is_thumbnail,
-                                              GimpRunMode            run_mode,
+                                              ClayRunMode            run_mode,
                                               GError               **error);
 
 static guchar         * deleave_indexed_row  (IFF_UByte             *bitplanes,
@@ -95,7 +95,7 @@ static guchar         * deleave_rgb_row      (IFF_UByte             *bitplanes,
                                               gint                   nPlanes,
                                               gint                   pixel_size);
 
-static guchar         * deleave_ham_row      (const guchar          *gimp_cmap,
+static guchar         * deleave_ham_row      (const guchar          *clay_cmap,
                                               IFF_UByte             *bitplanes,
                                               gint                   width,
                                               gint                   nPlanes);
@@ -104,16 +104,16 @@ static guchar         * pbm_row              (IFF_UByte             *bitplanes,
                                               gint                   width);
 
 
-G_DEFINE_TYPE (Iff, iff, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Iff, iff, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (IFF_TYPE)
+CLAY_MAIN (IFF_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 iff_class_init (IffClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = iff_query_procedures;
   plug_in_class->create_procedure = iff_create_procedure;
@@ -126,7 +126,7 @@ iff_init (Iff *iff)
 }
 
 static GList *
-iff_query_procedures (GimpPlugIn *plug_in)
+iff_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -136,50 +136,50 @@ iff_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-iff_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+iff_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            iff_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Amiga IFF"));
+      clay_procedure_set_menu_label (procedure, _("Amiga IFF"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file in the IFF file format"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2023");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-ilbm");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "iff,ilbm,lbm,acbm,ham,ham6,ham8");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,FORM");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 iff_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load IFF file as thumbnail"),
                                         NULL,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2024");
@@ -189,17 +189,17 @@ iff_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-iff_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+iff_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -207,62 +207,62 @@ iff_load (GimpProcedure         *procedure,
   image = load_image (file, G_OBJECT (config), FALSE, run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-iff_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+iff_load_thumb (ClayProcedure       *procedure,
                 GFile               *file,
                 gint                 size,
-                GimpProcedureConfig *config,
+                ClayProcedureConfig *config,
                 gpointer             run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  image = load_image (file, G_OBJECT (config), TRUE, GIMP_RUN_NONINTERACTIVE,
+  image = load_image (file, G_OBJECT (config), TRUE, CLAY_RUN_NONINTERACTIVE,
                       &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, gimp_image_get_width  (image));
-  GIMP_VALUES_SET_INT   (return_vals, 3, gimp_image_get_height (image));
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, clay_image_get_width  (image));
+  CLAY_VALUES_SET_INT   (return_vals, 3, clay_image_get_height (image));
 
-  gimp_value_array_truncate (return_vals, 4);
+  clay_value_array_truncate (return_vals, 4);
 
   return return_vals;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
             gboolean      is_thumbnail,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage   *image = NULL;
-  GimpLayer   *layer;
+  ClayImage   *image = NULL;
+  ClayLayer   *layer;
   GeglBuffer  *buffer;
   FILE        *fp;
   guint        imagesLength;
@@ -275,7 +275,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -286,7 +286,7 @@ load_image (GFile        *file,
 
   if (iff_image == NULL)
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("This is not an ILBM image"));
       return NULL;
     }
@@ -300,8 +300,8 @@ load_image (GFile        *file,
       ILBM_ColorMap     *colorMap;
       ILBM_Viewport     *camg;
       IFF_UByte         *bitplanes;
-      GimpImageType      image_type;
-      guchar             gimp_cmap[768];  /* Max index is (2^nplanes) - 1 */
+      ClayImageType      image_type;
+      guchar             clay_cmap[768];  /* Max index is (2^nplanes) - 1 */
       gint               width;
       gint               height;
       gint               nPlanes;
@@ -374,9 +374,9 @@ load_image (GFile        *file,
 
           for (gint j = 0; j < palette_size; j++)
             {
-              gimp_cmap[j * 3]     = colorMap->colorRegister[j].red;
-              gimp_cmap[j * 3 + 1] = colorMap->colorRegister[j].green;
-              gimp_cmap[j * 3 + 2] = colorMap->colorRegister[j].blue;
+              clay_cmap[j * 3]     = colorMap->colorRegister[j].red;
+              clay_cmap[j * 3 + 1] = colorMap->colorRegister[j].green;
+              clay_cmap[j * 3 + 2] = colorMap->colorRegister[j].blue;
             }
 
           if (ehb_mode)
@@ -399,11 +399,11 @@ load_image (GFile        *file,
                 {
                   gint offset_index = j + 32;
 
-                  gimp_cmap[offset_index * 3]     =
+                  clay_cmap[offset_index * 3]     =
                     colorMap->colorRegister[j].red / 2;
-                  gimp_cmap[offset_index * 3 + 1] =
+                  clay_cmap[offset_index * 3 + 1] =
                     colorMap->colorRegister[j].green / 2;
-                  gimp_cmap[offset_index * 3 + 2] =
+                  clay_cmap[offset_index * 3 + 2] =
                     colorMap->colorRegister[j].blue / 2;
                 }
               /* EHB mode always has 64 colors in total */
@@ -416,30 +416,30 @@ load_image (GFile        *file,
 
       if (pixel_size == 4)
         {
-          image_type = GIMP_RGBA_IMAGE;
+          image_type = CLAY_RGBA_IMAGE;
         }
       else if (pixel_size == 3)
         {
-          image_type = GIMP_RGB_IMAGE;
+          image_type = CLAY_RGB_IMAGE;
         }
       else
         {
           pixel_size = 1;
-          image_type = GIMP_INDEXED_IMAGE;
+          image_type = CLAY_INDEXED_IMAGE;
         }
 
       ILBM_unpackByteRun (true_image);
 
       if (! image)
-        image = gimp_image_new (width, height,
-                                pixel_size == 1 ? GIMP_INDEXED : GIMP_RGB);
+        image = clay_image_new (width, height,
+                                pixel_size == 1 ? CLAY_INDEXED : CLAY_RGB);
 
-      layer = gimp_layer_new (image, _("Background"), width, height,
+      layer = clay_layer_new (image, _("Background"), width, height,
                               image_type, 100,
-                              gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, 0);
+                              clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, 0);
 
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
       bitplanes = true_image->body->chunkData;
 
@@ -454,12 +454,12 @@ load_image (GFile        *file,
             g_message (_("Non-square pixels. Image might look squashed if "
                          "Dot for Dot mode is enabled."));
 
-          gimp_image_get_resolution (image, &image_xres, &image_yres);
+          clay_image_get_resolution (image, &image_xres, &image_yres);
           if (ratio < 1)
             image_xres = image_yres * (1 / ratio);
           else
             image_yres = image_xres * ratio;
-          gimp_image_set_resolution (image, image_xres, image_yres);
+          clay_image_set_resolution (image, image_xres, image_yres);
         }
 
       /* Loading rows */
@@ -474,7 +474,7 @@ load_image (GFile        *file,
           else if (pixel_size == 1)
             pixel_row = deleave_indexed_row (bitplanes, width, nPlanes);
           else if (ham_mode)
-            pixel_row = deleave_ham_row (gimp_cmap, bitplanes, width, nPlanes);
+            pixel_row = deleave_ham_row (clay_cmap, bitplanes, width, nPlanes);
           else
             pixel_row = deleave_rgb_row (bitplanes, width, nPlanes,
                                          pixel_size);
@@ -492,7 +492,7 @@ load_image (GFile        *file,
         }
 
       if (pixel_size == 1)
-        gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), gimp_cmap, palette_size * 3);
+        clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), clay_cmap, palette_size * 3);
 
       g_object_unref (buffer);
     }
@@ -530,7 +530,7 @@ deleave_indexed_row (IFF_UByte *bitplanes,
 }
 
 static guchar *
-deleave_ham_row (const guchar *gimp_cmap,
+deleave_ham_row (const guchar *clay_cmap,
                  IFF_UByte    *bitplanes,
                  gint          width,
                  gint          nPlanes)
@@ -588,9 +588,9 @@ deleave_ham_row (const guchar *gimp_cmap,
 
           if (control == 0)
             {
-              prior_rgb[0] = gimp_cmap[index * 3];
-              prior_rgb[1] = gimp_cmap[index * 3 + 1];
-              prior_rgb[2] = gimp_cmap[index * 3 + 2];
+              prior_rgb[0] = clay_cmap[index * 3];
+              prior_rgb[1] = clay_cmap[index * 3 + 1];
+              prior_rgb[2] = clay_cmap[index * 3 + 2];
             }
           else
             {

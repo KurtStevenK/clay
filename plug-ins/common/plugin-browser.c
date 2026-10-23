@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Copyright (C) 1999 Andy Thomas  alt@picnic.demon.co.uk
  *
@@ -27,15 +27,15 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC    "plug-in-plug-in-details"
 #define PLUG_IN_BINARY  "plugin-browser"
-#define PLUG_IN_ROLE    "gimp-plugin-browser"
+#define PLUG_IN_ROLE    "clay-plugin-browser"
 #define DBL_WIDTH       800
 #define DBL_HEIGHT      500
 
@@ -87,12 +87,12 @@ typedef struct _BrowserClass BrowserClass;
 
 struct _Browser
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _BrowserClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -104,12 +104,12 @@ struct _BrowserClass
 
 GType                   browser_get_type         (void);
 
-static GList          * browser_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * browser_create_procedure (GimpPlugIn           *plug_in,
+static GList          * browser_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * browser_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * browser_run              (GimpProcedure        *procedure,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray * browser_run              (ClayProcedure        *procedure,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
 static GtkWidget * browser_dialog_new             (void);
@@ -124,16 +124,16 @@ static gboolean    find_existing_mpath            (GtkTreeModel     *model,
                                                    GtkTreeIter      *return_iter);
 
 
-G_DEFINE_TYPE (Browser, browser, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Browser, browser, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (BROWSER_TYPE)
+CLAY_MAIN (BROWSER_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 browser_class_init (BrowserClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = browser_query_procedures;
   plug_in_class->create_procedure = browser_create_procedure;
@@ -146,28 +146,28 @@ browser_init (Browser *browser)
 }
 
 static GList *
-browser_query_procedures (GimpPlugIn *plug_in)
+browser_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-browser_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+browser_create_procedure (ClayPlugIn  *plug_in,
                           const gchar *procedure_name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (procedure_name, PLUG_IN_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, procedure_name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, procedure_name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       browser_run, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("_Plug-In Browser"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_PLUGIN);
-      gimp_procedure_add_menu_path (procedure, "<Image>/Help/[Programming]");
+      clay_procedure_set_menu_label (procedure, _("_Plug-In Browser"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_PLUGIN);
+      clay_procedure_add_menu_path (procedure, "<Image>/Help/[Programming]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Display information about plug-ins"),
                                         _("Allows one to browse the plug-in "
                                           "menus system. You can search for "
@@ -178,31 +178,31 @@ browser_create_procedure (GimpPlugIn  *plug_in,
                                           "new plug-ins have installed "
                                           "themselves in the menus."),
                                         PLUG_IN_PROC);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Andy Thomas",
                                       "Andy Thomas",
                                       "1999");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_INTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_INTERACTIVE,
                                         G_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-browser_run (GimpProcedure        *procedure,
-             GimpProcedureConfig  *config,
+static ClayValueArray *
+browser_run (ClayProcedure        *procedure,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
   browser_dialog_new ();
   gtk_main ();
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gboolean
@@ -353,31 +353,31 @@ insert_into_tree_view (PluginBrowser *browser,
 }
 
 static void
-browser_search (GimpBrowser   *gimp_browser,
+browser_search (ClayBrowser   *clay_browser,
                 const gchar   *search_text,
                 gint           search_type,
                 PluginBrowser *browser)
 {
-  GimpProcedure  *procedure;
-  GimpValueArray *return_vals;
+  ClayProcedure  *procedure;
+  ClayValueArray *return_vals;
   const gchar   **procedure_strs;
   gint            num_plugins = 0;
   gchar          *str;
   GtkListStore   *list_store;
   GtkTreeStore   *tree_store;
 
-  gimp_browser_show_message (GIMP_BROWSER (browser->browser),
+  clay_browser_show_message (CLAY_BROWSER (browser->browser),
                              _("Searching by name"));
 
-  procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (),
-                                           "gimp-plug-ins-query");
-  return_vals = gimp_procedure_run (procedure,
+  procedure   = clay_pdb_lookup_procedure (clay_get_pdb (),
+                                           "clay-plug-ins-query");
+  return_vals = clay_procedure_run (procedure,
                                     "search-string", search_text,
                                     NULL);
 
-  if (GIMP_VALUES_GET_ENUM (return_vals, 0) == GIMP_PDB_SUCCESS)
+  if (CLAY_VALUES_GET_ENUM (return_vals, 0) == CLAY_PDB_SUCCESS)
     {
-      procedure_strs = GIMP_VALUES_GET_STRV (return_vals, 1);
+      procedure_strs = CLAY_VALUES_GET_STRV (return_vals, 1);
       num_plugins = g_strv_length ((gchar **) procedure_strs);
     }
 
@@ -402,7 +402,7 @@ browser_search (GimpBrowser   *gimp_browser,
         }
     }
 
-  gimp_browser_set_search_summary (gimp_browser, str);
+  clay_browser_set_search_summary (clay_browser, str);
   g_free (str);
 
   list_store = GTK_LIST_STORE (gtk_tree_view_get_model (browser->list_view));
@@ -420,13 +420,13 @@ browser_search (GimpBrowser   *gimp_browser,
       const gint        *time_ints;
       gint               i;
 
-      accel_strs = GIMP_VALUES_GET_STRV (return_vals, 2);
-      prog_strs  = GIMP_VALUES_GET_STRV (return_vals, 3);
-      time_ints  = GIMP_VALUES_GET_INT32_ARRAY (return_vals, 4, NULL);
+      accel_strs = CLAY_VALUES_GET_STRV (return_vals, 2);
+      prog_strs  = CLAY_VALUES_GET_STRV (return_vals, 3);
+      time_ints  = CLAY_VALUES_GET_INT32_ARRAY (return_vals, 4, NULL);
 
       for (i = 0; i < num_plugins; i++)
         {
-          GimpProcedure *procedure;
+          ClayProcedure *procedure;
           const gchar   *types;
           PInfo         *pinfo;
           gchar         *menu_label;
@@ -438,12 +438,12 @@ browser_search (GimpBrowser   *gimp_browser,
           time_t         tx;
           gint           ret;
 
-          procedure = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+          procedure = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                  procedure_strs[i]);
 
-          types      = gimp_procedure_get_image_types (procedure);
-          menu_label = g_strdup (gimp_procedure_get_menu_label (procedure));
-          menu_paths = gimp_procedure_get_menu_paths (procedure);
+          types      = clay_procedure_get_image_types (procedure);
+          menu_label = g_strdup (clay_procedure_get_menu_label (procedure));
+          menu_paths = clay_procedure_get_menu_paths (procedure);
 
           menu_path = g_strdup (menu_paths->data);
 
@@ -452,7 +452,7 @@ browser_search (GimpBrowser   *gimp_browser,
           if (tmp && tmp == (menu_label + strlen (menu_label) - 3))
             *tmp = '\0';
 
-          tmp = gimp_strip_uline (menu_label);
+          tmp = clay_strip_uline (menu_label);
           g_free (menu_label);
           menu_label = tmp;
 
@@ -536,11 +536,11 @@ browser_search (GimpBrowser   *gimp_browser,
     }
   else
     {
-      gimp_browser_show_message (GIMP_BROWSER (browser->browser),
+      clay_browser_show_message (CLAY_BROWSER (browser->browser),
                                  _("No matches"));
     }
 
-  gimp_value_array_unref (return_vals);
+  clay_value_array_unref (return_vals);
 }
 
 static GtkWidget *
@@ -558,13 +558,13 @@ browser_dialog_new (void)
   GtkTreeSelection  *selection;
   GtkTreeIter        iter;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   browser = g_new0 (PluginBrowser, 1);
 
-  browser->dialog = gimp_dialog_new (_("Plug-in Browser"), PLUG_IN_ROLE,
+  browser->dialog = clay_dialog_new (_("Plug-in Browser"), PLUG_IN_ROLE,
                                      NULL, 0,
-                                     gimp_standard_help_func, PLUG_IN_PROC,
+                                     clay_standard_help_func, PLUG_IN_PROC,
 
                                      _("_Close"), GTK_RESPONSE_CLOSE,
 
@@ -572,13 +572,13 @@ browser_dialog_new (void)
   gtk_window_set_default_size (GTK_WINDOW (browser->dialog),
                                DBL_WIDTH, DBL_HEIGHT);
 
-  gimp_window_set_transient (GTK_WINDOW (browser->dialog));
+  clay_window_set_transient (GTK_WINDOW (browser->dialog));
 
   g_signal_connect_swapped (browser->dialog, "response",
                             G_CALLBACK (browser_dialog_quit),
                             browser);
 
-  browser->browser = gimp_browser_new ();
+  browser->browser = clay_browser_new ();
   gtk_container_set_border_width (GTK_CONTAINER (browser->browser), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (browser->dialog))),
                       browser->browser, TRUE, TRUE, 0);
@@ -594,7 +594,7 @@ browser_dialog_new (void)
   /* left = notebook */
 
   notebook = gtk_notebook_new ();
-  gtk_box_pack_start (GTK_BOX (gimp_browser_get_left_vbox (GIMP_BROWSER (browser->browser))),
+  gtk_box_pack_start (GTK_BOX (clay_browser_get_left_vbox (CLAY_BROWSER (browser->browser))),
                       notebook, TRUE, TRUE, 0);
 
   /* list : list in a scrolled_win */
@@ -730,7 +730,7 @@ browser_dialog_new (void)
   gtk_widget_set_visible (notebook, TRUE);
 
   /* now build the list */
-  browser_search (GIMP_BROWSER (browser->browser), "", 0, browser);
+  browser_search (CLAY_BROWSER (browser->browser), "", 0, browser);
 
   gtk_widget_set_visible (browser->dialog, TRUE);
 
@@ -800,8 +800,8 @@ browser_list_selection_changed (GtkTreeSelection *selection,
 
   g_free (mpath);
 
-  gimp_browser_set_widget (GIMP_BROWSER (browser->browser),
-                           gimp_proc_view_new (pinfo->procedure));
+  clay_browser_set_widget (CLAY_BROWSER (browser->browser),
+                           clay_proc_view_new (pinfo->procedure));
 }
 
 static void
@@ -877,6 +877,6 @@ browser_tree_selection_changed (GtkTreeSelection *selection,
       g_warning ("Failed to find node in list");
     }
 
-  gimp_browser_set_widget (GIMP_BROWSER (browser->browser),
-                           gimp_proc_view_new (pinfo->procedure));
+  clay_browser_set_widget (CLAY_BROWSER (browser->browser),
+                           clay_proc_view_new (pinfo->procedure));
 }

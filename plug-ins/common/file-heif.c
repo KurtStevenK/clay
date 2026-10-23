@@ -1,5 +1,5 @@
 /*
- * GIMP HEIF loader / write plugin.
+ * Clay HEIF loader / write plugin.
  * Copyright (c) 2018 struktur AG, Dirk Farin <farin@struktur.de>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,10 +25,10 @@
 #include <sys/time.h>
 #endif
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC        "file-heif-load"
@@ -55,96 +55,96 @@ typedef enum _HeifpluginExportFormat
   HEIFPLUGIN_EXPORT_FORMAT_YUV420 = 3
 } HeifpluginExportFormat;
 
-typedef struct _GimpHeif      GimpHeif;
-typedef struct _GimpHeifClass GimpHeifClass;
+typedef struct _ClayHeif      ClayHeif;
+typedef struct _ClayHeifClass ClayHeifClass;
 
-struct _GimpHeif
+struct _ClayHeif
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
-struct _GimpHeifClass
+struct _ClayHeifClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
-#define GIMP_HEIF_TYPE  (gimp_heif_get_type ())
-#define GIMP_HEIF(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GIMP_HEIF_TYPE, GimpHeif))
+#define CLAY_HEIF_TYPE  (clay_heif_get_type ())
+#define CLAY_HEIF(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLAY_HEIF_TYPE, ClayHeif))
 
-GType                   gimp_heif_get_type    (void);
+GType                   clay_heif_get_type    (void);
 
-static GList          * heif_init_procedures  (GimpPlugIn                   *plug_in);
-static GimpProcedure  * heif_create_procedure (GimpPlugIn                   *plug_in,
+static GList          * heif_init_procedures  (ClayPlugIn                   *plug_in);
+static ClayProcedure  * heif_create_procedure (ClayPlugIn                   *plug_in,
                                                const gchar                  *name);
 
-static GimpValueArray * heif_load             (GimpProcedure                *procedure,
-                                               GimpRunMode                   run_mode,
+static ClayValueArray * heif_load             (ClayProcedure                *procedure,
+                                               ClayRunMode                   run_mode,
                                                GFile                        *file,
-                                               GimpMetadata                 *metadata,
-                                               GimpMetadataLoadFlags        *flags,
-                                               GimpProcedureConfig          *config,
+                                               ClayMetadata                 *metadata,
+                                               ClayMetadataLoadFlags        *flags,
+                                               ClayProcedureConfig          *config,
                                                gpointer                      run_data);
-static GimpValueArray * heif_export           (GimpProcedure                *procedure,
-                                               GimpRunMode                   run_mode,
-                                               GimpImage                    *image,
+static ClayValueArray * heif_export           (ClayProcedure                *procedure,
+                                               ClayRunMode                   run_mode,
+                                               ClayImage                    *image,
                                                GFile                        *file,
-                                               GimpExportOptions            *options,
-                                               GimpMetadata                 *metadata,
-                                               GimpProcedureConfig          *config,
+                                               ClayExportOptions            *options,
+                                               ClayMetadata                 *metadata,
+                                               ClayProcedureConfig          *config,
                                                gpointer                      run_data);
 
-static GimpValueArray * heif_av1_export       (GimpProcedure                *procedure,
-                                               GimpRunMode                   run_mode,
-                                               GimpImage                    *image,
+static ClayValueArray * heif_av1_export       (ClayProcedure                *procedure,
+                                               ClayRunMode                   run_mode,
+                                               ClayImage                    *image,
                                                GFile                        *file,
-                                               GimpExportOptions            *options,
-                                               GimpMetadata                 *metadata,
-                                               GimpProcedureConfig          *config,
+                                               ClayExportOptions            *options,
+                                               ClayMetadata                 *metadata,
+                                               ClayProcedureConfig          *config,
                                                gpointer                      run_data);
 
 #if LIBHEIF_HAVE_VERSION(1,19,8)
-static GimpValueArray * heif_jpeg2000_export   (GimpProcedure                *procedure,
-                                                GimpRunMode                   run_mode,
-                                                GimpImage                    *image,
+static ClayValueArray * heif_jpeg2000_export   (ClayProcedure                *procedure,
+                                                ClayRunMode                   run_mode,
+                                                ClayImage                    *image,
                                                 GFile                        *file,
-                                                GimpExportOptions            *options,
-                                                GimpMetadata                 *metadata,
-                                                GimpProcedureConfig          *config,
+                                                ClayExportOptions            *options,
+                                                ClayMetadata                 *metadata,
+                                                ClayProcedureConfig          *config,
                                                 gpointer                      run_data);
 #endif
 
-static GimpImage      * load_image            (GFile                        *file,
-                                               GimpMetadata                 *metadata,
-                                               GimpMetadataLoadFlags        *flags,
+static ClayImage      * load_image            (GFile                        *file,
+                                               ClayMetadata                 *metadata,
+                                               ClayMetadataLoadFlags        *flags,
                                                gboolean                      interactive,
-                                               GimpPDBStatusType            *status,
+                                               ClayPDBStatusType            *status,
                                                GError                      **error);
 static gboolean         export_image          (GFile                        *file,
-                                               GimpImage                    *image,
-                                               GimpDrawable                 *drawable,
+                                               ClayImage                    *image,
+                                               ClayDrawable                 *drawable,
                                                GObject                      *config,
                                                GError                      **error,
                                                enum heif_compression_format  compression,
-                                               GimpMetadata                 *metadata);
+                                               ClayMetadata                 *metadata);
 
 static gboolean         load_dialog           (struct heif_context          *heif,
                                                uint32_t                     *selected_image);
-static gboolean         save_dialog           (GimpProcedure                *procedure,
+static gboolean         save_dialog           (ClayProcedure                *procedure,
                                                GObject                      *config,
-                                               GimpImage                    *image);
+                                               ClayImage                    *image);
 
 
-G_DEFINE_TYPE (GimpHeif, gimp_heif, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayHeif, clay_heif, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_HEIF_TYPE)
+CLAY_MAIN (CLAY_HEIF_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
-gimp_heif_class_init (GimpHeifClass *klass)
+clay_heif_class_init (ClayHeifClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->init_procedures  = heif_init_procedures;
   plug_in_class->create_procedure = heif_create_procedure;
@@ -152,12 +152,12 @@ gimp_heif_class_init (GimpHeifClass *klass)
 }
 
 static void
-gimp_heif_init (GimpHeif *heif)
+clay_heif_init (ClayHeif *heif)
 {
 }
 
 static GList *
-heif_init_procedures (GimpPlugIn *plug_in)
+heif_init_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -209,44 +209,44 @@ heif_init_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-heif_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+heif_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            heif_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("HEIF/HEIC"));
+      clay_procedure_set_menu_label (procedure, _("HEIF/HEIC"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads HEIF images"),
                                         _("Load image stored in HEIF format (High "
                                           "Efficiency Image File Format). Typical "
                                           "suffices for HEIF files are .heif, "
                                           ".heic."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dirk Farin <farin@struktur.de>",
                                       "Dirk Farin <farin@struktur.de>",
                                       "2018");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/heif");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "heif,heic");
 
       /* HEIF is an ISOBMFF format whose "brand" (the value after "ftyp")
        * can be of various values.
-       * See also: https://gitlab.gnome.org/GNOME/gimp/issues/2209
+       * See also: https://github.com/KurtStevenK/clay/issues/2209
        */
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "4,string,ftypheic,4,string,ftypheix,"
                                       "4,string,ftyphevc,4,string,ftypheim,"
                                       "4,string,ftypheis,4,string,ftyphevm,"
@@ -255,374 +255,374 @@ heif_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, heif_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_image_types (procedure, "RGB*");
 
-      gimp_procedure_set_menu_label (procedure, _("HEIF/HEIC"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("HEIF/HEIC"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "HEIF");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports HEIF images"),
                                         _("Save image in HEIF format (High "
                                           "Efficiency Image File Format)."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dirk Farin <farin@struktur.de>",
                                       "Dirk Farin <farin@struktur.de>",
                                       "2018");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/heif");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "heif,heic");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_int_argument (procedure, "quality",
+      clay_procedure_add_int_argument (procedure, "quality",
                                        _("_Quality"),
                                        _("Quality factor (0 = worst, 100 = best)"),
                                        0, 100, 50,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "lossless",
+      clay_procedure_add_boolean_argument (procedure, "lossless",
                                            _("L_ossless"),
                                            _("Use lossless compression"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "include-color-profile",
+      clay_procedure_add_boolean_aux_argument (procedure, "include-color-profile",
                                                _("Save color prof_ile"),
                                                _("Save the image's color profile"),
-                                               gimp_export_color_profile (),
+                                               clay_export_color_profile (),
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "save-bit-depth",
+      clay_procedure_add_int_argument (procedure, "save-bit-depth",
                                        _("_Bit depth"),
                                        _("Bit depth of exported image"),
                                        8, 12, 8,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "pixel-format",
+      clay_procedure_add_choice_argument (procedure, "pixel-format",
                                           _("_Pixel format"),
                                           _("Format of color sub-sampling"),
-                                          gimp_choice_new_with_values ("rgb",    HEIFPLUGIN_EXPORT_FORMAT_RGB,    _("RGB"),    NULL,
+                                          clay_choice_new_with_values ("rgb",    HEIFPLUGIN_EXPORT_FORMAT_RGB,    _("RGB"),    NULL,
                                                                        "yuv444", HEIFPLUGIN_EXPORT_FORMAT_YUV444, _("YUV444"), NULL,
                                                                        "yuv420", HEIFPLUGIN_EXPORT_FORMAT_YUV420, _("YUV420"), NULL,
                                                                        NULL),
                                           "yuv420",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "encoder-speed",
+      clay_procedure_add_choice_argument (procedure, "encoder-speed",
                                           _("Enco_der speed"),
                                           _("Tradeoff between speed and compression"),
-                                          gimp_choice_new_with_values ("slow",     HEIFPLUGIN_ENCODER_SPEED_SLOW,     _("Slow"),     NULL,
+                                          clay_choice_new_with_values ("slow",     HEIFPLUGIN_ENCODER_SPEED_SLOW,     _("Slow"),     NULL,
                                                                        "balanced", HEIFPLUGIN_ENCODER_SPEED_BALANCED, _("Balanced"), NULL,
                                                                        "fast",     HEIFPLUGIN_ENCODER_SPEED_FASTER,   _("Fast"),     NULL,
                                                                        NULL),
                                           "balanced",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-exif",
+      clay_procedure_add_boolean_argument (procedure, "include-exif",
                                            _("Save Exi_f"),
                                            _("Toggle saving Exif data"),
-                                           gimp_export_exif (),
+                                           clay_export_exif (),
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-xmp",
+      clay_procedure_add_boolean_argument (procedure, "include-xmp",
                                            _("Save _XMP"),
                                            _("Toggle saving XMP data"),
-                                           gimp_export_xmp (),
+                                           clay_export_xmp (),
                                            G_PARAM_READWRITE);
     }
   else if (! strcmp (name, LOAD_PROC_AV1))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            heif_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("HEIF/AVIF"));
+      clay_procedure_set_menu_label (procedure, _("HEIF/AVIF"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads AVIF images"),
                                         _("Load image stored in AV1 Image File Format (AVIF)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "2020");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/avif");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "avif");
 
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "4,string,ftypmif1,4,string,ftypavif");
 
-      gimp_file_procedure_set_priority (GIMP_FILE_PROCEDURE (procedure), 100);
+      clay_file_procedure_set_priority (CLAY_FILE_PROCEDURE (procedure), 100);
     }
   else if (! strcmp (name, EXPORT_PROC_AV1))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, heif_av1_export, NULL,
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_image_types (procedure, "RGB*");
 
-      gimp_procedure_set_menu_label (procedure, _("HEIF/AVIF"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("HEIF/AVIF"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "AVIF");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports AVIF images"),
                                         _("Save image in AV1 Image File Format (AVIF)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "2020");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/avif");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "avif");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_file_procedure_set_priority (GIMP_FILE_PROCEDURE (procedure), 100);
+      clay_file_procedure_set_priority (CLAY_FILE_PROCEDURE (procedure), 100);
 
-      gimp_procedure_add_int_argument (procedure, "quality",
+      clay_procedure_add_int_argument (procedure, "quality",
                                        _("_Quality"),
                                        _("Quality factor (0 = worst, 100 = best)"),
                                        0, 100, 50,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "lossless",
+      clay_procedure_add_boolean_argument (procedure, "lossless",
                                            _("L_ossless"),
                                            _("Use lossless compression"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "include-color-profile",
+      clay_procedure_add_boolean_aux_argument (procedure, "include-color-profile",
                                                _("Save color prof_ile"),
                                                _("Save the image's color profile"),
-                                               gimp_export_color_profile (),
+                                               clay_export_color_profile (),
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "save-bit-depth",
+      clay_procedure_add_int_argument (procedure, "save-bit-depth",
                                        _("_Bit depth"),
                                        _("Bit depth of exported image"),
                                        8, 12, 8,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "pixel-format",
+      clay_procedure_add_choice_argument (procedure, "pixel-format",
                                           _("_Pixel format"),
                                           _("Format of color sub-sampling"),
-                                          gimp_choice_new_with_values ("rgb",    HEIFPLUGIN_EXPORT_FORMAT_RGB,    _("RGB"),    NULL,
+                                          clay_choice_new_with_values ("rgb",    HEIFPLUGIN_EXPORT_FORMAT_RGB,    _("RGB"),    NULL,
                                                                        "yuv444", HEIFPLUGIN_EXPORT_FORMAT_YUV444, _("YUV444"), NULL,
                                                                        "yuv420", HEIFPLUGIN_EXPORT_FORMAT_YUV420, _("YUV420"), NULL,
                                                                        NULL),
                                           "yuv420",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "encoder-speed",
+      clay_procedure_add_choice_argument (procedure, "encoder-speed",
                                           _("Enco_der speed"),
                                           _("Tradeoff between speed and compression"),
-                                          gimp_choice_new_with_values ("slow",     HEIFPLUGIN_ENCODER_SPEED_SLOW,     _("Slow"),     NULL,
+                                          clay_choice_new_with_values ("slow",     HEIFPLUGIN_ENCODER_SPEED_SLOW,     _("Slow"),     NULL,
                                                                        "balanced", HEIFPLUGIN_ENCODER_SPEED_BALANCED, _("Balanced"), NULL,
                                                                        "fast",     HEIFPLUGIN_ENCODER_SPEED_FASTER,   _("Fast"),     NULL,
                                                                        NULL),
                                           "balanced",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-exif",
+      clay_procedure_add_boolean_argument (procedure, "include-exif",
                                            _("Save Exi_f"),
                                            _("Toggle saving Exif data"),
-                                           gimp_export_exif (),
+                                           clay_export_exif (),
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-xmp",
+      clay_procedure_add_boolean_argument (procedure, "include-xmp",
                                            _("Save _XMP"),
                                            _("Toggle saving XMP data"),
-                                           gimp_export_xmp (),
+                                           clay_export_xmp (),
                                            G_PARAM_READWRITE);
     }
 #if LIBHEIF_HAVE_VERSION(1,17,0)
   else if (! strcmp (name, LOAD_PROC_HEJ2))
     {
-      procedure = gimp_load_procedure_new (plug_in, name, GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name, CLAY_PDB_PROC_TYPE_PLUGIN,
                                            heif_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("JPEG 2000 encapsulated in HEIF"));
+      clay_procedure_set_menu_label (procedure, _("JPEG 2000 encapsulated in HEIF"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads HEJ2 images"),
                                         _("Load JPEG 2000 image encapsulated in HEIF (HEJ2)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "2023");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure), TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure), TRUE);
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/hej2k");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "hej2");
 
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "4,string,ftypj2ki");
     }
 #endif
 #if LIBHEIF_HAVE_VERSION(1,19,6)
   else if (! strcmp (name, LOAD_PROC_AVCI))
     {
-      procedure = gimp_load_procedure_new (plug_in, name, GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name, CLAY_PDB_PROC_TYPE_PLUGIN,
                                            heif_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("AVC-encoded image encapsulated in HEIF"));
+      clay_procedure_set_menu_label (procedure, _("AVC-encoded image encapsulated in HEIF"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads AVCI images"),
                                         _("Load AVCI image - H.264 image encapsulated in HEIF"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "2025");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure), TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure), TRUE);
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/avci");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "avci");
 
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "4,string,ftypavci");
     }
 #endif
 #if LIBHEIF_HAVE_VERSION(1,19,8)
   else if (! strcmp (name, EXPORT_PROC_HEJ2))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, heif_jpeg2000_export, NULL,
                                              NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_image_types (procedure, "RGB*");
 
-      gimp_procedure_set_menu_label (procedure, "HEIF/HEJ2");
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, "HEIF/HEJ2");
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "HEJ2");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports HEJ2 images"),
                                         _("Save JPEG 2000 image encapsulated in HEIF (HEJ2)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "Daniel Novomesky <dnovomesky@gmail.com>",
                                       "2025");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/hej2k");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "hej2");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_int_argument (procedure, "quality",
+      clay_procedure_add_int_argument (procedure, "quality",
                                        _("_Quality"),
                                        _("Quality factor (0 = worst, 100 = best)"),
                                        0, 100, 50,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "lossless",
+      clay_procedure_add_boolean_argument (procedure, "lossless",
                                            _("L_ossless"),
                                            _("Use lossless compression"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "include-color-profile",
+      clay_procedure_add_boolean_aux_argument (procedure, "include-color-profile",
                                                _("Save color prof_ile"),
                                                _("Save the image's color profile"),
-                                               gimp_export_color_profile (),
+                                               clay_export_color_profile (),
                                                G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "save-bit-depth",
+      clay_procedure_add_int_argument (procedure, "save-bit-depth",
                                        _("_Bit depth"),
                                        _("Bit depth of exported image"),
                                        8, 12, 8,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "pixel-format",
+      clay_procedure_add_choice_argument (procedure, "pixel-format",
                                           _("_Pixel format"),
                                           _("Format of color sub-sampling"),
-                                          gimp_choice_new_with_values ("yuv444", HEIFPLUGIN_EXPORT_FORMAT_YUV444, _("YUV444"), NULL,
+                                          clay_choice_new_with_values ("yuv444", HEIFPLUGIN_EXPORT_FORMAT_YUV444, _("YUV444"), NULL,
                                                                        "yuv420", HEIFPLUGIN_EXPORT_FORMAT_YUV420, _("YUV420"), NULL,
                                                                        NULL),
                                           "yuv420",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-exif",
+      clay_procedure_add_boolean_argument (procedure, "include-exif",
                                            _("Save Exi_f"),
                                            _("Toggle saving Exif data"),
-                                           gimp_export_exif (),
+                                           clay_export_exif (),
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-xmp",
+      clay_procedure_add_boolean_argument (procedure, "include-xmp",
                                            _("Save _XMP"),
                                            _("Toggle saving XMP data"),
-                                           gimp_export_xmp (),
+                                           clay_export_xmp (),
                                            G_PARAM_READWRITE);
     }
 #endif
   return procedure;
 }
 
-static GimpValueArray *
-heif_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+heif_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpImage         *image;
+  ClayValueArray    *return_vals;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayImage         *image;
   gboolean           interactive;
   GError            *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  interactive = (run_mode == GIMP_RUN_INTERACTIVE);
+  interactive = (run_mode == CLAY_RUN_INTERACTIVE);
 
   if (interactive)
-    gimp_ui_init (PLUG_IN_BINARY);
+    clay_ui_init (PLUG_IN_BINARY);
 
   heif_init (NULL);
 
@@ -631,58 +631,58 @@ heif_load (GimpProcedure         *procedure,
   heif_deinit ();
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure, status, error);
+    return clay_procedure_new_return_values (procedure, status, error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-heif_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+heif_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata_unused,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata_unused,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
-  GimpMetadata      *metadata;
+  ClayMetadata      *metadata;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpMetadataSaveFlags metadata_flags;
+      ClayMetadataSaveFlags metadata_flags;
 
-      metadata = gimp_image_metadata_save_prepare (image, "image/heif", &metadata_flags);
+      metadata = clay_image_metadata_save_prepare (image, "image/heif", &metadata_flags);
 
       heif_init (NULL);
 
       if (! export_image (file, image, drawables->data, G_OBJECT (config),
                           &error, heif_compression_HEVC, metadata))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
       heif_deinit ();
@@ -693,55 +693,55 @@ heif_export (GimpProcedure        *procedure,
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpValueArray *
-heif_av1_export (GimpProcedure        *procedure,
-                 GimpRunMode           run_mode,
-                 GimpImage            *image,
+static ClayValueArray *
+heif_av1_export (ClayProcedure        *procedure,
+                 ClayRunMode           run_mode,
+                 ClayImage            *image,
                  GFile                *file,
-                 GimpExportOptions    *options,
-                 GimpMetadata         *metadata_unused,
-                 GimpProcedureConfig  *config,
+                 ClayExportOptions    *options,
+                 ClayMetadata         *metadata_unused,
+                 ClayProcedureConfig  *config,
                  gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
 
-  GimpMetadata      *metadata;
+  ClayMetadata      *metadata;
   GError            *error       = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpMetadataSaveFlags metadata_flags;
+      ClayMetadataSaveFlags metadata_flags;
 
-      metadata = gimp_image_metadata_save_prepare (image, "image/avif", &metadata_flags);
+      metadata = clay_image_metadata_save_prepare (image, "image/avif", &metadata_flags);
 
       heif_init (NULL);
 
       if (! export_image (file, image, drawables->data, G_OBJECT (config),
                           &error, heif_compression_AV1, metadata))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
       heif_deinit ();
@@ -752,56 +752,56 @@ heif_av1_export (GimpProcedure        *procedure,
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 #if LIBHEIF_HAVE_VERSION(1,19,8)
-static GimpValueArray *
-heif_jpeg2000_export (GimpProcedure        *procedure,
-                      GimpRunMode           run_mode,
-                      GimpImage            *image,
+static ClayValueArray *
+heif_jpeg2000_export (ClayProcedure        *procedure,
+                      ClayRunMode           run_mode,
+                      ClayImage            *image,
                       GFile                *file,
-                      GimpExportOptions    *options,
-                      GimpMetadata         *metadata_unused,
-                      GimpProcedureConfig  *config,
+                      ClayExportOptions    *options,
+                      ClayMetadata         *metadata_unused,
+                      ClayProcedureConfig  *config,
                       gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
 
-  GimpMetadata      *metadata;
+  ClayMetadata      *metadata;
   GError            *error       = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (procedure, G_OBJECT (config), image))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      GimpMetadataSaveFlags metadata_flags;
+      ClayMetadataSaveFlags metadata_flags;
 
-      metadata = gimp_image_metadata_save_prepare (image, "image/hej2k", &metadata_flags);
+      metadata = clay_image_metadata_save_prepare (image, "image/hej2k", &metadata_flags);
 
       heif_init (NULL);
 
       if (! export_image (file, image, drawables->data, G_OBJECT (config),
                           &error, heif_compression_JPEG2000, metadata))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
       heif_deinit ();
@@ -812,11 +812,11 @@ heif_jpeg2000_export (GimpProcedure        *procedure,
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 #endif
 
@@ -854,8 +854,8 @@ heifplugin_color_profile_set_tag (cmsHPROFILE      profile,
   cmsMLUfree (mlu);
 }
 
-static GimpColorProfile *
-nclx_to_gimp_profile (const struct heif_color_profile_nclx *nclx)
+static ClayColorProfile *
+nclx_to_clay_profile (const struct heif_color_profile_nclx *nclx)
 {
   const gchar *primaries_name = "";
   const gchar *trc_name = "";
@@ -884,12 +884,12 @@ nclx_to_gimp_profile (const struct heif_color_profile_nclx *nclx)
     {
       if (nclx->transfer_characteristics == heif_transfer_characteristic_IEC_61966_2_1)
         {
-          return gimp_color_profile_new_rgb_srgb();
+          return clay_color_profile_new_rgb_srgb();
         }
 
       if (nclx->transfer_characteristics == heif_transfer_characteristic_linear)
         {
-          return gimp_color_profile_new_rgb_srgb_linear();
+          return clay_color_profile_new_rgb_srgb_linear();
         }
     }
 
@@ -991,7 +991,7 @@ nclx_to_gimp_profile (const struct heif_color_profile_nclx *nclx)
 
   if (profile)
     {
-      GimpColorProfile *new_profile;
+      ClayColorProfile *new_profile;
       gchar *description = g_strdup_printf ("%s %s", primaries_name, trc_name);
 
       heifplugin_color_profile_set_tag (profile, cmsSigProfileDescriptionTag,
@@ -1003,7 +1003,7 @@ nclx_to_gimp_profile (const struct heif_color_profile_nclx *nclx)
       heifplugin_color_profile_set_tag (profile, cmsSigCopyrightTag,
                                         "Public Domain");
 
-      new_profile = gimp_color_profile_new_from_lcms_profile (profile, NULL);
+      new_profile = clay_color_profile_new_from_lcms_profile (profile, NULL);
 
       cmsCloseProfile (profile);
       g_free (description);
@@ -1013,12 +1013,12 @@ nclx_to_gimp_profile (const struct heif_color_profile_nclx *nclx)
   return NULL;
 }
 
-GimpImage *
+ClayImage *
 load_image (GFile                 *file,
-            GimpMetadata          *metadata,
-            GimpMetadataLoadFlags *flags,
+            ClayMetadata          *metadata,
+            ClayMetadataLoadFlags *flags,
             gboolean               interactive,
-            GimpPDBStatusType     *status,
+            ClayPDBStatusType     *status,
             GError               **error)
 {
   GInputStream                *input;
@@ -1029,32 +1029,32 @@ load_image (GFile                 *file,
   struct heif_error            err;
   struct heif_image_handle    *handle  = NULL;
   struct heif_image           *img     = NULL;
-  GimpColorProfile            *profile = NULL;
+  ClayColorProfile            *profile = NULL;
   gint                         n_images;
   heif_item_id                 primary;
   heif_item_id                 selected_image;
   gboolean                     has_alpha;
   gint                         width;
   gint                         height;
-  GimpImage                   *image;
-  GimpLayer                   *layer;
+  ClayImage                   *image;
+  ClayLayer                   *layer;
   GeglBuffer                  *buffer;
   const Babl                  *format;
   const guint8                *data;
   gint                         stride;
   gint                         bit_depth = 8;
   enum heif_chroma             chroma    = heif_chroma_interleaved_RGB;
-  GimpPrecision                precision;
+  ClayPrecision                precision;
   gboolean                     load_linear;
   const char                  *encoding;
 #if LIBHEIF_HAVE_VERSION (1, 19, 1)
   struct heif_security_limits *limits;
 #endif
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
-  *status = GIMP_PDB_EXECUTION_ERROR;
+  *status = CLAY_PDB_EXECUTION_ERROR;
 
   file_size = get_file_size (file, error);
   if (file_size <= 0)
@@ -1075,7 +1075,7 @@ load_image (GFile                 *file,
       return NULL;
     }
 
-  gimp_progress_update (0.25);
+  clay_progress_update (0.25);
 
   ctx = heif_context_alloc ();
   if (!ctx)
@@ -1116,7 +1116,7 @@ load_image (GFile                 *file,
   g_free (file_buffer);
   g_object_unref (input);
 
-  gimp_progress_update (0.5);
+  clay_progress_update (0.5);
 
   /* analyze image content
    * Is there more than one image? Which image is the primary image?
@@ -1166,7 +1166,7 @@ load_image (GFile                 *file,
         {
           heif_context_free (ctx);
 
-          *status = GIMP_PDB_CANCEL;
+          *status = CLAY_PDB_CANCEL;
 
           return NULL;
         }
@@ -1269,7 +1269,7 @@ load_image (GFile                 *file,
           g_warning ("%s: ICC profile loading failed and discarded.",
                      G_STRFUNC);
         else
-          profile = gimp_color_profile_new_from_icc_profile ((guint8 *) profile_data,
+          profile = clay_color_profile_new_from_icc_profile ((guint8 *) profile_data,
                                                              profile_size, NULL);
 
         g_free (profile_data);
@@ -1287,7 +1287,7 @@ load_image (GFile                 *file,
           }
         else
           {
-            profile = nclx_to_gimp_profile (nclx);
+            profile = nclx_to_clay_profile (nclx);
             heif_nclx_color_profile_free (nclx);
           }
       }
@@ -1298,18 +1298,18 @@ load_image (GFile                 *file,
       break;
     }
 
-  gimp_progress_update (0.75);
+  clay_progress_update (0.75);
 
   width  = heif_image_get_width  (img, heif_channel_interleaved);
   height = heif_image_get_height (img, heif_channel_interleaved);
 
-  /* create GIMP image and copy HEIF image into the GIMP image
+  /* create Clay image and copy HEIF image into the Clay image
    * (converting it to RGB)
    */
 
   if (profile)
     {
-      load_linear = gimp_color_profile_is_linear (profile);
+      load_linear = clay_color_profile_is_linear (profile);
     }
   else
     {
@@ -1320,12 +1320,12 @@ load_image (GFile                 *file,
     {
       if (bit_depth == 8)
         {
-          precision = GIMP_PRECISION_U8_LINEAR;
+          precision = CLAY_PRECISION_U8_LINEAR;
           encoding = has_alpha ? "RGBA u8" : "RGB u8";
         }
       else
         {
-          precision = GIMP_PRECISION_U16_LINEAR;
+          precision = CLAY_PRECISION_U16_LINEAR;
           encoding = has_alpha ? "RGBA u16" : "RGB u16";
         }
     }
@@ -1333,25 +1333,25 @@ load_image (GFile                 *file,
     {
       if (bit_depth == 8)
         {
-          precision = GIMP_PRECISION_U8_NON_LINEAR;
+          precision = CLAY_PRECISION_U8_NON_LINEAR;
           encoding = has_alpha ? "R'G'B'A u8" : "R'G'B' u8";
         }
       else
         {
-          precision = GIMP_PRECISION_U16_NON_LINEAR;
+          precision = CLAY_PRECISION_U16_NON_LINEAR;
           encoding = has_alpha ? "R'G'B'A u16" : "R'G'B' u16";
         }
     }
 
-  image = gimp_image_new_with_precision (width, height, GIMP_RGB, precision);
+  image = clay_image_new_with_precision (width, height, CLAY_RGB, precision);
 
   if (profile)
     {
-      if (gimp_color_profile_is_rgb (profile))
+      if (clay_color_profile_is_rgb (profile))
         {
-          gimp_image_set_color_profile (image, profile);
+          clay_image_set_color_profile (image, profile);
         }
-      else if (gimp_color_profile_is_gray (profile))
+      else if (clay_color_profile_is_gray (profile))
         {
           g_warning ("Gray ICC profile was not applied to the imported image.");
         }
@@ -1361,16 +1361,16 @@ load_image (GFile                 *file,
         }
     }
 
-  layer = gimp_layer_new (image,
+  layer = clay_layer_new (image,
                           _("image content"),
                           width, height,
-                          has_alpha ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE,
+                          has_alpha ? CLAY_RGBA_IMAGE : CLAY_RGB_IMAGE,
                           100.0,
-                          gimp_image_get_default_new_layer_mode (image));
+                          clay_image_get_default_new_layer_mode (image));
 
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   data = heif_image_get_plane_readonly (img, heif_channel_interleaved,
                                         &stride);
@@ -1544,7 +1544,7 @@ load_image (GFile                 *file,
 
           if (xmp_data)
             {
-              if (! gimp_metadata_set_from_xmp (metadata, xmp_data, xmp_data_size, error))
+              if (! clay_metadata_set_from_xmp (metadata, xmp_data, xmp_data_size, error))
                 {
                   g_printerr ("%s: Failed to set XMP metadata: %s\n", G_STRFUNC, (*error)->message);
                   g_clear_error (error);
@@ -1558,7 +1558,7 @@ load_image (GFile                 *file,
       gexiv2_metadata_try_set_metadata_pixel_height (GEXIV2_METADATA (metadata),
                                                      height, NULL);
 
-      *flags = GIMP_METADATA_LOAD_COMMENT | GIMP_METADATA_LOAD_RESOLUTION;
+      *flags = CLAY_METADATA_LOAD_COMMENT | CLAY_METADATA_LOAD_RESOLUTION;
     }
 
   if (profile)
@@ -1568,11 +1568,11 @@ load_image (GFile                 *file,
   heif_context_free (ctx);
   heif_image_release (img);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   if (image)
     {
-      *status = GIMP_PDB_SUCCESS;
+      *status = CLAY_PDB_SUCCESS;
     }
   return image;
 }
@@ -1602,12 +1602,12 @@ write_callback (struct heif_context *ctx,
 
 static gboolean
 export_image (GFile                        *file,
-              GimpImage                    *image,
-              GimpDrawable                 *drawable,
+              ClayImage                    *image,
+              ClayDrawable                 *drawable,
               GObject                      *config,
               GError                      **error,
               enum heif_compression_format  compression,
-              GimpMetadata                 *metadata)
+              ClayMetadata                 *metadata)
 {
   struct heif_image                    *h_image = NULL;
   struct heif_context                  *context = heif_context_alloc ();
@@ -1656,7 +1656,7 @@ export_image (GFile                        *file,
                 "include-xmp", &save_xmp,
                 NULL);
   pixel_format =
-    gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+    clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                          "pixel-format");
 
   if (compression == heif_compression_HEVC)
@@ -1702,13 +1702,13 @@ export_image (GFile                        *file,
         }
     }
 
-  gimp_progress_init_printf (_("Exporting '%s' using %s encoder"),
-                             gimp_file_get_utf8_name (file), encoder_name);
+  clay_progress_init_printf (_("Exporting '%s' using %s encoder"),
+                             clay_file_get_utf8_name (file), encoder_name);
 
-  width   = gimp_drawable_get_width  (drawable);
-  height  = gimp_drawable_get_height (drawable);
+  width   = clay_drawable_get_width  (drawable);
+  height  = clay_drawable_get_height (drawable);
 
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   switch (save_bit_depth)
     {
@@ -1758,26 +1758,26 @@ export_image (GFile                        *file,
 
   if (save_profile)
     {
-      GimpColorProfile *profile = NULL;
+      ClayColorProfile *profile = NULL;
       const guint8     *icc_data;
       gsize             icc_length;
 
-      profile = gimp_image_get_color_profile (image);
-      if (profile && gimp_color_profile_is_linear (profile))
+      profile = clay_image_get_color_profile (image);
+      if (profile && clay_color_profile_is_linear (profile))
         out_linear = TRUE;
 
       if (! profile)
         {
-          profile = gimp_image_get_effective_color_profile (image);
+          profile = clay_image_get_effective_color_profile (image);
 
-          if (gimp_color_profile_is_linear (profile))
+          if (clay_color_profile_is_linear (profile))
             {
-              if (gimp_image_get_precision (image) != GIMP_PRECISION_U8_LINEAR)
+              if (clay_image_get_precision (image) != CLAY_PRECISION_U8_LINEAR)
                 {
                   /* If stored data was linear, let's convert the profile. */
-                  GimpColorProfile *saved_profile;
+                  ClayColorProfile *saved_profile;
 
-                  saved_profile = gimp_color_profile_new_srgb_trc_from_color_profile (profile);
+                  saved_profile = clay_color_profile_new_srgb_trc_from_color_profile (profile);
                   g_clear_object (&profile);
                   profile = saved_profile;
                 }
@@ -1809,10 +1809,10 @@ export_image (GFile                        *file,
           heif_image_set_nclx_color_profile (h_image, &nclx_profile);
         }
 
-      icc_data = gimp_color_profile_get_icc_profile (profile, &icc_length);
+      icc_data = clay_color_profile_get_icc_profile (profile, &icc_length);
       heif_image_set_raw_color_profile (h_image, "prof", icc_data, icc_length);
-      space = gimp_color_profile_get_space (profile,
-                                            GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+      space = clay_color_profile_get_space (profile,
+                                            CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                             error);
       if (error && *error)
         {
@@ -1846,7 +1846,7 @@ export_image (GFile                        *file,
     }
 
   if (! space)
-    space = gimp_drawable_get_format (drawable);
+    space = clay_drawable_get_format (drawable);
 
 
   if (save_bit_depth > 8)
@@ -1881,7 +1881,7 @@ export_image (GFile                        *file,
 
       format = babl_format_with_space (encoding, space);
 
-      buffer = gimp_drawable_get_buffer (drawable);
+      buffer = clay_drawable_get_buffer (drawable);
 
       gegl_buffer_get (buffer,
                        GEGL_RECTANGLE (0, 0, width, height),
@@ -1944,7 +1944,7 @@ export_image (GFile                        *file,
 
       data = heif_image_get_plane (h_image, heif_channel_interleaved, &stride);
 
-      buffer = gimp_drawable_get_buffer (drawable);
+      buffer = clay_drawable_get_buffer (drawable);
 
       if (has_alpha)
         {
@@ -1969,7 +1969,7 @@ export_image (GFile                        *file,
       g_object_unref (buffer);
     }
 
-  gimp_progress_update (0.33);
+  clay_progress_update (0.33);
 
   /*  encode to HEIF file  */
   err = heif_context_get_encoder (context,
@@ -2027,7 +2027,7 @@ export_image (GFile                        *file,
   if (compression == heif_compression_HEVC)
     {
       HeifpluginEncoderSpeed  encoder_speed_hevc =
-        gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+        clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                              "encoder-speed");
 
       switch (encoder_speed_hevc)
@@ -2053,12 +2053,12 @@ export_image (GFile                        *file,
   else if (compression == heif_compression_AV1)
     {
       HeifpluginEncoderSpeed  encoder_speed_av1 =
-        gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+        clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                              "encoder-speed");
 
       int parameter_number;
 
-      parameter_number = gimp_get_num_processors();
+      parameter_number = clay_get_num_processors();
       parameter_number = CLAMP(parameter_number, 1, 16);
 
       err = heif_encoder_set_parameter_integer (encoder, "threads", parameter_number);
@@ -2153,20 +2153,20 @@ export_image (GFile                        *file,
 
   if (metadata && (save_exif || save_xmp))
     {
-      GimpMetadata         *filtered_metadata;
-      GimpMetadataSaveFlags metadata_flags = 0;
+      ClayMetadata         *filtered_metadata;
+      ClayMetadataSaveFlags metadata_flags = 0;
 
       if (save_exif)
         {
-          metadata_flags |= GIMP_METADATA_SAVE_EXIF;
+          metadata_flags |= CLAY_METADATA_SAVE_EXIF;
         }
 
       if (save_xmp)
         {
-          metadata_flags |= GIMP_METADATA_SAVE_XMP;
+          metadata_flags |= CLAY_METADATA_SAVE_XMP;
         }
 
-      filtered_metadata = gimp_image_metadata_save_filter (image, "image/heif", metadata, metadata_flags, NULL, error);
+      filtered_metadata = clay_image_metadata_save_filter (image, "image/heif", metadata, metadata_flags, NULL, error);
       if(! filtered_metadata)
         {
           if (error && *error)
@@ -2237,7 +2237,7 @@ export_image (GFile                        *file,
 
   heif_image_handle_release (handle);
 
-  gimp_progress_update (0.66);
+  clay_progress_update (0.66);
 
   writer.writer_api_version = 1;
   writer.write              = write_callback;
@@ -2279,7 +2279,7 @@ export_image (GFile                        *file,
   heif_image_release (h_image);
   heif_context_free (context);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return TRUE;
 }
@@ -2341,7 +2341,7 @@ load_thumbnails (struct heif_context *heif,
       err = heif_context_get_image_handle (heif, IDs[i], &handle);
       if (err.code)
         {
-          gimp_message (err.message);
+          clay_message (err.message);
           continue;
         }
 
@@ -2377,7 +2377,7 @@ load_thumbnails (struct heif_context *heif,
                                                  &thumbnail_handle);
           if (err.code)
             {
-              gimp_message (err.message);
+              clay_message (err.message);
               continue;
             }
         }
@@ -2386,7 +2386,7 @@ load_thumbnails (struct heif_context *heif,
           err = heif_context_get_image_handle (heif, IDs[i], &thumbnail_handle);
           if (err.code)
             {
-              gimp_message (err.message);
+              clay_message (err.message);
               continue;
             }
         }
@@ -2400,7 +2400,7 @@ load_thumbnails (struct heif_context *heif,
                                NULL);
       if (err.code)
         {
-          gimp_message (err.message);
+          clay_message (err.message);
           continue;
         }
 
@@ -2438,7 +2438,7 @@ load_thumbnails (struct heif_context *heif,
                                         NULL);
           if (err.code)
             {
-              gimp_message (err.message);
+              clay_message (err.message);
               continue;
             }
 
@@ -2498,9 +2498,9 @@ load_dialog (struct heif_context *heif,
   if (! load_thumbnails (heif, heif_images))
     return FALSE;
 
-  dialog = gimp_dialog_new (_("Load HEIF Image"), PLUG_IN_BINARY,
+  dialog = clay_dialog_new (_("Load HEIF Image"), PLUG_IN_BINARY,
                             NULL, 0,
-                            gimp_standard_help_func, LOAD_PROC,
+                            clay_standard_help_func, LOAD_PROC,
 
                             _("_Cancel"), GTK_RESPONSE_CANCEL,
                             _("_OK"),     GTK_RESPONSE_OK,
@@ -2512,7 +2512,7 @@ load_dialog (struct heif_context *heif,
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
                       main_vbox, TRUE, TRUE, 0);
 
-  frame = gimp_frame_new (_("Select Image"));
+  frame = clay_frame_new (_("Select Image"));
   gtk_box_pack_start (GTK_BOX (main_vbox), frame, TRUE, TRUE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
@@ -2603,7 +2603,7 @@ load_dialog (struct heif_context *heif,
   gtk_widget_set_visible (main_vbox, TRUE);
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_OK);
+  run = (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_OK);
 
   if (run)
     {
@@ -2636,43 +2636,43 @@ load_dialog (struct heif_context *heif,
 /*  the save dialog  */
 
 gboolean
-save_dialog (GimpProcedure *procedure,
+save_dialog (ClayProcedure *procedure,
              GObject       *config,
-             GimpImage     *image)
+             ClayImage     *image)
 {
   GtkWidget    *dialog;
   GtkWidget    *quality_scale;
   GtkListStore *store_bitdepths;
   gboolean      run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                     "lossless", GTK_TYPE_CHECK_BUTTON);
 
-  quality_scale = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  quality_scale = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                                     "quality",
-                                                    GIMP_TYPE_SCALE_ENTRY);
+                                                    CLAY_TYPE_SCALE_ENTRY);
 
   g_object_bind_property (config,        "lossless",
                           quality_scale, "sensitive",
                           G_BINDING_SYNC_CREATE |
                           G_BINDING_INVERT_BOOLEAN);
 
-  store_bitdepths = gimp_int_store_new (_("8 bit/channel"),   8,
+  store_bitdepths = clay_int_store_new (_("8 bit/channel"),   8,
                                         _("10 bit/channel"), 10,
                                         _("12 bit/channel"), 12,
                                         NULL);
 
-  gimp_procedure_dialog_get_int_combo (GIMP_PROCEDURE_DIALOG (dialog),
-                                       "save-bit-depth", GIMP_INT_STORE (store_bitdepths));
+  clay_procedure_dialog_get_int_combo (CLAY_PROCEDURE_DIALOG (dialog),
+                                       "save-bit-depth", CLAY_INT_STORE (store_bitdepths));
 
-  if (g_strcmp0 (gimp_procedure_get_name (procedure), EXPORT_PROC_HEJ2) == 0)
+  if (g_strcmp0 (clay_procedure_get_name (procedure), EXPORT_PROC_HEJ2) == 0)
     {
       /* HEJ2 doesn't use encoder-speed */
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "lossless", "quality",
                                   "pixel-format",
                                   "save-bit-depth",
@@ -2681,7 +2681,7 @@ save_dialog (GimpProcedure *procedure,
     }
   else
     {
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "lossless", "quality",
                                   "pixel-format",
                                   "save-bit-depth", "encoder-speed",
@@ -2689,7 +2689,7 @@ save_dialog (GimpProcedure *procedure,
                                   "include-exif", "include-xmp", NULL);
     }
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

@@ -20,51 +20,51 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimptoolinfo.h"
-#include "core/gimptoolpreset.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claytoolinfo.h"
+#include "core/claytoolpreset.h"
 
-#include "widgets/gimpcontainereditor.h"
-#include "widgets/gimpcontainerview.h"
+#include "widgets/claycontainereditor.h"
+#include "widgets/claycontainerview.h"
 
 #include "tool-presets-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  public functions  */
 
 void
-tool_presets_save_cmd_callback (GimpAction *action,
+tool_presets_save_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpToolPreset      *preset;
-  GimpToolInfo        *tool_info;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayToolPreset      *preset;
+  ClayToolInfo        *tool_info;
 
-  context = gimp_container_view_get_context (editor->view);
+  context = clay_container_view_get_context (editor->view);
 
-  preset    = gimp_context_get_tool_preset (context);
-  tool_info = gimp_context_get_tool (gimp_get_user_context (context->gimp));
+  preset    = clay_context_get_tool_preset (context);
+  tool_info = clay_context_get_tool (clay_get_user_context (context->clay));
 
   if (tool_info && preset)
     {
-      GimpToolInfo *preset_tool;
+      ClayToolInfo *preset_tool;
 
-      preset_tool =  gimp_context_get_tool (GIMP_CONTEXT (preset->tool_options));
+      preset_tool =  clay_context_get_tool (CLAY_CONTEXT (preset->tool_options));
 
       if (tool_info != preset_tool)
         {
-          gimp_message (context->gimp,
-                        G_OBJECT (editor), GIMP_MESSAGE_WARNING,
+          clay_message (context->clay,
+                        G_OBJECT (editor), CLAY_MESSAGE_WARNING,
                         _("Can't save '%s' tool options to an "
                           "existing '%s' tool preset."),
                         tool_info->label,
@@ -72,24 +72,24 @@ tool_presets_save_cmd_callback (GimpAction *action,
           return;
         }
 
-      gimp_config_sync (G_OBJECT (tool_info->tool_options),
+      clay_config_sync (G_OBJECT (tool_info->tool_options),
                         G_OBJECT (preset->tool_options), 0);
     }
 }
 
 void
-tool_presets_restore_cmd_callback (GimpAction *action,
+tool_presets_restore_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpContainerEditor *editor = GIMP_CONTAINER_EDITOR (data);
-  GimpContext         *context;
-  GimpToolPreset      *preset;
+  ClayContainerEditor *editor = CLAY_CONTAINER_EDITOR (data);
+  ClayContext         *context;
+  ClayToolPreset      *preset;
 
-  context = gimp_container_view_get_context (editor->view);
+  context = clay_container_view_get_context (editor->view);
 
-  preset = gimp_context_get_tool_preset (context);
+  preset = clay_context_get_tool_preset (context);
 
   if (preset)
-    gimp_context_tool_preset_changed (gimp_get_user_context (context->gimp));
+    clay_context_tool_preset_changed (clay_get_user_context (context->clay));
 }

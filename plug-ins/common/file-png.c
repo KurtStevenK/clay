@@ -32,19 +32,19 @@
 #include <glib/gstdio.h>
 #include "lcms2.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <png.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC       "file-png-load"
 #define LOAD_APNG_PROC  "file-apng-load"
 #define EXPORT_PROC     "file-png-export"
 #define PLUG_IN_BINARY  "file-png"
-#define PLUG_IN_ROLE    "gimp-file-png"
+#define PLUG_IN_ROLE    "clay-file-png"
 
 #define PLUG_IN_VERSION "1.3.4 - 03 September 2002"
 #define SCALE_WIDTH     125
@@ -99,12 +99,12 @@ typedef struct _PngClass PngClass;
 
 struct _Png
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PngClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -113,47 +113,47 @@ struct _PngClass
 
 GType                   png_get_type         (void);
 
-static GList          * png_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * png_create_procedure (GimpPlugIn            *plug_in,
+static GList          * png_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * png_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * png_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * png_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * apng_load            (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * apng_load            (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * png_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * png_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage * load_image                (GFile                 *file,
+static ClayImage * load_image                (GFile                 *file,
                                               gboolean               report_progress,
                                               gboolean              *resolution_loaded,
                                               gboolean              *profile_loaded,
                                               gboolean              *is_apng,
                                               GError               **error);
 static gboolean    load_apng_image           (GFile                 *file,
-                                              GimpImage             *image,
+                                              ClayImage             *image,
                                               gboolean               report_progress,
                                               GError               **error);
 static gboolean    export_image              (GFile                 *file,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable,
-                                              GimpImage             *orig_image,
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable,
+                                              ClayImage             *orig_image,
                                               GObject               *config,
                                               gint                  *bits_per_sample,
                                               gboolean               report_progress,
@@ -162,11 +162,11 @@ static gboolean    export_image              (GFile                 *file,
 static int         respin_cmap               (png_structp            pp,
                                               png_infop              info,
                                               guchar                *remap,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable);
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable);
 
-static gboolean    export_dialog             (GimpImage             *image,
-                                              GimpProcedure         *procedure,
+static gboolean    export_dialog             (ClayImage             *image,
+                                              ClayProcedure         *procedure,
                                               GObject               *config,
                                               gboolean               alpha);
 
@@ -178,7 +178,7 @@ static gboolean    ia_has_transparent_pixels (GeglBuffer            *buffer);
 static gint        find_unused_ia_color      (GeglBuffer            *buffer,
                                               gint                  *colors);
 
-static void        add_alpha_to_indexed      (GimpLayer             *layer,
+static void        add_alpha_to_indexed      (ClayLayer             *layer,
                                               guchar                *alpha);
 
 static gboolean    restart_apng_processing   (png_structp           *png_ptr,
@@ -201,10 +201,10 @@ static void         read_apng_row            (png_structp            png_ptr,
                                               gint                   pass);
 static inline guint read_apng_chunk          (FILE                  *f,
                                               APNGChunk             *chunk);
-static void         create_apng_layer        (GimpImage             *image,
+static void         create_apng_layer        (ClayImage             *image,
                                               APNGFrame             *apng_frame,
                                               guchar                *prior_pixels,
-                                              GimpImageType          image_type,
+                                              ClayImageType          image_type,
                                               guint                  frame_no,
                                               guchar                *alpha,
                                               gboolean               is_indexed_alpha,
@@ -215,16 +215,16 @@ static gint        read_unknown_chunk        (png_structp            png_ptr,
                                               png_unknown_chunkp     chunk);
 
 
-G_DEFINE_TYPE (Png, png, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Png, png, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PNG_TYPE)
+CLAY_MAIN (PNG_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 png_class_init (PngClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = png_query_procedures;
   plug_in_class->create_procedure = png_create_procedure;
@@ -237,7 +237,7 @@ png_init (Png *png)
 }
 
 static GList *
-png_query_procedures (GimpPlugIn *plug_in)
+png_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -248,26 +248,26 @@ png_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-png_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+png_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            png_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("PNG image"));
+      clay_procedure_set_menu_label (procedure, _("PNG image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files in PNG file format",
                                         "This plug-in loads Portable Network "
                                         "Graphics (PNG) files.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Michael Sweet <mike@easysw.com>, "
                                       "Daniel Skarda <0rfelyus@atrey.karlin.mff.cuni.cz>",
                                       "Michael Sweet <mike@easysw.com>, "
@@ -275,52 +275,52 @@ png_create_procedure (GimpPlugIn  *plug_in,
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       PLUG_IN_VERSION);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/png");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "png");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,\211PNG\r\n\032\n");
     }
   else if (! strcmp (name, LOAD_APNG_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            apng_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("APNG image"));
+      clay_procedure_set_menu_label (procedure, _("APNG image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files in APNG file format",
                                         "This plug-in loads Animated Portable Network "
                                         "Graphics (APNG) files.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alx Sa",
                                       "Alx Sa",
                                       "2025");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/apng");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "apng");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              TRUE, png_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("PNG image"));
+      clay_procedure_set_menu_label (procedure, _("PNG image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports files in PNG file format",
                                         "This plug-in exports Portable Network "
                                         "Graphics (PNG) files.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Michael Sweet <mike@easysw.com>, "
                                       "Daniel Skarda <0rfelyus@atrey.karlin.mff.cuni.cz>",
                                       "Michael Sweet <mike@easysw.com>, "
@@ -328,63 +328,63 @@ png_create_procedure (GimpPlugIn  *plug_in,
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       PLUG_IN_VERSION);
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("PNG"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/png");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "png");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "interlaced",
+      clay_procedure_add_boolean_argument (procedure, "interlaced",
                                            _("_Interlacing (Adam7)"),
                                            _("Use Adam7 interlacing"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "compression",
+      clay_procedure_add_int_argument (procedure, "compression",
                                        _("Co_mpression level"),
                                        _("Deflate Compression factor (0..9)"),
                                        0, 9, 9,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "bkgd",
+      clay_procedure_add_boolean_argument (procedure, "bkgd",
                                            _("Save _background color"),
                                            _("Write bKGD chunk (PNG metadata)"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "offs",
+      clay_procedure_add_boolean_argument (procedure, "offs",
                                            _("Save layer o_ffset"),
                                            _("Write oFFs chunk (PNG metadata)"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "phys",
+      clay_procedure_add_boolean_argument (procedure, "phys",
                                            _("Save resol_ution"),
                                            _("Write pHYs chunk (PNG metadata)"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "time",
+      clay_procedure_add_boolean_argument (procedure, "time",
                                            _("Save creation _time"),
                                            _("Write tIME chunk (PNG metadata)"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "save-transparent",
+      clay_procedure_add_boolean_argument (procedure, "save-transparent",
                                            _("Save color _values from transparent pixels"),
                                            _("Preserve color of completely transparent pixels"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "optimize-palette",
+      clay_procedure_add_boolean_argument (procedure, "optimize-palette",
                                            _("_Optimize for smallest possible palette size"),
                                            _("When checked, save as 1, 2, 4, or 8-bit depending"
                                              " on number of colors used. When unchecked, always"
@@ -392,10 +392,10 @@ png_create_procedure (GimpPlugIn  *plug_in,
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "format",
+      clay_procedure_add_choice_argument (procedure, "format",
                                           _("_Pixel format"),
                                           _("PNG export format"),
-                                          gimp_choice_new_with_values ("auto",    PNG_FORMAT_AUTO,    _("Automatic"),    NULL,
+                                          clay_choice_new_with_values ("auto",    PNG_FORMAT_AUTO,    _("Automatic"),    NULL,
                                                                        "rgb8",    PNG_FORMAT_RGB8,    _("8 bpc RGB"),    NULL,
                                                                        "gray8",   PNG_FORMAT_GRAY8,   _("8 bpc GRAY"),   NULL,
                                                                        "rgba8",   PNG_FORMAT_RGBA8,   _("8 bpc RGBA"),   NULL,
@@ -407,41 +407,41 @@ png_create_procedure (GimpPlugIn  *plug_in,
                                                                        NULL),
                                           "auto", G_PARAM_READWRITE);
 
-      gimp_export_procedure_set_support_exif      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_iptc      (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_xmp       (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_exif      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_iptc      (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_xmp       (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
 #if defined(PNG_iCCP_SUPPORTED)
-      gimp_export_procedure_set_support_profile   (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_profile   (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
 #endif
-      gimp_export_procedure_set_support_thumbnail (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
-      gimp_export_procedure_set_support_comment   (GIMP_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_thumbnail (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
+      clay_export_procedure_set_support_comment   (CLAY_EXPORT_PROCEDURE (procedure), TRUE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-png_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+png_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean        report_progress   = FALSE;
   gboolean        resolution_loaded = FALSE;
   gboolean        profile_loaded    = FALSE;
   gboolean        is_apng           = FALSE;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
       report_progress = TRUE;
     }
 
@@ -453,8 +453,8 @@ png_load (GimpProcedure         *procedure,
                       &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   /* Some APNGs have .png extensions */
@@ -462,42 +462,42 @@ png_load (GimpProcedure         *procedure,
     load_apng_image (file, image, report_progress, &error);
 
   if (resolution_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_RESOLUTION;
+    *flags &= ~CLAY_METADATA_LOAD_RESOLUTION;
 
   if (profile_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_COLORSPACE;
+    *flags &= ~CLAY_METADATA_LOAD_COLORSPACE;
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-apng_load (GimpProcedure         *procedure,
-           GimpRunMode            run_mode,
+static ClayValueArray *
+apng_load (ClayProcedure         *procedure,
+           ClayRunMode            run_mode,
            GFile                 *file,
-           GimpMetadata          *metadata,
-           GimpMetadataLoadFlags *flags,
-           GimpProcedureConfig   *config,
+           ClayMetadata          *metadata,
+           ClayMetadataLoadFlags *flags,
+           ClayProcedureConfig   *config,
            gpointer               run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean        report_progress   = FALSE;
   gboolean        resolution_loaded = FALSE;
   gboolean        profile_loaded    = FALSE;
   gboolean        is_apng           = TRUE;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode != GIMP_RUN_NONINTERACTIVE)
+  if (run_mode != CLAY_RUN_NONINTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
       report_progress = TRUE;
     }
 
@@ -510,41 +510,41 @@ apng_load (GimpProcedure         *procedure,
                       &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   load_apng_image (file, image, report_progress, &error);
 
   if (resolution_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_RESOLUTION;
+    *flags &= ~CLAY_METADATA_LOAD_RESOLUTION;
 
   if (profile_loaded)
-    *flags &= ~GIMP_METADATA_LOAD_COLORSPACE;
+    *flags &= ~CLAY_METADATA_LOAD_COLORSPACE;
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-png_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+png_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
-  GimpImage         *orig_image;
+  ClayImage         *orig_image;
   gboolean           alpha;
   GError            *error  = NULL;
 
@@ -552,9 +552,9 @@ png_export (GimpProcedure        *procedure,
 
   orig_image = image;
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
-  alpha = gimp_drawable_has_alpha (drawables->data);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
+  alpha = clay_drawable_has_alpha (drawables->data);
 
   /* If the image has no transparency, then there is usually no need
    * to save a bKGD chunk. For more information, see:
@@ -565,41 +565,41 @@ png_export (GimpProcedure        *procedure,
                   "bkgd", FALSE,
                   NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! export_dialog (orig_image, procedure, G_OBJECT (config), alpha))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       gint bits_per_sample;
 
       if (export_image (file, image, drawables->data, orig_image, G_OBJECT (config),
-                        &bits_per_sample, run_mode != GIMP_RUN_NONINTERACTIVE,
+                        &bits_per_sample, run_mode != CLAY_RUN_NONINTERACTIVE,
                         &error))
         {
           if (metadata)
-            gimp_metadata_set_bits_per_sample (metadata, bits_per_sample);
+            clay_metadata_set_bits_per_sample (metadata, bits_per_sample);
         }
       else
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 struct read_error_data
 {
-  volatile GimpImage
+  volatile ClayImage
                *image;           /* Image */
   guchar       *pixel;           /* Pixel data */
   GeglBuffer   *buffer;          /* GEGL buffer for layer */
@@ -607,7 +607,7 @@ struct read_error_data
   guint32       width;           /* png_infop->width */
   guint32       height;          /* png_infop->height */
   gint          bpp;             /* Bytes per pixel */
-  gint          tile_height;     /* Height of tile in GIMP */
+  gint          tile_height;     /* Height of tile in Clay */
   gint          begin;           /* Beginning tile row */
   gint          end;             /* Ending tile row */
   gint          num;             /* Number of rows to load */
@@ -663,12 +663,12 @@ get_bit_depth_for_palette (int num_palette)
     return 8;
 }
 
-static GimpColorProfile *
+static ClayColorProfile *
 load_color_profile (png_structp   pp,
                     png_infop     info,
                     gchar       **profile_name)
 {
-  GimpColorProfile *profile = NULL;
+  ClayColorProfile *profile = NULL;
 
 #if defined(PNG_iCCP_SUPPORTED)
   png_uint_32       proflen;
@@ -678,7 +678,7 @@ load_color_profile (png_structp   pp,
 
   if (png_get_iCCP (pp, info, &profname, &profcomp, &prof, &proflen))
     {
-      profile = gimp_color_profile_new_from_icc_profile ((guint8 *) prof,
+      profile = clay_color_profile_new_from_icc_profile ((guint8 *) prof,
                                                          proflen, NULL);
       if (profile && profname)
         {
@@ -709,7 +709,7 @@ Build_sRGBGamma (cmsContext ContextID)
 /*
  * 'load_image()' - Load a PNG image into a new image window.
  */
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             gboolean      report_progress,
             gboolean     *resolution_loaded,
@@ -724,18 +724,18 @@ load_image (GFile        *file,
   gint                   height;               /* image height */
   gint                   num_passes;           /* Number of interlace passes in file */
   gint                   pass;                 /* Current pass in file */
-  gint                   tile_height;          /* Height of tile in GIMP */
+  gint                   tile_height;          /* Height of tile in Clay */
   gint                   begin;                /* Beginning tile row */
   gint                   end;                  /* Ending tile row */
   gint                   num;                  /* Number of rows to load */
-  GimpImageBaseType      image_type;           /* Type of image */
-  GimpPrecision          image_precision;      /* Precision of image */
-  GimpImageType          layer_type;           /* Type of drawable/layer */
-  GimpColorProfile      *profile      = NULL;  /* Color profile */
+  ClayImageBaseType      image_type;           /* Type of image */
+  ClayPrecision          image_precision;      /* Precision of image */
+  ClayImageType          layer_type;           /* Type of drawable/layer */
+  ClayColorProfile      *profile      = NULL;  /* Color profile */
   gchar                 *profile_name = NULL;  /* Profile's name */
   FILE                  *fp           = NULL;  /* File pointer */
-  volatile GimpImage    *image        = NULL;  /* Image -- protected for setjmp() */
-  GimpLayer             *layer;                /* Layer */
+  volatile ClayImage    *image        = NULL;  /* Image -- protected for setjmp() */
+  ClayLayer             *layer;                /* Layer */
   GeglBuffer            *buffer;               /* GEGL buffer for layer */
   const Babl            *file_format;          /* BABL format for layer */
   png_structp            pp           = NULL;  /* PNG read pointer */
@@ -758,7 +758,7 @@ load_image (GFile        *file,
 
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error creating PNG read struct while loading '%s'."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return NULL;
     }
 
@@ -767,7 +767,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error while reading '%s'. Could not create PNG header info structure."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       png_destroy_read_struct (&pp, NULL, NULL);
       return NULL;
     }
@@ -775,7 +775,7 @@ load_image (GFile        *file,
   if (setjmp (png_jmpbuf (pp)))
     {
       struct read_error_data *crash_error_data = png_get_error_ptr (pp);
-      volatile GimpImage     *crash_image      = NULL;
+      volatile ClayImage     *crash_image      = NULL;
 
       if (crash_error_data)
         crash_image = crash_error_data->image;
@@ -784,12 +784,12 @@ load_image (GFile        *file,
         {
           g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                        _("Error while reading '%s'. File corrupted?"),
-                       gimp_file_get_utf8_name (file));
+                       clay_file_get_utf8_name (file));
         }
       else
         { 
           g_message (_("Error while reading '%s'. File corrupted?"),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
         }
 
       if (fp)
@@ -805,7 +805,7 @@ load_image (GFile        *file,
       free (pp);
       free (info);
 
-      return (GimpImage *) crash_image;
+      return (ClayImage *) crash_image;
     }
 
 #ifdef PNG_BENIGN_ERRORS_SUPPORTED
@@ -821,8 +821,8 @@ load_image (GFile        *file,
    */
 
   if (report_progress)
-    gimp_progress_init_printf (_("Opening '%s'"),
-                               gimp_file_get_utf8_name (file));
+    clay_progress_init_printf (_("Opening '%s'"),
+                               clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -830,7 +830,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       png_destroy_read_struct (&pp, &info, NULL);
       free (pp);
       free (info);
@@ -954,7 +954,7 @@ load_image (GFile        *file,
           cmsMLUsetASCII (description_mlu,  "en", "US", profile_desc);
           cmsWriteTag (cms_profile, cmsSigProfileDescriptionTag, description_mlu);
 
-          profile = gimp_color_profile_new_from_lcms_profile (cms_profile, NULL);
+          profile = clay_color_profile_new_from_lcms_profile (cms_profile, NULL);
 
           g_free (profile_desc);
           cmsMLUfree (description_mlu);
@@ -977,9 +977,9 @@ load_image (GFile        *file,
    */
 
   if (png_get_bit_depth (pp, info) == 16)
-    image_precision = GIMP_PRECISION_U16_NON_LINEAR;
+    image_precision = CLAY_PRECISION_U16_NON_LINEAR;
   else
-    image_precision = GIMP_PRECISION_U8_NON_LINEAR;
+    image_precision = CLAY_PRECISION_U8_NON_LINEAR;
 
   if (png_get_bit_depth (pp, info) < 8)
     {
@@ -1040,34 +1040,34 @@ load_image (GFile        *file,
   switch (png_get_color_type (pp, info))
     {
     case PNG_COLOR_TYPE_RGB:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGB_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGB_IMAGE;
       break;
 
     case PNG_COLOR_TYPE_RGB_ALPHA:
-      image_type = GIMP_RGB;
-      layer_type = GIMP_RGBA_IMAGE;
+      image_type = CLAY_RGB;
+      layer_type = CLAY_RGBA_IMAGE;
       break;
 
     case PNG_COLOR_TYPE_GRAY:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAY_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAY_IMAGE;
       break;
 
     case PNG_COLOR_TYPE_GRAY_ALPHA:
-      image_type = GIMP_GRAY;
-      layer_type = GIMP_GRAYA_IMAGE;
+      image_type = CLAY_GRAY;
+      layer_type = CLAY_GRAYA_IMAGE;
       break;
 
     case PNG_COLOR_TYPE_PALETTE:
-      image_type = GIMP_INDEXED;
-      layer_type = GIMP_INDEXED_IMAGE;
+      image_type = CLAY_INDEXED;
+      layer_type = CLAY_INDEXED_IMAGE;
       break;
 
     default:
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Unknown color model in PNG file '%s'."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       png_destroy_read_struct (&pp, &info, NULL);
       free (pp);
       free (info);
@@ -1079,14 +1079,14 @@ load_image (GFile        *file,
   width = png_get_image_width (pp, info);
   height = png_get_image_height (pp, info);
 
-  image = gimp_image_new_with_precision (width, height,
+  image = clay_image_new_with_precision (width, height,
                                          image_type, image_precision);
   if (! image)
     {
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Could not create new image for '%s': %s"),
-                   gimp_file_get_utf8_name (file),
-                   gimp_pdb_get_last_error (gimp_get_pdb ()));
+                   clay_file_get_utf8_name (file),
+                   clay_pdb_get_last_error (clay_get_pdb ()));
       png_destroy_read_struct (&pp, &info, NULL);
       free (pp);
       free (info);
@@ -1101,20 +1101,20 @@ load_image (GFile        *file,
 
   if (profile)
     {
-      gimp_image_set_color_profile ((GimpImage *) image, profile);
+      clay_image_set_color_profile ((ClayImage *) image, profile);
       g_object_unref (profile);
 
       if (profile_name)
         {
-          GimpParasite *parasite;
+          ClayParasite *parasite;
 
-          parasite = gimp_parasite_new ("icc-profile-name",
-                                        GIMP_PARASITE_PERSISTENT |
-                                        GIMP_PARASITE_UNDOABLE,
+          parasite = clay_parasite_new ("icc-profile-name",
+                                        CLAY_PARASITE_PERSISTENT |
+                                        CLAY_PARASITE_UNDOABLE,
                                         strlen (profile_name),
                                         profile_name);
-          gimp_image_attach_parasite ((GimpImage *) image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite ((ClayImage *) image, parasite);
+          clay_parasite_free (parasite);
 
           g_free (profile_name);
         }
@@ -1124,13 +1124,13 @@ load_image (GFile        *file,
    * Create the "background" layer to hold the image...
    */
 
-  layer = gimp_layer_new ((GimpImage *) image, _("Background"), width, height,
+  layer = clay_layer_new ((ClayImage *) image, _("Background"), width, height,
                           layer_type,
                           100,
-                          gimp_image_get_default_new_layer_mode ((GimpImage *) image));
-  gimp_image_insert_layer ((GimpImage *) image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode ((ClayImage *) image));
+  clay_image_insert_layer ((ClayImage *) image, layer, NULL, 0);
 
-  file_format = gimp_drawable_get_format (GIMP_DRAWABLE (layer));
+  file_format = clay_drawable_get_format (CLAY_DRAWABLE (layer));
 
   /*
    * Find out everything we can about the image resolution
@@ -1148,11 +1148,11 @@ load_image (GFile        *file,
         {
           if (! report_progress)
             {
-              gimp_layer_set_offsets (layer, offset_x, offset_y);
+              clay_layer_set_offsets (layer, offset_x, offset_y);
             }
           else if (offsets_dialog (offset_x, offset_y))
             {
-              gimp_layer_set_offsets (layer, offset_x, offset_y);
+              clay_layer_set_offsets (layer, offset_x, offset_y);
 
               if (abs (offset_x) > width ||
                   abs (offset_y) > height)
@@ -1179,24 +1179,24 @@ load_image (GFile        *file,
               {
                 gdouble image_xres, image_yres;
 
-                gimp_image_get_resolution ((GimpImage *) image, &image_xres, &image_yres);
+                clay_image_get_resolution ((ClayImage *) image, &image_xres, &image_yres);
 
                 if (xres > yres)
                   image_xres = image_yres * (gdouble) xres / (gdouble) yres;
                 else
                   image_yres = image_xres * (gdouble) yres / (gdouble) xres;
 
-                gimp_image_set_resolution ((GimpImage *) image, image_xres, image_yres);
+                clay_image_set_resolution ((ClayImage *) image, image_xres, image_yres);
 
                 *resolution_loaded = TRUE;
               }
               break;
 
             case PNG_RESOLUTION_METER:
-              gimp_image_set_resolution ((GimpImage *) image,
+              clay_image_set_resolution ((ClayImage *) image,
                                          (gdouble) xres * 0.0254,
                                          (gdouble) yres * 0.0254);
-              gimp_image_set_unit ((GimpImage *) image, gimp_unit_mm ());
+              clay_image_set_unit ((ClayImage *) image, clay_unit_mm ());
 
               *resolution_loaded = TRUE;
               break;
@@ -1218,19 +1218,19 @@ load_image (GFile        *file,
       int num_palette;
 
       png_get_PLTE (pp, info, &palette, &num_palette);
-      gimp_palette_set_colormap (gimp_image_get_palette ((GimpImage *) image), babl_format ("R'G'B' u8"),
+      clay_palette_set_colormap (clay_image_get_palette ((ClayImage *) image), babl_format ("R'G'B' u8"),
                                  (guchar *) palette, num_palette * 3);
     }
 
   bpp = babl_format_get_bytes_per_pixel (file_format);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   /*
    * Temporary buffer...
    */
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   pixel = g_new0 (guchar, tile_height * width * bpp);
   pixels = g_new (guchar *, tile_height);
 
@@ -1283,7 +1283,7 @@ load_image (GFile        *file,
                            GEGL_AUTO_ROWSTRIDE);
 
           if (report_progress)
-            gimp_progress_update (((gdouble) pass +
+            clay_progress_update (((gdouble) pass +
                                    (gdouble) end / (gdouble) height) /
                                   (gdouble) num_passes);
         }
@@ -1317,13 +1317,13 @@ load_image (GFile        *file,
 
       if (comment && *comment)
         {
-          GimpParasite *parasite;
+          ClayParasite *parasite;
 
-          parasite = gimp_parasite_new ("gimp-comment",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("clay-comment",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (comment) + 1, comment);
-          gimp_image_attach_parasite ((GimpImage *) image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite ((ClayImage *) image, parasite);
+          clay_parasite_free (parasite);
         }
 
       g_free (comment);
@@ -1354,29 +1354,29 @@ load_image (GFile        *file,
 
       for (iter = safe_to_copy_chunks; iter; iter = iter->next)
         {
-          GimpParasite *parasite = iter->data;
+          ClayParasite *parasite = iter->data;
 
-          if (strcmp (gimp_parasite_get_name (parasite), "png/fcTL") == 0)
+          if (strcmp (clay_parasite_get_name (parasite), "png/fcTL") == 0)
             *is_apng = TRUE;
           else
-            gimp_image_attach_parasite ((GimpImage *) image, parasite);
-          gimp_parasite_free (parasite);
+            clay_image_attach_parasite ((ClayImage *) image, parasite);
+          clay_parasite_free (parasite);
         }
 
       g_slist_free (safe_to_copy_chunks);
     }
 
-  return (GimpImage *) image;
+  return (ClayImage *) image;
 }
 
 static gboolean
 load_apng_image (GFile      *file,
-                 GimpImage  *image,
+                 ClayImage  *image,
                  gboolean    report_progress,
                  GError    **error)
 {
-  GimpLayer     **layers;
-  GimpImageType   image_type;
+  ClayLayer     **layers;
+  ClayImageType   image_type;
   gint            bpp;
   guchar          sig[8];
   guchar          trns[256];
@@ -1394,14 +1394,14 @@ load_apng_image (GFile      *file,
   guint           frame_count      = 2;
   gsize           frame_data_size  = 0;
 
-  layers     = gimp_image_get_layers (image);
-  image_type = gimp_drawable_type (GIMP_DRAWABLE (layers[0]));
-  bpp        = gimp_drawable_get_bpp (GIMP_DRAWABLE (layers[0]));
+  layers     = clay_image_get_layers (image);
+  image_type = clay_drawable_type (CLAY_DRAWABLE (layers[0]));
+  bpp        = clay_drawable_get_bpp (CLAY_DRAWABLE (layers[0]));
   g_free (layers);
 
-  if (image_type == GIMP_INDEXEDA_IMAGE)
+  if (image_type == CLAY_INDEXEDA_IMAGE)
     {
-      image_type       = GIMP_INDEXED_IMAGE;
+      image_type       = CLAY_INDEXED_IMAGE;
       bpp              = 1;
       is_indexed_alpha = TRUE;
 
@@ -1415,13 +1415,13 @@ load_apng_image (GFile      *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
   if (report_progress)
-    gimp_progress_init_printf (_("Importing APNG frames from '%s'"),
-                               gimp_file_get_utf8_name (file));
+    clay_progress_init_printf (_("Importing APNG frames from '%s'"),
+                               clay_file_get_utf8_name (file));
 
   if (fread (sig, 1, 8, fp)   == 8 &&
       png_sig_cmp (sig, 0, 8) == 0)
@@ -1452,8 +1452,8 @@ load_apng_image (GFile      *file,
       /* Set initial frame information */
       if (png_id == id_IHDR)
         {
-          gdouble image_width  = gimp_image_get_width (image);
-          gdouble image_height = gimp_image_get_height (image);
+          gdouble image_width  = clay_image_get_width (image);
+          gdouble image_height = clay_image_get_height (image);
 
           frame_data_size = ((gsize) image_width) * image_height * bpp;
 
@@ -1515,7 +1515,7 @@ load_apng_image (GFile      *file,
 
               if (png_id == id_acTL)
                 {
-                  GimpParasite *parasite;
+                  ClayParasite *parasite;
                   gchar        *str;
 
                   is_animated = TRUE;
@@ -1523,12 +1523,12 @@ load_apng_image (GFile      *file,
                   playback_no = png_get_uint_32 (chunk.data + 12);
 
                   str = g_strdup_printf ("%d %d", frame_no, playback_no);
-                  parasite = gimp_parasite_new ("apng-image-data",
-                                                GIMP_PARASITE_PERSISTENT,
+                  parasite = clay_parasite_new ("apng-image-data",
+                                                CLAY_PARASITE_PERSISTENT,
                                                 strlen (str) + 1, (gpointer) str);
                   g_free (str);
-                  gimp_image_attach_parasite (image, parasite);
-                  gimp_parasite_free (parasite);
+                  clay_image_attach_parasite (image, parasite);
+                  clay_parasite_free (parasite);
 
                 }
               else if (png_id == id_fcTL && (! idat_read || is_animated))
@@ -1563,14 +1563,14 @@ load_apng_image (GFile      *file,
                   region_width  = apng_frame.offset_x + apng_frame.width;
                   region_height = apng_frame.offset_y + apng_frame.height;
 
-                  if (region_width > (guint) gimp_image_get_width (image)  ||
-                      region_height > (guint) gimp_image_get_height (image))
+                  if (region_width > (guint) clay_image_get_width (image)  ||
+                      region_height > (guint) clay_image_get_height (image))
                     {
                       fclose (fp);
                       g_free (apng_frame.pixels);
                       g_free (prior_pixels);
 
-                      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+                      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                                    _("Invalid APNG: fcTL frame dimensions "
                                      "exceed IHDR allocation"));
 
@@ -1684,7 +1684,7 @@ load_apng_image (GFile      *file,
   fclose (fp);
 
   if (report_progress)
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 
   return TRUE;
 }
@@ -1703,11 +1703,11 @@ offsets_dialog (gint offset_x,
   gchar     *message;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_dialog_new (_("Apply PNG Offset"), PLUG_IN_ROLE,
+  dialog = clay_dialog_new (_("Apply PNG Offset"), PLUG_IN_ROLE,
                             NULL, 0,
-                            gimp_standard_help_func, LOAD_PROC,
+                            clay_standard_help_func, LOAD_PROC,
 
                             _("Ignore PNG offset"),         GTK_RESPONSE_NO,
                             _("Apply PNG offset to layer"), GTK_RESPONSE_YES,
@@ -1715,12 +1715,12 @@ offsets_dialog (gint offset_x,
                             NULL);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_YES);
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_YES,
                                            GTK_RESPONSE_NO,
                                            -1);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
@@ -1729,7 +1729,7 @@ offsets_dialog (gint offset_x,
                       hbox, FALSE, FALSE, 0);
   gtk_widget_set_visible (hbox, TRUE);
 
-  image = gtk_image_new_from_icon_name (GIMP_ICON_DIALOG_QUESTION,
+  image = gtk_image_new_from_icon_name (CLAY_ICON_DIALOG_QUESTION,
                                         GTK_ICON_SIZE_DIALOG);
   gtk_widget_set_valign (image, GTK_ALIGN_START);
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
@@ -1747,7 +1747,7 @@ offsets_dialog (gint offset_x,
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_YES);
+  run = (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_YES);
 
   gtk_widget_destroy (dialog);
 
@@ -1773,9 +1773,9 @@ static PngGlobals pngg;
 
 static gboolean
 export_image (GFile        *file,
-              GimpImage    *image,
-              GimpDrawable *drawable,
-              GimpImage    *orig_image,
+              ClayImage    *image,
+              ClayDrawable *drawable,
+              ClayImage    *orig_image,
               GObject      *config,
               gint         *bits_per_sample,
               gboolean      report_progress,
@@ -1786,14 +1786,14 @@ export_image (GFile        *file,
   gint              type;             /* Type of drawable/layer */
   gint              num_passes;       /* Number of interlace passes in file */
   gint              pass;             /* Current pass in file */
-  gint              tile_height;      /* Height of tile in GIMP */
+  gint              tile_height;      /* Height of tile in Clay */
   gint              width;            /* image width */
   gint              height;           /* image height */
   gint              begin;            /* Beginning tile row */
   gint              end;              /* Ending tile row */
   gint              num;              /* Number of rows to load */
   FILE             *fp;               /* File pointer */
-  GimpColorProfile *profile = NULL;   /* Color profile */
+  ClayColorProfile *profile = NULL;   /* Color profile */
   gchar           **parasites;        /* Safe-to-copy chunks */
   gboolean          out_linear;       /* Save linear RGB */
   GeglBuffer       *buffer;           /* GEGL buffer for layer */
@@ -1806,7 +1806,7 @@ export_image (GFile        *file,
   guchar          **pixels;           /* Pixel rows */
   guchar           *fixed;            /* Fixed-up pixel data */
   guchar           *pixel;            /* Pixel data */
-  gdouble           xres, yres;       /* GIMP resolution (dpi) */
+  gdouble           xres, yres;       /* Clay resolution (dpi) */
   png_time          mod_time;         /* Modification time (ie NOW) */
   GDateTime        *gmt;              /* GMT broken down */
   gint              color_type;       /* PNG color type */
@@ -1842,17 +1842,17 @@ export_image (GFile        *file,
                 "phys",                  &save_phys,
                 "time",                  &save_time,
                 "include-comment",       &save_comment,
-                "gimp-comment",          &comment,
+                "clay-comment",          &comment,
                 "save-transparent",      &save_transp_pixels,
                 "optimize-palette",      &optimize_palette,
                 "compression",           &compression_level,
                 "include-color-profile", &save_profile,
                 NULL);
 
-  export_format = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "format");
+  export_format = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "format");
 
   out_linear = FALSE;
-  space      = gimp_drawable_get_format (drawable);
+  space      = clay_drawable_get_format (drawable);
 
 #if defined(PNG_iCCP_SUPPORTED)
   /* If no profile is written: export as sRGB.
@@ -1864,7 +1864,7 @@ export_image (GFile        *file,
    */
   if (save_profile)
     {
-      profile = gimp_image_get_color_profile (orig_image);
+      profile = clay_image_get_color_profile (orig_image);
 
       if (profile                             ||
           export_format == PNG_FORMAT_AUTO    ||
@@ -1872,13 +1872,13 @@ export_image (GFile        *file,
           export_format == PNG_FORMAT_RGBA16  ||
           export_format == PNG_FORMAT_GRAY16  ||
           export_format == PNG_FORMAT_GRAYA16 ||
-          gimp_image_get_precision (image) == GIMP_PRECISION_U8_LINEAR     ||
-          gimp_image_get_precision (image) == GIMP_PRECISION_U8_NON_LINEAR ||
-          gimp_image_get_precision (image) == GIMP_PRECISION_U8_PERCEPTUAL)
+          clay_image_get_precision (image) == CLAY_PRECISION_U8_LINEAR     ||
+          clay_image_get_precision (image) == CLAY_PRECISION_U8_NON_LINEAR ||
+          clay_image_get_precision (image) == CLAY_PRECISION_U8_PERCEPTUAL)
         {
           if (! profile)
-            profile = gimp_image_get_effective_color_profile (orig_image);
-          out_linear = (gimp_color_profile_is_linear (profile));
+            profile = clay_image_get_effective_color_profile (orig_image);
+          out_linear = (clay_color_profile_is_linear (profile));
         }
       else
         {
@@ -1886,20 +1886,20 @@ export_image (GFile        *file,
            * with no manually assigned profile, make sure the result is
            * sRGB.
            */
-          profile = gimp_image_get_effective_color_profile (orig_image);
+          profile = clay_image_get_effective_color_profile (orig_image);
 
-          if (gimp_color_profile_is_linear (profile))
+          if (clay_color_profile_is_linear (profile))
             {
-              GimpColorProfile *saved_profile;
+              ClayColorProfile *saved_profile;
 
-              saved_profile = gimp_color_profile_new_srgb_trc_from_color_profile (profile);
+              saved_profile = clay_color_profile_new_srgb_trc_from_color_profile (profile);
               g_object_unref (profile);
               profile = saved_profile;
             }
         }
 
-      space = gimp_color_profile_get_space (profile,
-                                            GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+      space = clay_color_profile_get_space (profile,
+                                            CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                             error);
       if (error && *error)
         {
@@ -1912,7 +1912,7 @@ export_image (GFile        *file,
           g_printerr ("%s: error getting the profile space: %s",
                      G_STRFUNC, (*error)->message);
           g_clear_error (error);
-          space = gimp_drawable_get_format (drawable);
+          space = clay_drawable_get_format (drawable);
         }
     }
 #endif
@@ -1923,15 +1923,15 @@ export_image (GFile        *file,
    * profile.
    */
   bit_depth = 16;
-  switch (gimp_image_get_precision (image))
+  switch (clay_image_get_precision (image))
     {
-    case GIMP_PRECISION_U8_LINEAR:
+    case CLAY_PRECISION_U8_LINEAR:
       if (out_linear)
         bit_depth = 8;
       break;
 
-    case GIMP_PRECISION_U8_NON_LINEAR:
-    case GIMP_PRECISION_U8_PERCEPTUAL:
+    case CLAY_PRECISION_U8_NON_LINEAR:
+    case CLAY_PRECISION_U8_PERCEPTUAL:
       if (! out_linear)
         bit_depth = 8;
       break;
@@ -1948,7 +1948,7 @@ export_image (GFile        *file,
        */
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error creating PNG write struct while exporting '%s'."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return FALSE;
     }
 
@@ -1957,7 +1957,7 @@ export_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error while exporting '%s'. Could not create PNG header info structure."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return FALSE;
     }
 
@@ -1965,7 +1965,7 @@ export_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, 0,
                    _("Error while exporting '%s'. Could not export image."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       return FALSE;
     }
 
@@ -1982,8 +1982,8 @@ export_image (GFile        *file,
    */
 
   if (report_progress)
-    gimp_progress_init_printf (_("Exporting '%s'"),
-                               gimp_file_get_utf8_name (file));
+    clay_progress_init_printf (_("Exporting '%s'"),
+                               clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "wb");
 
@@ -1991,7 +1991,7 @@ export_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -2001,10 +2001,10 @@ export_image (GFile        *file,
    * Get the buffer for the current image...
    */
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
   width  = gegl_buffer_get_width (buffer);
   height = gegl_buffer_get_height (buffer);
-  type   = gimp_drawable_type (drawable);
+  type   = clay_drawable_type (drawable);
 
   /*
    * Initialise remap[]
@@ -2020,7 +2020,7 @@ export_image (GFile        *file,
 
     switch (type)
       {
-      case GIMP_RGB_IMAGE:
+      case CLAY_RGB_IMAGE:
         color_type = PNG_COLOR_TYPE_RGB;
         if (bit_depth == 8)
           {
@@ -2038,7 +2038,7 @@ export_image (GFile        *file,
           }
         break;
 
-      case GIMP_RGBA_IMAGE:
+      case CLAY_RGBA_IMAGE:
         color_type = PNG_COLOR_TYPE_RGB_ALPHA;
         if (bit_depth == 8)
           {
@@ -2056,7 +2056,7 @@ export_image (GFile        *file,
           }
         break;
 
-      case GIMP_GRAY_IMAGE:
+      case CLAY_GRAY_IMAGE:
         color_type = PNG_COLOR_TYPE_GRAY;
         if (bit_depth == 8)
           {
@@ -2074,7 +2074,7 @@ export_image (GFile        *file,
           }
         break;
 
-      case GIMP_GRAYA_IMAGE:
+      case CLAY_GRAYA_IMAGE:
         color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
         if (bit_depth == 8)
           {
@@ -2092,20 +2092,20 @@ export_image (GFile        *file,
           }
         break;
 
-      case GIMP_INDEXED_IMAGE:
+      case CLAY_INDEXED_IMAGE:
         color_type = PNG_COLOR_TYPE_PALETTE;
-        file_format = gimp_drawable_get_format (drawable);
+        file_format = clay_drawable_get_format (drawable);
         pngg.has_plte = TRUE;
-        pngg.palette = (png_colorp) gimp_palette_get_colormap (gimp_image_get_palette (image),
+        pngg.palette = (png_colorp) clay_palette_get_colormap (clay_image_get_palette (image),
                                                                babl_format ("R'G'B' u8"),
                                                                &pngg.num_palette, NULL);
         if (optimize_palette)
           bit_depth = get_bit_depth_for_palette (pngg.num_palette);
         break;
 
-      case GIMP_INDEXEDA_IMAGE:
+      case CLAY_INDEXEDA_IMAGE:
         color_type = PNG_COLOR_TYPE_PALETTE;
-        file_format = gimp_drawable_get_format (drawable);
+        file_format = clay_drawable_get_format (drawable);
         /* fix up transparency */
         if (optimize_palette)
           bit_depth = respin_cmap (pp, info, remap, image, drawable);
@@ -2222,7 +2222,7 @@ export_image (GFile        *file,
       png_color_16  background;       /* Background color */
 
       background.index = 0;
-      color = gimp_context_get_background ();
+      color = clay_context_get_background ();
       if (bit_depth < 16)
         {
           /* Per PNG spec 1.2: "(If the image bit depth is less than 16, the
@@ -2262,14 +2262,14 @@ export_image (GFile        *file,
 
   if (save_offs)
     {
-      gimp_drawable_get_offsets (drawable, &offx, &offy);
+      clay_drawable_get_offsets (drawable, &offx, &offy);
       if (offx != 0 || offy != 0)
         png_set_oFFs (pp, info, offx, offy, PNG_OFFSET_PIXEL);
     }
 
   if (save_phys)
     {
-      gimp_image_get_resolution (orig_image, &xres, &yres);
+      clay_image_get_resolution (orig_image, &xres, &yres);
       png_set_pHYs (pp, info, RINT (xres / 0.0254), RINT (yres / 0.0254),
                     PNG_RESOLUTION_METER);
     }
@@ -2292,21 +2292,21 @@ export_image (GFile        *file,
 #if defined(PNG_iCCP_SUPPORTED)
   if (save_profile)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
       gchar        *profile_name = NULL;
       const guint8 *icc_data;
       gsize         icc_length;
 
-      icc_data = gimp_color_profile_get_icc_profile (profile, &icc_length);
+      icc_data = clay_color_profile_get_icc_profile (profile, &icc_length);
 
-      parasite = gimp_image_get_parasite (orig_image,
+      parasite = clay_image_get_parasite (orig_image,
                                           "icc-profile-name");
       if (parasite)
         {
           gchar   *parasite_data;
           guint32  parasite_size;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           profile_name = g_convert (parasite_data, parasite_size,
                                     "UTF-8", "ISO-8859-1", NULL, NULL, NULL);
         }
@@ -2328,21 +2328,21 @@ export_image (GFile        *file,
       /* Be more specific by writing into the file that the image is in
        * sRGB color space.
        */
-      GimpColorConfig *config = gimp_get_color_configuration ();
+      ClayColorConfig *config = clay_get_color_configuration ();
       int              srgb_intent;
 
-      switch (gimp_color_config_get_display_intent (config))
+      switch (clay_color_config_get_display_intent (config))
         {
-        case GIMP_COLOR_RENDERING_INTENT_PERCEPTUAL:
+        case CLAY_COLOR_RENDERING_INTENT_PERCEPTUAL:
           srgb_intent = PNG_sRGB_INTENT_PERCEPTUAL;
           break;
-        case GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC:
+        case CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC:
           srgb_intent = PNG_sRGB_INTENT_RELATIVE;
           break;
-        case GIMP_COLOR_RENDERING_INTENT_SATURATION:
+        case CLAY_COLOR_RENDERING_INTENT_SATURATION:
           srgb_intent = PNG_sRGB_INTENT_SATURATION;
           break;
-        case GIMP_COLOR_RENDERING_INTENT_ABSOLUTE_COLORIMETRIC:
+        case CLAY_COLOR_RENDERING_INTENT_ABSOLUTE_COLORIMETRIC:
           srgb_intent = PNG_sRGB_INTENT_ABSOLUTE;
           break;
         }
@@ -2445,7 +2445,7 @@ export_image (GFile        *file,
     png_set_swap (pp);
 
   /* Write any safe-to-copy chunks saved from import */
-  parasites = gimp_image_get_parasite_list (image);
+  parasites = clay_image_get_parasite_list (image);
 
   if (parasites)
     {
@@ -2456,9 +2456,9 @@ export_image (GFile        *file,
         {
           if (strncmp (parasites[i], "png", 3) == 0)
             {
-              GimpParasite *parasite;
+              ClayParasite *parasite;
 
-              parasite = gimp_image_get_parasite (image, parasites[i]);
+              parasite = clay_image_get_parasite (image, parasites[i]);
 
               if (parasite)
                 {
@@ -2478,11 +2478,11 @@ export_image (GFile        *file,
                       for (gint j = 0; j < 4; j++)
                         name[j] = chunk_name[j];
 
-                      data = (const guint8 *) gimp_parasite_get_data (parasite, &len);
+                      data = (const guint8 *) clay_parasite_get_data (parasite, &len);
 
                       png_write_chunk (pp, name, data, len);
                     }
-                  gimp_parasite_free (parasite);
+                  clay_parasite_free (parasite);
                 }
             }
         }
@@ -2510,7 +2510,7 @@ export_image (GFile        *file,
    * Allocate memory for "tile_height" rows and export the image...
    */
 
-  tile_height = gimp_tile_height ();
+  tile_height = clay_tile_height ();
   pixel = g_new (guchar, tile_height * width * bpp);
   pixels = g_new (guchar *, tile_height);
 
@@ -2606,14 +2606,14 @@ export_image (GFile        *file,
           png_write_rows (pp, pixels, num);
 
           if (report_progress)
-            gimp_progress_update (((double) pass + (double) end /
+            clay_progress_update (((double) pass + (double) end /
                                    (double) height) /
                                   (double) num_passes);
         }
     }
 
   if (report_progress)
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 
   png_write_end (pp, info);
   png_destroy_write_struct (&pp, &info);
@@ -2741,7 +2741,7 @@ find_unused_ia_color (GeglBuffer *buffer,
 }
 
 static void
-add_alpha_to_indexed (GimpLayer *layer,
+add_alpha_to_indexed (ClayLayer *layer,
                       guchar    *alpha)
 {
   GeglBufferIterator *iter;
@@ -2749,8 +2749,8 @@ add_alpha_to_indexed (GimpLayer *layer,
   const Babl         *format;
   gint                n_components;
 
-  gimp_layer_add_alpha (layer);
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  clay_layer_add_alpha (layer);
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
   format = gegl_buffer_get_format (buffer);
 
   iter = gegl_buffer_iterator_new (buffer, NULL, 0, format,
@@ -2777,8 +2777,8 @@ static int
 respin_cmap (png_structp   pp,
              png_infop     info,
              guchar       *remap,
-             GimpImage    *image,
-             GimpDrawable *drawable)
+             ClayImage    *image,
+             ClayDrawable *drawable)
 {
   static guchar trans[] = { 0 };
   GeglBuffer   *buffer;
@@ -2786,8 +2786,8 @@ respin_cmap (png_structp   pp,
   gint          colors;
   guchar       *before;
 
-  before = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
-  buffer = gimp_drawable_get_buffer (drawable);
+  before = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+  buffer = clay_drawable_get_buffer (drawable);
 
   /* Make sure there is something in the colormap.
    */
@@ -2882,13 +2882,13 @@ read_unknown_chunk (png_structp        png_ptr,
   if (g_ascii_islower (chunk->name[3]) ||
       strcmp ((gchar *) chunk->name, "fcTL") == 0)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
       gchar         pname[255];
 
       g_snprintf (pname, sizeof (pname), "png/%s", chunk->name);
 
-      if ((parasite = gimp_parasite_new (pname,
-                                         GIMP_PARASITE_PERSISTENT,
+      if ((parasite = clay_parasite_new (pname,
+                                         CLAY_PARASITE_PERSISTENT,
                                          chunk->size, chunk->data)))
         safe_to_copy_chunks = g_slist_prepend (safe_to_copy_chunks, parasite);
     }
@@ -3038,19 +3038,19 @@ read_apng_chunk (FILE      *f,
 }
 
 static void
-create_apng_layer (GimpImage     *image,
+create_apng_layer (ClayImage     *image,
                    APNGFrame     *apng_frame,
                    guchar        *prior_pixels,
-                   GimpImageType  image_type,
+                   ClayImageType  image_type,
                    guint          frame_no,
                    guchar        *alpha,
                    gboolean       is_indexed_alpha,
                    gint           dispose_op,
                    gint           blend_op)
 {
-  GimpLayer    *layer;
+  ClayLayer    *layer;
   GeglBuffer   *buffer;
-  GimpParasite *parasite;
+  ClayParasite *parasite;
   guint         milliseconds = 0;
   gchar        *layer_name;
   gchar        *str;
@@ -3065,15 +3065,15 @@ create_apng_layer (GimpImage     *image,
   layer_name = g_strdup_printf (_("Frame %d (%d%s)"),
                                 frame_no, milliseconds, "ms");
 
-  layer = gimp_layer_new (image, layer_name,
+  layer = clay_layer_new (image, layer_name,
                           apng_frame->width, apng_frame->height,
                           image_type, 100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_layer_set_offsets (layer, apng_frame->offset_x, apng_frame->offset_y);
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_layer_set_offsets (layer, apng_frame->offset_x, apng_frame->offset_y);
+  clay_image_insert_layer (image, layer, NULL, 0);
   g_free (layer_name);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   gegl_buffer_set (buffer,
                    GEGL_RECTANGLE (0, 0, apng_frame->width, apng_frame->height),
@@ -3089,18 +3089,18 @@ create_apng_layer (GimpImage     *image,
                          apng_frame->delay_den,
                          dispose_op,
                          blend_op);
-  parasite = gimp_parasite_new ("apng-frame-data",
-                                GIMP_PARASITE_PERSISTENT,
+  parasite = clay_parasite_new ("apng-frame-data",
+                                CLAY_PARASITE_PERSISTENT,
                                 strlen (str) + 1,
                                 (gpointer) str);
   g_free (str);
-  gimp_item_attach_parasite (GIMP_ITEM (layer), parasite);
-  gimp_parasite_free (parasite);
+  clay_item_attach_parasite (CLAY_ITEM (layer), parasite);
+  clay_parasite_free (parasite);
 }
 
 static gboolean
-export_dialog (GimpImage     *image,
-               GimpProcedure *procedure,
+export_dialog (ClayImage     *image,
+               ClayProcedure *procedure,
                GObject       *config,
                gboolean       alpha)
 {
@@ -3108,34 +3108,34 @@ export_dialog (GimpImage     *image,
   gboolean   run;
   gboolean   indexed;
 
-  indexed = (gimp_image_get_base_type (image) == GIMP_INDEXED);
+  indexed = (clay_image_get_base_type (image) == CLAY_INDEXED);
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "compression", GIMP_TYPE_SPIN_SCALE);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "compression", CLAY_TYPE_SPIN_SCALE);
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "save-transparent",
                                        alpha, NULL, NULL, FALSE);
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "optimize-palette",
                                        indexed, NULL, NULL, FALSE);
 
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog), "bkgd");
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog), "offs");
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog), "phys");
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog), "time");
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog), "bkgd");
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog), "offs");
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog), "phys");
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog), "time");
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "format", "compression",
                               "interlaced", "save-transparent",
                               "optimize-palette",
                               NULL);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

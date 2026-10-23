@@ -18,20 +18,20 @@
 #pragma once
 
 
-typedef void (* GimpAddMaskCallback) (GtkWidget       *dialog,
+typedef void (* ClayAddMaskCallback) (GtkWidget       *dialog,
                                       GList           *layers,
-                                      GimpAddMaskType  add_mask_type,
-                                      GimpChannel     *channel,
+                                      ClayAddMaskType  add_mask_type,
+                                      ClayChannel     *channel,
                                       gboolean         invert,
                                       gboolean         edit_mask,
                                       gpointer         user_data);
 
 
 GtkWidget * layer_add_mask_dialog_new (GList               *layers,
-                                       GimpContext         *context,
+                                       ClayContext         *context,
                                        GtkWidget           *parent,
-                                       GimpAddMaskType      add_mask_type,
+                                       ClayAddMaskType      add_mask_type,
                                        gboolean             invert,
                                        gboolean             edit_mask,
-                                       GimpAddMaskCallback  callback,
+                                       ClayAddMaskCallback  callback,
                                        gpointer             user_data);

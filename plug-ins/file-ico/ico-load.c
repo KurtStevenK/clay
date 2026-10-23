@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,8 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <png.h>
 
@@ -35,7 +35,7 @@
 #include "ico.h"
 #include "ico-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define A_VAL(p) ((guchar *)(p))[3]
@@ -43,10 +43,10 @@
 #define G_VAL(p) ((guchar *)(p))[1]
 #define B_VAL(p) ((guchar *)(p))[0]
 
-#define A_VAL_GIMP(p) ((guchar *)(p))[3]
-#define R_VAL_GIMP(p) ((guchar *)(p))[0]
-#define G_VAL_GIMP(p) ((guchar *)(p))[1]
-#define B_VAL_GIMP(p) ((guchar *)(p))[2]
+#define A_VAL_CLAY(p) ((guchar *)(p))[3]
+#define R_VAL_CLAY(p) ((guchar *)(p))[0]
+#define G_VAL_CLAY(p) ((guchar *)(p))[1]
+#define B_VAL_CLAY(p) ((guchar *)(p))[2]
 
 
 static gint       ico_read_int8  (FILE        *fp,
@@ -584,14 +584,14 @@ ico_read_icon (FILE    *fp,
                                                            w, y * w + x)];
             guint32 *dest = dest_vec + (h - 1 - y) * w + x;
 
-            R_VAL_GIMP (dest) = R_VAL (&color);
-            G_VAL_GIMP (dest) = G_VAL (&color);
-            B_VAL_GIMP (dest) = B_VAL (&color);
+            R_VAL_CLAY (dest) = R_VAL (&color);
+            G_VAL_CLAY (dest) = G_VAL (&color);
+            B_VAL_CLAY (dest) = B_VAL (&color);
 
             if (ico_get_bit_from_data (and_map, w, y * w + x))
-              A_VAL_GIMP (dest) = 0;
+              A_VAL_CLAY (dest) = 0;
             else
-              A_VAL_GIMP (dest) = 255;
+              A_VAL_CLAY (dest) = 255;
           }
       break;
 
@@ -603,14 +603,14 @@ ico_read_icon (FILE    *fp,
                                                               w, y * w + x)];
             guint32 *dest = dest_vec + (h - 1 - y) * w + x;
 
-            R_VAL_GIMP (dest) = R_VAL (&color);
-            G_VAL_GIMP (dest) = G_VAL (&color);
-            B_VAL_GIMP (dest) = B_VAL (&color);
+            R_VAL_CLAY (dest) = R_VAL (&color);
+            G_VAL_CLAY (dest) = G_VAL (&color);
+            B_VAL_CLAY (dest) = B_VAL (&color);
 
             if (ico_get_bit_from_data (and_map, w, y * w + x))
-              A_VAL_GIMP (dest) = 0;
+              A_VAL_CLAY (dest) = 0;
             else
-              A_VAL_GIMP (dest) = 255;
+              A_VAL_CLAY (dest) = 255;
           }
       break;
 
@@ -622,14 +622,14 @@ ico_read_icon (FILE    *fp,
                                                             w, y * w + x)];
             guint32 *dest = dest_vec + (h - 1 - y) * w + x;
 
-            R_VAL_GIMP (dest) = R_VAL (&color);
-            G_VAL_GIMP (dest) = G_VAL (&color);
-            B_VAL_GIMP (dest) = B_VAL (&color);
+            R_VAL_CLAY (dest) = R_VAL (&color);
+            G_VAL_CLAY (dest) = G_VAL (&color);
+            B_VAL_CLAY (dest) = B_VAL (&color);
 
             if (ico_get_bit_from_data (and_map, w, y * w + x))
-              A_VAL_GIMP (dest) = 0;
+              A_VAL_CLAY (dest) = 0;
             else
-              A_VAL_GIMP (dest) = 255;
+              A_VAL_CLAY (dest) = 255;
           }
       break;
 
@@ -647,20 +647,20 @@ ico_read_icon (FILE    *fp,
               {
                 guint32 *dest = dest_vec + (h - 1 - y) * w + x;
 
-                B_VAL_GIMP (dest) = row[0];
-                G_VAL_GIMP (dest) = row[1];
-                R_VAL_GIMP (dest) = row[2];
+                B_VAL_CLAY (dest) = row[0];
+                G_VAL_CLAY (dest) = row[1];
+                R_VAL_CLAY (dest) = row[2];
 
                 if (use_and_mask)
                   {
                     if (ico_get_bit_from_data (and_map, w, y * w + x))
-                      A_VAL_GIMP (dest) = 0;
+                      A_VAL_CLAY (dest) = 0;
                     else
-                      A_VAL_GIMP (dest) = 255;
+                      A_VAL_CLAY (dest) = 255;
                   }
                 else
                   {
-                    A_VAL_GIMP (dest) = row[3];
+                    A_VAL_CLAY (dest) = row[3];
                   }
 
                 row += bytespp;
@@ -678,9 +678,9 @@ ico_read_icon (FILE    *fp,
   return TRUE;
 }
 
-static GimpLayer *
+static ClayLayer *
 ico_load_layer (FILE        *fp,
-                GimpImage   *image,
+                ClayImage   *image,
                 gint32       icon_num,
                 guchar      *buf,
                 gsize        maxsize,
@@ -689,7 +689,7 @@ ico_load_layer (FILE        *fp,
                 IcoLoadInfo *info)
 {
   gint        width, height;
-  GimpLayer  *layer;
+  ClayLayer  *layer;
   guint32     first_bytes;
   GeglBuffer *buffer;
 
@@ -719,12 +719,12 @@ ico_load_layer (FILE        *fp,
     }
 
   /* read successfully. add to image */
-  layer = gimp_layer_new (image, layer_prefix, width, height,
-                          GIMP_RGBA_IMAGE, 100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, icon_num);
+  layer = clay_layer_new (image, layer_prefix, width, height,
+                          CLAY_RGBA_IMAGE, 100,
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, icon_num);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, width, height), 0,
                    NULL, buf, GEGL_AUTO_ROWSTRIDE);
@@ -735,7 +735,7 @@ ico_load_layer (FILE        *fp,
 }
 
 
-GimpImage *
+ClayImage *
 ico_load_image (GFile        *file,
                 gint32       *file_offset,
                 gint          frame_num,
@@ -749,15 +749,15 @@ ico_load_image (GFile        *file,
   gsize          max_height;
   gint           i;
   gint           j;
-  GimpImage     *image;
+  ClayImage     *image;
   guchar        *buf;
   guint          icon_count;
   gsize          maxsize;
   gchar         *str;
 
   if (! file_offset)
-    gimp_progress_init_printf (_("Opening '%s'"),
-                               gimp_file_get_utf8_name (file));
+    clay_progress_init_printf (_("Opening '%s'"),
+                               clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -765,7 +765,7 @@ ico_load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -798,8 +798,8 @@ ico_load_image (GFile        *file,
         max_height = info[i].height;
     }
   if (max_width <= 0 || max_height <= 0 ||
-      max_width > GIMP_MAX_IMAGE_SIZE   ||
-      max_height > GIMP_MAX_IMAGE_SIZE)
+      max_width > CLAY_MAX_IMAGE_SIZE   ||
+      max_height > CLAY_MAX_IMAGE_SIZE)
     {
       g_free (info);
       fclose (fp);
@@ -807,11 +807,11 @@ ico_load_image (GFile        *file,
     }
   D(("image size: %ix%i\n", max_width, max_height));
 
-  image = gimp_image_new (max_width, max_height, GIMP_RGB);
+  image = clay_image_new (max_width, max_height, CLAY_RGB);
 
   if (max_width <= 0 || max_height <= 0 ||
-      max_width > GIMP_MAX_IMAGE_SIZE   ||
-      max_height > GIMP_MAX_IMAGE_SIZE)
+      max_width > CLAY_MAX_IMAGE_SIZE   ||
+      max_height > CLAY_MAX_IMAGE_SIZE)
     {
       g_free (info);
       fclose (fp);
@@ -839,7 +839,7 @@ ico_load_image (GFile        *file,
 
   for (j = 0; j < icon_count; j++)
     {
-      GimpLayer *layer;
+      ClayLayer *layer;
       gchar     *layer_name;
       gchar     *icon_metadata;
 
@@ -875,7 +875,7 @@ ico_load_image (GFile        *file,
         }
 
       if (layer)
-        gimp_item_set_name (GIMP_ITEM (layer), layer_name);
+        clay_item_set_name (CLAY_ITEM (layer), layer_name);
 
       g_free (icon_metadata);
       g_free (layer_name);
@@ -883,19 +883,19 @@ ico_load_image (GFile        *file,
       /* Save CUR hot spot information */
       if (header.resource_type == 2)
         {
-          GimpParasite *parasite;
+          ClayParasite *parasite;
 
           str = g_strdup_printf ("%d %d", info[i].planes, info[i].bpp);
-          parasite = gimp_parasite_new ("cur-hot-spot",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("cur-hot-spot",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (str) + 1, (gpointer) str);
           g_free (str);
-          gimp_item_attach_parasite (GIMP_ITEM (layer), parasite);
-          gimp_parasite_free (parasite);
+          clay_item_attach_parasite (CLAY_ITEM (layer), parasite);
+          clay_parasite_free (parasite);
         }
 
       if (! file_offset)
-        gimp_progress_update (j / (gfloat) icon_count);
+        clay_progress_update (j / (gfloat) icon_count);
     }
 
   g_free (order);
@@ -909,7 +909,7 @@ ico_load_image (GFile        *file,
 
   /* Don't update progress here if .ani file */
   if (! file_offset)
-    gimp_progress_update (1.0);
+    clay_progress_update (1.0);
 
   return image;
 }
@@ -952,7 +952,7 @@ ico_best_entry (IcoLoadInfo *info,
   return best_idx;
 }
 
-GimpImage *
+ClayImage *
 ico_load_thumbnail_image (GFile   *file,
                           gint    *width,
                           gint    *height,
@@ -962,7 +962,7 @@ ico_load_thumbnail_image (GFile   *file,
   FILE          *fp;
   IcoLoadInfo   *info;
   IcoFileHeader  header;
-  GimpImage     *image;
+  ClayImage     *image;
   gint           max_width;
   gint           max_height;
   gint           match;
@@ -975,7 +975,7 @@ ico_load_thumbnail_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -991,7 +991,7 @@ ico_load_thumbnail_image (GFile   *file,
     }
 
   D(("*** %s: Microsoft icon file, containing %i icon(s)\n",
-     gimp_file_get_utf8_name (file), icon_count));
+     clay_file_get_utf8_name (file), icon_count));
 
   info = ico_read_info (fp, icon_count, file_offset, error);
   if (! info)
@@ -1019,7 +1019,7 @@ ico_load_thumbnail_image (GFile   *file,
 
   match = ico_best_entry (info, icon_count, *width, *height, 32);
 
-  image = gimp_image_new (info[match].width, info[match].height, GIMP_RGB);
+  image = clay_image_new (info[match].width, info[match].height, CLAY_RGB);
   buf   = g_new (guchar, info[match].width * info[match].height * 4);
   ico_load_layer (fp, image, match, buf,
                   info[match].width * info[match].height * 4,
@@ -1031,7 +1031,7 @@ ico_load_thumbnail_image (GFile   *file,
 
   D(("*** thumbnail successfully loaded.\n\n"));
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_free (info);
   fclose (fp);

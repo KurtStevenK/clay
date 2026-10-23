@@ -27,164 +27,164 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpparamspecs.h"
-#include "plug-in/gimpplugin.h"
-#include "plug-in/gimppluginmanager.h"
+#include "core/clay.h"
+#include "core/clayparamspecs.h"
+#include "plug-in/clayplugin.h"
+#include "plug-in/claypluginmanager.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-message_invoker (GimpProcedure         *procedure,
-                 Gimp                  *gimp,
-                 GimpContext           *context,
-                 GimpProgress          *progress,
-                 const GimpValueArray  *args,
+static ClayValueArray *
+message_invoker (ClayProcedure         *procedure,
+                 Clay                  *clay,
+                 ClayContext           *context,
+                 ClayProgress          *progress,
+                 const ClayValueArray  *args,
                  GError               **error)
 {
   gboolean success = TRUE;
   const gchar *message;
 
-  message = g_value_get_string (gimp_value_array_index (args, 0));
+  message = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
       const gchar *domain = NULL;
 
-      if (gimp->plug_in_manager->current_plug_in)
-        domain = gimp_plug_in_get_undo_desc (gimp->plug_in_manager->current_plug_in);
-      gimp_show_message (gimp, G_OBJECT (progress), GIMP_MESSAGE_WARNING,
+      if (clay->plug_in_manager->current_plug_in)
+        domain = clay_plug_in_get_undo_desc (clay->plug_in_manager->current_plug_in);
+      clay_show_message (clay, G_OBJECT (progress), CLAY_MESSAGE_WARNING,
                          domain, message);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-message_get_handler_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+message_get_handler_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint handler = 0;
 
-  handler = gimp->message_handler;
+  handler = clay->message_handler;
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), handler);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), handler);
 
   return return_vals;
 }
 
-static GimpValueArray *
-message_set_handler_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+message_set_handler_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
   gint handler;
 
-  handler = g_value_get_enum (gimp_value_array_index (args, 0));
+  handler = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp->message_handler = handler;
+      clay->message_handler = handler;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_message_procs (GimpPDB *pdb)
+register_message_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-message
+   * clay-message
    */
-  procedure = gimp_procedure_new (message_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-message");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (message_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-message");
+  clay_procedure_set_static_help (procedure,
                                   "Displays a dialog box with a message.",
                                   "Displays a dialog box with a message. Useful for status or error reporting. The message must be in UTF-8 encoding.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Manish Singh",
                                          "Manish Singh",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("message",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("message",
                                                        "message",
                                                        "Message to display in the dialog",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-message-get-handler
+   * clay-message-get-handler
    */
-  procedure = gimp_procedure_new (message_get_handler_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-message-get-handler");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (message_get_handler_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-message-get-handler");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the current state of where warning messages are displayed.",
-                                  "This procedure returns the way g_message warnings are displayed. They can be shown in a dialog box or printed on the console where gimp was started.",
+                                  "This procedure returns the way g_message warnings are displayed. They can be shown in a dialog box or printed on the console where clay was started.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Manish Singh",
                                          "Manish Singh",
                                          "1998");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("handler",
                                                       "handler",
                                                       "The current handler type",
-                                                      GIMP_TYPE_MESSAGE_HANDLER_TYPE,
-                                                      GIMP_MESSAGE_BOX,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_MESSAGE_HANDLER_TYPE,
+                                                      CLAY_MESSAGE_BOX,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-message-set-handler
+   * clay-message-set-handler
    */
-  procedure = gimp_procedure_new (message_set_handler_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-message-set-handler");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (message_set_handler_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-message-set-handler");
+  clay_procedure_set_static_help (procedure,
                                   "Controls where warning messages are displayed.",
-                                  "This procedure controls how g_message warnings are displayed. They can be shown in a dialog box or printed on the console where gimp was started.",
+                                  "This procedure controls how g_message warnings are displayed. They can be shown in a dialog box or printed on the console where clay was started.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Manish Singh",
                                          "Manish Singh",
                                          "1998");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("handler",
                                                   "handler",
                                                   "The new handler type",
-                                                  GIMP_TYPE_MESSAGE_HANDLER_TYPE,
-                                                  GIMP_MESSAGE_BOX,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_MESSAGE_HANDLER_TYPE,
+                                                  CLAY_MESSAGE_BOX,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

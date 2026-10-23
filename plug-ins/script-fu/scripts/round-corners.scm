@@ -50,44 +50,44 @@
          (shadow-blur (abs shadow-blur))
          (radius (abs radius))
          (diam (* 2 radius))
-         (width (car (gimp-image-get-width img)))
-         (height (car (gimp-image-get-height img)))
+         (width (car (clay-image-get-width img)))
+         (height (car (clay-image-get-height img)))
          (image (cond ((= work-on-copy TRUE)
-                       (car (gimp-image-duplicate img)))
+                       (car (clay-image-duplicate img)))
                       ((= work-on-copy FALSE)
                        img)))
          ; active drawable is not necessarily the active layer
-         (pic-layer (vector-ref (car (gimp-image-get-selected-layers image)) 0))
-         (type (car (gimp-drawable-type-with-alpha pic-layer)))
-         (background-color (car (gimp-context-get-background)))
+         (pic-layer (vector-ref (car (clay-image-get-selected-layers image)) 0))
+         (type (car (clay-drawable-type-with-alpha pic-layer)))
+         (background-color (car (clay-context-get-background)))
         )
 
-  (gimp-context-push)
-  (gimp-context-set-defaults)
-  (gimp-context-set-background background-color)
+  (clay-context-push)
+  (clay-context-set-defaults)
+  (clay-context-set-background background-color)
 
   (if (= work-on-copy TRUE)
-      (gimp-image-undo-disable image)
-      (gimp-image-undo-group-start image)
+      (clay-image-undo-disable image)
+      (clay-image-undo-group-start image)
   )
 
   ; add an alpha channel to the image
-  (gimp-layer-add-alpha pic-layer)
+  (clay-layer-add-alpha pic-layer)
 
   ; round the edges
-  (gimp-selection-none image)
-  (gimp-image-select-rectangle image CHANNEL-OP-ADD 0 0 radius radius)
-  (gimp-image-select-ellipse image CHANNEL-OP-SUBTRACT  0 0 diam diam)
-  (gimp-image-select-rectangle image CHANNEL-OP-ADD (- width radius) 0 radius radius)
-  (gimp-image-select-ellipse image CHANNEL-OP-SUBTRACT (- width diam) 0 diam diam)
-  (gimp-image-select-rectangle image CHANNEL-OP-ADD 0 (- height radius) radius radius)
-  (gimp-image-select-ellipse image CHANNEL-OP-SUBTRACT 0 (- height diam) diam diam)
-  (gimp-image-select-rectangle image CHANNEL-OP-ADD (- width radius) (- height radius)
+  (clay-selection-none image)
+  (clay-image-select-rectangle image CHANNEL-OP-ADD 0 0 radius radius)
+  (clay-image-select-ellipse image CHANNEL-OP-SUBTRACT  0 0 diam diam)
+  (clay-image-select-rectangle image CHANNEL-OP-ADD (- width radius) 0 radius radius)
+  (clay-image-select-ellipse image CHANNEL-OP-SUBTRACT (- width diam) 0 diam diam)
+  (clay-image-select-rectangle image CHANNEL-OP-ADD 0 (- height radius) radius radius)
+  (clay-image-select-ellipse image CHANNEL-OP-SUBTRACT 0 (- height diam) diam diam)
+  (clay-image-select-rectangle image CHANNEL-OP-ADD (- width radius) (- height radius)
                     radius radius)
-  (gimp-image-select-ellipse image CHANNEL-OP-SUBTRACT (- width diam) (- height diam)
+  (clay-image-select-ellipse image CHANNEL-OP-SUBTRACT (- width diam) (- height diam)
                        diam diam)
-  (gimp-drawable-edit-clear pic-layer)
-  (gimp-selection-none image)
+  (clay-drawable-edit-clear pic-layer)
+  (clay-selection-none image)
 
   ; optionally add a shadow
   (if (= shadow-toggle TRUE)
@@ -100,34 +100,34 @@
                                '(0 0 0)
                                80
                                TRUE)
-        (set! width (car (gimp-image-get-width image)))
-        (set! height (car (gimp-image-get-height image)))))
+        (set! width (car (clay-image-get-width image)))
+        (set! height (car (clay-image-get-height image)))))
 
   ; optionally add a background
   (if (= background-toggle TRUE)
-      (let* ((bg-layer (car (gimp-layer-new image
+      (let* ((bg-layer (car (clay-layer-new image
                                             "Background"
                                             width
                                             height
                                             type
                                             100
                                             LAYER-MODE-NORMAL))))
-        (gimp-drawable-fill bg-layer FILL-BACKGROUND)
-        (gimp-image-insert-layer image bg-layer 0 -1)
-        (gimp-image-raise-item image pic-layer)
+        (clay-drawable-fill bg-layer FILL-BACKGROUND)
+        (clay-image-insert-layer image bg-layer 0 -1)
+        (clay-image-raise-item image pic-layer)
         (if (= shadow-toggle TRUE)
-            (gimp-image-lower-item image bg-layer))))
+            (clay-image-lower-item image bg-layer))))
 
 ; clean up after the script
   (if (= work-on-copy TRUE)
-      (gimp-image-undo-enable image)
-      (gimp-image-undo-group-end image)
+      (clay-image-undo-enable image)
+      (clay-image-undo-group-end image)
   )
 
   (if (= work-on-copy TRUE)
-      (gimp-display-new image))
-  (gimp-context-pop)
-  (gimp-displays-flush))
+      (clay-display-new image))
+  (clay-context-pop)
+  (clay-displays-flush))
 )
 
 (script-fu-register-filter "script-fu-round-corners"

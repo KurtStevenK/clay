@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GIMP PSD Plug-in
+ * Clay PSD Plug-in
  * Copyright 2007 by John Marshall
  *
  * This program is free software: you can redistribute it and/or modify
@@ -131,13 +131,13 @@
 
 #include <glib/gstdio.h>
 #include <json-glib/json-glib.h>
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "psd.h"
 #include "psd-util.h"
 #include "psd-layer-res-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /*  Local function prototypes  */
 static gint       load_resource_unknown (const PSDlayerres     *res_a,
@@ -648,14 +648,14 @@ load_resource_ladj (const PSDlayerres  *res_a,
           if (count_bits & (1 << i))
             count++;
         }
-      /* TODO: Currently GIMP only supports 4 curves channels,
+      /* TODO: Currently Clay only supports 4 curves channels,
        * Value/RGB, R, G, and B. PS supports 17. */
       count = MIN (4, count);
 
       lyr_a->adjustment_layer->curve_count = count;
       for (gint i = 0; i < count; i++)
         {
-          lyr_a->adjustment_layer->curve[i] = gimp_curve_new ();
+          lyr_a->adjustment_layer->curve[i] = clay_curve_new ();
 
           if (! psd_read_uint16 (input, &curve_count, res_a->ibm_pc_format,
                                 error))
@@ -664,8 +664,8 @@ load_resource_ladj (const PSDlayerres  *res_a,
               return -1;
             }
 
-          gimp_curve_set_curve_type (lyr_a->adjustment_layer->curve[i],
-                                     GIMP_CURVE_SMOOTH);
+          clay_curve_set_curve_type (lyr_a->adjustment_layer->curve[i],
+                                     CLAY_CURVE_SMOOTH);
 
           for (gint j = 0; j < curve_count; j++)
             {
@@ -675,7 +675,7 @@ load_resource_ladj (const PSDlayerres  *res_a,
                   psd_set_error (error);
                   return -1;
                 }
-              gimp_curve_add_point (lyr_a->adjustment_layer->curve[i],
+              clay_curve_add_point (lyr_a->adjustment_layer->curve[i],
                                     input_c / 255.0f, output_c / 255.0f);
             }
         }
@@ -806,7 +806,7 @@ load_resource_ladj (const PSDlayerres  *res_a,
         }
       else
         {
-          /* GIMP's Colorize hue & saturation ranges from 0.0 to 1.0, so we
+          /* Clay's Colorize hue & saturation ranges from 0.0 to 1.0, so we
            * need to offset the imported values from PS */
           lyr_a->adjustment_layer->colorization[0] /= 180.0;
           lyr_a->adjustment_layer->colorization[1] /= 100.0;

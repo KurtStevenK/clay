@@ -26,15 +26,15 @@
 #include <gexiv2/gexiv2.h>
 #include <gegl.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "sanity.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  early-stage tests  */
-static gchar * sanity_check_gimp              (void);
+static gchar * sanity_check_clay              (void);
 static gchar * sanity_check_glib              (void);
 static gchar * sanity_check_cairo             (void);
 static gchar * sanity_check_pango             (void);
@@ -60,7 +60,7 @@ sanity_check_early (void)
   gchar *abort_message = NULL;
 
   if (! abort_message)
-    abort_message = sanity_check_gimp ();
+    abort_message = sanity_check_clay ();
 
   if (! abort_message)
     abort_message = sanity_check_glib ();
@@ -148,20 +148,20 @@ sanity_check_version (guint major_version, guint required_major,
 }
 
 static gchar *
-sanity_check_gimp (void)
+sanity_check_clay (void)
 {
-  if (GIMP_MAJOR_VERSION != gimp_major_version ||
-      GIMP_MINOR_VERSION != gimp_minor_version ||
-      GIMP_MICRO_VERSION != gimp_micro_version)
+  if (CLAY_MAJOR_VERSION != clay_major_version ||
+      CLAY_MINOR_VERSION != clay_minor_version ||
+      CLAY_MICRO_VERSION != clay_micro_version)
     {
       return g_strdup_printf
-        ("Libgimp version mismatch!\n\n"
-         "The Clay binary cannot run with a libgimp version\n"
+        ("Libclay version mismatch!\n\n"
+         "The Clay binary cannot run with a libclay version\n"
          "other than its own. This is Clay %d.%d.%d, but the\n"
-         "libgimp version is %d.%d.%d.\n\n"
+         "libclay version is %d.%d.%d.\n\n"
          "Maybe you have Clay versions in both /usr and /usr/local ?",
-         GIMP_MAJOR_VERSION, GIMP_MINOR_VERSION, GIMP_MICRO_VERSION,
-         gimp_major_version, gimp_minor_version, gimp_micro_version);
+         CLAY_MAJOR_VERSION, CLAY_MINOR_VERSION, CLAY_MICRO_VERSION,
+         clay_major_version, clay_minor_version, clay_micro_version);
     }
 
   return NULL;
@@ -556,7 +556,7 @@ sanity_check_filename_encoding (void)
 
   g_free (result);
 
-  result = g_filename_to_utf8 (gimp_directory (), -1, NULL, NULL, &error);
+  result = g_filename_to_utf8 (clay_directory (), -1, NULL, NULL, &error);
 
   if (! result)
     {

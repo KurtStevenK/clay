@@ -20,6 +20,6 @@
 #pragma once
 
 
-GtkWidget * grid_dialog_new (GimpImage   *image,
-                             GimpContext *context,
+GtkWidget * grid_dialog_new (ClayImage   *image,
+                             ClayContext *context,
                              GtkWidget   *parent);

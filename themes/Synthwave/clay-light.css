@@ -1,0 +1,34 @@
+/* Synthwave theme, light scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(42,27,77);
+@define-color bg-color                   rgb(246,238,255);
+@define-color border-color               rgb(217,208,230);
+@define-color dimmed-fg-color            rgb(93,80,122);
+@define-color disabled-fg-color          rgb(134,122,157);
+@define-color disabled-button-color      rgb(181,170,198);
+@define-color hover-color                rgb(222,213,234);
+@define-color widget-bg-color            rgb(236,227,246);
+@define-color selected-color             rgb(209,200,223);
+@define-color extreme-bg-color           rgb(250,246,255);
+@define-color extreme-selected-color     rgb(217,208,230);
+@define-color strong-border-color        rgb(175,164,193);
+@define-color stronger-border-color      rgb(175,164,193);
+@define-color edge-border-color          rgb(175,164,193);
+@define-color scrollbar-slider-color     rgb(175,164,193);
+@define-color scrollbar-trough-color     rgb(246,238,255);
+@define-color ruler-color                rgba(217,208,230,0.3);
+@define-color accent-color               rgb(255,60,172);
+@define-color accent-hover-color         rgb(255,95,187);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(196,43,28);
+@define-color good-color                 rgb(31,122,63);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Menlo", "Monaco", "Courier New", monospace; }

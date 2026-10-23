@@ -4,7 +4,7 @@
   <menu id="/dashboard-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="dashboard-action">Dashboard Menu</attribute>
-      <attribute name="icon">gimp-dashboard</attribute>
+      <attribute name="icon">clay-dashboard</attribute>
       <submenu>
         <attribute name="label" translatable="yes" context="dashboard-action">Groups</attribute>
         <section>

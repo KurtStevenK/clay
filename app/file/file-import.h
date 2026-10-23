@@ -20,8 +20,8 @@
 #pragma once
 
 
-void   file_import_image (GimpImage    *image,
-                          GimpContext  *context,
+void   file_import_image (ClayImage    *image,
+                          ClayContext  *context,
                           GFile        *file,
                           gboolean      interactive,
-                          GimpProgress *progress);
+                          ClayProgress *progress);

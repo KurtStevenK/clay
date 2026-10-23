@@ -4,17 +4,17 @@
 /* Externally visible variables */
 /* ============================ */
 
-extern GimpImage    *image;
+extern ClayImage    *image;
 
-extern GimpDrawable *input_drawable;
-extern GimpDrawable *output_drawable;
+extern ClayDrawable *input_drawable;
+extern ClayDrawable *output_drawable;
 extern GeglBuffer   *source_buffer;
 extern GeglBuffer   *dest_buffer;
 
-extern GimpDrawable *box_drawables[6];
+extern ClayDrawable *box_drawables[6];
 extern GeglBuffer   *box_buffers[6];
 
-extern GimpDrawable *cylinder_drawables[2];
+extern ClayDrawable *cylinder_drawables[2];
 extern GeglBuffer   *cylinder_buffers[2];
 
 extern guchar          *preview_rgb_data;
@@ -30,9 +30,9 @@ extern gint border_x1, border_y1, border_x2, border_y2;
 /* Externally visible functions */
 /* ============================ */
 
-extern gint        image_setup              (GimpDrawable *drawable,
+extern gint        image_setup              (ClayDrawable *drawable,
                                              gint          interactive,
-                                             GimpProcedureConfig
+                                             ClayProcedureConfig
                                                           *config);
 extern glong       in_xy_to_index           (gint          x,
                                              gint          y);
@@ -47,7 +47,7 @@ extern void        poke                     (gint          x,
                                              gint          y,
                                              gdouble      *color,
                                              gpointer      user_data);
-extern GimpVector3 int_to_pos               (gint          x,
+extern ClayVector3 int_to_pos               (gint          x,
                                              gint          y);
 extern void        pos_to_int               (gdouble       x,
                                              gdouble       y,

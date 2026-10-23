@@ -18,7 +18,7 @@
 
 
 sub fonts_popup {
-    $blurb = 'Invokes the Gimp font selection dialog.';
+    $blurb = 'Invokes the Clay font selection dialog.';
     $help  = 'Opens a dialog letting a user choose a font.';
 
     &neo_pdb_misc('2003');
@@ -37,15 +37,15 @@ sub fonts_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->font_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->font_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, font_callback) ||
-      ! gimp_data_factory_data_wait (gimp->font_factory)     ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
-                             gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, font_callback) ||
+      ! clay_data_factory_data_wait (clay->font_factory)     ||
+      ! clay_pdb_dialog_new (clay, context, progress,
+                             clay_container_get_child_type (container),
                              parent_window, popup_title, font_callback,
-                             GIMP_OBJECT (initial_font), NULL))
+                             CLAY_OBJECT (initial_font), NULL))
     success = FALSE;
 }
 CODE
@@ -66,12 +66,12 @@ sub fonts_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->font_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->font_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, font_callback) ||
-      ! gimp_pdb_dialog_close (gimp,
-                               gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, font_callback) ||
+      ! clay_pdb_dialog_close (clay,
+                               clay_container_get_child_type (container),
                                font_callback))
     success = FALSE;
 }
@@ -95,14 +95,14 @@ sub fonts_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->font_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->font_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, font_callback) ||
-      ! gimp_data_factory_data_wait (gimp->font_factory)     ||
-      ! gimp_pdb_dialog_set (gimp,
-                             gimp_container_get_child_type (container),
-                             font_callback, GIMP_OBJECT (font), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, font_callback) ||
+      ! clay_data_factory_data_wait (clay->font_factory)     ||
+      ! clay_pdb_dialog_set (clay,
+                             clay_container_get_child_type (container),
+                             font_callback, CLAY_OBJECT (font), NULL))
     success = FALSE;
 }
 CODE
@@ -110,9 +110,9 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdatafactory.h");
+@headers = qw("core/clay.h"
+              "core/claycontainer.h"
+              "core/claydatafactory.h");
 
 @procs = qw(fonts_popup
             fonts_close_popup
@@ -121,7 +121,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Font UI';
-$doc_title = 'gimpfontselect';
+$doc_title = 'clayfontselect';
 $doc_short_desc = 'Methods of a font chooser dialog.';
 $doc_long_desc = <<'LONG_DESC';
 A font chooser dialog shows installed fonts.

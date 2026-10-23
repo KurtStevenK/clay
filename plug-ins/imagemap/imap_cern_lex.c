@@ -581,7 +581,7 @@ char *cern_text;
 #line 1 "imap_cern.l"
 #line 2 "imap_cern.l"
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *

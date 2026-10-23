@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# Ensure the script work properly
+case $(readlink /proc/$$/exe) in
+  *bash)
+    set -o posix
+    ;;
+esac
+set -e
+if [ "$0" != 'build/linux/snap/2_build-clay-snapcraft.sh' ] && [ $(basename "$PWD") != 'snap' ]; then
+  printf '\033[31m(ERROR)\033[0m: Script called from wrong dir. Please, call this script from the root of clay source dir\n'
+  exit 1
+elif [ "$(basename "$PWD")" = 'snap' ]; then
+  cd ../../..
+fi
+if [ -z "$GITLAB_CI" ]; then
+  git submodule update --init || true #true is for this script work on tarballs too
+fi
+
+
+# Install part of the deps
+eval "$(sed -n '/Install part/,/End of check/p' build/linux/snap/1_build-deps-snapcraft.sh)"
+
+if [ "$GITLAB_CI" ]; then
+  # Extract deps from previous job
+  tar xf _install-$RUNNER.tar -C /
+  tar xf _build-$RUNNER.tar -C /
+fi
+
+
+# Prepare env (snapcraft does not allow to freely set the .yaml path)
+cp build/linux/snap/snapcraft.yaml .
+
+
+# Build Clay
+printf "\e[0Ksection_start:`date +%s`:clay_build[collapsed=true]\r\e[0KBuilding Clay\n"
+sudo snapcraft stage clay --destructive-mode --build-for=$(dpkg --print-architecture) --verbosity=verbose > clay-snapcraft.log 2>&1 || { cat clay-snapcraft.log; exit 1; }
+if [ "$GITLAB_CI" ]; then
+  tar cf clay-meson-log.tar /root/parts/clay/build/meson-logs/meson-log.txt >/dev/null 2>&1
+fi
+printf "\e[0Ksection_end:`date +%s`:clay_build\r\e[0K\n"
+
+
+# Bundle
+printf "\e[0Ksection_start:`date +%s`:clay_bundle[collapsed=true]\r\e[0KCreating prime dir\n"
+sudo mkdir /tmp/craft-state
+sudo snapcraft prime --destructive-mode --build-for=$(dpkg --print-architecture) --verbosity=trace >> clay-snapcraft.log 2>&1 || { cat clay-snapcraft.log; exit 1; }
+
+if [ "$GITLAB_CI" ]; then
+  ## On CI, make the .snap prematurely on each runner since snapcraft does not allow multiple prime/ directories
+  eval "$(sed -n -e '/NAME=/,/TRACK=/ { s/  //; p }' build/linux/snap/3_dist-clay-snapcraft.sh)"
+  eval "$(grep 'snapcraft pack' build/linux/snap/3_dist-clay-snapcraft.sh | sed 's/  //')"
+fi
+printf "\e[0Ksection_end:`date +%s`:clay_bundle\r\e[0K\n"
+
+rm snapcraft.yaml

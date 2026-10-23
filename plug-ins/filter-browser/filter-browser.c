@@ -1,5 +1,5 @@
 /*
- * GIMP plug-in for browsing available GEGL filters.
+ * Clay plug-in for browsing available GEGL filters.
  *
  * Copyright (C) 2025 Ondřej Míchal <harrymichal@seznam.cz>
  *
@@ -28,10 +28,10 @@
 #include <operation/gegl-operation.h>
 #include <string.h>
 
-#include "libgimp/stdplugins-intl.h"
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
-#include "libgimpbase/gimpbase.h"
+#include "libclay/stdplugins-intl.h"
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
+#include "libclaybase/claybase.h"
 
 #include "gegl-filter-info.h"
 
@@ -67,12 +67,12 @@ typedef struct _FilterBrowserClass FilterBrowserClass;
 
 struct _FilterBrowser
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _FilterBrowserClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 #define FILTER_BROWSER_TYPE (filter_browser_get_type ())
@@ -81,9 +81,9 @@ struct _FilterBrowserClass
 
 GType filter_browser_get_type (void);
 
-G_DEFINE_TYPE (FilterBrowser, filter_browser, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (FilterBrowser, filter_browser, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (FILTER_BROWSER_TYPE)
+CLAY_MAIN (FILTER_BROWSER_TYPE)
 DEFINE_STD_SET_I18N
 
 static GMainLoop *main_loop = NULL;
@@ -126,7 +126,7 @@ create_filter_param_details (GParamSpec   *pspec,
   gtk_box_pack_start (GTK_BOX (param_box), hbox, FALSE, FALSE, 0);
 
   /* Some types might not be understood by the wire. In such a case the
-   * Gimp_drawable_filter_operation_get_pspecs procedure encodes the
+   * Clay_drawable_filter_operation_get_pspecs procedure encodes the
    * parameter information in the blurb of a placeholder GParamSpec.
    * See the definition of the procedure for more details.
    */
@@ -163,7 +163,7 @@ create_filter_param_details (GParamSpec   *pspec,
   gtk_widget_set_visible (label, TRUE);
 
   label = gtk_label_new (type);
-  gimp_label_set_attributes (GTK_LABEL (label), PANGO_ATTR_FAMILY, "monospace",
+  clay_label_set_attributes (GTK_LABEL (label), PANGO_ATTR_FAMILY, "monospace",
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC, -1);
   gtk_label_set_xalign (GTK_LABEL (label), 0.0);
   gtk_label_set_yalign (GTK_LABEL (label), 0.0);
@@ -280,14 +280,14 @@ create_filter_param_details (GParamSpec   *pspec,
       g_string_append_printf (blurb, "\n<tt><i>default: %s</i></tt>", default_value ? "TRUE" : "FALSE");
     }
 
-  if (GIMP_IS_PARAM_SPEC_CHOICE (pspec))
+  if (CLAY_IS_PARAM_SPEC_CHOICE (pspec))
     {
-      GimpChoice *choice  = NULL;
+      ClayChoice *choice  = NULL;
       GList      *choices = NULL;
       GString    *desc    = NULL;
 
-      choice  = gimp_param_spec_choice_get_choice (pspec);
-      choices = gimp_choice_list_nicks (choice);
+      choice  = clay_param_spec_choice_get_choice (pspec);
+      choices = clay_choice_list_nicks (choice);
       desc    = g_string_new ("\n");
 
       g_string_append_printf (desc, "<i>%s</i>", _("Allowed values:"));
@@ -298,7 +298,7 @@ create_filter_param_details (GParamSpec   *pspec,
           gchar *label = NULL;
           gchar *help  = NULL;
 
-          gimp_choice_get_documentation (choice, (const gchar *) nick, (const gchar **) &label, (const gchar **) &help);
+          clay_choice_get_documentation (choice, (const gchar *) nick, (const gchar **) &label, (const gchar **) &help);
           nick  = g_markup_escape_text (nick, -1);
           label = g_markup_escape_text (label, -1);
           help  = (help != NULL ? g_markup_escape_text (help, -1) : NULL);
@@ -314,7 +314,7 @@ create_filter_param_details (GParamSpec   *pspec,
         }
 
       g_string_append_printf (blurb, "\n<tt><i>default:</i> \"%s\"</tt>",
-                              gimp_param_spec_choice_get_default (pspec));
+                              clay_param_spec_choice_get_default (pspec));
 
       g_string_append (blurb, desc->str);
       g_string_free (desc, TRUE);
@@ -383,7 +383,7 @@ create_filter_param_details (GParamSpec   *pspec,
 }
 
 static GtkWidget *
-create_filter_info_view (GimpGeglFilterInfo *filter_info)
+create_filter_info_view (ClayGeglFilterInfo *filter_info)
 {
   GtkWidget            *frame       = NULL;
   GtkWidget            *label       = NULL;
@@ -395,7 +395,7 @@ create_filter_info_view (GimpGeglFilterInfo *filter_info)
   const gchar          *description = NULL;
   const gchar          *categories  = NULL;
   const gchar          *license     = NULL;
-  const GimpValueArray *pspecs      = NULL;
+  const ClayValueArray *pspecs      = NULL;
 
   g_object_get (G_OBJECT (filter_info),
                 "name",        &name,
@@ -426,9 +426,9 @@ create_filter_info_view (GimpGeglFilterInfo *filter_info)
    */
 
   if (title != NULL)
-    frame = gimp_frame_new (title);
+    frame = clay_frame_new (title);
   else
-    frame = gimp_frame_new (name);
+    frame = clay_frame_new (name);
   gtk_label_set_selectable (GTK_LABEL (gtk_frame_get_label_widget (GTK_FRAME (frame))), TRUE);
   gtk_box_pack_start (GTK_BOX (view), frame, FALSE, FALSE, 0);
 
@@ -472,13 +472,13 @@ create_filter_info_view (GimpGeglFilterInfo *filter_info)
    * Parameters
    */
 
-  if (pspecs != NULL && gimp_value_array_length (pspecs) != 0)
+  if (pspecs != NULL && clay_value_array_length (pspecs) != 0)
     {
       GtkSizeGroup *sg_label = NULL;
       GtkSizeGroup *sg_type  = NULL;
       GtkSizeGroup *sg_blurb = NULL;
 
-      frame = gimp_frame_new (_ ("Parameters"));
+      frame = clay_frame_new (_ ("Parameters"));
       gtk_box_pack_start (GTK_BOX (view), frame, FALSE, FALSE, 0);
       gtk_widget_set_visible (frame, TRUE);
 
@@ -490,9 +490,9 @@ create_filter_info_view (GimpGeglFilterInfo *filter_info)
       sg_type  = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
       sg_blurb = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
 
-      for (gint i = 0; i < gimp_value_array_length (pspecs); i++)
+      for (gint i = 0; i < clay_value_array_length (pspecs); i++)
         {
-          GParamSpec *pspec = g_value_get_param (gimp_value_array_index (pspecs, i));
+          GParamSpec *pspec = g_value_get_param (clay_value_array_index (pspecs, i));
 
           gtk_box_pack_start (GTK_BOX (vbox),
                               create_filter_param_details (pspec, sg_label, sg_type, sg_blurb),
@@ -510,7 +510,7 @@ create_filter_info_view (GimpGeglFilterInfo *filter_info)
 
   if (license != NULL)
     {
-      frame = gimp_frame_new (_("Additional Information"));
+      frame = clay_frame_new (_("Additional Information"));
       gtk_box_pack_start (GTK_BOX (view), frame, FALSE, FALSE, 0);
 
       vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 8);
@@ -537,7 +537,7 @@ filter_list_row_selected (GtkListBox    *filter_list,
                           gpointer       data)
 {
   FilterBrowserPrivate *browser     = NULL;
-  GimpGeglFilterInfo   *filter_info = NULL;
+  ClayGeglFilterInfo   *filter_info = NULL;
 
   browser = (FilterBrowserPrivate *) data;
 
@@ -547,7 +547,7 @@ filter_list_row_selected (GtkListBox    *filter_list,
 
   filter_info = g_object_get_data (G_OBJECT (row), "filter-info");
 
-  gimp_browser_set_widget (GIMP_BROWSER (browser->browser),
+  clay_browser_set_widget (CLAY_BROWSER (browser->browser),
                            create_filter_info_view (filter_info));
 }
 
@@ -555,13 +555,13 @@ static gint
 gegl_filter_info_sort_func (gconstpointer a,
                             gconstpointer b)
 {
-  GimpGeglFilterInfo *info_a = (GimpGeglFilterInfo *) a;
-  GimpGeglFilterInfo *info_b = (GimpGeglFilterInfo *) b;
+  ClayGeglFilterInfo *info_a = (ClayGeglFilterInfo *) a;
+  ClayGeglFilterInfo *info_b = (ClayGeglFilterInfo *) b;
   gchar              *name_a = NULL;
   gchar              *name_b = NULL;
 
-  g_assert_true (GIMP_IS_GEGL_FILTER_INFO (info_a));
-  g_assert_true (GIMP_IS_GEGL_FILTER_INFO (info_b));
+  g_assert_true (CLAY_IS_GEGL_FILTER_INFO (info_a));
+  g_assert_true (CLAY_IS_GEGL_FILTER_INFO (info_b));
 
   g_object_get (G_OBJECT (info_a), "name", &name_a, NULL);
   g_object_get (G_OBJECT (info_b), "name", &name_b, NULL);
@@ -573,7 +573,7 @@ static GtkWidget *
 create_filter_list_row (gpointer item,
                         gpointer user_data)
 {
-  GimpGeglFilterInfo *filter_info = item;
+  ClayGeglFilterInfo *filter_info = item;
   GtkWidget          *row         = NULL;
   GtkWidget          *box         = NULL;
   GtkWidget          *name_label  = NULL;
@@ -601,17 +601,17 @@ static void
 insert_gegl_filter_info_into_list_store (gpointer data,
                                          gpointer user_data)
 {
-  GimpGeglFilterInfo *filter_info = (GimpGeglFilterInfo *) data;
+  ClayGeglFilterInfo *filter_info = (ClayGeglFilterInfo *) data;
   GListStore         *model       = (GListStore *) (user_data);
 
-  g_assert_true (GIMP_IS_GEGL_FILTER_INFO (filter_info));
+  g_assert_true (CLAY_IS_GEGL_FILTER_INFO (filter_info));
   g_assert_true (G_IS_LIST_STORE (model));
 
   g_list_store_append (model, filter_info);
 }
 
 static void
-filter_browser_search (GimpBrowser            *gimp_browser,
+filter_browser_search (ClayBrowser            *clay_browser,
                        const gchar            *search_text,
                        FilterBrowserSearchType search_type,
                        FilterBrowserPrivate   *browser)
@@ -637,18 +637,18 @@ filter_browser_search (GimpBrowser            *gimp_browser,
     default:
       return;
     }
-  gimp_browser_show_message (GIMP_BROWSER (browser->browser), search_msg);
+  clay_browser_show_message (CLAY_BROWSER (browser->browser), search_msg);
 
-  new_model = g_list_store_new (GIMP_GEGL_FILTER_TYPE_INFO);
+  new_model = g_list_store_new (CLAY_GEGL_FILTER_TYPE_INFO);
 
   if (strlen (search_text) != 0)
     {
       for (GList *iter = browser->filters; iter != NULL; iter = iter->next)
         {
-          GimpGeglFilterInfo *filter_info = NULL;
+          ClayGeglFilterInfo *filter_info = NULL;
           const gchar        *value       = NULL;
 
-          filter_info = (GimpGeglFilterInfo *) iter->data;
+          filter_info = (ClayGeglFilterInfo *) iter->data;
 
           switch (search_type)
             {
@@ -692,7 +692,7 @@ filter_browser_search (GimpBrowser            *gimp_browser,
       if (matches == 0)
         {
           search_summary = g_strdup (_("No matches for your query"));
-          gimp_browser_show_message (GIMP_BROWSER (browser->browser),
+          clay_browser_show_message (CLAY_BROWSER (browser->browser),
                                      _("No matches"));
         }
       else
@@ -706,7 +706,7 @@ filter_browser_search (GimpBrowser            *gimp_browser,
     {
       search_summary = g_strdup_printf (ngettext ("%d filter", "%d filters", matches), matches);
     }
-  gimp_browser_set_search_summary (gimp_browser, search_summary);
+  clay_browser_set_search_summary (clay_browser, search_summary);
   g_free (search_summary);
 }
 
@@ -720,9 +720,9 @@ browser_dialog_quit (FilterBrowserPrivate *browser)
   g_main_loop_unref (main_loop);
 }
 
-static GimpValueArray *
-filter_browser_run (GimpProcedure       *procedure,
-                    GimpProcedureConfig *config,
+static ClayValueArray *
+filter_browser_run (ClayProcedure       *procedure,
+                    ClayProcedureConfig *config,
                     gpointer             run_data)
 {
   FilterBrowserPrivate  *browser         = NULL;
@@ -731,29 +731,29 @@ filter_browser_run (GimpProcedure       *procedure,
   GListStore            *model           = NULL;
   gchar                **filter_names    = NULL;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
   browser              = g_new0 (FilterBrowserPrivate, 1);
   browser->search_type = SEARCH_NAME;
 
-  browser->dialog = gimp_dialog_new (_("GEGL Filter Browser"),
+  browser->dialog = clay_dialog_new (_("GEGL Filter Browser"),
                                      PLUG_IN_ROLE,
                                      NULL,
                                      0,
-                                     gimp_standard_help_func,
+                                     clay_standard_help_func,
                                      PLUG_IN_GEGL_FILTER_BROWSER,
                                      _("_Close"),
                                      GTK_RESPONSE_CLOSE,
                                      NULL);
   gtk_window_set_default_size (GTK_WINDOW (browser->dialog),
                                FILTER_BROWSER_WIDTH, FILTER_BROWSER_HEIGHT);
-  gimp_window_set_transient (GTK_WINDOW (browser->dialog));
+  clay_window_set_transient (GTK_WINDOW (browser->dialog));
 
   g_signal_connect_swapped (browser->dialog, "response",
                             G_CALLBACK (browser_dialog_quit), browser);
 
-  browser->browser = gimp_browser_new ();
-  gimp_browser_add_search_types (GIMP_BROWSER (browser->browser),
+  browser->browser = clay_browser_new ();
+  clay_browser_add_search_types (CLAY_BROWSER (browser->browser),
                                  _("by name"), SEARCH_NAME,
                                  _("by title"), SEARCH_TITLE,
                                  _("by description"), SEARCH_DESCRIPTION,
@@ -772,7 +772,7 @@ filter_browser_run (GimpProcedure       *procedure,
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled_window), GTK_SHADOW_IN);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  gtk_box_pack_start (GTK_BOX (gimp_browser_get_left_vbox (GIMP_BROWSER (browser->browser))),
+  gtk_box_pack_start (GTK_BOX (clay_browser_get_left_vbox (CLAY_BROWSER (browser->browser))),
                       scrolled_window, TRUE, TRUE, 0);
   gtk_widget_set_visible (scrolled_window, TRUE);
 
@@ -780,37 +780,37 @@ filter_browser_run (GimpProcedure       *procedure,
    * TODO: Extract the data preparation, so that it can run on idle and not
    * block the GUI.
    */
-  filter_names = gimp_drawable_filter_operation_get_available ();
+  filter_names = clay_drawable_filter_operation_get_available ();
   for (gint i = 0; filter_names[i] != NULL; i++)
     {
-      GimpGeglFilterInfo *info   = NULL;
-      GimpValueArray     *pspecs = NULL;
-      GimpValueArray     *values = NULL;
+      ClayGeglFilterInfo *info   = NULL;
+      ClayValueArray     *pspecs = NULL;
+      ClayValueArray     *values = NULL;
       GStrv               names  = NULL;
 
-      gimp_drawable_filter_operation_get_details (filter_names[i],
+      clay_drawable_filter_operation_get_details (filter_names[i],
                                                   &names, &values);
-      pspecs = gimp_drawable_filter_operation_get_pspecs (filter_names[i]);
+      pspecs = clay_drawable_filter_operation_get_pspecs (filter_names[i]);
 
-      info = g_object_new (GIMP_GEGL_FILTER_TYPE_INFO,
+      info = g_object_new (CLAY_GEGL_FILTER_TYPE_INFO,
                            "name",        filter_names[i],
-                           "title",       g_value_get_string (gimp_value_array_index (values, 0)),
-                           "description", g_value_get_string (gimp_value_array_index (values, 1)),
-                           "categories",  g_value_get_string (gimp_value_array_index (values, 2)),
-                           "license",     g_value_get_string (gimp_value_array_index (values, 3)),
+                           "title",       g_value_get_string (clay_value_array_index (values, 0)),
+                           "description", g_value_get_string (clay_value_array_index (values, 1)),
+                           "categories",  g_value_get_string (clay_value_array_index (values, 2)),
+                           "license",     g_value_get_string (clay_value_array_index (values, 3)),
                            "pspecs",      pspecs,
                            NULL);
       browser->filters = g_list_append (browser->filters, info);
 
       g_strfreev (names);
-      gimp_value_array_unref (values);
-      gimp_value_array_unref (pspecs);
+      clay_value_array_unref (values);
+      clay_value_array_unref (pspecs);
     }
   g_strfreev (filter_names);
 
   browser->filters = g_list_sort (browser->filters, gegl_filter_info_sort_func);
 
-  model = g_list_store_new (GIMP_GEGL_FILTER_TYPE_INFO);
+  model = g_list_store_new (CLAY_GEGL_FILTER_TYPE_INFO);
   g_list_foreach (browser->filters, insert_gegl_filter_info_into_list_store, model);
 
   browser->filter_list = GTK_LIST_BOX (gtk_list_box_new ());
@@ -833,26 +833,26 @@ filter_browser_run (GimpProcedure       *procedure,
   main_loop = g_main_loop_new (NULL, TRUE);
   g_main_loop_run (main_loop);
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
-static GimpProcedure *
-filter_browser_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+filter_browser_create_procedure (ClayPlugIn  *plug_in,
                                  const gchar *procedure_name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (strcmp (procedure_name, PLUG_IN_GEGL_FILTER_BROWSER))
     return procedure;
 
-  procedure = gimp_procedure_new (plug_in, procedure_name, GIMP_PDB_PROC_TYPE_PLUGIN,
+  procedure = clay_procedure_new (plug_in, procedure_name, CLAY_PDB_PROC_TYPE_PLUGIN,
                                   filter_browser_run, NULL, NULL);
 
-  gimp_procedure_set_menu_label (procedure, _ ("_GEGL Filter Browser"));
-  gimp_procedure_set_icon_name (procedure, GIMP_ICON_PLUGIN);
-  gimp_procedure_add_menu_path (procedure, "<Image>/Help/[Programming]");
+  clay_procedure_set_menu_label (procedure, _ ("_GEGL Filter Browser"));
+  clay_procedure_set_icon_name (procedure, CLAY_ICON_PLUGIN);
+  clay_procedure_add_menu_path (procedure, "<Image>/Help/[Programming]");
 
-  gimp_procedure_set_documentation (procedure,
+  clay_procedure_set_documentation (procedure,
                                     _("Display information about available"
                                       " GEGL operations (i.e., filters)."),
                                     _("Shows a list of all GEGL operations,"
@@ -861,17 +861,17 @@ filter_browser_create_procedure (GimpPlugIn  *plug_in,
                                       " operations provided by GEGL itself,"
                                       " Clay and plug-ins loaded by GEGL."),
                                     PLUG_IN_GEGL_FILTER_BROWSER);
-  gimp_procedure_set_attribution (procedure, "Ondřej Míchal", "Ondřej Míchal", "2025");
+  clay_procedure_set_attribution (procedure, "Ondřej Míchal", "Ondřej Míchal", "2025");
 
-  gimp_procedure_add_enum_argument (procedure, "run-mode", "Run mode",
-                                    "The run mode", GIMP_TYPE_RUN_MODE,
-                                    GIMP_RUN_INTERACTIVE, G_PARAM_READWRITE);
+  clay_procedure_add_enum_argument (procedure, "run-mode", "Run mode",
+                                    "The run mode", CLAY_TYPE_RUN_MODE,
+                                    CLAY_RUN_INTERACTIVE, G_PARAM_READWRITE);
 
   return procedure;
 }
 
 static GList *
-filter_browser_query_procedures (GimpPlugIn *plug_in)
+filter_browser_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_GEGL_FILTER_BROWSER));
 }
@@ -884,7 +884,7 @@ filter_browser_init (FilterBrowser *browser)
 static void
 filter_browser_class_init (FilterBrowserClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = filter_browser_query_procedures;
   plug_in_class->create_procedure = filter_browser_create_procedure;

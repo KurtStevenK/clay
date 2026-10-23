@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<locatingRules>
+  <locatingRule name="ClayTips" pattern="*.xml">
+    <documentRule localName="clay-tips" target="clay-tips.its"/>
+  </locatingRule>
+</locatingRules>

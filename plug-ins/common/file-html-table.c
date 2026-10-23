@@ -1,15 +1,15 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GTM plug-in --- GIMP Table Magic
+ * GTM plug-in --- Clay Table Magic
  * Allows images to be exported as HTML tables with different colored cells.
  * It doesn't  have very much practical use other than being able to
- * easily design a table by "painting" it in GIMP, or to make small HTML
+ * easily design a table by "painting" it in Clay, or to make small HTML
  * table images/icons.
  *
  * Copyright (C) 1997 Daniel Dunbar
  * Email: ddunbar@diads.com
- * WWW:   http://millennium.diads.com/gimp/
+ * WWW:   http://millennium.diads.com/clay/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
  *
  * At first I just wrote a really ugly hack to do it, which I then planned
  * on using once just to see how it worked, and then posting a URL and
- * laughing about it on #gimp.  As it turns out, tigert thought it actually
+ * laughing about it on #clay.  As it turns out, tigert thought it actually
  * had potential to be a useful plugin, so I started adding features and
  * and making a nice UI.
  *
@@ -51,10 +51,10 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define EXPORT_PROC    "file-html-table-export"
@@ -66,12 +66,12 @@ typedef struct _HtmlClass HtmlClass;
 
 struct _Html
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _HtmlClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -80,25 +80,25 @@ struct _HtmlClass
 
 GType                   html_get_type          (void);
 
-static GList          * html_query_procedures  (GimpPlugIn           *plug_in);
-static GimpProcedure  * html_create_procedure  (GimpPlugIn           *plug_in,
+static GList          * html_query_procedures  (ClayPlugIn           *plug_in);
+static ClayProcedure  * html_create_procedure  (ClayPlugIn           *plug_in,
                                                 const gchar          *name);
 
-static GimpValueArray * html_export            (GimpProcedure        *procedure,
-                                                GimpRunMode           run_mode,
-                                                GimpImage            *image,
+static ClayValueArray * html_export            (ClayProcedure        *procedure,
+                                                ClayRunMode           run_mode,
+                                                ClayImage            *image,
                                                 GFile                *file,
-                                                GimpExportOptions    *options,
-                                                GimpMetadata         *metadata,
-                                                GimpProcedureConfig  *config,
+                                                ClayExportOptions    *options,
+                                                ClayMetadata         *metadata,
+                                                ClayProcedureConfig  *config,
                                                 gpointer              run_data);
 
 static gboolean         export_image           (GFile                *file,
                                                 GeglBuffer           *buffer,
                                                 GObject              *config,
                                                 GError              **error);
-static gboolean         save_dialog            (GimpImage            *image,
-                                                GimpProcedure        *procedure,
+static gboolean         save_dialog            (ClayImage            *image,
+                                                ClayProcedure        *procedure,
                                                 GObject              *config);
 
 static gboolean         print                  (GOutputStream        *output,
@@ -109,16 +109,16 @@ static gboolean         color_comp             (guchar               *buffer,
                                                 guchar               *buf2);
 
 
-G_DEFINE_TYPE (Html, html, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Html, html, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (HTML_TYPE)
+CLAY_MAIN (HTML_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 html_class_init (HtmlClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = html_query_procedures;
   plug_in_class->create_procedure = html_create_procedure;
@@ -131,108 +131,108 @@ html_init (Html *html)
 }
 
 static GList *
-html_query_procedures (GimpPlugIn *plug_in)
+html_query_procedures (ClayPlugIn *plug_in)
 {
   return  g_list_append (NULL, g_strdup (EXPORT_PROC));
 }
 
-static GimpProcedure *
-html_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+html_create_procedure (ClayPlugIn  *plug_in,
                        const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, html_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("HTML table"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("HTML table"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("HTML Table"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Clay Table Magic"),
                                         _("Allows you to draw an HTML table "
                                           "in Clay. See help for more info."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Daniel Dunbar",
                                       "Daniel Dunbar",
                                       "1998");
 
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "text/html");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "html,htm");
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB  |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB  |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "use-caption",
+      clay_procedure_add_boolean_aux_argument (procedure, "use-caption",
                                                _("Use c_aption"),
                                                _("Enable if you would like to have the table "
                                                  "captioned."),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_aux_argument (procedure, "caption-text",
+      clay_procedure_add_string_aux_argument (procedure, "caption-text",
                                               _("Capt_ion"),
                                               _("The text for the table caption."),
                                               "Made with Clay Table Magic",
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_aux_argument (procedure, "cell-content",
+      clay_procedure_add_string_aux_argument (procedure, "cell-content",
                                               _("Cell con_tent"),
                                               _("The text to go into each cell."),
                                               "&nbsp;",
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_aux_argument (procedure, "cell-width",
+      clay_procedure_add_string_aux_argument (procedure, "cell-width",
                                               _("_Width"),
                                               _("The width for each table cell. "
                                                 "Can be a number or a percent."),
                                               "",
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_string_aux_argument (procedure, "cell-height",
+      clay_procedure_add_string_aux_argument (procedure, "cell-height",
                                               _("_Height"),
                                               _("The height for each table cell. "
                                                 "Can be a number or a percent."),
                                               "",
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "full-document",
+      clay_procedure_add_boolean_aux_argument (procedure, "full-document",
                                                _("_Generate full HTML document"),
                                                _("If enabled Clay Table Magic will output a full HTML "
                                                  "document with <HTML>, <BODY>, etc. tags "
                                                  "instead of just the table html."),
                                                TRUE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_aux_argument (procedure, "border",
+      clay_procedure_add_int_aux_argument (procedure, "border",
                                            _("_Border"),
                                            _("The number of pixels in the table border."),
                                            0, 1000, 2,
-                                           GIMP_PARAM_READWRITE);
+                                           CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "span-tags",
+      clay_procedure_add_boolean_aux_argument (procedure, "span-tags",
                                                _("_Use cellspan"),
                                                _("If enabled Clay Table Magic will replace any "
                                                  "rectangular sections of identically "
                                                  "colored blocks with one large cell with "
                                                  "ROWSPAN and COLSPAN values."),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_aux_argument (procedure, "compress-td-tags",
+      clay_procedure_add_boolean_aux_argument (procedure, "compress-td-tags",
                                                _("Co_mpress TD tags"),
                                                _("Enabling this will cause Clay Table Magic to "
                                                  "leave no whitespace between the TD "
@@ -240,67 +240,67 @@ html_create_procedure (GimpPlugIn  *plug_in,
                                                  "necessary for pixel level positioning "
                                                  "control."),
                                                FALSE,
-                                               GIMP_PARAM_READWRITE);
+                                               CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_aux_argument (procedure, "cell-padding",
+      clay_procedure_add_int_aux_argument (procedure, "cell-padding",
                                            _("Cell-pa_dding"),
                                            _("The amount of cell padding."),
                                            0, 1000, 4,
-                                           GIMP_PARAM_READWRITE);
+                                           CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_int_aux_argument (procedure, "cell-spacing",
+      clay_procedure_add_int_aux_argument (procedure, "cell-spacing",
                                            _("Cell spaci_ng"),
                                            _("The amount of cell spacing."),
                                            0, 1000, 0,
-                                           GIMP_PARAM_READWRITE);
+                                           CLAY_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-html_export (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
+static ClayValueArray *
+html_export (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
              GFile                *file,
-             GimpExportOptions    *options,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
+             ClayExportOptions    *options,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GeglBuffer        *buffer;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
     }
 
-  export    = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
-  buffer    = gimp_drawable_get_buffer (drawables->data);
+  export    = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
+  buffer    = clay_drawable_get_buffer (drawables->data);
 
   if (! export_image (file, buffer, G_OBJECT (config),
                       &error))
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_object_unref (buffer);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static gboolean
@@ -355,8 +355,8 @@ export_image (GFile       *file,
   cols = gegl_buffer_get_width  (buffer);
   rows = gegl_buffer_get_height (buffer);
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   output = G_OUTPUT_STREAM (g_file_replace (file,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
@@ -383,9 +383,9 @@ export_image (GFile       *file,
     {
       if (! print (output, error,
                    "<HTML>\n<HEAD><TITLE>%s</TITLE></HEAD>\n<BODY>\n",
-                   gimp_file_get_utf8_name (file)) ||
+                   clay_file_get_utf8_name (file)) ||
           ! print (output, error, "<H1>%s</H1>\n",
-                   gimp_file_get_utf8_name (file)))
+                   clay_file_get_utf8_name (file)))
         {
           goto fail;
         }
@@ -530,7 +530,7 @@ export_image (GFile       *file,
       if (! print (output, error, "   </TR>\n"))
         goto fail;
 
-      gimp_progress_update ((double) y / (double) rows);
+      clay_progress_update ((double) y / (double) rows);
     }
 
   if (config_full_document)
@@ -558,7 +558,7 @@ export_image (GFile       *file,
   g_free (config_cell_width);
   g_free (config_cell_height);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return TRUE;
 
@@ -584,110 +584,110 @@ export_image (GFile       *file,
 }
 
 static gint
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget *dialog;
   GtkWidget *frame;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  if (gimp_image_get_width (image) * gimp_image_get_height (image) > 4096)
+  if (clay_image_get_width (image) * clay_image_get_height (image) > 4096)
     {
       GtkWidget *eek;
       GtkWidget *hbox;
 
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "warning-label",
                                        _("You are about to create a huge\n"
                                         "HTML file which will most likely\n"
                                         "crash your browser."),
                                        FALSE, FALSE);
-      hbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+      hbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                              "warning-hbox", "warning-label",
                                              NULL);
       gtk_orientable_set_orientation (GTK_ORIENTABLE (hbox),
                                   GTK_ORIENTATION_HORIZONTAL);
 
-      eek = gtk_image_new_from_icon_name (GIMP_ICON_WILBER_EEK,
+      eek = gtk_image_new_from_icon_name (CLAY_ICON_WILBER_EEK,
                                           GTK_ICON_SIZE_DIALOG);
       gtk_box_pack_start (GTK_BOX (hbox), eek, FALSE, FALSE, 0);
       gtk_widget_set_visible (eek, TRUE);
       gtk_box_reorder_child (GTK_BOX (hbox), eek, 0);
       gtk_widget_set_margin_end (eek, 24);
 
-      gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                        "warning-frame-label", _("Warning"),
                                        FALSE, FALSE);
-      frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+      frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                                 "warning-frame",
                                                 "warning-frame-label",
                                                 FALSE, "warning-hbox");
       gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
 
-      gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+      clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                                   "warning-frame", NULL);
     }
 
   /* HTML Page Options */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "page-label", _("HTML Page Options"),
                                    FALSE, FALSE);
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "page-frame",
                                             "page-label",
                                             FALSE, "full-document");
   gtk_widget_set_margin_bottom (frame, 8);
 
   /* HTML Table Creation Options */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "creation-label",
                                    _("Table Creation Options"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "creation-vbox", "span-tags",
                                   "compress-td-tags", "use-caption",
                                   "caption-text", "cell-content", NULL);
 
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "caption-text", TRUE,
                                        config, "use-caption",
                                        FALSE);
 
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "creation-frame",
                                             "creation-label",
                                             FALSE, "creation-vbox");
   gtk_widget_set_margin_bottom (frame, 8);
   /* HTML Table Options */
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "table-label", _("Table Options"),
                                    FALSE, FALSE);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "table-vbox", "border", "cell-width",
                                   "cell-height", "cell-padding",
                                   "cell-spacing", NULL);
 
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "table-frame", "table-label",
                                             FALSE, "table-vbox");
   gtk_widget_set_margin_bottom (frame, 8);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "page-frame", "creation-frame",
                               "table-frame", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

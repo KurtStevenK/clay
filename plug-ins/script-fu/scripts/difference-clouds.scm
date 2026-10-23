@@ -28,53 +28,53 @@
                                      y_size)
 
   (let* ((layer (vector-ref drawables 0))
-         (draw-offset-x (car (gimp-drawable-get-offsets layer)))
-         (draw-offset-y (cadr (gimp-drawable-get-offsets layer)))
-         (has-sel       (car (gimp-drawable-mask-intersect layer)))
-         (sel-offset-x  (cadr (gimp-drawable-mask-intersect layer)))
-         (sel-offset-y  (caddr (gimp-drawable-mask-intersect layer)))
-         (width         (cadddr (gimp-drawable-mask-intersect layer)))
-         (height        (caddr (cddr (gimp-drawable-mask-intersect layer))))
-         (type          (car (gimp-drawable-type-with-alpha layer)))
+         (draw-offset-x (car (clay-drawable-get-offsets layer)))
+         (draw-offset-y (cadr (clay-drawable-get-offsets layer)))
+         (has-sel       (car (clay-drawable-mask-intersect layer)))
+         (sel-offset-x  (cadr (clay-drawable-mask-intersect layer)))
+         (sel-offset-y  (caddr (clay-drawable-mask-intersect layer)))
+         (width         (cadddr (clay-drawable-mask-intersect layer)))
+         (height        (caddr (cddr (clay-drawable-mask-intersect layer))))
+         (type          (car (clay-drawable-type-with-alpha layer)))
          (diff-clouds  -1)
          (offset-x      0)
          (offset-y      0)
         )
 
-    (gimp-image-undo-group-start image)
+    (clay-image-undo-group-start image)
 
     ; Create the cloud layer
-    (set! diff-clouds (car (gimp-layer-new image "Clouds" width height type
+    (set! diff-clouds (car (clay-layer-new image "Clouds" width height type
                                            100 LAYER-MODE-DIFFERENCE)))
 
     ; Add the cloud layer above the current layer
-    (gimp-image-insert-layer image diff-clouds 0 -1)
+    (clay-image-insert-layer image diff-clouds 0 -1)
 
     ; Clear the layer (so there are no noise in it)
-    (gimp-drawable-fill diff-clouds FILL-TRANSPARENT)
+    (clay-drawable-fill diff-clouds FILL-TRANSPARENT)
 
     ; Selections are relative to the drawable; adjust the final offset
     (set! offset-x (+ draw-offset-x sel-offset-x))
     (set! offset-y (+ draw-offset-y sel-offset-y))
 
     ; Offset the clouds layer
-    (if (gimp-item-id-is-layer layer)
-      (gimp-item-transform-translate diff-clouds offset-x offset-y))
+    (if (clay-item-id-is-layer layer)
+      (clay-item-transform-translate diff-clouds offset-x offset-y))
 
     ; Run GEGL Solid Noise filter
-    (let* ((cloud-width  (cadddr (gimp-drawable-mask-intersect diff-clouds)))
-           (cloud-height (caddr (cddr (gimp-drawable-mask-intersect diff-clouds)))))
-      (gimp-drawable-merge-new-filter diff-clouds "gegl:noise-solid" 0 LAYER-MODE-REPLACE 1.0 "tileable" tileable "turbulent" turbulent "seed" seed
+    (let* ((cloud-width  (cadddr (clay-drawable-mask-intersect diff-clouds)))
+           (cloud-height (caddr (cddr (clay-drawable-mask-intersect diff-clouds)))))
+      (clay-drawable-merge-new-filter diff-clouds "gegl:noise-solid" 0 LAYER-MODE-REPLACE 1.0 "tileable" tileable "turbulent" turbulent "seed" seed
                                                                                                "detail" detail "x-size" x_size "y-size" y_size
                                                                                                "width" cloud-width "height" cloud-height)
     )
 
     ; Merge the clouds layer with the layer below
-    (gimp-image-merge-down image diff-clouds EXPAND-AS-NECESSARY)
+    (clay-image-merge-down image diff-clouds EXPAND-AS-NECESSARY)
 
-    (gimp-image-undo-group-end image)
+    (clay-image-undo-group-end image)
 
-    (gimp-displays-flush)
+    (clay-displays-flush)
   )
 )
 

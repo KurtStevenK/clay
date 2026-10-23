@@ -2,20 +2,20 @@
 
 ; in the console, this typically works to debug:
 ; i.e. these are the typical IDs
-; (gimp-image-get-paths 1) => (#(3))
-; (gimp-path-get-strokes 3) => (#(2))
-;  (gimp-path-stroke-get-points 3 2) => (0 #(200.0 200.0 200.0 200.0 200.0 200.0) 0)
+; (clay-image-get-paths 1) => (#(3))
+; (clay-path-get-strokes 3) => (#(2))
+;  (clay-path-stroke-get-points 3 2) => (0 #(200.0 200.0 200.0 200.0 200.0 200.0) 0)
 
 ; setup
 
-(define testImage (testing:load-test-image "gimp-logo.png"))
-(define testLayer (vector-ref (car (gimp-image-get-layers testImage ))
+(define testImage (testing:load-test-image "clay-logo.png"))
+(define testLayer (vector-ref (car (clay-image-get-layers testImage ))
                                   0))
 
-(define testPath (car (gimp-path-new
+(define testPath (car (clay-path-new
                         testImage
                         "Test Path")))
-(gimp-image-insert-path
+(clay-image-insert-path
     testImage
     testPath
     0 0)
@@ -30,23 +30,23 @@
 ; Each control point is a coordinate i.e. pair of floats.
 ; The count of elements in the array is minimum of 12
 ; Two endpoints * three control points per endpoint * 2 floats per control point
-(assert `(gimp-path-stroke-new-from-points
+(assert `(clay-path-stroke-new-from-points
             ,testPath
             PATH-STROKE-TYPE-BEZIER
             (vector 1 2 3 4 5 6 7 8 9 10 11 12) ; control points
             FALSE)) ; not closed
 
 ; path now has one stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             1))
 
 
 
 ; capture stroke ID
-(define testStroke (vector-ref (car (gimp-path-get-strokes testPath)) 0))
+(define testStroke (vector-ref (car (clay-path-get-strokes testPath)) 0))
 
 ; stroke has correct count of control points
-(assert `(gimp-path-stroke-get-points
+(assert `(clay-path-stroke-get-points
             ,testPath
             ,testStroke))
 ; TODO check the returned values
@@ -70,13 +70,13 @@
 ; to coincide with the coords of the start point of the stroke.
 
 ; close a path does not throw
-(assert `(gimp-path-stroke-close ,testPath ,testStroke))
+(assert `(clay-path-stroke-close ,testPath ,testStroke))
 ; effective: path still has one stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             1))
 ; effective: the flag on the stroke says it is closed
 ; the flag is the third element of the returned list.
-(assert `(= (caddr (gimp-path-stroke-get-points ,testPath ,testStroke))
+(assert `(= (caddr (clay-path-stroke-get-points ,testPath ,testStroke))
             1))
 ; effective: the coords coincide
 ; TODO
@@ -84,36 +84,36 @@
 
 (test! "stroke transformations")
 
-(assert `(gimp-path-stroke-flip ,testPath ,testStroke
+(assert `(clay-path-stroke-flip ,testPath ,testStroke
             ORIENTATION-HORIZONTAL
             0)) ; axis
 
-(assert `(gimp-path-stroke-flip-free ,testPath ,testStroke
+(assert `(clay-path-stroke-flip-free ,testPath ,testStroke
             0 0 ; x1,y1 of axis
             100 100 ; x2,y2 of axis
             ))
 
-(assert `(gimp-path-stroke-reverse ,testPath ,testStroke))
+(assert `(clay-path-stroke-reverse ,testPath ,testStroke))
 
-(assert `(gimp-path-stroke-rotate ,testPath ,testStroke
+(assert `(clay-path-stroke-rotate ,testPath ,testStroke
               0 0 ; center x,y
               45)) ; angle
 
-(assert `(gimp-path-stroke-scale ,testPath ,testStroke
+(assert `(clay-path-stroke-scale ,testPath ,testStroke
               10 10)) ; x, y factors
 
-(assert `(gimp-path-stroke-translate ,testPath ,testStroke
+(assert `(clay-path-stroke-translate ,testPath ,testStroke
               10 10)) ; x, y offsets
 
 
 
 (test! "stroke attributes")
 
-(assert `(gimp-path-stroke-get-length ,testPath ,testStroke
+(assert `(clay-path-stroke-get-length ,testPath ,testStroke
             0 ;precision
             ))
 
-(assert `(gimp-path-stroke-get-point-at-dist ,testPath ,testStroke
+(assert `(clay-path-stroke-get-point-at-dist ,testPath ,testStroke
             0 ; along
             0 ; precision
             ))
@@ -122,7 +122,7 @@
 ; TODO check isClosed
 ; !!! yields vector 24k length
 ; This does NOT add a stroke, only yields data
-(assert `(gimp-path-stroke-interpolate ,testPath ,testStroke
+(assert `(clay-path-stroke-interpolate ,testPath ,testStroke
              0 ; precision
              ))
 
@@ -132,28 +132,28 @@
 
 ; add a stroke to path by moveto does not throw
 ; TODO does this start at the end of the path?
-(assert `(gimp-path-bezier-stroke-new-moveto ,testPath
+(assert `(clay-path-bezier-stroke-new-moveto ,testPath
             200 200 ; x, y of moveto point
           ))
 ; effective: path now has two stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             2))
 
 ; FIXME: this crashes app when the stroke is closed
-;(assert `(gimp-path-bezier-stroke-lineto ,testPath ,testStroke
+;(assert `(clay-path-bezier-stroke-lineto ,testPath ,testStroke
 ;           256 256 ; x,y of lineto point
 ;         ))
 
 
 ; TODO error case: lineto when no previous moveto???
 
-(assert `(gimp-path-bezier-stroke-new-ellipse ,testPath
+(assert `(clay-path-bezier-stroke-new-ellipse ,testPath
             200 200 ; x, y of center
             20 20 ; radius in x, y direction
             200 ; angle of x axis in radians
           ))
 ; effective: path now has three stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             3))
 
 (test! "add strokeconicto")
@@ -161,36 +161,36 @@
 ; Extending a stroke, or adding another stroke?
 ; Should it fail if the given stroke is not a bezier?
 ; Isn't every stroke a bezier?
-(assert `(gimp-path-bezier-stroke-conicto
+(assert `(clay-path-bezier-stroke-conicto
             ,testPath
             ,testStroke
             200 200 ; x, y of control point
             20 20   ; x, y of end point
           ))
 ; effective: path now has three stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             3))
 
 (test! "add strokecubicto")
 ; simple test, I don't really know what the effect is.
 ; See above, conicto.
 ; Can you extend the same stroke twice?
-(assert `(gimp-path-bezier-stroke-cubicto
+(assert `(clay-path-bezier-stroke-cubicto
             ,testPath
             ,testStroke
             200 200 ; x, y of control point
             20 20   ; x, y of end point
           ))
 ; effective: path now has three stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             3))
 
 
 
 (test! "remove stroke")
 
-(assert `(gimp-path-remove-stroke ,testPath ,testStroke))
+(assert `(clay-path-remove-stroke ,testPath ,testStroke))
 ; effective: path now has two stroke
-(assert `(= (vector-length (car (gimp-path-get-strokes ,testPath)))
+(assert `(= (vector-length (car (clay-path-get-strokes ,testPath)))
             2))
 

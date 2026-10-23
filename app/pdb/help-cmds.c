@@ -25,86 +25,86 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpparamspecs.h"
-#include "plug-in/gimpplugin.h"
-#include "plug-in/gimppluginmanager-help-domain.h"
-#include "plug-in/gimppluginmanager.h"
+#include "core/clay.h"
+#include "core/clayparamspecs.h"
+#include "plug-in/clayplugin.h"
+#include "plug-in/claypluginmanager-help-domain.h"
+#include "plug-in/claypluginmanager.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-help_invoker (GimpProcedure         *procedure,
-              Gimp                  *gimp,
-              GimpContext           *context,
-              GimpProgress          *progress,
-              const GimpValueArray  *args,
+static ClayValueArray *
+help_invoker (ClayProcedure         *procedure,
+              Clay                  *clay,
+              ClayContext           *context,
+              ClayProgress          *progress,
+              const ClayValueArray  *args,
               GError               **error)
 {
   gboolean success = TRUE;
   const gchar *help_domain;
   const gchar *help_id;
 
-  help_domain = g_value_get_string (gimp_value_array_index (args, 0));
-  help_id = g_value_get_string (gimp_value_array_index (args, 1));
+  help_domain = g_value_get_string (clay_value_array_index (args, 0));
+  help_id = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpPlugInManager *manager = gimp->plug_in_manager;
+      ClayPlugInManager *manager = clay->plug_in_manager;
 
       if (! help_domain && manager->current_plug_in)
         help_domain = (gchar *)
-          gimp_plug_in_manager_get_help_domain (manager,
+          clay_plug_in_manager_get_help_domain (manager,
                                                 manager->current_plug_in->file,
                                                 NULL);
 
-      gimp_help (gimp, progress, help_domain, help_id);
+      clay_help (clay, progress, help_domain, help_id);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_help_procs (GimpPDB *pdb)
+register_help_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-help
+   * clay-help
    */
-  procedure = gimp_procedure_new (help_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-help");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (help_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-help");
+  clay_procedure_set_static_help (procedure,
                                   "Load a help page.",
-                                  "This procedure loads the specified help page into the helpbrowser or what ever is configured as help viewer. The help page is identified by its domain and ID: if help_domain is NULL, we use the help_domain which was registered using the 'gimp-plugin-help-register' procedure. If help_domain is NULL and no help domain was registered, the help domain of the main GIMP installation is used.",
+                                  "This procedure loads the specified help page into the helpbrowser or what ever is configured as help viewer. The help page is identified by its domain and ID: if help_domain is NULL, we use the help_domain which was registered using the 'clay-plugin-help-register' procedure. If help_domain is NULL and no help domain was registered, the help domain of the main Clay installation is used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2000");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("help-domain",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("help-domain",
                                                        "help domain",
                                                        "The help domain in which help_id is registered",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("help-id",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("help-id",
                                                        "help id",
                                                        "The help page's ID",
                                                        FALSE, FALSE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

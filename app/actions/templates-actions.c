@@ -20,76 +20,76 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimpcontext.h"
+#include "core/claycontext.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "actions.h"
 #include "templates-actions.h"
 #include "templates-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry templates_actions[] =
+static const ClayActionEntry templates_actions[] =
 {
-  { "templates-create-image", GIMP_ICON_IMAGE,
+  { "templates-create-image", CLAY_ICON_IMAGE,
     NC_("templates-action", "_Create Image from Template"), NULL, { NULL },
     NC_("templates-action", "Create a new image from the selected template"),
     templates_create_image_cmd_callback,
-    GIMP_HELP_TEMPLATE_IMAGE_NEW },
+    CLAY_HELP_TEMPLATE_IMAGE_NEW },
 
-  { "templates-new", GIMP_ICON_DOCUMENT_NEW,
+  { "templates-new", CLAY_ICON_DOCUMENT_NEW,
     NC_("templates-action", "_New Template..."), NULL, { NULL },
     NC_("templates-action", "Create a new template"),
     templates_new_cmd_callback,
-    GIMP_HELP_TEMPLATE_NEW },
+    CLAY_HELP_TEMPLATE_NEW },
 
-  { "templates-duplicate", GIMP_ICON_OBJECT_DUPLICATE,
+  { "templates-duplicate", CLAY_ICON_OBJECT_DUPLICATE,
     NC_("templates-action", "D_uplicate Template..."), NULL, { NULL },
     NC_("templates-action", "Duplicate this template"),
     templates_duplicate_cmd_callback,
-    GIMP_HELP_TEMPLATE_DUPLICATE },
+    CLAY_HELP_TEMPLATE_DUPLICATE },
 
-  { "templates-edit", GIMP_ICON_EDIT,
+  { "templates-edit", CLAY_ICON_EDIT,
     NC_("templates-action", "_Edit Template..."), NULL, { NULL },
     NC_("templates-action", "Edit this template"),
     templates_edit_cmd_callback,
-    GIMP_HELP_TEMPLATE_EDIT },
+    CLAY_HELP_TEMPLATE_EDIT },
 
-  { "templates-delete", GIMP_ICON_EDIT_DELETE,
+  { "templates-delete", CLAY_ICON_EDIT_DELETE,
     NC_("templates-action", "_Delete Template"), NULL, { NULL },
     NC_("templates-action", "Delete this template"),
     templates_delete_cmd_callback,
-    GIMP_HELP_TEMPLATE_DELETE }
+    CLAY_HELP_TEMPLATE_DELETE }
 };
 
 
 void
-templates_actions_setup (GimpActionGroup *group)
+templates_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "templates-action",
+  clay_action_group_add_actions (group, "templates-action",
                                  templates_actions,
                                  G_N_ELEMENTS (templates_actions));
 }
 
 void
-templates_actions_update (GimpActionGroup *group,
+templates_actions_update (ClayActionGroup *group,
                           gpointer         data)
 {
-  GimpContext  *context  = action_data_get_context (data);
-  GimpTemplate *template = NULL;
+  ClayContext  *context  = action_data_get_context (data);
+  ClayTemplate *template = NULL;
 
   if (context)
-    template = gimp_context_get_template (context);
+    template = clay_context_get_template (context);
 
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0, NULL)
 
   SET_SENSITIVE ("templates-create-image", template);
   SET_SENSITIVE ("templates-new",          context);

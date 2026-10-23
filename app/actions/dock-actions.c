@@ -20,16 +20,16 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpdockwindow.h"
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpmenudock.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claydockwindow.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/claymenudock.h"
 
-#include "display/gimpimagewindow.h"
+#include "display/clayimagewindow.h"
 
 #include "actions.h"
 #include "dock-actions.h"
@@ -37,15 +37,15 @@
 #include "window-actions.h"
 #include "window-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry dock_actions[] =
+static const ClayActionEntry dock_actions[] =
 {
-  { "dock-close", GIMP_ICON_WINDOW_CLOSE,
+  { "dock-close", CLAY_ICON_WINDOW_CLOSE,
     NC_("dock-action", "Close Dock"), NULL, { NULL }, NULL,
     window_close_cmd_callback,
-    GIMP_HELP_DOCK_CLOSE },
+    CLAY_HELP_DOCK_CLOSE },
 
   { "dock-open-display", NULL,
     NC_("dock-action", "_Open Display..."), NULL, { NULL },
@@ -54,38 +54,38 @@ static const GimpActionEntry dock_actions[] =
     NULL }
 };
 
-static const GimpToggleActionEntry dock_toggle_actions[] =
+static const ClayToggleActionEntry dock_toggle_actions[] =
 {
   { "dock-show-image-menu", NULL,
     NC_("dock-action", "_Show Image Selection"), NULL, { NULL }, NULL,
     dock_toggle_image_menu_cmd_callback,
     TRUE,
-    GIMP_HELP_DOCK_IMAGE_MENU },
+    CLAY_HELP_DOCK_IMAGE_MENU },
 
   { "dock-auto-follow-active", NULL,
     NC_("dock-action", "Auto _Follow Active Image"), NULL, { NULL }, NULL,
     dock_toggle_auto_cmd_callback,
     TRUE,
-    GIMP_HELP_DOCK_AUTO_BUTTON }
+    CLAY_HELP_DOCK_AUTO_BUTTON }
 };
 
 
 void
-dock_actions_setup (GimpActionGroup *group)
+dock_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "dock-action",
+  clay_action_group_add_actions (group, "dock-action",
                                  dock_actions,
                                  G_N_ELEMENTS (dock_actions));
 
-  gimp_action_group_add_toggle_actions (group, "dock-action",
+  clay_action_group_add_toggle_actions (group, "dock-action",
                                         dock_toggle_actions,
                                         G_N_ELEMENTS (dock_toggle_actions));
 
-  window_actions_setup (group, GIMP_HELP_DOCK_CHANGE_SCREEN);
+  window_actions_setup (group, CLAY_HELP_DOCK_CHANGE_SCREEN);
 }
 
 void
-dock_actions_update (GimpActionGroup *group,
+dock_actions_update (ClayActionGroup *group,
                      gpointer         data)
 {
   GtkWidget *widget   = action_data_get_widget (data);
@@ -95,14 +95,14 @@ dock_actions_update (GimpActionGroup *group,
     toplevel = gtk_widget_get_toplevel (widget);
 
 #define SET_ACTIVE(action,active) \
-        gimp_action_group_set_action_active (group, action, (active) != 0)
+        clay_action_group_set_action_active (group, action, (active) != 0)
 #define SET_VISIBLE(action,active) \
-        gimp_action_group_set_action_visible (group, action, (active) != 0)
+        clay_action_group_set_action_visible (group, action, (active) != 0)
 
-  if (GIMP_IS_DOCK_WINDOW (toplevel))
+  if (CLAY_IS_DOCK_WINDOW (toplevel))
     {
-      GimpDockWindow *dock_window = GIMP_DOCK_WINDOW (toplevel);
-      gboolean show_image_menu = ! gimp_dock_window_has_toolbox (dock_window);
+      ClayDockWindow *dock_window = CLAY_DOCK_WINDOW (toplevel);
+      gboolean show_image_menu = ! clay_dock_window_has_toolbox (dock_window);
 
       if (show_image_menu)
         {
@@ -110,9 +110,9 @@ dock_actions_update (GimpActionGroup *group,
           SET_VISIBLE ("dock-auto-follow-active", TRUE);
 
           SET_ACTIVE ("dock-show-image-menu",
-                      gimp_dock_window_get_show_image_menu (dock_window));
+                      clay_dock_window_get_show_image_menu (dock_window));
           SET_ACTIVE ("dock-auto-follow-active",
-                      gimp_dock_window_get_auto_follow_active (dock_window));
+                      clay_dock_window_get_auto_follow_active (dock_window));
         }
       else
         {
@@ -126,7 +126,7 @@ dock_actions_update (GimpActionGroup *group,
        */
       window_actions_update (group, toplevel);
     }
-  else if (GIMP_IS_IMAGE_WINDOW (toplevel))
+  else if (CLAY_IS_IMAGE_WINDOW (toplevel))
     {
       SET_VISIBLE ("dock-show-image-menu",    FALSE);
       SET_VISIBLE ("dock-auto-follow-active", FALSE);

@@ -14,19 +14,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package Gimp::CodeGen::lib;
+package Clay::CodeGen::lib;
 
-# Generates all the libgimp C wrappers (used by plugins)
-$destdir  = "$main::destdir/libgimp";
-$builddir = "$main::builddir/libgimp";
+# Generates all the libclay C wrappers (used by plugins)
+$destdir  = "$main::destdir/libclay";
+$builddir = "$main::builddir/libclay";
 
-*arg_types = \%Gimp::CodeGen::pdb::arg_types;
-*arg_parse = \&Gimp::CodeGen::pdb::arg_parse;
+*arg_types = \%Clay::CodeGen::pdb::arg_types;
+*arg_parse = \&Clay::CodeGen::pdb::arg_parse;
 
-*enums = \%Gimp::CodeGen::enums::enums;
+*enums = \%Clay::CodeGen::enums::enums;
 
-*write_file = \&Gimp::CodeGen::util::write_file;
-*FILE_EXT   = \$Gimp::CodeGen::util::FILE_EXT;
+*write_file = \&Clay::CodeGen::util::write_file;
+*FILE_EXT   = \$Clay::CodeGen::util::FILE_EXT;
 
 use Text::Wrap qw(wrap);
 
@@ -76,7 +76,7 @@ sub generate_fun {
 	return $rettype;
     }
 
-    my $funcname = "gimp_$name";
+    my $funcname = "clay_$name";
     my $wrapped = "";
     my $new_funcname = $funcname;
     my %usednames;
@@ -94,13 +94,13 @@ sub generate_fun {
 
     if ($proc->{deprecated}) {
         if ($proc->{deprecated} eq 'NONE') {
-            push @{$out->{protos}}, "GIMP_DEPRECATED\n";
+            push @{$out->{protos}}, "CLAY_DEPRECATED\n";
         }
         else {
             my $underscores = $proc->{deprecated};
             $underscores =~ s/-/_/g;
 
-            push @{$out->{protos}}, "GIMP_DEPRECATED_FOR($underscores)\n";
+            push @{$out->{protos}}, "CLAY_DEPRECATED_FOR($underscores)\n";
         }
     }
 
@@ -168,7 +168,7 @@ sub generate_fun {
         my $array_test = $retarg->{type};
         $array_test =~ s/array$//g;
         if ($retarg->{type} eq 'colorarray') {
-            $retdesc .= "\n *          The returned value must be freed with gimp_color_array_free().";
+            $retdesc .= "\n *          The returned value must be freed with clay_color_array_free().";
         }
         elsif ($retarg->{type} eq 'strv') {
             $retdesc .= "\n *          The returned value must be freed with g_strfreev().";
@@ -234,13 +234,13 @@ sub generate_fun {
             }
         }
         else {
-            # This gets passed to gimp_value_array_new_with_types()
+            # This gets passed to clay_value_array_new_with_types()
             if ($type eq 'enum') {
                 $enum_type = $typeinfo[0];
                 $enum_type =~ s/([a-z])([A-Z])/$1_$2/g;
                 $enum_type =~ s/([A-Z]+)([A-Z])/$1_$2/g;
                 $enum_type =~ tr/[a-z]/[A-Z]/;
-                $enum_type =~ s/^GIMP/GIMP_TYPE/;
+                $enum_type =~ s/^CLAY/CLAY_TYPE/;
                 $enum_type =~ s/^GEGL/GEGL_TYPE/;
 
                 $value_array .= "$enum_type, ";
@@ -262,7 +262,7 @@ sub generate_fun {
         if (exists $_->{array}) {
             my $arrayarg = $_->{array};
 
-            $value = "gimp_value_array_index (args, $argc)";
+            $value = "clay_value_array_index (args, $argc)";
 
             if (exists $arrayarg->{name}) {
                 $var_len = $arrayarg->{name};
@@ -317,7 +317,7 @@ sub generate_fun {
 
     # This marshals the return value(s)
     my $return_args = "";
-    my $return_marshal = "gimp_value_array_unref (return_vals);";
+    my $return_marshal = "clay_value_array_unref (return_vals);";
 
     # return success/failure boolean if we don't have anything else
     if ($rettype eq 'void') {
@@ -392,14 +392,14 @@ sub generate_fun {
 
         if ($rettype eq 'void') {
             $return_marshal .= <<CODE;
-success = GIMP_VALUES_GET_ENUM (return_vals, 0) == GIMP_PDB_SUCCESS;
+success = CLAY_VALUES_GET_ENUM (return_vals, 0) == CLAY_PDB_SUCCESS;
 
   if (success)
 CODE
         }
         else {
             $return_marshal .= <<CODE;
-if (GIMP_VALUES_GET_ENUM (return_vals, 0) == GIMP_PDB_SUCCESS)
+if (CLAY_VALUES_GET_ENUM (return_vals, 0) == CLAY_PDB_SUCCESS)
 CODE
         }
 
@@ -476,7 +476,7 @@ CODE
 
         $return_marshal .= <<'CODE';
 
-  gimp_value_array_unref (return_vals);
+  clay_value_array_unref (return_vals);
 
 CODE
         unless ($retvoid) {
@@ -488,7 +488,7 @@ CODE
     }
     else {
         $return_marshal = <<CODE;
-success = GIMP_VALUES_GET_ENUM (return_vals, 0) == GIMP_PDB_SUCCESS;
+success = CLAY_VALUES_GET_ENUM (return_vals, 0) == CLAY_PDB_SUCCESS;
 
   $return_marshal
 
@@ -607,16 +607,16 @@ $retdesc$sincedesc
 $rettype
 $wrapped$funcname ($clist)
 {
-  GimpValueArray *args;
-  GimpValueArray *return_vals;$return_args
+  ClayValueArray *args;
+  ClayValueArray *return_vals;$return_args
 $inargs_testing
-  args = gimp_value_array_new_from_types (NULL,
+  args = clay_value_array_new_from_types (NULL,
                                           ${value_array}G_TYPE_NONE);
 $arg_array
-  return_vals = _gimp_pdb_run_procedure_array (gimp_get_pdb (),
-                                               "gimp-$proc->{canonical_name}",
+  return_vals = _clay_pdb_run_procedure_array (clay_get_pdb (),
+                                               "clay-$proc->{canonical_name}",
                                                args);
-  gimp_value_array_unref (args);
+  clay_value_array_unref (args);
 
   $return_marshal
 }
@@ -648,7 +648,7 @@ sub generate_hbody {
     foreach (@{$out->{protos}}) {
         my $arglist;
 
-        if (!/^GIMP_DEPRECATED/) {
+        if (!/^CLAY_DEPRECATED/) {
             my $len;
 
             $arglist = [ split(' ', $_, 3) ];
@@ -722,7 +722,7 @@ sub generate_hbody {
     $body = $extra->{decls} if exists $extra->{decls};
     foreach (@{$out->{protos}}) { $body .= $_ }
     if ($out->{deprecated}) {
-        $body .= "#endif /* GIMP_DISABLE_DEPRECATED */\n";
+        $body .= "#endif /* CLAY_DISABLE_DEPRECATED */\n";
     }
     chomp $body;
 
@@ -745,7 +745,7 @@ sub generate {
     }
 
     my $lgpl_top = <<'LGPL';
-/* LIBGIMP - The GIMP Library
+/* LIBCLAY - The Clay Library
  * Copyright (C) 1995-2003 Peter Mattis and Spencer Kimball
  *
 LGPL
@@ -776,9 +776,9 @@ LGPL
     while (my($group, $out) = each %out) {
         my $hname = "${group}pdb.h"; 
         my $cname = "${group}pdb.c";
-        if ($group ne 'gimp') {
-	    $hname = "gimp${hname}"; 
-	    $cname = "gimp${cname}";
+        if ($group ne 'clay') {
+	    $hname = "clay${hname}"; 
+	    $cname = "clay${cname}";
         }
         $hname =~ s/_//g; $hname =~ s/pdb\./_pdb./;
         $cname =~ s/_//g; $cname =~ s/pdb\./_pdb./;
@@ -797,10 +797,10 @@ LGPL
         print HFILE $lgpl_top;
         print HFILE " * $hname\n";
         print HFILE $lgpl_bottom;
- 	my $guard = "__GIMP_\U$group\E_PDB_H__";
+ 	my $guard = "__CLAY_\U$group\E_PDB_H__";
 	print HFILE <<HEADER;
-#if !defined (__GIMP_H_INSIDE__) && !defined (GIMP_COMPILATION)
-#error "Only <libgimp/gimp.h> can be included directly."
+#if !defined (__CLAY_H_INSIDE__) && !defined (CLAY_COMPILATION)
+#error "Only <libclay/clay.h> can be included directly."
 #endif
 
 #ifndef $guard
@@ -828,7 +828,7 @@ HEADER
         print CFILE qq/#include "config.h"\n\n/;
 	print CFILE qq/#include "stamp-pdbgen.h"\n\n/;
 	print CFILE $out->{headers}, "\n" if exists $out->{headers};
-	print CFILE qq/#include "gimp.h"\n/;
+	print CFILE qq/#include "clay.h"\n/;
 
 	if (exists $main::grp{$group}->{lib_private}) {
 	    print CFILE qq/#include "$hname"\n/;
@@ -857,15 +857,15 @@ SECTION_DOCS
     }
 
     if (! $ENV{PDBGEN_GROUPS}) {
-        my $gimp_pdb_headers = "$builddir/gimp_pdb_headers.h$FILE_EXT";
-	open PFILE, "> $gimp_pdb_headers" or die "Can't open $gimp_pdb_headers: $!\n";
+        my $clay_pdb_headers = "$builddir/clay_pdb_headers.h$FILE_EXT";
+	open PFILE, "> $clay_pdb_headers" or die "Can't open $clay_pdb_headers: $!\n";
         print PFILE $lgpl_top;
-        print PFILE " * gimp_pdb_headers.h\n";
+        print PFILE " * clay_pdb_headers.h\n";
         print PFILE $lgpl_bottom;
-	my $guard = "__GIMP_PDB_HEADERS_H__";
+	my $guard = "__CLAY_PDB_HEADERS_H__";
 	print PFILE <<HEADER;
-#if !defined (__GIMP_H_INSIDE__) && !defined (GIMP_COMPILATION)
-#error "Only <libgimp/gimp.h> can be included directly."
+#if !defined (__CLAY_H_INSIDE__) && !defined (CLAY_COMPILATION)
+#error "Only <libclay/clay.h> can be included directly."
 #endif
 
 #ifndef $guard
@@ -875,8 +875,8 @@ HEADER
 	my @groups;
 	foreach $group (keys %out) {
 	    my $hname = "${group}pdb.h";
-	    if ($group ne 'gimp') {
-		$hname = "gimp${hname}";
+	    if ($group ne 'clay') {
+		$hname = "clay${hname}";
 	    }
 	    $hname =~ s/_//g; $hname =~ s/pdb\./_pdb./;
 	    if (! exists $main::grp{$group}->{lib_private}) {
@@ -884,13 +884,13 @@ HEADER
 	    }
 	}
 	foreach $group (sort @groups) {
-	    print PFILE "#include <libgimp/$group>\n";
+	    print PFILE "#include <libclay/$group>\n";
 	}
 	print PFILE <<HEADER;
 
 #endif /* $guard */
 HEADER
 	close PFILE;
-	&write_file($gimp_pdb_headers, $destdir);
+	&write_file($clay_pdb_headers, $destdir);
     }
 }

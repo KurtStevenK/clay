@@ -22,17 +22,17 @@
 
 #include <gexiv2/gexiv2.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "metadata-misc.h"
 #include "metadata-xml.h"
 #include "metadata-tags.h"
 #include "metadata-editor.h"
 
-gboolean gimpmetadata = FALSE;
+gboolean claymetadata = FALSE;
 gboolean xmptag;
 gboolean iptctag;
 gboolean tagvalue;
@@ -83,7 +83,7 @@ xml_parser_start_element (GMarkupParseContext  *context,
                           gpointer              user_data,
                           GError              **error)
 {
-  if (strcmp (element_name, "gimp-metadata") == 0)
+  if (strcmp (element_name, "clay-metadata") == 0)
     {
       if (attribute_names != NULL)
         {
@@ -106,10 +106,10 @@ xml_parser_start_element (GMarkupParseContext  *context,
               attrib = attribute_names[i + 1];
             }
         }
-      gimpmetadata = TRUE;
+      claymetadata = TRUE;
 
       if (metadata_xml_version < METADATA_XML_VERSION)
-        gimp_message (_("Older version metadata template found. Not all data will be set correctly!"));
+        clay_message (_("Older version metadata template found. Not all data will be set correctly!"));
     }
   else if (strcmp (element_name, "iptc-tag") == 0)
     {
@@ -146,7 +146,7 @@ xml_parser_start_element (GMarkupParseContext  *context,
 
       if (row_count > MAX_TAG_ROWS)
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("Metadata import: too many rows for tag '%s'"),
                       str_tag_name);
         }
@@ -158,7 +158,7 @@ xml_parser_start_element (GMarkupParseContext  *context,
 
       if (item_count > MAX_TAG_COLS)
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("Metadata import: too many columns for tag '%s'"),
                       str_tag_name);
         }
@@ -360,9 +360,9 @@ xml_parser_end_element (GMarkupParseContext  *context,
 
   args = user_data;
 
-  if (strcmp (element_name, "gimp-metadata") == 0)
+  if (strcmp (element_name, "clay-metadata") == 0)
     {
-      gimpmetadata = FALSE;
+      claymetadata = FALSE;
     }
   else if (strcmp (element_name, "iptc-tag") == 0)
     {
@@ -443,7 +443,7 @@ xml_parser_end_element (GMarkupParseContext  *context,
 }
 
 gboolean
-xml_parser_parse_file (GimpXmlParser  *parser,
+xml_parser_parse_file (ClayXmlParser  *parser,
                        const gchar    *filename,
                        GError        **error)
 {
@@ -473,15 +473,15 @@ xml_parser_parse_file (GimpXmlParser  *parser,
   return success;
 }
 
-GimpXmlParser *
+ClayXmlParser *
 xml_parser_new (const GMarkupParser *markup_parser,
                 gpointer             user_data)
 {
-  GimpXmlParser *parser;
+  ClayXmlParser *parser;
 
   g_return_val_if_fail (markup_parser != NULL, NULL);
 
-  parser = g_slice_new (GimpXmlParser);
+  parser = g_slice_new (ClayXmlParser);
 
   parser->context = g_markup_parse_context_new (markup_parser,
                     0, user_data, NULL);
@@ -490,12 +490,12 @@ xml_parser_new (const GMarkupParser *markup_parser,
 }
 
 void
-xml_parser_free (GimpXmlParser *parser)
+xml_parser_free (ClayXmlParser *parser)
 {
   g_return_if_fail (parser != NULL);
 
   g_markup_parse_context_free (parser->context);
-  g_slice_free (GimpXmlParser, parser);
+  g_slice_free (ClayXmlParser, parser);
 }
 
 gboolean
@@ -563,7 +563,7 @@ parse_encoding (const gchar  *text,
 }
 
 gboolean
-xml_parser_parse_io_channel (GimpXmlParser  *parser,
+xml_parser_parse_io_channel (ClayXmlParser  *parser,
                              GIOChannel     *io,
                              GError        **error)
 {

@@ -27,47 +27,47 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpgrouplayer.h"
-#include "core/gimpimage-merge.h"
-#include "core/gimpimage.h"
-#include "core/gimplayer.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claygrouplayer.h"
+#include "core/clayimage-merge.h"
+#include "core/clayimage.h"
+#include "core/claylayer.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-group_layer_new_invoker (GimpProcedure         *procedure,
-                         Gimp                  *gimp,
-                         GimpContext           *context,
-                         GimpProgress          *progress,
-                         const GimpValueArray  *args,
+static ClayValueArray *
+group_layer_new_invoker (ClayProcedure         *procedure,
+                         Clay                  *clay,
+                         ClayContext           *context,
+                         ClayProgress          *progress,
+                         const ClayValueArray  *args,
                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   const gchar *name;
-  GimpGroupLayer *group_layer = NULL;
+  ClayGroupLayer *group_layer = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  name = g_value_get_string (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 1));
 
   if (success)
     {
-      group_layer = GIMP_GROUP_LAYER (gimp_group_layer_new (image));
+      group_layer = CLAY_GROUP_LAYER (clay_group_layer_new (image));
 
       if (! group_layer)
         {
@@ -75,42 +75,42 @@ group_layer_new_invoker (GimpProcedure         *procedure,
         }
       else if (name != NULL && strlen (name) > 0)
         {
-          gimp_item_rename (GIMP_ITEM (group_layer), name, error);
+          clay_item_rename (CLAY_ITEM (group_layer), name, error);
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), group_layer);
+    g_value_set_object (clay_value_array_index (return_vals, 1), group_layer);
 
   return return_vals;
 }
 
-static GimpValueArray *
-group_layer_merge_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+group_layer_merge_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGroupLayer *group_layer;
-  GimpLayer *layer = NULL;
+  ClayValueArray *return_vals;
+  ClayGroupLayer *group_layer;
+  ClayLayer *layer = NULL;
 
-  group_layer = g_value_get_object (gimp_value_array_index (args, 0));
+  group_layer = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (gimp_pdb_item_is_attached (GIMP_ITEM (group_layer), NULL, 0, error) &&
-          gimp_pdb_item_is_group (GIMP_ITEM (group_layer), error))
+      if (clay_pdb_item_is_attached (CLAY_ITEM (group_layer), NULL, 0, error) &&
+          clay_pdb_item_is_group (CLAY_ITEM (group_layer), error))
         {
-          GimpImage *image = gimp_item_get_image (GIMP_ITEM (group_layer));
+          ClayImage *image = clay_item_get_image (CLAY_ITEM (group_layer));
 
-          layer = gimp_image_merge_group_layer (image, group_layer);
+          layer = clay_image_merge_group_layer (image, group_layer);
 
           if (! layer)
             success = FALSE;
@@ -119,88 +119,88 @@ group_layer_merge_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), layer);
+    g_value_set_object (clay_value_array_index (return_vals, 1), layer);
 
   return return_vals;
 }
 
 void
-register_group_layer_procs (GimpPDB *pdb)
+register_group_layer_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-group-layer-new
+   * clay-group-layer-new
    */
-  procedure = gimp_procedure_new (group_layer_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-group-layer-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (group_layer_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-group-layer-new");
+  clay_procedure_set_static_help (procedure,
                                   "Create a new group layer.",
-                                  "This procedure creates a new group layer with a given @name. If @name is %NULL, GIMP will choose a name using its default layer name algorithm.\n"
+                                  "This procedure creates a new group layer with a given @name. If @name is %NULL, Clay will choose a name using its default layer name algorithm.\n"
                                   "\n"
                                   "The new group layer still needs to be added to the image, as this is not automatic. Add the new layer with the [method@Image.insert_layer] method.\n"
                                   "Other attributes such as layer mask, modes and offsets should be set with explicit procedure calls.\n"
                                   "\n"
                                   "Other procedures useful with group layers: [method@Image.reorder_item], [method@Item.get_parent], [method@Item.get_children], [method@Item.is_group].",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Barak Itkin <lightningismyname@gmail.com>",
                                          "Barak Itkin",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image to which to add the group layer",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The group layer name",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_group_layer ("group-layer",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_group_layer ("group-layer",
                                                                 "group layer",
                                                                 "The newly created group layer",
                                                                 FALSE,
-                                                                GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-group-layer-merge
+   * clay-group-layer-merge
    */
-  procedure = gimp_procedure_new (group_layer_merge_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-group-layer-merge");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (group_layer_merge_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-group-layer-merge");
+  clay_procedure_set_static_help (procedure,
                                   "Merge the passed group layer's layers into one normal layer.",
                                   "This procedure combines the layers of the passed group layer into a single normal layer, replacing the group.\n"
                                   "The group layer is expected to be attached to an image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ell",
                                          "Ell",
                                          "2019");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_group_layer ("group-layer",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_group_layer ("group-layer",
                                                             "group layer",
                                                             "The group layer to merge",
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_layer ("layer",
+                                                            CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_layer ("layer",
                                                           "layer",
                                                           "The resulting layer",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

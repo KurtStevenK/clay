@@ -22,8 +22,8 @@
                                     height
                                     gradient-reverse)
   (let* (
-        (img (car (gimp-image-new width height RGB)))
-        (drawable (car (gimp-layer-new img "Gradient example" width height RGB
+        (img (car (clay-image-new width height RGB)))
+        (drawable (car (clay-layer-new img "Gradient example" width height RGB
                                        100 LAYER-MODE-NORMAL)))
 
         ; Calculate colors for checkerboard... just like in the gradient editor
@@ -32,40 +32,40 @@
         (bg-color (* 255 (/ 1 3)))
         )
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
     ; Render background checkerboard
 
-    (gimp-context-push)
+    (clay-context-push)
 
-    (gimp-context-set-foreground (list fg-color fg-color fg-color))
-    (gimp-context-set-background (list bg-color bg-color bg-color))
+    (clay-context-set-foreground (list fg-color fg-color fg-color))
+    (clay-context-set-background (list bg-color bg-color bg-color))
     (plug-in-checkerboard #:run-mode    RUN-NONINTERACTIVE
                           #:image       img
                           #:drawables   (vector drawable)
                           #:psychobilly 0
                           #:check-size  8)
 
-    (gimp-context-pop)
+    (clay-context-pop)
 
     ; Render gradient
 
-    (gimp-context-push)
+    (clay-context-push)
 
-    (gimp-context-set-gradient-reverse gradient-reverse)
-    (gimp-drawable-edit-gradient-fill drawable
+    (clay-context-set-gradient-reverse gradient-reverse)
+    (clay-drawable-edit-gradient-fill drawable
 				      GRADIENT-LINEAR 0
 				      FALSE 1 0
 				      TRUE
 				      0 0 (- width 1) 0)
 
-    (gimp-context-pop)
+    (clay-context-pop)
 
     ; Terminate
 
-    (gimp-image-undo-enable img)
-    (gimp-display-new img)
+    (clay-image-undo-enable img)
+    (clay-display-new img)
   )
 )
 

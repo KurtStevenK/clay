@@ -1,9 +1,9 @@
-# GIMP controllerrc
+# Clay controllerrc
 
-(GimpControllerInfo "Main Mouse Wheel"
+(ClayControllerInfo "Main Mouse Wheel"
     (enabled yes)
     (debug-events no)
-    (controller "GimpControllerWheel")
+    (controller "ClayControllerWheel")
     (mapping
         (map "scroll-up-alt"                 "tools-opacity-increase")
         (map "scroll-down-alt"               "tools-opacity-decrease")
@@ -16,10 +16,10 @@
         (map "scroll-up-shift-primary-alt"   "tools-spacing-increase")
         (map "scroll-down-shift-primary-alt" "tools-spacing-decrease")))
 
-(GimpControllerInfo "Main Keyboard"
+(ClayControllerInfo "Main Keyboard"
     (enabled yes)
     (debug-events no)
-    (controller "GimpControllerKeyboard")
+    (controller "ClayControllerKeyboard")
     (mapping
         (map "cursor-up-shift"      "view-scroll-page-up")
         (map "cursor-down-shift"    "view-scroll-page-down")
@@ -34,7 +34,7 @@
         (map "cursor-left-alt"      "tools-size-decrease")
         (map "cursor-right-alt"     "tools-size-increase")))
 
-# (GimpControllerInfo "Linux Input Example"
+# (ClayControllerInfo "Linux Input Example"
 #    (enabled yes)
 #    (debug-events no)
 #    (controller "ControllerLinuxInput"
@@ -43,7 +43,7 @@
 #        (map "wheel-turn-left"  "tools-value-2-decrease")
 #        (map "wheel-turn-right" "tools-value-2-increase")))
 
-# (GimpControllerInfo "Midi Example"
+# (ClayControllerInfo "Midi Example"
 #    (enabled yes)
 #    (debug-events no)
 #    (controller "ControllerMidi"

@@ -22,14 +22,14 @@
 
 #include "actions-types.h"
 
-#include "core/gimpchannel-select.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-colormap.h"
-#include "core/gimppalette.h"
+#include "core/claychannel-select.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-colormap.h"
+#include "core/claypalette.h"
 
-#include "widgets/gimpcolormapeditor.h"
-#include "widgets/gimpcolormapselection.h"
+#include "widgets/claycolormapeditor.h"
+#include "widgets/claycolormapselection.h"
 
 #include "actions.h"
 #include "colormap-commands.h"
@@ -38,73 +38,73 @@
 /*  public functions  */
 
 void
-colormap_edit_color_cmd_callback (GimpAction *action,
+colormap_edit_color_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpColormapEditor *editor = GIMP_COLORMAP_EDITOR (data);
+  ClayColormapEditor *editor = CLAY_COLORMAP_EDITOR (data);
 
-  gimp_colormap_editor_edit_color (editor);
+  clay_colormap_editor_edit_color (editor);
 }
 
 void
-colormap_delete_color_cmd_callback (GimpAction *action,
+colormap_delete_color_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpColormapEditor *editor = GIMP_COLORMAP_EDITOR (data);
+  ClayColormapEditor *editor = CLAY_COLORMAP_EDITOR (data);
 
-  gimp_colormap_editor_delete_color (editor);
+  clay_colormap_editor_delete_color (editor);
 }
 
 void
-colormap_add_color_cmd_callback (GimpAction *action,
+colormap_add_color_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpContext *context;
-  GimpImage   *image;
+  ClayContext *context;
+  ClayImage   *image;
   gboolean     background;
   return_if_no_context (context, data);
   return_if_no_image (image, data);
 
   background = (gboolean) g_variant_get_int32 (value);
 
-  if (gimp_palette_get_n_colors (gimp_image_get_colormap_palette ((image))) < 256)
+  if (clay_palette_get_n_colors (clay_image_get_colormap_palette ((image))) < 256)
     {
       GeglColor *color;
 
       if (background)
-        color = gimp_context_get_background (context);
+        color = clay_context_get_background (context);
       else
-        color = gimp_context_get_foreground (context);
+        color = clay_context_get_foreground (context);
 
-      gimp_image_add_colormap_entry (image, color);
-      gimp_image_flush (image);
+      clay_image_add_colormap_entry (image, color);
+      clay_image_flush (image);
     }
 }
 
 void
-colormap_to_selection_cmd_callback (GimpAction *action,
+colormap_to_selection_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpColormapSelection *selection;
-  GimpColormapEditor    *editor;
-  GimpImage             *image;
+  ClayColormapSelection *selection;
+  ClayColormapEditor    *editor;
+  ClayImage             *image;
   GList                 *drawables;
-  GimpChannelOps         op;
+  ClayChannelOps         op;
   gint                   col_index;
 
   return_if_no_image (image, data);
 
-  editor    = GIMP_COLORMAP_EDITOR (data);
-  selection = GIMP_COLORMAP_SELECTION (editor->selection);
-  col_index = gimp_colormap_selection_get_index (selection, NULL);
+  editor    = CLAY_COLORMAP_EDITOR (data);
+  selection = CLAY_COLORMAP_SELECTION (editor->selection);
+  col_index = clay_colormap_selection_get_index (selection, NULL);
 
-  op = (GimpChannelOps) g_variant_get_int32 (value);
+  op = (ClayChannelOps) g_variant_get_int32 (value);
 
-  drawables = gimp_image_get_selected_drawables (image);
+  drawables = clay_image_get_selected_drawables (image);
   if (g_list_length (drawables) != 1)
     {
       /* We should not reach this anyway as colormap-actions.c normally takes
@@ -115,11 +115,11 @@ colormap_to_selection_cmd_callback (GimpAction *action,
       return;
     }
 
-  gimp_channel_select_by_index (gimp_image_get_mask (image),
+  clay_channel_select_by_index (clay_image_get_mask (image),
                                 drawables->data,
                                 col_index, op,
                                 FALSE, 0.0, 0.0);
 
   g_list_free (drawables);
-  gimp_image_flush (image);
+  clay_image_flush (image);
 }

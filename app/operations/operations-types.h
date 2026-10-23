@@ -21,41 +21,41 @@
 
 #include <gegl-types.h>
 
-#include "gegl/gimp-gegl-types.h"
+#include "gegl/clay-gegl-types.h"
 
 #include "operations-enums.h"
 
 
 /*  operations  */
 
-typedef struct _GimpOperationPointFilter        GimpOperationPointFilter;
-typedef struct _GimpOperationLayerMode          GimpOperationLayerMode;
+typedef struct _ClayOperationPointFilter        ClayOperationPointFilter;
+typedef struct _ClayOperationLayerMode          ClayOperationLayerMode;
 
 
 /*  operation config objects  */
 
-typedef struct _GimpOperationSettings           GimpOperationSettings;
+typedef struct _ClayOperationSettings           ClayOperationSettings;
 
-typedef struct _GimpBrightnessContrastConfig    GimpBrightnessContrastConfig;
-typedef struct _GimpCageConfig                  GimpCageConfig;
-typedef struct _GimpColorBalanceConfig          GimpColorBalanceConfig;
-typedef struct _GimpColorizeConfig              GimpColorizeConfig;
-typedef struct _GimpCurvesConfig                GimpCurvesConfig;
-typedef struct _GimpDesaturateConfig            GimpDesaturateConfig;
-typedef struct _GimpHueSaturationConfig         GimpHueSaturationConfig;
-typedef struct _GimpLevelsConfig                GimpLevelsConfig;
-typedef struct _GimpPosterizeConfig             GimpPosterizeConfig;
-typedef struct _GimpThresholdConfig             GimpThresholdConfig;
+typedef struct _ClayBrightnessContrastConfig    ClayBrightnessContrastConfig;
+typedef struct _ClayCageConfig                  ClayCageConfig;
+typedef struct _ClayColorBalanceConfig          ClayColorBalanceConfig;
+typedef struct _ClayColorizeConfig              ClayColorizeConfig;
+typedef struct _ClayCurvesConfig                ClayCurvesConfig;
+typedef struct _ClayDesaturateConfig            ClayDesaturateConfig;
+typedef struct _ClayHueSaturationConfig         ClayHueSaturationConfig;
+typedef struct _ClayLevelsConfig                ClayLevelsConfig;
+typedef struct _ClayPosterizeConfig             ClayPosterizeConfig;
+typedef struct _ClayThresholdConfig             ClayThresholdConfig;
 
 
 /*  non-object types  */
 
-typedef struct _GimpCagePoint                   GimpCagePoint;
+typedef struct _ClayCagePoint                   ClayCagePoint;
 
 
 /*  functions  */
 
-typedef gboolean (* GimpLayerModeFunc)      (GeglOperation          *operation,
+typedef gboolean (* ClayLayerModeFunc)      (GeglOperation          *operation,
                                              void                   *in,
                                              void                   *aux,
                                              void                   *mask,
@@ -64,7 +64,7 @@ typedef gboolean (* GimpLayerModeFunc)      (GeglOperation          *operation,
                                              const GeglRectangle    *roi,
                                              gint                    level);
 
-typedef  void    (* GimpLayerModeBlendFunc) (GeglOperation          *operation,
+typedef  void    (* ClayLayerModeBlendFunc) (GeglOperation          *operation,
                                              const gfloat           *in,
                                              const gfloat           *layer,
                                              gfloat                 *out,

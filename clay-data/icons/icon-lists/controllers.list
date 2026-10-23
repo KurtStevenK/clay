@@ -1,0 +1,14 @@
+# grep -rI icon_name modules/controller-* app/widgets/claycontroller*
+# Used in:
+# - ClayControllerList as GtkCellRendererPixbuf (16px).
+
+# Default
+clay-controller
+
+clay-controller-keyboard
+clay-controller-linux-input
+clay-controller-midi
+clay-controller-wheel
+
+# CLAY_ICON_CONTROLLER_MOUSE == CLAY_ICON_CURSOR
+clay-cursor

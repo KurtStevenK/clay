@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * GimpConfig typedefs
+ * ClayConfig typedefs
  * Copyright (C) 2001-2002  Sven Neumann <sven@gimp.org>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,38 +20,38 @@
 
 #pragma once
 
-#include "libgimpconfig/gimpconfigtypes.h"
+#include "libclayconfig/clayconfigtypes.h"
 
 #include "config/config-enums.h"
 
 
-#define GIMP_OPACITY_TRANSPARENT      0.0
-#define GIMP_OPACITY_OPAQUE           1.0
+#define CLAY_OPACITY_TRANSPARENT      0.0
+#define CLAY_OPACITY_OPAQUE           1.0
 
 
-typedef struct _GimpGeglConfig       GimpGeglConfig;
-typedef struct _GimpCoreConfig       GimpCoreConfig;
-typedef struct _GimpDisplayConfig    GimpDisplayConfig;
-typedef struct _GimpGuiConfig        GimpGuiConfig;
-typedef struct _GimpDialogConfig     GimpDialogConfig;
-typedef struct _GimpEarlyRc          GimpEarlyRc;
-typedef struct _GimpPluginConfig     GimpPluginConfig;
-typedef struct _GimpRc               GimpRc;
+typedef struct _ClayGeglConfig       ClayGeglConfig;
+typedef struct _ClayCoreConfig       ClayCoreConfig;
+typedef struct _ClayDisplayConfig    ClayDisplayConfig;
+typedef struct _ClayGuiConfig        ClayGuiConfig;
+typedef struct _ClayDialogConfig     ClayDialogConfig;
+typedef struct _ClayEarlyRc          ClayEarlyRc;
+typedef struct _ClayPluginConfig     ClayPluginConfig;
+typedef struct _ClayRc               ClayRc;
 
-typedef struct _GimpXmlParser        GimpXmlParser;
+typedef struct _ClayXmlParser        ClayXmlParser;
 
-typedef struct _GimpDisplayOptions   GimpDisplayOptions;
+typedef struct _ClayDisplayOptions   ClayDisplayOptions;
 
 /* should be in core/core-types.h */
-typedef struct _GimpGrid             GimpGrid;
-typedef struct _GimpTemplate         GimpTemplate;
+typedef struct _ClayGrid             ClayGrid;
+typedef struct _ClayTemplate         ClayTemplate;
 
 
 /* for now these are defines, but can be turned into something
  * fancier for nicer debugging
  */
-#define gimp_assert             g_assert
-#define gimp_assert_not_reached g_assert_not_reached
+#define clay_assert             g_assert
+#define clay_assert_not_reached g_assert_not_reached
 
 
 #if ! GLIB_CHECK_VERSION(2, 76, 0)

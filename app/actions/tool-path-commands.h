@@ -18,19 +18,19 @@
 #pragma once
 
 
-void   tool_path_delete_anchor_cmd_callback  (GimpAction *action,
+void   tool_path_delete_anchor_cmd_callback  (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   tool_path_shift_start_cmd_callback    (GimpAction *action,
+void   tool_path_shift_start_cmd_callback    (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
 
-void   tool_path_insert_anchor_cmd_callback  (GimpAction *action,
+void   tool_path_insert_anchor_cmd_callback  (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   tool_path_delete_segment_cmd_callback (GimpAction *action,
+void   tool_path_delete_segment_cmd_callback (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);
-void   tool_path_reverse_stroke_cmd_callback (GimpAction *action,
+void   tool_path_reverse_stroke_cmd_callback (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data);

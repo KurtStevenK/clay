@@ -75,15 +75,15 @@ foreach language : languages
     lang_check = 'value[@xml:lang=\'@0@\'] | value[@xml:lang=\'@1@\']'.format(lang_code, web_lang_code)
   endif
 
-  gimp_ms_installer_lang_xsl = configure_file(
-    input: 'gimp-ms-installer-config.xsl.in',
-    output: 'gimp-ms-installer-config-@0@.xsl'.format(lang_code),
+  clay_ms_installer_lang_xsl = configure_file(
+    input: 'clay-ms-installer-config.xsl.in',
+    output: 'clay-ms-installer-config-@0@.xsl'.format(lang_code),
     configuration: { 'LANG_CHECK': lang_check },
   )
 
   setup_isl = '@0@.setup.isl'.format(lang_code)
   custom_target(setup_isl,
-    input : [ ms_installer_config_xml, gimp_ms_installer_lang_xsl  ],
+    input : [ ms_installer_config_xml, clay_ms_installer_lang_xsl  ],
     output: setup_isl,
     command: [
       xsltproc,

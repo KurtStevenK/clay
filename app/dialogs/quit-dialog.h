@@ -20,5 +20,5 @@
 #pragma once
 
 
-GtkWidget * quit_dialog_new      (Gimp *gimp);
-GtkWidget * close_all_dialog_new (Gimp *gimp);
+GtkWidget * quit_dialog_new      (Clay *clay);
+GtkWidget * close_all_dialog_new (Clay *clay);

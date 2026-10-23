@@ -30,8 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/clay.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_NAME        "wia-acquire"
@@ -45,12 +45,12 @@ typedef struct _WiaClass WiaClass;
 
 struct _Wia
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _WiaClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -59,32 +59,32 @@ struct _WiaClass
 
 GType                   wia_get_type           (void);
 
-static GList          * wia_query_procedures   (GimpPlugIn           *plug_in);
-static GimpProcedure  * wia_create_procedure   (GimpPlugIn           *plug_in,
+static GList          * wia_query_procedures   (ClayPlugIn           *plug_in);
+static ClayProcedure  * wia_create_procedure   (ClayPlugIn           *plug_in,
                                                 const gchar          *name);
 
-static GimpValueArray * wia_run                (GimpProcedure        *procedure,
-                                                GimpRunMode           run_mode,
-                                                GimpImage            *image,
-                                                GimpDrawable        **drawables,
-                                                GimpProcedureConfig  *config,
+static ClayValueArray * wia_run                (ClayProcedure        *procedure,
+                                                ClayRunMode           run_mode,
+                                                ClayImage            *image,
+                                                ClayDrawable        **drawables,
+                                                ClayProcedureConfig  *config,
                                                 gpointer              run_data);
 
-static GimpValueArray * wia_main               (GimpProcedure        *procedure,
-                                                GimpProcedureConfig  *config);
+static ClayValueArray * wia_main               (ClayProcedure        *procedure,
+                                                ClayProcedureConfig  *config);
 
 static HRESULT          CreateWiaDeviceManager (IWiaDevMgr2 **ppWiaDevMgr);
 
-G_DEFINE_TYPE (Wia, wia, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Wia, wia, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (WIA_TYPE)
+CLAY_MAIN (WIA_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 wia_class_init (WiaClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = wia_query_procedures;
   plug_in_class->create_procedure = wia_create_procedure;
@@ -97,72 +97,72 @@ wia_init (Wia *wia)
 }
 
 static GList *
-wia_query_procedures (GimpPlugIn *plug_in)
+wia_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_NAME));
 }
 
-static GimpProcedure *
-wia_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+wia_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_NAME))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             wia_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE     |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES    |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_IMAGE);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE     |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES    |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_IMAGE);
 
-      gimp_procedure_set_menu_label (procedure, _("_Scanner/Camera..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/File/Create");
+      clay_procedure_set_menu_label (procedure, _("_Scanner/Camera..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/File/Create");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         PLUG_IN_DESCRIPTION,
                                         PLUG_IN_HELP,
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alx Sa",
                                       "Alx Sa",
                                       "2026");
 
-      gimp_procedure_add_string_aux_argument (procedure, "scan-directory",
+      clay_procedure_add_string_aux_argument (procedure, "scan-directory",
                                               NULL, NULL,
                                               NULL,
-                                              GIMP_PARAM_READWRITE);
+                                              CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_core_object_array_return_value (procedure, "images",
+      clay_procedure_add_core_object_array_return_value (procedure, "images",
                                                          "Array of acquired images",
                                                          "Array of acquired images",
-                                                         GIMP_TYPE_IMAGE,
+                                                         CLAY_TYPE_IMAGE,
                                                          G_PARAM_READWRITE);
      }
 
   return procedure;
 }
 
-static GimpValueArray *
-wia_run (GimpProcedure        *procedure,
-         GimpRunMode           run_mode,
-         GimpImage            *image,
-         GimpDrawable        **drawables,
-         GimpProcedureConfig  *config,
+static ClayValueArray *
+wia_run (ClayProcedure        *procedure,
+         ClayRunMode           run_mode,
+         ClayImage            *image,
+         ClayDrawable        **drawables,
+         ClayProcedureConfig  *config,
          gpointer              run_data)
 {
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  if (run_mode == CLAY_RUN_NONINTERACTIVE)
     /* Currently, we don't do non-interactive calls.
      * Bail if someone tries to call us non-interactively
      */
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_CALLING_ERROR,
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_CALLING_ERROR,
                                              NULL);
 
   return wia_main (procedure, config);
@@ -185,9 +185,9 @@ CreateWiaDeviceManager (IWiaDevMgr2 **ppWiaDevMgr)
   return hr;
 }
 
-static GimpValueArray *
-wia_main (GimpProcedure       *procedure,
-          GimpProcedureConfig *config)
+static ClayValueArray *
+wia_main (ClayProcedure       *procedure,
+          ClayProcedureConfig *config)
 {
   GError  *error = NULL;
   HRESULT  hr    = CoInitialize (NULL);
@@ -200,8 +200,8 @@ wia_main (GimpProcedure       *procedure,
 
       if (SUCCEEDED (hr))
         {
-          GimpImage      **images         = NULL;
-          GimpValueArray  *return_vals    = NULL;
+          ClayImage      **images         = NULL;
+          ClayValueArray  *return_vals    = NULL;
           HWND             window_handle;
           LONG             nFiles         = 0;
           LPWSTR          *rFilePaths     = NULL;
@@ -239,7 +239,7 @@ wia_main (GimpProcedure       *procedure,
             }
 
           /* Values taken from app/gui/gui-unique.h */
-          window_handle = FindWindowW (L"GimpWin32UniqueHandler", L"GimpProxy");
+          window_handle = FindWindowW (L"ClayWin32UniqueHandler", L"ClayProxy");
 
           hr = pWiaDevMgr2->lpVtbl->GetImageDlg (pWiaDevMgr2, 0, NULL, window_handle,
                                                  szFolder, szFileName, &nFiles,
@@ -254,18 +254,18 @@ wia_main (GimpProcedure       *procedure,
 
               CoUninitialize ();
 
-              g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+              g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                            _("Unable to read scanned images."));
 
-              return gimp_procedure_new_return_values (procedure,
-                                                       GIMP_PDB_EXECUTION_ERROR,
+              return clay_procedure_new_return_values (procedure,
+                                                       CLAY_PDB_EXECUTION_ERROR,
                                                        NULL);
             }
 
           if (nFiles > 0)
             {
               gboolean has_directory = FALSE;
-              images                 = g_new0 (GimpImage *, nFiles + 1);
+              images                 = g_new0 (ClayImage *, nFiles + 1);
 
               for (gint i = 0; i < nFiles; i++)
                 {
@@ -276,11 +276,11 @@ wia_main (GimpProcedure       *procedure,
                     {
                       GFile *file = g_file_new_for_path (filename);
 
-                      images[i] = gimp_file_load (GIMP_RUN_NONINTERACTIVE,
+                      images[i] = clay_file_load (CLAY_RUN_NONINTERACTIVE,
                                                   file);
-                      gimp_display_new (images[i]);
-                      if (! gimp_image_undo_is_enabled (images[i]))
-                        gimp_image_undo_enable (images[i]);
+                      clay_display_new (images[i]);
+                      if (! clay_image_undo_is_enabled (images[i]))
+                        clay_image_undo_enable (images[i]);
 
                       /* Store first valid directory for later use */
                       if (! has_directory)
@@ -310,26 +310,26 @@ wia_main (GimpProcedure       *procedure,
 
           CoUninitialize ();
 
-          return_vals = gimp_procedure_new_return_values (procedure,
-                                                          GIMP_PDB_SUCCESS,
+          return_vals = clay_procedure_new_return_values (procedure,
+                                                          CLAY_PDB_SUCCESS,
                                                           NULL);
-          GIMP_VALUES_TAKE_CORE_OBJECT_ARRAY (return_vals, 1, images);
+          CLAY_VALUES_TAKE_CORE_OBJECT_ARRAY (return_vals, 1, images);
 
           return return_vals;
         }
       else
         {
-          g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                        _("WIA driver not found, scanning not available"));
 
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_EXECUTION_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_EXECUTION_ERROR,
                                                    NULL);
         }
 
       CoUninitialize ();
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR,
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR,
                                            NULL);
 }

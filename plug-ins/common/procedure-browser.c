@@ -29,7 +29,7 @@
  * NOTE :
  * this is only a exercice for me (my first "plug-in" (extension))
  * so it's very (very) dirty.
- * Btw, hope it gives you some ideas about gimp possibilities.
+ * Btw, hope it gives you some ideas about clay possibilities.
  *
  * The core of the plugin is not here. See dbbrowser_utils (shared
  * with script-fu-console).
@@ -42,15 +42,15 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-dbbrowser"
 #define PLUG_IN_BINARY "procedure-browser"
-#define PLUG_IN_ROLE   "gimp-procedure-browser"
+#define PLUG_IN_ROLE   "clay-procedure-browser"
 
 
 typedef struct _Browser      Browser;
@@ -58,12 +58,12 @@ typedef struct _BrowserClass BrowserClass;
 
 struct _Browser
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _BrowserClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -75,25 +75,25 @@ struct _BrowserClass
 
 GType                   browser_get_type         (void);
 
-static GList          * browser_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * browser_create_procedure (GimpPlugIn           *plug_in,
+static GList          * browser_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * browser_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * browser_run              (GimpProcedure        *procedure,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray * browser_run              (ClayProcedure        *procedure,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
 
-G_DEFINE_TYPE (Browser, browser, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Browser, browser, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (BROWSER_TYPE)
+CLAY_MAIN (BROWSER_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 browser_class_init (BrowserClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = browser_query_procedures;
   plug_in_class->create_procedure = browser_create_procedure;
@@ -106,88 +106,88 @@ browser_init (Browser *browser)
 }
 
 static GList *
-browser_query_procedures (GimpPlugIn *plug_in)
+browser_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-browser_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+browser_create_procedure (ClayPlugIn  *plug_in,
                           const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_procedure_new (plug_in, name,
-                                      GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_procedure_new (plug_in, name,
+                                      CLAY_PDB_PROC_TYPE_PLUGIN,
                                       browser_run, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Procedure _Browser"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Help/[Programming]");
+      clay_procedure_set_menu_label (procedure, _("Procedure _Browser"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Help/[Programming]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("List available procedures in the PDB"),
                                         NULL,
                                         PLUG_IN_PROC);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Thomas Noel",
                                       "Thomas Noel",
                                       "23th june 1997");
 
-      gimp_procedure_add_enum_argument (procedure, "run-mode",
+      clay_procedure_add_enum_argument (procedure, "run-mode",
                                         "Run mode",
                                         "The run mode",
-                                        GIMP_TYPE_RUN_MODE,
-                                        GIMP_RUN_INTERACTIVE,
+                                        CLAY_TYPE_RUN_MODE,
+                                        CLAY_RUN_INTERACTIVE,
                                         G_PARAM_READWRITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-browser_run (GimpProcedure        *procedure,
-             GimpProcedureConfig  *config,
+static ClayValueArray *
+browser_run (ClayProcedure        *procedure,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpRunMode run_mode;
+  ClayRunMode run_mode;
 
   g_object_get (config, "run-mode", &run_mode, NULL);
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
+    case CLAY_RUN_INTERACTIVE:
       {
         GtkWidget *dialog;
 
-        gimp_ui_init (PLUG_IN_BINARY);
+        clay_ui_init (PLUG_IN_BINARY);
 
         dialog =
-          gimp_proc_browser_dialog_new (_("Procedure Browser"), PLUG_IN_BINARY,
-                                        gimp_standard_help_func, PLUG_IN_PROC,
+          clay_proc_browser_dialog_new (_("Procedure Browser"), PLUG_IN_BINARY,
+                                        clay_standard_help_func, PLUG_IN_PROC,
 
                                         _("_Close"), GTK_RESPONSE_CLOSE,
 
                                         NULL);
 
-          gimp_window_set_transient (GTK_WINDOW (dialog));
+          clay_window_set_transient (GTK_WINDOW (dialog));
 
         gtk_dialog_run (GTK_DIALOG (dialog));
         gtk_widget_destroy (dialog);
       }
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_NONINTERACTIVE:
         {
           GError *error = NULL;
 
-          g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                        _("Procedure %s allows only interactive invocation."),
-                       gimp_procedure_get_name (procedure));
+                       clay_procedure_get_name (procedure));
 
-          return gimp_procedure_new_return_values (procedure,
-                                                   GIMP_PDB_CALLING_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                                   CLAY_PDB_CALLING_ERROR,
                                                    error);
         }
       break;
@@ -196,5 +196,5 @@ browser_run (GimpProcedure        *procedure,
       break;
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }

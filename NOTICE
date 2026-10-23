@@ -10,11 +10,12 @@ Development Team. The upstream copyright notices in the source files are
 kept unchanged.
 
 Clay is distributed under the GNU General Public License, version 3 or
-later (see COPYING). The libraries under libgimp* are distributed under the
+later (see COPYING). The libraries under libclay* are distributed under the
 GNU Lesser General Public License, version 3 or later. Some icons and
 artwork carry their own notices.
 
-Clay keeps GIMP's plug-in interface (libgimp, the PDB, the Gimp-3.0
-introspection namespace and the gimp-3.0 pkg-config files) so that GIMP
-plug-ins and scripts keep working. Those internal names are therefore
-not renamed.
+Clay renames GIMP's plug-in interface: libgimp is libclay, PDB procedures
+are clay-*, the Gimp-3.0 introspection namespace is Clay-3.0 and the
+pkg-config files are clay-3.0 (with a gimp-3.0 compatibility file for one
+release). GIMP plug-ins and
+scripts need these new names to run in Clay.

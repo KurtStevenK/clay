@@ -29,17 +29,17 @@
 
 
 ; Setup
-; gimp-logo.png
+; clay-logo.png
 (define testImage (testing:load-test-image-basic-v3))
 ; image has one layer
-(define testDrawable (vector-ref (gimp-image-get-layers testImage) 0))
+(define testDrawable (vector-ref (clay-image-get-layers testImage) 0))
 
 (define testImageGray (testing:load-test-image-basic-v3))
-(gimp-image-convert-grayscale testImageGray)
-(define testDrawableGray (vector-ref (gimp-image-get-layers testImageGray) 0))
+(clay-image-convert-grayscale testImageGray)
+(define testDrawableGray (vector-ref (clay-image-get-layers testImageGray) 0))
 
 (define testImageIndexed (testing:load-test-image-basic-v3))
-(gimp-image-convert-indexed
+(clay-image-convert-indexed
                   testImageIndexed
                   CONVERT-DITHER-NONE
                   CONVERT-PALETTE-GENERATE
@@ -48,7 +48,7 @@
                   1  ; remove-unused. FUTURE: #t
                   "myPalette" ; ignored
                   )
-(define testDrawableIndexed (vector-ref (gimp-image-get-layers testImageIndexed) 0))
+(define testDrawableIndexed (vector-ref (clay-image-get-layers testImageIndexed) 0))
 
 
 
@@ -57,14 +57,14 @@
 ; returned pixel of image of mode RGBA has alpha component
 ; Test is fragile to chosen testImage.
 ; Formerly: (71 71 71)
-(assert `(equal? (gimp-drawable-get-pixel ,testDrawable 1 1)
+(assert `(equal? (clay-drawable-get-pixel ,testDrawable 1 1)
                  '(0 0 0 0)))
 
 (test! "set-pixel of RGBA image from a 3 component list.")
 ; ScriptFu sets alpha to opaque.
-(assert `(gimp-drawable-set-pixel ,testDrawable 1 1 '(2 2 2)))
+(assert `(clay-drawable-set-pixel ,testDrawable 1 1 '(2 2 2)))
 ; effective
-(assert `(equal? (gimp-drawable-get-pixel ,testDrawable 1 1)
+(assert `(equal? (clay-drawable-get-pixel ,testDrawable 1 1)
                  '(2 2 2 255)))
 
 
@@ -77,15 +77,15 @@
 
 ; returned pixel of image of mode GRAYA has two component
 ; black transparent
-(assert `(equal? (gimp-drawable-get-pixel ,testDrawableGray 1 1)
+(assert `(equal? (clay-drawable-get-pixel ,testDrawableGray 1 1)
                  '(0 0)))
 
 ; Can set a pixel in GRAYA image from a 3 component list.
 ; Extra list elements are ignored
-(assert `(gimp-drawable-set-pixel ,testDrawableGray 1 1 '(2 2 2)))
+(assert `(clay-drawable-set-pixel ,testDrawableGray 1 1 '(2 2 2)))
 ; effective
 ; FIXME why isn't it (2 2) ????
-(assert `(equal? (gimp-drawable-get-pixel ,testDrawableGray 1 1)
+(assert `(equal? (clay-drawable-get-pixel ,testDrawableGray 1 1)
                  '(2 255)))
 
 
@@ -96,10 +96,10 @@
 (test! "get-pixel of INDEXED A image ")
 
 ; pixel of image of mode INDEXED A has four components
-(assert `(equal? (gimp-drawable-get-pixel ,testDrawableIndexed 1 1)
+(assert `(equal? (clay-drawable-get-pixel ,testDrawableIndexed 1 1)
                 '(19 18 17 0)))
 ; FIXME the results seem strange, should be (0 0 0 0)?
-(display (gimp-drawable-get-pixel testDrawableIndexed 1 1))
+(display (clay-drawable-get-pixel testDrawableIndexed 1 1))
 ; Sometimes???  '(71 71 71 0)))
 
 

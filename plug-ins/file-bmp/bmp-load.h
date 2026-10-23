@@ -20,7 +20,7 @@
 #define __BMP_LOAD_H__
 
 
-GimpImage * load_image (GFile   *file,
+ClayImage * load_image (GFile   *file,
                         GError **error);
 
 

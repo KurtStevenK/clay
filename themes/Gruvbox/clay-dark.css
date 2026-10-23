@@ -1,0 +1,34 @@
+/* Gruvbox theme, dark scheme (generated palette; plain @define-color values, edit freely). */
+
+@define-color fg-color                   rgb(235,219,178);
+@define-color bg-color                   rgb(40,40,40);
+@define-color border-color               rgb(67,65,59);
+@define-color dimmed-fg-color            rgb(186,174,144);
+@define-color disabled-fg-color          rgb(147,138,116);
+@define-color disabled-button-color      rgb(102,97,84);
+@define-color hover-color                rgb(67,65,59);
+@define-color widget-bg-color            rgb(52,51,48);
+@define-color selected-color             rgb(79,76,68);
+@define-color extreme-bg-color           rgb(28,28,28);
+@define-color extreme-selected-color     rgb(67,65,59);
+@define-color strong-border-color        rgb(108,103,88);
+@define-color stronger-border-color      rgb(108,103,88);
+@define-color edge-border-color          rgb(108,103,88);
+@define-color scrollbar-slider-color     rgb(108,103,88);
+@define-color scrollbar-trough-color     rgb(28,28,28);
+@define-color ruler-color                rgba(67,65,59,0.3);
+@define-color accent-color               rgb(250,189,47);
+@define-color accent-hover-color         rgb(251,202,89);
+@define-color on-accent-color            rgb(20,20,20);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");
+
+/* theme extras (typeface, icon colours) */
+* { font-family: "Menlo", "Monaco", "Courier New", monospace; }

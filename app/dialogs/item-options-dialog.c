@@ -20,39 +20,39 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpitem.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayitem.h"
 
-#include "widgets/gimpviewabledialog.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayviewabledialog.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "item-options-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _ItemOptionsDialog ItemOptionsDialog;
 
 struct _ItemOptionsDialog
 {
-  GimpImage               *image;
-  GimpItem                *item;
-  GimpContext             *context;
+  ClayImage               *image;
+  ClayItem                *item;
+  ClayContext             *context;
   gboolean                 visible;
-  GimpColorTag             color_tag;
+  ClayColorTag             color_tag;
   gboolean                 lock_content;
   gboolean                 lock_position;
   gboolean                 lock_visibility;
-  GimpItemOptionsCallback  callback;
+  ClayItemOptionsCallback  callback;
   gpointer                 user_data;
 
   GtkWidget               *left_vbox;
@@ -80,9 +80,9 @@ static gint        check_button_get_bold_label_width (const gchar       *text);
 /*  public functions  */
 
 GtkWidget *
-item_options_dialog_new (GimpImage               *image,
-                         GimpItem                *item,
-                         GimpContext             *context,
+item_options_dialog_new (ClayImage               *image,
+                         ClayItem                *item,
+                         ClayContext             *context,
                          GtkWidget               *parent,
                          const gchar             *title,
                          const gchar             *role,
@@ -96,23 +96,23 @@ item_options_dialog_new (GimpImage               *image,
                          const gchar             *lock_visibility_label,
                          const gchar             *item_name,
                          gboolean                 item_visible,
-                         GimpColorTag             item_color_tag,
+                         ClayColorTag             item_color_tag,
                          gboolean                 item_lock_content,
                          gboolean                 item_lock_position,
                          gboolean                 item_lock_visibility,
-                         GimpItemOptionsCallback  callback,
+                         ClayItemOptionsCallback  callback,
                          gpointer                 user_data)
 {
   ItemOptionsDialog *private;
   GtkWidget         *dialog;
-  GimpViewable      *viewable;
+  ClayViewable      *viewable;
   GtkWidget         *main_hbox;
   GtkWidget         *grid;
   GtkWidget         *button;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), NULL);
-  g_return_val_if_fail (item == NULL || GIMP_IS_ITEM (item), NULL);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), NULL);
+  g_return_val_if_fail (item == NULL || CLAY_IS_ITEM (item), NULL);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
   g_return_val_if_fail (title != NULL, NULL);
   g_return_val_if_fail (role != NULL, NULL);
@@ -135,14 +135,14 @@ item_options_dialog_new (GimpImage               *image,
   private->user_data       = user_data;
 
   if (item)
-    viewable = GIMP_VIEWABLE (item);
+    viewable = CLAY_VIEWABLE (item);
   else
-    viewable = GIMP_VIEWABLE (image);
+    viewable = CLAY_VIEWABLE (image);
 
-  dialog = gimp_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
+  dialog = clay_viewable_dialog_new (g_list_prepend (NULL, viewable), context,
                                      title, role, icon_name, desc,
                                      parent,
-                                     gimp_standard_help_func, help_id,
+                                     clay_standard_help_func, help_id,
 
                                      _("_Cancel"), GTK_RESPONSE_CANCEL,
                                      _("_OK"),     GTK_RESPONSE_OK,
@@ -151,7 +151,7 @@ item_options_dialog_new (GimpImage               *image,
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -192,24 +192,24 @@ item_options_dialog_new (GimpImage               *image,
       private->name_entry = gtk_entry_new ();
       gtk_entry_set_activates_default (GTK_ENTRY (private->name_entry), TRUE);
       gtk_entry_set_text (GTK_ENTRY (private->name_entry), item_name);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, private->grid_row++,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, private->grid_row++,
                                 name_label, 0.0, 0.5,
                                 private->name_entry, 1);
       /* Make the item name entry field have focus on creation */
       gtk_widget_grab_focus (private->name_entry);
 
-      radio_box = gimp_enum_radio_box_new (GIMP_TYPE_COLOR_TAG,
-                                           G_CALLBACK (gimp_radio_button_update),
+      radio_box = clay_enum_radio_box_new (CLAY_TYPE_COLOR_TAG,
+                                           G_CALLBACK (clay_radio_button_update),
                                            &private->color_tag, NULL,
                                            &radio);
-      gtk_widget_set_name (radio_box, "gimp-color-tag-box");
+      gtk_widget_set_name (radio_box, "clay-color-tag-box");
       gtk_orientable_set_orientation (GTK_ORIENTABLE (radio_box),
                                       GTK_ORIENTATION_HORIZONTAL);
-      gimp_grid_attach_aligned (GTK_GRID (grid), 0, private->grid_row++,
+      clay_grid_attach_aligned (GTK_GRID (grid), 0, private->grid_row++,
                                 _("Color tag:"), 0.0, 0.5,
                                 radio_box, 1);
 
-      gimp_int_radio_group_set_active (GTK_RADIO_BUTTON (radio),
+      clay_int_radio_group_set_active (GTK_RADIO_BUTTON (radio),
                                        private->color_tag);
 
       children = gtk_container_get_children (GTK_CONTAINER (radio_box));
@@ -218,7 +218,7 @@ item_options_dialog_new (GimpImage               *image,
            list;
            list = g_list_next (list))
         {
-          GimpColorTag  color_tag;
+          ClayColorTag  color_tag;
           GeglColor    *rgb = gegl_color_new ("none");
           GtkWidget    *image;
 
@@ -229,21 +229,21 @@ item_options_dialog_new (GimpImage               *image,
           gtk_widget_destroy (gtk_bin_get_child (GTK_BIN (radio)));
 
           color_tag = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (radio),
-                                                          "gimp-item-data"));
+                                                          "clay-item-data"));
 
-          if (gimp_get_color_tag_color (color_tag, rgb, FALSE))
+          if (clay_get_color_tag_color (color_tag, rgb, FALSE))
             {
               gint w, h;
 
-              image = gimp_color_area_new (rgb, GIMP_COLOR_AREA_FLAT, 0);
-              gimp_color_area_set_color_config (GIMP_COLOR_AREA (image),
-                                                context->gimp->config->color_management);
+              image = clay_color_area_new (rgb, CLAY_COLOR_AREA_FLAT, 0);
+              clay_color_area_set_color_config (CLAY_COLOR_AREA (image),
+                                                context->clay->config->color_management);
               gtk_icon_size_lookup (GTK_ICON_SIZE_MENU, &w, &h);
               gtk_widget_set_size_request (image, w, h);
             }
           else
             {
-              image = gtk_image_new_from_icon_name (GIMP_ICON_CLOSE,
+              image = gtk_image_new_from_icon_name (CLAY_ICON_CLOSE,
                                                     GTK_ICON_SIZE_MENU);
             }
           g_object_unref (rgb);
@@ -257,7 +257,7 @@ item_options_dialog_new (GimpImage               *image,
 
   /*  The switches frame & vbox  */
 
-  private->right_frame = gimp_frame_new (_("Switches"));
+  private->right_frame = clay_frame_new (_("Switches"));
   gtk_box_pack_start (GTK_BOX (main_hbox), private->right_frame,
                       FALSE, FALSE, 0);
   gtk_widget_set_visible (private->right_frame, TRUE);
@@ -267,12 +267,12 @@ item_options_dialog_new (GimpImage               *image,
   gtk_widget_set_visible (private->right_vbox, TRUE);
 
   button = check_button_with_icon_new (_("_Visible"),
-                                       GIMP_ICON_VISIBLE,
+                                       CLAY_ICON_VISIBLE,
                                        GTK_BOX (private->right_vbox));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
                                 private->visible);
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->visible);
 
   button = check_button_with_icon_new (lock_content_label,
@@ -281,27 +281,27 @@ item_options_dialog_new (GimpImage               *image,
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
                                 private->lock_content);
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->lock_content);
 
   button = check_button_with_icon_new (lock_position_label,
-                                       GIMP_ICON_LOCK_POSITION,
+                                       CLAY_ICON_LOCK_POSITION,
                                        GTK_BOX (private->right_vbox));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
                                 private->lock_position);
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->lock_position);
 
   private->lock_position_toggle = button;
 
   button = check_button_with_icon_new (lock_visibility_label,
-                                       GIMP_ICON_LOCK_VISIBILITY,
+                                       CLAY_ICON_LOCK_VISIBILITY,
                                        GTK_BOX (private->right_vbox));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
                                 private->lock_visibility);
   g_signal_connect (button, "toggled",
-                    G_CALLBACK (gimp_toggle_button_update),
+                    G_CALLBACK (clay_toggle_button_update),
                     &private->lock_visibility);
 
   return dialog;
@@ -312,7 +312,7 @@ item_options_dialog_get_vbox (GtkWidget *dialog)
 {
   ItemOptionsDialog *private;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog), NULL);
 
   private = g_object_get_data (G_OBJECT (dialog),
                                "item-options-dialog-private");
@@ -327,7 +327,7 @@ item_options_dialog_get_right_vbox (GtkWidget *dialog)
 {
   ItemOptionsDialog *private;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog), NULL);
 
   private = g_object_get_data (G_OBJECT (dialog),
                                "item-options-dialog-private");
@@ -343,7 +343,7 @@ item_options_dialog_get_grid (GtkWidget *dialog,
 {
   ItemOptionsDialog *private;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog), NULL);
   g_return_val_if_fail (next_row != NULL, NULL);
 
   private = g_object_get_data (G_OBJECT (dialog),
@@ -361,7 +361,7 @@ item_options_dialog_get_name_entry (GtkWidget *dialog)
 {
   ItemOptionsDialog *private;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog), NULL);
 
   private = g_object_get_data (G_OBJECT (dialog),
                                "item-options-dialog-private");
@@ -376,7 +376,7 @@ item_options_dialog_get_lock_position (GtkWidget *dialog)
 {
   ItemOptionsDialog *private;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog), NULL);
 
   private = g_object_get_data (G_OBJECT (dialog),
                                "item-options-dialog-private");
@@ -393,7 +393,7 @@ item_options_dialog_add_widget (GtkWidget   *dialog,
 {
   ItemOptionsDialog *private;
 
-  g_return_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog));
+  g_return_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog));
   g_return_if_fail (GTK_IS_WIDGET (widget));
 
   private = g_object_get_data (G_OBJECT (dialog),
@@ -401,7 +401,7 @@ item_options_dialog_add_widget (GtkWidget   *dialog,
 
   g_return_if_fail (private != NULL);
 
-  gimp_grid_attach_aligned (GTK_GRID (private->left_grid),
+  clay_grid_attach_aligned (GTK_GRID (private->left_grid),
                             0, private->grid_row++,
                             label, 0.0, 0.5,
                             widget, 1);
@@ -414,7 +414,7 @@ item_options_dialog_add_switch (GtkWidget   *dialog,
 {
   ItemOptionsDialog *private;
 
-  g_return_val_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog), NULL);
+  g_return_val_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog), NULL);
   g_return_val_if_fail (icon_name != NULL, NULL);
   g_return_val_if_fail (label != NULL, NULL);
 
@@ -433,7 +433,7 @@ item_options_dialog_set_switches_visible (GtkWidget *dialog,
 {
   ItemOptionsDialog *private;
 
-  g_return_if_fail (GIMP_IS_VIEWABLE_DIALOG (dialog));
+  g_return_if_fail (CLAY_IS_VIEWABLE_DIALOG (dialog));
 
   private = g_object_get_data (G_OBJECT (dialog),
                                "item-options-dialog-private");
@@ -522,7 +522,7 @@ check_button_get_bold_label_width (const gchar *text)
   gtk_label_set_text (GTK_LABEL (temp_label), text);
   gtk_widget_set_visible (temp_label, TRUE);
 
-  gimp_label_set_attributes (GTK_LABEL (temp_label),
+  clay_label_set_attributes (GTK_LABEL (temp_label),
                              PANGO_ATTR_WEIGHT, PANGO_WEIGHT_BOLD,
                              -1);
 

@@ -18,269 +18,269 @@
 #pragma once
 
 
-#define GIMP_TYPE_BUTTON_PRESS_TYPE (gimp_button_press_type_get_type ())
+#define CLAY_TYPE_BUTTON_PRESS_TYPE (clay_button_press_type_get_type ())
 
-GType gimp_button_press_type_get_type (void);
-
-typedef enum
-{
-  GIMP_BUTTON_PRESS_NORMAL,
-  GIMP_BUTTON_PRESS_DOUBLE,
-  GIMP_BUTTON_PRESS_TRIPLE
-} GimpButtonPressType;
-
-
-#define GIMP_TYPE_BUTTON_RELEASE_TYPE (gimp_button_release_type_get_type ())
-
-GType gimp_button_release_type_get_type (void);
+GType clay_button_press_type_get_type (void);
 
 typedef enum
 {
-  GIMP_BUTTON_RELEASE_NORMAL,
-  GIMP_BUTTON_RELEASE_CANCEL,
-  GIMP_BUTTON_RELEASE_CLICK,
-  GIMP_BUTTON_RELEASE_NO_MOTION
-} GimpButtonReleaseType;
+  CLAY_BUTTON_PRESS_NORMAL,
+  CLAY_BUTTON_PRESS_DOUBLE,
+  CLAY_BUTTON_PRESS_TRIPLE
+} ClayButtonPressType;
 
 
-#define GIMP_TYPE_COMPASS_ORIENTATION (gimp_compass_orientation_get_type ())
+#define CLAY_TYPE_BUTTON_RELEASE_TYPE (clay_button_release_type_get_type ())
 
-GType gimp_compass_orientation_get_type (void);
-
-typedef enum
-{
-  GIMP_COMPASS_ORIENTATION_AUTO,       /*< desc="Auto"       >*/
-  GIMP_COMPASS_ORIENTATION_HORIZONTAL, /*< desc="Horizontal" >*/
-  GIMP_COMPASS_ORIENTATION_VERTICAL    /*< desc="Vertical"   >*/
-} GimpCompassOrientation;
-
-
-#define GIMP_TYPE_CURSOR_PRECISION (gimp_cursor_precision_get_type ())
-
-GType gimp_cursor_precision_get_type (void);
+GType clay_button_release_type_get_type (void);
 
 typedef enum
 {
-  GIMP_CURSOR_PRECISION_PIXEL_CENTER,
-  GIMP_CURSOR_PRECISION_PIXEL_BORDER,
-  GIMP_CURSOR_PRECISION_SUBPIXEL
-} GimpCursorPrecision;
+  CLAY_BUTTON_RELEASE_NORMAL,
+  CLAY_BUTTON_RELEASE_CANCEL,
+  CLAY_BUTTON_RELEASE_CLICK,
+  CLAY_BUTTON_RELEASE_NO_MOTION
+} ClayButtonReleaseType;
 
 
-#define GIMP_TYPE_GUIDES_TYPE (gimp_guides_type_get_type ())
+#define CLAY_TYPE_COMPASS_ORIENTATION (clay_compass_orientation_get_type ())
 
-GType gimp_guides_type_get_type (void);
-
-typedef enum
-{
-  GIMP_GUIDES_NONE,          /*< desc="No guides"       >*/
-  GIMP_GUIDES_CENTER_LINES,  /*< desc="Center lines"    >*/
-  GIMP_GUIDES_THIRDS,        /*< desc="Rule of thirds"  >*/
-  GIMP_GUIDES_FIFTHS,        /*< desc="Rule of fifths"  >*/
-  GIMP_GUIDES_GOLDEN,        /*< desc="Golden sections" >*/
-  GIMP_GUIDES_DIAGONALS,     /*< desc="Diagonal lines"  >*/
-  GIMP_GUIDES_N_LINES,       /*< desc="Number of lines" >*/
-  GIMP_GUIDES_SPACING        /*< desc="Line spacing"    >*/
-} GimpGuidesType;
-
-
-#define GIMP_TYPE_HANDLE_TYPE (gimp_handle_type_get_type ())
-
-GType gimp_handle_type_get_type (void);
+GType clay_compass_orientation_get_type (void);
 
 typedef enum
 {
-  GIMP_HANDLE_SQUARE,
-  GIMP_HANDLE_DASHED_SQUARE,
-  GIMP_HANDLE_FILLED_SQUARE,
-  GIMP_HANDLE_CIRCLE,
-  GIMP_HANDLE_DASHED_CIRCLE,
-  GIMP_HANDLE_FILLED_CIRCLE,
-  GIMP_HANDLE_DIAMOND,
-  GIMP_HANDLE_DASHED_DIAMOND,
-  GIMP_HANDLE_FILLED_DIAMOND,
-  GIMP_HANDLE_CROSS,
-  GIMP_HANDLE_CROSSHAIR,
-  GIMP_HANDLE_DROP,
-  GIMP_HANDLE_FILLED_DROP
-} GimpHandleType;
+  CLAY_COMPASS_ORIENTATION_AUTO,       /*< desc="Auto"       >*/
+  CLAY_COMPASS_ORIENTATION_HORIZONTAL, /*< desc="Horizontal" >*/
+  CLAY_COMPASS_ORIENTATION_VERTICAL    /*< desc="Vertical"   >*/
+} ClayCompassOrientation;
 
 
-#define GIMP_TYPE_HANDLE_ANCHOR (gimp_handle_anchor_get_type ())
+#define CLAY_TYPE_CURSOR_PRECISION (clay_cursor_precision_get_type ())
 
-GType gimp_handle_anchor_get_type (void);
+GType clay_cursor_precision_get_type (void);
 
 typedef enum
 {
-  GIMP_HANDLE_ANCHOR_CENTER,
-  GIMP_HANDLE_ANCHOR_NORTH,
-  GIMP_HANDLE_ANCHOR_NORTH_WEST,
-  GIMP_HANDLE_ANCHOR_NORTH_EAST,
-  GIMP_HANDLE_ANCHOR_SOUTH,
-  GIMP_HANDLE_ANCHOR_SOUTH_WEST,
-  GIMP_HANDLE_ANCHOR_SOUTH_EAST,
-  GIMP_HANDLE_ANCHOR_WEST,
-  GIMP_HANDLE_ANCHOR_EAST
-} GimpHandleAnchor;
+  CLAY_CURSOR_PRECISION_PIXEL_CENTER,
+  CLAY_CURSOR_PRECISION_PIXEL_BORDER,
+  CLAY_CURSOR_PRECISION_SUBPIXEL
+} ClayCursorPrecision;
 
 
-#define GIMP_TYPE_LIMIT_TYPE (gimp_limit_type_get_type ())
+#define CLAY_TYPE_GUIDES_TYPE (clay_guides_type_get_type ())
 
-GType gimp_limit_type_get_type (void);
+GType clay_guides_type_get_type (void);
 
 typedef enum
 {
-  GIMP_LIMIT_CIRCLE,
-  GIMP_LIMIT_SQUARE,
-  GIMP_LIMIT_DIAMOND,
-  GIMP_LIMIT_HORIZONTAL,
-  GIMP_LIMIT_VERTICAL
-} GimpLimitType;
+  CLAY_GUIDES_NONE,          /*< desc="No guides"       >*/
+  CLAY_GUIDES_CENTER_LINES,  /*< desc="Center lines"    >*/
+  CLAY_GUIDES_THIRDS,        /*< desc="Rule of thirds"  >*/
+  CLAY_GUIDES_FIFTHS,        /*< desc="Rule of fifths"  >*/
+  CLAY_GUIDES_GOLDEN,        /*< desc="Golden sections" >*/
+  CLAY_GUIDES_DIAGONALS,     /*< desc="Diagonal lines"  >*/
+  CLAY_GUIDES_N_LINES,       /*< desc="Number of lines" >*/
+  CLAY_GUIDES_SPACING        /*< desc="Line spacing"    >*/
+} ClayGuidesType;
 
 
-#define GIMP_TYPE_PATH_STYLE (gimp_path_style_get_type ())
+#define CLAY_TYPE_HANDLE_TYPE (clay_handle_type_get_type ())
 
-GType gimp_path_style_get_type (void);
-
-typedef enum
-{
-  GIMP_PATH_STYLE_DEFAULT,
-  GIMP_PATH_STYLE_PATH,
-  GIMP_PATH_STYLE_OUTLINE
-} GimpPathStyle;
-
-
-#define GIMP_TYPE_RECTANGLE_CONSTRAINT (gimp_rectangle_constraint_get_type ())
-
-GType gimp_rectangle_constraint_get_type (void);
+GType clay_handle_type_get_type (void);
 
 typedef enum
 {
-  GIMP_RECTANGLE_CONSTRAIN_NONE,
-  GIMP_RECTANGLE_CONSTRAIN_IMAGE,
-  GIMP_RECTANGLE_CONSTRAIN_DRAWABLE
-} GimpRectangleConstraint;
+  CLAY_HANDLE_SQUARE,
+  CLAY_HANDLE_DASHED_SQUARE,
+  CLAY_HANDLE_FILLED_SQUARE,
+  CLAY_HANDLE_CIRCLE,
+  CLAY_HANDLE_DASHED_CIRCLE,
+  CLAY_HANDLE_FILLED_CIRCLE,
+  CLAY_HANDLE_DIAMOND,
+  CLAY_HANDLE_DASHED_DIAMOND,
+  CLAY_HANDLE_FILLED_DIAMOND,
+  CLAY_HANDLE_CROSS,
+  CLAY_HANDLE_CROSSHAIR,
+  CLAY_HANDLE_DROP,
+  CLAY_HANDLE_FILLED_DROP
+} ClayHandleType;
 
 
-#define GIMP_TYPE_RECTANGLE_FIXED_RULE (gimp_rectangle_fixed_rule_get_type ())
+#define CLAY_TYPE_HANDLE_ANCHOR (clay_handle_anchor_get_type ())
 
-GType gimp_rectangle_fixed_rule_get_type (void);
-
-typedef enum
-{
-  GIMP_RECTANGLE_FIXED_ASPECT, /*< desc="Aspect ratio" >*/
-  GIMP_RECTANGLE_FIXED_WIDTH,  /*< desc="Width"        >*/
-  GIMP_RECTANGLE_FIXED_HEIGHT, /*< desc="Height"       >*/
-  GIMP_RECTANGLE_FIXED_SIZE,   /*< desc="Size"         >*/
-} GimpRectangleFixedRule;
-
-
-#define GIMP_TYPE_RECTANGLE_PRECISION (gimp_rectangle_precision_get_type ())
-
-GType gimp_rectangle_precision_get_type (void);
+GType clay_handle_anchor_get_type (void);
 
 typedef enum
 {
-  GIMP_RECTANGLE_PRECISION_INT,
-  GIMP_RECTANGLE_PRECISION_DOUBLE,
-} GimpRectanglePrecision;
+  CLAY_HANDLE_ANCHOR_CENTER,
+  CLAY_HANDLE_ANCHOR_NORTH,
+  CLAY_HANDLE_ANCHOR_NORTH_WEST,
+  CLAY_HANDLE_ANCHOR_NORTH_EAST,
+  CLAY_HANDLE_ANCHOR_SOUTH,
+  CLAY_HANDLE_ANCHOR_SOUTH_WEST,
+  CLAY_HANDLE_ANCHOR_SOUTH_EAST,
+  CLAY_HANDLE_ANCHOR_WEST,
+  CLAY_HANDLE_ANCHOR_EAST
+} ClayHandleAnchor;
 
 
-#define GIMP_TYPE_TRANSFORM_3D_MODE (gimp_transform_3d_mode_get_type ())
+#define CLAY_TYPE_LIMIT_TYPE (clay_limit_type_get_type ())
 
-GType gimp_transform_3d_mode_get_type (void);
-
-typedef enum /*< lowercase_name=gimp_transform_3d_mode >*/
-{
-  GIMP_TRANSFORM_3D_MODE_CAMERA,
-  GIMP_TRANSFORM_3D_MODE_MOVE,
-  GIMP_TRANSFORM_3D_MODE_ROTATE
-} GimpTransform3DMode;
-
-
-#define GIMP_TYPE_TRANSFORM_FUNCTION (gimp_transform_function_get_type ())
-
-GType gimp_transform_function_get_type (void);
+GType clay_limit_type_get_type (void);
 
 typedef enum
 {
-  GIMP_TRANSFORM_FUNCTION_NONE,
-  GIMP_TRANSFORM_FUNCTION_MOVE,
-  GIMP_TRANSFORM_FUNCTION_SCALE,
-  GIMP_TRANSFORM_FUNCTION_ROTATE,
-  GIMP_TRANSFORM_FUNCTION_SHEAR,
-  GIMP_TRANSFORM_FUNCTION_PERSPECTIVE
-} GimpTransformFunction;
+  CLAY_LIMIT_CIRCLE,
+  CLAY_LIMIT_SQUARE,
+  CLAY_LIMIT_DIAMOND,
+  CLAY_LIMIT_HORIZONTAL,
+  CLAY_LIMIT_VERTICAL
+} ClayLimitType;
 
 
-#define GIMP_TYPE_TRANSFORM_HANDLE_MODE (gimp_transform_handle_mode_get_type ())
+#define CLAY_TYPE_PATH_STYLE (clay_path_style_get_type ())
 
-GType gimp_transform_handle_mode_get_type (void);
-
-typedef enum
-{
-  GIMP_HANDLE_MODE_ADD_TRANSFORM, /*< desc="Add / Transform" >*/
-  GIMP_HANDLE_MODE_MOVE,          /*< desc="Move"            >*/
-  GIMP_HANDLE_MODE_REMOVE         /*< desc="Remove"          >*/
-} GimpTransformHandleMode;
-
-
-#define GIMP_TYPE_PATH_MODE (gimp_path_mode_get_type ())
-
-GType gimp_path_mode_get_type (void);
+GType clay_path_style_get_type (void);
 
 typedef enum
 {
-  GIMP_PATH_MODE_DESIGN,      /*< desc="Design" >*/
-  GIMP_PATH_MODE_EDIT,        /*< desc="Edit"   >*/
-  GIMP_PATH_MODE_MOVE         /*< desc="Move"   >*/
-} GimpPathMode;
+  CLAY_PATH_STYLE_DEFAULT,
+  CLAY_PATH_STYLE_PATH,
+  CLAY_PATH_STYLE_OUTLINE
+} ClayPathStyle;
 
 
-#define GIMP_TYPE_ZOOM_FOCUS (gimp_zoom_focus_get_type ())
+#define CLAY_TYPE_RECTANGLE_CONSTRAINT (clay_rectangle_constraint_get_type ())
 
-GType gimp_zoom_focus_get_type (void);
+GType clay_rectangle_constraint_get_type (void);
+
+typedef enum
+{
+  CLAY_RECTANGLE_CONSTRAIN_NONE,
+  CLAY_RECTANGLE_CONSTRAIN_IMAGE,
+  CLAY_RECTANGLE_CONSTRAIN_DRAWABLE
+} ClayRectangleConstraint;
+
+
+#define CLAY_TYPE_RECTANGLE_FIXED_RULE (clay_rectangle_fixed_rule_get_type ())
+
+GType clay_rectangle_fixed_rule_get_type (void);
+
+typedef enum
+{
+  CLAY_RECTANGLE_FIXED_ASPECT, /*< desc="Aspect ratio" >*/
+  CLAY_RECTANGLE_FIXED_WIDTH,  /*< desc="Width"        >*/
+  CLAY_RECTANGLE_FIXED_HEIGHT, /*< desc="Height"       >*/
+  CLAY_RECTANGLE_FIXED_SIZE,   /*< desc="Size"         >*/
+} ClayRectangleFixedRule;
+
+
+#define CLAY_TYPE_RECTANGLE_PRECISION (clay_rectangle_precision_get_type ())
+
+GType clay_rectangle_precision_get_type (void);
+
+typedef enum
+{
+  CLAY_RECTANGLE_PRECISION_INT,
+  CLAY_RECTANGLE_PRECISION_DOUBLE,
+} ClayRectanglePrecision;
+
+
+#define CLAY_TYPE_TRANSFORM_3D_MODE (clay_transform_3d_mode_get_type ())
+
+GType clay_transform_3d_mode_get_type (void);
+
+typedef enum /*< lowercase_name=clay_transform_3d_mode >*/
+{
+  CLAY_TRANSFORM_3D_MODE_CAMERA,
+  CLAY_TRANSFORM_3D_MODE_MOVE,
+  CLAY_TRANSFORM_3D_MODE_ROTATE
+} ClayTransform3DMode;
+
+
+#define CLAY_TYPE_TRANSFORM_FUNCTION (clay_transform_function_get_type ())
+
+GType clay_transform_function_get_type (void);
+
+typedef enum
+{
+  CLAY_TRANSFORM_FUNCTION_NONE,
+  CLAY_TRANSFORM_FUNCTION_MOVE,
+  CLAY_TRANSFORM_FUNCTION_SCALE,
+  CLAY_TRANSFORM_FUNCTION_ROTATE,
+  CLAY_TRANSFORM_FUNCTION_SHEAR,
+  CLAY_TRANSFORM_FUNCTION_PERSPECTIVE
+} ClayTransformFunction;
+
+
+#define CLAY_TYPE_TRANSFORM_HANDLE_MODE (clay_transform_handle_mode_get_type ())
+
+GType clay_transform_handle_mode_get_type (void);
+
+typedef enum
+{
+  CLAY_HANDLE_MODE_ADD_TRANSFORM, /*< desc="Add / Transform" >*/
+  CLAY_HANDLE_MODE_MOVE,          /*< desc="Move"            >*/
+  CLAY_HANDLE_MODE_REMOVE         /*< desc="Remove"          >*/
+} ClayTransformHandleMode;
+
+
+#define CLAY_TYPE_PATH_MODE (clay_path_mode_get_type ())
+
+GType clay_path_mode_get_type (void);
+
+typedef enum
+{
+  CLAY_PATH_MODE_DESIGN,      /*< desc="Design" >*/
+  CLAY_PATH_MODE_EDIT,        /*< desc="Edit"   >*/
+  CLAY_PATH_MODE_MOVE         /*< desc="Move"   >*/
+} ClayPathMode;
+
+
+#define CLAY_TYPE_ZOOM_FOCUS (clay_zoom_focus_get_type ())
+
+GType clay_zoom_focus_get_type (void);
 
 typedef enum
 {
   /* Make a best guess */
-  GIMP_ZOOM_FOCUS_BEST_GUESS,
+  CLAY_ZOOM_FOCUS_BEST_GUESS,
 
   /* Use the mouse cursor (if within canvas) */
-  GIMP_ZOOM_FOCUS_POINTER,
+  CLAY_ZOOM_FOCUS_POINTER,
 
   /* Use the image center */
-  GIMP_ZOOM_FOCUS_IMAGE_CENTER,
+  CLAY_ZOOM_FOCUS_IMAGE_CENTER,
 
   /* If the image is centered, retain the centering. Else use
    * _BEST_GUESS
    */
-  GIMP_ZOOM_FOCUS_RETAIN_CENTERING_ELSE_BEST_GUESS
+  CLAY_ZOOM_FOCUS_RETAIN_CENTERING_ELSE_BEST_GUESS
 
-} GimpZoomFocus;
+} ClayZoomFocus;
 
 
-#define GIMP_TYPE_MODIFIER_ACTION (gimp_modifier_action_get_type ())
+#define CLAY_TYPE_MODIFIER_ACTION (clay_modifier_action_get_type ())
 
-GType gimp_modifier_action_get_type (void);
+GType clay_modifier_action_get_type (void);
 
 typedef enum
 {
-  GIMP_MODIFIER_ACTION_NONE,                    /*< desc="No action"                                  >*/
-  GIMP_MODIFIER_ACTION_PANNING,                 /*< desc="Pan"                                        >*/
-  GIMP_MODIFIER_ACTION_ZOOMING,                 /*< desc="Zoom"                                       >*/
-  GIMP_MODIFIER_ACTION_ROTATING,                /*< desc="Rotate View"                                >*/
-  GIMP_MODIFIER_ACTION_STEP_ROTATING,           /*< desc="Rotate View by 15 degree steps"             >*/
-  GIMP_MODIFIER_ACTION_LAYER_PICKING,           /*< desc="Pick a layer"                               >*/
+  CLAY_MODIFIER_ACTION_NONE,                    /*< desc="No action"                                  >*/
+  CLAY_MODIFIER_ACTION_PANNING,                 /*< desc="Pan"                                        >*/
+  CLAY_MODIFIER_ACTION_ZOOMING,                 /*< desc="Zoom"                                       >*/
+  CLAY_MODIFIER_ACTION_ROTATING,                /*< desc="Rotate View"                                >*/
+  CLAY_MODIFIER_ACTION_STEP_ROTATING,           /*< desc="Rotate View by 15 degree steps"             >*/
+  CLAY_MODIFIER_ACTION_LAYER_PICKING,           /*< desc="Pick a layer"                               >*/
 
-  GIMP_MODIFIER_ACTION_MENU,                    /*< desc="Display the menu"                           >*/
+  CLAY_MODIFIER_ACTION_MENU,                    /*< desc="Display the menu"                           >*/
 
-  GIMP_MODIFIER_ACTION_ACTION,                  /*< desc="Custom action"                              >*/
+  CLAY_MODIFIER_ACTION_ACTION,                  /*< desc="Custom action"                              >*/
 
-  GIMP_MODIFIER_ACTION_BRUSH_PIXEL_SIZE,        /*< desc="Change brush size in canvas pixels"         >*/
-  GIMP_MODIFIER_ACTION_BRUSH_RADIUS_PIXEL_SIZE, /*< desc="Change brush radius' size in canvas pixels" >*/
-  GIMP_MODIFIER_ACTION_TOOL_OPACITY,            /*< desc="Change tool opacity"                        >*/
-} GimpModifierAction;
+  CLAY_MODIFIER_ACTION_BRUSH_PIXEL_SIZE,        /*< desc="Change brush size in canvas pixels"         >*/
+  CLAY_MODIFIER_ACTION_BRUSH_RADIUS_PIXEL_SIZE, /*< desc="Change brush radius' size in canvas pixels" >*/
+  CLAY_MODIFIER_ACTION_TOOL_OPACITY,            /*< desc="Change tool opacity"                        >*/
+} ClayModifierAction;
 
 
 /*
@@ -290,7 +290,7 @@ typedef enum
 
 typedef enum  /*< pdb-skip, skip >*/
 {
-  GIMP_HIT_NONE,
-  GIMP_HIT_INDIRECT,
-  GIMP_HIT_DIRECT
-} GimpHit;
+  CLAY_HIT_NONE,
+  CLAY_HIT_INDIRECT,
+  CLAY_HIT_DIRECT
+} ClayHit;

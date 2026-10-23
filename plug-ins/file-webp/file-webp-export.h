@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * file-webp - WebP file format plug-in for the GIMP
+ * file-webp - WebP file format plug-in for the Clay
  * Copyright (C) 2015  Nathan Osman
  * Copyright (C) 2016  Ben Touchette
  *
@@ -24,13 +24,13 @@
 
 
 gboolean   save_layer     (GFile         *file,
-                           GimpImage     *image,
-                           GimpDrawable  *drawable,
+                           ClayImage     *image,
+                           ClayDrawable  *drawable,
                            GObject       *config,
                            GError       **error);
 
 gboolean   save_animation (GFile         *file,
-                           GimpImage     *image,
+                           ClayImage     *image,
                            gint           n_drawables,
                            GList         *drawables,
                            GObject       *config,

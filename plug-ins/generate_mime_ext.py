@@ -20,10 +20,10 @@ for source_file in source_files:
   if source_file_ext == '.c':
     if "LOAD_PROC" not in content and "load_procedure" not in content:
       continue
-    proc_regex  = r'gimp_(load|vector_load)_procedure_new'
-    mime_regex  = r'gimp_file_procedure_set_mime_types\s*\([^,]+,\s*"([^"]+)"'
-    ext_regex   = r'gimp_file_procedure_set_extensions\s*\([^,]+,\s*"([^"]+)"'
-    label_regex = r'gimp_procedure_set_menu_label\s*\([^,]+,\s*_\("([^"]+)"\)\s*\)'
+    proc_regex  = r'clay_(load|vector_load)_procedure_new'
+    mime_regex  = r'clay_file_procedure_set_mime_types\s*\([^,]+,\s*"([^"]+)"'
+    ext_regex   = r'clay_file_procedure_set_extensions\s*\([^,]+,\s*"([^"]+)"'
+    label_regex = r'clay_procedure_set_menu_label\s*\([^,]+,\s*_\("([^"]+)"\)\s*\)'
   elif source_file_ext == '.py':
     if "LoadProcedure" not in content:
       continue

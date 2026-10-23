@@ -27,7 +27,7 @@
 
 
 void
-dockable_menu_setup (GimpUIManager *manager,
+dockable_menu_setup (ClayUIManager *manager,
                      const gchar   *ui_path)
 {
   window_menu_setup (manager, "dock", ui_path);

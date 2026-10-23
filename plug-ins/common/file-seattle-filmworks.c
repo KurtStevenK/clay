@@ -27,27 +27,27 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-seattle-filmworks-load"
 #define PLUG_IN_BINARY "file-seattle-filmworks"
-#define PLUG_IN_ROLE   "gimp-file-seattle-filmworks"
+#define PLUG_IN_ROLE   "clay-file-seattle-filmworks"
 
 typedef struct _Seattle_FilmWorks      Seattle_FilmWorks;
 typedef struct _Seattle_FilmWorksClass Seattle_FilmWorksClass;
 
 struct _Seattle_FilmWorks
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _Seattle_FilmWorksClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 guchar huffman_table [420] = {
@@ -86,24 +86,24 @@ guchar huffman_table [420] = {
 GType                   seattle_filmworks_get_type         (void);
 
 
-static GList          * seattle_filmworks_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * seattle_filmworks_create_procedure (GimpPlugIn            *plug_in,
+static GList          * seattle_filmworks_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * seattle_filmworks_create_procedure (ClayPlugIn            *plug_in,
                                                             const gchar           *name);
 
-static GimpValueArray * seattle_filmworks_load             (GimpProcedure         *procedure,
-                                                            GimpRunMode            run_mode,
+static ClayValueArray * seattle_filmworks_load             (ClayProcedure         *procedure,
+                                                            ClayRunMode            run_mode,
                                                             GFile                 *file,
-                                                            GimpMetadata          *metadata,
-                                                            GimpMetadataLoadFlags *flags,
-                                                            GimpProcedureConfig   *config,
+                                                            ClayMetadata          *metadata,
+                                                            ClayMetadataLoadFlags *flags,
+                                                            ClayProcedureConfig   *config,
                                                             gpointer               run_data);
 
-static GimpImage      * load_image                         (GFile                 *file,
+static ClayImage      * load_image                         (GFile                 *file,
                                                             GObject               *config,
-                                                            GimpRunMode            run_mode,
+                                                            ClayRunMode            run_mode,
                                                             GError               **error);
 
-static GimpImage      * load_sfw93a                        (FILE                  *fp,
+static ClayImage      * load_sfw93a                        (FILE                  *fp,
                                                             gsize                  file_size,
                                                             GError               **error);
 
@@ -112,16 +112,16 @@ static guint32          skip_to_next_marker                (guchar              
 static guint            fix_marker                         (guchar                *data,
                                                             gint                   index);
 
-G_DEFINE_TYPE (Seattle_FilmWorks, seattle_filmworks, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Seattle_FilmWorks, seattle_filmworks, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SEATTLE_FILMWORKS_TYPE)
+CLAY_MAIN (SEATTLE_FILMWORKS_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 seattle_filmworks_class_init (Seattle_FilmWorksClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = seattle_filmworks_query_procedures;
   plug_in_class->create_procedure = seattle_filmworks_create_procedure;
@@ -134,7 +134,7 @@ seattle_filmworks_init (Seattle_FilmWorks *seattle_filmworks)
 }
 
 static GList *
-seattle_filmworks_query_procedures (GimpPlugIn *plug_in)
+seattle_filmworks_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -143,52 +143,52 @@ seattle_filmworks_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-seattle_filmworks_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+seattle_filmworks_create_procedure (ClayPlugIn  *plug_in,
                                     const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            seattle_filmworks_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure,
+      clay_procedure_set_menu_label (procedure,
                                      _("Seattle FilmWorks Image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load file in the Seattle FilmWorks "
                                           "file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2025");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-seattle-filmcamera");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "sfw");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,SFW93A,0,string,SFW94A");
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-seattle_filmworks_load (GimpProcedure         *procedure,
-                        GimpRunMode            run_mode,
+static ClayValueArray *
+seattle_filmworks_load (ClayProcedure         *procedure,
+                        ClayRunMode            run_mode,
                         GFile                 *file,
-                        GimpMetadata          *metadata,
-                        GimpMetadataLoadFlags *flags,
-                        GimpProcedureConfig   *config,
+                        ClayMetadata          *metadata,
+                        ClayMetadataLoadFlags *flags,
+                        ClayProcedureConfig   *config,
                         gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -196,28 +196,28 @@ seattle_filmworks_load (GimpProcedure         *procedure,
   image = load_image (file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
 /* Implementation references code by Joe Nord, available at
  * https://www.joenord.com/apps/sfwjpg/ */
-static GimpImage *
+static ClayImage *
 load_image (GFile        *file,
             GObject      *config,
-            GimpRunMode   run_mode,
+            ClayRunMode   run_mode,
             GError      **error)
 {
-  GimpImage  *image = NULL;
+  ClayImage  *image = NULL;
   gchar       magic[7];
   gsize       file_size;
   FILE       *fp;
@@ -228,7 +228,7 @@ load_image (GFile        *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -258,8 +258,8 @@ load_image (GFile        *file,
     }
   else if (strcmp (magic, "SFW94A") == 0)
     {
-      GimpProcedure  *procedure;
-      GimpValueArray *return_vals     = NULL;
+      ClayProcedure  *procedure;
+      ClayValueArray *return_vals     = NULL;
       GFile          *temp_file       = NULL;
       FILE           *temp_fp;
       gint            data_size       = file_size - 0xE0;
@@ -444,7 +444,7 @@ load_image (GFile        *file,
       data[index + 1] = 0xD9;
 
       /* Load as JPEG */
-      temp_file = gimp_temp_file ("jpeg");
+      temp_file = clay_temp_file ("jpeg");
       temp_fp   = g_fopen (g_file_peek_path (temp_file), "wb");
 
       if (! temp_fp)
@@ -470,27 +470,27 @@ load_image (GFile        *file,
       fclose (temp_fp);
       g_free (data);
 
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-jpeg-load");
-      return_vals = gimp_procedure_run (procedure,
-                                        "run-mode", GIMP_RUN_NONINTERACTIVE,
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-jpeg-load");
+      return_vals = clay_procedure_run (procedure,
+                                        "run-mode", CLAY_RUN_NONINTERACTIVE,
                                         "file",     temp_file,
                                         NULL);
 
       if (return_vals)
         {
-          image = g_value_get_object (gimp_value_array_index (return_vals, 1));
-          g_clear_pointer (&return_vals, gimp_value_array_unref);
+          image = g_value_get_object (clay_value_array_index (return_vals, 1));
+          g_clear_pointer (&return_vals, clay_value_array_unref);
         }
       g_file_delete (temp_file, NULL, NULL);
       g_object_unref (temp_file);
 
       if (image)
         {
-          gimp_image_flip (image, GIMP_ORIENTATION_VERTICAL);
+          clay_image_flip (image, CLAY_ORIENTATION_VERTICAL);
 
           if (roll_num && photo_date)
             {
-              GimpParasite *parasite;
+              ClayParasite *parasite;
               gchar        *comment;
               gchar        *verified_comment;
 
@@ -513,12 +513,12 @@ load_image (GFile        *file,
                 }
               else
                 {
-                  parasite = gimp_parasite_new ("gimp-comment",
-                                                GIMP_PARASITE_PERSISTENT,
+                  parasite = clay_parasite_new ("clay-comment",
+                                                CLAY_PARASITE_PERSISTENT,
                                                 strlen (verified_comment) + 1,
                                                 verified_comment);
-                  gimp_image_attach_parasite (image, parasite);
-                  gimp_parasite_free (parasite);
+                  clay_image_attach_parasite (image, parasite);
+                  clay_parasite_free (parasite);
 
                   g_free (verified_comment);
                 }
@@ -536,16 +536,16 @@ load_image (GFile        *file,
   return image;
 }
 
-static GimpImage *
+static ClayImage *
 load_sfw93a (FILE    *fp,
              gsize    file_size,
              GError **error)
 {
   /* SFW93A files are basically JPEGs with an extra 30 bytes
      in the header */
-  GimpProcedure  *procedure;
-  GimpValueArray *return_vals = NULL;
-  GimpImage      *image       = NULL;
+  ClayProcedure  *procedure;
+  ClayValueArray *return_vals = NULL;
+  ClayImage      *image       = NULL;
   GFile          *temp_file   = NULL;
   FILE           *temp_fp;
   gsize           data_size   = file_size - 30;
@@ -571,7 +571,7 @@ load_sfw93a (FILE    *fp,
     }
   fclose (fp);
 
-  temp_file = gimp_temp_file ("jpeg");
+  temp_file = clay_temp_file ("jpeg");
   temp_fp   = g_fopen (g_file_peek_path (temp_file), "wb");
 
   if (! temp_fp)
@@ -589,16 +589,16 @@ load_sfw93a (FILE    *fp,
   g_free (data);
   fclose (temp_fp);
 
-  procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-jpeg-load");
-  return_vals = gimp_procedure_run (procedure,
-                                    "run-mode", GIMP_RUN_NONINTERACTIVE,
+  procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-jpeg-load");
+  return_vals = clay_procedure_run (procedure,
+                                    "run-mode", CLAY_RUN_NONINTERACTIVE,
                                     "file",     temp_file,
                                     NULL);
 
   if (return_vals)
     {
-      image = g_value_get_object (gimp_value_array_index (return_vals, 1));
-      g_clear_pointer (&return_vals, gimp_value_array_unref);
+      image = g_value_get_object (clay_value_array_index (return_vals, 1));
+      g_clear_pointer (&return_vals, clay_value_array_unref);
     }
 
   g_file_delete (temp_file, NULL, NULL);

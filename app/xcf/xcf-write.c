@@ -26,7 +26,7 @@
 #include "xcf-private.h"
 #include "xcf-write.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 guint

@@ -1,5 +1,5 @@
 /*
- * pcx.c GIMP plug-in for loading & exporting PCX files
+ * pcx.c Clay plug-in for loading & exporting PCX files
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,17 +26,17 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-pcx-load"
 #define LOAD_PROC_DCX  "file-dcx-load"
 #define EXPORT_PROC    "file-pcx-export"
 #define PLUG_IN_BINARY "file-pcx"
-#define PLUG_IN_ROLE   "gimp-file-pcx"
+#define PLUG_IN_ROLE   "clay-file-pcx"
 
 
 typedef struct _Pcx      Pcx;
@@ -44,12 +44,12 @@ typedef struct _PcxClass PcxClass;
 
 struct _Pcx
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _PcxClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -58,52 +58,52 @@ struct _PcxClass
 
 GType                   pcx_get_type         (void);
 
-static GList          * pcx_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * pcx_create_procedure (GimpPlugIn            *plug_in,
+static GList          * pcx_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * pcx_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * pcx_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * pcx_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * dcx_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * dcx_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * pcx_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * pcx_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_single          (GimpProcedure         *procedure,
+static ClayImage      * load_single          (ClayProcedure         *procedure,
                                               GFile                 *file,
                                               GObject               *config,
                                               gint                   run_mode,
                                               GError               **error);
-static GimpImage      * load_multi           (GimpProcedure         *procedure,
+static ClayImage      * load_multi           (ClayProcedure         *procedure,
                                               GFile                 *file,
                                               GObject               *config,
                                               gint                   run_mode,
                                               GError               **error);
 
-static GimpImage      * load_image           (GimpProcedure         *procedure,
+static ClayImage      * load_image           (ClayProcedure         *procedure,
                                               FILE                  *fd,
                                               const gchar           *filename,
                                               GObject               *config,
                                               gint                   run_mode,
                                               gint                   image_num,
                                               GError               **error);
-static gboolean         pcx_load_dialog      (GimpProcedure         *procedure,
+static gboolean         pcx_load_dialog      (ClayProcedure         *procedure,
                                               GObject               *config);
 
 static void             load_1               (FILE                  *fp,
@@ -139,8 +139,8 @@ static void             readline             (FILE                  *fp,
                                               gint                   bytes);
 
 static gboolean         export_image         (GFile                 *file,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable,
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable,
                                               GError               **error);
 static void             save_less_than_8     (FILE                  *fp,
                                               gint                   width,
@@ -163,16 +163,16 @@ static void             writeline            (FILE                  *fp,
                                               gint                   bytes);
 
 
-G_DEFINE_TYPE (Pcx, pcx, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Pcx, pcx, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PCX_TYPE)
+CLAY_MAIN (PCX_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 pcx_class_init (PcxClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = pcx_query_procedures;
   plug_in_class->create_procedure = pcx_create_procedure;
@@ -185,7 +185,7 @@ pcx_init (Pcx *pcx)
 }
 
 static GList *
-pcx_query_procedures (GimpPlugIn *plug_in)
+pcx_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -196,122 +196,122 @@ pcx_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-pcx_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+pcx_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            pcx_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("ZSoft PCX image"));
+      clay_procedure_set_menu_label (procedure, _("ZSoft PCX image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in Zsoft PCX file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Francisco Bustamante & Nick Lamb",
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       "January 1997");
 
-      gimp_procedure_add_choice_argument (procedure, "override-palette",
+      clay_procedure_add_choice_argument (procedure, "override-palette",
                                           _("_Palette Options"),
                                           _("Whether to use the built-in palette or "
                                             "a black and white palette for 1 bit images."),
-                                          gimp_choice_new_with_values ("use-built-in-palette", 0, _("Use PCX image's built-in palette"), NULL,
+                                          clay_choice_new_with_values ("use-built-in-palette", 0, _("Use PCX image's built-in palette"), NULL,
                                                                        "use-bw-palette",       1, _("Use black and white palette"),      NULL,
                                                                        NULL),
                                           "use-built-in-palette",
                                           G_PARAM_READWRITE);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-pcx");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pcx,pcc");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0&,byte,10,2&,byte,1,3&,byte,>0,3,byte,<9");
     }
   else if (! strcmp (name, LOAD_PROC_DCX))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            dcx_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("ZSoft DCX image"));
+      clay_procedure_set_menu_label (procedure, _("ZSoft DCX image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in Zsoft DCX file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Francisco Bustamante, Nick Lamb, Alex S.",
                                       "Alex S.",
                                       "2023");
 
-      gimp_procedure_add_choice_argument (procedure, "override-palette",
+      clay_procedure_add_choice_argument (procedure, "override-palette",
                                           _("_Palette Options"),
                                           _("Whether to use the built-in palette or "
                                             "a black and white palette for 1 bit images."),
-                                          gimp_choice_new_with_values ("use-built-in-palette", 0, _("Use PCX image's built-in palette"), NULL,
+                                          clay_choice_new_with_values ("use-built-in-palette", 0, _("Use PCX image's built-in palette"), NULL,
                                                                        "use-bw-palette",       1, _("Use black and white palette"),      NULL,
                                                                        NULL),
                                           "use-built-in-palette",
                                           G_PARAM_READWRITE);
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-dcx");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "dcx");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,\xB1\x68\xDE\x3A");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, pcx_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED, RGB, GRAY");
+      clay_procedure_set_image_types (procedure, "INDEXED, RGB, GRAY");
 
-      gimp_procedure_set_menu_label (procedure, _("ZSoft PCX image"));
+      clay_procedure_set_menu_label (procedure, _("ZSoft PCX image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in ZSoft PCX file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Francisco Bustamante & Nick Lamb",
                                       "Nick Lamb <njl195@zepler.org.uk>",
                                       "January 1997");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-pcx");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "pcx,pcc");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB  |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB  |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED,
                                               NULL, NULL, NULL);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-pcx_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+pcx_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -319,30 +319,30 @@ pcx_load (GimpProcedure         *procedure,
   image = load_single (procedure, file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-dcx_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+dcx_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -350,51 +350,51 @@ dcx_load (GimpProcedure         *procedure,
   image = load_multi (procedure, file, G_OBJECT (config), run_mode, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-pcx_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+pcx_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
   if (! export_image (file,
                       image, drawables->data,
                       &error))
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 static struct
@@ -466,18 +466,18 @@ pcx_header_to_buffer (guint8 *buf)
     }
 }
 
-static GimpImage *
-load_single (GimpProcedure  *procedure,
+static ClayImage *
+load_single (ClayProcedure  *procedure,
              GFile          *file,
              GObject        *config,
              gint            run_mode,
              GError        **error)
 {
   FILE      *fd;
-  GimpImage *image;
+  ClayImage *image;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fd = g_fopen (g_file_peek_path (file), "rb");
 
@@ -485,11 +485,11 @@ load_single (GimpProcedure  *procedure,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
-  image = load_image (procedure, fd, gimp_file_get_utf8_name (file),
+  image = load_image (procedure, fd, clay_file_get_utf8_name (file),
                       G_OBJECT (config), run_mode, 0, error);
   fclose (fd);
 
@@ -500,27 +500,27 @@ load_single (GimpProcedure  *procedure,
       return NULL;
     }
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
 
-static GimpImage *
-load_multi (GimpProcedure  *procedure,
+static ClayImage *
+load_multi (ClayProcedure  *procedure,
             GFile          *file,
             GObject        *config,
             gint            run_mode,
             GError        **error)
 {
   FILE      *fd;
-  GimpImage *image       = NULL;
-  GimpImage *temp_image  = NULL;
+  ClayImage *image       = NULL;
+  ClayImage *temp_image  = NULL;
   gint       offset;
   gint       next_id     = 8;
   gint       valid_offset;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fd = g_fopen (g_file_peek_path (file), "rb");
 
@@ -528,7 +528,7 @@ load_multi (GimpProcedure  *procedure,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -547,7 +547,7 @@ load_multi (GimpProcedure  *procedure,
       return NULL;
     }
 
-  image = load_image (procedure, fd, gimp_file_get_utf8_name (file),
+  image = load_image (procedure, fd, clay_file_get_utf8_name (file),
                       G_OBJECT (config), run_mode, 0, error);
 
   if (! image)
@@ -564,8 +564,8 @@ load_multi (GimpProcedure  *procedure,
    * plus a terminal value of 0 */
   for (gint i = 1; i < 1023; i++)
     {
-      GimpLayer **layers;
-      GimpLayer  *new_layer;
+      ClayLayer **layers;
+      ClayLayer  *new_layer;
 
       fread (&offset, 1, 4, fd);
 
@@ -582,21 +582,21 @@ load_multi (GimpProcedure  *procedure,
           return image;
         }
 
-      temp_image = load_image (procedure, fd, gimp_file_get_utf8_name (file),
+      temp_image = load_image (procedure, fd, clay_file_get_utf8_name (file),
                                G_OBJECT (config), run_mode, i, error);
 
       if (temp_image)
         {
-          layers = gimp_image_get_layers (temp_image);
-          new_layer = gimp_layer_new_from_drawable (GIMP_DRAWABLE (layers[0]),
+          layers = clay_image_get_layers (temp_image);
+          new_layer = clay_layer_new_from_drawable (CLAY_DRAWABLE (layers[0]),
                                                     image);
-          gimp_item_set_name (GIMP_ITEM (new_layer),
+          clay_item_set_name (CLAY_ITEM (new_layer),
                               g_file_get_basename (file));
-          if (! gimp_image_insert_layer (image, new_layer, NULL, 0))
+          if (! clay_image_insert_layer (image, new_layer, NULL, 0))
             g_message (_("Mixed-mode DCX image not loaded"));
 
           g_free (layers);
-          gimp_image_delete (temp_image);
+          clay_image_delete (temp_image);
         }
       else
         {
@@ -614,13 +614,13 @@ load_multi (GimpProcedure  *procedure,
   if (image)
     fclose (fd);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
 
-static GimpImage *
-load_image (GimpProcedure  *procedure,
+static ClayImage *
+load_image (ClayProcedure  *procedure,
             FILE           *fd,
             const gchar    *filename,
             GObject        *config,
@@ -632,8 +632,8 @@ load_image (GimpProcedure  *procedure,
   guint16       offset_x, offset_y, bytesperline, computed_bytesperline;
   gint32        width, height;
   guint16       resolution_x, resolution_y;
-  GimpImage    *image;
-  GimpLayer    *layer;
+  ClayImage    *image;
+  ClayLayer    *layer;
   guchar       *dest, cmap[768];
   gsize         allocation       = 0;
   guint8        header_buf[128];
@@ -665,16 +665,16 @@ load_image (GimpProcedure  *procedure,
   resolution_x = GUINT16_FROM_LE (pcx_header.hdpi);
   resolution_y = GUINT16_FROM_LE (pcx_header.vdpi);
 
-  if ((width <= 0) || (width > GIMP_MAX_IMAGE_SIZE))
+  if ((width <= 0) || (width > CLAY_MAX_IMAGE_SIZE))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Unsupported or invalid image width: %d"),
                    width);
       return NULL;
     }
-  if ((height <= 0) || (height > GIMP_MAX_IMAGE_SIZE))
+  if ((height <= 0) || (height > CLAY_MAX_IMAGE_SIZE))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Unsupported or invalid image height: %d"),
                    height);
       return NULL;
@@ -684,7 +684,7 @@ load_image (GimpProcedure  *procedure,
       pcx_header.bpp != 8)
     {
       /* FIXME: After string freeze this should be changed to a more descriptive error. */
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Unusual PCX flavour, giving up"));
       return NULL;
     }
@@ -702,8 +702,8 @@ load_image (GimpProcedure  *procedure,
       bytesperline = (width * pcx_header.bpp + 7) / 8;
     }
 
-  if ((resolution_x < 1) || (resolution_x > GIMP_MAX_RESOLUTION) ||
-      (resolution_y < 1) || (resolution_y > GIMP_MAX_RESOLUTION))
+  if ((resolution_x < 1) || (resolution_x > CLAY_MAX_RESOLUTION) ||
+      (resolution_y < 1) || (resolution_y > CLAY_MAX_RESOLUTION))
     {
       g_message (_("Resolution out of bounds in XCX header, using 72x72"));
       resolution_x = 72;
@@ -714,7 +714,7 @@ load_image (GimpProcedure  *procedure,
   if (G_MAXSIZE / width / height < 3 ||
       ! g_size_checked_mul (&allocation, width, height))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       return NULL;
@@ -722,35 +722,35 @@ load_image (GimpProcedure  *procedure,
 
   if (pcx_header.planes == 3 && pcx_header.bpp == 8)
     {
-      image = gimp_image_new (width, height, GIMP_RGB);
-      layer = gimp_layer_new (image, _("Background"), width, height,
-                              GIMP_RGB_IMAGE,
+      image = clay_image_new (width, height, CLAY_RGB);
+      layer = clay_layer_new (image, _("Background"), width, height,
+                              CLAY_RGB_IMAGE,
                               100,
-                              gimp_image_get_default_new_layer_mode (image));
+                              clay_image_get_default_new_layer_mode (image));
     }
   else if (pcx_header.planes == 4 && pcx_header.bpp == 8)
     {
-      image = gimp_image_new (width, height, GIMP_RGB);
-      layer = gimp_layer_new (image, _("Background"), width, height,
-                              GIMP_RGBA_IMAGE,
+      image = clay_image_new (width, height, CLAY_RGB);
+      layer = clay_layer_new (image, _("Background"), width, height,
+                              CLAY_RGBA_IMAGE,
                               100,
-                              gimp_image_get_default_new_layer_mode (image));
+                              clay_image_get_default_new_layer_mode (image));
     }
   else
     {
-      image = gimp_image_new (width, height, GIMP_INDEXED);
-      layer = gimp_layer_new (image, _("Background"), width, height,
-                              GIMP_INDEXED_IMAGE,
+      image = clay_image_new (width, height, CLAY_INDEXED);
+      layer = clay_layer_new (image, _("Background"), width, height,
+                              CLAY_INDEXED_IMAGE,
                               100,
-                              gimp_image_get_default_new_layer_mode (image));
+                              clay_image_get_default_new_layer_mode (image));
     }
 
-  gimp_image_set_resolution (image, resolution_x, resolution_y);
+  clay_image_set_resolution (image, resolution_x, resolution_y);
 
-  gimp_image_insert_layer (image, layer, NULL, 0);
-  gimp_layer_set_offsets (layer, offset_x, offset_y);
+  clay_image_insert_layer (image, layer, NULL, 0);
+  clay_layer_set_offsets (layer, offset_x, offset_y);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   if (pcx_header.planes == 1 && pcx_header.bpp == 1)
     {
@@ -759,14 +759,14 @@ load_image (GimpProcedure  *procedure,
       dest = g_new0 (guchar, allocation);
       load_1 (fd, width, height, dest, bytesperline);
 
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         {
-          override_palette = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+          override_palette = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                                   "override-palette");
 
           /* Only show dialogue once for DCX import */
           if (image_num == 0 && pcx_load_dialog (procedure, config))
-            override_palette = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+            override_palette = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                                     "override-palette");
         }
       /* Monochrome does not mean necessarily B&W. Therefore we still
@@ -782,7 +782,7 @@ load_image (GimpProcedure  *procedure,
       /* ... Actually, there *are* files out there with a zeroed 1-bit palette,
        * which are supposed to be displayed as B&W (see issue #2997.)  These
        * files *might* be in the wrong (who knows...) but the fact is that
-       * other software, including older versions of GIMP, do display them
+       * other software, including older versions of Clay, do display them
        * "correctly", so let's follow suit: if the two palette colors are
        * equal (or if the user chooses the option in the load dialog),
        * use a B&W palette instead.
@@ -793,7 +793,7 @@ load_image (GimpProcedure  *procedure,
                                                 255, 255, 255};
           colormap = bw_colormap;
         }
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  (guint8 *) colormap, 6);
     }
@@ -801,7 +801,7 @@ load_image (GimpProcedure  *procedure,
     {
       dest = g_new0 (guchar, allocation);
       load_sub_8 (fd, width, height, 1, 2, dest, bytesperline);
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  pcx_header.colormap, 4 * 3);
     }
@@ -809,7 +809,7 @@ load_image (GimpProcedure  *procedure,
     {
       dest = g_new0 (guchar, allocation);
       load_sub_8 (fd, width, height, 2, 1, dest, bytesperline);
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  pcx_header.colormap, 4 * 3);
     }
@@ -817,7 +817,7 @@ load_image (GimpProcedure  *procedure,
     {
       dest = g_new0 (guchar, allocation);
       load_sub_8 (fd, width, height, 1, 3, dest, bytesperline);
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  pcx_header.colormap, 8 * 3);
     }
@@ -825,7 +825,7 @@ load_image (GimpProcedure  *procedure,
     {
       dest = g_new0 (guchar, allocation);
       load_4 (fd, width, height, dest, bytesperline);
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  pcx_header.colormap, 16 * 3);
     }
@@ -833,7 +833,7 @@ load_image (GimpProcedure  *procedure,
     {
       dest = g_new0 (guchar, allocation);
       load_sub_8 (fd, width, height, 4, 1, dest, bytesperline);
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  pcx_header.colormap, 16 * 3);
     }
@@ -843,7 +843,7 @@ load_image (GimpProcedure  *procedure,
       load_8 (fd, width, height, dest, bytesperline);
       fseek (fd, -768L, SEEK_END);
       fread (cmap, 768, 1, fd);
-      gimp_palette_set_colormap (gimp_image_get_palette (image),
+      clay_palette_set_colormap (clay_image_get_palette (image),
                                  babl_format ("R'G'B' u8"),
                                  cmap, 256 * 3);
     }
@@ -851,7 +851,7 @@ load_image (GimpProcedure  *procedure,
     {
       if (! g_size_checked_mul (&allocation, allocation, pcx_header.planes))
         {
-          g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                        _("Image dimensions too large: width %d x height %d"),
                        width, height);
           g_object_unref (buffer);
@@ -863,7 +863,7 @@ load_image (GimpProcedure  *procedure,
     }
   else
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Unusual PCX flavor, giving up"));
       g_object_unref (buffer);
       return NULL;
@@ -879,27 +879,27 @@ load_image (GimpProcedure  *procedure,
 }
 
 static gboolean
-pcx_load_dialog (GimpProcedure *procedure,
+pcx_load_dialog (ClayProcedure *procedure,
                  GObject       *config)
 {
   GtkWidget    *dialog;
   gboolean      run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Import from PCX"));
 
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                    "override-palette", GIMP_TYPE_INT_RADIO_FRAME);
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                    "override-palette", CLAY_TYPE_INT_RADIO_FRAME);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -920,7 +920,7 @@ load_8 (FILE    *fp,
     {
       readline (fp, line, bytes);
       memcpy (buf, line, width);
-      gimp_progress_update ((double) row / (double) height);
+      clay_progress_update ((double) row / (double) height);
     }
 
   g_free (line);
@@ -947,7 +947,7 @@ load_24 (FILE    *fp,
               buf[x * planes + c] = line[x];
             }
         }
-      gimp_progress_update ((double) y / (double) height);
+      clay_progress_update ((double) y / (double) height);
     }
 
   g_free (line);
@@ -973,7 +973,7 @@ load_1 (FILE    *fp,
           else
             buf[x] = 0;
         }
-      gimp_progress_update ((double) y / (double) height);
+      clay_progress_update ((double) y / (double) height);
     }
 
   g_free (line);
@@ -1002,7 +1002,7 @@ load_4 (FILE    *fp,
                 buf[x] += (1 << c);
             }
         }
-      gimp_progress_update ((double) y / (double) height);
+      clay_progress_update ((double) y / (double) height);
     }
 
   g_free (line);
@@ -1039,7 +1039,7 @@ load_sub_8 (FILE    *fp,
                 }
             }
         }
-      gimp_progress_update ((double) y / (double) height);
+      clay_progress_update ((double) y / (double) height);
     }
 
   g_free (line);
@@ -1081,14 +1081,14 @@ readline (FILE   *fp,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GError       **error)
 {
   FILE          *fp;
   GeglBuffer    *buffer;
   const Babl    *format;
-  GimpImageType  drawable_type;
+  ClayImageType  drawable_type;
   guchar        *cmap= NULL;
   guchar        *pixels;
   gsize          pixel_size;
@@ -1099,16 +1099,16 @@ export_image (GFile         *file,
   guint8         header_buf[128];
   gboolean       padding = FALSE;
 
-  drawable_type = gimp_drawable_type (drawable);
-  gimp_drawable_get_offsets (drawable, &offset_x, &offset_y);
+  drawable_type = clay_drawable_type (drawable);
+  clay_drawable_get_offsets (drawable, &offset_x, &offset_y);
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   pcx_header.manufacturer = 0x0a;
   pcx_header.version      = 5;
@@ -1116,8 +1116,8 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_INDEXED_IMAGE:
-      cmap = gimp_palette_get_colormap (gimp_image_get_palette (image),
+    case CLAY_INDEXED_IMAGE:
+      cmap = clay_palette_get_colormap (clay_image_get_palette (image),
                                         babl_format ("R'G'B' u8"), &colors, NULL);
 
       if (colors > 16)
@@ -1158,7 +1158,7 @@ export_image (GFile         *file,
 
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       pcx_header.bpp          = 8;
       pcx_header.planes       = 3;
       pcx_header.color        = GUINT16_TO_LE (1);
@@ -1166,7 +1166,7 @@ export_image (GFile         *file,
       format                  = babl_format ("R'G'B' u8");
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       pcx_header.bpp          = 8;
       pcx_header.planes       = 1;
       pcx_header.color        = GUINT16_TO_LE (2);
@@ -1238,7 +1238,7 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       g_object_unref (buffer);
       g_free (pixels);
       return FALSE;
@@ -1249,7 +1249,7 @@ export_image (GFile         *file,
   pcx_header.x2 = GUINT16_TO_LE ((guint16)(offset_x + width - 1));
   pcx_header.y2 = GUINT16_TO_LE ((guint16)(offset_y + height - 1));
 
-  gimp_image_get_resolution (image, &resolution_x, &resolution_y);
+  clay_image_get_resolution (image, &resolution_x, &resolution_y);
 
   pcx_header.hdpi = GUINT16_TO_LE (RINT (MAX (resolution_x, 1.0)));
   pcx_header.vdpi = GUINT16_TO_LE (RINT (MAX (resolution_y, 1.0)));
@@ -1261,7 +1261,7 @@ export_image (GFile         *file,
 
   switch (drawable_type)
     {
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_INDEXED_IMAGE:
       if (colors > 16)
         {
           save_8 (fp, width, height, pixels, padding);
@@ -1280,11 +1280,11 @@ export_image (GFile         *file,
         }
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       save_24 (fp, width, height, pixels, padding);
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       save_8 (fp, width, height, pixels, padding);
       fputc (0x0c, fp);
       for (i = 0; i < 256; i++)
@@ -1308,7 +1308,7 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Writing to file '%s' failed: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -1352,7 +1352,7 @@ save_less_than_8 (FILE         *fp,
               count = 0;
               if (padding)
                 fputc ('\0', fp);
-              gimp_progress_update ((double) x / (double) buf_size);
+              clay_progress_update ((double) x / (double) buf_size);
             }
         }
     }
@@ -1374,7 +1374,7 @@ save_8 (FILE         *fp,
       buf += width;
       if (padding)
         fputc ('\0', fp);
-      gimp_progress_update ((double) row / (double) height);
+      clay_progress_update ((double) row / (double) height);
     }
 }
 
@@ -1403,7 +1403,7 @@ save_24 (FILE         *fp,
             fputc ('\0', fp);
         }
       buf += width * 3;
-      gimp_progress_update ((double) y / (double) height);
+      clay_progress_update ((double) y / (double) height);
     }
   g_free (line);
 }

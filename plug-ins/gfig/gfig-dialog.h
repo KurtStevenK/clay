@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -28,7 +28,7 @@
 extern gint   undo_level;  /* Last slot filled in -1 = no undo */
 extern GList *undo_table[MAX_UNDO];
 
-gboolean  gfig_dialog                      (GimpGfig    *gfig);
+gboolean  gfig_dialog                      (ClayGfig    *gfig);
 void      gfig_dialog_action_set_sensitive (const gchar *name,
                                             gboolean     sensitive);
 

@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * X10 and X11 bitmap (XBM) loading and exporting file filter for GIMP.
+ * X10 and X11 bitmap (XBM) loading and exporting file filter for Clay.
  * XBM code Copyright (C) 1998 Gordon Matzigkeit
  *
  * The XBM reading and writing code was written from scratch by Gordon
@@ -40,10 +40,10 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-xbm-load"
@@ -60,12 +60,12 @@ typedef struct _XbmClass XbmClass;
 
 struct _Xbm
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _XbmClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -74,38 +74,38 @@ struct _XbmClass
 
 GType                   xbm_get_type         (void);
 
-static GList          * xbm_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * xbm_create_procedure (GimpPlugIn            *plug_in,
+static GList          * xbm_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * xbm_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * xbm_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * xbm_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * xbm_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * xbm_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GError               **error);
 static gboolean         export_image         (GFile                 *file,
                                               const gchar           *prefix,
                                               gboolean               save_mask,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable,
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable,
                                               GObject               *config,
                                               GError               **error);
-static gboolean         save_dialog          (GimpImage             *image,
-                                              GimpDrawable          *drawable,
-                                              GimpProcedure         *procedure,
+static gboolean         save_dialog          (ClayImage             *image,
+                                              ClayDrawable          *drawable,
+                                              ClayProcedure         *procedure,
                                               GObject               *config);
 
 static gboolean         print                (GOutputStream         *output,
@@ -114,16 +114,16 @@ static gboolean         print                (GOutputStream         *output,
                                               ...) G_GNUC_PRINTF (3, 4);
 
 
-G_DEFINE_TYPE (Xbm, xbm, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Xbm, xbm, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (XBM_TYPE)
+CLAY_MAIN (XBM_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 xbm_class_init (XbmClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = xbm_query_procedures;
   plug_in_class->create_procedure = xbm_create_procedure;
@@ -136,7 +136,7 @@ xbm_init (Xbm *xbm)
 }
 
 static GList *
-xbm_query_procedures (GimpPlugIn *plug_in)
+xbm_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -146,21 +146,21 @@ xbm_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-xbm_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+xbm_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            xbm_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("X BitMap image"));
+      clay_procedure_set_menu_label (procedure, _("X BitMap image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Load a file in X10 or X11 bitmap "
                                           "(XBM) file format"),
                                         _("Load a file in X10 or X11 bitmap "
@@ -168,27 +168,27 @@ xbm_create_procedure (GimpPlugIn  *plug_in,
                                           "format for flat black-and-white "
                                           "(two color indexed) images."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Gordon Matzigkeit",
                                       "Gordon Matzigkeit",
                                       "1998");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-xbitmap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "xbm,icon,bitmap");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, xbm_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "INDEXED");
+      clay_procedure_set_image_types (procedure, "INDEXED");
 
-      gimp_procedure_set_menu_label (procedure, _("X BitMap image"));
+      clay_procedure_set_menu_label (procedure, _("X BitMap image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Export a file in X10 or X11 bitmap "
                                           "(XBM) file format"),
                                         _("X10 or X11 bitmap "
@@ -196,77 +196,77 @@ xbm_create_procedure (GimpPlugIn  *plug_in,
                                           "format for flat black-and-white "
                                           "(two color indexed) images."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Gordon Matzigkeit",
                                       "Gordon Matzigkeit",
                                       "1998");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("XBM"));
-      gimp_file_procedure_set_handles_remote (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_handles_remote (CLAY_FILE_PROCEDURE (procedure),
                                               TRUE);
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-xbitmap");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "xbm,icon,bitmap");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_BITMAP |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_BITMAP |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "include-comment",
+      clay_procedure_add_boolean_argument (procedure, "include-comment",
                                            _("_Write comment"),
                                            _("Write a comment at the beginning of the file."),
-                                           FALSE, /* *NOT* gimp_export_comment() */
+                                           FALSE, /* *NOT* clay_export_comment() */
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "gimp-comment",
+      clay_procedure_add_string_argument (procedure, "clay-comment",
                                           _("Co_mment"),
                                           _("Image description (maximum 72 bytes)"),
-                                          gimp_get_default_comment (),
+                                          clay_get_default_comment (),
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_set_argument_sync (procedure, "gimp-comment",
-                                        GIMP_ARGUMENT_SYNC_PARASITE);
+      clay_procedure_set_argument_sync (procedure, "clay-comment",
+                                        CLAY_ARGUMENT_SYNC_PARASITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "x10-format",
+      clay_procedure_add_boolean_argument (procedure, "x10-format",
                                            _("_X10 format bitmap"),
                                            _("Export in X10 format"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "use-hot-spot",
+      clay_procedure_add_boolean_argument (procedure, "use-hot-spot",
                                            _("Write hot spot _values"),
                                            _("Write hotspot information"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "hot-spot-x",
+      clay_procedure_add_int_argument (procedure, "hot-spot-x",
                                        _("Hot s_pot X"),
                                        _("X coordinate of hotspot"),
-                                       0, GIMP_MAX_IMAGE_SIZE, 0,
+                                       0, CLAY_MAX_IMAGE_SIZE, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "hot-spot-y",
+      clay_procedure_add_int_argument (procedure, "hot-spot-y",
                                        _("Hot spot _Y"),
                                        _("Y coordinate of hotspot"),
-                                       0, GIMP_MAX_IMAGE_SIZE, 0,
+                                       0, CLAY_MAX_IMAGE_SIZE, 0,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "prefix",
+      clay_procedure_add_string_argument (procedure, "prefix",
                                           _("I_dentifier prefix"),
                                           _("Identifier prefix [determined from filename]"),
                                           "bitmap",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "write-mask",
+      clay_procedure_add_boolean_argument (procedure, "write-mask",
                                            _("Write extra mask _file"),
                                            _("Write extra mask file"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "mask-suffix",
+      clay_procedure_add_string_argument (procedure, "mask-suffix",
                                           _("Mas_k file extensions"),
                                           _("Suffix of the mask file"),
                                           "-mask",
@@ -276,18 +276,18 @@ xbm_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-xbm_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+xbm_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpImage         *image;
+  ClayValueArray    *return_vals;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayImage         *image;
   GError            *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -295,13 +295,13 @@ xbm_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure, status, error);
+    return clay_procedure_new_return_values (procedure, status, error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
@@ -338,40 +338,40 @@ init_prefix (GFile   *file,
   return prefix;
 }
 
-static GimpValueArray *
-xbm_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+xbm_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType    status        = GIMP_PDB_SUCCESS;
-  GimpExportReturn     export        = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType    status        = CLAY_PDB_SUCCESS;
+  ClayExportReturn     export        = CLAY_EXPORT_IGNORE;
   GList              *drawables;
   gchar               *mask_basename = NULL;
   GError              *error         = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE ||
-      run_mode == GIMP_RUN_WITH_LAST_VALS)
+  if (run_mode == CLAY_RUN_INTERACTIVE ||
+      run_mode == CLAY_RUN_WITH_LAST_VALS)
     {
       /* Always override the prefix with the filename. */
       mask_basename = g_strdup (init_prefix (file, G_OBJECT (config)));
     }
 
-  export    = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export    = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
 
-      gimp_ui_init (PLUG_IN_BINARY);
-      parasite = gimp_image_get_parasite (image, "hot-spot");
+      clay_ui_init (PLUG_IN_BINARY);
+      parasite = clay_image_get_parasite (image, "hot-spot");
 
       if (parasite)
         {
@@ -379,7 +379,7 @@ xbm_export (GimpProcedure        *procedure,
           guint32  parasite_size;
           gint     x, y;
 
-          parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+          parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
           parasite_data = g_strndup (parasite_data, parasite_size);
 
 #ifndef _UCRT
@@ -395,15 +395,15 @@ xbm_export (GimpProcedure        *procedure,
                             NULL);
             }
 
-          gimp_parasite_free (parasite);
+          clay_parasite_free (parasite);
           g_free (parasite_data);
         }
 
       if (! save_dialog (image, drawables->data, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       GFile    *mask_file;
       GFile    *dir;
@@ -459,7 +459,7 @@ xbm_export (GimpProcedure        *procedure,
                            G_OBJECT (config),
                            &error)))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
 
       g_free (prefix);
@@ -470,11 +470,11 @@ xbm_export (GimpProcedure        *procedure,
       g_object_unref (mask_file);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 /* Return the value of a digit. */
@@ -694,14 +694,14 @@ get_int (FILE *fp)
   return val;
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
   FILE       *fp;
   GeglBuffer *buffer;
-  GimpImage  *image;
-  GimpLayer  *layer;
+  ClayImage  *image;
+  ClayLayer  *layer;
   guchar     *data;
   gint        intbits;
   gint        width  = 0;
@@ -718,8 +718,8 @@ load_image (GFile   *file,
     0xff, 0xff, 0xff            /* white */
   };
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -727,7 +727,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -807,7 +807,7 @@ load_image (GFile   *file,
   if (c == EOF)
     {
       g_message (_("'%s':\nCould not read header (ftell == %ld)"),
-                 gimp_file_get_utf8_name (file), ftell (fp));
+                 clay_file_get_utf8_name (file), ftell (fp));
       fclose (fp);
       return NULL;
     }
@@ -815,15 +815,15 @@ load_image (GFile   *file,
   if (width <= 0)
     {
       g_message (_("'%s':\nNo image width specified"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
 
-  if (width > GIMP_MAX_IMAGE_SIZE)
+  if (width > CLAY_MAX_IMAGE_SIZE)
     {
       g_message (_("'%s':\nImage width is larger than Clay can handle"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -831,15 +831,15 @@ load_image (GFile   *file,
   if (height <= 0)
     {
       g_message (_("'%s':\nNo image height specified"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
 
-  if (height > GIMP_MAX_IMAGE_SIZE)
+  if (height > CLAY_MAX_IMAGE_SIZE)
     {
       g_message (_("'%s':\nImage height is larger than Clay can handle"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -847,22 +847,22 @@ load_image (GFile   *file,
   if (intbits == 0)
     {
       g_message (_("'%s':\nNo image data type specified"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
 
-  image = gimp_image_new (width, height, GIMP_INDEXED);
+  image = clay_image_new (width, height, CLAY_INDEXED);
 
   if (comment)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
 
-      parasite = gimp_parasite_new ("gimp-comment",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("clay-comment",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (comment) + 1, (gpointer) comment);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
 
       g_free (comment);
     }
@@ -872,33 +872,33 @@ load_image (GFile   *file,
 
   if (x_hot > 0 || y_hot > 0)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
       gchar        *str;
 
       str = g_strdup_printf ("%d %d", x_hot, y_hot);
-      parasite = gimp_parasite_new ("hot-spot",
-                                    GIMP_PARASITE_PERSISTENT,
+      parasite = clay_parasite_new ("hot-spot",
+                                    CLAY_PARASITE_PERSISTENT,
                                     strlen (str) + 1, (gpointer) str);
       g_free (str);
-      gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
   /* Set a black-and-white colormap. */
-  gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), (guint8 *) cmap, 2 * 3);
+  clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), (guint8 *) cmap, 2 * 3);
 
-  layer = gimp_layer_new (image,
+  layer = clay_layer_new (image,
                           _("Background"),
                           width, height,
-                          GIMP_INDEXED_IMAGE,
+                          CLAY_INDEXED_IMAGE,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
-  gimp_image_insert_layer (image, layer, NULL, 0);
+                          clay_image_get_default_new_layer_mode (image));
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   /* Allocate the data. */
-  tileheight = gimp_tile_height ();
+  tileheight = clay_tile_height ();
   data = (guchar *) g_malloc (width * tileheight);
 
   for (i = 0; i < height; i += tileheight)
@@ -931,14 +931,14 @@ load_image (GFile   *file,
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, i, width, tileheight), 0,
                        NULL, data, GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((double) (i + tileheight) / (double) height);
+      clay_progress_update ((double) (i + tileheight) / (double) height);
     }
 
   g_free (data);
   g_object_unref (buffer);
   fclose (fp);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
@@ -947,8 +947,8 @@ static gboolean
 export_image (GFile         *file,
               const gchar   *prefix,
               gboolean       save_mask,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GObject       *config,
               GError       **error)
 {
@@ -972,7 +972,7 @@ export_image (GFile         *file,
 
   g_object_get (config,
                 "include-comment", &config_save_comment,
-                "gimp-comment",    &config_comment,
+                "clay-comment",    &config_comment,
                 "x10-format",      &config_x10_format,
                 "use-hot-spot",    &config_use_hot,
                 "hot-spot-x",      &config_x_hot,
@@ -986,9 +986,9 @@ export_image (GFile         *file,
     g_printerr ("%s: save_image '%s'\n", G_STRFUNC, prefix);
 #endif
 
-  cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
+  cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &colors, NULL);
 
-  if (! gimp_drawable_is_indexed (drawable) || colors > 2)
+  if (! clay_drawable_is_indexed (drawable) || colors > 2)
     {
       /* The image is not black-and-white. */
       g_message (_("The image which you are trying to export as "
@@ -999,7 +999,7 @@ export_image (GFile         *file,
       return FALSE;
     }
 
-  has_alpha = gimp_drawable_has_alpha (drawable);
+  has_alpha = clay_drawable_has_alpha (drawable);
 
   if (! has_alpha && save_mask)
     {
@@ -1008,10 +1008,10 @@ export_image (GFile         *file,
       return FALSE;
     }
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
-  bpp    = gimp_drawable_get_bpp (drawable);
+  bpp    = clay_drawable_get_bpp (drawable);
 
   /* Figure out which color is black, and which is white. */
   dark = 0;
@@ -1027,8 +1027,8 @@ export_image (GFile         *file,
         dark = 1;
     }
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   output = G_OUTPUT_STREAM (g_file_replace (file,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
@@ -1091,7 +1091,7 @@ export_image (GFile         *file,
     goto fail;
 
   /* Allocate a new set of pixels. */
-  tileheight = gimp_tile_height ();
+  tileheight = clay_tile_height ();
   data = (guchar *) g_malloc (width * tileheight * bpp);
 
   /* Write out the integers. */
@@ -1182,7 +1182,7 @@ export_image (GFile         *file,
             }
         }
 
-      gimp_progress_update ((double) (i + tileheight) / (double) height);
+      clay_progress_update ((double) (i + tileheight) / (double) height);
     }
 
   /* Write the trailer. */
@@ -1196,7 +1196,7 @@ export_image (GFile         *file,
   g_object_unref (buffer);
   g_object_unref (output);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return TRUE;
 
@@ -1215,9 +1215,9 @@ export_image (GFile         *file,
 }
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpDrawable  *drawable,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayDrawable  *drawable,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget *dialog;
@@ -1226,55 +1226,55 @@ save_dialog (GimpImage     *image,
   GtkWidget *hint;
   gboolean   run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /* comment string. */
 
 
-  hint = g_object_new (GIMP_TYPE_HINT_BOX,
-                       "icon-name", GIMP_ICON_DIALOG_WARNING,
+  hint = g_object_new (CLAY_TYPE_HINT_BOX,
+                       "icon-name", CLAY_ICON_DIALOG_WARNING,
                        "hint",      _("Writing a comment will make the XBM "
                                       "file unreadable by some applications.\n"
                                       "The comment will not affect embedding "
                                       "the XBM in C source code."),
                        NULL);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
-                                         "comment-vbox", "gimp-comment", NULL);
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
+                                         "comment-vbox", "clay-comment", NULL);
 
   gtk_box_pack_start (GTK_BOX (vbox), hint, FALSE, FALSE, 0);
   gtk_widget_set_visible (hint, TRUE);
   gtk_box_reorder_child (GTK_BOX (vbox), hint, 0);
   gtk_widget_set_margin_end (hint, 24);
 
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "comment-frame", "include-comment",
                                             FALSE, "comment-vbox");
 
   /* hotspot toggle */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "hot-spot-vbox", "hot-spot-x", "hot-spot-y",
                                   NULL);
 
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "hot-spot-frame", "use-hot-spot",
                                             FALSE, "hot-spot-vbox");
 
   /* mask file */
-  frame = gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  frame = clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                             "mask-frame", "write-mask",
                                             FALSE, "mask-suffix");
-  gtk_widget_set_sensitive (frame, gimp_drawable_has_alpha (drawable));
+  gtk_widget_set_sensitive (frame, clay_drawable_has_alpha (drawable));
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "x10-format", "prefix", "comment-frame",
                               "hot-spot-frame", "mask-frame", NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

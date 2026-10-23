@@ -23,17 +23,17 @@
 
 #include <gexiv2/gexiv2.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "metadata-tag-object.h"
 #include "metadata-tags.h"
 
 #define PLUG_IN_PROC   "plug-in-metadata-viewer"
 #define PLUG_IN_BINARY "metadata-viewer"
-#define PLUG_IN_ROLE   "gimp-metadata"
+#define PLUG_IN_ROLE   "clay-metadata"
 
 #define EXIF_PREFIX "Exif."
 #define IPTC_PREFIX "Iptc."
@@ -48,28 +48,28 @@
 #define RAW_DATA_MAX_SIZE 16
 
 
-#define GIMP_TYPE_METADATA_VIEWER  (gimp_metadata_viewer_get_type ())
-G_DECLARE_FINAL_TYPE (GimpMetadataViewer, gimp_metadata_viewer, GIMP, METADATA_VIEWER, GimpPlugIn)
+#define CLAY_TYPE_METADATA_VIEWER  (clay_metadata_viewer_get_type ())
+G_DECLARE_FINAL_TYPE (ClayMetadataViewer, clay_metadata_viewer, CLAY, METADATA_VIEWER, ClayPlugIn)
 
-struct _GimpMetadataViewer
+struct _ClayMetadataViewer
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 
-static GList          * metadata_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * metadata_create_procedure (GimpPlugIn           *plug_in,
+static GList          * metadata_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * metadata_create_procedure (ClayPlugIn           *plug_in,
                                                    const gchar          *name);
 
-static GimpValueArray * metadata_run              (GimpProcedure        *procedure,
-                                                   GimpRunMode           run_mode,
-                                                   GimpImage            *image,
-                                                   GimpDrawable        **drawables,
-                                                   GimpProcedureConfig  *config,
+static ClayValueArray * metadata_run              (ClayProcedure        *procedure,
+                                                   ClayRunMode           run_mode,
+                                                   ClayImage            *image,
+                                                   ClayDrawable        **drawables,
+                                                   ClayProcedureConfig  *config,
                                                    gpointer              run_data);
 
-static gboolean  metadata_viewer_dialog           (GimpImage            *image,
-                                                   GimpMetadata         *g_metadata,
+static gboolean  metadata_viewer_dialog           (ClayImage            *image,
+                                                   ClayMetadata         *g_metadata,
                                                    GError              **error);
 static void      metadata_dialog_set_metadata     (GExiv2Metadata       *metadata,
                                                    GListStore           *exif_store,
@@ -99,16 +99,16 @@ static gchar   * metadata_format_string_value     (const gchar          *value,
 static inline gboolean metadata_tag_is_string     (const gchar          *tag);
 
 
-G_DEFINE_TYPE (GimpMetadataViewer, gimp_metadata_viewer, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ClayMetadataViewer, clay_metadata_viewer, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (GIMP_TYPE_METADATA_VIEWER)
+CLAY_MAIN (CLAY_TYPE_METADATA_VIEWER)
 DEFINE_STD_SET_I18N
 
 
 static void
-gimp_metadata_viewer_class_init (GimpMetadataViewerClass *klass)
+clay_metadata_viewer_class_init (ClayMetadataViewerClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = metadata_query_procedures;
   plug_in_class->create_procedure = metadata_create_procedure;
@@ -116,45 +116,45 @@ gimp_metadata_viewer_class_init (GimpMetadataViewerClass *klass)
 }
 
 static void
-gimp_metadata_viewer_init (GimpMetadataViewer *self)
+clay_metadata_viewer_init (ClayMetadataViewer *self)
 {
 }
 
 static GList *
-metadata_query_procedures (GimpPlugIn *plug_in)
+metadata_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-metadata_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+metadata_create_procedure (ClayPlugIn  *plug_in,
                            const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             metadata_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("_View Metadata"));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Image/Metadata");
+      clay_procedure_set_menu_label (procedure, _("_View Metadata"));
+      clay_procedure_add_menu_path (procedure, "<Image>/Image/Metadata");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("View metadata (Exif, IPTC, XMP)"),
                                         "View metadata information attached "
                                         "to the current image. This can "
                                         "include Exif, IPTC and/or XMP "
                                         "information.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Hartmut Kuhse, Michael Natterer, "
                                       "Ben Touchette",
                                       "Hartmut Kuhse, Michael Natterer, "
@@ -165,20 +165,20 @@ metadata_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-metadata_run (GimpProcedure        *procedure,
-              GimpRunMode           run_mode,
-              GimpImage            *image,
-              GimpDrawable        **drawables,
-              GimpProcedureConfig  *config,
+static ClayValueArray *
+metadata_run (ClayProcedure        *procedure,
+              ClayRunMode           run_mode,
+              ClayImage            *image,
+              ClayDrawable        **drawables,
+              ClayProcedureConfig  *config,
               gpointer              run_data)
 {
-  GimpMetadata *metadata;
+  ClayMetadata *metadata;
   GError       *error  = NULL;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  metadata = gimp_image_get_metadata (image);
+  metadata = clay_image_get_metadata (image);
 
   /* Always show metadata dialog so we can add appropriate iptc data
    * as needed. Sometimes license data needs to be added after the
@@ -187,19 +187,19 @@ metadata_run (GimpProcedure        *procedure,
    */
   if (! metadata)
     {
-      metadata = gimp_metadata_new ();
-      gimp_image_set_metadata (image, metadata);
+      metadata = clay_metadata_new ();
+      clay_image_set_metadata (image, metadata);
     }
 
   if (metadata_viewer_dialog (image, metadata, &error))
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
   else
-    return gimp_procedure_new_return_values (procedure, GIMP_PDB_EXECUTION_ERROR, error);
+    return clay_procedure_new_return_values (procedure, CLAY_PDB_EXECUTION_ERROR, error);
 }
 
 static gboolean
-metadata_viewer_dialog (GimpImage     *image,
-                        GimpMetadata  *g_metadata,
+metadata_viewer_dialog (ClayImage     *image,
+                        ClayMetadata  *g_metadata,
                         GError       **error)
 {
   gchar             *title;
@@ -216,24 +216,24 @@ metadata_viewer_dialog (GimpImage     *image,
 
   metadata = GEXIV2_METADATA(g_metadata);
 
-  name = gimp_image_get_name (image);
+  name = clay_image_get_name (image);
   title = g_strdup_printf (_("Metadata Viewer: %s"), name);
   g_free (name);
 
-  dialog = gimp_dialog_new (title,
-                            "gimp-metadata-viewer-dialog",
+  dialog = clay_dialog_new (title,
+                            "clay-metadata-viewer-dialog",
                             NULL, 0,
-                            gimp_standard_help_func, PLUG_IN_PROC,
+                            clay_standard_help_func, PLUG_IN_PROC,
                             _("_Close"), GTK_RESPONSE_CLOSE,
                             NULL);
 
-  gimp_window_set_transient (GTK_WINDOW (dialog));
+  clay_window_set_transient (GTK_WINDOW (dialog));
 
   gtk_widget_set_size_request(dialog, 650, 500);
 
   g_free (title);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_CLOSE,
                                            -1);
 
@@ -255,7 +255,7 @@ metadata_viewer_dialog (GimpImage     *image,
   gtk_container_set_border_width (GTK_CONTAINER (scrolled_win), 6);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled_win), GTK_SHADOW_IN);
 
-  exif_store = g_list_store_new (GIMP_TYPE_METADATA_TAG_OBJECT);
+  exif_store = g_list_store_new (CLAY_TYPE_METADATA_TAG_OBJECT);
   list_box = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (list_box),
                                    GTK_SELECTION_NONE);
@@ -277,7 +277,7 @@ metadata_viewer_dialog (GimpImage     *image,
   gtk_container_set_border_width (GTK_CONTAINER (scrolled_win), 6);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled_win), GTK_SHADOW_IN);
 
-  xmp_store = g_list_store_new (GIMP_TYPE_METADATA_TAG_OBJECT);
+  xmp_store = g_list_store_new (CLAY_TYPE_METADATA_TAG_OBJECT);
   list_box = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (list_box),
                                    GTK_SELECTION_NONE);
@@ -299,7 +299,7 @@ metadata_viewer_dialog (GimpImage     *image,
   gtk_container_set_border_width (GTK_CONTAINER (scrolled_win), 6);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolled_win), GTK_SHADOW_IN);
 
-  iptc_store = g_list_store_new (GIMP_TYPE_METADATA_TAG_OBJECT);
+  iptc_store = g_list_store_new (CLAY_TYPE_METADATA_TAG_OBJECT);
   list_box = gtk_list_box_new ();
   gtk_list_box_set_selection_mode (GTK_LIST_BOX (list_box),
                                    GTK_SELECTION_NONE);
@@ -366,7 +366,7 @@ static GtkWidget *
 create_widget_for_tag_object (gpointer item,
                               gpointer user_data)
 {
-  GimpMetadataTagObject *tag_obj = GIMP_METADATA_TAG_OBJECT (item);
+  ClayMetadataTagObject *tag_obj = CLAY_METADATA_TAG_OBJECT (item);
   GtkWidget             *row;
   GtkWidget             *box;
   GtkWidget             *tag_label;
@@ -382,7 +382,7 @@ create_widget_for_tag_object (gpointer item,
   gtk_container_add (GTK_CONTAINER (row), box);
   gtk_widget_set_visible (box, TRUE);
 
-  tag_label = gtk_label_new (gimp_metadata_tag_object_get_tag (tag_obj));
+  tag_label = gtk_label_new (clay_metadata_tag_object_get_tag (tag_obj));
   gtk_label_set_xalign (GTK_LABEL (tag_label), 0.0);
   gtk_label_set_selectable (GTK_LABEL (tag_label), TRUE);
   gtk_style_context_add_class (gtk_widget_get_style_context (row),
@@ -392,7 +392,7 @@ create_widget_for_tag_object (gpointer item,
   gtk_widget_set_visible (tag_label, TRUE);
   gtk_box_pack_start (GTK_BOX (box), tag_label, FALSE, FALSE, 0);
 
-  value_label = gtk_label_new (gimp_metadata_tag_object_get_value (tag_obj));
+  value_label = gtk_label_new (clay_metadata_tag_object_get_value (tag_obj));
   gtk_style_context_add_class (gtk_widget_get_style_context (value_label),
                                "metadata-value-label");
   gtk_label_set_xalign (GTK_LABEL (value_label), 0.0);
@@ -461,12 +461,12 @@ metadata_dialog_add_tag (GListStore      *store,
                          const gchar     *tag,
                          const gchar     *value)
 {
-  GimpMetadataTagObject *tag_object;
+  ClayMetadataTagObject *tag_object;
 
   if (value == NULL)
     return;
 
-  tag_object = gimp_metadata_tag_object_new (tag, value);
+  tag_object = clay_metadata_tag_object_new (tag, value);
   g_list_store_append (store, tag_object);
   g_object_unref (tag_object);
 }

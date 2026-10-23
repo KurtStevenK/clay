@@ -32,23 +32,23 @@ HELP
 	{ name => 'message', type => 'string', none_ok => 1,
 	  desc => 'Message to use in the progress dialog' },
 	{ name => 'gdisplay', type => 'display', none_ok => 1,
-	  desc => 'GimpDisplay to update progressbar in, or %NULL for a separate
+	  desc => 'ClayDisplay to update progressbar in, or %NULL for a separate
 		   window' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-        gimp_plug_in_progress_start (plug_in, message, gdisplay);
+      if (! clay->no_interface)
+        clay_plug_in_progress_start (plug_in, message, gdisplay);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -78,16 +78,16 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-	gimp_plug_in_progress_set_value (plug_in, percentage);
+      if (! clay->no_interface)
+	clay_plug_in_progress_set_value (plug_in, percentage);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -102,7 +102,7 @@ sub progress_pulse {
     $help = <<'HELP';
 Updates the progress bar for the current plug-in. It is only valid to
 call this procedure from a plug-in. Use this function instead of
-gimp_progress_update() if you cannot tell how much progress has been
+clay_progress_update() if you cannot tell how much progress has been
 made. This usually causes the the progress bar to enter "activity
 mode", where a block bounces back and forth.
 HELP
@@ -112,16 +112,16 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-        gimp_plug_in_progress_pulse (plug_in);
+      if (! clay->no_interface)
+        clay_plug_in_progress_pulse (plug_in);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -135,7 +135,7 @@ sub progress_set_text {
 
     $help = <<'HELP';
 This function changes the text in the progress bar for the current
-plug-in. Unlike gimp_progress_init() it does not change the displayed
+plug-in. Unlike clay_progress_init() it does not change the displayed
 value.
 HELP
 
@@ -149,16 +149,16 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-        gimp_plug_in_progress_set_text (plug_in, message);
+      if (! clay->no_interface)
+        clay_plug_in_progress_set_text (plug_in, message);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -180,17 +180,17 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      GimpPlugInProcFrame *proc_frame = gimp_plug_in_get_proc_frame (plug_in);
+      ClayPlugInProcFrame *proc_frame = clay_plug_in_get_proc_frame (plug_in);
 
-      gimp_plug_in_progress_end (plug_in, proc_frame);
+      clay_plug_in_progress_end (plug_in, proc_frame);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -220,16 +220,16 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      if (! gimp->no_interface)
-        handle = gimp_plug_in_progress_get_window_handle (plug_in);
+      if (! clay->no_interface)
+        handle = clay_plug_in_progress_get_window_handle (plug_in);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -259,15 +259,15 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      success = gimp_plug_in_progress_install (plug_in, progress_callback);
+      success = clay_plug_in_progress_install (plug_in, progress_callback);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -281,7 +281,7 @@ sub progress_uninstall {
 
     $help = <<'HELP';
 This function uninstalls any progress callback installed with
-gimp_progress_install() before.
+clay_progress_install() before.
 HELP
 
     &mitch_pdb_misc('2004', '2.2');
@@ -296,15 +296,15 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      success = gimp_plug_in_progress_uninstall (plug_in, progress_callback);
+      success = clay_plug_in_progress_uninstall (plug_in, progress_callback);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -330,15 +330,15 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
     {
-      success = gimp_plug_in_progress_cancel (plug_in, progress_callback);
+      success = clay_plug_in_progress_cancel (plug_in, progress_callback);
     }
   else
     {
-      g_set_error (error, GIMP_PDB_ERROR, GIMP_PDB_ERROR_CANCELLED,
+      g_set_error (error, CLAY_PDB_ERROR, CLAY_PDB_ERROR_CANCELLED,
                    _("The plug-in is closing."));
       success = FALSE;
     }
@@ -348,12 +348,12 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "plug-in/gimpplugin.h"
-              "plug-in/gimpplugin-progress.h"
-              "plug-in/gimppluginmanager.h"
-              "gimppdberror.h"
-              "gimp-intl.h");
+@headers = qw("core/clay.h"
+              "plug-in/clayplugin.h"
+              "plug-in/clayplugin-progress.h"
+              "plug-in/claypluginmanager.h"
+              "claypdberror.h"
+              "clay-intl.h");
 
 @procs = qw(progress_init
             progress_update
@@ -368,7 +368,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Progress';
-$doc_title = 'gimpprogress';
+$doc_title = 'clayprogress';
 $doc_short_desc = "Functions for embedding the progress bar into a plug-in's GUI.";
 $doc_long_desc = "Functions for embedding the progress bar into a plug-in's GUI.";
 

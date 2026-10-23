@@ -40,7 +40,7 @@ sub brush_new {
     %invoke = (
         code => <<'CODE'
 {
-  brush = (GimpBrush *) gimp_data_factory_data_new (gimp->brush_factory,
+  brush = (ClayBrush *) clay_data_factory_data_new (clay->brush_factory,
                                                     context, name);
 
   if (! brush)
@@ -74,8 +74,8 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  brush = GIMP_BRUSH (gimp_pdb_get_resource (gimp, GIMP_TYPE_BRUSH, name,
-                                             GIMP_PDB_DATA_ACCESS_READ, error));
+  brush = CLAY_BRUSH (clay_pdb_get_resource (clay, CLAY_TYPE_BRUSH, name,
+                                             CLAY_PDB_DATA_ACCESS_READ, error));
   /* Ignore "not found" error, just return NULL. */
   g_clear_error (error);
 }
@@ -101,7 +101,7 @@ sub brush_is_generated {
     %invoke = (
         code => <<'CODE'
 {
-  generated = GIMP_IS_BRUSH_GENERATED (brush);
+  generated = CLAY_IS_BRUSH_GENERATED (brush);
 }
 CODE
     );
@@ -136,15 +136,15 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpTempBuf *mask   = gimp_brush_get_mask (brush);
-  GimpTempBuf *pixmap = gimp_brush_get_pixmap (brush);
+  ClayTempBuf *mask   = clay_brush_get_mask (brush);
+  ClayTempBuf *pixmap = clay_brush_get_pixmap (brush);
   const Babl  *format = NULL;
 
   if (brush)
-    format = gimp_babl_compat_u8_mask_format (gimp_temp_buf_get_format (mask));
+    format = clay_babl_compat_u8_mask_format (clay_temp_buf_get_format (mask));
 
-  width    = gimp_brush_get_width  (brush);
-  height   = gimp_brush_get_height (brush);
+  width    = clay_brush_get_width  (brush);
+  height   = clay_brush_get_height (brush);
 
   if (format)
     mask_bpp = babl_format_get_bytes_per_pixel (format);
@@ -153,7 +153,7 @@ HELP
 
   if (pixmap && format)
     {
-      format = gimp_babl_compat_u8_format (gimp_temp_buf_get_format (pixmap));
+      format = clay_babl_compat_u8_format (clay_temp_buf_get_format (pixmap));
 
       color_bpp = babl_format_get_bytes_per_pixel (format);
     }
@@ -196,39 +196,39 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  GimpTempBuf *mask   = gimp_brush_get_mask (brush);
-  GimpTempBuf *pixmap = gimp_brush_get_pixmap (brush);
+  ClayTempBuf *mask   = clay_brush_get_mask (brush);
+  ClayTempBuf *pixmap = clay_brush_get_pixmap (brush);
   const Babl  *format;
   gpointer     data;
   gsize        num_mask_bytes;
   gsize        num_color_bytes;
 
-  format = gimp_babl_compat_u8_mask_format (
-    gimp_temp_buf_get_format (mask));
-  data   = gimp_temp_buf_lock (mask, format, GEGL_ACCESS_READ);
+  format = clay_babl_compat_u8_mask_format (
+    clay_temp_buf_get_format (mask));
+  data   = clay_temp_buf_lock (mask, format, GEGL_ACCESS_READ);
 
-  width          = gimp_temp_buf_get_width  (mask);
-  height         = gimp_temp_buf_get_height (mask);
+  width          = clay_temp_buf_get_width  (mask);
+  height         = clay_temp_buf_get_height (mask);
   mask_bpp       = babl_format_get_bytes_per_pixel (format);
-  num_mask_bytes = (gsize) gimp_temp_buf_get_height (mask) *
-                   gimp_temp_buf_get_width  (mask) * mask_bpp;
+  num_mask_bytes = (gsize) clay_temp_buf_get_height (mask) *
+                   clay_temp_buf_get_width  (mask) * mask_bpp;
   mask_bytes     = g_bytes_new (data, num_mask_bytes);
 
-  gimp_temp_buf_unlock (mask, data);
+  clay_temp_buf_unlock (mask, data);
 
   if (pixmap)
     {
-      format = gimp_babl_compat_u8_format (
-        gimp_temp_buf_get_format (pixmap));
-      data   = gimp_temp_buf_lock (pixmap, format, GEGL_ACCESS_READ);
+      format = clay_babl_compat_u8_format (
+        clay_temp_buf_get_format (pixmap));
+      data   = clay_temp_buf_lock (pixmap, format, GEGL_ACCESS_READ);
 
       color_bpp       = babl_format_get_bytes_per_pixel (format);
-      num_color_bytes = (gsize) gimp_temp_buf_get_height (pixmap) *
-                        gimp_temp_buf_get_width  (pixmap) *
+      num_color_bytes = (gsize) clay_temp_buf_get_height (pixmap) *
+                        clay_temp_buf_get_width  (pixmap) *
                         color_bpp;
       color_bytes     = g_bytes_new (data, num_color_bytes);
 
-      gimp_temp_buf_unlock (pixmap, data);
+      clay_temp_buf_unlock (pixmap, data);
     }
 }
 CODE
@@ -260,7 +260,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  spacing = gimp_brush_get_spacing (brush);
+  spacing = clay_brush_get_spacing (brush);
 }
 CODE
     );
@@ -272,9 +272,9 @@ sub brush_get_shape {
     $help = <<'HELP';
 Gets the shape of a generated brush.
 Returns an error when called for a non-parametric brush.
-The choices for shape are Circle (GIMP_BRUSH_GENERATED_CIRCLE),
-Square (GIMP_BRUSH_GENERATED_SQUARE), and Diamond
-(GIMP_BRUSH_GENERATED_DIAMOND).  Other shapes might be
+The choices for shape are Circle (CLAY_BRUSH_GENERATED_CIRCLE),
+Square (CLAY_BRUSH_GENERATED_SQUARE), and Diamond
+(CLAY_BRUSH_GENERATED_DIAMOND).  Other shapes might be
 added in the future.
 HELP
 
@@ -285,7 +285,7 @@ HELP
     );
 
     @outargs = (
-      { name => 'shape', type => 'enum GimpBrushGeneratedShape',
+      { name => 'shape', type => 'enum ClayBrushGeneratedShape',
         void_ret => 1,
         desc => 'The brush shape' }
     );
@@ -293,8 +293,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush))
-    shape = GIMP_BRUSH_GENERATED (brush)->shape;
+  if (CLAY_IS_BRUSH_GENERATED (brush))
+    shape = CLAY_BRUSH_GENERATED (brush)->shape;
   else
     success = FALSE;
 }
@@ -325,8 +325,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush))
-    radius = GIMP_BRUSH_GENERATED (brush)->radius;
+  if (CLAY_IS_BRUSH_GENERATED (brush))
+    radius = CLAY_BRUSH_GENERATED (brush)->radius;
   else
     success = FALSE;
 }
@@ -357,8 +357,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush))
-    spikes = GIMP_BRUSH_GENERATED (brush)->spikes;
+  if (CLAY_IS_BRUSH_GENERATED (brush))
+    spikes = CLAY_BRUSH_GENERATED (brush)->spikes;
   else
     success = FALSE;
 }
@@ -391,8 +391,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush))
-    hardness = GIMP_BRUSH_GENERATED (brush)->hardness;
+  if (CLAY_IS_BRUSH_GENERATED (brush))
+    hardness = CLAY_BRUSH_GENERATED (brush)->hardness;
   else
     success = FALSE;
 }
@@ -424,8 +424,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush))
-    aspect_ratio = GIMP_BRUSH_GENERATED (brush)->aspect_ratio;
+  if (CLAY_IS_BRUSH_GENERATED (brush))
+    aspect_ratio = CLAY_BRUSH_GENERATED (brush)->aspect_ratio;
   else
     success = FALSE;
 }
@@ -456,8 +456,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush))
-    angle = GIMP_BRUSH_GENERATED (brush)->angle;
+  if (CLAY_IS_BRUSH_GENERATED (brush))
+    angle = CLAY_BRUSH_GENERATED (brush)->angle;
   else
     success = FALSE;
 }
@@ -487,8 +487,8 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_data_is_writable (GIMP_DATA (brush)))
-    gimp_brush_set_spacing (brush, spacing);
+  if (clay_data_is_writable (CLAY_DATA (brush)))
+    clay_brush_set_spacing (brush, spacing);
   else
     success = FALSE;
 }
@@ -502,21 +502,21 @@ sub brush_set_shape {
     $help = <<'HELP';
 Sets the shape of a generated brush.
 Returns an error when brush is non-parametric or not editable.
-The choices for shape are Circle (GIMP_BRUSH_GENERATED_CIRCLE),
-Square (GIMP_BRUSH_GENERATED_SQUARE), and Diamond
-(GIMP_BRUSH_GENERATED_DIAMOND).
+The choices for shape are Circle (CLAY_BRUSH_GENERATED_CIRCLE),
+Square (CLAY_BRUSH_GENERATED_SQUARE), and Diamond
+(CLAY_BRUSH_GENERATED_DIAMOND).
 HELP
 
     &bill_pdb_misc('2004', '2.4');
 
     @inargs = (
       ${brush_arg_spec},
-      { name => 'shape_in', type => 'enum GimpBrushGeneratedShape',
+      { name => 'shape_in', type => 'enum ClayBrushGeneratedShape',
         desc => 'The brush shape' }
     );
 
     @outargs = (
-      { name => 'shape_out', type => 'enum GimpBrushGeneratedShape',
+      { name => 'shape_out', type => 'enum ClayBrushGeneratedShape',
         void_ret => 1,
         desc => 'The brush shape actually assigned' }
     );
@@ -524,12 +524,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush) &&
-      gimp_data_is_writable (GIMP_DATA (brush)))
+  if (CLAY_IS_BRUSH_GENERATED (brush) &&
+      clay_data_is_writable (CLAY_DATA (brush)))
     {
-      gimp_brush_generated_set_shape (GIMP_BRUSH_GENERATED (brush),
+      clay_brush_generated_set_shape (CLAY_BRUSH_GENERATED (brush),
                                       shape_in);
-      shape_out = GIMP_BRUSH_GENERATED (brush)->shape;
+      shape_out = CLAY_BRUSH_GENERATED (brush)->shape;
     }
   else
     {
@@ -567,12 +567,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush) &&
-      gimp_data_is_writable (GIMP_DATA (brush)))
+  if (CLAY_IS_BRUSH_GENERATED (brush) &&
+      clay_data_is_writable (CLAY_DATA (brush)))
     {
-      gimp_brush_generated_set_radius (GIMP_BRUSH_GENERATED (brush),
+      clay_brush_generated_set_radius (CLAY_BRUSH_GENERATED (brush),
                                        radius_in);
-      radius_out = GIMP_BRUSH_GENERATED (brush)->radius;
+      radius_out = CLAY_BRUSH_GENERATED (brush)->radius;
     }
   else
     {
@@ -610,12 +610,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush) &&
-      gimp_data_is_writable (GIMP_DATA (brush)))
+  if (CLAY_IS_BRUSH_GENERATED (brush) &&
+      clay_data_is_writable (CLAY_DATA (brush)))
     {
-      gimp_brush_generated_set_spikes (GIMP_BRUSH_GENERATED (brush),
+      clay_brush_generated_set_spikes (CLAY_BRUSH_GENERATED (brush),
                                        spikes_in);
-      spikes_out = GIMP_BRUSH_GENERATED (brush)->spikes;
+      spikes_out = CLAY_BRUSH_GENERATED (brush)->spikes;
     }
   else
     {
@@ -653,12 +653,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush) &&
-      gimp_data_is_writable (GIMP_DATA (brush)))
+  if (CLAY_IS_BRUSH_GENERATED (brush) &&
+      clay_data_is_writable (CLAY_DATA (brush)))
     {
-      gimp_brush_generated_set_hardness (GIMP_BRUSH_GENERATED (brush),
+      clay_brush_generated_set_hardness (CLAY_BRUSH_GENERATED (brush),
                                          hardness_in);
-      hardness_out = GIMP_BRUSH_GENERATED (brush)->hardness;
+      hardness_out = CLAY_BRUSH_GENERATED (brush)->hardness;
     }
   else
     {
@@ -696,12 +696,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush) &&
-      gimp_data_is_writable (GIMP_DATA (brush)))
+  if (CLAY_IS_BRUSH_GENERATED (brush) &&
+      clay_data_is_writable (CLAY_DATA (brush)))
     {
-      gimp_brush_generated_set_aspect_ratio (GIMP_BRUSH_GENERATED (brush),
+      clay_brush_generated_set_aspect_ratio (CLAY_BRUSH_GENERATED (brush),
                                              aspect_ratio_in);
-      aspect_ratio_out = GIMP_BRUSH_GENERATED (brush)->aspect_ratio;
+      aspect_ratio_out = CLAY_BRUSH_GENERATED (brush)->aspect_ratio;
     }
   else
     {
@@ -739,12 +739,12 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (GIMP_IS_BRUSH_GENERATED (brush) &&
-      gimp_data_is_writable (GIMP_DATA (brush)))
+  if (CLAY_IS_BRUSH_GENERATED (brush) &&
+      clay_data_is_writable (CLAY_DATA (brush)))
     {
-      gimp_brush_generated_set_angle (GIMP_BRUSH_GENERATED (brush),
+      clay_brush_generated_set_angle (CLAY_BRUSH_GENERATED (brush),
                                       angle_in);
-      angle_out = GIMP_BRUSH_GENERATED (brush)->angle;
+      angle_out = CLAY_BRUSH_GENERATED (brush)->angle;
     }
   else
     {
@@ -757,14 +757,14 @@ CODE
 
 
 @headers = qw(<string.h>
-              "gegl/gimp-babl-compat.h"
-              "core/gimp.h"
-              "core/gimpbrush.h"
-              "core/gimpbrushgenerated.h"
-              "core/gimpcontext.h"
-              "core/gimpdatafactory.h"
-              "core/gimptempbuf.h"
-              "gimppdb-utils.h");
+              "gegl/clay-babl-compat.h"
+              "core/clay.h"
+              "core/claybrush.h"
+              "core/claybrushgenerated.h"
+              "core/claycontext.h"
+              "core/claydatafactory.h"
+              "core/claytempbuf.h"
+              "claypdb-utils.h");
 
 @procs = qw(brush_new
             brush_get_by_name
@@ -782,7 +782,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Brush';
-$doc_title = 'gimpbrush';
+$doc_title = 'claybrush';
 $doc_short_desc = 'Installable object used by painting and stroking tools.';
 $doc_long_desc = 'Installable object used by painting and stroking tools.';
 

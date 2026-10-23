@@ -22,10 +22,10 @@
 #define __ICNS_EXPORT_H__
 
 
-GimpPDBStatusType icns_save_image (GFile                *file,
-                                   GimpImage            *image,
-                                   GimpProcedure        *procedure,
-                                   GimpProcedureConfig  *config,
+ClayPDBStatusType icns_save_image (GFile                *file,
+                                   ClayImage            *image,
+                                   ClayProcedure        *procedure,
+                                   ClayProcedureConfig  *config,
                                    gint32                run_mode,
                                    GError              **error);
 

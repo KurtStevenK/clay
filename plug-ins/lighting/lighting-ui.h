@@ -16,8 +16,8 @@ extern GtkWidget *spin_dir_z;
 /* Externally visible functions */
 /* ============================ */
 
-gboolean main_dialog (GimpProcedure       *procedure,
-                      GimpProcedureConfig *config,
-                      GimpDrawable        *drawable);
+gboolean main_dialog (ClayProcedure       *procedure,
+                      ClayProcedureConfig *config,
+                      ClayDrawable        *drawable);
 
 #endif  /* __LIGHTING_UI_H__ */

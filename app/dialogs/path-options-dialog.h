@@ -18,22 +18,22 @@
 #pragma once
 
 
-typedef void (* GimpPathOptionsCallback) (GtkWidget    *dialog,
-                                          GimpImage    *image,
-                                          GimpPath     *path,
-                                          GimpContext  *context,
+typedef void (* ClayPathOptionsCallback) (GtkWidget    *dialog,
+                                          ClayImage    *image,
+                                          ClayPath     *path,
+                                          ClayContext  *context,
                                           const gchar  *path_name,
                                           gboolean      path_visible,
-                                          GimpColorTag  path_color_tag,
+                                          ClayColorTag  path_color_tag,
                                           gboolean      path_lock_content,
                                           gboolean      path_lock_position,
                                           gboolean      path_lock_visibility,
                                           gpointer      user_data);
 
 
-GtkWidget * path_options_dialog_new    (GimpImage                *image,
-                                        GimpPath                 *path,
-                                        GimpContext              *context,
+GtkWidget * path_options_dialog_new    (ClayImage                *image,
+                                        ClayPath                 *path,
+                                        ClayContext              *context,
                                         GtkWidget                *parent,
                                         const gchar              *title,
                                         const gchar              *role,
@@ -42,9 +42,9 @@ GtkWidget * path_options_dialog_new    (GimpImage                *image,
                                         const gchar              *help_id,
                                         const gchar              *path_name,
                                         gboolean                  path_visible,
-                                        GimpColorTag              path_color_tag,
+                                        ClayColorTag              path_color_tag,
                                         gboolean                  path_lock_content,
                                         gboolean                  path_lock_position,
                                         gboolean                  path_lock_visibility,
-                                        GimpPathOptionsCallback   callback,
+                                        ClayPathOptionsCallback   callback,
                                         gpointer                  user_data);

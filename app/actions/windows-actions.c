@@ -21,73 +21,73 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpdisplayconfig.h"
-#include "config/gimpguiconfig.h"
+#include "config/claydisplayconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimplist.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/claylist.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdock.h"
-#include "widgets/gimpdockwindow.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydock.h"
+#include "widgets/claydockwindow.h"
+#include "widgets/clayhelp-ids.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
 
 #include "dialogs/dialogs.h"
 
 #include "windows-actions.h"
 #include "windows-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static void  windows_actions_display_add               (GimpContainer     *container,
-                                                        GimpDisplay       *display,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_display_remove            (GimpContainer     *container,
-                                                        GimpDisplay       *display,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_display_reorder           (GimpContainer     *container,
-                                                        GimpDisplay       *display,
+static void  windows_actions_display_add               (ClayContainer     *container,
+                                                        ClayDisplay       *display,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_display_remove            (ClayContainer     *container,
+                                                        ClayDisplay       *display,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_display_reorder           (ClayContainer     *container,
+                                                        ClayDisplay       *display,
                                                         gint               old_index,
                                                         gint               new_index,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_image_notify              (GimpDisplay       *display,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_image_notify              (ClayDisplay       *display,
                                                         const GParamSpec  *unused,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_title_notify              (GimpDisplayShell  *shell,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_title_notify              (ClayDisplayShell  *shell,
                                                         const GParamSpec  *unused,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_update_display_accels     (GimpActionGroup   *group);
+                                                        ClayActionGroup   *group);
+static void  windows_actions_update_display_accels     (ClayActionGroup   *group);
 
-static void  windows_actions_dock_window_added         (GimpDialogFactory *factory,
-                                                        GimpDockWindow    *dock_window,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_dock_window_removed       (GimpDialogFactory *factory,
-                                                        GimpDockWindow    *dock_window,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_dock_window_notify        (GimpDockWindow    *dock,
+static void  windows_actions_dock_window_added         (ClayDialogFactory *factory,
+                                                        ClayDockWindow    *dock_window,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_dock_window_removed       (ClayDialogFactory *factory,
+                                                        ClayDockWindow    *dock_window,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_dock_window_notify        (ClayDockWindow    *dock,
                                                         const GParamSpec  *pspec,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_recent_add                (GimpContainer     *container,
-                                                        GimpSessionInfo   *info,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_recent_remove             (GimpContainer     *container,
-                                                        GimpSessionInfo   *info,
-                                                        GimpActionGroup   *group);
-static void  windows_actions_single_window_mode_notify (GimpDisplayConfig *config,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_recent_add                (ClayContainer     *container,
+                                                        ClaySessionInfo   *info,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_recent_remove             (ClayContainer     *container,
+                                                        ClaySessionInfo   *info,
+                                                        ClayActionGroup   *group);
+static void  windows_actions_single_window_mode_notify (ClayDisplayConfig *config,
                                                         GParamSpec        *pspec,
-                                                        GimpActionGroup   *group);
+                                                        ClayActionGroup   *group);
 
 
 /* The only reason we have "Tab" in the action entries below is to
@@ -101,12 +101,12 @@ static void  windows_actions_single_window_mode_notify (GimpDisplayConfig *confi
 #define WINDOWS_SHOW_DISPLAY_NEXT_ACCEL     "<alt>Tab"
 #define WINDOWS_SHOW_DISPLAY_PREVIOUS_ACCEL "<alt><shift>Tab"
 #else
-/* on macOS, Cmd+` is used. See: #428 and app/display/gimpdisplayshell-tool-events.c */
+/* on macOS, Cmd+` is used. See: #428 and app/display/claydisplayshell-tool-events.c */
 #define WINDOWS_SHOW_DISPLAY_NEXT_ACCEL     "<primary>grave"
 #define WINDOWS_SHOW_DISPLAY_PREVIOUS_ACCEL "<primary><shift>grave"
 #endif
 
-static const GimpActionEntry windows_actions[] =
+static const ClayActionEntry windows_actions[] =
 {
   { "windows-show-display-next", NULL,
     NC_("windows-action", "Next Image"), NULL, { WINDOWS_SHOW_DISPLAY_NEXT_ACCEL, "Forward", NULL },
@@ -124,106 +124,106 @@ static const GimpActionEntry windows_actions[] =
                                              "_Tabs Position")   },
 };
 
-static const GimpToggleActionEntry windows_toggle_actions[] =
+static const ClayToggleActionEntry windows_toggle_actions[] =
 {
   { "windows-hide-docks", NULL,
     NC_("windows-action", "_Hide Docks"), NULL, { NULL },
     NC_("windows-action", "When enabled, docks and other dialogs are hidden, leaving only image windows."),
     windows_hide_docks_cmd_callback,
     FALSE,
-    GIMP_HELP_WINDOWS_HIDE_DOCKS },
+    CLAY_HELP_WINDOWS_HIDE_DOCKS },
 
   { "windows-show-tabs", NULL,
     NC_("windows-action", "_Show Tabs"), NULL, { NULL },
     NC_("windows-action", "When enabled, the image tabs bar is shown."),
     windows_show_tabs_cmd_callback,
     TRUE,
-    GIMP_HELP_WINDOWS_SHOW_TABS },
+    CLAY_HELP_WINDOWS_SHOW_TABS },
 
   { "windows-use-single-window-mode", NULL,
     NC_("windows-action", "Single-Window _Mode"), NULL, { NULL },
     NC_("windows-action", "When enabled, Clay is in a single-window mode."),
     windows_use_single_window_mode_cmd_callback,
     TRUE,
-    GIMP_HELP_WINDOWS_USE_SINGLE_WINDOW_MODE }
+    CLAY_HELP_WINDOWS_USE_SINGLE_WINDOW_MODE }
 };
 
-static const GimpRadioActionEntry windows_tabs_position_actions[] =
+static const ClayRadioActionEntry windows_tabs_position_actions[] =
 {
-  { "windows-tabs-position-top", GIMP_ICON_GO_TOP,
+  { "windows-tabs-position-top", CLAY_ICON_GO_TOP,
     NC_("windows-tabs-position-action", "_Top"), NULL, { NULL },
     NC_("windows-tabs-position-action", "Position the tabs on the top"),
-    GIMP_POSITION_TOP, GIMP_HELP_WINDOWS_TABS_POSITION },
+    CLAY_POSITION_TOP, CLAY_HELP_WINDOWS_TABS_POSITION },
 
-  { "windows-tabs-position-bottom", GIMP_ICON_GO_BOTTOM,
+  { "windows-tabs-position-bottom", CLAY_ICON_GO_BOTTOM,
     NC_("windows-tabs-position-action", "_Bottom"), NULL, { NULL },
     NC_("windows-tabs-position-action", "Position the tabs on the bottom"),
-    GIMP_POSITION_BOTTOM, GIMP_HELP_WINDOWS_TABS_POSITION },
+    CLAY_POSITION_BOTTOM, CLAY_HELP_WINDOWS_TABS_POSITION },
 
-  { "windows-tabs-position-left", GIMP_ICON_GO_FIRST,
+  { "windows-tabs-position-left", CLAY_ICON_GO_FIRST,
     NC_("windows-tabs-position-action", "_Left"), NULL, { NULL },
     NC_("windows-tabs-position-action", "Position the tabs on the left"),
-    GIMP_POSITION_LEFT, GIMP_HELP_WINDOWS_TABS_POSITION },
+    CLAY_POSITION_LEFT, CLAY_HELP_WINDOWS_TABS_POSITION },
 
-  { "windows-tabs-position-right", GIMP_ICON_GO_LAST,
+  { "windows-tabs-position-right", CLAY_ICON_GO_LAST,
     NC_("windows-tabs-position-action", "_Right"), NULL, { NULL },
     NC_("windows-tabs-position-action", "Position the tabs on the right"),
-    GIMP_POSITION_RIGHT, GIMP_HELP_WINDOWS_TABS_POSITION },
+    CLAY_POSITION_RIGHT, CLAY_HELP_WINDOWS_TABS_POSITION },
 };
 
 void
-windows_actions_setup (GimpActionGroup *group)
+windows_actions_setup (ClayActionGroup *group)
 {
   GList *list;
 
-  gimp_action_group_add_actions (group, "windows-action",
+  clay_action_group_add_actions (group, "windows-action",
                                  windows_actions,
                                  G_N_ELEMENTS (windows_actions));
 
-  gimp_action_group_add_toggle_actions (group, "windows-action",
+  clay_action_group_add_toggle_actions (group, "windows-action",
                                         windows_toggle_actions,
                                         G_N_ELEMENTS (windows_toggle_actions));
 
-  gimp_action_group_add_radio_actions (group, "windows-tabs-position-action",
+  clay_action_group_add_radio_actions (group, "windows-tabs-position-action",
                                        windows_tabs_position_actions,
                                        G_N_ELEMENTS (windows_tabs_position_actions),
                                        NULL, 0,
                                        windows_set_tabs_position_cmd_callback);
 
-  g_signal_connect_object (group->gimp->displays, "add",
+  g_signal_connect_object (group->clay->displays, "add",
                            G_CALLBACK (windows_actions_display_add),
                            group, 0);
-  g_signal_connect_object (group->gimp->displays, "remove",
+  g_signal_connect_object (group->clay->displays, "remove",
                            G_CALLBACK (windows_actions_display_remove),
                            group, 0);
-  g_signal_connect_object (group->gimp->displays, "reorder",
+  g_signal_connect_object (group->clay->displays, "reorder",
                            G_CALLBACK (windows_actions_display_reorder),
                            group, 0);
 
-  for (list = gimp_get_display_iter (group->gimp);
+  for (list = clay_get_display_iter (group->clay);
        list;
        list = g_list_next (list))
     {
-      GimpDisplay *display = list->data;
+      ClayDisplay *display = list->data;
 
-      windows_actions_display_add (group->gimp->displays, display, group);
+      windows_actions_display_add (group->clay->displays, display, group);
     }
 
-  g_signal_connect_object (gimp_dialog_factory_get_singleton (), "dock-window-added",
+  g_signal_connect_object (clay_dialog_factory_get_singleton (), "dock-window-added",
                            G_CALLBACK (windows_actions_dock_window_added),
                            group, 0);
-  g_signal_connect_object (gimp_dialog_factory_get_singleton (), "dock-window-removed",
+  g_signal_connect_object (clay_dialog_factory_get_singleton (), "dock-window-removed",
                            G_CALLBACK (windows_actions_dock_window_removed),
                            group, 0);
 
-  for (list = gimp_dialog_factory_get_open_dialogs (gimp_dialog_factory_get_singleton ());
+  for (list = clay_dialog_factory_get_open_dialogs (clay_dialog_factory_get_singleton ());
        list;
        list = g_list_next (list))
     {
-      GimpDockWindow *dock_window = list->data;
+      ClayDockWindow *dock_window = list->data;
 
-      if (GIMP_IS_DOCK_WINDOW (dock_window))
-        windows_actions_dock_window_added (gimp_dialog_factory_get_singleton (),
+      if (CLAY_IS_DOCK_WINDOW (dock_window))
+        windows_actions_dock_window_added (clay_dialog_factory_get_singleton (),
                                            dock_window,
                                            group);
     }
@@ -235,29 +235,29 @@ windows_actions_setup (GimpActionGroup *group)
                            G_CALLBACK (windows_actions_recent_remove),
                            group, 0);
 
-  for (list = GIMP_LIST (global_recent_docks)->queue->head;
+  for (list = CLAY_LIST (global_recent_docks)->queue->head;
        list;
        list = g_list_next (list))
     {
-      GimpSessionInfo *info = list->data;
+      ClaySessionInfo *info = list->data;
 
       windows_actions_recent_add (global_recent_docks, info, group);
     }
 
-  g_signal_connect_object (group->gimp->config, "notify::single-window-mode",
+  g_signal_connect_object (group->clay->config, "notify::single-window-mode",
                            G_CALLBACK (windows_actions_single_window_mode_notify),
                            group, 0);
 }
 
 void
-windows_actions_update (GimpActionGroup *group,
+windows_actions_update (ClayActionGroup *group,
                         gpointer         data)
 {
-  GimpGuiConfig *config = GIMP_GUI_CONFIG (group->gimp->config);
+  ClayGuiConfig *config = CLAY_GUI_CONFIG (group->clay->config);
   const gchar   *action = NULL;
 
 #define SET_ACTIVE(action,condition) \
-        gimp_action_group_set_action_active (group, action, (condition) != 0)
+        clay_action_group_set_action_active (group, action, (condition) != 0)
 
   SET_ACTIVE ("windows-use-single-window-mode", config->single_window_mode);
   SET_ACTIVE ("windows-hide-docks", config->hide_docks);
@@ -265,16 +265,16 @@ windows_actions_update (GimpActionGroup *group,
 
   switch (config->tabs_position)
     {
-    case GIMP_POSITION_TOP:
+    case CLAY_POSITION_TOP:
       action = "windows-tabs-position-top";
       break;
-    case GIMP_POSITION_BOTTOM:
+    case CLAY_POSITION_BOTTOM:
       action = "windows-tabs-position-bottom";
       break;
-    case GIMP_POSITION_LEFT:
+    case CLAY_POSITION_LEFT:
       action = "windows-tabs-position-left";
       break;
-    case GIMP_POSITION_RIGHT:
+    case CLAY_POSITION_RIGHT:
       action = "windows-tabs-position-right";
       break;
     default:
@@ -282,31 +282,31 @@ windows_actions_update (GimpActionGroup *group,
       break;
     }
 
-  gimp_action_group_set_action_active (group, action, TRUE);
-  gimp_action_group_set_action_sensitive (group, "windows-tab-position", config->single_window_mode,
+  clay_action_group_set_action_active (group, action, TRUE);
+  clay_action_group_set_action_sensitive (group, "windows-tab-position", config->single_window_mode,
                                           _("Single-window mode disabled"));
-  gimp_action_group_set_action_sensitive (group, "windows-show-tabs", config->single_window_mode,
+  clay_action_group_set_action_sensitive (group, "windows-show-tabs", config->single_window_mode,
                                           _("Single-window mode disabled"));
 
 #undef SET_ACTIVE
 }
 
 gchar *
-windows_actions_dock_window_to_action_name (GimpDockWindow *dock_window)
+windows_actions_dock_window_to_action_name (ClayDockWindow *dock_window)
 {
   return g_strdup_printf ("windows-dock-%04d",
-                          gimp_dock_window_get_id (dock_window));
+                          clay_dock_window_get_id (dock_window));
 }
 
 
 /*  private functions  */
 
 static void
-windows_actions_display_add (GimpContainer   *container,
-                             GimpDisplay     *display,
-                             GimpActionGroup *group)
+windows_actions_display_add (ClayContainer   *container,
+                             ClayDisplay     *display,
+                             ClayActionGroup *group)
 {
-  GimpDisplayShell *shell = gimp_display_get_shell (display);
+  ClayDisplayShell *shell = clay_display_get_shell (display);
 
   g_signal_connect_object (display, "notify::image",
                            G_CALLBACK (windows_actions_image_notify),
@@ -320,12 +320,12 @@ windows_actions_display_add (GimpContainer   *container,
 }
 
 static void
-windows_actions_display_remove (GimpContainer   *container,
-                                GimpDisplay     *display,
-                                GimpActionGroup *group)
+windows_actions_display_remove (ClayContainer   *container,
+                                ClayDisplay     *display,
+                                ClayActionGroup *group)
 {
-  GimpDisplayShell *shell = gimp_display_get_shell (display);
-  GimpAction       *action;
+  ClayDisplayShell *shell = clay_display_get_shell (display);
+  ClayAction       *action;
   gchar            *action_name;
 
   if (shell)
@@ -333,53 +333,53 @@ windows_actions_display_remove (GimpContainer   *container,
                                           windows_actions_title_notify,
                                           group);
 
-  action_name = gimp_display_get_action_name (display);
-  action = gimp_action_group_get_action (group, action_name);
+  action_name = clay_display_get_action_name (display);
+  action = clay_action_group_get_action (group, action_name);
   g_free (action_name);
 
   if (action)
-    gimp_action_group_remove_action_and_accel (group, action);
+    clay_action_group_remove_action_and_accel (group, action);
 
   windows_actions_update_display_accels (group);
 }
 
 static void
-windows_actions_display_reorder (GimpContainer   *container,
-                                 GimpDisplay     *display,
+windows_actions_display_reorder (ClayContainer   *container,
+                                 ClayDisplay     *display,
                                  gint             old_index,
                                  gint             new_index,
-                                 GimpActionGroup *group)
+                                 ClayActionGroup *group)
 {
   windows_actions_update_display_accels (group);
 }
 
 static void
-windows_actions_image_notify (GimpDisplay      *display,
+windows_actions_image_notify (ClayDisplay      *display,
                               const GParamSpec *unused,
-                              GimpActionGroup  *group)
+                              ClayActionGroup  *group)
 {
-  GimpImage  *image = gimp_display_get_image (display);
-  GimpAction *action;
+  ClayImage  *image = clay_display_get_image (display);
+  ClayAction *action;
   gchar      *action_name;
 
-  action_name = gimp_display_get_action_name (display);
+  action_name = clay_display_get_action_name (display);
 
-  action = gimp_action_group_get_action (group, action_name);
+  action = clay_action_group_get_action (group, action_name);
 
   if (! action)
     {
-      GimpActionEntry entry = { 0 };
+      ClayActionEntry entry = { 0 };
 
       entry.name        = action_name;
-      entry.icon_name   = GIMP_ICON_IMAGE;
+      entry.icon_name   = CLAY_ICON_IMAGE;
       entry.label       = "";
       entry.tooltip     = NULL;
       entry.callback    = windows_show_display_cmd_callback;
       entry.help_id     = NULL;
 
-      gimp_action_group_add_actions (group, NULL, &entry, 1);
+      clay_action_group_add_actions (group, NULL, &entry, 1);
 
-      action = gimp_action_group_get_action (group, action_name);
+      action = clay_action_group_get_action (group, action_name);
 
       g_object_set_data (G_OBJECT (action), "display", display);
     }
@@ -392,22 +392,22 @@ windows_actions_image_notify (GimpDisplay      *display,
       gchar       *escaped;
       gchar       *title;
 
-      display_name = gimp_image_get_display_name (image);
-      escaped = gimp_escape_uline (display_name);
+      display_name = clay_image_get_display_name (image);
+      escaped = clay_escape_uline (display_name);
 
       /* TRANSLATORS: label for an action allowing to show (i.e. raise the image
        * tab or window above others) specific images or views of image. The part
        * between quotes is the image name and other view identifiers.
        */
       title = g_strdup_printf (_("Show \"%s-%d.%d\""), escaped,
-                               gimp_image_get_id (image),
-                               gimp_display_get_instance (display));
+                               clay_image_get_id (image),
+                               clay_display_get_instance (display));
 
       g_object_set (action,
                     "visible",     TRUE,
                     "label",       title,
                     "short-label", escaped,
-                    "tooltip",     gimp_image_get_display_path (image),
+                    "tooltip",     clay_image_get_display_path (image),
                     "viewable",    image,
                     NULL);
 
@@ -426,34 +426,34 @@ windows_actions_image_notify (GimpDisplay      *display,
 }
 
 static void
-windows_actions_title_notify (GimpDisplayShell *shell,
+windows_actions_title_notify (ClayDisplayShell *shell,
                               const GParamSpec *unused,
-                              GimpActionGroup  *group)
+                              ClayActionGroup  *group)
 {
   windows_actions_image_notify (shell->display, NULL, group);
 }
 
 static void
-windows_actions_update_display_accels (GimpActionGroup *group)
+windows_actions_update_display_accels (ClayActionGroup *group)
 {
   GList *list;
   gint   i;
 
-  for (list = gimp_get_display_iter (group->gimp), i = 0;
+  for (list = clay_get_display_iter (group->clay), i = 0;
        list && i < 10;
        list = g_list_next (list), i++)
     {
-      GimpDisplay *display = list->data;
-      GimpImage   *image   = gimp_display_get_image (display);
-      GimpAction  *action;
+      ClayDisplay *display = list->data;
+      ClayImage   *image   = clay_display_get_image (display);
+      ClayAction  *action;
       gchar       *action_name;
 
       if (image == NULL)
         break;
 
-      action_name = gimp_display_get_action_name (display);
+      action_name = clay_display_get_action_name (display);
 
-      action = gimp_action_group_get_action (group, action_name);
+      action = clay_action_group_get_action (group, action_name);
       g_free (action_name);
 
       if (action)
@@ -472,7 +472,7 @@ windows_actions_update_display_accels (GimpActionGroup *group)
           else
             accel = gtk_accelerator_name (GDK_KEY_0, GDK_MOD1_MASK);
 
-          gimp_action_set_accels (action, (const gchar*[]) { accel, NULL });
+          clay_action_set_accels (action, (const gchar*[]) { accel, NULL });
           g_free (accel);
 
           /* TRANSLATORS: the first argument (%1$s) is the image name, the
@@ -481,20 +481,20 @@ windows_actions_update_display_accels (GimpActionGroup *group)
           ntooltip = ngettext ("Switch to the first image view: %1$s",
                                "Switch to image view %2$d: %1$s",
                                i + 1);
-          tooltip = g_strdup_printf (ntooltip, gimp_image_get_display_path (image), i + 1);
-          gimp_action_set_tooltip (action, tooltip);
+          tooltip = g_strdup_printf (ntooltip, clay_image_get_display_path (image), i + 1);
+          clay_action_set_tooltip (action, tooltip);
           g_free (tooltip);
         }
     }
 }
 
 static void
-windows_actions_dock_window_added (GimpDialogFactory *factory,
-                                   GimpDockWindow    *dock_window,
-                                   GimpActionGroup   *group)
+windows_actions_dock_window_added (ClayDialogFactory *factory,
+                                   ClayDockWindow    *dock_window,
+                                   ClayActionGroup   *group)
 {
-  GimpAction      *action;
-  GimpActionEntry  entry       = { 0 };
+  ClayAction      *action;
+  ClayActionEntry  entry       = { 0 };
   gchar           *action_name = windows_actions_dock_window_to_action_name (dock_window);
 
   entry.name        = action_name;
@@ -502,11 +502,11 @@ windows_actions_dock_window_added (GimpDialogFactory *factory,
   entry.label       = "";
   entry.tooltip     = NULL;
   entry.callback    = windows_show_dock_cmd_callback;
-  entry.help_id     = GIMP_HELP_WINDOWS_SHOW_DOCK;
+  entry.help_id     = CLAY_HELP_WINDOWS_SHOW_DOCK;
 
-  gimp_action_group_add_actions (group, NULL, &entry, 1);
+  clay_action_group_add_actions (group, NULL, &entry, 1);
 
-  action = gimp_action_group_get_action (group, action_name);
+  action = clay_action_group_get_action (group, action_name);
 
   g_object_set (action,
                 "ellipsize", PANGO_ELLIPSIZE_END,
@@ -525,31 +525,31 @@ windows_actions_dock_window_added (GimpDialogFactory *factory,
 }
 
 static void
-windows_actions_dock_window_removed (GimpDialogFactory *factory,
-                                     GimpDockWindow    *dock_window,
-                                     GimpActionGroup   *group)
+windows_actions_dock_window_removed (ClayDialogFactory *factory,
+                                     ClayDockWindow    *dock_window,
+                                     ClayActionGroup   *group)
 {
-  GimpAction *action;
+  ClayAction *action;
   gchar      *action_name;
 
   action_name = windows_actions_dock_window_to_action_name (dock_window);
-  action = gimp_action_group_get_action (group, action_name);
+  action = clay_action_group_get_action (group, action_name);
   g_free (action_name);
 
   if (action)
-    gimp_action_group_remove_action_and_accel (group, action);
+    clay_action_group_remove_action_and_accel (group, action);
 }
 
 static void
-windows_actions_dock_window_notify (GimpDockWindow   *dock_window,
+windows_actions_dock_window_notify (ClayDockWindow   *dock_window,
                                     const GParamSpec *pspec,
-                                    GimpActionGroup  *group)
+                                    ClayActionGroup  *group)
 {
-  GimpAction *action;
+  ClayAction *action;
   gchar      *action_name;
 
   action_name = windows_actions_dock_window_to_action_name (dock_window);
-  action = gimp_action_group_get_action (group, action_name);
+  action = clay_action_group_get_action (group, action_name);
   g_free (action_name);
 
   if (action)
@@ -560,12 +560,12 @@ windows_actions_dock_window_notify (GimpDockWindow   *dock_window,
 }
 
 static void
-windows_actions_recent_add (GimpContainer   *container,
-                            GimpSessionInfo *info,
-                            GimpActionGroup *group)
+windows_actions_recent_add (ClayContainer   *container,
+                            ClaySessionInfo *info,
+                            ClayActionGroup *group)
 {
-  GimpAction      *action;
-  GimpActionEntry  entry = { 0 };
+  ClayAction      *action;
+  ClayActionEntry  entry = { 0 };
   gint             info_id;
   static gint      info_id_counter = 1;
   gchar           *action_name;
@@ -585,14 +585,14 @@ windows_actions_recent_add (GimpContainer   *container,
 
   entry.name        = action_name;
   entry.icon_name   = NULL;
-  entry.label       = gimp_object_get_name (info);
-  entry.tooltip     = gimp_object_get_name (info);
+  entry.label       = clay_object_get_name (info);
+  entry.tooltip     = clay_object_get_name (info);
   entry.callback    = windows_open_recent_cmd_callback;
-  entry.help_id     = GIMP_HELP_WINDOWS_OPEN_RECENT_DOCK;
+  entry.help_id     = CLAY_HELP_WINDOWS_OPEN_RECENT_DOCK;
 
-  gimp_action_group_add_actions (group, NULL, &entry, 1);
+  clay_action_group_add_actions (group, NULL, &entry, 1);
 
-  action = gimp_action_group_get_action (group, action_name);
+  action = clay_action_group_get_action (group, action_name);
 
   g_object_set (action,
                 "ellipsize",       PANGO_ELLIPSIZE_END,
@@ -605,11 +605,11 @@ windows_actions_recent_add (GimpContainer   *container,
 }
 
 static void
-windows_actions_recent_remove (GimpContainer   *container,
-                               GimpSessionInfo *info,
-                               GimpActionGroup *group)
+windows_actions_recent_remove (ClayContainer   *container,
+                               ClaySessionInfo *info,
+                               ClayActionGroup *group)
 {
-  GimpAction *action;
+  ClayAction *action;
   gint        info_id;
   gchar      *action_name;
 
@@ -617,19 +617,19 @@ windows_actions_recent_remove (GimpContainer   *container,
                                                 "recent-action-id"));
 
   action_name = g_strdup_printf ("windows-recent-%04d", info_id);
-  action = gimp_action_group_get_action (group, action_name);
+  action = clay_action_group_get_action (group, action_name);
   g_free (action_name);
 
   if (action)
-    gimp_action_group_remove_action_and_accel (group, action);
+    clay_action_group_remove_action_and_accel (group, action);
 }
 
 static void
-windows_actions_single_window_mode_notify (GimpDisplayConfig *config,
+windows_actions_single_window_mode_notify (ClayDisplayConfig *config,
                                            GParamSpec        *pspec,
-                                           GimpActionGroup   *group)
+                                           ClayActionGroup   *group)
 {
-  gimp_action_group_set_action_active (group,
+  clay_action_group_set_action_active (group,
                                        "windows-use-single-window-mode",
-                                       GIMP_GUI_CONFIG (config)->single_window_mode);
+                                       CLAY_GUI_CONFIG (config)->single_window_mode);
 }

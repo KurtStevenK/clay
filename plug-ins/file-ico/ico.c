@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -25,8 +25,8 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 /* #define ICO_DBG */
 
@@ -37,7 +37,7 @@
 #include "ico-export.h"
 #include "ico-load.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define LOAD_PROC           "file-ico-load"
 #define LOAD_CUR_PROC       "file-cur-load"
@@ -54,12 +54,12 @@ typedef struct _IcoClass IcoClass;
 
 struct _Ico
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _IcoClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -68,70 +68,70 @@ struct _IcoClass
 
 GType                   ico_get_type         (void);
 
-static GList          * ico_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * ico_create_procedure (GimpPlugIn            *plug_in,
+static GList          * ico_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * ico_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static GimpValueArray * ico_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * ico_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * ani_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * ani_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer              run_data);
-static GimpValueArray * ico_load_thumb       (GimpProcedure        *procedure,
+static ClayValueArray * ico_load_thumb       (ClayProcedure        *procedure,
                                               GFile                *file,
                                               gint                  size,
-                                              GimpProcedureConfig  *config,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
-static GimpValueArray * ani_load_thumb       (GimpProcedure        *procedure,
+static ClayValueArray * ani_load_thumb       (ClayProcedure        *procedure,
                                               GFile                *file,
                                               gint                  size,
-                                              GimpProcedureConfig  *config,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
-static GimpValueArray * ico_export           (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
+static ClayValueArray * ico_export           (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
                                               GFile                *file,
-                                              GimpExportOptions    *options,
-                                              GimpMetadata         *metadata,
-                                              GimpProcedureConfig  *config,
+                                              ClayExportOptions    *options,
+                                              ClayMetadata         *metadata,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
-static GimpValueArray * cur_export           (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
+static ClayValueArray * cur_export           (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
                                               GFile                *file,
-                                              GimpExportOptions    *options,
-                                              GimpMetadata         *metadata,
-                                              GimpProcedureConfig  *config,
+                                              ClayExportOptions    *options,
+                                              ClayMetadata         *metadata,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
-static GimpValueArray * ani_export           (GimpProcedure        *procedure,
-                                              GimpRunMode           run_mode,
-                                              GimpImage            *image,
+static ClayValueArray * ani_export           (ClayProcedure        *procedure,
+                                              ClayRunMode           run_mode,
+                                              ClayImage            *image,
                                               GFile                *file,
-                                              GimpExportOptions    *options,
-                                              GimpMetadata         *metadata,
-                                              GimpProcedureConfig  *config,
+                                              ClayExportOptions    *options,
+                                              ClayMetadata         *metadata,
+                                              ClayProcedureConfig  *config,
                                               gpointer              run_data);
 
 
-G_DEFINE_TYPE (Ico, ico, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Ico, ico, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (ICO_TYPE)
+CLAY_MAIN (ICO_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 ico_class_init (IcoClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = ico_query_procedures;
   plug_in_class->create_procedure = ico_create_procedure;
@@ -144,7 +144,7 @@ ico_init (Ico *ico)
 }
 
 static GList *
-ico_query_procedures (GimpPlugIn *plug_in)
+ico_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -160,121 +160,121 @@ ico_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-ico_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+ico_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             ico_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Microsoft Windows icon"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Microsoft Windows icon"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files of Windows ICO file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Christian Kreibich <christian@whoop.org>",
                                       "Christian Kreibich <christian@whoop.org>",
                                       "2002");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-ico");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ico");
       /* We do not set magics here, since that interferes with certain types
          of TGA images. */
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_CUR_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             ico_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Microsoft Windows cursor"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Microsoft Windows cursor"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files of Windows CUR file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "Nikc M.",
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "Nikc M.",
                                       "2002-2022");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/vnd.microsoft.icon");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "cur");
       /* We do not set magics here, since that interferes with certain types
          of TGA images. */
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_ANI_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             ani_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("Microsoft Windows animated cursor"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Microsoft Windows animated cursor"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files of Windows ANI file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "James Huang, Alex S.",
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "James Huang, Alex S.",
                                       "2007-2022");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "application/x-navi-animation");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ani");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "8,string,ACON");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_ANI_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 ico_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads a preview from a Windows ICO or CUR files",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dom Lachowicz, Sven Neumann",
                                       "Sven Neumann <sven@gimp.org>",
                                       "2005");
     }
   else if (! strcmp (name, LOAD_ANI_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 ani_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads a preview from a Windows ANI files"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dom Lachowicz, Sven Neumann, James Huang, "
                                       "Alex S.",
                                       "Dom Lachowicz, "
@@ -284,143 +284,143 @@ ico_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, ico_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Microsoft Windows icon"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Microsoft Windows icon"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports files in Windows ICO file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Christian Kreibich <christian@whoop.org>",
                                       "Christian Kreibich <christian@whoop.org>",
                                       "2002");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "Microsoft Windows icon");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-ico");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ico");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS,
                                               NULL, NULL, NULL);
     }
   else if (! strcmp (name, EXPORT_CUR_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, cur_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Microsoft Windows cursor"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Microsoft Windows cursor"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports files in Windows CUR file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "Nikc M.",
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "Nikc M.",
                                       "2002-2022");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "Microsoft Windows cursor");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/vnd.microsoft.icon");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "cur");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_int32_array_argument (procedure, "hot-spot-x",
+      clay_procedure_add_int32_array_argument (procedure, "hot-spot-x",
                                                "Hot spot X",
                                                "X coordinates of hot spot (one per layer)",
                                                G_PARAM_READWRITE);
-      gimp_procedure_add_int32_array_argument (procedure, "hot-spot-y",
+      clay_procedure_add_int32_array_argument (procedure, "hot-spot-y",
                                                "Hot spot Y",
                                                "Y coordinates of hot spot (one per layer)",
                                                G_PARAM_READWRITE);
     }
   else if (! strcmp (name, EXPORT_ANI_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, ani_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Microsoft Windows animated cursor"));
-      gimp_procedure_set_icon_name (procedure, GIMP_ICON_BRUSH);
+      clay_procedure_set_menu_label (procedure, _("Microsoft Windows animated cursor"));
+      clay_procedure_set_icon_name (procedure, CLAY_ICON_BRUSH);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in Windows ANI file format"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "James Huang, Alex S.",
                                       "Christian Kreibich <christian@whoop.org>, "
                                       "James Huang, Alex S.",
                                       "2007-2022");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "Microsoft Windows animated cursor");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "application/x-navi-animation");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "ani");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_string_argument (procedure, "cursor-name",
+      clay_procedure_add_string_argument (procedure, "cursor-name",
                                           "Cursor Name",
                                           _("Cursor Name (Optional)"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "author-name",
+      clay_procedure_add_string_argument (procedure, "author-name",
                                           "Cursor Author",
                                           _("Cursor Author (Optional)"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "default-delay",
+      clay_procedure_add_int_argument (procedure, "default-delay",
                                        "Default delay",
                                        "Default delay between frames "
                                        "in jiffies (1/60 of a second)",
                                        0, G_MAXINT, 8,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int32_array_argument (procedure, "hot-spot-x",
+      clay_procedure_add_int32_array_argument (procedure, "hot-spot-x",
                                                "Hot spot X",
                                                "X coordinates of hot spot (one per layer)",
                                                G_PARAM_READWRITE);
-      gimp_procedure_add_int32_array_argument (procedure, "hot-spot-y",
+      clay_procedure_add_int32_array_argument (procedure, "hot-spot-y",
                                                "Hot spot Y",
                                                "Y coordinates of hot spot (one per layer)",
                                                G_PARAM_READWRITE);
@@ -429,17 +429,17 @@ ico_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-ico_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+ico_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -447,30 +447,30 @@ ico_load (GimpProcedure         *procedure,
   image = ico_load_image (file, NULL, -1, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-ani_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+ani_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -479,30 +479,30 @@ ani_load (GimpProcedure         *procedure,
                           NULL, NULL, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-ico_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+ico_load_thumb (ClayProcedure       *procedure,
                 GFile               *file,
                 gint                 size,
-                GimpProcedureConfig *config,
+                ClayProcedureConfig *config,
                 gpointer             run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint            width;
   gint            height;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -514,34 +514,34 @@ ico_load_thumb (GimpProcedure       *procedure,
                                     &width, &height, 0, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, width);
-  GIMP_VALUES_SET_INT   (return_vals, 3, height);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, width);
+  CLAY_VALUES_SET_INT   (return_vals, 3, height);
 
-  gimp_value_array_truncate (return_vals, 4);
+  clay_value_array_truncate (return_vals, 4);
 
   return return_vals;
 }
 
-static GimpValueArray *
-ani_load_thumb (GimpProcedure        *procedure,
+static ClayValueArray *
+ani_load_thumb (ClayProcedure        *procedure,
                 GFile                *file,
                 gint                  size,
-                GimpProcedureConfig  *config,
+                ClayProcedureConfig  *config,
                 gpointer              run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint            width;
   gint            height;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -553,63 +553,63 @@ ani_load_thumb (GimpProcedure        *procedure,
                           &width, &height, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, width);
-  GIMP_VALUES_SET_INT   (return_vals, 3, height);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, width);
+  CLAY_VALUES_SET_INT   (return_vals, 3, height);
 
-  gimp_value_array_truncate (return_vals, 4);
+  clay_value_array_truncate (return_vals, 4);
 
   return return_vals;
 }
 
-static GimpValueArray *
-ico_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+ico_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
   status = ico_export_image (file, image, procedure, config, run_mode, &error);
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpValueArray *
-cur_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+cur_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status;
-  GimpExportReturn   export       = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status;
+  ClayExportReturn   export       = CLAY_EXPORT_IGNORE;
   GError            *error        = NULL;
-  GimpArray         *x_array      = NULL;
-  GimpArray         *y_array      = NULL;
+  ClayArray         *x_array      = NULL;
+  ClayArray         *y_array      = NULL;
   const gint32      *hot_spot_x   = NULL;
   const gint32      *hot_spot_y   = NULL;
   gint32            *new_hot_spot_x   = NULL;
@@ -624,19 +624,19 @@ cur_export (GimpProcedure        *procedure,
                 "hot-spot-y", &y_array,
                 NULL);
 
-  hot_spot_x = gimp_int32_array_get_values (x_array, &n_hot_spot_x);
-  hot_spot_y = gimp_int32_array_get_values (y_array, &n_hot_spot_y);
+  hot_spot_x = clay_int32_array_get_values (x_array, &n_hot_spot_x);
+  hot_spot_y = clay_int32_array_get_values (y_array, &n_hot_spot_y);
 
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
   status = cur_export_image (file, image, procedure, config, run_mode,
                              &n_hot_spot_x, hot_spot_x, &new_hot_spot_x,
                              &n_hot_spot_y, hot_spot_y, &new_hot_spot_y,
                              &error);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      gimp_int32_array_set_values (x_array, new_hot_spot_x, n_hot_spot_x, FALSE);
-      gimp_int32_array_set_values (y_array, new_hot_spot_y, n_hot_spot_y, FALSE);
+      clay_int32_array_set_values (x_array, new_hot_spot_x, n_hot_spot_x, FALSE);
+      clay_int32_array_set_values (y_array, new_hot_spot_y, n_hot_spot_y, FALSE);
       g_object_set (config,
                     "hot-spot-x", x_array,
                     "hot-spot-y", y_array,
@@ -645,30 +645,30 @@ cur_export (GimpProcedure        *procedure,
       g_free (new_hot_spot_y);
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpValueArray *
-ani_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+ani_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status;
-  GimpExportReturn   export         = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status;
+  ClayExportReturn   export         = CLAY_EXPORT_IGNORE;
   GError            *error          = NULL;
   gchar             *inam           = NULL;
   gchar             *iart           = NULL;
   gint               jif_rate       = 0;
-  GimpArray         *x_array        = NULL;
-  GimpArray         *y_array        = NULL;
+  ClayArray         *x_array        = NULL;
+  ClayArray         *y_array        = NULL;
   const gint32      *hot_spot_x     = NULL;
   const gint32      *hot_spot_y     = NULL;
   gint32            *new_hot_spot_x = NULL;
@@ -693,19 +693,19 @@ ani_export (GimpProcedure        *procedure,
   ani_info.inam = inam;
   ani_info.iart = iart;
 
-  hot_spot_x = gimp_int32_array_get_values (x_array, &n_hot_spot_x);
-  hot_spot_y = gimp_int32_array_get_values (y_array, &n_hot_spot_y);
+  hot_spot_x = clay_int32_array_get_values (x_array, &n_hot_spot_x);
+  hot_spot_y = clay_int32_array_get_values (y_array, &n_hot_spot_y);
 
-  export = gimp_export_options_get_image (options, &image);
+  export = clay_export_options_get_image (options, &image);
   status = ani_export_image (file, image, procedure, config, run_mode,
                              &n_hot_spot_x, hot_spot_x, &new_hot_spot_x,
                              &n_hot_spot_y, hot_spot_y, &new_hot_spot_y,
                              &header, &ani_info, &error);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      gimp_int32_array_set_values (x_array, new_hot_spot_x, n_hot_spot_x, FALSE);
-      gimp_int32_array_set_values (y_array, new_hot_spot_y, n_hot_spot_y, FALSE);
+      clay_int32_array_set_values (x_array, new_hot_spot_x, n_hot_spot_x, FALSE);
+      clay_int32_array_set_values (y_array, new_hot_spot_y, n_hot_spot_y, FALSE);
       g_object_set (config,
                     "cursor-name",   NULL,
                     "author-name",   NULL,
@@ -719,13 +719,13 @@ ani_export (GimpProcedure        *procedure,
   g_free (new_hot_spot_y);
   g_free (ani_info.inam);
   g_free (ani_info.iart);
-  gimp_array_free (x_array);
-  gimp_array_free (y_array);
+  clay_array_free (x_array);
+  clay_array_free (y_array);
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 gint

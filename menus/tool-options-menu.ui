@@ -4,7 +4,7 @@
   <menu id="/tool-options-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="tool-options-action">Tool Options Menu</attribute>
-      <attribute name="icon">gimp-tool-options</attribute>
+      <attribute name="icon">clay-tool-options</attribute>
       <submenu>
         <attribute name="label" translatable="yes" context="tool-options-action">_Save Tool Preset</attribute>
         <attribute name="icon">document-save</attribute>

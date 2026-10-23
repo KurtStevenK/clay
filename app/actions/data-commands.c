@@ -20,207 +20,207 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdata.h"
-#include "core/gimpdatafactory.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/claydata.h"
+#include "core/claydatafactory.h"
 
 #include "file/file-open.h"
 
-#include "widgets/gimpclipboard.h"
-#include "widgets/gimpcontainerview.h"
-#include "widgets/gimpdataeditor.h"
-#include "widgets/gimpdatafactoryview.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
-#include "widgets/gimpwidgets-utils.h"
-#include "widgets/gimpwindowstrategy.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/clayclipboard.h"
+#include "widgets/claycontainerview.h"
+#include "widgets/claydataeditor.h"
+#include "widgets/claydatafactoryview.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
+#include "widgets/claywidgets-utils.h"
+#include "widgets/claywindowstrategy.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "dialogs/data-delete-dialog.h"
 
 #include "actions.h"
 #include "data-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  public functions  */
 
 void
-data_open_as_image_cmd_callback (GimpAction *action,
+data_open_as_image_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  GimpContext         *context;
-  GimpData            *data;
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  ClayContext         *context;
+  ClayData            *data;
 
   context =
-    gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+    clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-  data = (GimpData *)
-    gimp_context_get_by_type (context,
-                              gimp_data_factory_view_get_child_type (view));
+  data = (ClayData *)
+    clay_context_get_by_type (context,
+                              clay_data_factory_view_get_child_type (view));
 
-  if (data && gimp_data_get_file (data))
+  if (data && clay_data_get_file (data))
     {
-      GFile             *file   = gimp_data_get_file (data);
+      GFile             *file   = clay_data_get_file (data);
       GtkWidget         *widget = GTK_WIDGET (view);
-      GimpImage         *image;
-      GimpPDBStatusType  status;
+      ClayImage         *image;
+      ClayPDBStatusType  status;
       GError            *error = NULL;
 
-      image = file_open_with_display (context->gimp, context, NULL,
+      image = file_open_with_display (context->clay, context, NULL,
                                       file, FALSE,
-                                      G_OBJECT (gimp_widget_get_monitor (widget)),
+                                      G_OBJECT (clay_widget_get_monitor (widget)),
                                       &status, &error);
 
-      if (! image && status != GIMP_PDB_CANCEL)
+      if (! image && status != CLAY_PDB_CANCEL)
         {
-          gimp_message (context->gimp, G_OBJECT (view),
-                        GIMP_MESSAGE_ERROR,
+          clay_message (context->clay, G_OBJECT (view),
+                        CLAY_MESSAGE_ERROR,
                         _("Opening '%s' failed:\n\n%s"),
-                        gimp_file_get_utf8_name (file), error->message);
+                        clay_file_get_utf8_name (file), error->message);
           g_clear_error (&error);
         }
     }
 }
 
 void
-data_new_cmd_callback (GimpAction *action,
+data_new_cmd_callback (ClayAction *action,
                        GVariant   *value,
                        gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
 
-  if (gimp_data_factory_view_has_data_new_func (view))
+  if (clay_data_factory_view_has_data_new_func (view))
     {
-      GimpDataFactory *factory;
-      GimpContext     *context;
-      GimpData        *data;
+      ClayDataFactory *factory;
+      ClayContext     *context;
+      ClayData        *data;
 
-      factory = gimp_data_factory_view_get_data_factory (view);
+      factory = clay_data_factory_view_get_data_factory (view);
 
       context =
-        gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+        clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-      data = gimp_data_factory_data_new (factory, context, _("Untitled"));
+      data = clay_data_factory_data_new (factory, context, _("Untitled"));
 
       if (data)
         {
           GtkWidget *edit_button;
 
-          gimp_context_set_by_type (context,
-                                    gimp_data_factory_view_get_child_type (view),
-                                    GIMP_OBJECT (data));
+          clay_context_set_by_type (context,
+                                    clay_data_factory_view_get_child_type (view),
+                                    CLAY_OBJECT (data));
 
-          edit_button = gimp_data_factory_view_get_edit_button (view);
+          edit_button = clay_data_factory_view_get_edit_button (view);
           if (edit_button && gtk_widget_get_visible (edit_button))
-            gtk_button_clicked (GTK_BUTTON (gimp_data_factory_view_get_edit_button (view)));
+            gtk_button_clicked (GTK_BUTTON (clay_data_factory_view_get_edit_button (view)));
         }
     }
 }
 
 void
-data_duplicate_cmd_callback (GimpAction *action,
+data_duplicate_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  GimpContext         *context;
-  GimpData            *data;
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  ClayContext         *context;
+  ClayData            *data;
 
-  context = gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+  context = clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-  data = (GimpData *)
-    gimp_context_get_by_type (context,
-                              gimp_data_factory_view_get_child_type (view));
+  data = (ClayData *)
+    clay_context_get_by_type (context,
+                              clay_data_factory_view_get_child_type (view));
 
-  if (data && gimp_data_factory_view_have (view, GIMP_OBJECT (data)))
+  if (data && clay_data_factory_view_have (view, CLAY_OBJECT (data)))
     {
-      GimpData *new_data;
+      ClayData *new_data;
 
-      new_data = gimp_data_factory_data_duplicate (gimp_data_factory_view_get_data_factory (view), data);
+      new_data = clay_data_factory_data_duplicate (clay_data_factory_view_get_data_factory (view), data);
 
       if (new_data)
         {
           GtkWidget *edit_button;
 
-          gimp_context_set_by_type (context,
-                                    gimp_data_factory_view_get_child_type (view),
-                                    GIMP_OBJECT (new_data));
+          clay_context_set_by_type (context,
+                                    clay_data_factory_view_get_child_type (view),
+                                    CLAY_OBJECT (new_data));
 
-          edit_button = gimp_data_factory_view_get_edit_button (view);
+          edit_button = clay_data_factory_view_get_edit_button (view);
           if (edit_button && gtk_widget_get_visible (edit_button))
-            gtk_button_clicked (GTK_BUTTON (gimp_data_factory_view_get_edit_button (view)));
+            gtk_button_clicked (GTK_BUTTON (clay_data_factory_view_get_edit_button (view)));
         }
     }
 }
 
 void
-data_copy_location_cmd_callback (GimpAction *action,
+data_copy_location_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  GimpContext         *context;
-  GimpData            *data;
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  ClayContext         *context;
+  ClayData            *data;
 
-  context = gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+  context = clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-  data = (GimpData *)
-    gimp_context_get_by_type (context,
-                              gimp_data_factory_view_get_child_type (view));
+  data = (ClayData *)
+    clay_context_get_by_type (context,
+                              clay_data_factory_view_get_child_type (view));
 
   if (data)
     {
-      GFile *file = gimp_data_get_file (data);
+      GFile *file = clay_data_get_file (data);
 
       if (file)
         {
           gchar *uri = g_file_get_uri (file);
 
-          gimp_clipboard_set_text (context->gimp, uri);
+          clay_clipboard_set_text (context->clay, uri);
           g_free (uri);
         }
     }
 }
 
 void
-data_show_in_file_manager_cmd_callback (GimpAction *action,
+data_show_in_file_manager_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  GimpContext         *context;
-  GimpData            *data;
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  ClayContext         *context;
+  ClayData            *data;
 
-  context = gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+  context = clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-  data = (GimpData *)
-    gimp_context_get_by_type (context,
-                              gimp_data_factory_view_get_child_type (view));
+  data = (ClayData *)
+    clay_context_get_by_type (context,
+                              clay_data_factory_view_get_child_type (view));
 
   if (data)
     {
-      GFile *file = gimp_data_get_file (data);
+      GFile *file = clay_data_get_file (data);
 
       if (file)
         {
           GError *error = NULL;
 
-          if (! gimp_file_show_in_file_manager (file, &error))
+          if (! clay_file_show_in_file_manager (file, &error))
             {
-              gimp_message (context->gimp, G_OBJECT (view),
-                            GIMP_MESSAGE_ERROR,
+              clay_message (context->clay, G_OBJECT (view),
+                            CLAY_MESSAGE_ERROR,
                             _("Can't show file in file manager: %s"),
                             error->message);
               g_clear_error (&error);
@@ -230,29 +230,29 @@ data_show_in_file_manager_cmd_callback (GimpAction *action,
 }
 
 void
-data_delete_cmd_callback (GimpAction *action,
+data_delete_cmd_callback (ClayAction *action,
                           GVariant   *value,
                           gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  GimpContext         *context;
-  GimpData            *data;
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  ClayContext         *context;
+  ClayData            *data;
 
   context =
-    gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+    clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-  data = (GimpData *)
-    gimp_context_get_by_type (context,
-                              gimp_data_factory_view_get_child_type (view));
+  data = (ClayData *)
+    clay_context_get_by_type (context,
+                              clay_data_factory_view_get_child_type (view));
 
   if (data                          &&
-      gimp_data_is_deletable (data) &&
-      gimp_data_factory_view_have (view, GIMP_OBJECT (data)))
+      clay_data_is_deletable (data) &&
+      clay_data_factory_view_have (view, CLAY_OBJECT (data)))
     {
-      GimpDataFactory *factory;
+      ClayDataFactory *factory;
       GtkWidget       *dialog;
 
-      factory = gimp_data_factory_view_get_data_factory (view);
+      factory = clay_data_factory_view_get_data_factory (view);
 
       dialog = data_delete_dialog_new (factory, data, context,
                                        GTK_WIDGET (view));
@@ -261,45 +261,45 @@ data_delete_cmd_callback (GimpAction *action,
 }
 
 void
-data_refresh_cmd_callback (GimpAction *action,
+data_refresh_cmd_callback (ClayAction *action,
                            GVariant   *value,
                            gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  Gimp                *gimp;
-  return_if_no_gimp (gimp, user_data);
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  Clay                *clay;
+  return_if_no_clay (clay, user_data);
 
-  gimp_set_busy (gimp);
-  gimp_data_factory_data_refresh (gimp_data_factory_view_get_data_factory (view),
+  clay_set_busy (clay);
+  clay_data_factory_data_refresh (clay_data_factory_view_get_data_factory (view),
                                   action_data_get_context (user_data));
-  gimp_unset_busy (gimp);
+  clay_unset_busy (clay);
 }
 
 void
-data_edit_cmd_callback (GimpAction *action,
+data_edit_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    user_data)
 {
-  GimpDataFactoryView *view = GIMP_DATA_FACTORY_VIEW (user_data);
-  GimpContext         *context;
-  GimpData            *data;
+  ClayDataFactoryView *view = CLAY_DATA_FACTORY_VIEW (user_data);
+  ClayContext         *context;
+  ClayData            *data;
 
-  context = gimp_container_view_get_context (GIMP_CONTAINER_EDITOR (view)->view);
+  context = clay_container_view_get_context (CLAY_CONTAINER_EDITOR (view)->view);
 
-  data = (GimpData *)
-    gimp_context_get_by_type (context,
-                              gimp_data_factory_view_get_child_type (view));
+  data = (ClayData *)
+    clay_context_get_by_type (context,
+                              clay_data_factory_view_get_child_type (view));
 
-  if (data && gimp_data_factory_view_have (view, GIMP_OBJECT (data)))
+  if (data && clay_data_factory_view_have (view, CLAY_OBJECT (data)))
     {
-      GdkMonitor *monitor = gimp_widget_get_monitor (GTK_WIDGET (view));
+      GdkMonitor *monitor = clay_widget_get_monitor (GTK_WIDGET (view));
       GtkWidget  *dockable;
       GtkWidget  *editor  = NULL;
 
       dockable =
-        gimp_window_strategy_show_dockable_dialog (GIMP_WINDOW_STRATEGY (gimp_get_window_strategy (context->gimp)),
-                                                   context->gimp,
-                                                   gimp_dialog_factory_get_singleton (),
+        clay_window_strategy_show_dockable_dialog (CLAY_WINDOW_STRATEGY (clay_get_window_strategy (context->clay)),
+                                                   context->clay,
+                                                   clay_dialog_factory_get_singleton (),
                                                    monitor,
                                                    g_variant_get_string (value,
                                                                          NULL));
@@ -307,7 +307,7 @@ data_edit_cmd_callback (GimpAction *action,
       if (dockable)
         editor = gtk_bin_get_child (GTK_BIN (dockable));
 
-      if (editor && GIMP_IS_DATA_EDITOR (editor))
-        gimp_data_editor_set_data (GIMP_DATA_EDITOR (editor), data);
+      if (editor && CLAY_IS_DATA_EDITOR (editor))
+        clay_data_editor_set_data (CLAY_DATA_EDITOR (editor), data);
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<locatingRules>
+  <locatingRule name="ClayMsInstallerConfig" pattern="*.xml">
+    <documentRule localName="clay-ms-installer-config" target="clay-ms-installer-config.its"/>
+  </locatingRule>
+</locatingRules>

@@ -10,7 +10,7 @@ on:
     paths:
       - .github/workflows/build-release.yml
       - build/macos/**
-      - gimp-data/images/logo/**
+      - clay-data/images/logo/**
       - tools/make-mac-typelib.py
   workflow_dispatch:
     inputs:
@@ -60,7 +60,7 @@ jobs:
       - name: Set up paths
         run: |
           {
-            echo "GIMP_PREFIX=$RUNNER_TEMP/_install"
+            echo "CLAY_PREFIX=$RUNNER_TEMP/_install"
             echo "BUILD_DIR=$RUNNER_TEMP/build-arm64"
             echo "DIST_DIR=$RUNNER_TEMP/dist"
             echo "PKG_CONFIG_PATH=$RUNNER_TEMP/_install/lib/pkgconfig:$OPT_PREFIX/lib/pkgconfig:$OPT_PREFIX/share/pkgconfig:$OPT_PREFIX/opt/libarchive/lib/pkgconfig"
@@ -98,7 +98,7 @@ jobs:
         run: |
           for dep in babl gegl; do
             git clone --depth 1 "https://gitlab.gnome.org/GNOME/$dep.git" "$RUNNER_TEMP/$dep"
-            meson setup "$RUNNER_TEMP/$dep/_build" "$RUNNER_TEMP/$dep" -Dprefix="$GIMP_PREFIX" -Dbuildtype=debugoptimized \
+            meson setup "$RUNNER_TEMP/$dep/_build" "$RUNNER_TEMP/$dep" -Dprefix="$CLAY_PREFIX" -Dbuildtype=debugoptimized \
               -Dc_args="-I$OPT_PREFIX/include" -Dcpp_args="-I$OPT_PREFIX/include" \
               -Dc_link_args="-L$OPT_PREFIX/lib" -Dcpp_link_args="-L$OPT_PREFIX/lib"
             ninja -C "$RUNNER_TEMP/$dep/_build"
@@ -107,7 +107,7 @@ jobs:
 
       - name: Build Clay
         run: |
-          meson setup "$BUILD_DIR" . -Dprefix="$GIMP_PREFIX" -Dbuildtype=debugoptimized \
+          meson setup "$BUILD_DIR" . -Dprefix="$CLAY_PREFIX" -Dbuildtype=debugoptimized \
             -Drelocatable-bundle=yes -Ddmg=true -Denable-default-bin=enabled -Dbuild-id=xyz.kainzmayer.clay \
             -Dc_args="-I$OPT_PREFIX/include" -Dcpp_args="-I$OPT_PREFIX/include" \
             -Dc_link_args="-L$OPT_PREFIX/lib" -Dcpp_link_args="-L$OPT_PREFIX/lib"

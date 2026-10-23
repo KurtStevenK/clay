@@ -1,6 +1,6 @@
 # C version
 
-extension_name = 'org.gimp.extension.goat-exercises'
+extension_name = 'org.clay.extension.goat-exercises'
 plugin_name   = 'goat-exercise'
 
 plugin_sources = [
@@ -9,7 +9,7 @@ plugin_sources = [
 
 if platform_windows
   plugin_sources += windows.compile_resources(
-    gimp_plugins_rc,
+    clay_plugins_rc,
     args: [
       rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', plugin_name+'-c.exe'),
       rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', plugin_name),
@@ -23,11 +23,11 @@ endif
 exe = executable(plugin_name + '-c',
   plugin_sources,
   dependencies: [
-    libgimpui_dep,
+    libclayui_dep,
     math,
   ],
   install: true,
-  install_dir: gimpplugindir /  'extensions' / extension_name,
+  install_dir: clayplugindir /  'extensions' / extension_name,
   win_subsystem: 'windows',
 )
 
@@ -37,7 +37,7 @@ plug_ins = exe.full_path().split('/')[-1].split('\\')[-1]
 
 install_data(
   'goat-exercise-c.c',
-  install_dir: gimpplugindir /  'extensions' / extension_name,
+  install_dir: clayplugindir /  'extensions' / extension_name,
 )
 
 # Vala version
@@ -47,21 +47,21 @@ if have_vala and have_gobject_introspection
     'goat-exercise-vala.vala',
     include_directories: [ rootInclude, ],
     dependencies: [
-      libgimp_vapi, libgimpui_vapi, libgimpui_dep, math,
+      libclay_vapi, libclayui_vapi, libclayui_dep, math,
     ],
     c_args: [
-      '-DGETTEXT_PACKAGE="@0@"'.format('org.gimp.extension.goat-exercises'),
+      '-DGETTEXT_PACKAGE="@0@"'.format('org.clay.extension.goat-exercises'),
       '-w',
     ],
     install: true,
-    install_dir: gimpplugindir /  'extensions' / extension_name,
+    install_dir: clayplugindir /  'extensions' / extension_name,
     win_subsystem: 'windows',
   )
   plug_ins = plug_ins + ':' + exe.full_path().split('/')[-1].split('\\')[-1]
 
   install_data(
     'goat-exercise-vala.vala',
-    install_dir: gimpplugindir /  'extensions' / extension_name,
+    install_dir: clayplugindir /  'extensions' / extension_name,
   )
 endif
 
@@ -69,7 +69,7 @@ endif
 
 install_data(
   'goat-exercise-py3.py',
-  install_dir: gimpplugindir /  'extensions' / extension_name,
+  install_dir: clayplugindir /  'extensions' / extension_name,
 )
 plug_ins = plug_ins + ':goat-exercise-py3.py'
 
@@ -78,7 +78,7 @@ plug_ins = plug_ins + ':goat-exercise-py3.py'
 if have_javascript
   install_data(
     'goat-exercise-gjs.js',
-    install_dir: gimpplugindir /  'extensions' / extension_name,
+    install_dir: clayplugindir /  'extensions' / extension_name,
   )
   plug_ins = plug_ins + ':goat-exercise-gjs.js'
 endif
@@ -88,7 +88,7 @@ endif
 if have_lua
   install_data(
     'goat-exercise-lua.lua',
-    install_dir: gimpplugindir /  'extensions' / extension_name,
+    install_dir: clayplugindir /  'extensions' / extension_name,
   )
   plug_ins = plug_ins + ':goat-exercise-lua.lua'
 endif
@@ -98,7 +98,7 @@ endif
 conf = configuration_data()
 conf.set('GOAT_EXERCISES', plug_ins)
 
-appdatafilename = 'org.gimp.extension.goat-exercises.metainfo.xml'
+appdatafilename = 'org.clay.extension.goat-exercises.metainfo.xml'
 appdatafilein = configure_file(
   input : appdatafilename + '.in.in',
   output: appdatafilename + '.in',
@@ -110,5 +110,5 @@ appdatafile = i18n.merge_file(
   output: appdatafilename,
   po_dir: po_plug_ins_dir,
   install: true,
-  install_dir: gimpplugindir /  'extensions' / extension_name,
+  install_dir: clayplugindir /  'extensions' / extension_name,
 )

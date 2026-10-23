@@ -18,5 +18,5 @@
 #pragma once
 
 
-GtkWidget * about_dialog_create (Gimp           *gimp,
-                                 GimpCoreConfig *config);
+GtkWidget * about_dialog_create (Clay           *clay,
+                                 ClayCoreConfig *config);

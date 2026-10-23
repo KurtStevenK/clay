@@ -1,9 +1,9 @@
-# GIMP tool preset file
+# Clay tool preset file
 
-(icon-name "gimp-tool-gradient")
+(icon-name "clay-tool-gradient")
 (name "Vignette")
-(tool-options "GimpGradientOptions"
-    (tool "gimp-gradient-tool")
+(tool-options "ClayGradientOptions"
+    (tool "clay-gradient-tool")
     (opacity 0.750000)
     (paint-mode multiply)
     (gradient "FG to Transparent")
@@ -22,4 +22,4 @@
 (use-palette no)
 (use-font no)
 
-# end of GIMP tool preset file
+# end of Clay tool preset file

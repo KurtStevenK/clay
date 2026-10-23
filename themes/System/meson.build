@@ -1,6 +1,6 @@
 files = [
-  'gimp-light.css'
+  'clay-light.css'
 ]
 
 install_data(files,
-             install_dir: gimpdatadir / 'themes' / 'System')
+             install_dir: claydatadir / 'themes' / 'System')

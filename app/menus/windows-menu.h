@@ -18,5 +18,5 @@
 #pragma once
 
 
-void   windows_menu_setup (GimpUIManager *manager,
+void   windows_menu_setup (ClayUIManager *manager,
                            const gchar   *ui_path);

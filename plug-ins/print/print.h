@@ -20,14 +20,14 @@
 #define EMBED_PAGE_SETUP 1
 #endif
 
-#define GIMP_PLUGIN_PRINT_ERROR gimp_plugin_print_error_quark ()
+#define CLAY_PLUGIN_PRINT_ERROR clay_plugin_print_error_quark ()
 
 typedef enum
 {
-  GIMP_PLUGIN_PRINT_ERROR_FAILED
-} GimpPluginPrintError;
+  CLAY_PLUGIN_PRINT_ERROR_FAILED
+} ClayPluginPrintError;
 
-GQuark gimp_plugin_print_error_quark (void);
+GQuark clay_plugin_print_error_quark (void);
 
 typedef enum
 {
@@ -39,14 +39,14 @@ typedef enum
 
 typedef struct
 {
-  GimpImage          *image;
-  GimpDrawable       *drawable;
-  GimpUnit           *unit;
+  ClayImage          *image;
+  ClayDrawable       *drawable;
+  ClayUnit           *unit;
   gdouble             xres;
   gdouble             yres;
   gdouble             min_xres;
   gdouble             min_yres;
-  GimpUnit           *image_unit;
+  ClayUnit           *image_unit;
   gdouble             offset_x;
   gdouble             offset_y;
   PrintCenterMode     center;

@@ -20,14 +20,14 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define PLUG_IN_PROC   "plug-in-align-layers"
 #define PLUG_IN_BINARY "align-layers"
-#define PLUG_IN_ROLE   "gimp-align-layers"
+#define PLUG_IN_ROLE   "clay-align-layers"
 
 enum
 {
@@ -75,12 +75,12 @@ typedef struct _AlignLayersClass AlignLayersClass;
 
 struct _AlignLayers
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _AlignLayersClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -89,57 +89,57 @@ struct _AlignLayersClass
 
 GType                   align_layers_get_type               (void);
 
-static GList          * align_layers_query_procedures       (GimpPlugIn           *plug_in);
-static GimpProcedure  * align_layers_create_procedure       (GimpPlugIn           *plug_in,
+static GList          * align_layers_query_procedures       (ClayPlugIn           *plug_in);
+static ClayProcedure  * align_layers_create_procedure       (ClayPlugIn           *plug_in,
                                                              const gchar          *name);
 
-static GimpValueArray * align_layers_run                    (GimpProcedure        *procedure,
-                                                             GimpRunMode           run_mode,
-                                                             GimpImage            *image,
-                                                             GimpDrawable        **drawables,
-                                                             GimpProcedureConfig  *config,
+static ClayValueArray * align_layers_run                    (ClayProcedure        *procedure,
+                                                             ClayRunMode           run_mode,
+                                                             ClayImage            *image,
+                                                             ClayDrawable        **drawables,
+                                                             ClayProcedureConfig  *config,
                                                              gpointer              run_data);
 
 
 /* Main function */
-static GimpPDBStatusType align_layers                       (GimpImage            *image,
+static ClayPDBStatusType align_layers                       (ClayImage            *image,
                                                              GObject              *config);
 
 /* Helpers and internal functions */
 static gint             align_layers_count_visibles_layers  (GList                *layers);
-static GimpLayer      * align_layers_find_last_layer        (GList                *layers,
+static ClayLayer      * align_layers_find_last_layer        (GList                *layers,
                                                              gboolean             *found);
 static gint             align_layers_spread_visibles_layers (GList                *layers,
-                                                             GimpLayer           **layers_array);
-static GimpLayer     ** align_layers_spread_image           (GimpImage            *image,
+                                                             ClayLayer           **layers_array);
+static ClayLayer     ** align_layers_spread_image           (ClayImage            *image,
                                                              gint                 *layer_num);
-static GimpLayer      * align_layers_find_background        (GimpImage            *image);
-static AlignData        align_layers_gather_data            (GimpLayer           **layers,
+static ClayLayer      * align_layers_find_background        (ClayImage            *image);
+static AlignData        align_layers_gather_data            (ClayLayer           **layers,
                                                              gint                  layer_num,
-                                                             GimpLayer            *background,
+                                                             ClayLayer            *background,
                                                              GObject              *config);
-static void             align_layers_perform_alignment      (GimpLayer           **layers,
+static void             align_layers_perform_alignment      (ClayLayer           **layers,
                                                              gint                  layer_num,
                                                              AlignData             data,
                                                              GObject              *config);
-static void             align_layers_get_align_offsets      (GimpDrawable         *drawable,
+static void             align_layers_get_align_offsets      (ClayDrawable         *drawable,
                                                              gint                 *x,
                                                              gint                 *y,
                                                              GObject              *config);
-static gint             align_layers_dialog                 (GimpProcedure        *procedure,
+static gint             align_layers_dialog                 (ClayProcedure        *procedure,
                                                              GObject              *config);
 
 
-G_DEFINE_TYPE (AlignLayers, align_layers, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (AlignLayers, align_layers, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (ALIGN_LAYERS_TYPE)
+CLAY_MAIN (ALIGN_LAYERS_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 align_layers_class_init (AlignLayersClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = align_layers_query_procedures;
   plug_in_class->create_procedure = align_layers_create_procedure;
@@ -152,44 +152,44 @@ align_layers_init (AlignLayers *film)
 }
 
 static GList *
-align_layers_query_procedures (GimpPlugIn *plug_in)
+align_layers_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-align_layers_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+align_layers_create_procedure (ClayPlugIn  *plug_in,
                                const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             align_layers_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE  |
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLES |
-                                           GIMP_PROCEDURE_SENSITIVE_NO_DRAWABLES);
+      clay_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE  |
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLES |
+                                           CLAY_PROCEDURE_SENSITIVE_NO_DRAWABLES);
 
-      gimp_procedure_set_menu_label (procedure, _("Align Visi_ble Layers..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Image/[Arrange]");
+      clay_procedure_set_menu_label (procedure, _("Align Visi_ble Layers..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Image/[Arrange]");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Align all visible layers of the image"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Shuji Narazaki <narazaki@InetQ.or.jp>",
                                       "Shuji Narazaki",
                                       "1997");
 
-      gimp_procedure_add_choice_argument (procedure, "horizontal-style",
+      clay_procedure_add_choice_argument (procedure, "horizontal-style",
                                           _("_Horizontal style"),
                                           "",
-                                          gimp_choice_new_with_values ("none",               H_NONE,     _("None"),                 NULL,
+                                          clay_choice_new_with_values ("none",               H_NONE,     _("None"),                 NULL,
                                                                        "collect",            H_COLLECT,  _("Collect"),              NULL,
                                                                        "fill-left-to-right", LEFT2RIGHT, _("Fill (left to right)"), NULL,
                                                                        "fill-right-to-left", RIGHT2LEFT, _("Fill (right to left)"), NULL,
@@ -198,20 +198,20 @@ align_layers_create_procedure (GimpPlugIn  *plug_in,
                                           "none",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "horizontal-base",
+      clay_procedure_add_choice_argument (procedure, "horizontal-base",
                                           _("Hori_zontal base"),
                                           "",
-                                          gimp_choice_new_with_values ("left-edge",  H_BASE_LEFT,   _("Left edge"),  NULL,
+                                          clay_choice_new_with_values ("left-edge",  H_BASE_LEFT,   _("Left edge"),  NULL,
                                                                        "center",     H_BASE_CENTER, _("Center"),     NULL,
                                                                        "right-edge", H_BASE_RIGHT,  _("Right edge"), NULL,
                                                                        NULL),
                                           "left-edge",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "vertical-style",
+      clay_procedure_add_choice_argument (procedure, "vertical-style",
                                           _("_Vertical style"),
                                           "",
-                                          gimp_choice_new_with_values ("none",               V_NONE,     _("None"),                 NULL,
+                                          clay_choice_new_with_values ("none",               V_NONE,     _("None"),                 NULL,
                                                                        "collect",            V_COLLECT,  _("Collect"),              NULL,
                                                                        "fill-left-to-right", TOP2BOTTOM, _("Fill (top to bottom)"), NULL,
                                                                        "fill-right-to-left", BOTTOM2TOP, _("Fill (bottom to top)"), NULL,
@@ -220,30 +220,30 @@ align_layers_create_procedure (GimpPlugIn  *plug_in,
                                           "none",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "vertical-base",
+      clay_procedure_add_choice_argument (procedure, "vertical-base",
                                           _("Ver_tical base"),
                                           "",
-                                          gimp_choice_new_with_values ("top-edge",    V_BASE_TOP,     _("Top edge"),    NULL,
+                                          clay_choice_new_with_values ("top-edge",    V_BASE_TOP,     _("Top edge"),    NULL,
                                                                        "center",      V_BASE_CENTER,  _("Center"),      NULL,
                                                                        "bottom-edge", V_BASE_BOTTOM,  _("Bottom edge"), NULL,
                                                                        NULL),
                                           "top-edge",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "grid-size",
+      clay_procedure_add_int_argument (procedure, "grid-size",
                                        _("_Grid"),
                                        _("Grid"),
                                        1, 200, 10,
-                                       GIMP_PARAM_READWRITE);
+                                       CLAY_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure,
+      clay_procedure_add_boolean_argument (procedure,
                                            "ignore-bottom-layer",
                                            _("Ignore the _bottom layer even if visible"),
                                            _("Ignore the bottom layer even if visible"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure,
+      clay_procedure_add_boolean_argument (procedure,
                                            "use-bottom-layer",
                                            _("_Use the (invisible) bottom layer as the base"),
                                            _("Use the (invisible) bottom layer as the base"),
@@ -256,12 +256,12 @@ align_layers_create_procedure (GimpPlugIn  *plug_in,
        * them.
        */
       /*
-      gimp_procedure_add_boolean_argument (procedure,
+      clay_procedure_add_boolean_argument (procedure,
                                            "link-after-alignment",
                                            "Link the visible layers after alignment",
                                            FALSE,
                                            G_PARAM_READWRITE);
-      gimp_procedure_add_boolean_argument (procedure,
+      clay_procedure_add_boolean_argument (procedure,
                                            "use-bottom",
                                            "use the bottom layer as the base of alignment",
                                            TRUE,
@@ -272,54 +272,54 @@ align_layers_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-align_layers_run (GimpProcedure        *procedure,
-                  GimpRunMode           run_mode,
-                  GimpImage            *image,
-                  GimpDrawable        **drawables,
-                  GimpProcedureConfig  *config,
+static ClayValueArray *
+align_layers_run (ClayProcedure        *procedure,
+                  ClayRunMode           run_mode,
+                  ClayImage            *image,
+                  ClayDrawable        **drawables,
+                  ClayProcedureConfig  *config,
                   gpointer              run_data)
 {
-  GimpValueArray    *return_vals = NULL;
-  GimpPDBStatusType  status      = GIMP_PDB_EXECUTION_ERROR;
+  ClayValueArray    *return_vals = NULL;
+  ClayPDBStatusType  status      = CLAY_PDB_EXECUTION_ERROR;
   GError            *error       = NULL;
   GList             *layers;
   gint               layer_num;
 
   switch ( run_mode )
     {
-    case GIMP_RUN_INTERACTIVE:
-      layers = gimp_image_list_layers (image);
+    case CLAY_RUN_INTERACTIVE:
+      layers = clay_image_list_layers (image);
       layer_num = align_layers_count_visibles_layers (layers);
       g_list_free (layers);
       if (layer_num < 2)
         {
-          g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+          g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                        _("There are not enough layers to align."));
 
-          return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+          return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
         }
 
       if (! align_layers_dialog (procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_NONINTERACTIVE:
+    case CLAY_RUN_WITH_LAST_VALS:
       break;
     }
 
-  if (status != GIMP_PDB_CANCEL)
+  if (status != CLAY_PDB_CANCEL)
     {
       status = align_layers (image, G_OBJECT (config));
 
-      if (run_mode != GIMP_RUN_NONINTERACTIVE)
-        gimp_displays_flush ();
+      if (run_mode != CLAY_RUN_NONINTERACTIVE)
+        clay_displays_flush ();
     }
 
-  return_vals = gimp_procedure_new_return_values (procedure, status, error);
+  return_vals = clay_procedure_new_return_values (procedure, status, error);
 
   return return_vals;
 }
@@ -327,13 +327,13 @@ align_layers_run (GimpProcedure        *procedure,
 /*
  * Main function
  */
-static GimpPDBStatusType
-align_layers (GimpImage *image,
+static ClayPDBStatusType
+align_layers (ClayImage *image,
               GObject   *config)
 {
   gint         layer_num  = 0;
-  GimpLayer  **layers     = NULL;
-  GimpLayer   *background = 0;
+  ClayLayer  **layers     = NULL;
+  ClayLayer   *background = 0;
   AlignData    data;
   gboolean     ignore_bottom_layer;
 
@@ -345,7 +345,7 @@ align_layers (GimpImage *image,
   if (layer_num < 2)
     {
       g_free (layers);
-      return GIMP_PDB_EXECUTION_ERROR;
+      return CLAY_PDB_EXECUTION_ERROR;
     }
 
   background = align_layers_find_background (image);
@@ -361,25 +361,25 @@ align_layers (GimpImage *image,
                                    background,
                                    config);
 
-  gimp_image_undo_group_start (image);
+  clay_image_undo_group_start (image);
 
   align_layers_perform_alignment (layers,
                                   layer_num,
                                   data,
                                   config);
 
-  gimp_image_undo_group_end (image);
+  clay_image_undo_group_end (image);
 
   g_free (layers);
 
-  return GIMP_PDB_SUCCESS;
+  return CLAY_PDB_SUCCESS;
 }
 
 /*
  * Find the bottommost layer, visible or not
  * The image must contain at least one layer.
  */
-static GimpLayer *
+static ClayLayer *
 align_layers_find_last_layer (GList    *layers,
                               gboolean *found)
 {
@@ -387,24 +387,24 @@ align_layers_find_last_layer (GList    *layers,
 
   for (; last; last = last->prev)
     {
-      GimpItem *item = last->data;
+      ClayItem *item = last->data;
 
-      if (gimp_item_is_group (item))
+      if (clay_item_is_group (item))
         {
           GList     *children;
-          GimpLayer *last_layer;
+          ClayLayer *last_layer;
 
-          children = gimp_item_list_children (item);
+          children = clay_item_list_children (item);
           last_layer = align_layers_find_last_layer (children,
                                                      found);
           g_list_free (children);
           if (*found)
             return last_layer;
         }
-      else if (gimp_item_is_layer (item))
+      else if (clay_item_is_layer (item))
         {
           *found = TRUE;
-          return GIMP_LAYER (item);
+          return CLAY_LAYER (item);
         }
     }
 
@@ -415,14 +415,14 @@ align_layers_find_last_layer (GList    *layers,
 /*
  * Return the bottom layer.
  */
-static GimpLayer *
-align_layers_find_background (GimpImage *image)
+static ClayLayer *
+align_layers_find_background (ClayImage *image)
 {
   GList     *layers;
-  GimpLayer *background;
+  ClayLayer *background;
   gboolean   found = FALSE;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   background = align_layers_find_last_layer (layers, &found);
   g_list_free (layers);
 
@@ -435,29 +435,29 @@ align_layers_find_background (GimpImage *image)
  */
 static gint
 align_layers_spread_visibles_layers (GList      *layers,
-                                     GimpLayer **layers_array)
+                                     ClayLayer **layers_array)
 {
   GList *iter;
   gint   index = 0;
 
   for (iter = layers; iter; iter = iter->next)
     {
-      GimpItem *item = iter->data;
+      ClayItem *item = iter->data;
 
-      if (gimp_item_get_visible (item))
+      if (clay_item_get_visible (item))
         {
-          if (gimp_item_is_group (item))
+          if (clay_item_is_group (item))
             {
               GList *children;
 
-              children = gimp_item_list_children (item);
+              children = clay_item_list_children (item);
               index += align_layers_spread_visibles_layers (children,
                                                             &(layers_array[index]));
               g_list_free (children);
             }
-          else if (gimp_item_is_layer (item))
+          else if (clay_item_is_layer (item))
             {
-              layers_array[index] = GIMP_LAYER (item);
+              layers_array[index] = CLAY_LAYER (item);
               index++;
             }
         }
@@ -469,17 +469,17 @@ align_layers_spread_visibles_layers (GList      *layers,
 /*
  * Return a contiguous array of all visible layers
  */
-static GimpLayer **
-align_layers_spread_image (GimpImage *image,
+static ClayLayer **
+align_layers_spread_image (ClayImage *image,
                            gint      *layer_num)
 {
   GList      *layers;
-  GimpLayer **layers_array;
+  ClayLayer **layers_array;
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
   *layer_num = align_layers_count_visibles_layers (layers);
 
-  layers_array = g_malloc (sizeof (GimpLayer *) * *layer_num);
+  layers_array = g_malloc (sizeof (ClayLayer *) * *layer_num);
 
   align_layers_spread_visibles_layers (layers,
                                        layers_array);
@@ -496,19 +496,19 @@ align_layers_count_visibles_layers (GList *layers)
 
   for (iter = layers; iter; iter = iter->next)
     {
-      GimpItem *item = iter->data;
+      ClayItem *item = iter->data;
 
-      if (gimp_item_get_visible (item))
+      if (clay_item_get_visible (item))
         {
-          if (gimp_item_is_group (item))
+          if (clay_item_is_group (item))
             {
               GList *children;
 
-              children = gimp_item_list_children (item);
+              children = clay_item_list_children (item);
               count += align_layers_count_visibles_layers (children);
               g_list_free (children);
             }
-          else if (gimp_item_is_layer (item))
+          else if (clay_item_is_layer (item))
             {
               count += 1;
             }
@@ -519,9 +519,9 @@ align_layers_count_visibles_layers (GList *layers)
 }
 
 static AlignData
-align_layers_gather_data (GimpLayer **layers,
+align_layers_gather_data (ClayLayer **layers,
                           gint        layer_num,
-                          GimpLayer  *background,
+                          ClayLayer  *background,
                           GObject    *config)
 {
   AlignData data;
@@ -541,9 +541,9 @@ align_layers_gather_data (GimpLayer **layers,
   g_object_get (config,
                 "use-bottom-layer", &use_bottom_layer,
                 NULL);
-  horizontal_style = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  horizontal_style = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                           "horizontal-style");
-  vertical_style = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  vertical_style = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                         "vertical-style");
 
 
@@ -555,9 +555,9 @@ align_layers_gather_data (GimpLayer **layers,
   /* 0 is the top layer */
   for (index = 0; index < layer_num; index++)
     {
-      gimp_drawable_get_offsets (GIMP_DRAWABLE (layers[index]), &orig_x, &orig_y);
+      clay_drawable_get_offsets (CLAY_DRAWABLE (layers[index]), &orig_x, &orig_y);
 
-      align_layers_get_align_offsets (GIMP_DRAWABLE (layers[index]),
+      align_layers_get_align_offsets (CLAY_DRAWABLE (layers[index]),
                                       &offset_x,
                                       &offset_y,
                                       config);
@@ -572,9 +572,9 @@ align_layers_gather_data (GimpLayer **layers,
 
   if (use_bottom_layer)
     {
-      gimp_drawable_get_offsets (GIMP_DRAWABLE (background), &orig_x, &orig_y);
+      clay_drawable_get_offsets (CLAY_DRAWABLE (background), &orig_x, &orig_y);
 
-      align_layers_get_align_offsets (GIMP_DRAWABLE (background),
+      align_layers_get_align_offsets (CLAY_DRAWABLE (background),
                                       &offset_x,
                                       &offset_y,
                                       config);
@@ -604,7 +604,7 @@ align_layers_gather_data (GimpLayer **layers,
  * according to data.
  */
 static void
-align_layers_perform_alignment (GimpLayer **layers,
+align_layers_perform_alignment (ClayLayer **layers,
                                 gint        layer_num,
                                 AlignData   data,
                                 GObject    *config)
@@ -617,9 +617,9 @@ align_layers_perform_alignment (GimpLayer **layers,
   g_object_get (config,
                 "grid-size", &grid_size,
                 NULL);
-  horizontal_style = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  horizontal_style = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                           "horizontal-style");
-  vertical_style = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  vertical_style = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                         "vertical-style");
 
   for (index = 0; index < layer_num; index++)
@@ -631,9 +631,9 @@ align_layers_perform_alignment (GimpLayer **layers,
       gint offset_x;
       gint offset_y;
 
-      gimp_drawable_get_offsets (GIMP_DRAWABLE (layers[index]), &orig_x, &orig_y);
+      clay_drawable_get_offsets (CLAY_DRAWABLE (layers[index]), &orig_x, &orig_y);
 
-      align_layers_get_align_offsets (GIMP_DRAWABLE (layers[index]),
+      align_layers_get_align_offsets (CLAY_DRAWABLE (layers[index]),
                                       &offset_x,
                                       &offset_y,
                                       config);
@@ -679,24 +679,24 @@ align_layers_perform_alignment (GimpLayer **layers,
           break;
         }
 
-      gimp_layer_set_offsets (layers[index], x, y);
+      clay_layer_set_offsets (layers[index], x, y);
     }
 }
 
 static void
-align_layers_get_align_offsets (GimpDrawable *drawable,
+align_layers_get_align_offsets (ClayDrawable *drawable,
                                 gint         *x,
                                 gint         *y,
                                 GObject      *config)
 {
-  gint width  = gimp_drawable_get_width  (drawable);
-  gint height = gimp_drawable_get_height (drawable);
+  gint width  = clay_drawable_get_width  (drawable);
+  gint height = clay_drawable_get_height (drawable);
   gint horizontal_base;
   gint vertical_base;
 
-  horizontal_base = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  horizontal_base = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                          "horizontal-base");
-  vertical_base = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  vertical_base = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                        "vertical-base");
 
   switch (horizontal_base)
@@ -733,27 +733,27 @@ align_layers_get_align_offsets (GimpDrawable *drawable,
 }
 
 static int
-align_layers_dialog (GimpProcedure *procedure,
+align_layers_dialog (ClayProcedure *procedure,
                      GObject       *config)
 {
   GtkWidget *dialog;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_procedure_dialog_new (procedure,
-                                      GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_procedure_dialog_new (procedure,
+                                      CLAY_PROCEDURE_CONFIG (config),
                                       _("Align Visible Layers"));
 
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog),
                                         "grid-size", 1.0);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

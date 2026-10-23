@@ -24,7 +24,7 @@
 #include "xcf-private.h"
 #include "xcf-seek.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 gboolean
@@ -46,7 +46,7 @@ xcf_seek_pos (XcfInfo  *info,
           return FALSE;
         }
 
-      gimp_assert (info->cp == g_seekable_tell (info->seekable));
+      clay_assert (info->cp == g_seekable_tell (info->seekable));
     }
 
   return TRUE;

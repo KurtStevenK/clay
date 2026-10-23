@@ -27,116 +27,116 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer-filter.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpgradient.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claycontainer-filter.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/claygradient.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-gradients_refresh_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+gradients_refresh_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
-  gimp_data_factory_data_refresh (gimp->gradient_factory, context);
+  clay_data_factory_data_refresh (clay->gradient_factory, context);
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-gradients_get_list_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+gradients_get_list_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *filter;
-  GimpGradient **gradient_list = NULL;
+  ClayGradient **gradient_list = NULL;
 
-  filter = g_value_get_string (gimp_value_array_index (args, 0));
+  filter = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gradient_list = (GimpGradient **) gimp_container_get_filtered_array (gimp_data_factory_get_container (gimp->gradient_factory),
+      gradient_list = (ClayGradient **) clay_container_get_filtered_array (clay_data_factory_get_container (clay->gradient_factory),
                                                                            filter);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), gradient_list);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), gradient_list);
 
   return return_vals;
 }
 
 void
-register_gradients_procs (GimpPDB *pdb)
+register_gradients_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-gradients-refresh
+   * clay-gradients-refresh
    */
-  procedure = gimp_procedure_new (gradients_refresh_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradients-refresh");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradients_refresh_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradients-refresh");
+  clay_procedure_set_static_help (procedure,
                                   "Refresh current gradients. This function always succeeds.",
                                   "This procedure retrieves all gradients currently in the user's gradient path and updates the gradient dialogs accordingly.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2002");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradients-get-list
+   * clay-gradients-get-list
    */
-  procedure = gimp_procedure_new (gradients_get_list_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradients-get-list");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradients_get_list_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradients-get-list");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve the list of loaded gradients.",
                                   "This procedure returns a list of the gradients that are currently loaded.\n"
-                                  "Each gradient returned can be used as input to [func@Gimp.context_set_gradient].",
+                                  "Each gradient returned can be used as input to [func@Clay.context_set_gradient].",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Federico Mena Quintero",
                                          "Federico Mena Quintero",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("filter",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("filter",
                                                        "filter",
                                                        "An optional regular expression used to filter the list",
                                                        FALSE, TRUE, FALSE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_core_object_array ("gradient-list",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_core_object_array ("gradient-list",
                                                                       "gradient list",
                                                                       "The list of gradients",
-                                                                      GIMP_TYPE_GRADIENT,
-                                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                      CLAY_TYPE_GRADIENT,
+                                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

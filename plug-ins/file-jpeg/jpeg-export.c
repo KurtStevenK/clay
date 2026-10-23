@@ -33,10 +33,10 @@
 #include <jpeglib.h>
 #include <jerror.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #include "jpeg.h"
 #include "jpeg-icc.h"
@@ -66,14 +66,14 @@ typedef struct
 } PreviewPersistent;
 
 
-static void  make_preview              (GimpProcedureConfig *config);
+static void  make_preview              (ClayProcedureConfig *config);
 
-static void  quality_changed           (GimpProcedureConfig *config);
-static void  subsampling_changed       (GimpProcedureConfig *config,
+static void  quality_changed           (ClayProcedureConfig *config);
+static void  subsampling_changed       (ClayProcedureConfig *config,
                                         const GParamSpec    *pspec,
                                         GtkWidget           *smoothing_scale);
-static void  use_orig_qual_changed     (GimpProcedureConfig *config);
-static void  use_orig_qual_changed_rgb (GimpProcedureConfig *config);
+static void  use_orig_qual_changed     (ClayProcedureConfig *config);
+static void  use_orig_qual_changed_rgb (ClayProcedureConfig *config);
 
 
 static GtkWidget         *preview_size  = NULL;
@@ -151,7 +151,7 @@ background_jpeg_save (PreviewPersistent *pp)
           g_free (text);
 
           /* and load the preview */
-          load_image (pp->file, GIMP_RUN_NONINTERACTIVE,
+          load_image (pp->file, CLAY_RUN_NONINTERACTIVE,
                       TRUE, NULL, NULL, NULL);
         }
 
@@ -162,7 +162,7 @@ background_jpeg_save (PreviewPersistent *pp)
       g_free (pp);
       prev_p = NULL;
 
-      gimp_displays_flush ();
+      clay_displays_flush ();
       gdk_display_flush (gdk_display_get_default ());
 
       return FALSE;
@@ -194,17 +194,17 @@ background_jpeg_save (PreviewPersistent *pp)
 
 gboolean
 export_image (GFile                *file,
-              GimpProcedureConfig  *config,
-              GimpImage            *image,
-              GimpDrawable         *drawable,
-              GimpImage            *orig_image,
+              ClayProcedureConfig  *config,
+              ClayImage            *image,
+              ClayDrawable         *drawable,
+              ClayImage            *orig_image,
               gboolean              preview,
               GError              **error)
 {
   static struct jpeg_compress_struct cinfo;
   static struct my_error_mgr         jerr;
 
-  GimpImageType     drawable_type;
+  ClayImageType     drawable_type;
   GeglBuffer       *buffer;
   const gchar      *encoding;
   const Babl       *format;
@@ -213,8 +213,8 @@ export_image (GFile                *file,
   FILE             * volatile outfile;
   guchar           *data;
   guchar           *src;
-  GimpColorProfile *profile      = NULL;
-  GimpColorProfile *cmyk_profile = NULL;
+  ClayColorProfile *profile      = NULL;
+  ClayColorProfile *cmyk_profile = NULL;
 
   gboolean         has_alpha;
   gboolean         out_linear = FALSE;
@@ -258,21 +258,21 @@ export_image (GFile                *file,
                 "include-color-profile",     &save_profile,
                 "include-comment",           &save_comment,
                 "save-resources",            &save_resources,
-                "gimp-comment",              &comment,
+                "clay-comment",              &comment,
 
                 NULL);
-  dct    = gimp_procedure_config_get_choice_id (config, "dct");
-  subsmp = gimp_procedure_config_get_choice_id (config, "sub-sampling");
+  dct    = clay_procedure_config_get_choice_id (config, "dct");
+  subsmp = clay_procedure_config_get_choice_id (config, "sub-sampling");
 
   quality = (gint) (dquality * 100.0 + 0.5);
 
-  drawable_type = gimp_drawable_type (drawable);
-  buffer = gimp_drawable_get_buffer (drawable);
-  space = gimp_drawable_get_format (drawable);
+  drawable_type = clay_drawable_type (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
+  space = clay_drawable_get_format (drawable);
 
   if (! preview)
-    gimp_progress_init_printf (_("Exporting '%s'"),
-                               gimp_file_get_utf8_name (file));
+    clay_progress_init_printf (_("Exporting '%s'"),
+                               clay_file_get_utf8_name (file));
 
   /* Step 1: allocate and initialize JPEG compression object */
 
@@ -317,7 +317,7 @@ export_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -329,26 +329,26 @@ export_image (GFile                *file,
    */
   if (save_profile)
     {
-      profile = gimp_image_get_color_profile (orig_image);
+      profile = clay_image_get_color_profile (orig_image);
 
       /* If a profile is explicitly set, follow its TRC, whatever the
        * storage format.
        */
-      if (profile && gimp_color_profile_is_linear (profile))
+      if (profile && clay_color_profile_is_linear (profile))
         out_linear = TRUE;
 
       if (! profile)
         {
           /* There is always an effective profile. */
-          profile = gimp_image_get_effective_color_profile (orig_image);
+          profile = clay_image_get_effective_color_profile (orig_image);
 
-          if (gimp_color_profile_is_linear (profile))
+          if (clay_color_profile_is_linear (profile))
             {
-              if (gimp_image_get_precision (image) != GIMP_PRECISION_U8_LINEAR)
+              if (clay_image_get_precision (image) != CLAY_PRECISION_U8_LINEAR)
                 {
-                  GimpColorProfile *saved_profile;
+                  ClayColorProfile *saved_profile;
 
-                  saved_profile = gimp_color_profile_new_srgb_trc_from_color_profile (profile);
+                  saved_profile = clay_color_profile_new_srgb_trc_from_color_profile (profile);
                   g_object_unref (profile);
                   profile = saved_profile;
                 }
@@ -359,8 +359,8 @@ export_image (GFile                *file,
                 }
             }
         }
-      space = gimp_color_profile_get_space (profile,
-                                            gimp_image_get_simulation_intent (image),
+      space = clay_color_profile_get_space (profile,
+                                            clay_image_get_simulation_intent (image),
                                             error);
       if (error && *error)
         {
@@ -373,7 +373,7 @@ export_image (GFile                *file,
           g_printerr ("%s: error getting the profile space: %s",
                      G_STRFUNC, (*error)->message);
           g_clear_error (error);
-          space = gimp_drawable_get_format (drawable);
+          space = clay_drawable_get_format (drawable);
         }
     }
 
@@ -383,7 +383,7 @@ export_image (GFile                *file,
    */
   switch (drawable_type)
     {
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       /* # of color components per pixel */
       cinfo.input_components = 3;
       has_alpha = FALSE;
@@ -394,7 +394,7 @@ export_image (GFile                *file,
         encoding = "R'G'B' u8";
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       /* # of color components per pixel */
       cinfo.input_components = 1;
       has_alpha = FALSE;
@@ -405,8 +405,8 @@ export_image (GFile                *file,
         encoding = "Y' u8";
       break;
 
-    case GIMP_RGBA_IMAGE:
-      /* # of color components per pixel (minus the GIMP alpha channel) */
+    case CLAY_RGBA_IMAGE:
+      /* # of color components per pixel (minus the Clay alpha channel) */
       cinfo.input_components = 4 - 1;
       has_alpha = TRUE;
 
@@ -416,8 +416,8 @@ export_image (GFile                *file,
         encoding = "R'G'B' u8";
       break;
 
-    case GIMP_GRAYA_IMAGE:
-      /* # of color components per pixel (minus the GIMP alpha channel) */
+    case CLAY_GRAYA_IMAGE:
+      /* # of color components per pixel (minus the Clay alpha channel) */
       cinfo.input_components = 2 - 1;
       has_alpha = TRUE;
       if (out_linear)
@@ -426,7 +426,7 @@ export_image (GFile                *file,
         encoding = "Y' u8";
       break;
 
-    case GIMP_INDEXED_IMAGE:
+    case CLAY_INDEXED_IMAGE:
     default:
       return FALSE;
     }
@@ -435,11 +435,11 @@ export_image (GFile                *file,
     {
       GError *err = NULL;
 
-      cmyk_profile = gimp_image_get_simulation_profile (image);
+      cmyk_profile = clay_image_get_simulation_profile (image);
       if (! cmyk_profile && err)
         g_printerr ("%s: no soft-proof profile: %s\n", G_STRFUNC, err->message);
 
-      if (cmyk_profile && ! gimp_color_profile_is_cmyk (cmyk_profile))
+      if (cmyk_profile && ! clay_color_profile_is_cmyk (cmyk_profile))
         g_clear_object (&cmyk_profile);
 
       g_clear_error (&err);
@@ -457,8 +457,8 @@ export_image (GFile                *file,
       encoding = "cmyk u8";
 
       if (cmyk_profile)
-        space = gimp_color_profile_get_space (cmyk_profile,
-                                              GIMP_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
+        space = clay_color_profile_get_space (cmyk_profile,
+                                              CLAY_COLOR_RENDERING_INTENT_RELATIVE_COLORIMETRIC,
                                               error);
       else
         /* The NULL space will fallback to a naive CMYK conversion. */
@@ -484,8 +484,8 @@ export_image (GFile                *file,
     }
   else
     {
-      cinfo.in_color_space = (drawable_type == GIMP_RGB_IMAGE ||
-                              drawable_type == GIMP_RGBA_IMAGE)
+      cinfo.in_color_space = (drawable_type == CLAY_RGB_IMAGE ||
+                              drawable_type == CLAY_RGBA_IMAGE)
         ? JCS_RGB : JCS_GRAYSCALE;
     }
   /* Now use the library's routine to set default compression parameters.
@@ -526,7 +526,7 @@ export_image (GFile                *file,
   cinfo.optimize_coding = optimize;
 #endif
 
-  subsampling = (gimp_drawable_is_rgb (drawable) ?
+  subsampling = (clay_drawable_is_rgb (drawable) ?
                  subsmp : JPEG_SUBSAMPLING_1x1_1x1_1x1);
 
   /*  smoothing is not supported with nonstandard sampling ratios  */
@@ -604,13 +604,13 @@ export_image (GFile                *file,
     gdouble xresolution;
     gdouble yresolution;
 
-    gimp_image_get_resolution (orig_image, &xresolution, &yresolution);
+    clay_image_get_resolution (orig_image, &xresolution, &yresolution);
 
     if (xresolution > 1e-5 && yresolution > 1e-5)
       {
         gdouble factor;
 
-        factor = gimp_unit_get_factor (gimp_image_get_unit (orig_image));
+        factor = clay_unit_get_factor (clay_image_get_unit (orig_image));
 
         if (factor == 2.54 /* cm */ ||
             factor == 25.4 /* mm */)
@@ -640,7 +640,7 @@ export_image (GFile                *file,
   /* Step 4.1: Write the comment out - pw */
   if (save_comment && comment && *comment)
     {
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
       g_print ("jpeg-export: saving image comment (%d bytes)\n",
                (int) strlen (comment));
 #endif
@@ -655,7 +655,7 @@ export_image (GFile                *file,
       const guint8 *icc_data;
       gsize         icc_length;
 
-      icc_data = gimp_color_profile_get_icc_profile (cmyk_profile ? cmyk_profile : profile, &icc_length);
+      icc_data = clay_color_profile_get_icc_profile (cmyk_profile ? cmyk_profile : profile, &icc_length);
       jpeg_icc_write_profile (&cinfo, icc_data, icc_length);
     }
   g_clear_object (&profile);
@@ -665,24 +665,24 @@ export_image (GFile                *file,
   if (save_resources)
     {
       GFile             *temp_file   = NULL;
-      GimpProcedure     *procedure;
-      GimpValueArray    *return_vals = NULL;
-      GimpPDBStatusType  export_status;
+      ClayProcedure     *procedure;
+      ClayValueArray    *return_vals = NULL;
+      ClayPDBStatusType  export_status;
       guchar            *data_buffer = NULL;
       gsize              data_length = 0;
 
-      temp_file   = gimp_temp_file ("tmp");
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (),
+      temp_file   = clay_temp_file ("tmp");
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (),
                                                "file-psd-export-metadata");
-      return_vals = gimp_procedure_run (procedure,
+      return_vals = clay_procedure_run (procedure,
                                         "file",          temp_file,
                                         "image",         orig_image,
                                         "metadata-type", FALSE,
                                         "cmyk",          FALSE,
                                         NULL);
 
-      export_status = GIMP_VALUES_GET_ENUM (return_vals, 0);
-      if (export_status == GIMP_PDB_SUCCESS)
+      export_status = CLAY_VALUES_GET_ENUM (return_vals, 0);
+      if (export_status == CLAY_PDB_SUCCESS)
         {
           if (g_file_get_contents (g_file_peek_path (temp_file),
                                    (gchar **) &data_buffer,
@@ -695,7 +695,7 @@ export_image (GFile                *file,
               memcpy (full_data + sizeof (JPEG_APP_HEADER_PS), data_buffer,
                       data_length);
 
-#ifdef GIMP_UNSTABLE
+#ifdef CLAY_UNSTABLE
       g_print ("jpeg-export: saving Photoshop metadata (%d bytes)\n",
                (gint) (data_length + sizeof (JPEG_APP_HEADER_PS)));
 #endif
@@ -709,7 +709,7 @@ export_image (GFile                *file,
       g_free (data_buffer);
       g_file_delete (temp_file, NULL, NULL);
       g_object_unref (temp_file);
-      gimp_value_array_unref (return_vals);
+      clay_value_array_unref (return_vals);
     }
 
   /* Step 5: while (scan lines remain to be written) */
@@ -722,10 +722,10 @@ export_image (GFile                *file,
    */
   /* JSAMPLEs per row in image_buffer */
   rowstride = cinfo.input_components * cinfo.image_width;
-  data = g_new (guchar, rowstride * gimp_tile_height ());
+  data = g_new (guchar, rowstride * clay_tile_height ());
 
   /* fault if cinfo.next_scanline isn't initially a multiple of
-   * gimp_tile_height */
+   * clay_tile_height */
   src = NULL;
 
   /*
@@ -739,7 +739,7 @@ export_image (GFile                *file,
 
       /* pass all the information we need */
       pp->cinfo       = cinfo;
-      pp->tile_height = gimp_tile_height();
+      pp->tile_height = clay_tile_height();
       pp->data        = data;
       pp->outfile     = outfile;
       pp->has_alpha   = has_alpha;
@@ -768,9 +768,9 @@ export_image (GFile                *file,
 
   while (cinfo.next_scanline < cinfo.image_height)
     {
-      if ((cinfo.next_scanline % gimp_tile_height ()) == 0)
+      if ((cinfo.next_scanline % clay_tile_height ()) == 0)
         {
-          yend = cinfo.next_scanline + gimp_tile_height ();
+          yend = cinfo.next_scanline + clay_tile_height ();
           yend = MIN (yend, cinfo.image_height);
           gegl_buffer_get (buffer,
                            GEGL_RECTANGLE (0, cinfo.next_scanline,
@@ -788,7 +788,7 @@ export_image (GFile                *file,
       src += rowstride;
 
       if ((cinfo.next_scanline % 32) == 0)
-        gimp_progress_update ((gdouble) cinfo.next_scanline /
+        clay_progress_update ((gdouble) cinfo.next_scanline /
                               (gdouble) cinfo.image_height);
     }
 
@@ -806,7 +806,7 @@ export_image (GFile                *file,
   g_free (data);
 
   /* And we're done! */
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   g_object_unref (buffer);
 
@@ -814,7 +814,7 @@ export_image (GFile                *file,
 }
 
 static void
-make_preview (GimpProcedureConfig *config)
+make_preview (ClayProcedureConfig *config)
 {
   gboolean show_preview;
 
@@ -824,13 +824,13 @@ make_preview (GimpProcedureConfig *config)
 
   if (show_preview)
     {
-      GFile *file = gimp_temp_file ("jpeg");
+      GFile *file = clay_temp_file ("jpeg");
 
       if (! undo_touched)
         {
           /* we freeze undo saving so that we can avoid sucking up
            * tile cache with our unneeded preview steps. */
-          gimp_image_undo_freeze (preview_image);
+          clay_image_undo_freeze (preview_image);
 
           undo_touched = TRUE;
         }
@@ -844,13 +844,13 @@ make_preview (GimpProcedureConfig *config)
       g_object_unref (file);
 
       if (separate_display && ! display)
-        display = gimp_display_new (preview_image);
+        display = clay_display_new (preview_image);
     }
   else
     {
       gtk_label_set_text (GTK_LABEL (preview_size), _("File size without metadata: unknown"));
 
-      gimp_displays_flush ();
+      clay_displays_flush ();
     }
 }
 
@@ -865,30 +865,30 @@ destroy_preview (void)
       g_source_remove (id);
     }
 
-  if (gimp_image_is_valid (preview_image) &&
-      gimp_item_is_valid (GIMP_ITEM (preview_layer)))
+  if (clay_image_is_valid (preview_image) &&
+      clay_item_is_valid (CLAY_ITEM (preview_layer)))
     {
       /* assuming that reference counting is working correctly, we do
        * not need to delete the layer, removing it from the image
        * should be sufficient
        */
-      gimp_image_remove_layer (preview_image, preview_layer);
+      clay_image_remove_layer (preview_image, preview_layer);
 
       preview_layer = NULL;
     }
 }
 
 gboolean
-save_dialog (GimpProcedure       *procedure,
-             GimpProcedureConfig *config,
-             GimpDrawable        *drawable,
-             GimpImage           *image)
+save_dialog (ClayProcedure       *procedure,
+             ClayProcedureConfig *config,
+             ClayDrawable        *drawable,
+             ClayImage           *image)
 {
   GtkWidget        *dialog;
   GtkWidget        *widget;
   GtkWidget        *box;
   GtkWidget        *profile_label;
-  GimpColorProfile *cmyk_profile = NULL;
+  ClayColorProfile *cmyk_profile = NULL;
   gint              orig_quality;
   gint              restart;
   gboolean          run;
@@ -898,21 +898,21 @@ save_dialog (GimpProcedure       *procedure,
                 "restart",          &restart,
                 NULL);
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "option-title", _("Options"),
                                    FALSE, FALSE);
 
   /* custom quantization tables - now used also for original quality */
-  gimp_procedure_dialog_set_sensitive (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_set_sensitive (CLAY_PROCEDURE_DIALOG (dialog),
                                        "use-original-quality",
                                        (orig_quality > 0), NULL, NULL, FALSE);
 
-  /* Quality as a GimpScaleEntry. */
-  gimp_procedure_dialog_get_spin_scale (GIMP_PROCEDURE_DIALOG (dialog), "quality", 100.0);
+  /* Quality as a ClayScaleEntry. */
+  clay_procedure_dialog_get_spin_scale (CLAY_PROCEDURE_DIALOG (dialog), "quality", 100.0);
 
   /* changing quality disables custom quantization tables, and vice-versa */
   g_signal_connect (config, "notify::quality",
@@ -923,43 +923,43 @@ save_dialog (GimpProcedure       *procedure,
                     NULL);
 
   /* File size label. */
-  preview_size = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  preview_size = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                   "preview-size", _("File size without metadata: unknown"),
                                                   FALSE, FALSE);
   gtk_label_set_xalign (GTK_LABEL (preview_size), 0.0);
   gtk_label_set_ellipsize (GTK_LABEL (preview_size), PANGO_ELLIPSIZE_END);
-  gimp_label_set_attributes (GTK_LABEL (preview_size),
+  clay_label_set_attributes (GTK_LABEL (preview_size),
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                              -1);
-  gimp_help_set_help_data (preview_size,
+  clay_help_set_help_data (preview_size,
                            _("Enable preview to obtain the approximate file size."), NULL);
 
 
   /* Profile label. */
-  profile_label = gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  profile_label = clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                                    "profile-label", _("No soft-proofing profile"),
                                                    FALSE, FALSE);
   gtk_label_set_xalign (GTK_LABEL (profile_label), 0.0);
   gtk_label_set_ellipsize (GTK_LABEL (profile_label), PANGO_ELLIPSIZE_END);
-  gimp_label_set_attributes (GTK_LABEL (profile_label),
+  clay_label_set_attributes (GTK_LABEL (profile_label),
                              PANGO_ATTR_STYLE, PANGO_STYLE_ITALIC,
                              -1);
-  gimp_help_set_help_data (profile_label,
+  clay_help_set_help_data (profile_label,
                            _("Name of the color profile used for CMYK export."), NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "cmyk-frame", "cmyk", FALSE,
                                     "profile-label");
-  cmyk_profile = gimp_image_get_simulation_profile (image);
+  cmyk_profile = clay_image_get_simulation_profile (image);
   if (cmyk_profile)
     {
-      if (gimp_color_profile_is_cmyk (cmyk_profile))
+      if (clay_color_profile_is_cmyk (cmyk_profile))
         {
           gchar *label_text;
 
           label_text = g_strdup_printf (_("Profile: %s"),
-                                        gimp_color_profile_get_label (cmyk_profile));
+                                        clay_color_profile_get_label (cmyk_profile));
           gtk_label_set_text (GTK_LABEL (profile_label), label_text);
-          gimp_label_set_attributes (GTK_LABEL (profile_label),
+          clay_label_set_attributes (GTK_LABEL (profile_label),
                                      PANGO_ATTR_STYLE, PANGO_STYLE_NORMAL,
                                      -1);
           g_free (label_text);
@@ -968,7 +968,7 @@ save_dialog (GimpProcedure       *procedure,
     }
 
 #ifdef C_ARITH_CODING_SUPPORTED
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "arithmetic-frame", "use-arithmetic-coding", TRUE,
                                     "optimize");
 #endif
@@ -977,7 +977,7 @@ save_dialog (GimpProcedure       *procedure,
   /* TODO: apparently when toggle is unchecked, we want to show the
    * scale as 0.
    */
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "restart-frame", "use-restart", FALSE,
                                     "restart");
   if (restart == 0)
@@ -987,24 +987,24 @@ save_dialog (GimpProcedure       *procedure,
                   NULL);
 
   /* Subsampling */
-  widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                              "sub-sampling", G_TYPE_NONE);
 
-  if (! gimp_drawable_is_rgb (drawable))
+  if (! clay_drawable_is_rgb (drawable))
     {
       g_object_set (config, "sub-sampling", "sub-sampling-1x1", NULL);
       gtk_widget_set_sensitive (widget, FALSE);
     }
 
-  gimp_procedure_dialog_get_label (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_label (CLAY_PROCEDURE_DIALOG (dialog),
                                    "advanced-title", _("Advanced Options"),
                                    FALSE, FALSE);
-  widget = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
-                                             "smoothing", GIMP_TYPE_SPIN_SCALE);
-  gimp_help_set_help_data (widget, NULL, "file-jpeg-save-smoothing");
+  widget = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
+                                             "smoothing", CLAY_TYPE_SPIN_SCALE);
+  clay_help_set_help_data (widget, NULL, "file-jpeg-save-smoothing");
 
   /* Add some logics for "Use original quality". */
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
       g_signal_connect (config, "notify::sub-sampling",
                         G_CALLBACK (subsampling_changed),
@@ -1017,7 +1017,7 @@ save_dialog (GimpProcedure       *procedure,
 
   /* Put options in two column form so the dialog fits on
    * smaller screens. */
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "options",
                                   "quality",
                                   "use-original-quality",
@@ -1026,15 +1026,15 @@ save_dialog (GimpProcedure       *procedure,
                                   "progressive",
                                   "cmyk-frame",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "option-frame", "option-title", FALSE,
                                     "options");
 
   /* Enforce setting DCT as a combobox */
-  gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                     "dct", GTK_TYPE_COMBO_BOX);
 
-  gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                   "advanced-options",
                                   "smoothing",
 #ifdef C_ARITH_CODING_SUPPORTED
@@ -1046,11 +1046,11 @@ save_dialog (GimpProcedure       *procedure,
                                   "sub-sampling",
                                   "dct",
                                   NULL);
-  gimp_procedure_dialog_fill_frame (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill_frame (CLAY_PROCEDURE_DIALOG (dialog),
                                     "advanced-frame", "advanced-title", FALSE,
                                     "advanced-options");
 
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "jpeg-hbox", "option-frame",
                                         "advanced-frame", NULL);
   gtk_box_set_spacing (GTK_BOX (box), 12);
@@ -1058,10 +1058,10 @@ save_dialog (GimpProcedure       *procedure,
                                   GTK_ORIENTATION_HORIZONTAL);
 
   /* Add option for saving PSD metadata */
-  gimp_export_procedure_dialog_add_metadata (GIMP_EXPORT_PROCEDURE_DIALOG (dialog),
+  clay_export_procedure_dialog_add_metadata (CLAY_EXPORT_PROCEDURE_DIALOG (dialog),
                                              "save-resources");
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "jpeg-hbox", NULL);
 
   /* Run make_preview() when various config are changed. */
@@ -1071,7 +1071,7 @@ save_dialog (GimpProcedure       *procedure,
 
   make_preview (config);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
   gtk_widget_destroy (dialog);
 
   destroy_preview ();
@@ -1080,7 +1080,7 @@ save_dialog (GimpProcedure       *procedure,
 }
 
 static void
-quality_changed (GimpProcedureConfig *config)
+quality_changed (ClayProcedureConfig *config)
 {
   gboolean use_orig_quality;
   gdouble  quality;
@@ -1097,7 +1097,7 @@ quality_changed (GimpProcedureConfig *config)
 }
 
 static void
-subsampling_changed (GimpProcedureConfig *config,
+subsampling_changed (ClayProcedureConfig *config,
                      const GParamSpec    *pspec,
                      GtkWidget           *smoothing_scale)
 {
@@ -1109,7 +1109,7 @@ subsampling_changed (GimpProcedureConfig *config,
                 "use-original-quality",  &use_orig_quality,
                 "original-sub-sampling", &orig_subsmp,
                 NULL);
-  subsmp = gimp_procedure_config_get_choice_id (config, "sub-sampling");
+  subsmp = clay_procedure_config_get_choice_id (config, "sub-sampling");
 
   /*  smoothing is not supported with nonstandard sampling ratios  */
   gtk_widget_set_sensitive (smoothing_scale,
@@ -1121,7 +1121,7 @@ subsampling_changed (GimpProcedureConfig *config,
 }
 
 static void
-use_orig_qual_changed (GimpProcedureConfig *config)
+use_orig_qual_changed (ClayProcedureConfig *config)
 {
   gboolean use_orig_quality;
   gint     orig_quality;
@@ -1140,7 +1140,7 @@ use_orig_qual_changed (GimpProcedureConfig *config)
 }
 
 static void
-use_orig_qual_changed_rgb (GimpProcedureConfig *config)
+use_orig_qual_changed_rgb (ClayProcedureConfig *config)
 {
   gboolean use_orig_quality;
   gint     orig_quality;

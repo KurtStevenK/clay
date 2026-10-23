@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -31,9 +31,9 @@
 #define MAX_UNDO         10
 #define MIN_UNDO         1
 
-struct _GimpGfig
+struct _ClayGfig
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
   GtkApplication *app;
 
   GtkWidget      *top_level_dlg;
@@ -44,10 +44,10 @@ struct _GimpGfig
 
 #define PLUG_IN_PROC   "plug-in-gfig"
 #define PLUG_IN_BINARY "gfig"
-#define PLUG_IN_ROLE   "gimp-gfig"
+#define PLUG_IN_ROLE   "clay-gfig"
 
-#define GIMP_TYPE_GFIG  (gimp_gfig_get_type ())
-G_DECLARE_FINAL_TYPE (GimpGfig, gimp_gfig, GIMP, GFIG, GimpPlugIn)
+#define CLAY_TYPE_GFIG  (clay_gfig_get_type ())
+G_DECLARE_FINAL_TYPE (ClayGfig, clay_gfig, CLAY, GFIG, ClayPlugIn)
 
 typedef struct
 {
@@ -66,7 +66,7 @@ typedef struct
 
 typedef struct
 {
-  GimpChannelOps type;           /* ADD etc .. */
+  ClayChannelOps type;           /* ADD etc .. */
   gint           antia;          /* Boolean for Antia */
   gint           feather;        /* Feather it ? */
   gdouble        feather_radius; /* Radius to feather */
@@ -77,11 +77,11 @@ typedef struct
 
 void       object_start            (GdkPoint *pnt, gint);
 void       object_operation        (GdkPoint *pnt, gint);
-void       object_operation_start  (GimpGfig *gfig,
+void       object_operation_start  (ClayGfig *gfig,
                                     GdkPoint *pnt,
                                     gint shift_down);
 void       object_operation_end    (GdkPoint *pnt, gint);
-void       object_end              (GimpGfig *gfig,
+void       object_end              (ClayGfig *gfig,
                                     GdkPoint *pnt,
                                     gint shift_down);
 
@@ -133,10 +133,10 @@ struct _GFigObj
 /* this is temp, should be able to get rid of */
 typedef struct BrushDesc
 {
-  GimpBrush     *brush;
+  ClayBrush     *brush;
   gdouble        opacity;
   gint           spacing;
-  GimpLayerMode  paint_mode;
+  ClayLayerMode  paint_mode;
   gint           width;
   gint           height;
   guchar        *pv_buf;  /* Buffer where brush placed */
@@ -149,8 +149,8 @@ typedef struct
 {
   gboolean     debug_styles;
   gboolean     show_background;  /* show thumbnail of image behind figure */
-  GimpImage    *image;           /* Gimp image */
-  GimpDrawable *drawable;        /* Gimp drawable to paint on */
+  ClayImage    *image;           /* Clay image */
+  ClayDrawable *drawable;        /* Clay drawable to paint on */
   GFigObj     *current_obj;
   GfigObject  *selected_obj;
   GtkWidget   *preview;
@@ -174,7 +174,7 @@ extern GFigContext *gfig_context;
 extern selection_option selopt;
 extern SelectItVals selvals;
 
-void       add_to_all_obj          (GimpGfig   *gfig,
+void       add_to_all_obj          (ClayGfig   *gfig,
                                     GFigObj    *fobj,
                                     GfigObject *obj);
 
@@ -191,7 +191,7 @@ void            scale_to_original_xy (gdouble *list,
                                       gint     size);
 
 void gfig_paint (BrushType     brush_type,
-                 GimpDrawable *drawable,
+                 ClayDrawable *drawable,
                  gint          seg_count,
                  gdouble       line_pnts[]);
 
@@ -212,9 +212,9 @@ GtkWidget *num_sides_widget     (const gchar *d_title,
                                  gint         adj_min,
                                  gint         adj_max);
 
-void    setup_undo              (GimpGfig    *gfig);
+void    setup_undo              (ClayGfig    *gfig);
 void    draw_grid_clear         (void);
-void    prepend_to_all_obj      (GimpGfig    *gfig,
+void    prepend_to_all_obj      (ClayGfig    *gfig,
                                  GFigObj     *fobj,
                                  GList       *nobj);
 
@@ -233,7 +233,7 @@ void    gfig_draw_line          (gint x0,
                                  cairo_t *cr);
 
 void      gfig_paint_callback   (void);
-GFigObj  *gfig_load             (GimpGfig    *gfig,
+GFigObj  *gfig_load             (ClayGfig    *gfig,
                                  const gchar *filename,
                                  const gchar *name);
 void   gfig_name_encode         (gchar *dest,
@@ -249,7 +249,7 @@ void   save_options             (GString *string);
 
 GString   *gfig_save_as_string     (void);
 gboolean   gfig_save_as_parasite   (void);
-GFigObj   *gfig_load_from_parasite (GimpGfig *gfig);
+GFigObj   *gfig_load_from_parasite (ClayGfig *gfig);
 GFigObj   *gfig_new                (void);
 void       gfig_save_callbk        (void);
 void       paint_layer_fill        (gdouble x1,

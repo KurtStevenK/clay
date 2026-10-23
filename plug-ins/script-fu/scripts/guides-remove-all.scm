@@ -2,16 +2,16 @@
 
 (define (script-fu-guides-remove image drawables)
   (let* ((guide-id 0))
-    (gimp-image-undo-group-start image)
+    (clay-image-undo-group-start image)
 
-    (set! guide-id (car (gimp-image-find-next-guide image 0)))
+    (set! guide-id (car (clay-image-find-next-guide image 0)))
     (while (> guide-id 0)
-      (gimp-image-delete-guide image guide-id)
-      (set! guide-id (car (gimp-image-find-next-guide image 0)))
+      (clay-image-delete-guide image guide-id)
+      (set! guide-id (car (clay-image-find-next-guide image 0)))
     )
 
-    (gimp-image-undo-group-end image)
-    (gimp-displays-flush)
+    (clay-image-undo-group-end image)
+    (clay-displays-flush)
   )
 )
 

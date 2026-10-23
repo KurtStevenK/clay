@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995-1997 Spencer Kimball and Peter Mattis
  *
- * GIMP Plug-in for Windows Icon files.
+ * Clay Plug-in for Windows Icon files.
  * Copyright (C) 2002 Christian Kreibich <christian@whoop.org>.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,14 +22,14 @@
 #define __ICO_DIALOG_H__
 
 
-GtkWidget * ico_dialog_new                 (GimpImage           *image,
-                                            GimpProcedure       *procedure,
-                                            GimpProcedureConfig *config,
+GtkWidget * ico_dialog_new                 (ClayImage           *image,
+                                            ClayProcedure       *procedure,
+                                            ClayProcedureConfig *config,
                                             IcoSaveInfo         *info,
                                             AniFileHeader       *ani_header,
                                             AniSaveInfo         *ani_info);
 void        ico_dialog_add_icon            (GtkWidget           *dialog,
-                                            GimpDrawable        *layer,
+                                            ClayDrawable        *layer,
                                             gint                 layer_num);
 
 #endif /* __ICO_DIALOG_H__ */

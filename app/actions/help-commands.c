@@ -20,44 +20,44 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimpprogress.h"
+#include "core/clayprogress.h"
 
-#include "widgets/gimphelp.h"
+#include "widgets/clayhelp.h"
 
 #include "actions.h"
 #include "help-commands.h"
 
 
 void
-help_help_cmd_callback (GimpAction *action,
+help_help_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  Gimp        *gimp;
-  GimpDisplay *display;
-  return_if_no_gimp (gimp, data);
+  Clay        *clay;
+  ClayDisplay *display;
+  return_if_no_clay (clay, data);
   return_if_no_display (display, data);
 
-  gimp_help_show (gimp, GIMP_PROGRESS (display), NULL, NULL);
+  clay_help_show (clay, CLAY_PROGRESS (display), NULL, NULL);
 }
 
 void
-help_context_help_cmd_callback (GimpAction *action,
+help_context_help_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
   GtkWidget *widget;
   return_if_no_widget (widget, data);
 
-  gimp_context_help (widget);
+  clay_context_help (widget);
 }
 
 void
-help_online_cmd_callback (GimpAction *action,
+help_online_cmd_callback (ClayAction *action,
                           GVariant   *value,
                           gpointer    data)
 {

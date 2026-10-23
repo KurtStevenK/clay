@@ -1,0 +1,14 @@
+# grep -rI icon_name modules/display-filter*
+# These are used in:
+# - GtkCellRendererPixbuf in ClayColorDisplayEditor (default 16px)
+
+# Default icon of ClayColorDisplay. Doesn't think it's actually used in
+# this context since it's always overriden. Still must be installed.
+clay-display-filter
+
+clay-display-filter-clip-warning
+clay-display-filter-colorblind
+clay-display-filter-contrast
+clay-display-filter-gamma
+clay-display-filter-lcms
+clay-display-filter-proof

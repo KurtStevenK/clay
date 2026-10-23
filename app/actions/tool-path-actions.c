@@ -20,58 +20,58 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "core/gimpimage.h"
+#include "core/clayimage.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/clayhelp-ids.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimptoolpath.h"
+#include "display/claydisplay.h"
+#include "display/claydisplayshell.h"
+#include "display/claytoolpath.h"
 
 #include "tool-path-actions.h"
 #include "tool-path-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static const GimpActionEntry tool_path_actions[] =
+static const ClayActionEntry tool_path_actions[] =
 {
-  { "tool-path-delete-anchor", GIMP_ICON_PATH,
+  { "tool-path-delete-anchor", CLAY_ICON_PATH,
     NC_("tool-path-action", "_Delete Anchor"), NULL, { NULL }, NULL,
     tool_path_delete_anchor_cmd_callback,
-    GIMP_HELP_PATH_TOOL_DELETE_ANCHOR },
-  { "tool-path-shift-start", GIMP_ICON_PATH,
+    CLAY_HELP_PATH_TOOL_DELETE_ANCHOR },
+  { "tool-path-shift-start", CLAY_ICON_PATH,
     NC_("tool-path-action", "Shift S_tart"), NULL, { NULL }, NULL,
     tool_path_shift_start_cmd_callback,
-    GIMP_HELP_PATH_TOOL_SHIFT_START },
+    CLAY_HELP_PATH_TOOL_SHIFT_START },
 
-  { "tool-path-insert-anchor", GIMP_ICON_PATH,
+  { "tool-path-insert-anchor", CLAY_ICON_PATH,
     NC_("tool-path-action", "_Insert Anchor"), NULL, { NULL }, NULL,
     tool_path_insert_anchor_cmd_callback,
-    GIMP_HELP_PATH_TOOL_INSERT_ANCHOR },
-  { "tool-path-delete-segment", GIMP_ICON_PATH,
+    CLAY_HELP_PATH_TOOL_INSERT_ANCHOR },
+  { "tool-path-delete-segment", CLAY_ICON_PATH,
     NC_("tool-path-action", "Delete _Segment"), NULL, { NULL }, NULL,
     tool_path_delete_segment_cmd_callback,
-    GIMP_HELP_PATH_TOOL_DELETE_SEGMENT },
-  { "tool-path-reverse-stroke", GIMP_ICON_PATH,
+    CLAY_HELP_PATH_TOOL_DELETE_SEGMENT },
+  { "tool-path-reverse-stroke", CLAY_ICON_PATH,
     NC_("tool-path-action", "_Reverse Stroke"), NULL, { NULL }, NULL,
     tool_path_reverse_stroke_cmd_callback,
-    GIMP_HELP_PATH_TOOL_REVERSE_STROKE }
+    CLAY_HELP_PATH_TOOL_REVERSE_STROKE }
 };
 
 
 #define SET_HIDE_EMPTY(action,condition) \
-        gimp_action_group_set_action_hide_empty (group, action, (condition) != 0)
+        clay_action_group_set_action_hide_empty (group, action, (condition) != 0)
 
 void
-tool_path_actions_setup (GimpActionGroup *group)
+tool_path_actions_setup (ClayActionGroup *group)
 {
-  gimp_action_group_add_actions (group, "tool-path-action",
+  clay_action_group_add_actions (group, "tool-path-action",
                                  tool_path_actions,
                                  G_N_ELEMENTS (tool_path_actions));
 }
@@ -83,21 +83,21 @@ tool_path_actions_setup (GimpActionGroup *group)
  * will need to be added.
  */
 void
-tool_path_actions_update (GimpActionGroup *group,
+tool_path_actions_update (ClayActionGroup *group,
                           gpointer         data)
 {
-  GimpToolPath *tool_path = GIMP_TOOL_PATH (data);
+  ClayToolPath *tool_path = CLAY_TOOL_PATH (data);
   gboolean      on_handle;
   gboolean      on_curve;
 
-  gimp_tool_path_get_popup_state (tool_path, &on_handle, &on_curve);
+  clay_tool_path_get_popup_state (tool_path, &on_handle, &on_curve);
 
 #define SET_VISIBLE(action,condition) \
-        gimp_action_group_set_action_visible (group, action, (condition) != 0)
+        clay_action_group_set_action_visible (group, action, (condition) != 0)
 #define SET_SENSITIVE(action,condition) \
-        gimp_action_group_set_action_sensitive (group, action, (condition) != 0)
+        clay_action_group_set_action_sensitive (group, action, (condition) != 0)
 #define SET_ACTIVE(action,condition) \
-        gimp_action_group_set_action_active (group, action, (condition) != 0)
+        clay_action_group_set_action_active (group, action, (condition) != 0)
 
   SET_VISIBLE ("tool-path-shift-start",    on_handle);
   SET_VISIBLE ("tool-path-delete-anchor",  on_handle);

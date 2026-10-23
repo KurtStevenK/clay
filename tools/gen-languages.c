@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * gen-languages.c (formerly gimplanguagestore-parser.c)
+ * gen-languages.c (formerly claylanguagestore-parser.c)
  * Copyright (C) 2008, 2009  Sven Neumann <sven@gimp.org>
  * Copyright (C) 2013, 2024  Jehan <jehan at girinstud.io>
  *
@@ -26,7 +26,7 @@
 #include <gio/gio.h>
 
 #include "config/config-types.h"
-#include "config/gimpxmlparser.h"
+#include "config/clayxmlparser.h"
 
 #include <glib/gi18n.h>
 
@@ -55,8 +55,8 @@ typedef struct
 } IsoCodesParser;
 
 
-static gboolean gimp_language_store_parser_init  (GError    **error);
-static void     gimp_language_store_parser_clean (void);
+static gboolean clay_language_store_parser_init  (GError    **error);
+static void     clay_language_store_parser_clean (void);
 
 static gboolean parse_iso_codes                 (GHashTable  *base_lang_list,
                                                  GError     **error);
@@ -78,7 +78,7 @@ static void     iso_codes_parser_start_unknown  (IsoCodesParser       *parser);
 static void     iso_codes_parser_end_unknown    (IsoCodesParser       *parser);
 #endif /* HAVE_ISO_CODES */
 
-static void     gimp_bind_text_domain           (const gchar          *domain_name,
+static void     clay_bind_text_domain           (const gchar          *domain_name,
                                                  const gchar          *dir_name);
 
 
@@ -108,7 +108,7 @@ main (int    argc,
 /* xyz.kainzmayer.ClayDesign\n\
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis\n\
  *\n\
- * gimplanguagestore-data.h\n\
+ * claylanguagestore-data.h\n\
  * Copyright (C) 2024 Jehan\n\
  *\n\
  * This program is free software: you can redistribute it and/or modify\n\
@@ -127,13 +127,13 @@ main (int    argc,
 \n\
 #pragma once\n";
 
-  if (! gimp_language_store_parser_init (&error))
+  if (! clay_language_store_parser_init (&error))
     {
       g_printerr ("ERROR: %s\n", error->message);
       exit (EXIT_FAILURE);
     }
 
-  outfile = g_file_new_build_filename (argv[0], "../../app/widgets/gimplanguagestore-data.h", NULL);
+  outfile = g_file_new_build_filename (argv[0], "../../app/widgets/claylanguagestore-data.h", NULL);
   output = G_OUTPUT_STREAM (g_file_replace (outfile,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
                                             NULL, &error));
@@ -151,26 +151,26 @@ main (int    argc,
 
   g_hash_table_iter_init (&lang_iter, l10n_lang_list);
 
-  PRINT ("#define GIMP_L10N_LANGS_SIZE %d\n", g_hash_table_size (l10n_lang_list));
-  PRINT ("#define GIMP_ALL_LANGS_SIZE %d\n", g_hash_table_size (all_lang_list));
+  PRINT ("#define CLAY_L10N_LANGS_SIZE %d\n", g_hash_table_size (l10n_lang_list));
+  PRINT ("#define CLAY_ALL_LANGS_SIZE %d\n", g_hash_table_size (all_lang_list));
   PRINT ("\ntypedef struct"
          "\n{"
          "\n  gchar *code;"
          "\n  gchar *name;"
-         "\n} GimpLanguageDef;\n");
+         "\n} ClayLanguageDef;\n");
 
-  PRINT ("\nstatic const GimpLanguageDef GimpL10nLanguages[GIMP_L10N_LANGS_SIZE] =\n{\n");
+  PRINT ("\nstatic const ClayLanguageDef ClayL10nLanguages[CLAY_L10N_LANGS_SIZE] =\n{\n");
   while (g_hash_table_iter_next (&lang_iter, &code, &name))
     PRINT ("  { \"%s\", \"%s\" },\n", (gchar *) code, (gchar *) name);
   PRINT ("};\n");
 
   g_hash_table_iter_init (&lang_iter, all_lang_list);
-  PRINT ("\n\nstatic const GimpLanguageDef GimpAllLanguages[GIMP_ALL_LANGS_SIZE] =\n{\n");
+  PRINT ("\n\nstatic const ClayLanguageDef ClayAllLanguages[CLAY_ALL_LANGS_SIZE] =\n{\n");
   while (g_hash_table_iter_next (&lang_iter, &code, &name))
     PRINT ("  { \"%s\", \"%s\" },\n", (gchar *) code, (gchar *) name);
   PRINT ("};\n");
 
-  gimp_language_store_parser_clean ();
+  clay_language_store_parser_clean ();
 
   if (! g_output_stream_close (output, NULL, &error))
     {
@@ -187,7 +187,7 @@ main (int    argc,
  * made only once, at program initialization, but after language_init().
  */
 static gboolean
-gimp_language_store_parser_init (GError **error)
+clay_language_store_parser_init (GError **error)
 {
   GTimer           *timer  = g_timer_new ();
   GInputStream     *input  = NULL;
@@ -203,7 +203,7 @@ gimp_language_store_parser_init (GError **error)
   if (l10n_lang_list != NULL)
     {
       g_set_error_literal (error, G_IO_ERROR, 0,
-                           "gimp_language_store_parser_init() must be run only once.");
+                           "clay_language_store_parser_init() must be run only once.");
       return FALSE;
     }
 
@@ -302,8 +302,8 @@ gimp_language_store_parser_init (GError **error)
 
   /* Generate the localized language names. */
   g_hash_table_iter_init (&lang_iter, l10n_lang_list);
-  gimp_bind_text_domain ("iso_639_3", ISO_CODES_LOCALEDIR);
-  gimp_bind_text_domain ("iso_639-3", ISO_CODES_LOCALEDIR);
+  clay_bind_text_domain ("iso_639_3", ISO_CODES_LOCALEDIR);
+  clay_bind_text_domain ("iso_639-3", ISO_CODES_LOCALEDIR);
   while (g_hash_table_iter_next (&lang_iter, &key, NULL))
     {
       gchar *code           = (gchar*) key;
@@ -421,7 +421,7 @@ cleanup:
 }
 
 static void
-gimp_language_store_parser_clean (void)
+clay_language_store_parser_clean (void)
 {
   g_hash_table_destroy (l10n_lang_list);
   g_hash_table_destroy (all_lang_list);
@@ -453,7 +453,7 @@ parse_iso_codes (GHashTable  *base_lang_list,
       NULL   /*  error        */
     };
 
-  GimpXmlParser  *xml_parser;
+  ClayXmlParser  *xml_parser;
   GFile          *file;
   IsoCodesParser  parser = { 0, };
 
@@ -463,7 +463,7 @@ parse_iso_codes (GHashTable  *base_lang_list,
 
   parser.base_lang_list = g_hash_table_ref (base_lang_list);
 
-  xml_parser = gimp_xml_parser_new (&markup_parser, &parser);
+  xml_parser = clay_xml_parser_new (&markup_parser, &parser);
 
   file = g_file_new_for_path (ISO_CODES_LOCATION G_DIR_SEPARATOR_S
                               "iso_639_3.xml");
@@ -474,7 +474,7 @@ parse_iso_codes (GHashTable  *base_lang_list,
                                   "iso_639-3.xml");
     }
 
-  success = gimp_xml_parser_parse_gfile (xml_parser, file, error);
+  success = clay_xml_parser_parse_gfile (xml_parser, file, error);
   if (*error)
     {
       g_prefix_error (error, "%s: error parsing '%s': ",
@@ -491,7 +491,7 @@ parse_iso_codes (GHashTable  *base_lang_list,
 
   g_object_unref (file);
 
-  gimp_xml_parser_free (xml_parser);
+  clay_xml_parser_free (xml_parser);
   g_hash_table_unref (parser.base_lang_list);
 
 #endif /* HAVE_ISO_CODES */
@@ -508,8 +508,8 @@ iso_codes_parser_init (void)
   if (initialized)
     return;
 
-  gimp_bind_text_domain ("iso_639_3", ISO_CODES_LOCALEDIR);
-  gimp_bind_text_domain ("iso_639-3", ISO_CODES_LOCALEDIR);
+  clay_bind_text_domain ("iso_639_3", ISO_CODES_LOCALEDIR);
+  clay_bind_text_domain ("iso_639-3", ISO_CODES_LOCALEDIR);
 
   bind_textdomain_codeset ("iso_639_3", "UTF-8");
   bind_textdomain_codeset ("iso_639-3", "UTF-8");
@@ -649,7 +649,7 @@ iso_codes_parser_start_unknown (IsoCodesParser *parser)
 static void
 iso_codes_parser_end_unknown (IsoCodesParser *parser)
 {
-  gimp_assert (parser->unknown_depth > 0 &&
+  clay_assert (parser->unknown_depth > 0 &&
                parser->state == ISO_CODES_IN_UNKNOWN);
 
   parser->unknown_depth--;
@@ -660,12 +660,12 @@ iso_codes_parser_end_unknown (IsoCodesParser *parser)
 #endif /* HAVE_ISO_CODES */
 
 /*
- * Copied from libgimpbase: libgimpbase/gimputils.c
- * Just avoiding having to link libgimpbase, which in cross-builds mean
- * compiling libgimpbase twice (natively and cross).
+ * Copied from libclaybase: libclaybase/clayutils.c
+ * Just avoiding having to link libclaybase, which in cross-builds mean
+ * compiling libclaybase twice (natively and cross).
  */
 static void
-gimp_bind_text_domain (const gchar *domain_name,
+clay_bind_text_domain (const gchar *domain_name,
                        const gchar *dir_name)
 {
 #if defined (_WIN32) && !defined (__CYGWIN__)

@@ -31,22 +31,22 @@
 #include <winbase.h>
 #endif
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpmath/gimpmath.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpcolor/gimpcolor-private.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaymath/claymath.h"
+#include "libclaycolor/claycolor.h"
+#include "libclaycolor/claycolor-private.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "gui-types.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claywidgets-utils.h"
 
-#include "gimpapp.h"
+#include "clayapp.h"
 #include "splash.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define MEASURE_UPPER "1235678901234567890"
@@ -82,40 +82,40 @@ typedef struct
   guint           alt_timeout_id;
   gint32          alt_x;
   gint32          alt_y;
-} GimpSplash;
+} ClaySplash;
 
-static GimpSplash *splash = NULL;
+static ClaySplash *splash = NULL;
 
 
-static void        splash_position_layouts     (GimpSplash     *splash,
+static void        splash_position_layouts     (ClaySplash     *splash,
                                                 const gchar    *text1,
                                                 const gchar    *text2,
                                                 GdkRectangle   *area);
 static gboolean    splash_area_draw            (GtkWidget      *widget,
                                                 cairo_t        *cr,
-                                                GimpSplash     *splash);
+                                                ClaySplash     *splash);
 static gboolean    splash_button_event         (GtkWidget      *window,
                                                 GdkEventButton *event,
-                                                GimpSplash     *splash);
+                                                ClaySplash     *splash);
 static gboolean    splash_key_event            (GtkWidget      *window,
                                                 GdkEventKey    *event,
-                                                GimpSplash     *splash);
-static gboolean    splash_unset_alt            (GimpSplash     *splash);
+                                                ClaySplash     *splash);
+static gboolean    splash_unset_alt            (ClaySplash     *splash);
 
 static gboolean    splash_window_focus         (GtkWidget        *window,
                                                 GtkDirectionType  direction,
-                                                Gimp             *gimp);
+                                                Clay             *clay);
 
 static void        splash_rectangle_union      (GdkRectangle   *dest,
                                                 PangoRectangle *pango_rect,
                                                 gint            offset_x,
                                                 gint            offset_y);
-static void        splash_average_text_area    (GimpSplash     *splash,
+static void        splash_average_text_area    (ClaySplash     *splash,
                                                 GdkPixbuf      *pixbuf,
                                                 GdkRGBA        *rgba);
 
 static GdkPixbufAnimation *
-                   splash_image_load           (Gimp           *gimp,
+                   splash_image_load           (Clay           *clay,
                                                 gint            max_width,
                                                 gint            max_height,
                                                 gboolean        be_verbose,
@@ -132,19 +132,19 @@ static GdkPixbufAnimation *
                                                 gboolean        be_verbose);
 
 static void        splash_timer_elapsed        (void);
-static void        splash_center_on_monitor    (GimpSplash     *splash);
+static void        splash_center_on_monitor    (ClaySplash     *splash);
 static gboolean    splash_map_event            (GtkWidget      *widget,
                                                 GdkEventAny    *event,
-                                                GimpSplash     *splash);
+                                                ClaySplash     *splash);
 
 
 /*  public functions  */
 
 void
-splash_create (Gimp         *gimp,
+splash_create (Clay         *clay,
                gboolean      be_verbose,
                GdkMonitor   *monitor,
-               GimpApp      *app)
+               ClayApp      *app)
 {
   GtkWidget          *frame;
   GtkWidget          *vbox;
@@ -162,7 +162,7 @@ splash_create (Gimp         *gimp,
 
   g_return_if_fail (splash == NULL);
   g_return_if_fail (GDK_IS_MONITOR (monitor));
-  g_return_if_fail (GIMP_IS_APP (app) || app == NULL);
+  g_return_if_fail (CLAY_IS_APP (app) || app == NULL);
 
   gdk_monitor_get_workarea (monitor, &workarea);
 
@@ -194,19 +194,19 @@ splash_create (Gimp         *gimp,
       max_width  = workarea.width  / 2;
       max_height = workarea.height / 2;
     }
-  pixbuf = splash_image_load (gimp, max_width, max_height, be_verbose, &release_splash);
+  pixbuf = splash_image_load (clay, max_width, max_height, be_verbose, &release_splash);
 
   if (! pixbuf)
     return;
 
-  splash = g_slice_new0 (GimpSplash);
+  splash = g_slice_new0 (ClaySplash);
 
   splash->window =
     g_object_new (GTK_TYPE_APPLICATION_WINDOW,
                   "type",            GTK_WINDOW_TOPLEVEL,
                   "type-hint",       GDK_WINDOW_TYPE_HINT_SPLASHSCREEN,
                   "title",           _("Clay Startup"),
-                  "role",            "gimp-startup",
+                  "role",            "clay-startup",
                   "window-position", GTK_WIN_POS_NONE,
                   "resizable",       FALSE,
                   "application",     GTK_APPLICATION (app),
@@ -271,26 +271,26 @@ splash_create (Gimp         *gimp,
   pango_layout_get_pixel_extents (splash->upper, &ink, NULL);
 
   if (splash->width > 4 * ink.width)
-    gimp_pango_layout_set_scale (splash->upper, PANGO_SCALE_X_LARGE);
+    clay_pango_layout_set_scale (splash->upper, PANGO_SCALE_X_LARGE);
   else if (splash->width > 3 * ink.width)
-    gimp_pango_layout_set_scale (splash->upper, PANGO_SCALE_LARGE);
+    clay_pango_layout_set_scale (splash->upper, PANGO_SCALE_LARGE);
   else if (splash->width > 2 * ink.width)
-    gimp_pango_layout_set_scale (splash->upper, PANGO_SCALE_MEDIUM);
+    clay_pango_layout_set_scale (splash->upper, PANGO_SCALE_MEDIUM);
   else
-    gimp_pango_layout_set_scale (splash->upper, PANGO_SCALE_SMALL);
+    clay_pango_layout_set_scale (splash->upper, PANGO_SCALE_SMALL);
 
   splash->lower = gtk_widget_create_pango_layout (splash->area,
                                                   MEASURE_LOWER);
   pango_layout_get_pixel_extents (splash->lower, &ink, NULL);
 
   if (splash->width > 4 * ink.width)
-    gimp_pango_layout_set_scale (splash->lower, PANGO_SCALE_LARGE);
+    clay_pango_layout_set_scale (splash->lower, PANGO_SCALE_LARGE);
   else if (splash->width > 3 * ink.width)
-    gimp_pango_layout_set_scale (splash->lower, PANGO_SCALE_MEDIUM);
+    clay_pango_layout_set_scale (splash->lower, PANGO_SCALE_MEDIUM);
   else if (splash->width > 2 * ink.width)
-    gimp_pango_layout_set_scale (splash->lower, PANGO_SCALE_SMALL);
+    clay_pango_layout_set_scale (splash->lower, PANGO_SCALE_SMALL);
   else
-    gimp_pango_layout_set_scale (splash->lower, PANGO_SCALE_X_SMALL);
+    clay_pango_layout_set_scale (splash->lower, PANGO_SCALE_X_SMALL);
 
   /*  this sets the initial layout positions  */
   splash_position_layouts (splash, "", "", NULL);
@@ -308,11 +308,11 @@ splash_create (Gimp         *gimp,
   /*  add a progress bar  */
   splash->progress = gtk_progress_bar_new ();
   gtk_box_pack_end (GTK_BOX (vbox), splash->progress, FALSE, FALSE, 0);
-  gtk_widget_set_visible (splash->progress, gimp_widget_animation_enabled ());
+  gtk_widget_set_visible (splash->progress, clay_widget_animation_enabled ());
 
   g_signal_connect (splash->window, "focus",
                     G_CALLBACK (splash_window_focus),
-                    gimp);
+                    clay);
   g_signal_connect (splash->window, "map-event",
                     G_CALLBACK (splash_map_event),
                     splash);
@@ -354,7 +354,7 @@ splash_destroy (void)
   if (splash->timer)
     g_timer_destroy (splash->timer);
 
-  g_slice_free (GimpSplash, splash);
+  g_slice_free (ClaySplash, splash);
   splash = NULL;
 }
 
@@ -371,7 +371,7 @@ splash_update (const gchar *text1,
   if (! splash)
     return;
 
-  if (! gimp_widget_animation_enabled ())
+  if (! clay_widget_animation_enabled ())
     {
       /* When reducing animation, we use the title text, which are
        * bigger sections of loading as secondary text, so that we get a
@@ -430,7 +430,7 @@ splash_update (const gchar *text1,
 static gboolean
 splash_area_draw (GtkWidget  *widget,
                   cairo_t    *cr,
-                  GimpSplash *splash)
+                  ClaySplash *splash)
 {
   gdk_cairo_set_source_rgba (cr, &splash->color);
 
@@ -446,7 +446,7 @@ splash_area_draw (GtkWidget  *widget,
       cairo_surface_t *surface;
       double           scale;
 
-      file = gimp_data_directory_file ("images", "sidrat.data", NULL);
+      file = clay_data_directory_file ("images", "sidrat.data", NULL);
       surface = cairo_image_surface_create_from_png (g_file_peek_path (file));
       g_object_unref (file);
       if (cairo_surface_status (surface) != CAIRO_STATUS_SUCCESS)
@@ -481,7 +481,7 @@ splash_area_draw (GtkWidget  *widget,
 static gboolean
 splash_button_event (GtkWidget      *window,
                      GdkEventButton *event,
-                     GimpSplash     *splash)
+                     ClaySplash     *splash)
 {
   if (gdk_event_get_event_type ((GdkEvent *) event) == GDK_BUTTON_PRESS && splash->alt_timeout_id == 0)
     {
@@ -496,7 +496,7 @@ splash_button_event (GtkWidget      *window,
 static gboolean
 splash_key_event (GtkWidget   *window,
                   GdkEventKey *event,
-                  GimpSplash  *splash)
+                  ClaySplash  *splash)
 {
   if (gdk_event_get_event_type ((GdkEvent *) event) == GDK_KEY_PRESS && splash->alt_timeout_id == 0)
     {
@@ -509,7 +509,7 @@ splash_key_event (GtkWidget   *window,
 }
 
 static gboolean
-splash_unset_alt (GimpSplash *splash)
+splash_unset_alt (ClaySplash *splash)
 {
   splash->alt            = FALSE;
   splash->alt_x          = -1;
@@ -523,19 +523,19 @@ splash_unset_alt (GimpSplash *splash)
 static gboolean
 splash_window_focus (GtkWidget        *window,
                      GtkDirectionType  direction,
-                     Gimp             *gimp)
+                     Clay             *clay)
 {
   g_signal_handlers_disconnect_by_func (splash->window,
                                         G_CALLBACK (splash_window_focus),
-                                        gimp);
-  gimp_set_focused_once (gimp);
+                                        clay);
+  clay_set_focused_once (clay);
 
   return FALSE;
 }
 
 /* area returns the union of the previous and new ink rectangles */
 static void
-splash_position_layouts (GimpSplash   *splash,
+splash_position_layouts (ClaySplash   *splash,
                          const gchar  *text1,
                          const gchar  *text2,
                          GdkRectangle *area)
@@ -634,7 +634,7 @@ splash_rectangle_union (GdkRectangle   *dest,
  * the average luminance of the text area of the splash image.
  */
 static void
-splash_average_text_area (GimpSplash *splash,
+splash_average_text_area (ClaySplash *splash,
                           GdkPixbuf  *pixbuf,
                           GdkRGBA    *color)
 {
@@ -682,7 +682,7 @@ splash_average_text_area (GimpSplash *splash,
           pixels += rowstride;
         }
 
-      luminance = GIMP_RGB_LUMINANCE (sum[0] / count,
+      luminance = CLAY_RGB_LUMINANCE (sum[0] / count,
                                       sum[1] / count,
                                       sum[2] / count);
 
@@ -696,7 +696,7 @@ splash_average_text_area (GimpSplash *splash,
 }
 
 static GdkPixbufAnimation *
-splash_image_load (Gimp     *gimp,
+splash_image_load (Clay     *clay,
                    gint      max_width,
                    gint      max_height,
                    gboolean  be_verbose,
@@ -709,7 +709,7 @@ splash_image_load (Gimp     *gimp,
   *release_splash = FALSE;
 
   /* Random image in splash extensions. */
-  g_object_get (gimp->extension_manager,
+  g_object_get (clay->extension_manager,
                 "splash-paths", &list,
                 NULL);
   animation = splash_image_pick_from_dirs (list,
@@ -718,8 +718,8 @@ splash_image_load (Gimp     *gimp,
   if (animation)
     return animation;
 
-  /* File "gimp-splash.png" in personal configuration directory. */
-  file = gimp_directory_file ("gimp-splash.png", NULL);
+  /* File "clay-splash.png" in personal configuration directory. */
+  file = clay_directory_file ("clay-splash.png", NULL);
   animation = splash_image_load_from_file (file,
                                            max_width, max_height,
                                            be_verbose);
@@ -728,7 +728,7 @@ splash_image_load (Gimp     *gimp,
     return animation;
 
   /* Random image under splashes/ directory in personal config dir. */
-  file = gimp_directory_file ("splashes", NULL);
+  file = clay_directory_file ("splashes", NULL);
   list = NULL;
   list = g_list_prepend (list, file);
   animation = splash_image_pick_from_dirs (list,
@@ -739,7 +739,7 @@ splash_image_load (Gimp     *gimp,
     return animation;
 
   /* Release splash image. */
-  file = gimp_data_directory_file ("images", "gimp-splash.png", NULL);
+  file = clay_data_directory_file ("images", "clay-splash.png", NULL);
   animation = splash_image_load_from_file (file,
                                            max_width, max_height,
                                            be_verbose);
@@ -751,7 +751,7 @@ splash_image_load (Gimp     *gimp,
     }
 
   /* Random release image in installed splashes/ directory. */
-  file = gimp_data_directory_file ("splashes", NULL);
+  file = clay_data_directory_file ("splashes", NULL);
   list = NULL;
   list = g_list_prepend (list, file);
   animation = splash_image_pick_from_dirs (list,
@@ -911,7 +911,7 @@ splash_image_pick_from_dirs (GList    *dirs,
 }
 
 static void
-splash_center_on_monitor (GimpSplash *splash)
+splash_center_on_monitor (ClaySplash *splash)
 {
   GdkRectangle workarea;
   gint         width;
@@ -940,7 +940,7 @@ splash_center_on_monitor (GimpSplash *splash)
 static gboolean
 splash_map_event (GtkWidget   *widget,
                   GdkEventAny *event,
-                  GimpSplash  *splash)
+                  ClaySplash  *splash)
 {
   splash_center_on_monitor (splash);
 

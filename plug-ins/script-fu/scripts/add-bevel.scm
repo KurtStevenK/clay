@@ -21,7 +21,7 @@
 ; Contains code from add-shadow.scm by Sven Neumann
 ; (neumanns@uni-duesseldorf.de) (thanks Sven).
 ;
-; Adds a bevel to an image.  See http://www.cs.waikato.ac.nz/~ard/gimp/
+; Adds a bevel to an image.  See http://www.cs.waikato.ac.nz/~ard/clay/
 ;
 ; If there is a selection, it is bevelled.
 ; Otherwise if there is an alpha channel, the selection is taken from it
@@ -36,7 +36,7 @@
 ; 1.01: now works on offset layers.
 ; 1.02: has crop-pixel-border option to trim one pixel off each edge of the
 ;       bevelled image.  Bumpmapping leaves edge pixels unchanged, which
-;       looks bad.  Oddly, this is not apparent in GIMP - you have to
+;       looks bad.  Oddly, this is not apparent in Clay - you have to
 ;       save the image and load it into another viewer.  First noticed in
 ;       Nutscrape.
 ;       Changed path (removed "filters/").
@@ -61,14 +61,14 @@
         (index 1)
         (greyness 0)
         (thickness (abs thickness))
-        (image (if (= work-on-copy TRUE) (car (gimp-image-duplicate img)) img))
-        (pic-layer (vector-ref (car (gimp-image-get-selected-drawables image)) 0))
-        (offsets (gimp-drawable-get-offsets pic-layer))
-        (width (car (gimp-drawable-get-width pic-layer)))
-        (height (car (gimp-drawable-get-height pic-layer)))
+        (image (if (= work-on-copy TRUE) (car (clay-image-duplicate img)) img))
+        (pic-layer (vector-ref (car (clay-image-get-selected-drawables image)) 0))
+        (offsets (clay-drawable-get-offsets pic-layer))
+        (width (car (clay-drawable-get-width pic-layer)))
+        (height (car (clay-drawable-get-height pic-layer)))
 
         ; Bumpmap has a one pixel border on each side
-        (bump-layer (car (gimp-layer-new image
+        (bump-layer (car (clay-layer-new image
                                          _"Bumpmap"
                                          (+ width 2)
                                          (+ height 2)
@@ -76,24 +76,24 @@
                                          100
                                          LAYER-MODE-NORMAL)))
 
-        (selection-exists (car (gimp-selection-bounds image)))
+        (selection-exists (car (clay-selection-bounds image)))
         (selection 0)
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
     ; disable undo on copy, start group otherwise
     (if (= work-on-copy TRUE)
-      (gimp-image-undo-disable image)
-      (gimp-image-undo-group-start image)
+      (clay-image-undo-disable image)
+      (clay-image-undo-group-start image)
     )
 
-    (gimp-image-insert-layer image bump-layer 0 1)
+    (clay-image-insert-layer image bump-layer 0 1)
 
     ; If the layer we're bevelling is offset from the image's origin, we
     ; have to do the same to the bumpmap
-    (gimp-layer-set-offsets bump-layer (- (car offsets) 1)
+    (clay-layer-set-offsets bump-layer (- (car offsets) 1)
                                        (- (cadr offsets) 1))
 
     ;------------------------------------------------------------
@@ -101,36 +101,36 @@
     ; Set the selection to the area we want to bevel.
     ;
     (if (= selection-exists 0)
-        (gimp-image-select-item image CHANNEL-OP-REPLACE pic-layer)
+        (clay-image-select-item image CHANNEL-OP-REPLACE pic-layer)
     )
 
     ; Store it for later.
-    (set! selection (car (gimp-selection-save image)))
+    (set! selection (car (clay-selection-save image)))
     ; Try to lose the jaggies
-    (gimp-selection-feather image 2)
+    (clay-selection-feather image 2)
 
     ;------------------------------------------------------------
     ;
     ; Initialise our bumpmap
     ;
-    (gimp-context-set-background '(0 0 0))
-    (gimp-drawable-fill bump-layer FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-drawable-fill bump-layer FILL-BACKGROUND)
 
     (while (and (< index thickness)
-                (= (car (gimp-selection-is-empty image)) FALSE)
+                (= (car (clay-selection-is-empty image)) FALSE)
            )
            (set! greyness (/ (* index 255) thickness))
-           (gimp-context-set-background (list greyness greyness greyness))
-           ;(gimp-selection-feather image 1) ;Stop the slopey jaggies?
-           (gimp-drawable-edit-fill bump-layer FILL-BACKGROUND)
-           (gimp-selection-shrink image 1)
+           (clay-context-set-background (list greyness greyness greyness))
+           ;(clay-selection-feather image 1) ;Stop the slopey jaggies?
+           (clay-drawable-edit-fill bump-layer FILL-BACKGROUND)
+           (clay-selection-shrink image 1)
            (set! index (+ index 1))
     )
     ; Now the white interior
-    (if (= (car (gimp-selection-is-empty image)) FALSE)
+    (if (= (car (clay-selection-is-empty image)) FALSE)
         (begin
-          (gimp-context-set-background '(255 255 255))
-          (gimp-drawable-edit-fill bump-layer FILL-BACKGROUND)
+          (clay-context-set-background '(255 255 255))
+          (clay-drawable-edit-fill bump-layer FILL-BACKGROUND)
         )
     )
 
@@ -138,10 +138,10 @@
     ;
     ; Do the bump.
     ;
-    (gimp-selection-none image)
+    (clay-selection-none image)
 
     ; To further lessen jaggies?
-    ;(gimp-drawable-merge-new-filter bump-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
+    ;(clay-drawable-merge-new-filter bump-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
     ;                                "std-dev-x" (* 0.32 thickness)
     ;                                "std-dev-y" (* 0.32 thickness)
     ;                                "filter" "auto")
@@ -150,14 +150,14 @@
     ;
     ; BUMPMAP INVOCATION:
     ;
-    (let* ((filter (car (gimp-drawable-filter-new pic-layer "gegl:bump-map" ""))))
-      (gimp-drawable-filter-configure filter LAYER-MODE-REPLACE 1.0
+    (let* ((filter (car (clay-drawable-filter-new pic-layer "gegl:bump-map" ""))))
+      (clay-drawable-filter-configure filter LAYER-MODE-REPLACE 1.0
                                       "azimuth" 125.0 "elevation" 45.0 "depth" 3
                                       "offset-x" 0 "offset-y" 0 "waterlevel" 0.0 "ambient" 0.0
                                       "compensate" TRUE "invert" FALSE "type" "spherical"
                                       "tiled" FALSE)
-      (gimp-drawable-filter-set-aux-input filter "aux" bump-layer)
-      (gimp-drawable-merge-filter pic-layer filter)
+      (clay-drawable-filter-set-aux-input filter "aux" bump-layer)
+      (clay-drawable-merge-filter pic-layer filter)
     )
 
     ;------------------------------------------------------------
@@ -165,33 +165,33 @@
     ; Restore things
     ;
     (if (= selection-exists 0)
-        (gimp-selection-none image)        ; No selection to start with
-        (gimp-image-select-item image CHANNEL-OP-REPLACE selection)
+        (clay-selection-none image)        ; No selection to start with
+        (clay-image-select-item image CHANNEL-OP-REPLACE selection)
     )
     ; If they started with a selection, they can Select->Invert then
     ; Edit->Clear for a cutout.
 
     ; clean up
-    (gimp-image-remove-channel image selection)
+    (clay-image-remove-channel image selection)
     (if (= keep-bump-layer TRUE)
-        (gimp-item-set-visible bump-layer 0)
-        (gimp-image-remove-layer image bump-layer)
+        (clay-item-set-visible bump-layer 0)
+        (clay-image-remove-layer image bump-layer)
     )
 
-    (gimp-image-set-selected-layers image (vector pic-layer))
+    (clay-image-set-selected-layers image (vector pic-layer))
 
     ; enable undo / end undo group
     (if (= work-on-copy TRUE)
       (begin
-        (gimp-display-new image)
-        (gimp-image-undo-enable image)
+        (clay-display-new image)
+        (clay-image-undo-enable image)
       )
-      (gimp-image-undo-group-end image)
+      (clay-image-undo-group-end image)
     )
 
-    (gimp-displays-flush)
+    (clay-displays-flush)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

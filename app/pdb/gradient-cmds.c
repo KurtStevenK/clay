@@ -28,149 +28,149 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpgradient.h"
-#include "core/gimpparamspecs.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/claydatafactory.h"
+#include "core/claygradient.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-gradient_new_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+gradient_new_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpGradient *gradient = NULL;
+  ClayGradient *gradient = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gradient = (GimpGradient*) gimp_data_factory_data_new (gimp->gradient_factory,
+      gradient = (ClayGradient*) clay_data_factory_data_new (clay->gradient_factory,
                                                              context, name);
 
       if (!gradient)
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), gradient);
+    g_value_set_object (clay_value_array_index (return_vals, 1), gradient);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_get_by_name_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+gradient_get_by_name_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *name;
-  GimpGradient *gradient = NULL;
+  ClayGradient *gradient = NULL;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gradient = GIMP_GRADIENT (gimp_pdb_get_resource (gimp, GIMP_TYPE_GRADIENT, name,
-                                                       GIMP_PDB_DATA_ACCESS_READ, error));
+      gradient = CLAY_GRADIENT (clay_pdb_get_resource (clay, CLAY_TYPE_GRADIENT, name,
+                                                       CLAY_PDB_DATA_ACCESS_READ, error));
 
       /* Ignore "not found" error, just return NULL. */
       g_clear_error (error);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), gradient);
+    g_value_set_object (clay_value_array_index (return_vals, 1), gradient);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_get_number_of_segments_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+gradient_get_number_of_segments_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint num_segments = 0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
       if (gradient)
         {
-          for (GimpGradientSegment *seg = gradient->segments; seg; seg = seg->next)
+          for (ClayGradientSegment *seg = gradient->segments; seg; seg = seg->next)
             num_segments++;
         }
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_int (gimp_value_array_index (return_vals, 1), num_segments);
+    g_value_set_int (clay_value_array_index (return_vals, 1), num_segments);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_get_uniform_samples_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+gradient_get_uniform_samples_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint num_samples;
   gboolean reverse;
   GeglColor **color_samples = NULL;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  num_samples = g_value_get_int (gimp_value_array_index (args, 1));
-  reverse = g_value_get_boolean (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  num_samples = g_value_get_int (clay_value_array_index (args, 1));
+  reverse = g_value_get_boolean (clay_value_array_index (args, 2));
 
   if (success)
     {
       if (gradient)
         {
-          GimpGradientSegment *seg   = NULL;
+          ClayGradientSegment *seg   = NULL;
           gdouble              pos   = 0.0;
           gdouble              delta = 1.0 / (num_samples - 1);
           GeglColor          **sample;
@@ -179,9 +179,9 @@ gradient_get_uniform_samples_invoker (GimpProcedure         *procedure,
 
           while (num_samples--)
             {
-              seg = gimp_gradient_get_color_at (gradient, context, seg,
+              seg = clay_gradient_get_color_at (gradient, context, seg,
                                                 pos, reverse,
-                                                GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                                 sample);
 
               sample++,
@@ -192,50 +192,50 @@ gradient_get_uniform_samples_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), color_samples);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), color_samples);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_get_custom_samples_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+gradient_get_custom_samples_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gsize num_samples;
   const gdouble *positions;
   gboolean reverse;
   GeglColor **color_samples = NULL;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  positions = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_samples);
-  reverse = g_value_get_boolean (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  positions = clay_value_get_double_array (clay_value_array_index (args, 1), &num_samples);
+  reverse = g_value_get_boolean (clay_value_array_index (args, 2));
 
   if (success)
     {
       if (gradient)
         {
-          GimpGradientSegment  *seg = NULL;
+          ClayGradientSegment  *seg = NULL;
           GeglColor           **sample;
 
           sample = color_samples = g_new0 (GeglColor *, num_samples + 1);
 
           while (num_samples--)
             {
-              seg = gimp_gradient_get_color_at (gradient, context,
+              seg = clay_gradient_get_color_at (gradient, context,
                                                 seg, *positions,
                                                 reverse,
-                                                GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                                 sample);
 
               sample++;
@@ -246,78 +246,78 @@ gradient_get_custom_samples_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_boxed (gimp_value_array_index (return_vals, 1), color_samples);
+    g_value_take_boxed (clay_value_array_index (return_vals, 1), color_samples);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_get_left_color_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_left_color_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   GeglColor *color = NULL;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg;
+      ClayGradientSegment *seg;
 
-      seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        color = g_object_ref (gimp_gradient_segment_get_left_color (gradient, seg));
+        color = g_object_ref (clay_gradient_segment_get_left_color (gradient, seg));
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), color);
+    g_value_take_object (clay_value_array_index (return_vals, 1), color);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_set_left_color_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_set_left_color_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint segment;
   GeglColor *color;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
-  color = g_value_get_object (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
+  color = g_value_get_object (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+          ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
           if (seg)
-            gimp_gradient_segment_set_left_color (gradient, seg, color);
+            clay_gradient_segment_set_left_color (gradient, seg, color);
           else
             success = FALSE;
           }
@@ -327,73 +327,73 @@ gradient_segment_set_left_color_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_get_right_color_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_right_color_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   GeglColor *color = NULL;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg;
+      ClayGradientSegment *seg;
 
-      seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        color = g_object_ref (gimp_gradient_segment_get_right_color (gradient, seg));
+        color = g_object_ref (clay_gradient_segment_get_right_color (gradient, seg));
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), color);
+    g_value_take_object (clay_value_array_index (return_vals, 1), color);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_set_right_color_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_set_right_color_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint segment;
   GeglColor *color;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
-  color = g_value_get_object (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
+  color = g_value_get_object (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+          ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
           if (seg)
-            gimp_gradient_segment_set_right_color (gradient, seg, color);
+            clay_gradient_segment_set_right_color (gradient, seg, color);
           else
             success = FALSE;
         }
@@ -403,73 +403,73 @@ gradient_segment_set_right_color_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_get_left_pos_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_left_pos_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gdouble pos = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        pos = gimp_gradient_segment_get_left_pos (gradient, seg);
+        pos = clay_gradient_segment_get_left_pos (gradient, seg);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), pos);
+    g_value_set_double (clay_value_array_index (return_vals, 1), pos);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_set_left_pos_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_set_left_pos_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gdouble pos;
   gdouble final_pos = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
-  pos = g_value_get_double (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
+  pos = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+          ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
           if (seg)
-            final_pos = gimp_gradient_segment_set_left_pos (gradient, seg, pos);
+            final_pos = clay_gradient_segment_set_left_pos (gradient, seg, pos);
           else
             success = FALSE;
         }
@@ -479,78 +479,78 @@ gradient_segment_set_left_pos_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), final_pos);
+    g_value_set_double (clay_value_array_index (return_vals, 1), final_pos);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_get_middle_pos_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_middle_pos_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gdouble pos = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        pos = gimp_gradient_segment_get_middle_pos (gradient, seg);
+        pos = clay_gradient_segment_get_middle_pos (gradient, seg);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), pos);
+    g_value_set_double (clay_value_array_index (return_vals, 1), pos);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_set_middle_pos_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_set_middle_pos_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gdouble pos;
   gdouble final_pos = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
-  pos = g_value_get_double (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
+  pos = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+          ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
           if (seg)
-            final_pos = gimp_gradient_segment_set_middle_pos (gradient, seg, pos);
+            final_pos = clay_gradient_segment_set_middle_pos (gradient, seg, pos);
           else
             success = FALSE;
         }
@@ -560,78 +560,78 @@ gradient_segment_set_middle_pos_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), final_pos);
+    g_value_set_double (clay_value_array_index (return_vals, 1), final_pos);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_get_right_pos_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_right_pos_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gdouble pos = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        pos = gimp_gradient_segment_get_right_pos (gradient, seg);
+        pos = clay_gradient_segment_get_right_pos (gradient, seg);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), pos);
+    g_value_set_double (clay_value_array_index (return_vals, 1), pos);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_set_right_pos_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_set_right_pos_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gdouble pos;
   gdouble final_pos = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
-  pos = g_value_get_double (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
+  pos = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+          ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
           if (seg)
-            final_pos = gimp_gradient_segment_set_right_pos (gradient, seg, pos);
+            final_pos = clay_gradient_segment_set_right_pos (gradient, seg, pos);
           else
             success = FALSE;
         }
@@ -641,118 +641,118 @@ gradient_segment_set_right_pos_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), final_pos);
+    g_value_set_double (clay_value_array_index (return_vals, 1), final_pos);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_get_blending_function_invoker (GimpProcedure         *procedure,
-                                                Gimp                  *gimp,
-                                                GimpContext           *context,
-                                                GimpProgress          *progress,
-                                                const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_blending_function_invoker (ClayProcedure         *procedure,
+                                                Clay                  *clay,
+                                                ClayContext           *context,
+                                                ClayProgress          *progress,
+                                                const ClayValueArray  *args,
                                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gint blend_func = 0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        blend_func = gimp_gradient_segment_get_blending_function (gradient, seg);
+        blend_func = clay_gradient_segment_get_blending_function (gradient, seg);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), blend_func);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), blend_func);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_get_coloring_type_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_get_coloring_type_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint segment;
   gint coloring_type = 0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  segment = g_value_get_int (gimp_value_array_index (args, 1));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  segment = g_value_get_int (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGradientSegment *seg = gimp_gradient_segment_get_nth (gradient->segments, segment);
+      ClayGradientSegment *seg = clay_gradient_segment_get_nth (gradient->segments, segment);
 
       if (seg)
-        coloring_type = gimp_gradient_segment_get_coloring_type (gradient, seg);
+        coloring_type = clay_gradient_segment_get_coloring_type (gradient, seg);
       else
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), coloring_type);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), coloring_type);
 
   return return_vals;
 }
 
-static GimpValueArray *
-gradient_segment_range_set_blending_function_invoker (GimpProcedure         *procedure,
-                                                      Gimp                  *gimp,
-                                                      GimpContext           *context,
-                                                      GimpProgress          *progress,
-                                                      const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_set_blending_function_invoker (ClayProcedure         *procedure,
+                                                      Clay                  *clay,
+                                                      ClayContext           *context,
+                                                      ClayProgress          *progress,
+                                                      const ClayValueArray  *args,
                                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
   gint blending_function;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
-  blending_function = g_value_get_enum (gimp_value_array_index (args, 3));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
+  blending_function = g_value_get_enum (clay_value_array_index (args, 3));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_set_blending_function (gradient,
+            clay_gradient_segment_range_set_blending_function (gradient,
                                                                start_seg, end_seg,
                                                                blending_function);
           else
@@ -762,41 +762,41 @@ gradient_segment_range_set_blending_function_invoker (GimpProcedure         *pro
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_set_coloring_type_invoker (GimpProcedure         *procedure,
-                                                  Gimp                  *gimp,
-                                                  GimpContext           *context,
-                                                  GimpProgress          *progress,
-                                                  const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_set_coloring_type_invoker (ClayProcedure         *procedure,
+                                                  Clay                  *clay,
+                                                  ClayContext           *context,
+                                                  ClayProgress          *progress,
+                                                  const ClayValueArray  *args,
                                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
   gint coloring_type;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
-  coloring_type = g_value_get_enum (gimp_value_array_index (args, 3));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
+  coloring_type = g_value_get_enum (clay_value_array_index (args, 3));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_set_coloring_type (gradient,
+            clay_gradient_segment_range_set_coloring_type (gradient,
                                                            start_seg, end_seg,
                                                            coloring_type);
           else
@@ -806,39 +806,39 @@ gradient_segment_range_set_coloring_type_invoker (GimpProcedure         *procedu
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_flip_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_flip_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_flip (gradient,
+            clay_gradient_segment_range_flip (gradient,
                                               start_seg, end_seg,
                                               NULL, NULL);
           else
@@ -848,41 +848,41 @@ gradient_segment_range_flip_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_replicate_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_replicate_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
   gint replicate_times;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
-  replicate_times = g_value_get_int (gimp_value_array_index (args, 3));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
+  replicate_times = g_value_get_int (clay_value_array_index (args, 3));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_replicate (gradient,
+            clay_gradient_segment_range_replicate (gradient,
                                                    start_seg, end_seg,
                                                    replicate_times,
                                                    NULL, NULL);
@@ -893,41 +893,41 @@ gradient_segment_range_replicate_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_split_midpoint_invoker (GimpProcedure         *procedure,
-                                               Gimp                  *gimp,
-                                               GimpContext           *context,
-                                               GimpProgress          *progress,
-                                               const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_split_midpoint_invoker (ClayProcedure         *procedure,
+                                               Clay                  *clay,
+                                               ClayContext           *context,
+                                               ClayProgress          *progress,
+                                               const ClayValueArray  *args,
                                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_split_midpoint (gradient, context,
+            clay_gradient_segment_range_split_midpoint (gradient, context,
                                                         start_seg, end_seg,
-                                                        GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                        CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                                         NULL, NULL);
           else
             success = FALSE;
@@ -936,44 +936,44 @@ gradient_segment_range_split_midpoint_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_split_uniform_invoker (GimpProcedure         *procedure,
-                                              Gimp                  *gimp,
-                                              GimpContext           *context,
-                                              GimpProgress          *progress,
-                                              const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_split_uniform_invoker (ClayProcedure         *procedure,
+                                              Clay                  *clay,
+                                              ClayContext           *context,
+                                              ClayProgress          *progress,
+                                              const ClayValueArray  *args,
                                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
   gint split_parts;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
-  split_parts = g_value_get_int (gimp_value_array_index (args, 3));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
+  split_parts = g_value_get_int (clay_value_array_index (args, 3));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_split_uniform (gradient, context,
+            clay_gradient_segment_range_split_uniform (gradient, context,
                                                        start_seg, end_seg,
                                                        split_parts,
-                                                       GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                       CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
                                                        NULL, NULL);
           else
             success = FALSE;
@@ -984,39 +984,39 @@ gradient_segment_range_split_uniform_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_delete_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_delete_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_delete (gradient,
+            clay_gradient_segment_range_delete (gradient,
                                                 start_seg, end_seg,
                                                 NULL, NULL);
           else
@@ -1028,39 +1028,39 @@ gradient_segment_range_delete_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_redistribute_handles_invoker (GimpProcedure         *procedure,
-                                                     Gimp                  *gimp,
-                                                     GimpContext           *context,
-                                                     GimpProgress          *progress,
-                                                     const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_redistribute_handles_invoker (ClayProcedure         *procedure,
+                                                     Clay                  *clay,
+                                                     ClayContext           *context,
+                                                     ClayProgress          *progress,
+                                                     const ClayValueArray  *args,
                                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_redistribute_handles (gradient,
+            clay_gradient_segment_range_redistribute_handles (gradient,
                                                               start_seg, end_seg);
           else
             success = FALSE;
@@ -1071,39 +1071,39 @@ gradient_segment_range_redistribute_handles_invoker (GimpProcedure         *proc
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_blend_colors_invoker (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_blend_colors_invoker (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_blend (gradient,
+            clay_gradient_segment_range_blend (gradient,
                                                start_seg, end_seg,
                                                start_seg->left_color,
                                                end_seg->right_color,
@@ -1117,39 +1117,39 @@ gradient_segment_range_blend_colors_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_blend_opacity_invoker (GimpProcedure         *procedure,
-                                              Gimp                  *gimp,
-                                              GimpContext           *context,
-                                              GimpProgress          *progress,
-                                              const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_blend_opacity_invoker (ClayProcedure         *procedure,
+                                              Clay                  *clay,
+                                              ClayContext           *context,
+                                              ClayProgress          *progress,
+                                              const ClayValueArray  *args,
                                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpGradient *gradient;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            gimp_gradient_segment_range_blend (gradient,
+            clay_gradient_segment_range_blend (gradient,
                                                start_seg, end_seg,
                                                start_seg->left_color,
                                                end_seg->right_color,
@@ -1163,45 +1163,45 @@ gradient_segment_range_blend_opacity_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-gradient_segment_range_move_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+gradient_segment_range_move_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient;
   gint start_segment;
   gint end_segment;
   gdouble delta;
   gboolean control_compress;
   gdouble final_delta = 0.0;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
-  start_segment = g_value_get_int (gimp_value_array_index (args, 1));
-  end_segment = g_value_get_int (gimp_value_array_index (args, 2));
-  delta = g_value_get_double (gimp_value_array_index (args, 3));
-  control_compress = g_value_get_boolean (gimp_value_array_index (args, 4));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
+  start_segment = g_value_get_int (clay_value_array_index (args, 1));
+  end_segment = g_value_get_int (clay_value_array_index (args, 2));
+  delta = g_value_get_double (clay_value_array_index (args, 3));
+  control_compress = g_value_get_boolean (clay_value_array_index (args, 4));
 
   if (success)
     {
-      if (gimp_data_is_writable (GIMP_DATA (gradient)))
+      if (clay_data_is_writable (CLAY_DATA (gradient)))
         {
-          GimpGradientSegment *start_seg;
-          GimpGradientSegment *end_seg;
+          ClayGradientSegment *start_seg;
+          ClayGradientSegment *end_seg;
 
-          start_seg = gimp_gradient_segment_get_nth (gradient->segments, start_segment);
-          end_seg   = gimp_gradient_segment_get_nth (gradient->segments, end_segment);
+          start_seg = clay_gradient_segment_get_nth (gradient->segments, start_segment);
+          end_seg   = clay_gradient_segment_get_nth (gradient->segments, end_segment);
 
           if (start_seg && end_seg)
-            final_delta = gimp_gradient_segment_range_move (gradient,
+            final_delta = clay_gradient_segment_range_move (gradient,
                                                             start_seg, end_seg,
                                                             delta,
                                                             control_compress);
@@ -1214,1139 +1214,1139 @@ gradient_segment_range_move_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), final_delta);
+    g_value_set_double (clay_value_array_index (return_vals, 1), final_delta);
 
   return return_vals;
 }
 
 void
-register_gradient_procs (GimpPDB *pdb)
+register_gradient_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-gradient-new
+   * clay-gradient-new
    */
-  procedure = gimp_procedure_new (gradient_new_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-new");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_new_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-new");
+  clay_procedure_set_static_help (procedure,
                                   "Creates a new gradient",
                                   "Creates a new gradient having no segments.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The requested name of the new gradient",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_gradient ("gradient",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_gradient ("gradient",
                                                              "gradient",
                                                              "The gradient",
                                                              FALSE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-get-by-name
+   * clay-gradient-get-by-name
    */
-  procedure = gimp_procedure_new (gradient_get_by_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-get-by-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_get_by_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-get-by-name");
+  clay_procedure_set_static_help (procedure,
                                   "Returns the gradient with the given name.",
                                   "Returns an existing gradient having the given name. Returns %NULL when no gradient exists of that name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The name of the gradient",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_gradient ("gradient",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_gradient ("gradient",
                                                              "gradient",
                                                              "The gradient",
                                                              TRUE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-get-number-of-segments
+   * clay-gradient-get-number-of-segments
    */
-  procedure = gimp_procedure_new (gradient_get_number_of_segments_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-get-number-of-segments");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_get_number_of_segments_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-get-number-of-segments");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the number of segments of the gradient",
                                   "Gets the number of segments of the gradient",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Lars-Peter Clausen <lars@metafoo.de>",
                                          "Lars-Peter Clausen",
                                          "2008");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("num-segments",
                                                      "num segments",
                                                      "Number of segments",
                                                      G_MININT32, G_MAXINT32, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-get-uniform-samples
+   * clay-gradient-get-uniform-samples
    */
-  procedure = gimp_procedure_new (gradient_get_uniform_samples_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-get-uniform-samples");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_get_uniform_samples_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-get-uniform-samples");
+  clay_procedure_set_static_help (procedure,
                                   "Sample the gradient in uniform parts.",
                                   "Samples colors uniformly across the gradient. It returns a list of colors for each sample. The minimum number of samples to take is 2, in which case the returned colors will correspond to the `{ 0.0, 1.0 }` positions in the gradient. For example, if the number of samples is 3, the procedure will return the colors at positions `{ 0.0, 0.5, 1.0 }`.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Federico Mena Quintero",
                                          "Federico Mena Quintero",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("num-samples",
                                                  "num samples",
                                                  "The number of samples to take",
                                                  2, G_MAXINT32, 2,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("reverse",
                                                      "reverse",
                                                      "Use the reverse gradient",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("color-samples",
                                                        "color samples",
                                                        "Color samples",
-                                                       GIMP_TYPE_COLOR_ARRAY,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_TYPE_COLOR_ARRAY,
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-get-custom-samples
+   * clay-gradient-get-custom-samples
    */
-  procedure = gimp_procedure_new (gradient_get_custom_samples_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-get-custom-samples");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_get_custom_samples_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-get-custom-samples");
+  clay_procedure_set_static_help (procedure,
                                   "Sample the gradient in custom positions.",
                                   "Samples the color of the gradient at positions from a list. The left endpoint of the gradient corresponds to position 0.0, and the right endpoint corresponds to 1.0. Returns a list of colors, one for each sample.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Federico Mena Quintero",
                                          "Federico Mena Quintero",
                                          "1997");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("positions",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("positions",
                                                              "positions",
                                                              "The list of positions to sample along the gradient",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("reverse",
                                                      "reverse",
                                                      "Use the reverse gradient",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("color-samples",
                                                        "color samples",
                                                        "Color samples",
-                                                       GIMP_TYPE_COLOR_ARRAY,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_TYPE_COLOR_ARRAY,
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-left-color
+   * clay-gradient-segment-get-left-color
    */
-  procedure = gimp_procedure_new (gradient_segment_get_left_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-left-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_left_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-left-color");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the left endpoint color of the segment",
                                   "Gets the left endpoint color of the indexed segment of the gradient.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("color",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("color",
                                                           "color",
                                                           "The return color",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-set-left-color
+   * clay-gradient-segment-set-left-color
    */
-  procedure = gimp_procedure_new (gradient_segment_set_left_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-set-left-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_set_left_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-set-left-color");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the left endpoint color of a segment",
                                   "Sets the color of the left endpoint the indexed segment of the gradient. The alpha channel of the [class@Gegl.Color] is taken into account.\n"
                                   "Returns an error when gradient is not editable or index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The color to set",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-right-color
+   * clay-gradient-segment-get-right-color
    */
-  procedure = gimp_procedure_new (gradient_segment_get_right_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-right-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_right_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-right-color");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the right endpoint color of the segment",
                                   "Gets the color of the right endpoint color of the segment of the gradient.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("color",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("color",
                                                           "color",
                                                           "The return color",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-set-right-color
+   * clay-gradient-segment-set-right-color
    */
-  procedure = gimp_procedure_new (gradient_segment_set_right_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-set-right-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_set_right_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-set-right-color");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the right endpoint color of the segment",
                                   "Sets the right endpoint color of the segment of the gradient. The alpha channel of the [class@Gegl.Color] is taken into account.\n"
                                   "Returns an error when gradient is not editable or segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("color",
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("color",
                                                       "color",
                                                       "The color to set",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-left-pos
+   * clay-gradient-segment-get-left-pos
    */
-  procedure = gimp_procedure_new (gradient_segment_get_left_pos_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-left-pos");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_left_pos_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-left-pos");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the left endpoint position of a segment",
                                   "Gets the position of the left endpoint of the segment of the gradient.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("pos",
                                                         "pos",
                                                         "The return position",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-set-left-pos
+   * clay-gradient-segment-set-left-pos
    */
-  procedure = gimp_procedure_new (gradient_segment_set_left_pos_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-set-left-pos");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_set_left_pos_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-set-left-pos");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the left endpoint position of the segment",
                                   "Sets the position of the left endpoint of the segment of the gradient. The final position will be the given fraction from the midpoint to the left to the midpoint of the current segment.\n"
                                   "Returns the final position. Returns an error when gradient is not editable or segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("pos",
                                                     "pos",
                                                     "The position to set the guidepoint to",
                                                     0.0, 1.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("final-pos",
                                                         "final pos",
                                                         "The return position",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-middle-pos
+   * clay-gradient-segment-get-middle-pos
    */
-  procedure = gimp_procedure_new (gradient_segment_get_middle_pos_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-middle-pos");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_middle_pos_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-middle-pos");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the midpoint position of the segment",
                                   "Gets the position of the midpoint of the segment of the gradient.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("pos",
                                                         "pos",
                                                         "The return position",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-set-middle-pos
+   * clay-gradient-segment-set-middle-pos
    */
-  procedure = gimp_procedure_new (gradient_segment_set_middle_pos_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-set-middle-pos");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_set_middle_pos_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-set-middle-pos");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the midpoint position of the segment",
                                   "Sets the midpoint position of the segment of the gradient. The final position will be the given fraction between the two endpoints of the segment.\n"
                                   "Returns the final position. Returns an error when gradient is not editable or segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("pos",
                                                     "pos",
                                                     "The position to set the guidepoint to",
                                                     0.0, 1.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("final-pos",
                                                         "final pos",
                                                         "The return position",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-right-pos
+   * clay-gradient-segment-get-right-pos
    */
-  procedure = gimp_procedure_new (gradient_segment_get_right_pos_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-right-pos");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_right_pos_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-right-pos");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the right endpoint position of the segment",
                                   "Gets the position of the right endpoint of the segment of the gradient.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("pos",
                                                         "pos",
                                                         "The return position",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-set-right-pos
+   * clay-gradient-segment-set-right-pos
    */
-  procedure = gimp_procedure_new (gradient_segment_set_right_pos_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-set-right-pos");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_set_right_pos_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-set-right-pos");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the right endpoint position of the segment",
                                   "Sets the right endpoint position of the segment of the gradient. The final position will be the given fraction from the midpoint of the current segment to the midpoint of the segment to the right.\n"
                                   "Returns the final position. Returns an error when gradient is not editable or segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("pos",
                                                     "pos",
                                                     "The position to set the right endpoint to",
                                                     0.0, 1.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("final-pos",
                                                         "final pos",
                                                         "The return position",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-blending-function
+   * clay-gradient-segment-get-blending-function
    */
-  procedure = gimp_procedure_new (gradient_segment_get_blending_function_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-blending-function");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_blending_function_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-blending-function");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the gradient segment's blending function",
                                   "Gets the blending function of the segment at the index.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("blend-func",
                                                       "blend func",
                                                       "The blending function of the segment",
-                                                      GIMP_TYPE_GRADIENT_SEGMENT_TYPE,
-                                                      GIMP_GRADIENT_SEGMENT_LINEAR,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_GRADIENT_SEGMENT_TYPE,
+                                                      CLAY_GRADIENT_SEGMENT_LINEAR,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-get-coloring-type
+   * clay-gradient-segment-get-coloring-type
    */
-  procedure = gimp_procedure_new (gradient_segment_get_coloring_type_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-get-coloring-type");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_get_coloring_type_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-get-coloring-type");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the gradient segment's coloring type",
                                   "Gets the coloring type of the segment at the index.\n"
                                   "Returns an error when the segment index is out of range.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("segment",
                                                  "segment",
                                                  "The index of a segment within the gradient",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("coloring-type",
                                                       "coloring type",
                                                       "The coloring type of the segment",
-                                                      GIMP_TYPE_GRADIENT_SEGMENT_COLOR,
-                                                      GIMP_GRADIENT_SEGMENT_RGB,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_GRADIENT_SEGMENT_COLOR,
+                                                      CLAY_GRADIENT_SEGMENT_RGB,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-set-blending-function
+   * clay-gradient-segment-range-set-blending-function
    */
-  procedure = gimp_procedure_new (gradient_segment_range_set_blending_function_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-set-blending-function");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_set_blending_function_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-set-blending-function");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the blending function of a range of segments",
                                   "Sets the blending function of a range of segments.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("blending-function",
                                                   "blending function",
                                                   "The blending function",
-                                                  GIMP_TYPE_GRADIENT_SEGMENT_TYPE,
-                                                  GIMP_GRADIENT_SEGMENT_LINEAR,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_GRADIENT_SEGMENT_TYPE,
+                                                  CLAY_GRADIENT_SEGMENT_LINEAR,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-set-coloring-type
+   * clay-gradient-segment-range-set-coloring-type
    */
-  procedure = gimp_procedure_new (gradient_segment_range_set_coloring_type_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-set-coloring-type");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_set_coloring_type_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-set-coloring-type");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the coloring type of a range of segments",
                                   "Sets the coloring type of a range of segments.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("coloring-type",
                                                   "coloring type",
                                                   "The coloring type",
-                                                  GIMP_TYPE_GRADIENT_SEGMENT_COLOR,
-                                                  GIMP_GRADIENT_SEGMENT_RGB,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_GRADIENT_SEGMENT_COLOR,
+                                                  CLAY_GRADIENT_SEGMENT_RGB,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-flip
+   * clay-gradient-segment-range-flip
    */
-  procedure = gimp_procedure_new (gradient_segment_range_flip_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-flip");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_flip_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-flip");
+  clay_procedure_set_static_help (procedure,
                                   "Flip the segment range",
                                   "Reverses the order of segments in a range, and swaps the left and right colors in each segment. As if the range as a 1D line were rotated in a plane.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-replicate
+   * clay-gradient-segment-range-replicate
    */
-  procedure = gimp_procedure_new (gradient_segment_range_replicate_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-replicate");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_replicate_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-replicate");
+  clay_procedure_set_static_help (procedure,
                                   "Replicate the segment range",
                                   "Replicates a segment range a given number of times. Instead of the original segment range, several smaller scaled copies of it will appear in equal widths.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("replicate-times",
                                                  "replicate times",
                                                  "The number of replicas for each segment",
                                                  2, 20, 2,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-split-midpoint
+   * clay-gradient-segment-range-split-midpoint
    */
-  procedure = gimp_procedure_new (gradient_segment_range_split_midpoint_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-split-midpoint");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_split_midpoint_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-split-midpoint");
+  clay_procedure_set_static_help (procedure,
                                   "Splits each segment in the segment range at midpoint",
                                   "Splits each segment in the segment range at its midpoint.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-split-uniform
+   * clay-gradient-segment-range-split-uniform
    */
-  procedure = gimp_procedure_new (gradient_segment_range_split_uniform_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-split-uniform");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_split_uniform_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-split-uniform");
+  clay_procedure_set_static_help (procedure,
                                   "Splits each segment in the segment range uniformly",
                                   "Splits each segment in the segment range uniformly into to the number of parts given.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("split-parts",
                                                  "split parts",
                                                  "The number of uniform divisions to split each segment to",
                                                  2, 1024, 2,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-delete
+   * clay-gradient-segment-range-delete
    */
-  procedure = gimp_procedure_new (gradient_segment_range_delete_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-delete");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_delete_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-delete");
+  clay_procedure_set_static_help (procedure,
                                   "Delete the segment range",
                                   "Deletes a range of segments.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable. Deleting all the segments is undefined behavior.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-redistribute-handles
+   * clay-gradient-segment-range-redistribute-handles
    */
-  procedure = gimp_procedure_new (gradient_segment_range_redistribute_handles_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-redistribute-handles");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_redistribute_handles_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-redistribute-handles");
+  clay_procedure_set_static_help (procedure,
                                   "Uniformly redistribute the segment range's handles",
                                   "Redistributes the handles of the segment range of the gradient, so they'll be evenly spaced. A handle is where two segments meet. Segments will then have the same width.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-blend-colors
+   * clay-gradient-segment-range-blend-colors
    */
-  procedure = gimp_procedure_new (gradient_segment_range_blend_colors_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-blend-colors");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_blend_colors_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-blend-colors");
+  clay_procedure_set_static_help (procedure,
                                   "Blend the colors of the segment range.",
                                   "Blends the colors (but not the opacity) of the range of segments. The colors' transition will then be uniform across the range.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-blend-opacity
+   * clay-gradient-segment-range-blend-opacity
    */
-  procedure = gimp_procedure_new (gradient_segment_range_blend_opacity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-blend-opacity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_blend_opacity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-blend-opacity");
+  clay_procedure_set_static_help (procedure,
                                   "Blend the opacity of the segment range.",
                                   "Blends the opacity (but not the colors) of the range of segments. The opacity's transition will then be uniform across the range.\n"
                                   "Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-gradient-segment-range-move
+   * clay-gradient-segment-range-move
    */
-  procedure = gimp_procedure_new (gradient_segment_range_move_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-gradient-segment-range-move");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (gradient_segment_range_move_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-gradient-segment-range-move");
+  clay_procedure_set_static_help (procedure,
                                   "Move the position of an entire segment range by a delta.",
                                   "Moves the position of an entire segment range by a delta. The actual delta (which is returned) will be limited by the control points of the neighboring segments.\n"
                                   "Returns the actual delta. Returns an error when a segment index is out of range, or gradient is not editable.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Shlomi Fish <shlomif@iglu.org.il>",
                                          "Shlomi Fish",
                                          "2003");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("start-segment",
                                                  "start segment",
                                                  "Index of the first segment to operate on",
                                                  0, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("end-segment",
                                                  "end segment",
                                                  "Index of the last segment to operate on. If negative, the range will extend to the end segment.",
                                                  G_MININT32, G_MAXINT32, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                 CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("delta",
                                                     "delta",
                                                     "The delta to move the segment range",
                                                     -1.0, 1.0, -1.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("control-compress",
                                                      "control compress",
                                                      "Whether or not to compress the neighboring segments",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                     CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("final-delta",
                                                         "final delta",
                                                         "The final delta by which the range moved",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

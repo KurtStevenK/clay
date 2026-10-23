@@ -217,7 +217,7 @@ fitted_splines (pixel_outline_list_type pixel_outline_list)
 /* Set up the internal parameters from the external ones */
 
 void
-fit_set_params (GimpProcedureConfig *config)
+fit_set_params (ClayProcedureConfig *config)
 {
   g_object_get (config,
                 "align-threshold",             &align_threshold,

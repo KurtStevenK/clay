@@ -20,41 +20,41 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpmath/gimpmath.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaymath/claymath.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "config/gimpdisplayoptions.h"
-#include "config/gimpguiconfig.h"
+#include "config/claydisplayoptions.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpgrouplayer.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/claygrouplayer.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpcolordialog.h"
-#include "widgets/gimpdock.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimptoggleaction.h"
-#include "widgets/gimpuimanager.h"
-#include "widgets/gimpwidgets-utils.h"
-#include "widgets/gimpwindowstrategy.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claycolordialog.h"
+#include "widgets/claydock.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claytoggleaction.h"
+#include "widgets/clayuimanager.h"
+#include "widgets/claywidgets-utils.h"
+#include "widgets/claywindowstrategy.h"
 
-#include "display/gimpdisplay.h"
-#include "display/gimpdisplay-foreach.h"
-#include "display/gimpdisplayshell.h"
-#include "display/gimpdisplayshell-appearance.h"
-#include "display/gimpdisplayshell-filter-dialog.h"
-#include "display/gimpdisplayshell-rotate.h"
-#include "display/gimpdisplayshell-rotate-dialog.h"
-#include "display/gimpdisplayshell-scale.h"
-#include "display/gimpdisplayshell-scale-dialog.h"
-#include "display/gimpdisplayshell-scroll.h"
-#include "display/gimpdisplayshell-close.h"
-#include "display/gimpimagewindow.h"
+#include "display/claydisplay.h"
+#include "display/claydisplay-foreach.h"
+#include "display/claydisplayshell.h"
+#include "display/claydisplayshell-appearance.h"
+#include "display/claydisplayshell-filter-dialog.h"
+#include "display/claydisplayshell-rotate.h"
+#include "display/claydisplayshell-rotate-dialog.h"
+#include "display/claydisplayshell-scale.h"
+#include "display/claydisplayshell-scale-dialog.h"
+#include "display/claydisplayshell-scroll.h"
+#include "display/claydisplayshell-close.h"
+#include "display/clayimagewindow.h"
 
 #include "dialogs/color-profile-dialog.h"
 #include "dialogs/dialogs.h"
@@ -64,187 +64,187 @@
 #include "actions.h"
 #include "view-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 #define SET_ACTIVE(manager,action_name,active) \
-  { GimpActionGroup *group = \
-      gimp_ui_manager_get_action_group (manager, "view"); \
-    gimp_action_group_set_action_active (group, action_name, active); }
+  { ClayActionGroup *group = \
+      clay_ui_manager_get_action_group (manager, "view"); \
+    clay_action_group_set_action_active (group, action_name, active); }
 
 #define IS_ACTIVE_DISPLAY(display) \
   ((display) == \
-   gimp_context_get_display (gimp_get_user_context ((display)->gimp)))
+   clay_context_get_display (clay_get_user_context ((display)->clay)))
 
 
 /*  local function prototypes  */
 
-static void   view_padding_color_dialog_update (GimpColorDialog          *dialog,
+static void   view_padding_color_dialog_update (ClayColorDialog          *dialog,
                                                 GeglColor                *color,
-                                                GimpColorDialogState      state,
-                                                GimpDisplayShell         *shell);
+                                                ClayColorDialogState      state,
+                                                ClayDisplayShell         *shell);
 
 
 /*  public functions  */
 
 void
-view_new_cmd_callback (GimpAction *action,
+view_new_cmd_callback (ClayAction *action,
                        GVariant   *value,
                        gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
-  gimp_create_display (display->gimp,
-                       gimp_display_get_image (display),
-                       shell->unit, gimp_zoom_model_get_factor (shell->zoom),
-                       G_OBJECT (gimp_widget_get_monitor (GTK_WIDGET (shell))));
+  clay_create_display (display->clay,
+                       clay_display_get_image (display),
+                       shell->unit, clay_zoom_model_get_factor (shell->zoom),
+                       G_OBJECT (clay_widget_get_monitor (GTK_WIDGET (shell))));
 }
 
 void
-view_close_cmd_callback (GimpAction *action,
+view_close_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
-  GimpImage        *image;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
+  ClayImage        *image;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
-  image = gimp_display_get_image (display);
+  shell = clay_display_get_shell (display);
+  image = clay_display_get_image (display);
 
   /* Check for the image so we don't close the last display. */
   if (image)
-    gimp_display_shell_close (shell, FALSE);
+    clay_display_shell_close (shell, FALSE);
 }
 
 void
-view_scroll_center_cmd_callback (GimpAction *action,
+view_scroll_center_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpDisplay *display;
+  ClayDisplay *display;
   return_if_no_display (display, data);
 
-  gimp_display_shell_scroll_center_image (gimp_display_get_shell (display),
+  clay_display_shell_scroll_center_image (clay_display_get_shell (display),
                                           TRUE, TRUE);
 }
 
 void
-view_zoom_fit_in_cmd_callback (GimpAction *action,
+view_zoom_fit_in_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpDisplay *display;
+  ClayDisplay *display;
   return_if_no_display (display, data);
 
-  gimp_display_shell_scale_fit_in (gimp_display_get_shell (display));
+  clay_display_shell_scale_fit_in (clay_display_get_shell (display));
 }
 
 void
-view_zoom_fill_cmd_callback (GimpAction *action,
+view_zoom_fill_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  GimpDisplay *display;
+  ClayDisplay *display;
   return_if_no_display (display, data);
 
-  gimp_display_shell_scale_fill (gimp_display_get_shell (display));
+  clay_display_shell_scale_fill (clay_display_get_shell (display));
 }
 
 void
-view_zoom_selection_cmd_callback (GimpAction *action,
+view_zoom_selection_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpDisplay *display;
-  GimpImage   *image;
+  ClayDisplay *display;
+  ClayImage   *image;
   gint         x, y, width, height;
   return_if_no_display (display, data);
   return_if_no_image (image, data);
 
-  gimp_item_bounds (GIMP_ITEM (gimp_image_get_mask (image)),
+  clay_item_bounds (CLAY_ITEM (clay_image_get_mask (image)),
                     &x, &y, &width, &height);
 
-  gimp_display_shell_scale_to_rectangle (gimp_display_get_shell (display),
-                                         GIMP_ZOOM_IN,
+  clay_display_shell_scale_to_rectangle (clay_display_get_shell (display),
+                                         CLAY_ZOOM_IN,
                                          x, y, width, height,
                                          FALSE);
 }
 
 void
-view_zoom_revert_cmd_callback (GimpAction *action,
+view_zoom_revert_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpDisplay *display;
+  ClayDisplay *display;
   return_if_no_display (display, data);
 
-  gimp_display_shell_scale_revert (gimp_display_get_shell (display));
+  clay_display_shell_scale_revert (clay_display_get_shell (display));
 }
 
 void
-view_zoom_cmd_callback (GimpAction *action,
+view_zoom_cmd_callback (ClayAction *action,
                         GVariant   *value,
                         gpointer    data)
 {
-  GimpDisplayShell     *shell;
-  GimpActionSelectType  select_type;
+  ClayDisplayShell     *shell;
+  ClayActionSelectType  select_type;
   return_if_no_shell (shell, data);
 
-  select_type = (GimpActionSelectType) g_variant_get_int32 (value);
+  select_type = (ClayActionSelectType) g_variant_get_int32 (value);
 
   switch (select_type)
     {
-    case GIMP_ACTION_SELECT_FIRST:
-      gimp_display_shell_scale (shell,
-                                GIMP_ZOOM_OUT_MAX,
+    case CLAY_ACTION_SELECT_FIRST:
+      clay_display_shell_scale (shell,
+                                CLAY_ZOOM_OUT_MAX,
                                 0.0,
-                                GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                CLAY_ZOOM_FOCUS_BEST_GUESS);
       break;
 
-    case GIMP_ACTION_SELECT_LAST:
-      gimp_display_shell_scale (shell,
-                                GIMP_ZOOM_IN_MAX,
+    case CLAY_ACTION_SELECT_LAST:
+      clay_display_shell_scale (shell,
+                                CLAY_ZOOM_IN_MAX,
                                 0.0,
-                                GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                CLAY_ZOOM_FOCUS_BEST_GUESS);
       break;
 
-    case GIMP_ACTION_SELECT_PREVIOUS:
-      gimp_display_shell_scale (shell,
-                                GIMP_ZOOM_OUT,
+    case CLAY_ACTION_SELECT_PREVIOUS:
+      clay_display_shell_scale (shell,
+                                CLAY_ZOOM_OUT,
                                 0.0,
-                                GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                CLAY_ZOOM_FOCUS_BEST_GUESS);
       break;
 
-    case GIMP_ACTION_SELECT_NEXT:
-      gimp_display_shell_scale (shell,
-                                GIMP_ZOOM_IN,
+    case CLAY_ACTION_SELECT_NEXT:
+      clay_display_shell_scale (shell,
+                                CLAY_ZOOM_IN,
                                 0.0,
-                                GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                CLAY_ZOOM_FOCUS_BEST_GUESS);
       break;
 
-    case GIMP_ACTION_SELECT_SKIP_PREVIOUS:
-      gimp_display_shell_scale (shell,
-                                GIMP_ZOOM_OUT_MORE,
+    case CLAY_ACTION_SELECT_SKIP_PREVIOUS:
+      clay_display_shell_scale (shell,
+                                CLAY_ZOOM_OUT_MORE,
                                 0.0,
-                                GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                CLAY_ZOOM_FOCUS_BEST_GUESS);
       break;
 
-    case GIMP_ACTION_SELECT_SKIP_NEXT:
-      gimp_display_shell_scale (shell,
-                                GIMP_ZOOM_IN_MORE,
+    case CLAY_ACTION_SELECT_SKIP_NEXT:
+      clay_display_shell_scale (shell,
+                                CLAY_ZOOM_IN_MORE,
                                 0.0,
-                                GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                CLAY_ZOOM_FOCUS_BEST_GUESS);
       break;
 
     default:
       {
-        gdouble scale = gimp_zoom_model_get_factor (shell->zoom);
+        gdouble scale = clay_zoom_model_get_factor (shell->zoom);
 
         scale = action_select_value (select_type,
                                      scale,
@@ -256,21 +256,21 @@ view_zoom_cmd_callback (GimpAction *action,
         /* scale = min *  (max / min)**(i/n), i = 0..n  */
         scale = pow (65536.0, scale / 512.0) / 256.0;
 
-        gimp_display_shell_scale (shell,
-                                  GIMP_ZOOM_TO,
+        clay_display_shell_scale (shell,
+                                  CLAY_ZOOM_TO,
                                   scale,
-                                  GIMP_ZOOM_FOCUS_BEST_GUESS);
+                                  CLAY_ZOOM_FOCUS_BEST_GUESS);
         break;
       }
     }
 }
 
 void
-view_zoom_explicit_cmd_callback (GimpAction *action,
+view_zoom_explicit_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gint              factor;
   return_if_no_shell (shell, data);
 
@@ -278,40 +278,40 @@ view_zoom_explicit_cmd_callback (GimpAction *action,
 
   if (factor != 0 /* not Other... */)
     {
-      if (fabs (factor - gimp_zoom_model_get_factor (shell->zoom)) > 0.0001)
-        gimp_display_shell_scale (shell,
-                                  GIMP_ZOOM_TO,
+      if (fabs (factor - clay_zoom_model_get_factor (shell->zoom)) > 0.0001)
+        clay_display_shell_scale (shell,
+                                  CLAY_ZOOM_TO,
                                   (gdouble) factor / 10000,
-                                  GIMP_ZOOM_FOCUS_RETAIN_CENTERING_ELSE_BEST_GUESS);
+                                  CLAY_ZOOM_FOCUS_RETAIN_CENTERING_ELSE_BEST_GUESS);
     }
   else
     {
-      gimp_display_shell_scale_dialog (shell);
+      clay_display_shell_scale_dialog (shell);
     }
 }
 
 void
-view_show_all_cmd_callback (GimpAction *action,
+view_show_all_cmd_callback (ClayAction *action,
                             GVariant   *value,
                             gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
   active = g_variant_get_boolean (value);
 
   if (active != shell->show_all)
     {
-      GimpImageWindow *window = gimp_display_shell_get_window (shell);
+      ClayImageWindow *window = clay_display_shell_get_window (shell);
 
-      gimp_display_shell_set_show_all (shell, active);
+      clay_display_shell_set_show_all (shell, active);
 
       if (window)
-        SET_ACTIVE (menus_get_image_manager_singleton (display->gimp),
+        SET_ACTIVE (menus_get_image_manager_singleton (display->clay),
                     "view-show-all", shell->show_all);
 
       if (IS_ACTIVE_DISPLAY (display))
@@ -321,27 +321,27 @@ view_show_all_cmd_callback (GimpAction *action,
 }
 
 void
-view_dot_for_dot_cmd_callback (GimpAction *action,
+view_dot_for_dot_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
   active = g_variant_get_boolean (value);
 
   if (active != shell->dot_for_dot)
     {
-      GimpImageWindow *window = gimp_display_shell_get_window (shell);
+      ClayImageWindow *window = clay_display_shell_get_window (shell);
 
-      gimp_display_shell_scale_set_dot_for_dot (shell, active);
+      clay_display_shell_scale_set_dot_for_dot (shell, active);
 
       if (window)
-        SET_ACTIVE (menus_get_image_manager_singleton (display->gimp),
+        SET_ACTIVE (menus_get_image_manager_singleton (display->clay),
                     "view-dot-for-dot", shell->dot_for_dot);
 
       if (IS_ACTIVE_DISPLAY (display))
@@ -351,73 +351,73 @@ view_dot_for_dot_cmd_callback (GimpAction *action,
 }
 
 void
-view_flip_horizontally_cmd_callback (GimpAction *action,
+view_flip_horizontally_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
   active = g_variant_get_boolean (value);
 
   if (active != shell->flip_horizontally)
     {
-      gimp_display_shell_flip (shell, active, shell->flip_vertically);
+      clay_display_shell_flip (shell, active, shell->flip_vertically);
     }
 }
 
 void
-view_flip_vertically_cmd_callback (GimpAction *action,
+view_flip_vertically_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
   active = g_variant_get_boolean (value);
 
   if (active != shell->flip_vertically)
     {
-      gimp_display_shell_flip (shell, shell->flip_horizontally, active);
+      clay_display_shell_flip (shell, shell->flip_horizontally, active);
     }
 }
 
 void
-view_flip_reset_cmd_callback (GimpAction *action,
+view_flip_reset_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
 
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
-  gimp_display_shell_flip (shell, FALSE, FALSE);
+  shell = clay_display_get_shell (display);
+  clay_display_shell_flip (shell, FALSE, FALSE);
 }
 
 void
-view_rotate_absolute_cmd_callback (GimpAction *action,
+view_rotate_absolute_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpDisplay          *display;
-  GimpDisplayShell     *shell;
-  GimpActionSelectType  select_type;
+  ClayDisplay          *display;
+  ClayDisplayShell     *shell;
+  ClayActionSelectType  select_type;
   gdouble               angle = 0.0;
   return_if_no_display (display, data);
 
-  select_type = (GimpActionSelectType) g_variant_get_int32 (value);
+  select_type = (ClayActionSelectType) g_variant_get_int32 (value);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
   angle = action_select_value (select_type,
                                0.0,
@@ -425,23 +425,23 @@ view_rotate_absolute_cmd_callback (GimpAction *action,
                                1.0, 15.0, 90.0, 0.0,
                                TRUE);
 
-  gimp_display_shell_rotate_to (shell, angle);
+  clay_display_shell_rotate_to (shell, angle);
 }
 
 void
-view_rotate_relative_cmd_callback (GimpAction *action,
+view_rotate_relative_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpDisplay          *display;
-  GimpDisplayShell     *shell;
-  GimpActionSelectType  select_type;
+  ClayDisplay          *display;
+  ClayDisplayShell     *shell;
+  ClayActionSelectType  select_type;
   gdouble               delta = 0.0;
   return_if_no_display (display, data);
 
-  select_type = (GimpActionSelectType) g_variant_get_int32 (value);
+  select_type = (ClayActionSelectType) g_variant_get_int32 (value);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
   delta = action_select_value (select_type,
                                0.0,
@@ -449,50 +449,50 @@ view_rotate_relative_cmd_callback (GimpAction *action,
                                1.0, 15.0, 90.0, 0.0,
                                TRUE);
 
-  gimp_display_shell_rotate (shell, delta);
+  clay_display_shell_rotate (shell, delta);
 }
 
 void
-view_rotate_other_cmd_callback (GimpAction *action,
+view_rotate_other_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
+  shell = clay_display_get_shell (display);
 
-  gimp_display_shell_rotate_dialog (shell);
+  clay_display_shell_rotate_dialog (shell);
 }
 
 void
-view_reset_cmd_callback (GimpAction *action,
+view_reset_cmd_callback (ClayAction *action,
                          GVariant   *value,
                          gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
 
   return_if_no_display (display, data);
 
-  shell = gimp_display_get_shell (display);
-  gimp_display_shell_rotate_to (shell, 0.0);
-  gimp_display_shell_flip (shell, FALSE, FALSE);
+  shell = clay_display_get_shell (display);
+  clay_display_shell_rotate_to (shell, 0.0);
+  clay_display_shell_flip (shell, FALSE, FALSE);
 }
 
 void
-view_scroll_horizontal_cmd_callback (GimpAction *action,
+view_scroll_horizontal_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  GimpDisplayShell     *shell;
+  ClayDisplayShell     *shell;
   GtkAdjustment        *adj;
-  GimpActionSelectType  select_type;
+  ClayActionSelectType  select_type;
   gdouble               offset;
   return_if_no_shell (shell, data);
 
-  select_type = (GimpActionSelectType) g_variant_get_int32 (value);
+  select_type = (ClayActionSelectType) g_variant_get_int32 (value);
 
   adj = shell->hsbdata;
 
@@ -512,17 +512,17 @@ view_scroll_horizontal_cmd_callback (GimpAction *action,
 }
 
 void
-view_scroll_vertical_cmd_callback (GimpAction *action,
+view_scroll_vertical_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpDisplayShell     *shell;
+  ClayDisplayShell     *shell;
   GtkAdjustment        *adj;
-  GimpActionSelectType  select_type;
+  ClayActionSelectType  select_type;
   gdouble               offset;
   return_if_no_shell (shell, data);
 
-  select_type = (GimpActionSelectType) g_variant_get_int32 (value);
+  select_type = (ClayActionSelectType) g_variant_get_int32 (value);
 
   adj = shell->vsbdata;
 
@@ -542,38 +542,38 @@ view_scroll_vertical_cmd_callback (GimpAction *action,
 }
 
 void
-view_navigation_window_cmd_callback (GimpAction *action,
+view_navigation_window_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  Gimp             *gimp;
-  GimpDisplayShell *shell;
-  return_if_no_gimp (gimp, data);
+  Clay             *clay;
+  ClayDisplayShell *shell;
+  return_if_no_clay (clay, data);
   return_if_no_shell (shell, data);
 
-  gimp_window_strategy_show_dockable_dialog (GIMP_WINDOW_STRATEGY (gimp_get_window_strategy (gimp)),
-                                             gimp,
-                                             gimp_dialog_factory_get_singleton (),
-                                             gimp_widget_get_monitor (GTK_WIDGET (shell)),
-                                             "gimp-navigation-view");
+  clay_window_strategy_show_dockable_dialog (CLAY_WINDOW_STRATEGY (clay_get_window_strategy (clay)),
+                                             clay,
+                                             clay_dialog_factory_get_singleton (),
+                                             clay_widget_get_monitor (GTK_WIDGET (shell)),
+                                             "clay-navigation-view");
 }
 
 void
-view_display_filters_cmd_callback (GimpAction *action,
+view_display_filters_cmd_callback (ClayAction *action,
                                    GVariant   *value,
                                    gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   GtkWidget        *dialog;
   return_if_no_shell (shell, data);
 
-#define FILTERS_DIALOG_KEY "gimp-display-filters-dialog"
+#define FILTERS_DIALOG_KEY "clay-display-filters-dialog"
 
   dialog = dialogs_get_dialog (G_OBJECT (shell), FILTERS_DIALOG_KEY);
 
   if (! dialog)
     {
-      dialog = gimp_display_shell_filter_dialog_new (shell);
+      dialog = clay_display_shell_filter_dialog_new (shell);
 
       dialogs_attach_dialog (G_OBJECT (shell), FILTERS_DIALOG_KEY, dialog);
     }
@@ -582,52 +582,52 @@ view_display_filters_cmd_callback (GimpAction *action,
 }
 
 void
-view_color_management_reset_cmd_callback (GimpAction *action,
+view_color_management_reset_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data)
 {
-  GimpDisplayShell *shell;
-  GimpColorConfig  *global_config;
-  GimpColorConfig  *shell_config;
+  ClayDisplayShell *shell;
+  ClayColorConfig  *global_config;
+  ClayColorConfig  *shell_config;
   return_if_no_shell (shell, data);
 
-  global_config = GIMP_CORE_CONFIG (shell->display->config)->color_management;
-  shell_config  = gimp_display_shell_get_color_config (shell);
+  global_config = CLAY_CORE_CONFIG (shell->display->config)->color_management;
+  shell_config  = clay_display_shell_get_color_config (shell);
 
-  gimp_config_copy (GIMP_CONFIG (global_config),
-                    GIMP_CONFIG (shell_config),
+  clay_config_copy (CLAY_CONFIG (global_config),
+                    CLAY_CONFIG (shell_config),
                     0);
   shell->color_config_set = FALSE;
 }
 
 void
-view_color_management_enable_cmd_callback (GimpAction *action,
+view_color_management_enable_cmd_callback (ClayAction *action,
                                            GVariant   *value,
                                            gpointer    data)
 {
-  GimpDisplayShell        *shell;
-  GimpColorConfig         *color_config;
-  GimpColorManagementMode  mode;
+  ClayDisplayShell        *shell;
+  ClayColorConfig         *color_config;
+  ClayColorManagementMode  mode;
   gboolean                 active;
   return_if_no_shell (shell, data);
 
-  color_config = gimp_display_shell_get_color_config (shell);
+  color_config = clay_display_shell_get_color_config (shell);
 
   active = g_variant_get_boolean (value);
 
-  mode = gimp_color_config_get_mode (color_config);
+  mode = clay_color_config_get_mode (color_config);
 
   if (active)
     {
-      if (mode != GIMP_COLOR_MANAGEMENT_SOFTPROOF)
-        mode = GIMP_COLOR_MANAGEMENT_DISPLAY;
+      if (mode != CLAY_COLOR_MANAGEMENT_SOFTPROOF)
+        mode = CLAY_COLOR_MANAGEMENT_DISPLAY;
     }
   else
     {
-      mode = GIMP_COLOR_MANAGEMENT_OFF;
+      mode = CLAY_COLOR_MANAGEMENT_OFF;
     }
 
-  if (mode != gimp_color_config_get_mode (color_config))
+  if (mode != clay_color_config_get_mode (color_config))
     {
       g_object_set (color_config,
                     "mode", mode,
@@ -637,33 +637,33 @@ view_color_management_enable_cmd_callback (GimpAction *action,
 }
 
 void
-view_color_management_softproof_cmd_callback (GimpAction *action,
+view_color_management_softproof_cmd_callback (ClayAction *action,
                                               GVariant   *value,
                                               gpointer    data)
 {
-  GimpDisplayShell        *shell;
-  GimpColorConfig         *color_config;
-  GimpColorManagementMode  mode;
+  ClayDisplayShell        *shell;
+  ClayColorConfig         *color_config;
+  ClayColorManagementMode  mode;
   gboolean                 active;
   return_if_no_shell (shell, data);
 
-  color_config = gimp_display_shell_get_color_config (shell);
+  color_config = clay_display_shell_get_color_config (shell);
 
   active = g_variant_get_boolean (value);
 
-  mode = gimp_color_config_get_mode (color_config);
+  mode = clay_color_config_get_mode (color_config);
 
   if (active)
     {
-      mode = GIMP_COLOR_MANAGEMENT_SOFTPROOF;
+      mode = CLAY_COLOR_MANAGEMENT_SOFTPROOF;
     }
   else
     {
-      if (mode != GIMP_COLOR_MANAGEMENT_OFF)
-        mode = GIMP_COLOR_MANAGEMENT_DISPLAY;
+      if (mode != CLAY_COLOR_MANAGEMENT_OFF)
+        mode = CLAY_COLOR_MANAGEMENT_DISPLAY;
     }
 
-  if (mode != gimp_color_config_get_mode (color_config))
+  if (mode != clay_color_config_get_mode (color_config))
     {
       g_object_set (color_config,
                     "mode", mode,
@@ -673,20 +673,20 @@ view_color_management_softproof_cmd_callback (GimpAction *action,
 }
 
 void
-view_display_intent_cmd_callback (GimpAction *action,
+view_display_intent_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpDisplayShell          *shell;
-  GimpColorConfig           *color_config;
-  GimpColorRenderingIntent   intent;
+  ClayDisplayShell          *shell;
+  ClayColorConfig           *color_config;
+  ClayColorRenderingIntent   intent;
   return_if_no_shell (shell, data);
 
-  intent = (GimpColorRenderingIntent) g_variant_get_int32 (value);
+  intent = (ClayColorRenderingIntent) g_variant_get_int32 (value);
 
-  color_config = gimp_display_shell_get_color_config (shell);
+  color_config = clay_display_shell_get_color_config (shell);
 
-  if (intent != gimp_color_config_get_display_intent (color_config))
+  if (intent != clay_color_config_get_display_intent (color_config))
     {
       g_object_set (color_config,
                     "display-rendering-intent", intent,
@@ -696,20 +696,20 @@ view_display_intent_cmd_callback (GimpAction *action,
 }
 
 void
-view_display_bpc_cmd_callback (GimpAction *action,
+view_display_bpc_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpDisplayShell *shell;
-  GimpColorConfig  *color_config;
+  ClayDisplayShell *shell;
+  ClayColorConfig  *color_config;
   gboolean          active;
   return_if_no_shell (shell, data);
 
-  color_config = gimp_display_shell_get_color_config (shell);
+  color_config = clay_display_shell_get_color_config (shell);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_color_config_get_display_bpc (color_config))
+  if (active != clay_color_config_get_display_bpc (color_config))
     {
       g_object_set (color_config,
                     "display-use-black-point-compensation", active,
@@ -719,20 +719,20 @@ view_display_bpc_cmd_callback (GimpAction *action,
 }
 
 void
-view_softproof_gamut_check_cmd_callback (GimpAction *action,
+view_softproof_gamut_check_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpDisplayShell *shell;
-  GimpColorConfig  *color_config;
+  ClayDisplayShell *shell;
+  ClayColorConfig  *color_config;
   gboolean          active;
   return_if_no_shell (shell, data);
 
-  color_config = gimp_display_shell_get_color_config (shell);
+  color_config = clay_display_shell_get_color_config (shell);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_color_config_get_simulation_gamut_check (color_config))
+  if (active != clay_color_config_get_simulation_gamut_check (color_config))
     {
       g_object_set (color_config,
                     "simulation-gamut-check", active,
@@ -742,295 +742,295 @@ view_softproof_gamut_check_cmd_callback (GimpAction *action,
 }
 
 void
-view_toggle_selection_cmd_callback (GimpAction *action,
+view_toggle_selection_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_selection (shell))
+  if (active != clay_display_shell_get_show_selection (shell))
     {
-      gimp_display_shell_set_show_selection (shell, active);
+      clay_display_shell_set_show_selection (shell, active);
     }
 }
 
 void
-view_toggle_layer_boundary_cmd_callback (GimpAction *action,
+view_toggle_layer_boundary_cmd_callback (ClayAction *action,
                                          GVariant   *value,
                                          gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_layer (shell))
+  if (active != clay_display_shell_get_show_layer (shell))
     {
-      gimp_display_shell_set_show_layer (shell, active);
+      clay_display_shell_set_show_layer (shell, active);
     }
 }
 
 void
-view_toggle_canvas_boundary_cmd_callback (GimpAction *action,
+view_toggle_canvas_boundary_cmd_callback (ClayAction *action,
                                           GVariant   *value,
                                           gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_canvas (shell))
+  if (active != clay_display_shell_get_show_canvas (shell))
     {
-      gimp_display_shell_set_show_canvas (shell, active);
+      clay_display_shell_set_show_canvas (shell, active);
     }
 }
 
 void
-view_toggle_menubar_cmd_callback (GimpAction *action,
+view_toggle_menubar_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_menubar (shell))
+  if (active != clay_display_shell_get_show_menubar (shell))
     {
-      gimp_display_shell_set_show_menubar (shell, active);
+      clay_display_shell_set_show_menubar (shell, active);
     }
 }
 
 void
-view_toggle_rulers_cmd_callback (GimpAction *action,
+view_toggle_rulers_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_rulers (shell))
+  if (active != clay_display_shell_get_show_rulers (shell))
     {
-      gimp_display_shell_set_show_rulers (shell, active);
+      clay_display_shell_set_show_rulers (shell, active);
     }
 }
 
 void
-view_toggle_scrollbars_cmd_callback (GimpAction *action,
+view_toggle_scrollbars_cmd_callback (ClayAction *action,
                                      GVariant   *value,
                                      gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_scrollbars (shell))
+  if (active != clay_display_shell_get_show_scrollbars (shell))
     {
-      gimp_display_shell_set_show_scrollbars (shell, active);
+      clay_display_shell_set_show_scrollbars (shell, active);
     }
 }
 
 void
-view_toggle_statusbar_cmd_callback (GimpAction *action,
+view_toggle_statusbar_cmd_callback (ClayAction *action,
                                     GVariant   *value,
                                     gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_statusbar (shell))
+  if (active != clay_display_shell_get_show_statusbar (shell))
     {
-      gimp_display_shell_set_show_statusbar (shell, active);
+      clay_display_shell_set_show_statusbar (shell, active);
     }
 }
 
 void
-view_toggle_guides_cmd_callback (GimpAction *action,
+view_toggle_guides_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_guides (shell))
+  if (active != clay_display_shell_get_show_guides (shell))
     {
-      gimp_display_shell_set_show_guides (shell, active);
+      clay_display_shell_set_show_guides (shell, active);
     }
 }
 
 void
-view_toggle_grid_cmd_callback (GimpAction *action,
+view_toggle_grid_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_grid (shell))
+  if (active != clay_display_shell_get_show_grid (shell))
     {
-      gimp_display_shell_set_show_grid (shell, active);
+      clay_display_shell_set_show_grid (shell, active);
     }
 }
 
 void
-view_toggle_sample_points_cmd_callback (GimpAction *action,
+view_toggle_sample_points_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_show_sample_points (shell))
+  if (active != clay_display_shell_get_show_sample_points (shell))
     {
-      gimp_display_shell_set_show_sample_points (shell, active);
+      clay_display_shell_set_show_sample_points (shell, active);
     }
 }
 
 void
-view_snap_to_guides_cmd_callback (GimpAction *action,
+view_snap_to_guides_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_snap_to_guides (shell))
+  if (active != clay_display_shell_get_snap_to_guides (shell))
     {
-      gimp_display_shell_set_snap_to_guides (shell, active);
+      clay_display_shell_set_snap_to_guides (shell, active);
     }
 }
 
 void
-view_snap_to_grid_cmd_callback (GimpAction *action,
+view_snap_to_grid_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_snap_to_grid (shell))
+  if (active != clay_display_shell_get_snap_to_grid (shell))
     {
-      gimp_display_shell_set_snap_to_grid (shell, active);
+      clay_display_shell_set_snap_to_grid (shell, active);
     }
 }
 
 void
-view_snap_to_canvas_cmd_callback (GimpAction *action,
+view_snap_to_canvas_cmd_callback (ClayAction *action,
                                   GVariant   *value,
                                   gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_snap_to_canvas (shell))
+  if (active != clay_display_shell_get_snap_to_canvas (shell))
     {
-      gimp_display_shell_set_snap_to_canvas (shell, active);
+      clay_display_shell_set_snap_to_canvas (shell, active);
     }
 }
 
 void
-view_snap_to_path_cmd_callback (GimpAction *action,
+view_snap_to_path_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_snap_to_path (shell))
+  if (active != clay_display_shell_get_snap_to_path (shell))
     {
-      gimp_display_shell_set_snap_to_path (shell, active);
+      clay_display_shell_set_snap_to_path (shell, active);
     }
 }
 
 void
-view_snap_to_bbox_cmd_callback (GimpAction *action,
+view_snap_to_bbox_cmd_callback (ClayAction *action,
                                 GVariant   *value,
                                 gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_snap_to_bbox (shell))
+  if (active != clay_display_shell_get_snap_to_bbox (shell))
     {
-      gimp_display_shell_set_snap_to_bbox (shell, active);
+      clay_display_shell_set_snap_to_bbox (shell, active);
     }
 }
 
 void
-view_snap_to_equidistance_cmd_callback (GimpAction *action,
+view_snap_to_equidistance_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_snap_to_equidistance (shell))
-    gimp_display_shell_set_snap_to_equidistance (shell, active);
+  if (active != clay_display_shell_get_snap_to_equidistance (shell))
+    clay_display_shell_set_snap_to_equidistance (shell, active);
 }
 
 void
-view_padding_color_cmd_callback (GimpAction *action,
+view_padding_color_cmd_callback (ClayAction *action,
                                  GVariant   *value,
                                  gpointer    data)
 {
-  GimpDisplay           *display;
-  GimpImageWindow       *window;
-  GimpDisplayShell      *shell;
-  GimpDisplayOptions    *options;
-  GimpCanvasPaddingMode  padding_mode;
+  ClayDisplay           *display;
+  ClayImageWindow       *window;
+  ClayDisplayShell      *shell;
+  ClayDisplayOptions    *options;
+  ClayCanvasPaddingMode  padding_mode;
   gboolean               fullscreen;
   return_if_no_display (display, data);
 
-  padding_mode = (GimpCanvasPaddingMode) g_variant_get_int32 (value);
+  padding_mode = (ClayCanvasPaddingMode) g_variant_get_int32 (value);
 
-  shell  = gimp_display_get_shell (display);
-  window = gimp_display_shell_get_window (shell);
+  shell  = clay_display_get_shell (display);
+  window = clay_display_shell_get_window (shell);
 
   if (window)
-    fullscreen = gimp_image_window_get_fullscreen (window);
+    fullscreen = clay_image_window_get_fullscreen (window);
   else
     fullscreen = FALSE;
 
@@ -1039,40 +1039,40 @@ view_padding_color_cmd_callback (GimpAction *action,
   else
     options = shell->options;
 
-#define PADDING_COLOR_DIALOG_KEY "gimp-padding-color-dialog"
+#define PADDING_COLOR_DIALOG_KEY "clay-padding-color-dialog"
 
   switch (padding_mode)
     {
-    case GIMP_CANVAS_PADDING_MODE_DEFAULT:
-    case GIMP_CANVAS_PADDING_MODE_LIGHT_CHECK:
-    case GIMP_CANVAS_PADDING_MODE_DARK_CHECK:
+    case CLAY_CANVAS_PADDING_MODE_DEFAULT:
+    case CLAY_CANVAS_PADDING_MODE_LIGHT_CHECK:
+    case CLAY_CANVAS_PADDING_MODE_DARK_CHECK:
       dialogs_destroy_dialog (G_OBJECT (shell), PADDING_COLOR_DIALOG_KEY);
 
       options->padding_mode_set = TRUE;
 
-      gimp_display_shell_set_padding (shell, padding_mode,
+      clay_display_shell_set_padding (shell, padding_mode,
                                       options->padding_color);
       break;
 
-    case GIMP_CANVAS_PADDING_MODE_CUSTOM:
+    case CLAY_CANVAS_PADDING_MODE_CUSTOM:
       {
         GtkWidget             *dialog;
         GeglColor             *old_color;
-        GimpCanvasPaddingMode  old_padding_mode;
+        ClayCanvasPaddingMode  old_padding_mode;
 
         dialog = dialogs_get_dialog (G_OBJECT (shell), PADDING_COLOR_DIALOG_KEY);
 
         if (! dialog)
           {
-            GimpImage        *image = gimp_display_get_image (display);
-            GimpDisplayShell *shell = gimp_display_get_shell (display);
+            ClayImage        *image = clay_display_get_image (display);
+            ClayDisplayShell *shell = clay_display_get_shell (display);
 
             dialog =
-              gimp_color_dialog_new (GIMP_VIEWABLE (image),
+              clay_color_dialog_new (CLAY_VIEWABLE (image),
                                      action_data_get_context (data),
                                      FALSE,
                                      _("Set Canvas Padding Color"),
-                                     GIMP_ICON_FONT,
+                                     CLAY_ICON_FONT,
                                      _("Set Custom Canvas Padding Color"),
                                      GTK_WIDGET (shell),
                                      NULL, NULL,
@@ -1097,11 +1097,11 @@ view_padding_color_cmd_callback (GimpAction *action,
       }
       break;
 
-    case GIMP_CANVAS_PADDING_MODE_RESET:
+    case CLAY_CANVAS_PADDING_MODE_RESET:
       dialogs_destroy_dialog (G_OBJECT (shell), PADDING_COLOR_DIALOG_KEY);
 
       {
-        GimpDisplayOptions *default_options;
+        ClayDisplayOptions *default_options;
 
         options->padding_mode_set = FALSE;
 
@@ -1110,10 +1110,10 @@ view_padding_color_cmd_callback (GimpAction *action,
         else
           default_options = display->config->default_view;
 
-        gimp_display_shell_set_padding (shell,
+        clay_display_shell_set_padding (shell,
                                         default_options->padding_mode,
                                         default_options->padding_color);
-        gimp_display_shell_set_padding_in_show_all (shell,
+        clay_display_shell_set_padding_in_show_all (shell,
                                                     default_options->padding_in_show_all);
       }
       break;
@@ -1121,51 +1121,51 @@ view_padding_color_cmd_callback (GimpAction *action,
 }
 
 void
-view_padding_color_in_show_all_cmd_callback (GimpAction *action,
+view_padding_color_in_show_all_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   gboolean          active;
   return_if_no_shell (shell, data);
 
   active = g_variant_get_boolean (value);
 
-  if (active != gimp_display_shell_get_padding_in_show_all (shell))
+  if (active != clay_display_shell_get_padding_in_show_all (shell))
     {
-      gimp_display_shell_set_padding_in_show_all (shell, active);
+      clay_display_shell_set_padding_in_show_all (shell, active);
     }
 }
 
 void
-view_shrink_wrap_cmd_callback (GimpAction *action,
+view_shrink_wrap_cmd_callback (ClayAction *action,
                                GVariant   *value,
                                gpointer    data)
 {
-  GimpDisplayShell *shell;
+  ClayDisplayShell *shell;
   return_if_no_shell (shell, data);
 
-  gimp_display_shell_scale_shrink_wrap (shell, FALSE);
+  clay_display_shell_scale_shrink_wrap (shell, FALSE);
 }
 
 void
-view_fullscreen_cmd_callback (GimpAction *action,
+view_fullscreen_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  GimpDisplay      *display;
-  GimpDisplayShell *shell;
-  GimpImageWindow  *window;
+  ClayDisplay      *display;
+  ClayDisplayShell *shell;
+  ClayImageWindow  *window;
   return_if_no_display (display, data);
 
-  shell  = gimp_display_get_shell (display);
-  window = gimp_display_shell_get_window (shell);
+  shell  = clay_display_get_shell (display);
+  window = clay_display_shell_get_window (shell);
 
   if (window)
     {
       gboolean active = g_variant_get_boolean (value);
 
-      gimp_image_window_set_fullscreen (window, active);
+      clay_image_window_set_fullscreen (window, active);
     }
 }
 
@@ -1173,25 +1173,25 @@ view_fullscreen_cmd_callback (GimpAction *action,
 /*  private functions  */
 
 static void
-view_padding_color_dialog_update (GimpColorDialog      *dialog,
+view_padding_color_dialog_update (ClayColorDialog      *dialog,
                                   GeglColor            *color,
-                                  GimpColorDialogState  state,
-                                  GimpDisplayShell     *shell)
+                                  ClayColorDialogState  state,
+                                  ClayDisplayShell     *shell)
 {
-  GimpImageWindow       *window;
-  GimpDisplayOptions    *options;
+  ClayImageWindow       *window;
+  ClayDisplayOptions    *options;
   GeglColor             *old_color;
-  GimpCanvasPaddingMode  old_padding_mode;
+  ClayCanvasPaddingMode  old_padding_mode;
   gboolean               fullscreen;
 
-  window           = gimp_display_shell_get_window (shell);
+  window           = clay_display_shell_get_window (shell);
   old_color        = g_object_get_data (G_OBJECT (dialog), "old-color");
   old_padding_mode = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (dialog), "old-padding-mode"));
 
   g_return_if_fail (old_color);
 
   if (window)
-    fullscreen = gimp_image_window_get_fullscreen (window);
+    fullscreen = clay_image_window_get_fullscreen (window);
   else
     fullscreen = FALSE;
 
@@ -1202,23 +1202,23 @@ view_padding_color_dialog_update (GimpColorDialog      *dialog,
 
   switch (state)
     {
-    case GIMP_COLOR_DIALOG_OK:
+    case CLAY_COLOR_DIALOG_OK:
       options->padding_mode_set = TRUE;
 
-      gimp_display_shell_set_padding (shell, GIMP_CANVAS_PADDING_MODE_CUSTOM,
+      clay_display_shell_set_padding (shell, CLAY_CANVAS_PADDING_MODE_CUSTOM,
                                       color);
       gtk_widget_destroy (GTK_WIDGET (dialog));
       break;
 
-    case GIMP_COLOR_DIALOG_CANCEL:
-      gimp_display_shell_set_padding (shell,
+    case CLAY_COLOR_DIALOG_CANCEL:
+      clay_display_shell_set_padding (shell,
                                       old_padding_mode,
                                       old_color);
       gtk_widget_destroy (GTK_WIDGET (dialog));
       break;
 
-    case GIMP_COLOR_DIALOG_UPDATE:
-      gimp_display_shell_set_padding (shell, GIMP_CANVAS_PADDING_MODE_CUSTOM,
+    case CLAY_COLOR_DIALOG_UPDATE:
+      clay_display_shell_set_padding (shell, CLAY_CANVAS_PADDING_MODE_CUSTOM,
                                       color);
       break;
 

@@ -18,94 +18,94 @@
 #pragma once
 
 
-void   paths_edit_cmd_callback                 (GimpAction *action,
+void   paths_edit_cmd_callback                 (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_edit_attributes_cmd_callback      (GimpAction *action,
+void   paths_edit_attributes_cmd_callback      (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_new_cmd_callback                  (GimpAction *action,
+void   paths_new_cmd_callback                  (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_new_last_vals_cmd_callback        (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-
-void   paths_raise_cmd_callback                (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_raise_to_top_cmd_callback         (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_lower_cmd_callback                (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_lower_to_bottom_cmd_callback      (GimpAction *action,
+void   paths_new_last_vals_cmd_callback        (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
 
-void   paths_duplicate_cmd_callback            (GimpAction *action,
+void   paths_raise_cmd_callback                (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_delete_cmd_callback               (GimpAction *action,
+void   paths_raise_to_top_cmd_callback         (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   path_to_vector_layer_cmd_callback       (GimpAction *action,
+void   paths_lower_cmd_callback                (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_merge_visible_cmd_callback        (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_to_selection_cmd_callback         (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_selection_to_paths_cmd_callback   (GimpAction *action,
+void   paths_lower_to_bottom_cmd_callback      (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
 
-void   paths_fill_cmd_callback                 (GimpAction *action,
+void   paths_duplicate_cmd_callback            (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_fill_last_vals_cmd_callback       (GimpAction *action,
+void   paths_delete_cmd_callback               (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_stroke_cmd_callback               (GimpAction *action,
+void   path_to_vector_layer_cmd_callback       (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_stroke_last_vals_cmd_callback     (GimpAction *action,
+void   paths_merge_visible_cmd_callback        (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-
-void   paths_copy_cmd_callback                 (GimpAction *action,
+void   paths_to_selection_cmd_callback         (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_paste_cmd_callback                (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_import_cmd_callback               (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_export_selected_cmd_callback      (GimpAction *action,
-                                                GVariant   *value,
-                                                gpointer    data);
-void   paths_export_all_cmd_callback           (GimpAction *action,
+void   paths_selection_to_paths_cmd_callback   (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
 
-void   paths_visible_cmd_callback              (GimpAction *action,
+void   paths_fill_cmd_callback                 (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_lock_content_cmd_callback         (GimpAction *action,
+void   paths_fill_last_vals_cmd_callback       (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
-void   paths_lock_position_cmd_callback        (GimpAction *action,
+void   paths_stroke_cmd_callback               (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_stroke_last_vals_cmd_callback     (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
 
-void   paths_color_tag_cmd_callback            (GimpAction *action,
+void   paths_copy_cmd_callback                 (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_paste_cmd_callback                (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_import_cmd_callback               (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_export_selected_cmd_callback      (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_export_all_cmd_callback           (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);
 
-void   paths_select_cmd_callback               (GimpAction *action,
+void   paths_visible_cmd_callback              (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_lock_content_cmd_callback         (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+void   paths_lock_position_cmd_callback        (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+
+void   paths_color_tag_cmd_callback            (ClayAction *action,
+                                                GVariant   *value,
+                                                gpointer    data);
+
+void   paths_select_cmd_callback               (ClayAction *action,
                                                 GVariant   *value,
                                                 gpointer    data);

@@ -19,10 +19,10 @@
 #define __SCRIPT_FU_EVAL_H__
 
 
-GimpValueArray * script_fu_eval_run (GimpProcedure        *procedure,
-                                     GimpRunMode           run_mode,
+ClayValueArray * script_fu_eval_run (ClayProcedure        *procedure,
+                                     ClayRunMode           run_mode,
                                      const gchar          *code,
-                                     GimpProcedureConfig  *config);
+                                     ClayProcedureConfig  *config);
 
 
 #endif /*  __SCRIPT_FU_EVAL_H__  */

@@ -23,11 +23,11 @@
 
 (define (script-fu-make-brush-rectangular name width height spacing)
   (let* (
-        (img (car (gimp-image-new width height GRAY)))
-        (drawable (car (gimp-layer-new img "MakeBrush"
+        (img (car (clay-image-new width height GRAY)))
+        (drawable (car (clay-layer-new img "MakeBrush"
                                        width height GRAY-IMAGE
                                        100 LAYER-MODE-NORMAL)))
-        (filename (string-append gimp-directory
+        (filename (string-append clay-directory
                                  "/brushes/r"
                                  (number->string width)
                                  "x"
@@ -35,28 +35,28 @@
                                  ".gbr"))
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-fill drawable FILL-BACKGROUND)
 
-    (gimp-image-select-rectangle img CHANNEL-OP-REPLACE 0 0 width height)
+    (clay-image-select-rectangle img CHANNEL-OP-REPLACE 0 0 width height)
 
-    (gimp-context-set-background '(0 0 0))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
 
     ; -1: NULL export_options
     (file-gbr-export 1 img filename -1 spacing name)
-    (gimp-image-delete img)
+    (clay-image-delete img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
 
-    (gimp-brushes-refresh)
-    (gimp-context-set-brush (car (gimp-brush-get-by-name name)))
+    (clay-brushes-refresh)
+    (clay-context-set-brush (car (clay-brush-get-by-name name)))
   )
 )
 
@@ -80,11 +80,11 @@
   (let* (
         (widthplus (+ width feathering))
         (heightplus (+ height feathering))
-        (img (car (gimp-image-new widthplus heightplus GRAY)))
-        (drawable (car (gimp-layer-new img "MakeBrush"
+        (img (car (clay-image-new widthplus heightplus GRAY)))
+        (drawable (car (clay-layer-new img "MakeBrush"
                                        widthplus heightplus GRAY-IMAGE
                                        100 LAYER-MODE-NORMAL)))
-        (filename (string-append gimp-directory
+        (filename (string-append clay-directory
                                  "/brushes/r"
                                  (number->string width)
                                  "x"
@@ -94,37 +94,37 @@
                                  ".gbr"))
         )
 
-    (gimp-context-push)
-    (gimp-context-set-paint-mode LAYER-MODE-NORMAL)
-    (gimp-context-set-opacity 100.0)
+    (clay-context-push)
+    (clay-context-set-paint-mode LAYER-MODE-NORMAL)
+    (clay-context-set-opacity 100.0)
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-fill drawable FILL-BACKGROUND)
 
     (cond
       ((< 0 feathering)
-       (gimp-context-set-feather TRUE)
-       (gimp-context-set-feather-radius feathering feathering)
-       (gimp-image-select-rectangle img CHANNEL-OP-REPLACE
+       (clay-context-set-feather TRUE)
+       (clay-context-set-feather-radius feathering feathering)
+       (clay-image-select-rectangle img CHANNEL-OP-REPLACE
            (/ feathering 2) (/ feathering 2) width height))
       ((>= 0 feathering)
-      (gimp-context-set-feather FALSE)
-      (gimp-image-select-rectangle img CHANNEL-OP-REPLACE 0 0 width height))
+      (clay-context-set-feather FALSE)
+      (clay-image-select-rectangle img CHANNEL-OP-REPLACE 0 0 width height))
     )
 
-    (gimp-context-set-background '(0 0 0))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
 
     (file-gbr-export 1 img filename -1 spacing name)
-    (gimp-image-delete img)
+    (clay-image-delete img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
 
-    (gimp-brushes-refresh)
-    (gimp-context-set-brush (car (gimp-brush-get-by-name name)))
+    (clay-brushes-refresh)
+    (clay-context-set-brush (car (clay-brush-get-by-name name)))
   )
 )
 
@@ -146,11 +146,11 @@
 
 (define (script-fu-make-brush-elliptical name width height spacing)
   (let* (
-        (img (car (gimp-image-new width height GRAY)))
-        (drawable (car (gimp-layer-new img "MakeBrush"
+        (img (car (clay-image-new width height GRAY)))
+        (drawable (car (clay-layer-new img "MakeBrush"
                                        width height GRAY-IMAGE
                                        100 LAYER-MODE-NORMAL)))
-        (filename (string-append gimp-directory
+        (filename (string-append clay-directory
                                  "/brushes/e"
                                  (number->string width)
                                  "x"
@@ -158,27 +158,27 @@
                                  ".gbr"))
         )
 
-    (gimp-context-push)
-    (gimp-context-set-antialias TRUE)
-    (gimp-context-set-feather FALSE)
+    (clay-context-push)
+    (clay-context-set-antialias TRUE)
+    (clay-context-set-feather FALSE)
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-fill drawable FILL-BACKGROUND)
-    (gimp-context-set-background '(0 0 0))
-    (gimp-image-select-ellipse img CHANNEL-OP-REPLACE 0 0 width height)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-image-select-ellipse img CHANNEL-OP-REPLACE 0 0 width height)
 
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
 
     (file-gbr-export 1 img filename -1 spacing name)
-    (gimp-image-delete img)
+    (clay-image-delete img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
 
-    (gimp-brushes-refresh)
-    (gimp-context-set-brush (car (gimp-brush-get-by-name name)))
+    (clay-brushes-refresh)
+    (clay-context-set-brush (car (clay-brush-get-by-name name)))
   )
 )
 
@@ -203,11 +203,11 @@
   (let* (
         (widthplus (+ feathering width)) ; add 3 for blurring
         (heightplus (+ feathering height))
-        (img (car (gimp-image-new widthplus heightplus GRAY)))
-        (drawable (car (gimp-layer-new img "MakeBrush"
+        (img (car (clay-image-new widthplus heightplus GRAY)))
+        (drawable (car (clay-layer-new img "MakeBrush"
                                        widthplus heightplus GRAY-IMAGE
                                        100 LAYER-MODE-NORMAL)))
-        (filename (string-append gimp-directory
+        (filename (string-append clay-directory
                                  "/brushes/e"
                                  (number->string width)
                                  "x"
@@ -217,35 +217,35 @@
                                  ".gbr"))
         )
 
-    (gimp-context-push)
-    (gimp-context-set-antialias TRUE)
+    (clay-context-push)
+    (clay-context-set-antialias TRUE)
 
-    (gimp-image-undo-disable img)
-    (gimp-image-insert-layer img drawable 0 0)
+    (clay-image-undo-disable img)
+    (clay-image-insert-layer img drawable 0 0)
 
-    (gimp-context-set-background '(255 255 255))
-    (gimp-drawable-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(255 255 255))
+    (clay-drawable-fill drawable FILL-BACKGROUND)
 
-    (cond ((> feathering 0)   ; keep from taking out gimp with stupid entry.
-        (gimp-context-set-feather TRUE)
-        (gimp-context-set-feather-radius feathering feathering)
-        (gimp-image-select-ellipse img CHANNEL-OP-REPLACE
+    (cond ((> feathering 0)   ; keep from taking out clay with stupid entry.
+        (clay-context-set-feather TRUE)
+        (clay-context-set-feather-radius feathering feathering)
+        (clay-image-select-ellipse img CHANNEL-OP-REPLACE
            (/ feathering 2) (/ feathering 2)
            width height))
           ((<= feathering 0)
-        (gimp-context-set-feather FALSE)
-        (gimp-image-select-ellipse img CHANNEL-OP-REPLACE 0 0 width height)))
+        (clay-context-set-feather FALSE)
+        (clay-image-select-ellipse img CHANNEL-OP-REPLACE 0 0 width height)))
 
-    (gimp-context-set-background '(0 0 0))
-    (gimp-drawable-edit-fill drawable FILL-BACKGROUND)
+    (clay-context-set-background '(0 0 0))
+    (clay-drawable-edit-fill drawable FILL-BACKGROUND)
 
     (file-gbr-export 1 img filename -1 spacing name)
-    (gimp-image-delete img)
+    (clay-image-delete img)
 
-    (gimp-context-pop)
+    (clay-context-pop)
 
-    (gimp-brushes-refresh)
-    (gimp-context-set-brush (car (gimp-brush-get-by-name name)))
+    (clay-brushes-refresh)
+    (clay-context-set-brush (car (clay-brush-get-by-name name)))
   )
 )
 

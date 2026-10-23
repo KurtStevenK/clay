@@ -18,7 +18,7 @@ pagecurl_icons_images = [
 resourcename = 'pagecurl-icons'
 xml_content  = '<?xml version="1.0" encoding="UTF-8"?>\n'
 xml_content += '<gresources>\n'
-xml_content += '  <gresource prefix="/org/gimp/pagecurl-icons">\n'
+xml_content += '  <gresource prefix="/org/clay/pagecurl-icons">\n'
 foreach file : pagecurl_icons_images
   xml_content+='    <file>'+ file +'</file>\n'
 endforeach
@@ -40,7 +40,7 @@ plugin_sources += gnome.compile_resources(
 
 if platform_windows
   plugin_sources += windows.compile_resources(
-    gimp_plugins_rc,
+    clay_plugins_rc,
     args: [
       rc_define_flag, rc_define_fmt.format('ORIGINALFILENAME_STR', plugin_name+'.exe'),
       rc_define_flag, rc_define_fmt.format('INTERNALNAME_STR', plugin_name),
@@ -54,17 +54,17 @@ endif
 plugin_exe = executable(plugin_name,
                         plugin_sources,
                         dependencies: [
-                          libgimpui_dep,
+                          libclayui_dep,
                           math,
                         ],
                         win_subsystem: 'windows',
                         install: true,
-                        install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                        install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
 # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
 plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)

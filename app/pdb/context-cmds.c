@@ -27,883 +27,883 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimp-gradients.h"
-#include "core/gimp.h"
-#include "core/gimpbrush.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpdashpattern.h"
-#include "core/gimpdatafactory.h"
-#include "core/gimpdynamics.h"
-#include "core/gimpgradient.h"
-#include "core/gimpimage.h"
-#include "core/gimplist.h"
-#include "core/gimpmybrush.h"
-#include "core/gimppalette.h"
-#include "core/gimpparamspecs.h"
-#include "core/gimppattern.h"
-#include "core/gimpresource.h"
-#include "core/gimpstrokeoptions.h"
-#include "paint/gimppaintoptions.h"
-#include "plug-in/gimpplugin-context.h"
-#include "plug-in/gimpplugin.h"
-#include "plug-in/gimppluginmanager.h"
-#include "text/gimpfont.h"
+#include "core/clay-gradients.h"
+#include "core/clay.h"
+#include "core/claybrush.h"
+#include "core/claycontainer.h"
+#include "core/claydashpattern.h"
+#include "core/claydatafactory.h"
+#include "core/claydynamics.h"
+#include "core/claygradient.h"
+#include "core/clayimage.h"
+#include "core/claylist.h"
+#include "core/claymybrush.h"
+#include "core/claypalette.h"
+#include "core/clayparamspecs.h"
+#include "core/claypattern.h"
+#include "core/clayresource.h"
+#include "core/claystrokeoptions.h"
+#include "paint/claypaintoptions.h"
+#include "plug-in/clayplugin-context.h"
+#include "plug-in/clayplugin.h"
+#include "plug-in/claypluginmanager.h"
+#include "text/clayfont.h"
 
-#include "gimppdb.h"
-#include "gimppdberror.h"
-#include "gimppdb-utils.h"
-#include "gimppdbcontext.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdberror.h"
+#include "claypdb-utils.h"
+#include "claypdbcontext.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
-static GimpValueArray *
-context_push_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+context_push_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
-    success = gimp_plug_in_context_push (plug_in);
+    success = clay_plug_in_context_push (plug_in);
   else
     success = FALSE;
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_pop_invoker (GimpProcedure         *procedure,
-                     Gimp                  *gimp,
-                     GimpContext           *context,
-                     GimpProgress          *progress,
-                     const GimpValueArray  *args,
+static ClayValueArray *
+context_pop_invoker (ClayProcedure         *procedure,
+                     Clay                  *clay,
+                     ClayContext           *context,
+                     ClayProgress          *progress,
+                     const ClayValueArray  *args,
                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpPlugIn *plug_in = gimp->plug_in_manager->current_plug_in;
+  ClayPlugIn *plug_in = clay->plug_in_manager->current_plug_in;
 
   if (plug_in && plug_in->open)
-    success = gimp_plug_in_context_pop (plug_in);
+    success = clay_plug_in_context_pop (plug_in);
   else
     success = FALSE;
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_set_defaults_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+context_set_defaults_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
-    gimp_config_reset (GIMP_CONFIG (context));
+    clay_config_reset (CLAY_CONFIG (context));
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_list_paint_methods_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_list_paint_methods_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar **paint_methods = NULL;
 
-  paint_methods = gimp_container_get_name_array (gimp->paint_info_list);
+  paint_methods = clay_container_get_name_array (clay->paint_info_list);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_take_boxed (gimp_value_array_index (return_vals, 1), paint_methods);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_take_boxed (clay_value_array_index (return_vals, 1), paint_methods);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_get_paint_method_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+context_get_paint_method_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar *name = NULL;
 
-  GimpPaintInfo *paint_info = gimp_context_get_paint_info (context);
+  ClayPaintInfo *paint_info = clay_context_get_paint_info (context);
 
   if (paint_info)
-    name = g_strdup (gimp_object_get_name (paint_info));
+    name = g_strdup (clay_object_get_name (paint_info));
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_paint_method_invoker (GimpProcedure         *procedure,
-                                  Gimp                  *gimp,
-                                  GimpContext           *context,
-                                  GimpProgress          *progress,
-                                  const GimpValueArray  *args,
+static ClayValueArray *
+context_set_paint_method_invoker (ClayProcedure         *procedure,
+                                  Clay                  *clay,
+                                  ClayContext           *context,
+                                  ClayProgress          *progress,
+                                  const ClayValueArray  *args,
                                   GError               **error)
 {
   gboolean success = TRUE;
   const gchar *name;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintInfo *paint_info = gimp_pdb_get_paint_info (gimp, name, error);
+      ClayPaintInfo *paint_info = clay_pdb_get_paint_info (clay, name, error);
 
       if (paint_info)
-        gimp_context_set_paint_info (context, paint_info);
+        clay_context_set_paint_info (context, paint_info);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_stroke_method_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_stroke_method_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint stroke_method = 0;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "method", &stroke_method,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), stroke_method);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), stroke_method);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_stroke_method_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_stroke_method_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   gint stroke_method;
 
-  stroke_method = g_value_get_enum (gimp_value_array_index (args, 0));
+  stroke_method = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "method", stroke_method,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_foreground_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_get_foreground_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   GeglColor *foreground = NULL;
 
-  foreground = gegl_color_duplicate (gimp_context_get_foreground (context));
-  gimp_color_set_alpha (foreground, 1.0);
+  foreground = gegl_color_duplicate (clay_context_get_foreground (context));
+  clay_color_set_alpha (foreground, 1.0);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_take_object (gimp_value_array_index (return_vals, 1), foreground);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_take_object (clay_value_array_index (return_vals, 1), foreground);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_foreground_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_set_foreground_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
   GeglColor *foreground;
 
-  foreground = g_value_get_object (gimp_value_array_index (args, 0));
+  foreground = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_color_set_alpha (foreground, 1.0);
-      gimp_context_set_foreground (context, foreground);
+      clay_color_set_alpha (foreground, 1.0);
+      clay_context_set_foreground (context, foreground);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_background_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_get_background_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   GeglColor *background = NULL;
 
-  background = gegl_color_duplicate (gimp_context_get_background (context));
-  gimp_color_set_alpha (background, 1.0);
+  background = gegl_color_duplicate (clay_context_get_background (context));
+  clay_color_set_alpha (background, 1.0);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_take_object (gimp_value_array_index (return_vals, 1), background);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_take_object (clay_value_array_index (return_vals, 1), background);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_background_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_set_background_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
   GeglColor *background;
 
-  background = g_value_get_object (gimp_value_array_index (args, 0));
+  background = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_color_set_alpha (background, 1.0);
-      gimp_context_set_background (context, background);
+      clay_color_set_alpha (background, 1.0);
+      clay_context_set_background (context, background);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_image_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+context_get_image_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpImage *image = NULL;
+  ClayValueArray *return_vals;
+  ClayImage *image = NULL;
 
-  image = gimp_context_get_image (context);
+  image = clay_context_get_image (context);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_object (gimp_value_array_index (return_vals, 1), image);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_object (clay_value_array_index (return_vals, 1), image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_image_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+context_set_image_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_context_set_image (context, image);
+      clay_context_set_image (context, image);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_set_default_colors_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_set_default_colors_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
-  gimp_context_set_default_colors (context);
+  clay_context_set_default_colors (context);
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_swap_colors_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_swap_colors_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
-  gimp_context_swap_colors (context);
+  clay_context_swap_colors (context);
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_get_opacity_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_get_opacity_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble opacity = 0.0;
 
-  opacity = gimp_context_get_opacity (context) * 100.0;
+  opacity = clay_context_get_opacity (context) * 100.0;
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_double (gimp_value_array_index (return_vals, 1), opacity);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_double (clay_value_array_index (return_vals, 1), opacity);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_opacity_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_set_opacity_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
   gdouble opacity;
 
-  opacity = g_value_get_double (gimp_value_array_index (args, 0));
+  opacity = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      gimp_context_set_opacity (context, opacity / 100.0);
+      clay_context_set_opacity (context, opacity / 100.0);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_paint_mode_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_get_paint_mode_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint paint_mode = 0;
 
-  paint_mode = gimp_context_get_paint_mode (context);
+  paint_mode = clay_context_get_paint_mode (context);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), paint_mode);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), paint_mode);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_paint_mode_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_set_paint_mode_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
   gint paint_mode;
 
-  paint_mode = g_value_get_enum (gimp_value_array_index (args, 0));
+  paint_mode = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      if (paint_mode == GIMP_LAYER_MODE_OVERLAY_LEGACY)
-        paint_mode = GIMP_LAYER_MODE_SOFTLIGHT_LEGACY;
+      if (paint_mode == CLAY_LAYER_MODE_OVERLAY_LEGACY)
+        paint_mode = CLAY_LAYER_MODE_SOFTLIGHT_LEGACY;
 
-      gimp_context_set_paint_mode (context, paint_mode);
+      clay_context_set_paint_mode (context, paint_mode);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_width_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_width_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble line_width = 0.0;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "width", &line_width,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_double (gimp_value_array_index (return_vals, 1), line_width);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_double (clay_value_array_index (return_vals, 1), line_width);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_width_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_width_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
   gdouble line_width;
 
-  line_width = g_value_get_double (gimp_value_array_index (args, 0));
+  line_width = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "width", line_width,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_width_unit_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_width_unit_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpUnit *line_width_unit = NULL;
+  ClayValueArray *return_vals;
+  ClayUnit *line_width_unit = NULL;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "unit", &line_width_unit,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_object (gimp_value_array_index (return_vals, 1), line_width_unit);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_object (clay_value_array_index (return_vals, 1), line_width_unit);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_width_unit_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_width_unit_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
-  GimpUnit *line_width_unit;
+  ClayUnit *line_width_unit;
 
-  line_width_unit = g_value_get_object (gimp_value_array_index (args, 0));
+  line_width_unit = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "unit", line_width_unit,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_cap_style_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_cap_style_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint cap_style = 0;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "cap-style", &cap_style,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), cap_style);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), cap_style);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_cap_style_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_cap_style_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
   gint cap_style;
 
-  cap_style = g_value_get_enum (gimp_value_array_index (args, 0));
+  cap_style = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "cap-style", cap_style,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_join_style_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_join_style_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint join_style = 0;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "join-style", &join_style,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), join_style);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), join_style);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_join_style_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_join_style_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
   gint join_style;
 
-  join_style = g_value_get_enum (gimp_value_array_index (args, 0));
+  join_style = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "join-style", join_style,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_miter_limit_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_miter_limit_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble miter_limit = 0.0;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "miter-limit", &miter_limit,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_double (gimp_value_array_index (return_vals, 1), miter_limit);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_double (clay_value_array_index (return_vals, 1), miter_limit);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_miter_limit_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_miter_limit_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   gdouble miter_limit;
 
-  miter_limit = g_value_get_double (gimp_value_array_index (args, 0));
+  miter_limit = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "miter-limit", miter_limit,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_dash_offset_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_dash_offset_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble dash_offset = 0.0;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   g_object_get (options,
                 "dash-offset", &dash_offset,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_double (gimp_value_array_index (return_vals, 1), dash_offset);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_double (clay_value_array_index (return_vals, 1), dash_offset);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_dash_offset_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_dash_offset_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   gdouble dash_offset;
 
-  dash_offset = g_value_get_double (gimp_value_array_index (args, 0));
+  dash_offset = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "dash-offset", dash_offset,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_line_dash_pattern_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+context_get_line_dash_pattern_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gsize num_dashes = 0;
   gdouble *dashes = NULL;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
-  GArray *pattern = gimp_stroke_options_get_dash_info (options);
+  GArray *pattern = clay_stroke_options_get_dash_info (options);
 
-  dashes = gimp_dash_pattern_to_double_array (pattern, &num_dashes);
+  dashes = clay_dash_pattern_to_double_array (pattern, &num_dashes);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  gimp_value_take_double_array (gimp_value_array_index (return_vals, 1), dashes, num_dashes);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  clay_value_take_double_array (clay_value_array_index (return_vals, 1), dashes, num_dashes);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_line_dash_pattern_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+context_set_line_dash_pattern_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
   gsize num_dashes;
   const gdouble *dashes;
 
-  dashes = gimp_value_get_double_array (gimp_value_array_index (args, 0), &num_dashes);
+  dashes = clay_value_get_double_array (clay_value_array_index (args, 0), &num_dashes);
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       GArray *pattern = NULL;
 
       if (num_dashes > 0)
         {
-          pattern = gimp_dash_pattern_from_double_array (num_dashes, dashes);
+          pattern = clay_dash_pattern_from_double_array (num_dashes, dashes);
 
           if (! pattern)
             success = FALSE;
         }
 
       if (success)
-        gimp_stroke_options_take_dash_pattern (options, GIMP_DASH_CUSTOM, pattern);
+        clay_stroke_options_take_dash_pattern (options, CLAY_DASH_CUSTOM, pattern);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_brush_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
-  GimpValueArray *return_vals;
-  GimpBrush *brush = NULL;
+  ClayValueArray *return_vals;
+  ClayBrush *brush = NULL;
 
-  brush = gimp_context_get_brush (context);
+  brush = clay_context_get_brush (context);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_object (gimp_value_array_index (return_vals, 1), brush);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_object (clay_value_array_index (return_vals, 1), brush);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
-  GimpBrush *brush;
+  ClayBrush *brush;
 
-  brush = g_value_get_object (gimp_value_array_index (args, 0));
+  brush = g_value_get_object (clay_value_array_index (args, 0));
 
-  gimp_context_set_brush (context, brush);
+  clay_context_set_brush (context, brush);
 
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_get_brush_size_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_size_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble size = 0.0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -912,34 +912,34 @@ context_get_brush_size_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), size);
+    g_value_set_double (clay_value_array_index (return_vals, 1), size);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_size_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_size_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
   gdouble size;
 
-  size = g_value_get_double (gimp_value_array_index (args, 0));
+  size = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
         g_object_set (list->data,
@@ -949,30 +949,30 @@ context_set_brush_size_invoker (GimpProcedure         *procedure,
       g_list_free (options);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_set_brush_default_size_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_default_size_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpBrush *brush = gimp_context_get_brush (context);
+  ClayBrush *brush = clay_context_get_brush (context);
 
   if (brush)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
-        gimp_paint_options_set_default_brush_size (list->data, brush);
+        clay_paint_options_set_default_brush_size (list->data, brush);
 
       g_list_free (options);
     }
@@ -981,26 +981,26 @@ context_set_brush_default_size_invoker (GimpProcedure         *procedure,
       success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_brush_aspect_ratio_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_aspect_ratio_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble aspect = 0.0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1009,34 +1009,34 @@ context_get_brush_aspect_ratio_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), aspect);
+    g_value_set_double (clay_value_array_index (return_vals, 1), aspect);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_aspect_ratio_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_aspect_ratio_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
   gdouble aspect;
 
-  aspect = g_value_get_double (gimp_value_array_index (args, 0));
+  aspect = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
         g_object_set (list->data,
@@ -1046,26 +1046,26 @@ context_set_brush_aspect_ratio_invoker (GimpProcedure         *procedure,
       g_list_free (options);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_brush_angle_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_angle_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble angle = 0.0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1074,34 +1074,34 @@ context_get_brush_angle_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), angle);
+    g_value_set_double (clay_value_array_index (return_vals, 1), angle);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_angle_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_angle_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
   gdouble angle;
 
-  angle = g_value_get_double (gimp_value_array_index (args, 0));
+  angle = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
         g_object_set (list->data,
@@ -1111,26 +1111,26 @@ context_set_brush_angle_invoker (GimpProcedure         *procedure,
       g_list_free (options);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_brush_spacing_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_spacing_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble spacing = 0.0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1139,34 +1139,34 @@ context_get_brush_spacing_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), spacing);
+    g_value_set_double (clay_value_array_index (return_vals, 1), spacing);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_spacing_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_spacing_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   gdouble spacing;
 
-  spacing = g_value_get_double (gimp_value_array_index (args, 0));
+  spacing = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
         g_object_set (list->data,
@@ -1176,30 +1176,30 @@ context_set_brush_spacing_invoker (GimpProcedure         *procedure,
       g_list_free (options);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_set_brush_default_spacing_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_default_spacing_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpBrush *brush = gimp_context_get_brush (context);
+  ClayBrush *brush = clay_context_get_brush (context);
 
   if (brush)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
-        gimp_paint_options_set_default_brush_spacing (list->data, brush);
+        clay_paint_options_set_default_brush_spacing (list->data, brush);
 
       g_list_free (options);
     }
@@ -1208,26 +1208,26 @@ context_set_brush_default_spacing_invoker (GimpProcedure         *procedure,
       success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_brush_hardness_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_hardness_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble hardness = 0.0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1236,34 +1236,34 @@ context_get_brush_hardness_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), hardness);
+    g_value_set_double (clay_value_array_index (return_vals, 1), hardness);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_hardness_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_hardness_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
   gdouble hardness;
 
-  hardness = g_value_get_double (gimp_value_array_index (args, 0));
+  hardness = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
         g_object_set (list->data,
@@ -1273,30 +1273,30 @@ context_set_brush_hardness_invoker (GimpProcedure         *procedure,
       g_list_free (options);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_set_brush_default_hardness_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_default_hardness_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpBrush *brush = gimp_context_get_brush (context);
+  ClayBrush *brush = clay_context_get_brush (context);
 
   if (brush)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
-        gimp_paint_options_set_default_brush_hardness (list->data, brush);
+        clay_paint_options_set_default_brush_hardness (list->data, brush);
 
       g_list_free (options);
     }
@@ -1305,26 +1305,26 @@ context_set_brush_default_hardness_invoker (GimpProcedure         *procedure,
       success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_brush_force_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+context_get_brush_force_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble force = 0.0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1333,34 +1333,34 @@ context_get_brush_force_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), force);
+    g_value_set_double (clay_value_array_index (return_vals, 1), force);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_brush_force_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+context_set_brush_force_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
   gdouble force;
 
-  force = g_value_get_double (gimp_value_array_index (args, 0));
+  force = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
       GList *options;
       GList *list;
 
-      options = gimp_pdb_context_get_brush_options (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_brush_options (CLAY_PDB_CONTEXT (context));
 
       for (list = options; list; list = g_list_next (list))
         g_object_set (list->data,
@@ -1370,138 +1370,138 @@ context_set_brush_force_invoker (GimpProcedure         *procedure,
       g_list_free (options);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_dynamics_name_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_dynamics_name_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar *name = NULL;
 
-  GimpDynamics *dynamics = gimp_context_get_dynamics (context);
+  ClayDynamics *dynamics = clay_context_get_dynamics (context);
 
   if (dynamics)
-    name = g_strdup (gimp_object_get_name (dynamics));
+    name = g_strdup (clay_object_get_name (dynamics));
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_dynamics_name_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_dynamics_name_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   const gchar *name;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpDynamics *dynamics = GIMP_DYNAMICS (gimp_pdb_get_resource (gimp, GIMP_TYPE_DYNAMICS, name, GIMP_PDB_DATA_ACCESS_READ, error));
+      ClayDynamics *dynamics = CLAY_DYNAMICS (clay_pdb_get_resource (clay, CLAY_TYPE_DYNAMICS, name, CLAY_PDB_DATA_ACCESS_READ, error));
 
       if (dynamics)
-        gimp_context_set_dynamics (context, dynamics);
+        clay_context_set_dynamics (context, dynamics);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_are_dynamics_enabled_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_are_dynamics_enabled_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean enabled = FALSE;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
-    enabled = gimp_paint_options_are_dynamics_enabled (options);
+    enabled = clay_paint_options_are_dynamics_enabled (options);
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), enabled);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), enabled);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_enable_dynamics_invoker (GimpProcedure         *procedure,
-                                 Gimp                  *gimp,
-                                 GimpContext           *context,
-                                 GimpProgress          *progress,
-                                 const GimpValueArray  *args,
+static ClayValueArray *
+context_enable_dynamics_invoker (ClayProcedure         *procedure,
+                                 Clay                  *clay,
+                                 ClayContext           *context,
+                                 ClayProgress          *progress,
+                                 const ClayValueArray  *args,
                                  GError               **error)
 {
   gboolean success = TRUE;
   gboolean enable;
 
-  enable = g_value_get_boolean (gimp_value_array_index (args, 0));
+  enable = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-paintbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-paintbrush");
 
       if (options)
-        gimp_paint_options_enable_dynamics (options, enable);
+        clay_paint_options_enable_dynamics (options, enable);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_emulate_brush_dynamics_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+context_get_emulate_brush_dynamics_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean emulate_dynamics = FALSE;
 
-  GimpStrokeOptions *options =
-    gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+  ClayStrokeOptions *options =
+    clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
   if (options)
     g_object_get (options,
@@ -1510,258 +1510,258 @@ context_get_emulate_brush_dynamics_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), emulate_dynamics);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), emulate_dynamics);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_emulate_brush_dynamics_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+context_set_emulate_brush_dynamics_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
   gboolean success = TRUE;
   gboolean emulate_dynamics;
 
-  emulate_dynamics = g_value_get_boolean (gimp_value_array_index (args, 0));
+  emulate_dynamics = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpStrokeOptions *options =
-        gimp_pdb_context_get_stroke_options (GIMP_PDB_CONTEXT (context));
+      ClayStrokeOptions *options =
+        clay_pdb_context_get_stroke_options (CLAY_PDB_CONTEXT (context));
 
       g_object_set (options,
                     "emulate-brush-dynamics", emulate_dynamics,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_mypaint_brush_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_mypaint_brush_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gchar *name = NULL;
 
-  GimpMybrush *brush = gimp_context_get_mybrush (context);
+  ClayMybrush *brush = clay_context_get_mybrush (context);
 
   if (brush)
-    name = g_strdup (gimp_object_get_name (brush));
+    name = g_strdup (clay_object_get_name (brush));
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_string (gimp_value_array_index (return_vals, 1), name);
+    g_value_take_string (clay_value_array_index (return_vals, 1), name);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_mypaint_brush_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_mypaint_brush_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   const gchar *name;
 
-  name = g_value_get_string (gimp_value_array_index (args, 0));
+  name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpMybrush *brush = GIMP_MYBRUSH (gimp_pdb_get_resource (gimp, GIMP_TYPE_MYBRUSH, name,
-                                                                GIMP_PDB_DATA_ACCESS_READ, error));
+      ClayMybrush *brush = CLAY_MYBRUSH (clay_pdb_get_resource (clay, CLAY_TYPE_MYBRUSH, name,
+                                                                CLAY_PDB_DATA_ACCESS_READ, error));
 
       if (brush)
-        gimp_context_set_mybrush (context, brush);
+        clay_context_set_mybrush (context, brush);
       else
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_pattern_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_get_pattern_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPattern *pattern = NULL;
+  ClayValueArray *return_vals;
+  ClayPattern *pattern = NULL;
 
-  pattern = gimp_context_get_pattern (context);
+  pattern = clay_context_get_pattern (context);
 
   if (!pattern)
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), pattern);
+    g_value_set_object (clay_value_array_index (return_vals, 1), pattern);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_pattern_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_set_pattern_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
-  GimpPattern *pattern;
+  ClayPattern *pattern;
 
-  pattern = g_value_get_object (gimp_value_array_index (args, 0));
+  pattern = g_value_get_object (clay_value_array_index (args, 0));
 
-  gimp_context_set_pattern (context, pattern);
+  clay_context_set_pattern (context, pattern);
 
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_get_gradient_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+context_get_gradient_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpGradient *gradient = NULL;
+  ClayValueArray *return_vals;
+  ClayGradient *gradient = NULL;
 
-  gradient = gimp_context_get_gradient (context);
+  gradient = clay_context_get_gradient (context);
 
   if (!gradient)
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), gradient);
+    g_value_set_object (clay_value_array_index (return_vals, 1), gradient);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_gradient_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
-  GimpGradient *gradient;
+  ClayGradient *gradient;
 
-  gradient = g_value_get_object (gimp_value_array_index (args, 0));
+  gradient = g_value_get_object (clay_value_array_index (args, 0));
 
-  gimp_context_set_gradient (context, gradient);
+  clay_context_set_gradient (context, gradient);
 
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_set_gradient_fg_bg_rgb_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_fg_bg_rgb_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_bg_rgb (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_bg_rgb (clay));
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_set_gradient_fg_bg_hsv_cw_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_fg_bg_hsv_cw_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_bg_hsv_cw (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_bg_hsv_cw (clay));
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_set_gradient_fg_bg_hsv_ccw_invoker (GimpProcedure         *procedure,
-                                            Gimp                  *gimp,
-                                            GimpContext           *context,
-                                            GimpProgress          *progress,
-                                            const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_fg_bg_hsv_ccw_invoker (ClayProcedure         *procedure,
+                                            Clay                  *clay,
+                                            ClayContext           *context,
+                                            ClayProgress          *progress,
+                                            const ClayValueArray  *args,
                                             GError               **error)
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_bg_hsv_ccw (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_bg_hsv_ccw (clay));
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_set_gradient_fg_transparent_invoker (GimpProcedure         *procedure,
-                                             Gimp                  *gimp,
-                                             GimpContext           *context,
-                                             GimpProgress          *progress,
-                                             const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_fg_transparent_invoker (ClayProcedure         *procedure,
+                                             Clay                  *clay,
+                                             ClayContext           *context,
+                                             ClayProgress          *progress,
+                                             const ClayValueArray  *args,
                                              GError               **error)
 {
-  gimp_context_set_gradient (context,
-                             gimp_gradients_get_fg_transparent (gimp));
+  clay_context_set_gradient (context,
+                             clay_gradients_get_fg_transparent (clay));
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_get_gradient_blend_color_space_invoker (GimpProcedure         *procedure,
-                                                Gimp                  *gimp,
-                                                GimpContext           *context,
-                                                GimpProgress          *progress,
-                                                const GimpValueArray  *args,
+static ClayValueArray *
+context_get_gradient_blend_color_space_invoker (ClayProcedure         *procedure,
+                                                Clay                  *clay,
+                                                ClayContext           *context,
+                                                ClayProgress          *progress,
+                                                const ClayValueArray  *args,
                                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint blend_color_space = 0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1770,61 +1770,61 @@ context_get_gradient_blend_color_space_invoker (GimpProcedure         *procedure
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), blend_color_space);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), blend_color_space);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_gradient_blend_color_space_invoker (GimpProcedure         *procedure,
-                                                Gimp                  *gimp,
-                                                GimpContext           *context,
-                                                GimpProgress          *progress,
-                                                const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_blend_color_space_invoker (ClayProcedure         *procedure,
+                                                Clay                  *clay,
+                                                ClayContext           *context,
+                                                ClayProgress          *progress,
+                                                const ClayValueArray  *args,
                                                 GError               **error)
 {
   gboolean success = TRUE;
   gint blend_color_space;
 
-  blend_color_space = g_value_get_enum (gimp_value_array_index (args, 0));
+  blend_color_space = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpContainer *options;
+      ClayContainer *options;
       GList         *list;
 
-      options = gimp_pdb_context_get_paint_options_list (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_paint_options_list (CLAY_PDB_CONTEXT (context));
 
-      for (list = GIMP_LIST (options)->queue->head; list; list = g_list_next (list))
+      for (list = CLAY_LIST (options)->queue->head; list; list = g_list_next (list))
         g_object_set (list->data,
                       "gradient-blend-color-space", blend_color_space,
                        NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_gradient_repeat_mode_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_get_gradient_repeat_mode_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint repeat_mode = 0;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1833,61 +1833,61 @@ context_get_gradient_repeat_mode_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), repeat_mode);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), repeat_mode);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_gradient_repeat_mode_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_repeat_mode_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
   gint repeat_mode;
 
-  repeat_mode = g_value_get_enum (gimp_value_array_index (args, 0));
+  repeat_mode = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpContainer *options;
+      ClayContainer *options;
       GList         *list;
 
-      options = gimp_pdb_context_get_paint_options_list (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_paint_options_list (CLAY_PDB_CONTEXT (context));
 
-      for (list = GIMP_LIST (options)->queue->head; list; list = g_list_next (list))
+      for (list = CLAY_LIST (options)->queue->head; list; list = g_list_next (list))
         g_object_set (list->data,
                       "gradient-repeat", repeat_mode,
                        NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_gradient_reverse_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_get_gradient_reverse_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean reverse = FALSE;
 
   /* all options should have the same value, so pick a random one */
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1896,60 +1896,60 @@ context_get_gradient_reverse_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_boolean (gimp_value_array_index (return_vals, 1), reverse);
+    g_value_set_boolean (clay_value_array_index (return_vals, 1), reverse);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_gradient_reverse_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_set_gradient_reverse_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   gboolean reverse;
 
-  reverse = g_value_get_boolean (gimp_value_array_index (args, 0));
+  reverse = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpContainer *options;
+      ClayContainer *options;
       GList         *list;
 
-      options = gimp_pdb_context_get_paint_options_list (GIMP_PDB_CONTEXT (context));
+      options = clay_pdb_context_get_paint_options_list (CLAY_PDB_CONTEXT (context));
 
-      for (list = GIMP_LIST (options)->queue->head; list; list = g_list_next (list))
+      for (list = CLAY_LIST (options)->queue->head; list; list = g_list_next (list))
         g_object_set (list->data,
                       "gradient-reverse", reverse,
                        NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_paint_fade_length_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+context_get_paint_fade_length_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble fade_length = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -1958,58 +1958,58 @@ context_get_paint_fade_length_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), fade_length);
+    g_value_set_double (clay_value_array_index (return_vals, 1), fade_length);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_paint_fade_length_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+context_set_paint_fade_length_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
   gdouble fade_length;
 
-  fade_length = g_value_get_double (gimp_value_array_index (args, 0));
+  fade_length = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-paintbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-paintbrush");
 
       g_object_set (options,
                     "fade-length", fade_length,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_paint_fade_repeat_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+context_get_paint_fade_repeat_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint fade_repeat = 0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-paintbrush");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-paintbrush");
 
   if (options)
     g_object_get (options,
@@ -2018,170 +2018,170 @@ context_get_paint_fade_repeat_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), fade_repeat);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), fade_repeat);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_paint_fade_repeat_invoker (GimpProcedure         *procedure,
-                                       Gimp                  *gimp,
-                                       GimpContext           *context,
-                                       GimpProgress          *progress,
-                                       const GimpValueArray  *args,
+static ClayValueArray *
+context_set_paint_fade_repeat_invoker (ClayProcedure         *procedure,
+                                       Clay                  *clay,
+                                       ClayContext           *context,
+                                       ClayProgress          *progress,
+                                       const ClayValueArray  *args,
                                        GError               **error)
 {
   gboolean success = TRUE;
   gint fade_repeat;
 
-  fade_repeat = g_value_get_enum (gimp_value_array_index (args, 0));
+  fade_repeat = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-paintbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-paintbrush");
       g_object_set (options,
                     "fade-repeat", fade_repeat,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_palette_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_get_palette_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpPalette *palette = NULL;
+  ClayValueArray *return_vals;
+  ClayPalette *palette = NULL;
 
-  palette = gimp_context_get_palette (context);
+  palette = clay_context_get_palette (context);
 
   if (!palette)
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), palette);
+    g_value_set_object (clay_value_array_index (return_vals, 1), palette);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_palette_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_set_palette_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
-  GimpPalette *palette;
+  ClayPalette *palette;
 
-  palette = g_value_get_object (gimp_value_array_index (args, 0));
+  palette = g_value_get_object (clay_value_array_index (args, 0));
 
-  gimp_context_set_palette (context, palette);
+  clay_context_set_palette (context, palette);
 
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_get_font_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+context_get_font_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpFont *font = NULL;
+  ClayValueArray *return_vals;
+  ClayFont *font = NULL;
 
-  if (! gimp_data_factory_data_wait (gimp->font_factory))
+  if (! clay_data_factory_data_wait (clay->font_factory))
     {
       success = FALSE;
-      g_set_error_literal (error, GIMP_PDB_ERROR,
-                           GIMP_PDB_ERROR_INTERNAL_ERROR,
+      g_set_error_literal (error, CLAY_PDB_ERROR,
+                           CLAY_PDB_ERROR_INTERNAL_ERROR,
                            _("Failed waiting for the loading of fonts."));
     }
   else
     {
-      font = gimp_context_get_font (context);
+      font = clay_context_get_font (context);
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), font);
+    g_value_set_object (clay_value_array_index (return_vals, 1), font);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_font_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+context_set_font_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
-  GimpFont *font;
+  ClayFont *font;
 
-  font = g_value_get_object (gimp_value_array_index (args, 0));
+  font = g_value_get_object (clay_value_array_index (args, 0));
 
-  gimp_context_set_font (context, font);
+  clay_context_set_font (context, font);
 
 
-  return gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return clay_procedure_get_return_values (procedure, TRUE, NULL);
 }
 
-static GimpValueArray *
-context_get_antialias_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+context_get_antialias_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean antialias = FALSE;
 
   g_object_get (context,
                 "antialias", &antialias,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_boolean (gimp_value_array_index (return_vals, 1), antialias);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_boolean (clay_value_array_index (return_vals, 1), antialias);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_antialias_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+context_set_antialias_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
   gboolean antialias;
 
-  antialias = g_value_get_boolean (gimp_value_array_index (args, 0));
+  antialias = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2190,43 +2190,43 @@ context_set_antialias_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_feather_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_get_feather_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean feather = FALSE;
 
   g_object_get (context,
                 "feather", &feather,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_boolean (gimp_value_array_index (return_vals, 1), feather);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_boolean (clay_value_array_index (return_vals, 1), feather);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_feather_invoker (GimpProcedure         *procedure,
-                             Gimp                  *gimp,
-                             GimpContext           *context,
-                             GimpProgress          *progress,
-                             const GimpValueArray  *args,
+static ClayValueArray *
+context_set_feather_invoker (ClayProcedure         *procedure,
+                             Clay                  *clay,
+                             ClayContext           *context,
+                             ClayProgress          *progress,
+                             const ClayValueArray  *args,
                              GError               **error)
 {
   gboolean success = TRUE;
   gboolean feather;
 
-  feather = g_value_get_boolean (gimp_value_array_index (args, 0));
+  feather = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2235,19 +2235,19 @@ context_set_feather_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_feather_radius_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_get_feather_radius_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble feather_radius_x = 0.0;
   gdouble feather_radius_y = 0.0;
 
@@ -2256,28 +2256,28 @@ context_get_feather_radius_invoker (GimpProcedure         *procedure,
                 "feather-radius-y", &feather_radius_y,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
 
-  g_value_set_double (gimp_value_array_index (return_vals, 1), feather_radius_x);
-  g_value_set_double (gimp_value_array_index (return_vals, 2), feather_radius_y);
+  g_value_set_double (clay_value_array_index (return_vals, 1), feather_radius_x);
+  g_value_set_double (clay_value_array_index (return_vals, 2), feather_radius_y);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_feather_radius_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_set_feather_radius_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
   gdouble feather_radius_x;
   gdouble feather_radius_y;
 
-  feather_radius_x = g_value_get_double (gimp_value_array_index (args, 0));
-  feather_radius_y = g_value_get_double (gimp_value_array_index (args, 1));
+  feather_radius_x = g_value_get_double (clay_value_array_index (args, 0));
+  feather_radius_y = g_value_get_double (clay_value_array_index (args, 1));
 
   if (success)
     {
@@ -2287,43 +2287,43 @@ context_set_feather_radius_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_sample_merged_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_sample_merged_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean sample_merged = FALSE;
 
   g_object_get (context,
                 "sample-merged", &sample_merged,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_boolean (gimp_value_array_index (return_vals, 1), sample_merged);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_boolean (clay_value_array_index (return_vals, 1), sample_merged);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_sample_merged_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_sample_merged_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   gboolean sample_merged;
 
-  sample_merged = g_value_get_boolean (gimp_value_array_index (args, 0));
+  sample_merged = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2332,43 +2332,43 @@ context_set_sample_merged_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_sample_criterion_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_get_sample_criterion_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint sample_criterion = 0;
 
   g_object_get (context,
                 "sample-criterion", &sample_criterion,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), sample_criterion);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), sample_criterion);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_sample_criterion_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_set_sample_criterion_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   gint sample_criterion;
 
-  sample_criterion = g_value_get_enum (gimp_value_array_index (args, 0));
+  sample_criterion = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2377,43 +2377,43 @@ context_set_sample_criterion_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_sample_threshold_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_get_sample_threshold_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble sample_threshold = 0.0;
 
   g_object_get (context,
                 "sample-threshold", &sample_threshold,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_double (gimp_value_array_index (return_vals, 1), sample_threshold);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_double (clay_value_array_index (return_vals, 1), sample_threshold);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_sample_threshold_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_set_sample_threshold_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   gdouble sample_threshold;
 
-  sample_threshold = g_value_get_double (gimp_value_array_index (args, 0));
+  sample_threshold = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2422,19 +2422,19 @@ context_set_sample_threshold_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_sample_threshold_int_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_get_sample_threshold_int_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint sample_threshold = 0;
 
   gdouble threshold;
@@ -2445,24 +2445,24 @@ context_get_sample_threshold_int_invoker (GimpProcedure         *procedure,
 
   sample_threshold = (gint) (threshold * 255.99);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_int (gimp_value_array_index (return_vals, 1), sample_threshold);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_int (clay_value_array_index (return_vals, 1), sample_threshold);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_sample_threshold_int_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_set_sample_threshold_int_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
   gint sample_threshold;
 
-  sample_threshold = g_value_get_int (gimp_value_array_index (args, 0));
+  sample_threshold = g_value_get_int (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2471,43 +2471,43 @@ context_set_sample_threshold_int_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_sample_transparent_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_get_sample_transparent_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean sample_transparent = FALSE;
 
   g_object_get (context,
                 "sample-transparent", &sample_transparent,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_boolean (gimp_value_array_index (return_vals, 1), sample_transparent);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_boolean (clay_value_array_index (return_vals, 1), sample_transparent);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_sample_transparent_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_set_sample_transparent_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
   gboolean sample_transparent;
 
-  sample_transparent = g_value_get_boolean (gimp_value_array_index (args, 0));
+  sample_transparent = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2516,43 +2516,43 @@ context_set_sample_transparent_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_diagonal_neighbors_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_get_diagonal_neighbors_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gboolean diagonal_neighbors = FALSE;
 
   g_object_get (context,
                 "diagonal-neighbors", &diagonal_neighbors,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_boolean (gimp_value_array_index (return_vals, 1), diagonal_neighbors);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_boolean (clay_value_array_index (return_vals, 1), diagonal_neighbors);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_diagonal_neighbors_invoker (GimpProcedure         *procedure,
-                                        Gimp                  *gimp,
-                                        GimpContext           *context,
-                                        GimpProgress          *progress,
-                                        const GimpValueArray  *args,
+static ClayValueArray *
+context_set_diagonal_neighbors_invoker (ClayProcedure         *procedure,
+                                        Clay                  *clay,
+                                        ClayContext           *context,
+                                        ClayProgress          *progress,
+                                        const ClayValueArray  *args,
                                         GError               **error)
 {
   gboolean success = TRUE;
   gboolean diagonal_neighbors;
 
-  diagonal_neighbors = g_value_get_boolean (gimp_value_array_index (args, 0));
+  diagonal_neighbors = g_value_get_boolean (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2561,43 +2561,43 @@ context_set_diagonal_neighbors_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_distance_metric_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+context_get_distance_metric_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint metric = 0;
 
   g_object_get (context,
                 "distance-metric", &metric,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), metric);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), metric);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_distance_metric_invoker (GimpProcedure         *procedure,
-                                     Gimp                  *gimp,
-                                     GimpContext           *context,
-                                     GimpProgress          *progress,
-                                     const GimpValueArray  *args,
+static ClayValueArray *
+context_set_distance_metric_invoker (ClayProcedure         *procedure,
+                                     Clay                  *clay,
+                                     ClayContext           *context,
+                                     ClayProgress          *progress,
+                                     const ClayValueArray  *args,
                                      GError               **error)
 {
   gboolean success = TRUE;
   gint metric;
 
-  metric = g_value_get_enum (gimp_value_array_index (args, 0));
+  metric = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2606,43 +2606,43 @@ context_set_distance_metric_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_interpolation_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_interpolation_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint interpolation = 0;
 
   g_object_get (context,
                 "interpolation", &interpolation,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), interpolation);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), interpolation);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_interpolation_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_interpolation_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   gint interpolation;
 
-  interpolation = g_value_get_enum (gimp_value_array_index (args, 0));
+  interpolation = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2651,43 +2651,43 @@ context_set_interpolation_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_transform_direction_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+context_get_transform_direction_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint transform_direction = 0;
 
   g_object_get (context,
                 "transform-direction", &transform_direction,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), transform_direction);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), transform_direction);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_transform_direction_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+context_set_transform_direction_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
   gint transform_direction;
 
-  transform_direction = g_value_get_enum (gimp_value_array_index (args, 0));
+  transform_direction = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2696,43 +2696,43 @@ context_set_transform_direction_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_transform_resize_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_get_transform_resize_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint transform_resize = 0;
 
   g_object_get (context,
                 "transform-resize", &transform_resize,
                 NULL);
 
-  return_vals = gimp_procedure_get_return_values (procedure, TRUE, NULL);
-  g_value_set_enum (gimp_value_array_index (return_vals, 1), transform_resize);
+  return_vals = clay_procedure_get_return_values (procedure, TRUE, NULL);
+  g_value_set_enum (clay_value_array_index (return_vals, 1), transform_resize);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_transform_resize_invoker (GimpProcedure         *procedure,
-                                      Gimp                  *gimp,
-                                      GimpContext           *context,
-                                      GimpProgress          *progress,
-                                      const GimpValueArray  *args,
+static ClayValueArray *
+context_set_transform_resize_invoker (ClayProcedure         *procedure,
+                                      Clay                  *clay,
+                                      ClayContext           *context,
+                                      ClayProgress          *progress,
+                                      const ClayValueArray  *args,
                                       GError               **error)
 {
   gboolean success = TRUE;
   gint transform_resize;
 
-  transform_resize = g_value_get_enum (gimp_value_array_index (args, 0));
+  transform_resize = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
@@ -2741,25 +2741,25 @@ context_set_transform_resize_invoker (GimpProcedure         *procedure,
                     NULL);
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_size_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_size_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble size = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -2768,33 +2768,33 @@ context_get_ink_size_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), size);
+    g_value_set_double (clay_value_array_index (return_vals, 1), size);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_size_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_size_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
   gdouble size;
 
-  size = g_value_get_double (gimp_value_array_index (args, 0));
+  size = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -2804,25 +2804,25 @@ context_set_ink_size_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_angle_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_angle_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble angle = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -2831,33 +2831,33 @@ context_get_ink_angle_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), angle);
+    g_value_set_double (clay_value_array_index (return_vals, 1), angle);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_angle_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_angle_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
   gdouble angle;
 
-  angle = g_value_get_double (gimp_value_array_index (args, 0));
+  angle = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -2867,25 +2867,25 @@ context_set_ink_angle_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_size_sensitivity_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_size_sensitivity_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble size = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -2894,33 +2894,33 @@ context_get_ink_size_sensitivity_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), size);
+    g_value_set_double (clay_value_array_index (return_vals, 1), size);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_size_sensitivity_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_size_sensitivity_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
   gdouble size;
 
-  size = g_value_get_double (gimp_value_array_index (args, 0));
+  size = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -2930,25 +2930,25 @@ context_set_ink_size_sensitivity_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_tilt_sensitivity_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_tilt_sensitivity_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble tilt = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -2957,33 +2957,33 @@ context_get_ink_tilt_sensitivity_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), tilt);
+    g_value_set_double (clay_value_array_index (return_vals, 1), tilt);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_tilt_sensitivity_invoker (GimpProcedure         *procedure,
-                                          Gimp                  *gimp,
-                                          GimpContext           *context,
-                                          GimpProgress          *progress,
-                                          const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_tilt_sensitivity_invoker (ClayProcedure         *procedure,
+                                          Clay                  *clay,
+                                          ClayContext           *context,
+                                          ClayProgress          *progress,
+                                          const ClayValueArray  *args,
                                           GError               **error)
 {
   gboolean success = TRUE;
   gdouble tilt;
 
-  tilt = g_value_get_double (gimp_value_array_index (args, 0));
+  tilt = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -2993,25 +2993,25 @@ context_set_ink_tilt_sensitivity_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_speed_sensitivity_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_speed_sensitivity_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble speed = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3020,33 +3020,33 @@ context_get_ink_speed_sensitivity_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), speed);
+    g_value_set_double (clay_value_array_index (return_vals, 1), speed);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_speed_sensitivity_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_speed_sensitivity_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
   gdouble speed;
 
-  speed = g_value_get_double (gimp_value_array_index (args, 0));
+  speed = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -3056,25 +3056,25 @@ context_set_ink_speed_sensitivity_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_blob_type_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_blob_type_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint type = 0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3083,33 +3083,33 @@ context_get_ink_blob_type_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), type);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), type);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_blob_type_invoker (GimpProcedure         *procedure,
-                                   Gimp                  *gimp,
-                                   GimpContext           *context,
-                                   GimpProgress          *progress,
-                                   const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_blob_type_invoker (ClayProcedure         *procedure,
+                                   Clay                  *clay,
+                                   ClayContext           *context,
+                                   ClayProgress          *progress,
+                                   const ClayValueArray  *args,
                                    GError               **error)
 {
   gboolean success = TRUE;
   gint type;
 
-  type = g_value_get_enum (gimp_value_array_index (args, 0));
+  type = g_value_get_enum (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -3119,25 +3119,25 @@ context_set_ink_blob_type_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_blob_aspect_ratio_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_blob_aspect_ratio_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble aspect = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     g_object_get (options,
@@ -3146,33 +3146,33 @@ context_get_ink_blob_aspect_ratio_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), aspect);
+    g_value_set_double (clay_value_array_index (return_vals, 1), aspect);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_blob_aspect_ratio_invoker (GimpProcedure         *procedure,
-                                           Gimp                  *gimp,
-                                           GimpContext           *context,
-                                           GimpProgress          *progress,
-                                           const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_blob_aspect_ratio_invoker (ClayProcedure         *procedure,
+                                           Clay                  *clay,
+                                           ClayContext           *context,
+                                           ClayProgress          *progress,
+                                           const ClayValueArray  *args,
                                            GError               **error)
 {
   gboolean success = TRUE;
   gdouble aspect;
 
-  aspect = g_value_get_double (gimp_value_array_index (args, 0));
+  aspect = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -3182,25 +3182,25 @@ context_set_ink_blob_aspect_ratio_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_ink_blob_angle_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_get_ink_blob_angle_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gdouble angle = 0.0;
 
-  GimpPaintOptions *options =
-    gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                        "gimp-ink");
+  ClayPaintOptions *options =
+    clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                        "clay-ink");
 
   if (options)
     {
@@ -3212,33 +3212,33 @@ context_get_ink_blob_angle_invoker (GimpProcedure         *procedure,
   else
     success = FALSE;
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_double (gimp_value_array_index (return_vals, 1), angle);
+    g_value_set_double (clay_value_array_index (return_vals, 1), angle);
 
   return return_vals;
 }
 
-static GimpValueArray *
-context_set_ink_blob_angle_invoker (GimpProcedure         *procedure,
-                                    Gimp                  *gimp,
-                                    GimpContext           *context,
-                                    GimpProgress          *progress,
-                                    const GimpValueArray  *args,
+static ClayValueArray *
+context_set_ink_blob_angle_invoker (ClayProcedure         *procedure,
+                                    Clay                  *clay,
+                                    ClayContext           *context,
+                                    ClayProgress          *progress,
+                                    const ClayValueArray  *args,
                                     GError               **error)
 {
   gboolean success = TRUE;
   gdouble angle;
 
-  angle = g_value_get_double (gimp_value_array_index (args, 0));
+  angle = g_value_get_double (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-ink");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-ink");
 
       if (options)
         g_object_set (options,
@@ -3248,41 +3248,41 @@ context_set_ink_blob_angle_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-context_get_resource_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+context_get_resource_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   const gchar *type_name;
-  GimpResource *resource = NULL;
+  ClayResource *resource = NULL;
 
-  type_name = g_value_get_string (gimp_value_array_index (args, 0));
+  type_name = g_value_get_string (clay_value_array_index (args, 0));
 
   if (success)
     {
       GType type = g_type_from_name (type_name);
 
-      if (g_type_is_a (type, GIMP_TYPE_RESOURCE))
+      if (g_type_is_a (type, CLAY_TYPE_RESOURCE))
         {
-          if (type == GIMP_TYPE_BRUSH)
-            resource = GIMP_RESOURCE (gimp_context_get_brush (context));
-          else if (type == GIMP_TYPE_FONT)
-            resource = GIMP_RESOURCE (gimp_context_get_font (context));
-          else if (type == GIMP_TYPE_GRADIENT)
-            resource = GIMP_RESOURCE (gimp_context_get_gradient (context));
-          else if (type == GIMP_TYPE_PATTERN)
-            resource = GIMP_RESOURCE (gimp_context_get_pattern (context));
-          else if (type == GIMP_TYPE_PALETTE)
-            resource = GIMP_RESOURCE (gimp_context_get_palette (context));
+          if (type == CLAY_TYPE_BRUSH)
+            resource = CLAY_RESOURCE (clay_context_get_brush (context));
+          else if (type == CLAY_TYPE_FONT)
+            resource = CLAY_RESOURCE (clay_context_get_font (context));
+          else if (type == CLAY_TYPE_GRADIENT)
+            resource = CLAY_RESOURCE (clay_context_get_gradient (context));
+          else if (type == CLAY_TYPE_PATTERN)
+            resource = CLAY_RESOURCE (clay_context_get_pattern (context));
+          else if (type == CLAY_TYPE_PALETTE)
+            resource = CLAY_RESOURCE (clay_context_get_palette (context));
           else
             /* Should not be reached. */
             success = FALSE;
@@ -3293,2918 +3293,2918 @@ context_get_resource_invoker (GimpProcedure         *procedure,
         }
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_object (gimp_value_array_index (return_vals, 1), resource);
+    g_value_set_object (clay_value_array_index (return_vals, 1), resource);
 
   return return_vals;
 }
 
 void
-register_context_procs (GimpPDB *pdb)
+register_context_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-context-push
+   * clay-context-push
    */
-  procedure = gimp_procedure_new (context_push_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-push");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_push_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-push");
+  clay_procedure_set_static_help (procedure,
                                   "Pushes a context onto the top of the plug-in's context stack.",
-                                  "Creates a new context by copying the current context. The copy becomes the new current context for the calling plug-in until it is popped again using 'gimp-context-pop'.",
+                                  "Creates a new context by copying the current context. The copy becomes the new current context for the calling plug-in until it is popped again using 'clay-context-pop'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-pop
+   * clay-context-pop
    */
-  procedure = gimp_procedure_new (context_pop_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-pop");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_pop_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-pop");
+  clay_procedure_set_static_help (procedure,
                                   "Pops the topmost context from the plug-in's context stack.",
-                                  "Removes the topmost context from the plug-in's context stack. The next context on the stack becomes the new current context of the plug-in, that is, the context that was active before the corresponding call to 'gimp-context-push'",
+                                  "Removes the topmost context from the plug-in's context stack. The next context on the stack becomes the new current context of the plug-in, that is, the context that was active before the corresponding call to 'clay-context-push'",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-defaults
+   * clay-context-set-defaults
    */
-  procedure = gimp_procedure_new (context_set_defaults_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-defaults");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_defaults_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-defaults");
+  clay_procedure_set_static_help (procedure,
                                   "Reset context settings to their default values.",
                                   "Resets context settings used by various procedures to their default value. You should usually call this after a context push so that a script which calls procedures affected by context settings will not be affected by changes in the global context.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Kevin Cozens <kcozens@svn.gnome.org>",
                                          "Kevin Cozens",
                                          "2011");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-list-paint-methods
+   * clay-context-list-paint-methods
    */
-  procedure = gimp_procedure_new (context_list_paint_methods_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-list-paint-methods");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_list_paint_methods_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-list-paint-methods");
+  clay_procedure_set_static_help (procedure,
                                   "Lists the available paint methods.",
-                                  "Lists the names of the available paint methods. Any of the names can be used for 'gimp-context-set-paint-method'.",
+                                  "Lists the names of the available paint methods. Any of the names can be used for 'clay-context-set-paint-method'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Simon Budig",
                                          "Simon Budig",
                                          "2007");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boxed ("paint-methods",
                                                        "paint methods",
                                                        "The names of the available paint methods",
                                                        G_TYPE_STRV,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-paint-method
+   * clay-context-get-paint-method
    */
-  procedure = gimp_procedure_new (context_get_paint_method_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-paint-method");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_paint_method_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-paint-method");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active paint method.",
                                   "Returns the name of the currently active paint method.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The name of the active paint method",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-paint-method
+   * clay-context-set-paint-method
    */
-  procedure = gimp_procedure_new (context_set_paint_method_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-paint-method");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_paint_method_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-paint-method");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active paint method.",
                                   "Sets the active paint method to the named paint method. The paint method will be used in all subsequent paint operations. The name should be a name of an available paint method. Returns an error if no matching paint method is found.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "The name of the paint method",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-stroke-method
+   * clay-context-get-stroke-method
    */
-  procedure = gimp_procedure_new (context_get_stroke_method_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-stroke-method");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_stroke_method_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-stroke-method");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active stroke method.",
                                   "Returns the currently active stroke method.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("stroke-method",
                                                       "stroke method",
                                                       "The active stroke method",
-                                                      GIMP_TYPE_STROKE_METHOD,
-                                                      GIMP_STROKE_LINE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_STROKE_METHOD,
+                                                      CLAY_STROKE_LINE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-stroke-method
+   * clay-context-set-stroke-method
    */
-  procedure = gimp_procedure_new (context_set_stroke_method_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-stroke-method");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_stroke_method_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-stroke-method");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active stroke method.",
                                   "Sets the active stroke method. The method will be used in all subsequent stroke operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("stroke-method",
                                                   "stroke method",
                                                   "The new stroke method",
-                                                  GIMP_TYPE_STROKE_METHOD,
-                                                  GIMP_STROKE_LINE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_STROKE_METHOD,
+                                                  CLAY_STROKE_LINE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-foreground
+   * clay-context-get-foreground
    */
-  procedure = gimp_procedure_new (context_get_foreground_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-foreground");
-  gimp_procedure_set_static_help (procedure,
-                                  "Get the current GIMP foreground color.",
-                                  "Returns the current GIMP foreground color. The foreground color is used in a variety of tools such as paint tools, blending, and bucket fill.",
+  procedure = clay_procedure_new (context_get_foreground_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-foreground");
+  clay_procedure_set_static_help (procedure,
+                                  "Get the current Clay foreground color.",
+                                  "Returns the current Clay foreground color. The foreground color is used in a variety of tools such as paint tools, blending, and bucket fill.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("foreground",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("foreground",
                                                           "foreground",
                                                           "The foreground color",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-foreground
+   * clay-context-set-foreground
    */
-  procedure = gimp_procedure_new (context_set_foreground_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-foreground");
-  gimp_procedure_set_static_help (procedure,
-                                  "Set the current GIMP foreground color.",
-                                  "Sets the current GIMP foreground color. After this is set, operations which use foreground such as paint tools, blending, and bucket fill will use the new value.",
+  procedure = clay_procedure_new (context_set_foreground_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-foreground");
+  clay_procedure_set_static_help (procedure,
+                                  "Set the current Clay foreground color.",
+                                  "Sets the current Clay foreground color. After this is set, operations which use foreground such as paint tools, blending, and bucket fill will use the new value.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("foreground",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("foreground",
                                                       "foreground",
                                                       "The foreground color",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-background
+   * clay-context-get-background
    */
-  procedure = gimp_procedure_new (context_get_background_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-background");
-  gimp_procedure_set_static_help (procedure,
-                                  "Get the current GIMP background color.",
-                                  "Returns the current GIMP background color. The background color is used in a variety of tools such as blending, erasing (with non-alpha images), and image filling.",
+  procedure = clay_procedure_new (context_get_background_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-background");
+  clay_procedure_set_static_help (procedure,
+                                  "Get the current Clay background color.",
+                                  "Returns the current Clay background color. The background color is used in a variety of tools such as blending, erasing (with non-alpha images), and image filling.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("background",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("background",
                                                           "background",
                                                           "The background color",
                                                           FALSE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-background
+   * clay-context-set-background
    */
-  procedure = gimp_procedure_new (context_set_background_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-background");
-  gimp_procedure_set_static_help (procedure,
-                                  "Set the current GIMP background color.",
-                                  "Sets the current GIMP background color. After this is set, operations which use background such as blending, filling images, clearing, and erasing (in non-alpha images) will use the new value.",
+  procedure = clay_procedure_new (context_set_background_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-background");
+  clay_procedure_set_static_help (procedure,
+                                  "Set the current Clay background color.",
+                                  "Sets the current Clay background color. After this is set, operations which use background such as blending, filling images, clearing, and erasing (in non-alpha images) will use the new value.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("background",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("background",
                                                       "background",
                                                       "The background color",
                                                       FALSE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-image
+   * clay-context-get-image
    */
-  procedure = gimp_procedure_new (context_get_image_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-image");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_image_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-image");
+  clay_procedure_set_static_help (procedure,
                                   "Get the current active image.",
-                                  "Returns the current active image in the GIMP workspace.",
+                                  "Returns the current active image in the Clay workspace.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2026");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_image ("image",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_image ("image",
                                                           "image",
                                                           "The active image",
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-image
+   * clay-context-set-image
    */
-  procedure = gimp_procedure_new (context_set_image_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-image");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_image_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-image");
+  clay_procedure_set_static_help (procedure,
                                   "Set the current active image.",
-                                  "Sets the current active image in the GIMP workspace. After this is set, operations will work on the new image.",
+                                  "Sets the current active image in the Clay workspace. After this is set, operations will work on the new image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alex S.",
                                          "Alex S.",
                                          "2026");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The active image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-default-colors
+   * clay-context-set-default-colors
    */
-  procedure = gimp_procedure_new (context_set_default_colors_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-default-colors");
-  gimp_procedure_set_static_help (procedure,
-                                  "Set the current GIMP foreground and background colors to black and white.",
-                                  "Sets the current GIMP foreground and background colors to their initial default values, black and white.",
+  procedure = clay_procedure_new (context_set_default_colors_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-default-colors");
+  clay_procedure_set_static_help (procedure,
+                                  "Set the current Clay foreground and background colors to black and white.",
+                                  "Sets the current Clay foreground and background colors to their initial default values, black and white.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-swap-colors
+   * clay-context-swap-colors
    */
-  procedure = gimp_procedure_new (context_swap_colors_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-swap-colors");
-  gimp_procedure_set_static_help (procedure,
-                                  "Swap the current GIMP foreground and background colors.",
-                                  "Swaps the current GIMP foreground and background colors, so that the new foreground color becomes the old background color and vice versa.",
+  procedure = clay_procedure_new (context_swap_colors_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-swap-colors");
+  clay_procedure_set_static_help (procedure,
+                                  "Swap the current Clay foreground and background colors.",
+                                  "Swaps the current Clay foreground and background colors, so that the new foreground color becomes the old background color and vice versa.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-opacity
+   * clay-context-get-opacity
    */
-  procedure = gimp_procedure_new (context_get_opacity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-opacity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_opacity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-opacity");
+  clay_procedure_set_static_help (procedure,
                                   "Get the opacity.",
                                   "Returns the opacity setting. The return value is a floating point number between 0 and 100.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("opacity",
                                                         "opacity",
                                                         "The opacity",
                                                         0, 100, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-opacity
+   * clay-context-set-opacity
    */
-  procedure = gimp_procedure_new (context_set_opacity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-opacity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_opacity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-opacity");
+  clay_procedure_set_static_help (procedure,
                                   "Set the opacity.",
                                   "Modifies the opacity setting. The value should be a floating point number between 0 and 100.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("opacity",
                                                     "opacity",
                                                     "The opacity",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-paint-mode
+   * clay-context-get-paint-mode
    */
-  procedure = gimp_procedure_new (context_get_paint_mode_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-paint-mode");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_paint_mode_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-paint-mode");
+  clay_procedure_set_static_help (procedure,
                                   "Get the paint mode.",
                                   "Returns the paint-mode setting. The return value is an integer which corresponds to the values listed in the argument description.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("paint-mode",
                                                       "paint mode",
                                                       "The paint mode",
-                                                      GIMP_TYPE_LAYER_MODE,
-                                                      GIMP_LAYER_MODE_NORMAL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_LAYER_MODE,
+                                                      CLAY_LAYER_MODE_NORMAL,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-paint-mode
+   * clay-context-set-paint-mode
    */
-  procedure = gimp_procedure_new (context_set_paint_mode_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-paint-mode");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_paint_mode_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-paint-mode");
+  clay_procedure_set_static_help (procedure,
                                   "Set the paint mode.",
                                   "Modifies the paint_mode setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("paint-mode",
                                                   "paint mode",
                                                   "The paint mode",
-                                                  GIMP_TYPE_LAYER_MODE,
-                                                  GIMP_LAYER_MODE_NORMAL,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_LAYER_MODE,
+                                                  CLAY_LAYER_MODE_NORMAL,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-width
+   * clay-context-get-line-width
    */
-  procedure = gimp_procedure_new (context_get_line_width_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-width");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_width_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-width");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line width setting.",
                                   "Returns the line width setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("line-width",
                                                         "line width",
                                                         "The line width setting",
                                                         0.0, 2000.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-width
+   * clay-context-set-line-width
    */
-  procedure = gimp_procedure_new (context_set_line_width_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-width");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_width_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-width");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line width setting.",
                                   "Modifies the line width setting for stroking lines.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("line-width",
                                                     "line width",
                                                     "The line width setting",
                                                     0.0, 2000.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-width-unit
+   * clay-context-get-line-width-unit
    */
-  procedure = gimp_procedure_new (context_get_line_width_unit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-width-unit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_width_unit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-width-unit");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line width unit setting.",
                                   "Returns the line width unit setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_unit ("line-width-unit",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_unit ("line-width-unit",
                                                          "line width unit",
                                                          "The line width unit setting",
                                                          FALSE,
                                                          FALSE,
-                                                         gimp_unit_inch (),
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         clay_unit_inch (),
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-width-unit
+   * clay-context-set-line-width-unit
    */
-  procedure = gimp_procedure_new (context_set_line_width_unit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-width-unit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_width_unit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-width-unit");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line width unit setting.",
                                   "Modifies the line width unit setting for stroking lines.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_unit ("line-width-unit",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_unit ("line-width-unit",
                                                      "line width unit",
                                                      "The line width setting unit",
                                                      TRUE,
                                                      FALSE,
-                                                     gimp_unit_inch (),
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     clay_unit_inch (),
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-cap-style
+   * clay-context-get-line-cap-style
    */
-  procedure = gimp_procedure_new (context_get_line_cap_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-cap-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_cap_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-cap-style");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line cap style setting.",
                                   "Returns the line cap style setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("cap-style",
                                                       "cap style",
                                                       "The line cap style setting",
-                                                      GIMP_TYPE_CAP_STYLE,
-                                                      GIMP_CAP_BUTT,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_CAP_STYLE,
+                                                      CLAY_CAP_BUTT,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-cap-style
+   * clay-context-set-line-cap-style
    */
-  procedure = gimp_procedure_new (context_set_line_cap_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-cap-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_cap_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-cap-style");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line cap style setting.",
                                   "Modifies the line cap style setting for stroking lines.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("cap-style",
                                                   "cap style",
                                                   "The line cap style setting",
-                                                  GIMP_TYPE_CAP_STYLE,
-                                                  GIMP_CAP_BUTT,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_CAP_STYLE,
+                                                  CLAY_CAP_BUTT,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-join-style
+   * clay-context-get-line-join-style
    */
-  procedure = gimp_procedure_new (context_get_line_join_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-join-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_join_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-join-style");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line join style setting.",
                                   "Returns the line join style setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("join-style",
                                                       "join style",
                                                       "The line join style setting",
-                                                      GIMP_TYPE_JOIN_STYLE,
-                                                      GIMP_JOIN_MITER,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_JOIN_STYLE,
+                                                      CLAY_JOIN_MITER,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-join-style
+   * clay-context-set-line-join-style
    */
-  procedure = gimp_procedure_new (context_set_line_join_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-join-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_join_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-join-style");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line join style setting.",
                                   "Modifies the line join style setting for stroking lines.\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("join-style",
                                                   "join style",
                                                   "The line join style setting",
-                                                  GIMP_TYPE_JOIN_STYLE,
-                                                  GIMP_JOIN_MITER,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_JOIN_STYLE,
+                                                  CLAY_JOIN_MITER,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-miter-limit
+   * clay-context-get-line-miter-limit
    */
-  procedure = gimp_procedure_new (context_get_line_miter_limit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-miter-limit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_miter_limit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-miter-limit");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line miter limit setting.",
                                   "Returns the line miter limit setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("miter-limit",
                                                         "miter limit",
                                                         "The line miter limit setting",
                                                         0.0, 100.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-miter-limit
+   * clay-context-set-line-miter-limit
    */
-  procedure = gimp_procedure_new (context_set_line_miter_limit_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-miter-limit");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_miter_limit_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-miter-limit");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line miter limit setting.",
                                   "Modifies the line miter limit setting for stroking lines.\n"
                                   "A mitered join is converted to a bevelled join if the miter would extend to a distance of more than (miter-limit * line-width) from the actual join point.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("miter-limit",
                                                     "miter limit",
                                                     "The line miter limit setting",
                                                     0.0, 100.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-dash-offset
+   * clay-context-get-line-dash-offset
    */
-  procedure = gimp_procedure_new (context_get_line_dash_offset_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-dash-offset");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_dash_offset_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-dash-offset");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line dash offset setting.",
                                   "Returns the line dash offset setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("dash-offset",
                                                         "dash offset",
                                                         "The line dash offset setting",
                                                         0.0, 2000.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-dash-offset
+   * clay-context-set-line-dash-offset
    */
-  procedure = gimp_procedure_new (context_set_line_dash_offset_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-dash-offset");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_dash_offset_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-dash-offset");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line dash offset setting.",
                                   "Modifies the line dash offset setting for stroking lines.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("dash-offset",
                                                     "dash offset",
                                                     "The line dash offset setting",
                                                     0.0, 100.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-line-dash-pattern
+   * clay-context-get-line-dash-pattern
    */
-  procedure = gimp_procedure_new (context_get_line_dash_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-line-dash-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_line_dash_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-line-dash-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Get the line dash pattern setting.",
                                   "Returns the line dash pattern setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_double_array ("dashes",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_double_array ("dashes",
                                                                  "dashes",
                                                                  "The line dash pattern setting",
-                                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-line-dash-pattern
+   * clay-context-set-line-dash-pattern
    */
-  procedure = gimp_procedure_new (context_set_line_dash_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-line-dash-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_line_dash_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-line-dash-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Set the line dash pattern setting.",
                                   "Modifies the line dash pattern setting for stroking lines.\n"
                                   "\n"
                                   "The unit of the dash pattern segments is the actual line width used for the stroke operation, in other words a segment length of 1.0 results in a square segment shape (or gap shape).\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-stroke-selection', 'gimp-drawable-edit-stroke-item'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-stroke-selection', 'clay-drawable-edit-stroke-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2015");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("dashes",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("dashes",
                                                              "dashes",
                                                              "The line dash pattern setting",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush
+   * clay-context-get-brush
    */
-  procedure = gimp_procedure_new (context_get_brush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active brush.",
                                   "Returns the currently active brush. All paint and stroke operations use this brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_brush ("brush",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_brush ("brush",
                                                           "brush",
                                                           "The active brush",
                                                           FALSE,
                                                           NULL,
                                                           FALSE,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush
+   * clay-context-set-brush
    */
-  procedure = gimp_procedure_new (context_set_brush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active brush.",
                                   "Sets the active brush in the current context. The brush will be used in subsequent paint and stroke operations. Returns an error when the brush data was uninstalled since the brush object was created.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_brush ("brush",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_brush ("brush",
                                                       "brush",
                                                       "The brush",
                                                       FALSE,
                                                       NULL,
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush-size
+   * clay-context-get-brush-size
    */
-  procedure = gimp_procedure_new (context_get_brush_size_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush-size");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_size_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush-size");
+  clay_procedure_set_static_help (procedure,
                                   "Get brush size in pixels.",
                                   "Get the brush size in pixels for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("size",
                                                         "size",
                                                         "Brush size in pixels",
                                                         0, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-size
+   * clay-context-set-brush-size
    */
-  procedure = gimp_procedure_new (context_set_brush_size_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-size");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_size_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-size");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush size in pixels.",
                                   "Set the brush size in pixels for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("size",
                                                     "size",
                                                     "Brush size in pixels",
                                                     1, 10000, 1,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-default-size
+   * clay-context-set-brush-default-size
    */
-  procedure = gimp_procedure_new (context_set_brush_default_size_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-default-size");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_default_size_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-default-size");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush size to its default.",
                                   "Set the brush size to the default (max of width and height) for paintbrush, airbrush, or pencil tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush-aspect-ratio
+   * clay-context-get-brush-aspect-ratio
    */
-  procedure = gimp_procedure_new (context_get_brush_aspect_ratio_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush-aspect-ratio");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_aspect_ratio_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush-aspect-ratio");
+  clay_procedure_set_static_help (procedure,
                                   "Get brush aspect ratio.",
                                   "Set the aspect ratio for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("aspect",
                                                         "aspect",
                                                         "Aspect ratio",
                                                         -20, 20, -20,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-aspect-ratio
+   * clay-context-set-brush-aspect-ratio
    */
-  procedure = gimp_procedure_new (context_set_brush_aspect_ratio_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-aspect-ratio");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_aspect_ratio_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-aspect-ratio");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush aspect ratio.",
                                   "Set the aspect ratio for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("aspect",
                                                     "aspect",
                                                     "Aspect ratio",
                                                     -20, 20, -20,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush-angle
+   * clay-context-get-brush-angle
    */
-  procedure = gimp_procedure_new (context_get_brush_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Get brush angle in degrees.",
                                   "Set the angle in degrees for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("angle",
                                                         "angle",
                                                         "Angle in degrees",
                                                         -180, 180, -180,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-angle
+   * clay-context-set-brush-angle
    */
-  procedure = gimp_procedure_new (context_set_brush_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush angle in degrees.",
                                   "Set the angle in degrees for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("angle",
                                                     "angle",
                                                     "Angle in degrees",
                                                     -180, 180, -180,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush-spacing
+   * clay-context-get-brush-spacing
    */
-  procedure = gimp_procedure_new (context_get_brush_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Get brush spacing as percent of size.",
                                   "Get the brush spacing as percent of size for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("spacing",
                                                         "spacing",
                                                         "Brush spacing as fraction of size",
                                                         0.01, 50.0, 0.01,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-spacing
+   * clay-context-set-brush-spacing
    */
-  procedure = gimp_procedure_new (context_set_brush_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush spacing as percent of size.",
                                   "Set the brush spacing as percent of size for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("spacing",
                                                     "spacing",
                                                     "Brush spacing as fraction of size",
                                                     0.01, 50.0, 0.01,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-default-spacing
+   * clay-context-set-brush-default-spacing
    */
-  procedure = gimp_procedure_new (context_set_brush_default_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-default-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_default_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-default-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush spacing to its default.",
                                   "Set the brush spacing to the default for paintbrush, airbrush, or pencil tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush-hardness
+   * clay-context-get-brush-hardness
    */
-  procedure = gimp_procedure_new (context_get_brush_hardness_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush-hardness");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_hardness_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush-hardness");
+  clay_procedure_set_static_help (procedure,
                                   "Get brush hardness in paint options.",
                                   "Get the brush hardness for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("hardness",
                                                         "hardness",
                                                         "Brush hardness",
                                                         0.0, 1.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-hardness
+   * clay-context-set-brush-hardness
    */
-  procedure = gimp_procedure_new (context_set_brush_hardness_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-hardness");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_hardness_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-hardness");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush hardness.",
                                   "Set the brush hardness for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("hardness",
                                                     "hardness",
                                                     "Brush hardness",
                                                     0.0, 1.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-default-hardness
+   * clay-context-set-brush-default-hardness
    */
-  procedure = gimp_procedure_new (context_set_brush_default_hardness_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-default-hardness");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_default_hardness_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-default-hardness");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush spacing to its default.",
                                   "Set the brush spacing to the default for paintbrush, airbrush, or pencil tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-brush-force
+   * clay-context-get-brush-force
    */
-  procedure = gimp_procedure_new (context_get_brush_force_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-brush-force");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_brush_force_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-brush-force");
+  clay_procedure_set_static_help (procedure,
                                   "Get brush force in paint options.",
                                   "Get the brush application force for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("force",
                                                         "force",
                                                         "Brush application force",
                                                         0.0, 1.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-brush-force
+   * clay-context-set-brush-force
    */
-  procedure = gimp_procedure_new (context_set_brush_force_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-brush-force");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_brush_force_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-brush-force");
+  clay_procedure_set_static_help (procedure,
                                   "Set brush application force.",
                                   "Set the brush application force for brush based paint tools.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alexia Death",
                                          "Alexia Death",
                                          "2014");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("force",
                                                     "force",
                                                     "Brush application force",
                                                     0.0, 1.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-dynamics-name
+   * clay-context-get-dynamics-name
    */
-  procedure = gimp_procedure_new (context_get_dynamics_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-dynamics-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_dynamics_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-dynamics-name");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active paint dynamics.",
                                   "Returns the name of the currently active paint dynamics. If enabled, all paint operations and stroke operations use this paint dynamics to control the application of paint to the image. If disabled, the dynamics will be ignored during paint actions.\n"
-                                  "See 'gimp-context-are-dynamics-enabled' to enquire whether dynamics are used or ignored.",
+                                  "See 'clay-context-are-dynamics-enabled' to enquire whether dynamics are used or ignored.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The name of the active paint dynamics",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-dynamics-name
+   * clay-context-set-dynamics-name
    */
-  procedure = gimp_procedure_new (context_set_dynamics_name_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-dynamics-name");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_dynamics_name_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-dynamics-name");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active paint dynamics.",
                                   "Sets the active paint dynamics. The paint dynamics will be used in all subsequent paint operations when dynamics are enabled. The name should be a name of an installed paint dynamics. Returns an error if no matching paint dynamics is found.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "A name of a paint dynamics",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-are-dynamics-enabled
+   * clay-context-are-dynamics-enabled
    */
-  procedure = gimp_procedure_new (context_are_dynamics_enabled_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-are-dynamics-enabled");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_are_dynamics_enabled_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-are-dynamics-enabled");
+  clay_procedure_set_static_help (procedure,
                                   "Whether the currently active paint dynamics will be applied to painting.",
-                                  "Returns whether the currently active paint dynamics (as returned by 'gimp-context-get-dynamics') is enabled.",
+                                  "Returns whether the currently active paint dynamics (as returned by 'clay-context-get-dynamics') is enabled.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2022");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("enabled",
                                                          "enabled",
                                                          "Whether dynamics enabled or disabled",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-enable-dynamics
+   * clay-context-enable-dynamics
    */
-  procedure = gimp_procedure_new (context_enable_dynamics_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-enable-dynamics");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_enable_dynamics_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-enable-dynamics");
+  clay_procedure_set_static_help (procedure,
                                   "Enables paint dynamics using the active paint dynamics.",
                                   "Enables the active paint dynamics to be used in all subsequent paint operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2022");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("enable",
                                                      "enable",
                                                      "Whether to enable or disable dynamics",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-emulate-brush-dynamics
+   * clay-context-get-emulate-brush-dynamics
    */
-  procedure = gimp_procedure_new (context_get_emulate_brush_dynamics_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-emulate-brush-dynamics");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_emulate_brush_dynamics_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-emulate-brush-dynamics");
+  clay_procedure_set_static_help (procedure,
                                   "Retrieve the currently active stroke option's emulate brush dynamics setting.",
                                   "This procedure returns the emulate brush dynamics property of the currently active stroke options.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Massimo Valentini",
                                          "Massimo Valentini",
                                          "2018");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("emulate-dynamics",
                                                          "emulate dynamics",
                                                          "The emulate brush dynamics setting",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-emulate-brush-dynamics
+   * clay-context-set-emulate-brush-dynamics
    */
-  procedure = gimp_procedure_new (context_set_emulate_brush_dynamics_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-emulate-brush-dynamics");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_emulate_brush_dynamics_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-emulate-brush-dynamics");
+  clay_procedure_set_static_help (procedure,
                                   "Set the stroke option's emulate brush dynamics setting.",
                                   "This procedure sets the specified emulate brush dynamics setting. The new method will be used in all subsequent stroke operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Massimo Valentini",
                                          "Massimo Valentini",
                                          "2018");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("emulate-dynamics",
                                                      "emulate dynamics",
                                                      "The new emulate brush dynamics setting",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-mypaint-brush
+   * clay-context-get-mypaint-brush
    */
-  procedure = gimp_procedure_new (context_get_mypaint_brush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-mypaint-brush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_mypaint_brush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-mypaint-brush");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active MyPaint brush.",
                                   "Returns the name of the currently active MyPaint brush.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2016");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_string ("name",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_string ("name",
                                                            "name",
                                                            "The name of the active MyPaint brush",
                                                            FALSE, FALSE, FALSE,
                                                            NULL,
-                                                           GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                           CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-mypaint-brush
+   * clay-context-set-mypaint-brush
    */
-  procedure = gimp_procedure_new (context_set_mypaint_brush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-mypaint-brush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_mypaint_brush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-mypaint-brush");
+  clay_procedure_set_static_help (procedure,
                                   "Set a MyPaint brush as the active MyPaint brush.",
                                   "Sets the active MyPaint brush to the named MyPaint brush. The brush will be used in all subsequent MyPaint paint operations. The name should be a name of an installed MyPaint brush. Returns an error if no matching MyPaint brush is found.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2016");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("name",
                                                        "name",
                                                        "A name of a MyPaint brush",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                       CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-pattern
+   * clay-context-get-pattern
    */
-  procedure = gimp_procedure_new (context_get_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active pattern.",
                                   "Returns the active pattern in the current context. All clone and bucket-fill operations with patterns will use this pattern to control the application of paint to the image.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_pattern ("pattern",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_pattern ("pattern",
                                                             "pattern",
                                                             "The active pattern",
                                                             FALSE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-pattern
+   * clay-context-set-pattern
    */
-  procedure = gimp_procedure_new (context_set_pattern_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-pattern");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_pattern_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-pattern");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active pattern.",
                                   "Sets the active pattern in the current context. The pattern will be used in subsequent fill operations using a pattern. Returns an error when the pattern data was uninstalled since the pattern object was created.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_pattern ("pattern",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_pattern ("pattern",
                                                         "pattern",
                                                         "The pattern",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-gradient
+   * clay-context-get-gradient
    */
-  procedure = gimp_procedure_new (context_get_gradient_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-gradient");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_gradient_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-gradient");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active gradient.",
                                   "Returns the currently active gradient.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_gradient ("gradient",
                                                              "gradient",
                                                              "The active gradient",
                                                              FALSE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient
+   * clay-context-set-gradient
    */
-  procedure = gimp_procedure_new (context_set_gradient_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the active gradient.",
                                   "Sets the active gradient in the current context. The gradient will be used in subsequent gradient operations. Returns an error when the gradient data was uninstalled since the gradient object was created.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_gradient ("gradient",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_gradient ("gradient",
                                                          "gradient",
                                                          "The gradient",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-fg-bg-rgb
+   * clay-context-set-gradient-fg-bg-rgb
    */
-  procedure = gimp_procedure_new (context_set_gradient_fg_bg_rgb_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-fg-bg-rgb");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_fg_bg_rgb_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-fg-bg-rgb");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the built-in FG-BG RGB gradient as the active gradient.",
                                   "Sets the built-in FG-BG RGB gradient as the active gradient. The gradient will be used for subsequent gradient operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-fg-bg-hsv-cw
+   * clay-context-set-gradient-fg-bg-hsv-cw
    */
-  procedure = gimp_procedure_new (context_set_gradient_fg_bg_hsv_cw_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-fg-bg-hsv-cw");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_fg_bg_hsv_cw_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-fg-bg-hsv-cw");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the built-in FG-BG HSV (cw) gradient as the active gradient.",
                                   "Sets the built-in FG-BG HSV (cw) gradient as the active gradient. The gradient will be used for subsequent gradient operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-fg-bg-hsv-ccw
+   * clay-context-set-gradient-fg-bg-hsv-ccw
    */
-  procedure = gimp_procedure_new (context_set_gradient_fg_bg_hsv_ccw_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-fg-bg-hsv-ccw");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_fg_bg_hsv_ccw_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-fg-bg-hsv-ccw");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the built-in FG-BG HSV (ccw) gradient as the active gradient.",
                                   "Sets the built-in FG-BG HSV (ccw) gradient as the active gradient. The gradient will be used for subsequent gradient operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-fg-transparent
+   * clay-context-set-gradient-fg-transparent
    */
-  procedure = gimp_procedure_new (context_set_gradient_fg_transparent_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-fg-transparent");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_fg_transparent_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-fg-transparent");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the built-in FG-Transparent gradient as the active gradient.",
                                   "Sets the built-in FG-Transparent gradient as the active gradient. The gradient will be used for subsequent gradient operations.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_pdb_register_procedure (pdb, procedure);
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-gradient-blend-color-space
+   * clay-context-get-gradient-blend-color-space
    */
-  procedure = gimp_procedure_new (context_get_gradient_blend_color_space_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-gradient-blend-color-space");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_gradient_blend_color_space_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-gradient-blend-color-space");
+  clay_procedure_set_static_help (procedure,
                                   "Get the gradient blend color space.",
                                   "Get the gradient blend color space for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("blend-color-space",
                                                       "blend color space",
                                                       "Color blend space",
-                                                      GIMP_TYPE_GRADIENT_BLEND_COLOR_SPACE,
-                                                      GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_GRADIENT_BLEND_COLOR_SPACE,
+                                                      CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-blend-color-space
+   * clay-context-set-gradient-blend-color-space
    */
-  procedure = gimp_procedure_new (context_set_gradient_blend_color_space_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-blend-color-space");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_blend_color_space_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-blend-color-space");
+  clay_procedure_set_static_help (procedure,
                                   "Set the gradient blend color space.",
                                   "Set the gradient blend color space for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("blend-color-space",
                                                   "blend color space",
                                                   "Blend color space",
-                                                  GIMP_TYPE_GRADIENT_BLEND_COLOR_SPACE,
-                                                  GIMP_GRADIENT_BLEND_RGB_PERCEPTUAL,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_GRADIENT_BLEND_COLOR_SPACE,
+                                                  CLAY_GRADIENT_BLEND_RGB_PERCEPTUAL,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-gradient-repeat-mode
+   * clay-context-get-gradient-repeat-mode
    */
-  procedure = gimp_procedure_new (context_get_gradient_repeat_mode_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-gradient-repeat-mode");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_gradient_repeat_mode_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-gradient-repeat-mode");
+  clay_procedure_set_static_help (procedure,
                                   "Get the gradient repeat mode.",
                                   "Get the gradient repeat mode for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("repeat-mode",
                                                       "repeat mode",
                                                       "Repeat mode",
-                                                      GIMP_TYPE_REPEAT_MODE,
-                                                      GIMP_REPEAT_NONE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_REPEAT_MODE,
+                                                      CLAY_REPEAT_NONE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-repeat-mode
+   * clay-context-set-gradient-repeat-mode
    */
-  procedure = gimp_procedure_new (context_set_gradient_repeat_mode_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-repeat-mode");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_repeat_mode_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-repeat-mode");
+  clay_procedure_set_static_help (procedure,
                                   "Set the gradient repeat mode.",
                                   "Set the gradient repeat mode for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("repeat-mode",
                                                   "repeat mode",
                                                   "Repeat mode",
-                                                  GIMP_TYPE_REPEAT_MODE,
-                                                  GIMP_REPEAT_NONE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_REPEAT_MODE,
+                                                  CLAY_REPEAT_NONE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-gradient-reverse
+   * clay-context-get-gradient-reverse
    */
-  procedure = gimp_procedure_new (context_get_gradient_reverse_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-gradient-reverse");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_gradient_reverse_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-gradient-reverse");
+  clay_procedure_set_static_help (procedure,
                                   "Get the gradient reverse setting.",
                                   "Get the gradient reverse setting for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("reverse",
                                                          "reverse",
                                                          "Reverse",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-gradient-reverse
+   * clay-context-set-gradient-reverse
    */
-  procedure = gimp_procedure_new (context_set_gradient_reverse_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-gradient-reverse");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_gradient_reverse_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-gradient-reverse");
+  clay_procedure_set_static_help (procedure,
                                   "Set the gradient reverse setting.",
                                   "Set the gradient reverse setting for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2018");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("reverse",
                                                      "reverse",
                                                      "Reverse",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-paint-fade-length
+   * clay-context-get-paint-fade-length
    */
-  procedure = gimp_procedure_new (context_get_paint_fade_length_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-paint-fade-length");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_paint_fade_length_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-paint-fade-length");
+  clay_procedure_set_static_help (procedure,
                                   "Get the paint fade length.",
                                   "Get the paint fade length for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alx Sa.",
                                          "Alx Sa.",
                                          "2025");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("fade-length",
                                                         "fade length",
                                                         "The paint fade length setting",
                                                         0.0, 32767.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-paint-fade-length
+   * clay-context-set-paint-fade-length
    */
-  procedure = gimp_procedure_new (context_set_paint_fade_length_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-paint-fade-length");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_paint_fade_length_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-paint-fade-length");
+  clay_procedure_set_static_help (procedure,
                                   "Set the paint fade length.",
                                   "Set the paint fade length for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alx Sa.",
                                          "Alx Sa.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("fade-length",
                                                     "fade length",
                                                     "The paint fade length setting",
                                                     0.0, 32767.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-paint-fade-repeat
+   * clay-context-get-paint-fade-repeat
    */
-  procedure = gimp_procedure_new (context_get_paint_fade_repeat_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-paint-fade-repeat");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_paint_fade_repeat_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-paint-fade-repeat");
+  clay_procedure_set_static_help (procedure,
                                   "Get the paint fade repeat type.",
                                   "Get the paint fade repeat type for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alx Sa.",
                                          "Alx Sa.",
                                          "2025");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("fade-repeat",
                                                       "fade repeat",
                                                       "The paint fade repeat type setting",
-                                                      GIMP_TYPE_REPEAT_MODE,
-                                                      GIMP_REPEAT_NONE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_REPEAT_MODE,
+                                                      CLAY_REPEAT_NONE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-paint-fade-repeat
+   * clay-context-set-paint-fade-repeat
    */
-  procedure = gimp_procedure_new (context_set_paint_fade_repeat_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-paint-fade-repeat");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_paint_fade_repeat_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-paint-fade-repeat");
+  clay_procedure_set_static_help (procedure,
                                   "Set the paint fade repeat type.",
                                   "Set the paint fade repeat type for paint tools and the gradient tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Alx Sa.",
                                          "Alx Sa.",
                                          "2025");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("fade-repeat",
                                                   "fade repeat",
                                                   "The paint fade repeat type setting",
-                                                  GIMP_TYPE_REPEAT_MODE,
-                                                  GIMP_REPEAT_NONE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_REPEAT_MODE,
+                                                  CLAY_REPEAT_NONE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-palette
+   * clay-context-get-palette
    */
-  procedure = gimp_procedure_new (context_get_palette_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-palette");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_palette_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-palette");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active palette.",
                                   "Returns the currently active palette.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_palette ("palette",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_palette ("palette",
                                                             "palette",
                                                             "The active palette",
                                                             FALSE,
                                                             NULL,
                                                             FALSE,
-                                                            GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                            CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-palette
+   * clay-context-set-palette
    */
-  procedure = gimp_procedure_new (context_set_palette_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-palette");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_palette_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-palette");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active palette.",
                                   "Sets the active palette in the current context. The palette will be used in subsequent paint operations. Returns an error when the palette data was uninstalled since the palette object was created.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_palette ("palette",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_palette ("palette",
                                                         "palette",
                                                         "The palette",
                                                         FALSE,
                                                         NULL,
                                                         FALSE,
-                                                        GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-font
+   * clay-context-get-font
    */
-  procedure = gimp_procedure_new (context_get_font_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-font");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_font_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-font");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active font.",
                                   "Returns the currently active font.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_font ("font",
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_font ("font",
                                                          "font",
                                                          "The active font",
                                                          FALSE,
                                                          NULL,
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-font
+   * clay-context-set-font
    */
-  procedure = gimp_procedure_new (context_set_font_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-font");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_font_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-font");
+  clay_procedure_set_static_help (procedure,
                                   "Set the active font.",
                                   "Sets the active font in the current context. The font will be used in subsequent text operations. Returns an error when the font data was uninstalled since the font object was created.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org> & Sven Neumann <sven@gimp.org>",
                                          "Michael Natterer & Sven Neumann",
                                          "2004");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_font ("font",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_font ("font",
                                                      "font",
                                                      "The font",
                                                      FALSE,
                                                      NULL,
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE | GIMP_PARAM_NO_VALIDATE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE | CLAY_PARAM_NO_VALIDATE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-antialias
+   * clay-context-get-antialias
    */
-  procedure = gimp_procedure_new (context_get_antialias_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-antialias");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_antialias_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-antialias");
+  clay_procedure_set_static_help (procedure,
                                   "Get the antialias setting.",
                                   "Returns the antialias setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("antialias",
                                                          "antialias",
                                                          "The antialias setting",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-antialias
+   * clay-context-set-antialias
    */
-  procedure = gimp_procedure_new (context_set_antialias_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-antialias");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_antialias_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-antialias");
+  clay_procedure_set_static_help (procedure,
                                   "Set the antialias setting.",
                                   "Modifies the antialias setting. If antialiasing is turned on, the edges of selected region will contain intermediate values which give the appearance of a sharper, less pixelized edge. This should be set as TRUE most of the time unless a binary-only selection is wanted.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-color', 'gimp-image-select-contiguous-color', 'gimp-image-select-round-rectangle', 'gimp-image-select-ellipse', 'gimp-image-select-polygon', 'gimp-image-select-item', 'gimp-drawable-edit-bucket-fill', 'gimp-drawable-edit-stroke-item', 'gimp-drawable-edit-stroke-selection'.",
+                                  "This setting affects the following procedures: 'clay-image-select-color', 'clay-image-select-contiguous-color', 'clay-image-select-round-rectangle', 'clay-image-select-ellipse', 'clay-image-select-polygon', 'clay-image-select-item', 'clay-drawable-edit-bucket-fill', 'clay-drawable-edit-stroke-item', 'clay-drawable-edit-stroke-selection'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("antialias",
                                                      "antialias",
                                                      "The antialias setting",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-feather
+   * clay-context-get-feather
    */
-  procedure = gimp_procedure_new (context_get_feather_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-feather");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_feather_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-feather");
+  clay_procedure_set_static_help (procedure,
                                   "Get the feather setting.",
                                   "Returns the feather setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("feather",
                                                          "feather",
                                                          "The feather setting",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-feather
+   * clay-context-set-feather
    */
-  procedure = gimp_procedure_new (context_set_feather_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-feather");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_feather_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-feather");
+  clay_procedure_set_static_help (procedure,
                                   "Set the feather setting.",
-                                  "Modifies the feather setting. If the feather option is enabled, selections will be blurred before combining. The blur is a gaussian blur; its radii can be controlled using 'gimp-context-set-feather-radius'.\n"
+                                  "Modifies the feather setting. If the feather option is enabled, selections will be blurred before combining. The blur is a gaussian blur; its radii can be controlled using 'clay-context-set-feather-radius'.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-color', 'gimp-image-select-contiguous-color', 'gimp-image-select-rectangle', 'gimp-image-select-round-rectangle', 'gimp-image-select-ellipse', 'gimp-image-select-polygon', 'gimp-image-select-item'.",
+                                  "This setting affects the following procedures: 'clay-image-select-color', 'clay-image-select-contiguous-color', 'clay-image-select-rectangle', 'clay-image-select-round-rectangle', 'clay-image-select-ellipse', 'clay-image-select-polygon', 'clay-image-select-item'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("feather",
                                                      "feather",
                                                      "The feather setting",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-feather-radius
+   * clay-context-get-feather-radius
    */
-  procedure = gimp_procedure_new (context_get_feather_radius_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-feather-radius");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_feather_radius_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-feather-radius");
+  clay_procedure_set_static_help (procedure,
                                   "Get the feather radius setting.",
                                   "Returns the feather radius setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("feather-radius-x",
                                                         "feather radius x",
                                                         "The horizontal feather radius",
                                                         0, 1000, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("feather-radius-y",
                                                         "feather radius y",
                                                         "The vertical feather radius",
                                                         0, 1000, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-feather-radius
+   * clay-context-set-feather-radius
    */
-  procedure = gimp_procedure_new (context_set_feather_radius_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-feather-radius");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_feather_radius_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-feather-radius");
+  clay_procedure_set_static_help (procedure,
                                   "Set the feather radius setting.",
                                   "Modifies the feather radius setting.\n"
                                   "\n"
-                                  "This setting affects all procedures that are affected by 'gimp-context-set-feather'.",
+                                  "This setting affects all procedures that are affected by 'clay-context-set-feather'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("feather-radius-x",
                                                     "feather radius x",
                                                     "The horizontal feather radius",
                                                     0, 1000, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("feather-radius-y",
                                                     "feather radius y",
                                                     "The vertical feather radius",
                                                     0, 1000, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-sample-merged
+   * clay-context-get-sample-merged
    */
-  procedure = gimp_procedure_new (context_get_sample_merged_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-sample-merged");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_sample_merged_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-sample-merged");
+  clay_procedure_set_static_help (procedure,
                                   "Get the sample merged setting.",
                                   "Returns the sample merged setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("sample-merged",
                                                          "sample merged",
                                                          "The sample merged setting",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-sample-merged
+   * clay-context-set-sample-merged
    */
-  procedure = gimp_procedure_new (context_set_sample_merged_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-sample-merged");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_sample_merged_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-sample-merged");
+  clay_procedure_set_static_help (procedure,
                                   "Set the sample merged setting.",
                                   "Modifies the sample merged setting. If an operation depends on the colors of the pixels present in a drawable, like when doing a seed fill, this setting controls whether the pixel data from the given drawable is used ('sample-merged' is FALSE), or the pixel data from the composite image ('sample-merged' is TRUE. This is equivalent to sampling for colors after merging all visible layers).\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-color', 'gimp-image-select-contiguous-color', 'gimp-drawable-edit-bucket-fill'.",
+                                  "This setting affects the following procedures: 'clay-image-select-color', 'clay-image-select-contiguous-color', 'clay-drawable-edit-bucket-fill'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("sample-merged",
                                                      "sample merged",
                                                      "The sample merged setting",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-sample-criterion
+   * clay-context-get-sample-criterion
    */
-  procedure = gimp_procedure_new (context_get_sample_criterion_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-sample-criterion");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_sample_criterion_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-sample-criterion");
+  clay_procedure_set_static_help (procedure,
                                   "Get the sample criterion setting.",
                                   "Returns the sample criterion setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("sample-criterion",
                                                       "sample criterion",
                                                       "The sample criterion setting",
-                                                      GIMP_TYPE_SELECT_CRITERION,
-                                                      GIMP_SELECT_CRITERION_COMPOSITE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_SELECT_CRITERION,
+                                                      CLAY_SELECT_CRITERION_COMPOSITE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-sample-criterion
+   * clay-context-set-sample-criterion
    */
-  procedure = gimp_procedure_new (context_set_sample_criterion_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-sample-criterion");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_sample_criterion_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-sample-criterion");
+  clay_procedure_set_static_help (procedure,
                                   "Set the sample criterion setting.",
                                   "Modifies the sample criterion setting. If an operation depends on the colors of the pixels present in a drawable, like when doing a seed fill, this setting controls how color similarity is determined. SELECT_CRITERION_COMPOSITE is the default value.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-color', 'gimp-image-select-contiguous-color', 'gimp-drawable-edit-bucket-fill'.",
+                                  "This setting affects the following procedures: 'clay-image-select-color', 'clay-image-select-contiguous-color', 'clay-drawable-edit-bucket-fill'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("sample-criterion",
                                                   "sample criterion",
                                                   "The sample criterion setting",
-                                                  GIMP_TYPE_SELECT_CRITERION,
-                                                  GIMP_SELECT_CRITERION_COMPOSITE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_SELECT_CRITERION,
+                                                  CLAY_SELECT_CRITERION_COMPOSITE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-sample-threshold
+   * clay-context-get-sample-threshold
    */
-  procedure = gimp_procedure_new (context_get_sample_threshold_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-sample-threshold");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_sample_threshold_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-sample-threshold");
+  clay_procedure_set_static_help (procedure,
                                   "Get the sample threshold setting.",
                                   "Returns the sample threshold setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("sample-threshold",
                                                         "sample threshold",
                                                         "The sample threshold setting",
                                                         0.0, 1.0, 0.0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-sample-threshold
+   * clay-context-set-sample-threshold
    */
-  procedure = gimp_procedure_new (context_set_sample_threshold_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-sample-threshold");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_sample_threshold_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-sample-threshold");
+  clay_procedure_set_static_help (procedure,
                                   "Set the sample threshold setting.",
-                                  "Modifies the sample threshold setting. If an operation depends on the colors of the pixels present in a drawable, like when doing a seed fill, this setting controls what is \"sufficiently close\" to be considered a similar color. If the sample threshold has not been set explicitly, the default threshold set in gimprc will be used.\n"
+                                  "Modifies the sample threshold setting. If an operation depends on the colors of the pixels present in a drawable, like when doing a seed fill, this setting controls what is \"sufficiently close\" to be considered a similar color. If the sample threshold has not been set explicitly, the default threshold set in clayrc will be used.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-color', 'gimp-image-select-contiguous-color', 'gimp-drawable-edit-bucket-fill'.",
+                                  "This setting affects the following procedures: 'clay-image-select-color', 'clay-image-select-contiguous-color', 'clay-drawable-edit-bucket-fill'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("sample-threshold",
                                                     "sample threshold",
                                                     "The sample threshold setting",
                                                     0.0, 1.0, 0.0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-sample-threshold-int
+   * clay-context-get-sample-threshold-int
    */
-  procedure = gimp_procedure_new (context_get_sample_threshold_int_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-sample-threshold-int");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_sample_threshold_int_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-sample-threshold-int");
+  clay_procedure_set_static_help (procedure,
                                   "Get the sample threshold setting as an integer value.",
-                                  "Returns the sample threshold setting as an integer value. See 'gimp-context-get-sample-threshold'.",
+                                  "Returns the sample threshold setting as an integer value. See 'clay-context-get-sample-threshold'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_int ("sample-threshold",
                                                      "sample threshold",
                                                      "The sample threshold setting",
                                                      0, 255, 0,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-sample-threshold-int
+   * clay-context-set-sample-threshold-int
    */
-  procedure = gimp_procedure_new (context_set_sample_threshold_int_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-sample-threshold-int");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_sample_threshold_int_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-sample-threshold-int");
+  clay_procedure_set_static_help (procedure,
                                   "Set the sample threshold setting as an integer value.",
-                                  "Modifies the sample threshold setting as an integer value. See 'gimp-context-set-sample-threshold'.",
+                                  "Modifies the sample threshold setting as an integer value. See 'clay-context-set-sample-threshold'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_int ("sample-threshold",
                                                  "sample threshold",
                                                  "The sample threshold setting",
                                                  0, 255, 0,
-                                                 GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                 CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-sample-transparent
+   * clay-context-get-sample-transparent
    */
-  procedure = gimp_procedure_new (context_get_sample_transparent_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-sample-transparent");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_sample_transparent_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-sample-transparent");
+  clay_procedure_set_static_help (procedure,
                                   "Get the sample transparent setting.",
                                   "Returns the sample transparent setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("sample-transparent",
                                                          "sample transparent",
                                                          "The sample transparent setting",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-sample-transparent
+   * clay-context-set-sample-transparent
    */
-  procedure = gimp_procedure_new (context_set_sample_transparent_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-sample-transparent");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_sample_transparent_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-sample-transparent");
+  clay_procedure_set_static_help (procedure,
                                   "Set the sample transparent setting.",
                                   "Modifies the sample transparent setting. If an operation depends on the colors of the pixels present in a drawable, like when doing a seed fill, this setting controls whether transparency is considered to be a unique selectable color. When this setting is TRUE, transparent areas can be selected or filled.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-color', 'gimp-image-select-contiguous-color', 'gimp-drawable-edit-bucket-fill'.",
+                                  "This setting affects the following procedures: 'clay-image-select-color', 'clay-image-select-contiguous-color', 'clay-drawable-edit-bucket-fill'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2011");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("sample-transparent",
                                                      "sample transparent",
                                                      "The sample transparent setting",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-diagonal-neighbors
+   * clay-context-get-diagonal-neighbors
    */
-  procedure = gimp_procedure_new (context_get_diagonal_neighbors_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-diagonal-neighbors");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_diagonal_neighbors_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-diagonal-neighbors");
+  clay_procedure_set_static_help (procedure,
                                   "Get the diagonal neighbors setting.",
                                   "Returns the diagonal neighbors setting.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ell",
                                          "Ell",
                                          "2016");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_boolean ("diagonal-neighbors",
                                                          "diagonal neighbors",
                                                          "The diagonal neighbors setting",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                         CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-diagonal-neighbors
+   * clay-context-set-diagonal-neighbors
    */
-  procedure = gimp_procedure_new (context_set_diagonal_neighbors_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-diagonal-neighbors");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_diagonal_neighbors_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-diagonal-neighbors");
+  clay_procedure_set_static_help (procedure,
                                   "Set the diagonal neighbors setting.",
                                   "Modifies the diagonal neighbors setting. If the affected region of an operation is based on a seed point, like when doing a seed fill, then, when this setting is TRUE, all eight neighbors of each pixel are considered when calculating the affected region; in contrast, when this setting is FALSE, only the four orthogonal neighbors of each pixel are considered.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-image-select-contiguous-color', 'gimp-drawable-edit-bucket-fill'.",
+                                  "This setting affects the following procedures: 'clay-image-select-contiguous-color', 'clay-drawable-edit-bucket-fill'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ell",
                                          "Ell",
                                          "2016");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_boolean ("diagonal-neighbors",
                                                      "diagonal neighbors",
                                                      "The diagonal neighbors setting",
                                                      FALSE,
-                                                     GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                     CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-distance-metric
+   * clay-context-get-distance-metric
    */
-  procedure = gimp_procedure_new (context_get_distance_metric_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-distance-metric");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_distance_metric_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-distance-metric");
+  clay_procedure_set_static_help (procedure,
                                   "Get the distance metric used in some computations.",
-                                  "Returns the distance metric in the current context. See 'gimp-context-set-distance-metric' to know more about its usage.",
+                                  "Returns the distance metric in the current context. See 'clay-context-set-distance-metric' to know more about its usage.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2018");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("metric",
                                                       "metric",
                                                       "The distance metric",
                                                       GEGL_TYPE_DISTANCE_METRIC,
                                                       GEGL_DISTANCE_METRIC_EUCLIDEAN,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-distance-metric
+   * clay-context-set-distance-metric
    */
-  procedure = gimp_procedure_new (context_set_distance_metric_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-distance-metric");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_distance_metric_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-distance-metric");
+  clay_procedure_set_static_help (procedure,
                                   "Set the distance metric used in some computations.",
-                                  "Modifies the distance metric used in some computations, such as 'gimp-drawable-edit-gradient-fill'. In particular, it does not change the metric used in generic distance computation on canvas, as in the Measure tool.\n"
+                                  "Modifies the distance metric used in some computations, such as 'clay-drawable-edit-gradient-fill'. In particular, it does not change the metric used in generic distance computation on canvas, as in the Measure tool.\n"
                                   "\n"
-                                  "This setting affects the following procedures: 'gimp-drawable-edit-gradient-fill'.",
+                                  "This setting affects the following procedures: 'clay-drawable-edit-gradient-fill'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2018");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("metric",
                                                   "metric",
                                                   "The distance metric",
                                                   GEGL_TYPE_DISTANCE_METRIC,
                                                   GEGL_DISTANCE_METRIC_EUCLIDEAN,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-interpolation
+   * clay-context-get-interpolation
    */
-  procedure = gimp_procedure_new (context_get_interpolation_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-interpolation");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_interpolation_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-interpolation");
+  clay_procedure_set_static_help (procedure,
                                   "Get the interpolation type.",
-                                  "Returns the interpolation setting. The return value is an integer which corresponds to the values listed in the argument description. If the interpolation has not been set explicitly by 'gimp-context-set-interpolation', the default interpolation set in gimprc will be used.",
+                                  "Returns the interpolation setting. The return value is an integer which corresponds to the values listed in the argument description. If the interpolation has not been set explicitly by 'clay-context-set-interpolation', the default interpolation set in clayrc will be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("interpolation",
                                                       "interpolation",
                                                       "The interpolation type",
-                                                      GIMP_TYPE_INTERPOLATION_TYPE,
-                                                      GIMP_INTERPOLATION_NONE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_INTERPOLATION_TYPE,
+                                                      CLAY_INTERPOLATION_NONE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-interpolation
+   * clay-context-set-interpolation
    */
-  procedure = gimp_procedure_new (context_set_interpolation_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-interpolation");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_interpolation_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-interpolation");
+  clay_procedure_set_static_help (procedure,
                                   "Set the interpolation type.",
                                   "Modifies the interpolation setting.\n"
                                   "\n"
-                                  "This setting affects affects the following procedures: 'gimp-item-transform-flip', 'gimp-item-transform-perspective', 'gimp-item-transform-rotate', 'gimp-item-transform-scale', 'gimp-item-transform-shear', 'gimp-item-transform-2d', 'gimp-item-transform-matrix', 'gimp-image-scale', 'gimp-layer-scale'.",
+                                  "This setting affects affects the following procedures: 'clay-item-transform-flip', 'clay-item-transform-perspective', 'clay-item-transform-rotate', 'clay-item-transform-scale', 'clay-item-transform-shear', 'clay-item-transform-2d', 'clay-item-transform-matrix', 'clay-image-scale', 'clay-layer-scale'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("interpolation",
                                                   "interpolation",
                                                   "The interpolation type",
-                                                  GIMP_TYPE_INTERPOLATION_TYPE,
-                                                  GIMP_INTERPOLATION_NONE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_INTERPOLATION_TYPE,
+                                                  CLAY_INTERPOLATION_NONE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-transform-direction
+   * clay-context-get-transform-direction
    */
-  procedure = gimp_procedure_new (context_get_transform_direction_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-transform-direction");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_transform_direction_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-transform-direction");
+  clay_procedure_set_static_help (procedure,
                                   "Get the transform direction.",
                                   "Returns the transform direction. The return value is an integer which corresponds to the values listed in the argument description.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("transform-direction",
                                                       "transform direction",
                                                       "The transform direction",
-                                                      GIMP_TYPE_TRANSFORM_DIRECTION,
-                                                      GIMP_TRANSFORM_FORWARD,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_TRANSFORM_DIRECTION,
+                                                      CLAY_TRANSFORM_FORWARD,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-transform-direction
+   * clay-context-set-transform-direction
    */
-  procedure = gimp_procedure_new (context_set_transform_direction_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-transform-direction");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_transform_direction_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-transform-direction");
+  clay_procedure_set_static_help (procedure,
                                   "Set the transform direction.",
                                   "Modifies the transform direction setting.\n"
                                   "\n"
-                                  "This setting affects affects the following procedures: 'gimp-item-transform-flip', 'gimp-item-transform-perspective', 'gimp-item-transform-rotate', 'gimp-item-transform-scale', 'gimp-item-transform-shear', 'gimp-item-transform-2d', 'gimp-item-transform-matrix'.",
+                                  "This setting affects affects the following procedures: 'clay-item-transform-flip', 'clay-item-transform-perspective', 'clay-item-transform-rotate', 'clay-item-transform-scale', 'clay-item-transform-shear', 'clay-item-transform-2d', 'clay-item-transform-matrix'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("transform-direction",
                                                   "transform direction",
                                                   "The transform direction",
-                                                  GIMP_TYPE_TRANSFORM_DIRECTION,
-                                                  GIMP_TRANSFORM_FORWARD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_TRANSFORM_DIRECTION,
+                                                  CLAY_TRANSFORM_FORWARD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-transform-resize
+   * clay-context-get-transform-resize
    */
-  procedure = gimp_procedure_new (context_get_transform_resize_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-transform-resize");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_transform_resize_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-transform-resize");
+  clay_procedure_set_static_help (procedure,
                                   "Get the transform resize type.",
                                   "Returns the transform resize setting. The return value is an integer which corresponds to the values listed in the argument description.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("transform-resize",
                                                       "transform resize",
                                                       "The transform resize type",
-                                                      GIMP_TYPE_TRANSFORM_RESIZE,
-                                                      GIMP_TRANSFORM_RESIZE_ADJUST,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_TRANSFORM_RESIZE,
+                                                      CLAY_TRANSFORM_RESIZE_ADJUST,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-transform-resize
+   * clay-context-set-transform-resize
    */
-  procedure = gimp_procedure_new (context_set_transform_resize_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-transform-resize");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_transform_resize_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-transform-resize");
+  clay_procedure_set_static_help (procedure,
                                   "Set the transform resize type.",
                                   "Modifies the transform resize setting. When transforming pixels, if the result of a transform operation has a different size than the original area, this setting determines how the resulting area is sized.\n"
                                   "\n"
-                                  "This setting affects affects the following procedures: 'gimp-item-transform-flip', 'gimp-item-transform-flip-simple', 'gimp-item-transform-perspective', 'gimp-item-transform-rotate', 'gimp-item-transform-rotate-simple', 'gimp-item-transform-scale', 'gimp-item-transform-shear', 'gimp-item-transform-2d', 'gimp-item-transform-matrix'.",
+                                  "This setting affects affects the following procedures: 'clay-item-transform-flip', 'clay-item-transform-flip-simple', 'clay-item-transform-perspective', 'clay-item-transform-rotate', 'clay-item-transform-rotate-simple', 'clay-item-transform-scale', 'clay-item-transform-shear', 'clay-item-transform-2d', 'clay-item-transform-matrix'.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Michael Natterer <mitch@gimp.org>",
                                          "Michael Natterer",
                                          "2010");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("transform-resize",
                                                   "transform resize",
                                                   "The transform resize type",
-                                                  GIMP_TYPE_TRANSFORM_RESIZE,
-                                                  GIMP_TRANSFORM_RESIZE_ADJUST,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_TRANSFORM_RESIZE,
+                                                  CLAY_TRANSFORM_RESIZE_ADJUST,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-size
+   * clay-context-get-ink-size
    */
-  procedure = gimp_procedure_new (context_get_ink_size_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-size");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_size_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-size");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink blob size in pixels.",
                                   "Get the ink blob size in pixels for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("size",
                                                         "size",
                                                         "ink blob size in pixels",
                                                         0, 200, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-size
+   * clay-context-set-ink-size
    */
-  procedure = gimp_procedure_new (context_set_ink_size_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-size");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_size_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-size");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink blob size in pixels.",
                                   "Set the ink blob size in pixels for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("size",
                                                     "size",
                                                     "ink blob size in pixels",
                                                     0, 200, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-angle
+   * clay-context-get-ink-angle
    */
-  procedure = gimp_procedure_new (context_get_ink_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink angle in degrees.",
                                   "Get the ink angle in degrees for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("angle",
                                                         "angle",
                                                         "ink angle in degrees",
                                                         -90, 90, -90,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-angle
+   * clay-context-set-ink-angle
    */
-  procedure = gimp_procedure_new (context_set_ink_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink angle in degrees.",
                                   "Set the ink angle in degrees for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("angle",
                                                     "angle",
                                                     "ink angle in degrees",
                                                     -90, 90, -90,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-size-sensitivity
+   * clay-context-get-ink-size-sensitivity
    */
-  procedure = gimp_procedure_new (context_get_ink_size_sensitivity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-size-sensitivity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_size_sensitivity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-size-sensitivity");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink size sensitivity.",
                                   "Get the ink size sensitivity for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("size",
                                                         "size",
                                                         "ink size sensitivity",
                                                         0, 1, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-size-sensitivity
+   * clay-context-set-ink-size-sensitivity
    */
-  procedure = gimp_procedure_new (context_set_ink_size_sensitivity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-size-sensitivity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_size_sensitivity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-size-sensitivity");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink size sensitivity.",
                                   "Set the ink size sensitivity for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("size",
                                                     "size",
                                                     "ink size sensitivity",
                                                     0, 1, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-tilt-sensitivity
+   * clay-context-get-ink-tilt-sensitivity
    */
-  procedure = gimp_procedure_new (context_get_ink_tilt_sensitivity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-tilt-sensitivity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_tilt_sensitivity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-tilt-sensitivity");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink tilt sensitivity.",
                                   "Get the ink tilt sensitivity for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("tilt",
                                                         "tilt",
                                                         "ink tilt sensitivity",
                                                         0, 1, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-tilt-sensitivity
+   * clay-context-set-ink-tilt-sensitivity
    */
-  procedure = gimp_procedure_new (context_set_ink_tilt_sensitivity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-tilt-sensitivity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_tilt_sensitivity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-tilt-sensitivity");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink tilt sensitivity.",
                                   "Set the ink tilt sensitivity for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("tilt",
                                                     "tilt",
                                                     "ink tilt sensitivity",
                                                     0, 1, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-speed-sensitivity
+   * clay-context-get-ink-speed-sensitivity
    */
-  procedure = gimp_procedure_new (context_get_ink_speed_sensitivity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-speed-sensitivity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_speed_sensitivity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-speed-sensitivity");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink speed sensitivity.",
                                   "Get the ink speed sensitivity for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("speed",
                                                         "speed",
                                                         "ink speed sensitivity",
                                                         0, 1, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-speed-sensitivity
+   * clay-context-set-ink-speed-sensitivity
    */
-  procedure = gimp_procedure_new (context_set_ink_speed_sensitivity_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-speed-sensitivity");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_speed_sensitivity_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-speed-sensitivity");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink speed sensitivity.",
                                   "Set the ink speed sensitivity for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("speed",
                                                     "speed",
                                                     "ink speed sensitivity",
                                                     0, 1, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-blob-type
+   * clay-context-get-ink-blob-type
    */
-  procedure = gimp_procedure_new (context_get_ink_blob_type_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-blob-type");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_blob_type_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-blob-type");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink blob type.",
                                   "Get the ink blob type for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("type",
                                                       "type",
                                                       "Ink blob type",
-                                                      GIMP_TYPE_INK_BLOB_TYPE,
-                                                      GIMP_INK_BLOB_TYPE_CIRCLE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_INK_BLOB_TYPE,
+                                                      CLAY_INK_BLOB_TYPE_CIRCLE,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-blob-type
+   * clay-context-set-ink-blob-type
    */
-  procedure = gimp_procedure_new (context_set_ink_blob_type_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-blob-type");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_blob_type_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-blob-type");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink blob type.",
                                   "Set the ink blob type for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("type",
                                                   "type",
                                                   "Ink blob type",
-                                                  GIMP_TYPE_INK_BLOB_TYPE,
-                                                  GIMP_INK_BLOB_TYPE_CIRCLE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_INK_BLOB_TYPE,
+                                                  CLAY_INK_BLOB_TYPE_CIRCLE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-blob-aspect-ratio
+   * clay-context-get-ink-blob-aspect-ratio
    */
-  procedure = gimp_procedure_new (context_get_ink_blob_aspect_ratio_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-blob-aspect-ratio");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_blob_aspect_ratio_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-blob-aspect-ratio");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink blob aspect ratio.",
                                   "Get the ink blob aspect ratio for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("aspect",
                                                         "aspect",
                                                         "ink blob aspect ratio",
                                                         1, 10, 1,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-blob-aspect-ratio
+   * clay-context-set-ink-blob-aspect-ratio
    */
-  procedure = gimp_procedure_new (context_set_ink_blob_aspect_ratio_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-blob-aspect-ratio");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_blob_aspect_ratio_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-blob-aspect-ratio");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink blob aspect ratio.",
                                   "Set the ink blob aspect ratio for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("aspect",
                                                     "aspect",
                                                     "ink blob aspect ratio",
                                                     1, 10, 1,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-ink-blob-angle
+   * clay-context-get-ink-blob-angle
    */
-  procedure = gimp_procedure_new (context_get_ink_blob_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-ink-blob-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_ink_blob_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-ink-blob-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Get ink blob angle in degrees.",
                                   "Get the ink blob angle in degrees for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_return_value (procedure,
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("angle",
                                                         "angle",
                                                         "ink blob angle in degrees",
                                                         -180, 180, -180,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-set-ink-blob-angle
+   * clay-context-set-ink-blob-angle
    */
-  procedure = gimp_procedure_new (context_set_ink_blob_angle_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-set-ink-blob-angle");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_set_ink_blob_angle_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-set-ink-blob-angle");
+  clay_procedure_set_static_help (procedure,
                                   "Set ink blob angle in degrees.",
                                   "Set the ink blob angle in degrees for ink tool.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Ed Swartz",
                                          "Ed Swartz",
                                          "2012");
-  gimp_procedure_add_argument (procedure,
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("angle",
                                                     "angle",
                                                     "ink blob angle in degrees",
                                                     -180, 180, -180,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-context-get-resource
+   * clay-context-get-resource
    */
-  procedure = gimp_procedure_new (context_get_resource_invoker, TRUE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-context-get-resource");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (context_get_resource_invoker, TRUE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-context-get-resource");
+  clay_procedure_set_static_help (procedure,
                                   "Get the currently active resource for a type.",
                                   "Returns the currently active resource for the given type name.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Jehan",
                                          "Jehan",
                                          "2023");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_string ("type-name",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_string ("type-name",
                                                        "type name",
                                                        "The name of the resource type",
                                                        FALSE, FALSE, TRUE,
                                                        NULL,
-                                                       GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_resource ("resource",
+                                                       CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_resource ("resource",
                                                              "resource",
                                                              "The active resource",
-                                                             GIMP_TYPE_RESOURCE,
+                                                             CLAY_TYPE_RESOURCE,
                                                              FALSE,
                                                              NULL,
                                                              FALSE,
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

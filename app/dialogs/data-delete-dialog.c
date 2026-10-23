@@ -20,31 +20,31 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontainer.h"
-#include "core/gimpcontext.h"
-#include "core/gimpdata.h"
-#include "core/gimpdatafactory.h"
+#include "core/clay.h"
+#include "core/claycontainer.h"
+#include "core/claycontext.h"
+#include "core/claydata.h"
+#include "core/claydatafactory.h"
 
-#include "widgets/gimpmessagebox.h"
-#include "widgets/gimpmessagedialog.h"
+#include "widgets/claymessagebox.h"
+#include "widgets/claymessagedialog.h"
 
 #include "data-delete-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 typedef struct _DataDeleteDialog DataDeleteDialog;
 
 struct _DataDeleteDialog
 {
-  GimpDataFactory *factory;
-  GimpData        *data;
-  GimpContext     *context;
+  ClayDataFactory *factory;
+  ClayData        *data;
+  ClayContext     *context;
   GtkWidget       *parent;
 };
 
@@ -59,17 +59,17 @@ static void  data_delete_dialog_response (GtkWidget        *dialog,
 /*  public functions  */
 
 GtkWidget *
-data_delete_dialog_new (GimpDataFactory *factory,
-                        GimpData        *data,
-                        GimpContext     *context,
+data_delete_dialog_new (ClayDataFactory *factory,
+                        ClayData        *data,
+                        ClayContext     *context,
                         GtkWidget       *parent)
 {
   DataDeleteDialog *private;
   GtkWidget        *dialog;
 
-  g_return_val_if_fail (GIMP_IS_DATA_FACTORY (factory), NULL);
-  g_return_val_if_fail (GIMP_IS_DATA (data), NULL);
-  g_return_val_if_fail (context == NULL || GIMP_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (CLAY_IS_DATA_FACTORY (factory), NULL);
+  g_return_val_if_fail (CLAY_IS_DATA (data), NULL);
+  g_return_val_if_fail (context == NULL || CLAY_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (parent), NULL);
 
   private = g_slice_new0 (DataDeleteDialog);
@@ -79,17 +79,17 @@ data_delete_dialog_new (GimpDataFactory *factory,
   private->context = context;
   private->parent  = parent;
 
-  dialog = gimp_message_dialog_new (_("Delete Object"),
-                                    GIMP_ICON_EDIT_DELETE,
+  dialog = clay_message_dialog_new (_("Delete Object"),
+                                    CLAY_ICON_EDIT_DELETE,
                                     gtk_widget_get_toplevel (parent), 0,
-                                    gimp_standard_help_func, NULL,
+                                    clay_standard_help_func, NULL,
 
                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
                                     _("_Delete"), GTK_RESPONSE_OK,
 
                                     NULL);
 
-  gimp_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
+  clay_dialog_set_alternative_button_order (GTK_DIALOG (dialog),
                                            GTK_RESPONSE_OK,
                                            GTK_RESPONSE_CANCEL,
                                            -1);
@@ -102,13 +102,13 @@ data_delete_dialog_new (GimpDataFactory *factory,
                     G_CALLBACK (data_delete_dialog_response),
                     private);
 
-  gimp_message_box_set_primary_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+  clay_message_box_set_primary_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                                      _("Delete '%s'?"),
-                                     gimp_object_get_name (data));
-  gimp_message_box_set_text (GIMP_MESSAGE_DIALOG (dialog)->box,
+                                     clay_object_get_name (data));
+  clay_message_box_set_text (CLAY_MESSAGE_DIALOG (dialog)->box,
                              _("Are you sure you want to remove '%s' "
                                "from the list and delete it on disk?"),
-                             gimp_object_get_name (data));
+                             clay_object_get_name (data));
 
   return dialog;
 }
@@ -125,34 +125,34 @@ data_delete_dialog_response (GtkWidget        *dialog,
 
   if (response_id == GTK_RESPONSE_OK)
     {
-      GimpDataFactory *factory    = private->factory;
-      GimpData        *data       = private->data;
-      GimpContainer   *container;
-      GimpObject      *new_active = NULL;
+      ClayDataFactory *factory    = private->factory;
+      ClayData        *data       = private->data;
+      ClayContainer   *container;
+      ClayObject      *new_active = NULL;
       GError          *error      = NULL;
 
-      container = gimp_data_factory_get_container (factory);
+      container = clay_data_factory_get_container (factory);
 
       if (private->context &&
-          GIMP_OBJECT (data) ==
-          gimp_context_get_by_type (private->context,
-                                    gimp_container_get_child_type (container)))
+          CLAY_OBJECT (data) ==
+          clay_context_get_by_type (private->context,
+                                    clay_container_get_child_type (container)))
         {
-          new_active = gimp_container_get_neighbor_of (container,
-                                                       GIMP_OBJECT (data));
+          new_active = clay_container_get_neighbor_of (container,
+                                                       CLAY_OBJECT (data));
         }
 
-      if (! gimp_data_factory_data_delete (factory, data, TRUE, &error))
+      if (! clay_data_factory_data_delete (factory, data, TRUE, &error))
         {
-          gimp_message (gimp_data_factory_get_gimp (factory),
-                        G_OBJECT (private->parent), GIMP_MESSAGE_ERROR,
+          clay_message (clay_data_factory_get_clay (factory),
+                        G_OBJECT (private->parent), CLAY_MESSAGE_ERROR,
                         "%s", error->message);
           g_clear_error (&error);
         }
 
       if (new_active)
-        gimp_context_set_by_type (private->context,
-                                  gimp_container_get_child_type (container),
+        clay_context_set_by_type (private->context,
+                                  clay_container_get_child_type (container),
                                   new_active);
     }
 

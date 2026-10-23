@@ -26,12 +26,12 @@
    Unfortunately glib returns a SUCCESS when you skip tests, which is
    not a reliable test feedback. So we hard-code the SKIPPED return
    value. */
-#define GIMP_EXIT_TEST_SKIPPED 77
+#define CLAY_EXIT_TEST_SKIPPED 77
 
-Gimp * gimp_init_for_testing             (void);
-Gimp * gimp_init_for_gui_testing         (gboolean  show_gui);
-Gimp * gimp_init_for_gui_testing_with_rc (gboolean  show_gui,
-                                          GFile    *gimprc);
-void   gimp_test_run_temp_mainloop       (guint32   running_time);
-void   gimp_test_run_mainloop_until_idle (void);
-void   gimp_test_bail_if_no_display      (void);
+Clay * clay_init_for_testing             (void);
+Clay * clay_init_for_gui_testing         (gboolean  show_gui);
+Clay * clay_init_for_gui_testing_with_rc (gboolean  show_gui,
+                                          GFile    *clayrc);
+void   clay_test_run_temp_mainloop       (guint32   running_time);
+void   clay_test_run_mainloop_until_idle (void);
+void   clay_test_bail_if_no_display      (void);

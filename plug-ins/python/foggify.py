@@ -15,8 +15,8 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import gi
-gi.require_version('Gimp', '3.0')
-from gi.repository import Gimp
+gi.require_version('Clay', '3.0')
+from gi.repository import Clay
 gi.require_version('Gegl', '0.4')
 from gi.repository import Gegl
 from gi.repository import GObject
@@ -29,17 +29,17 @@ def N_(message): return message
 def _(message): return GLib.dgettext(None, message)
 
 def foggify(procedure, run_mode, image, drawables, config, data):
-    if run_mode == Gimp.RunMode.INTERACTIVE:
-        gi.require_version('GimpUi', '3.0')
-        from gi.repository import GimpUi
+    if run_mode == Clay.RunMode.INTERACTIVE:
+        gi.require_version('ClayUi', '3.0')
+        from gi.repository import ClayUi
 
-        GimpUi.init('python-fu-foggify')
+        ClayUi.init('python-fu-foggify')
 
-        dialog = GimpUi.ProcedureDialog(procedure=procedure, config=config)
+        dialog = ClayUi.ProcedureDialog(procedure=procedure, config=config)
         dialog.fill(None)
         if not dialog.run():
             dialog.destroy()
-            return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
+            return procedure.new_return_values(Clay.PDBStatusType.CANCEL, GLib.Error())
         else:
             dialog.destroy()
 
@@ -48,24 +48,24 @@ def foggify(procedure, run_mode, image, drawables, config, data):
     turbulence = config.get_property('turbulence')
     opacity    = config.get_property('opacity')
 
-    Gimp.context_push()
+    Clay.context_push()
     image.undo_group_start()
 
-    if image.get_base_type() is Gimp.ImageBaseType.RGB:
-        type = Gimp.ImageType.RGBA_IMAGE
+    if image.get_base_type() is Clay.ImageBaseType.RGB:
+        type = Clay.ImageType.RGBA_IMAGE
     else:
-        type = Gimp.ImageType.GRAYA_IMAGE
+        type = Clay.ImageType.GRAYA_IMAGE
     for drawable in drawables:
-        fog = Gimp.Layer.new(image, name,
+        fog = Clay.Layer.new(image, name,
                              drawable.get_width(), drawable.get_height(),
                              type, opacity,
-                             Gimp.LayerMode.NORMAL)
-        fog.fill(Gimp.FillType.TRANSPARENT)
+                             Clay.LayerMode.NORMAL)
+        fog.fill(Clay.FillType.TRANSPARENT)
         image.insert_layer(fog, drawable.get_parent(),
                            image.get_item_position(drawable))
 
-        Gimp.context_set_background(color)
-        fog.edit_fill(Gimp.FillType.BACKGROUND)
+        Clay.context_set_background(color)
+        fog.edit_fill(Clay.FillType.BACKGROUND)
 
         # create a layer mask for the new layer
         mask = fog.create_mask(0)
@@ -73,10 +73,10 @@ def foggify(procedure, run_mode, image, drawables, config, data):
 
         # add some clouds to the layer
         _, x, y, width, height = mask.mask_intersect()
-        if not Gimp.Selection.is_empty(image):
+        if not Clay.Selection.is_empty(image):
           x = 0
           y = 0
-        plasma_filter = Gimp.DrawableFilter.new(mask, "gegl:plasma", "")
+        plasma_filter = Clay.DrawableFilter.new(mask, "gegl:plasma", "")
         plasma_filter_config = plasma_filter.get_config()
         plasma_filter_config.set_property("seed", int(time.time()))
         plasma_filter_config.set_property("turbulence", turbulence)
@@ -87,20 +87,20 @@ def foggify(procedure, run_mode, image, drawables, config, data):
         mask.merge_filter (plasma_filter)
 
         # apply the clouds to the layer
-        fog.remove_mask(Gimp.MaskApplyMode.APPLY)
+        fog.remove_mask(Clay.MaskApplyMode.APPLY)
         fog.set_visible(True)
 
-    Gimp.displays_flush()
+    Clay.displays_flush()
 
     image.undo_group_end()
-    Gimp.context_pop()
+    Clay.context_pop()
 
-    return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
+    return procedure.new_return_values(Clay.PDBStatusType.SUCCESS, GLib.Error())
 
-class Foggify (Gimp.PlugIn):
-    ## GimpPlugIn virtual methods ##
+class Foggify (Clay.PlugIn):
+    ## ClayPlugIn virtual methods ##
     def do_set_i18n(self, procname):
-        return True, 'gimp30-python', None
+        return True, 'clay30-python', None
 
     def do_query_procedures(self):
         return [ 'python-fu-foggify' ]
@@ -111,12 +111,12 @@ class Foggify (Gimp.PlugIn):
         _color = Gegl.Color.new("black")
         _color.set_rgba(0.871, 0.457, 0.061, 1.0)
 
-        procedure = Gimp.ImageProcedure.new(self, name,
-                                            Gimp.PDBProcType.PLUGIN,
+        procedure = Clay.ImageProcedure.new(self, name,
+                                            Clay.PDBProcType.PLUGIN,
                                             foggify, None)
         procedure.set_image_types("RGB*, GRAY*");
-        procedure.set_sensitivity_mask (Gimp.ProcedureSensitivityMask.DRAWABLE |
-                                        Gimp.ProcedureSensitivityMask.DRAWABLES)
+        procedure.set_sensitivity_mask (Clay.ProcedureSensitivityMask.DRAWABLE |
+                                        Clay.ProcedureSensitivityMask.DRAWABLES)
         procedure.set_documentation (_("Add a layer of fog"),
                                      _("Adds a layer of fog to the image."),
                                      name)
@@ -137,4 +137,4 @@ class Foggify (Gimp.PlugIn):
 
         return procedure
 
-Gimp.main(Foggify.__gtype__, sys.argv)
+Clay.main(Foggify.__gtype__, sys.argv)

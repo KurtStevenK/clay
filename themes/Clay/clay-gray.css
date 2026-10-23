@@ -1,0 +1,71 @@
+/* Dark brown variant for the Clay theme (the "Brown" colour scheme).
+ *
+ * Warm dark-brown surfaces with cream text. The six Lane colours (rust, maroon,
+ * mustard, purple, blue, green) are lightened so they keep strong contrast on
+ * the brown background; see common-dark.css for how the icons use them.
+ *
+ *   paper #2B1E16  plate #36271D  row #231810  ink #F3E6D3
+ *   muted #CDB89F  line #4A382B  edge #6E5543
+ *   accent #7FA8E6  accent-hover #9DBEF0  on-accent #231810
+ */
+
+/* Hint for debugging themes:
+ * first enable the GTK inspector with
+   gsettings set org.gtk.Settings.Debug enable-inspector-keybinding true
+ * then (after restarting Clay) call it up with ctrl+shift+i
+ * or from Clay's UI: File > Debug > Start GtkInspector
+ */
+
+/* Basic foreground, background and border colors. */
+@define-color fg-color               rgb(243,230,211);
+@define-color bg-color               rgb(43,30,22);
+@define-color border-color           rgb(74,56,43);
+
+/********* Variants for foreground colors *********/
+
+/* In places where we want not as strongly contrasted text. */
+@define-color dimmed-fg-color        rgb(205,184,159);
+/* Disabled items, such as disabled actions in menus. */
+@define-color disabled-fg-color      rgb(154,132,112);
+/* Disabled buttons are dimmed even more (text needs to still be
+ * readable, but buttons design are usually enough. */
+@define-color disabled-button-color  rgb(110,85,67);
+
+/********* Variants for background colors *********/
+
+/* Background color for hovered items to "stick out". */
+@define-color hover-color            rgb(74,56,43);
+/* Background color when we want widgets-in-widgets to differentiate. */
+@define-color widget-bg-color        rgb(54,39,29);
+/* Color for selected items. */
+@define-color selected-color         rgb(90,67,51);
+
+/* Background color more extreme in the theme tendency (darker on a dark theme). */
+@define-color extreme-bg-color       rgb(35,24,16);
+@define-color extreme-selected-color rgb(74,56,43);
+
+/********* Variants for border colors *********/
+
+@define-color strong-border-color    rgb(110,85,67);
+@define-color stronger-border-color  rgb(110,85,67);
+@define-color edge-border-color      rgb(110,85,67);
+
+/********* Colors for special cases *********/
+
+@define-color scrollbar-slider-color rgb(110,85,67);
+@define-color scrollbar-trough-color rgb(35,24,16);
+
+@define-color ruler-color            rgba(243,230,211,0.15);
+
+@define-color accent-color           rgb(127,168,230);
+@define-color accent-hover-color     rgb(157,190,240);
+@define-color on-accent-color        rgb(35,24,16);
+@define-color destructive-color      rgb(224,123,74);
+@define-color good-color             rgb(111,191,138);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");

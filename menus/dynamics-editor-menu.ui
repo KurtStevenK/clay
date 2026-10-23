@@ -4,7 +4,7 @@
   <menu id="/dynamics-editor-popup">
     <submenu>
       <attribute name="label" translatable="yes" context="dynamics-editor-action">Paint Dynamics Editor Menu</attribute>
-      <attribute name="icon">gimp-dynamics</attribute>
+      <attribute name="icon">clay-dynamics</attribute>
       <item><attribute name="action">dynamics-editor.dynamics-editor-edit-active</attribute></item>
     </submenu>
   </menu>

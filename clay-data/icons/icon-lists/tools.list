@@ -1,0 +1,76 @@
+# Required sizes:
+# - as a viewable icon, when registering the ClayPaintInfo:
+#   * 16 (scaled) in status bar
+#     See clay_statusbar_vprintf()
+#   * as action icon:
+#     + menu
+#     + action search: an icon in GtkCellRendererPixbuf (see
+#     ClaySearchPopup), whose default icon size is GTK_ICON_SIZE_MENU
+#     (16px).
+# - In device status.
+# - In Tool Preset Editor:
+#   * Header as GTK_ICON_SIZE_MENU (16px)
+#     See clay_tool_preset_editor_sync_data()
+#   * Button as icon picker CLAY_VIEW_SIZE_SMALL (24px)
+#     See clay_icon_picker_constructed()
+# - Toolbox default (DEFAULT_TOOL_ICON_SIZE) is GTK_ICON_SIZE_BUTTON (16px)
+#   Yet System theme sets:
+#   -ClayToolPalette-tool-icon-size:   large-toolbar; (24px)
+clay-tool-airbrush
+clay-tool-align
+clay-tool-blur
+clay-tool-brightness-contrast
+clay-tool-bucket-fill
+clay-tool-by-color-select
+clay-tool-cage
+clay-tool-clone
+clay-tool-color-balance
+clay-tool-color-picker
+clay-tool-color-temperature
+clay-tool-colorize
+clay-tool-crop
+clay-tool-curves
+clay-tool-desaturate
+clay-tool-dodge
+clay-tool-ellipse-select
+clay-tool-eraser
+clay-tool-exposure
+clay-tool-flip
+clay-tool-foreground-select
+clay-tool-free-select
+clay-tool-fuzzy-select
+clay-tool-gradient
+clay-tool-handle-transform
+clay-tool-heal
+clay-tool-hue-saturation
+clay-tool-ink
+clay-tool-iscissors
+clay-tool-levels
+clay-tool-measure
+clay-tool-move
+clay-tool-mypaint-brush
+clay-tool-n-point-deformation
+clay-tool-offset
+clay-tool-options
+clay-tool-paintbrush
+clay-tool-paint-select
+clay-tool-path
+clay-tool-pencil
+clay-tool-perspective
+clay-tool-perspective-clone
+clay-tool-posterize
+clay-tool-preset
+clay-tool-rect-select
+clay-tool-rotate
+clay-tool-scale
+clay-tool-seamless-clone
+clay-tool-shadows-highlights
+clay-tool-shear
+clay-tool-smudge
+clay-tool-text
+clay-tool-threshold
+clay-tool-transform-3d
+clay-tool-unified-transform
+clay-tool-warp
+clay-tool-zoom
+

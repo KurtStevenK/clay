@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -26,8 +26,8 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "imap_icons.h"
 #include "imap_main.h"
@@ -36,7 +36,7 @@
 #include "imap_rectangle.h"
 #include "imap_ui_grid.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 static gboolean rectangle_is_valid(Object_t *obj);
@@ -333,7 +333,7 @@ x_changed_cb(GtkWidget *widget, gpointer data)
    Object_t *obj = props->obj;
    gint x = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 
-   if (gimp_chain_button_get_active(GIMP_CHAIN_BUTTON(props->chain_button)))
+   if (clay_chain_button_get_active(CLAY_CHAIN_BUTTON(props->chain_button)))
       gtk_spin_button_set_value(GTK_SPIN_BUTTON(props->y), x);
 
    ObjectToRectangle(obj)->x = x;
@@ -409,7 +409,7 @@ rectangle_create_info_widget(GtkWidget *frame)
                     G_CALLBACK(height_changed_cb), (gpointer) props);
    create_label_in_grid (grid, 3, 3, _("pixels"));
 
-   chain_button = gimp_chain_button_new(GIMP_CHAIN_RIGHT);
+   chain_button = clay_chain_button_new(CLAY_CHAIN_RIGHT);
    props->chain_button = chain_button;
    gtk_grid_attach (GTK_GRID (grid), chain_button, 2, 2, 1, 2);
    gtk_widget_set_visible(chain_button, TRUE);

@@ -20,21 +20,21 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
+#include "core/clay.h"
 
-#include "widgets/gimphelp-ids.h"
+#include "widgets/clayhelp-ids.h"
 
 #include "tips-dialog.h"
 #include "tips-parser.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 enum
 {
@@ -42,13 +42,13 @@ enum
   RESPONSE_NEXT     = 2
 };
 
-static void     tips_dialog_set_tip  (GimpTip       *tip);
+static void     tips_dialog_set_tip  (ClayTip       *tip);
 static void     tips_dialog_response (GtkWidget     *dialog,
                                       gint           response);
 static void     tips_dialog_destroy  (GtkWidget     *widget,
-                                      GimpGuiConfig *config);
+                                      ClayGuiConfig *config);
 static gboolean more_button_clicked  (GtkWidget     *button,
-                                      Gimp          *gimp);
+                                      Clay          *clay);
 
 
 static GtkWidget *tips_dialog = NULL;
@@ -59,45 +59,45 @@ static GList     *current_tip = NULL;
 
 
 GtkWidget *
-tips_dialog_create (Gimp *gimp)
+tips_dialog_create (Clay *clay)
 {
-  GimpGuiConfig *config;
+  ClayGuiConfig *config;
   GtkWidget     *vbox;
   GtkWidget     *hbox;
   GtkWidget     *button;
   GtkWidget     *image;
   gint           tips_count;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), NULL);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), NULL);
 
   if (!tips)
     {
       GError *error = NULL;
       GFile  *file;
 
-      file = gimp_data_directory_file ("tips", "gimp-tips.xml", NULL);
+      file = clay_data_directory_file ("tips", "clay-tips.xml", NULL);
 
-      tips = gimp_tips_from_file (file, &error);
+      tips = clay_tips_from_file (file, &error);
 
       if (! tips)
         {
-          GimpTip *tip;
+          ClayTip *tip;
 
           if (! error)
             {
-              tip = gimp_tip_new (_("The Clay tips file is empty!"), NULL);
+              tip = clay_tip_new (_("The Clay tips file is empty!"), NULL);
             }
           else if (error->code == G_FILE_ERROR_NOENT)
             {
-              tip = gimp_tip_new (_("The Clay tips file appears to be "
+              tip = clay_tip_new (_("The Clay tips file appears to be "
                                     "missing!"),
                                   _("There should be a file called '%s'. "
                                     "Please check your installation."),
-                                  gimp_file_get_utf8_name (file));
+                                  clay_file_get_utf8_name (file));
             }
           else
             {
-              tip = gimp_tip_new (_("The Clay tips file could not be parsed!"),
+              tip = clay_tip_new (_("The Clay tips file could not be parsed!"),
                                   "%s", error->message);
             }
 
@@ -106,7 +106,7 @@ tips_dialog_create (Gimp *gimp)
       else if (error)
         {
           g_printerr ("Error while parsing '%s': %s\n",
-                      gimp_file_get_utf8_name (file), error->message);
+                      clay_file_get_utf8_name (file), error->message);
         }
 
       g_clear_error (&error);
@@ -115,7 +115,7 @@ tips_dialog_create (Gimp *gimp)
 
   tips_count = g_list_length (tips);
 
-  config = GIMP_GUI_CONFIG (gimp->config);
+  config = CLAY_GUI_CONFIG (clay->config);
 
   if (config->last_tip_shown >= tips_count || config->last_tip_shown < 0)
     config->last_tip_shown = 0;
@@ -125,22 +125,22 @@ tips_dialog_create (Gimp *gimp)
   if (tips_dialog)
     return tips_dialog;
 
-  tips_dialog = gimp_dialog_new (_("Clay Tip of the Day"),
-                                 "gimp-tip-of-the-day",
-                                 NULL, 0, gimp_standard_help_func,
-                                 GIMP_HELP_TIPS_DIALOG,
+  tips_dialog = clay_dialog_new (_("Clay Tip of the Day"),
+                                 "clay-tip-of-the-day",
+                                 NULL, 0, clay_standard_help_func,
+                                 CLAY_HELP_TIPS_DIALOG,
                                  NULL);
 
   button = gtk_dialog_add_button (GTK_DIALOG (tips_dialog),
                                   _("_Previous Tip"), RESPONSE_PREVIOUS);
-  image = gtk_image_new_from_icon_name (GIMP_ICON_GO_PREVIOUS,
+  image = gtk_image_new_from_icon_name (CLAY_ICON_GO_PREVIOUS,
                                         GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), image);
   gtk_widget_set_visible (image, TRUE);
 
   button = gtk_dialog_add_button (GTK_DIALOG (tips_dialog),
                                   _("_Next Tip"), RESPONSE_NEXT);
-  image = gtk_image_new_from_icon_name (GIMP_ICON_GO_NEXT,
+  image = gtk_image_new_from_icon_name (CLAY_ICON_GO_NEXT,
                                         GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), image);
   gtk_widget_set_visible (image, TRUE);
@@ -173,7 +173,7 @@ tips_dialog_create (Gimp *gimp)
   gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
   gtk_widget_set_visible (vbox, TRUE);
 
-  image = gtk_image_new_from_icon_name (GIMP_ICON_DIALOG_INFORMATION,
+  image = gtk_image_new_from_icon_name (CLAY_ICON_DIALOG_INFORMATION,
                                         GTK_ICON_SIZE_DIALOG);
   gtk_widget_set_valign (image, GTK_ALIGN_START);
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
@@ -200,7 +200,7 @@ tips_dialog_create (Gimp *gimp)
 
   g_signal_connect (more_button, "activate-link",
                     G_CALLBACK (more_button_clicked),
-                    gimp);
+                    clay);
 
   tips_dialog_set_tip (current_tip->data);
 
@@ -209,7 +209,7 @@ tips_dialog_create (Gimp *gimp)
 
 static void
 tips_dialog_destroy (GtkWidget     *widget,
-                     GimpGuiConfig *config)
+                     ClayGuiConfig *config)
 {
   /* the last-shown-tip is saved in sessionrc */
   config->last_tip_shown = g_list_position (tips, current_tip);
@@ -217,7 +217,7 @@ tips_dialog_destroy (GtkWidget     *widget,
   tips_dialog = NULL;
   current_tip = NULL;
 
-  gimp_tips_free (tips);
+  clay_tips_free (tips);
   tips = NULL;
 }
 
@@ -244,7 +244,7 @@ tips_dialog_response (GtkWidget *dialog,
 }
 
 static void
-tips_dialog_set_tip (GimpTip *tip)
+tips_dialog_set_tip (ClayTip *tip)
 {
   g_return_if_fail (tip != NULL);
 
@@ -259,12 +259,12 @@ tips_dialog_set_tip (GimpTip *tip)
 
 static gboolean
 more_button_clicked (GtkWidget *button,
-                     Gimp      *gimp)
+                     Clay      *clay)
 {
-  GimpTip *tip = current_tip->data;
+  ClayTip *tip = current_tip->data;
 
   if (tip->help_id)
-    gimp_help (gimp, NULL, NULL, tip->help_id);
+    clay_help (clay, NULL, NULL, tip->help_id);
 
   /* Do not run the link set at construction. */
   return TRUE;

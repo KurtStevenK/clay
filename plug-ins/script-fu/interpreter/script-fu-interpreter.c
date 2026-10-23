@@ -17,7 +17,7 @@
 
 #include "config.h"
 #include <glib.h>
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "libscriptfu/script-fu-lib.h"
 
@@ -29,9 +29,9 @@
  */
 
 /* We don't need to load (into the interpreter) any .scm files handled by extension-script-fu.
- * Namely, the .scm in the GIMP installation /scripts or in the user local /scripts dirs.
+ * Namely, the .scm in the Clay installation /scripts or in the user local /scripts dirs.
  *
- * During startup, GIMP might call gimp-script-fu-interpreter
+ * During startup, Clay might call clay-script-fu-interpreter
  * to query new files such as /plug-ins/fu/fu.scm.
  * This is before extension-script-fu starts.
  * But all the .scm files handled by extension-script-fu are type TEMPORARY and not needed
@@ -48,7 +48,7 @@
  * scrip-fu-interpreter always inits embedded interpreter(allow_register=TRUE)
  * In the "run" phase, you don't need script-fu-register to be defined, but its harmless.
  *
- * The usual sequence of phases and callbacks from GimpPlugin is:
+ * The usual sequence of phases and callbacks from ClayPlugin is:
  *   query phase
  *      set_i18n          script_fu_interpreter_get_i18n
  *      query procedures  script_fu_interpreter_list_defined_proc_names
@@ -64,10 +64,10 @@ static GFile *script_fu_get_plugin_parent_path (const gchar *path_to_this_script
 static void   script_fu_free_path_list         (GList      **list);
 static void   script_fu_interpreter_init_inner (void);
 static void   script_fu_interpreter_load_script (
-                                                GimpPlugIn  *plug_in,
+                                                ClayPlugIn  *plug_in,
                                                 const gchar *path_to_script);
 static void   script_fu_interpreter_init_and_load_script (
-                                                GimpPlugIn  *plug_in,
+                                                ClayPlugIn  *plug_in,
                                                 const gchar *path_to_script);
 
 /* Return a list of PDB procedure names defined in all .scm files in
@@ -85,7 +85,7 @@ static void   script_fu_interpreter_init_and_load_script (
  * Caller must free the list.
  */
 GList *
-script_fu_interpreter_list_defined_proc_names (GimpPlugIn  *plug_in,
+script_fu_interpreter_list_defined_proc_names (ClayPlugIn  *plug_in,
                                                const gchar *path_to_this_script)
 {
   GList *name_list = NULL;  /* list of strings */
@@ -100,17 +100,17 @@ script_fu_interpreter_list_defined_proc_names (GimpPlugIn  *plug_in,
   script_fu_free_path_list (&path_list);
 
   /* Usually name_list is not NULL i.e. not empty.
-   * But an .scm file that is not an actual GIMP plugin, or broken, may yield empty list.
+   * But an .scm file that is not an actual Clay plugin, or broken, may yield empty list.
    */
   return name_list;
 }
 
-GimpProcedure *
-script_fu_interpreter_create_proc (GimpPlugIn  *plug_in,
+ClayProcedure *
+script_fu_interpreter_create_proc (ClayPlugIn  *plug_in,
                                    const gchar *proc_name,
                                    const gchar *path_to_script)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   g_debug ("%s name: %s", G_STRFUNC, proc_name);
 
@@ -126,7 +126,7 @@ script_fu_interpreter_create_proc (GimpPlugIn  *plug_in,
    * and will fail gracefully, returning NULL.
    */
   /* Load scripts.
-   * We loaded scripts prior for callback gimp_plugin_set_18n,
+   * We loaded scripts prior for callback clay_plugin_set_18n,
    * but then i18n was not in effect.
    * Load again, but now i18n will translate GUI strings for declared args.
    */
@@ -135,7 +135,7 @@ script_fu_interpreter_create_proc (GimpPlugIn  *plug_in,
   /* Assert loaded scripts has proc_name.  Else this fails, returns NULL. */
   procedure = script_fu_create_PDB_proc_plugin (plug_in, proc_name);
 
-  /* When procedure is not NULL, the caller GIMP will it in the PDB. */
+  /* When procedure is not NULL, the caller Clay will it in the PDB. */
   return procedure;
 }
 
@@ -147,9 +147,9 @@ script_fu_interpreter_create_proc (GimpPlugIn  *plug_in,
  *
  * This is only used by the interpreter.
  * extension-script-fu does not let old-style scripts in /scripts
- * declare i18n; such scripts use only the shared translations gimp30-script-fu.mo.
+ * declare i18n; such scripts use only the shared translations clay30-script-fu.mo.
  *
- * This is called twice when GIMP is running the procedure:
+ * This is called twice when Clay is running the procedure:
  * 1. before create
  * 2. before run
  * For the first call, we initialize the interpreter and load the script.
@@ -157,7 +157,7 @@ script_fu_interpreter_create_proc (GimpPlugIn  *plug_in,
  * and we return the same results as the first call.
  */
 void
-script_fu_interpreter_get_i18n (GimpPlugIn  *plug_in,
+script_fu_interpreter_get_i18n (ClayPlugIn  *plug_in,
                                 const gchar *proc_name,
                                 const gchar *path_to_this_script,
                                 gchar       **i18n_domain, /* OUT handles */
@@ -186,7 +186,7 @@ script_fu_interpreter_get_i18n (GimpPlugIn  *plug_in,
  * A second call reloads the tree.
  */
 static void
-script_fu_interpreter_load_script (GimpPlugIn  *plug_in,
+script_fu_interpreter_load_script (ClayPlugIn  *plug_in,
                                    const gchar *path_to_script)
 {
   GList *path_list   = NULL;  /* list of GFile */
@@ -222,7 +222,7 @@ script_fu_interpreter_load_script (GimpPlugIn  *plug_in,
  */
 /* FUTURE we should not need to pass plug_in.  See script_fu_remove_script */
 static void
-script_fu_interpreter_init_and_load_script (GimpPlugIn  *plug_in,
+script_fu_interpreter_init_and_load_script (ClayPlugIn  *plug_in,
                                             const gchar *path_to_script)
 {
   if (script_fu_is_scripts_loaded ())
@@ -247,7 +247,7 @@ script_fu_get_plugin_parent_path (const gchar *path_to_this_script)
   GFile *path        = NULL;
   GFile *parent_path = NULL;
 
-  /* A libgimp GimpPlugin does not know its path,
+  /* A libclay ClayPlugin does not know its path,
    * but its path was passed in argv to this interpreter.
    * The path is to a file being queried e.g. "~/.config/Clay/2.99/plug-ins/fu/fu.scm"
    */
@@ -303,6 +303,6 @@ script_fu_interpreter_init_inner (void)
    *
    * Fourth argument FALSE means use no progress reporting.
    */
-  script_fu_init_embedded_interpreter (path_list, TRUE, GIMP_RUN_NONINTERACTIVE, FALSE);
+  script_fu_init_embedded_interpreter (path_list, TRUE, CLAY_RUN_NONINTERACTIVE, FALSE);
   script_fu_free_path_list (&path_list);
 }

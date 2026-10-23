@@ -39,10 +39,10 @@
         (ds-blur (max ds-blur 0))
         (ds-opacity (min ds-opacity 100))
         (ds-opacity (max ds-opacity 0))
-        (type (car (gimp-drawable-type-with-alpha drawable)))
-        (image-width (car (gimp-image-get-width image)))
+        (type (car (clay-drawable-type-with-alpha drawable)))
+        (image-width (car (clay-image-get-width image)))
         (hl-opacity (list hl-opacity-comp hl-opacity-comp hl-opacity-comp))
-        (image-height (car (gimp-image-get-height image)))
+        (image-height (car (clay-image-get-height image)))
         (active-selection 0)
         (from-selection 0)
         (theLayer 0)
@@ -51,71 +51,71 @@
         (mask 0)
         )
 
-    (gimp-context-push)
-    (gimp-context-set-defaults)
+    (clay-context-push)
+    (clay-context-set-defaults)
 
-    (gimp-image-undo-group-start image)
-    (gimp-layer-add-alpha drawable)
+    (clay-image-undo-group-start image)
+    (clay-layer-add-alpha drawable)
 
-    (if (= (car (gimp-selection-is-empty image)) TRUE)
+    (if (= (car (clay-selection-is-empty image)) TRUE)
         (begin
-          (gimp-image-select-item image CHANNEL-OP-REPLACE drawable)
-          (set! active-selection (car (gimp-selection-save image)))
+          (clay-image-select-item image CHANNEL-OP-REPLACE drawable)
+          (set! active-selection (car (clay-selection-save image)))
           (set! from-selection FALSE))
         (begin
           (set! from-selection TRUE)
-          (set! active-selection (car (gimp-selection-save image)))))
+          (set! active-selection (car (clay-selection-save image)))))
 
-    (set! hl-layer (car (gimp-layer-new image _"Highlight" image-width image-height type 100 LAYER-MODE-NORMAL)))
-    (gimp-image-insert-layer image hl-layer 0 -1)
+    (set! hl-layer (car (clay-layer-new image _"Highlight" image-width image-height type 100 LAYER-MODE-NORMAL)))
+    (clay-image-insert-layer image hl-layer 0 -1)
 
-    (gimp-selection-none image)
-    (gimp-drawable-edit-clear hl-layer)
-    (gimp-image-select-item image CHANNEL-OP-REPLACE active-selection)
+    (clay-selection-none image)
+    (clay-drawable-edit-clear hl-layer)
+    (clay-image-select-item image CHANNEL-OP-REPLACE active-selection)
 
-    (gimp-context-set-background hl-color)
-    (gimp-drawable-edit-fill hl-layer FILL-BACKGROUND)
-    (gimp-selection-translate image hl-offset-x hl-offset-y)
-    (gimp-drawable-edit-fill hl-layer FILL-BACKGROUND)
-    (gimp-selection-none image)
-    (gimp-image-select-item image CHANNEL-OP-REPLACE active-selection)
+    (clay-context-set-background hl-color)
+    (clay-drawable-edit-fill hl-layer FILL-BACKGROUND)
+    (clay-selection-translate image hl-offset-x hl-offset-y)
+    (clay-drawable-edit-fill hl-layer FILL-BACKGROUND)
+    (clay-selection-none image)
+    (clay-image-select-item image CHANNEL-OP-REPLACE active-selection)
 
-    (set! mask (car (gimp-layer-create-mask hl-layer ADD-MASK-WHITE)))
-    (gimp-layer-add-mask hl-layer mask)
+    (set! mask (car (clay-layer-create-mask hl-layer ADD-MASK-WHITE)))
+    (clay-layer-add-mask hl-layer mask)
 
-    (gimp-context-set-background hl-opacity)
-    (gimp-drawable-edit-fill mask FILL-BACKGROUND)
+    (clay-context-set-background hl-opacity)
+    (clay-drawable-edit-fill mask FILL-BACKGROUND)
 
-    (set! shadow-layer (car (gimp-layer-new image
+    (set! shadow-layer (car (clay-layer-new image
                                             _"Shadow"
                                             image-width
                                             image-height
                                             type
                                             ds-opacity
                                             LAYER-MODE-NORMAL)))
-    (gimp-image-insert-layer image shadow-layer 0 -1)
-    (gimp-selection-none image)
-    (gimp-drawable-edit-clear shadow-layer)
-    (gimp-image-select-item image CHANNEL-OP-REPLACE active-selection)
-    (gimp-selection-translate image ds-offset-x ds-offset-y)
-    (gimp-context-set-background ds-color)
-    (gimp-drawable-edit-fill shadow-layer FILL-BACKGROUND)
-    (gimp-selection-none image)
-    (gimp-drawable-merge-new-filter shadow-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
+    (clay-image-insert-layer image shadow-layer 0 -1)
+    (clay-selection-none image)
+    (clay-drawable-edit-clear shadow-layer)
+    (clay-image-select-item image CHANNEL-OP-REPLACE active-selection)
+    (clay-selection-translate image ds-offset-x ds-offset-y)
+    (clay-context-set-background ds-color)
+    (clay-drawable-edit-fill shadow-layer FILL-BACKGROUND)
+    (clay-selection-none image)
+    (clay-drawable-merge-new-filter shadow-layer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0
                                     "std-dev-x" (* 0.32 ds-blur) "std-dev-y" (* 0.32 ds-blur) "filter" "auto")
-    (gimp-image-select-item image CHANNEL-OP-REPLACE active-selection)
-    (gimp-drawable-edit-clear shadow-layer)
-    (gimp-image-lower-item image shadow-layer)
+    (clay-image-select-item image CHANNEL-OP-REPLACE active-selection)
+    (clay-drawable-edit-clear shadow-layer)
+    (clay-image-lower-item image shadow-layer)
 
     (if (= keep-selection FALSE)
-        (gimp-selection-none image))
+        (clay-selection-none image))
 
-    (gimp-image-set-selected-layers image (vector drawable))
-    (gimp-image-remove-channel image active-selection)
-    (gimp-image-undo-group-end image)
-    (gimp-displays-flush)
+    (clay-image-set-selected-layers image (vector drawable))
+    (clay-image-remove-channel image active-selection)
+    (clay-image-undo-group-end image)
+    (clay-displays-flush)
 
-    (gimp-context-pop)
+    (clay-context-pop)
   )
 )
 

@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "script-fu-types.h"    /* SFScript */
 #include "script-fu-lib.h"
@@ -49,21 +49,21 @@
  * 1) set the error message from tinyscheme into GError at given handle.
  * 2) return FALSE
  * Otherwise, return TRUE and discard any result of interpretation.
- * ScriptFu return values only have a GimpPDBStatus,
+ * ScriptFu return values only have a ClayPDBStatus,
  * since ScriptFu plugin scripts can only be declared returning void.
  *
  * In v2, we captured output from a script (calls to Scheme:display)
  * and they were a prefix of any error message.
- * In v3, output from a script is shown in any stdout/terminal in which Gimp was started.
+ * In v3, output from a script is shown in any stdout/terminal in which Clay was started.
  * And any error msg is retrieved from the inner interpreter.
  *
  * While interpreting, any errors from further calls to the PDB
- * can show error dialogs in any GIMP gui,
+ * can show error dialogs in any Clay gui,
  * unless the caller has taken responsibility with a prior call to
- * gimp_plug_in_set_pdb_error_handler
+ * clay_plug_in_set_pdb_error_handler
  *
  * FIXME: see script_fu_run_procedure.
- * It does not call gimp_plug_in_set_pdb_error_handler for NON-INTERACTIVE mode.
+ * It does not call clay_plug_in_set_pdb_error_handler for NON-INTERACTIVE mode.
  */
 gboolean
 script_fu_run_command (const gchar  *command,
@@ -87,24 +87,24 @@ script_fu_run_command (const gchar  *command,
  * The result is a PDB call result whose only value is the success.
  * Since no SF command returns more values i.e. scripts return type void.
  */
-static GimpValueArray *
-sf_wrap_run_command (GimpProcedure *procedure,
+static ClayValueArray *
+sf_wrap_run_command (ClayProcedure *procedure,
                      SFScript      *script,
                      gchar         *command)
 {
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
   gboolean        interpretation_result;
   GError         *error = NULL;
 
   /* Take responsibility for handling errors from the scripts further calls to PDB.
-   * ScriptFu does not show an error dialog, but forwards errors back to GIMP.
-   * This only tells GIMP that ScriptFu itself will forward GimpPDBStatus errors from
+   * ScriptFu does not show an error dialog, but forwards errors back to Clay.
+   * This only tells Clay that ScriptFu itself will forward ClayPDBStatus errors from
    * this scripts calls to the PDB.
-   * The onus is on this script's called PDB procedures to return errors in the GimpPDBStatus.
-   * Any that do not, but for example only call gimp-message, are breaching contract.
+   * The onus is on this script's called PDB procedures to return errors in the ClayPDBStatus.
+   * Any that do not, but for example only call clay-message, are breaching contract.
    */
-  gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                      GIMP_PDB_ERROR_HANDLER_PLUGIN);
+  clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                      CLAY_PDB_ERROR_HANDLER_PLUGIN);
 
   interpretation_result = script_fu_run_command (command, &error);
 
@@ -113,45 +113,45 @@ sf_wrap_run_command (GimpProcedure *procedure,
       /* This is to the console.
        * script->name not localized.
        * error->message expected to be localized.
-       * GIMP will later display "PDB procedure failed: <message>" localized.
+       * Clay will later display "PDB procedure failed: <message>" localized.
        */
       g_warning ("While executing %s: %s",
                  script->name,
                  error->message);
       /* A GError was allocated and this will take ownership. */
-      result = gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_EXECUTION_ERROR,
+      result = clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_EXECUTION_ERROR,
                                                  error);
     }
   else
     {
-      result = gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_SUCCESS,
+      result = clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_SUCCESS,
                                                  NULL);
     }
 
-  gimp_plug_in_set_pdb_error_handler (gimp_get_plug_in (),
-                                      GIMP_PDB_ERROR_HANDLER_INTERNAL);
+  clay_plug_in_set_pdb_error_handler (clay_get_plug_in (),
+                                      CLAY_PDB_ERROR_HANDLER_INTERNAL);
 
   return result;
 }
 
-/* Interpret a script that defines a GimpImageProcedure.
+/* Interpret a script that defines a ClayImageProcedure.
  *
  * Similar to v2 code in script-fu-interface.c, except:
- * 1) builds a command from a GValueArray from a GimpConfig,
+ * 1) builds a command from a GValueArray from a ClayConfig,
  *    instead of from local array of SFArg.
- * 2) adds actual args image, drawable, etc. for GimpImageProcedure
+ * 2) adds actual args image, drawable, etc. for ClayImageProcedure
  */
-GimpValueArray *
-script_fu_interpret_image_proc (GimpProcedure        *procedure,
+ClayValueArray *
+script_fu_interpret_image_proc (ClayProcedure        *procedure,
                                 SFScript             *script,
-                                GimpImage            *image,
-                                GimpDrawable        **drawables,
-                                GimpProcedureConfig  *config)
+                                ClayImage            *image,
+                                ClayDrawable        **drawables,
+                                ClayProcedureConfig  *config)
 {
   gchar          *command;
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
 
   command = script_fu_script_get_command_for_image_proc (script, image, drawables, config);
   result = sf_wrap_run_command (procedure, script, command);
@@ -159,14 +159,14 @@ script_fu_interpret_image_proc (GimpProcedure        *procedure,
   return result;
 }
 
-/* Interpret a script that defines a GimpProcedure. */
-GimpValueArray *
-script_fu_interpret_regular_proc (GimpProcedure        *procedure,
+/* Interpret a script that defines a ClayProcedure. */
+ClayValueArray *
+script_fu_interpret_regular_proc (ClayProcedure        *procedure,
                                   SFScript             *script,
-                                  GimpProcedureConfig  *config)
+                                  ClayProcedureConfig  *config)
 {
   gchar          *command;
-  GimpValueArray *result = NULL;
+  ClayValueArray *result = NULL;
 
   command = script_fu_script_get_command_for_regular_proc (script, config);
   result = sf_wrap_run_command (procedure, script, command);

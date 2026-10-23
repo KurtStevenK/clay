@@ -18,26 +18,26 @@
 #pragma once
 
 
-void   drawable_equalize_cmd_callback       (GimpAction *action,
+void   drawable_equalize_cmd_callback       (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);
-void   drawable_levels_stretch_cmd_callback (GimpAction *action,
-                                             GVariant   *value,
-                                             gpointer    data);
-
-void   drawable_visible_cmd_callback        (GimpAction *action,
-                                             GVariant   *value,
-                                             gpointer    data);
-void   drawable_lock_content_cmd_callback   (GimpAction *action,
-                                             GVariant   *value,
-                                             gpointer    data);
-void   drawable_lock_position_cmd_callback  (GimpAction *action,
+void   drawable_levels_stretch_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);
 
-void   drawable_flip_cmd_callback           (GimpAction *action,
+void   drawable_visible_cmd_callback        (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);
-void   drawable_rotate_cmd_callback         (GimpAction *action,
+void   drawable_lock_content_cmd_callback   (ClayAction *action,
+                                             GVariant   *value,
+                                             gpointer    data);
+void   drawable_lock_position_cmd_callback  (ClayAction *action,
+                                             GVariant   *value,
+                                             gpointer    data);
+
+void   drawable_flip_cmd_callback           (ClayAction *action,
+                                             GVariant   *value,
+                                             gpointer    data);
+void   drawable_rotate_cmd_callback         (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);

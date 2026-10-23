@@ -18,7 +18,7 @@
 
 
 sub gradients_popup {
-    $blurb = 'Invokes the Gimp gradients selection dialog.';
+    $blurb = 'Invokes the Clay gradients selection dialog.';
     $help  = 'Opens a dialog letting a user choose a gradient.';
 
     &andy_pdb_misc('1998');
@@ -37,7 +37,7 @@ sub gradients_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->gradient_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->gradient_factory);
 
   /* Formerly, this procedure had another parameter:
    * the sample size of the gradient's data passed in the changed callback.
@@ -45,12 +45,12 @@ sub gradients_popup {
    * the callback won't return a sample of the data at all.
    */
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, gradient_callback) ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
-                             gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, gradient_callback) ||
+      ! clay_pdb_dialog_new (clay, context, progress,
+                             clay_container_get_child_type (container),
                              parent_window, popup_title, gradient_callback,
-                             GIMP_OBJECT (initial_gradient), NULL))
+                             CLAY_OBJECT (initial_gradient), NULL))
     success = FALSE;
 }
 CODE
@@ -71,12 +71,12 @@ sub gradients_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->gradient_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->gradient_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, gradient_callback) ||
-      ! gimp_pdb_dialog_close (gimp,
-                               gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, gradient_callback) ||
+      ! clay_pdb_dialog_close (clay,
+                               clay_container_get_child_type (container),
                                gradient_callback))
     success = FALSE;
 }
@@ -100,13 +100,13 @@ sub gradients_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->gradient_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->gradient_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, gradient_callback) ||
-      ! gimp_pdb_dialog_set (gimp,
-                             gimp_container_get_child_type (container),
-                             gradient_callback, GIMP_OBJECT (gradient), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, gradient_callback) ||
+      ! clay_pdb_dialog_set (clay,
+                             clay_container_get_child_type (container),
+                             gradient_callback, CLAY_OBJECT (gradient), NULL))
     success = FALSE;
 }
 CODE
@@ -114,10 +114,10 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdatafactory.h"
-              "core/gimpgradient.h");
+@headers = qw("core/clay.h"
+              "core/claycontainer.h"
+              "core/claydatafactory.h"
+              "core/claygradient.h");
 
 @procs = qw(gradients_popup
             gradients_close_popup
@@ -126,8 +126,8 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Gradient UI';
-$doc_title = 'gimpgradientselect';
+$doc_title = 'claygradientselect';
 $doc_short_desc = 'Methods of a gradient chooser dialog';
-$doc_long_desc = 'A dialog letting a user choose a gradient.  Read more at gimpfontselect.';
+$doc_long_desc = 'A dialog letting a user choose a gradient.  Read more at clayfontselect.';
 
 1;

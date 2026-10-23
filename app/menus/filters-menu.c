@@ -23,14 +23,14 @@
 
 #include "menus-types.h"
 
-#include "gegl/gimp-gegl-utils.h"
+#include "gegl/clay-gegl-utils.h"
 
-#include "core/gimp.h"
-#include "core/gimp-filter-history.h"
+#include "core/clay.h"
+#include "core/clay-filter-history.h"
 
-#include "widgets/gimpactiongroup.h"
-#include "widgets/gimpstringaction.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayactiongroup.h"
+#include "widgets/claystringaction.h"
+#include "widgets/clayuimanager.h"
 
 #include "filters-menu.h"
 
@@ -38,43 +38,43 @@
 /*  public functions  */
 
 void
-filters_menu_setup (GimpUIManager *manager,
+filters_menu_setup (ClayUIManager *manager,
                     const gchar   *ui_path)
 {
-  GimpActionGroup  *group;
+  ClayActionGroup  *group;
   gchar           **gegl_actions;
   gint              i;
 
-  g_return_if_fail (GIMP_IS_UI_MANAGER (manager));
+  g_return_if_fail (CLAY_IS_UI_MANAGER (manager));
   g_return_if_fail (ui_path != NULL);
 
-  for (i = 0; i < gimp_filter_history_size (manager->gimp); i++)
+  for (i = 0; i < clay_filter_history_size (manager->clay); i++)
     {
       gchar *action_name;
 
       action_name = g_strdup_printf ("filters-recent-%02d", i + 1);
 
-      gimp_ui_manager_add_ui (manager, "/Filters/Recently Used/[Filters]",
+      clay_ui_manager_add_ui (manager, "/Filters/Recently Used/[Filters]",
                               action_name, FALSE);
 
       g_free (action_name);
     }
 
-  group        = gimp_ui_manager_get_action_group (manager, "filters");
+  group        = clay_ui_manager_get_action_group (manager, "filters");
   gegl_actions = g_object_get_data (G_OBJECT (group), "filters-group-generated-gegl-actions");
 
   g_return_if_fail (gegl_actions != NULL);
 
   for (i = 0; i < g_strv_length (gegl_actions); i++)
     {
-      GimpAction  *action;
+      ClayAction  *action;
       gchar       *path;
       gchar       *root;
       const gchar *op_name;
 
-      action  = gimp_action_group_get_action (group, gegl_actions[i]);
-      op_name = (const gchar *) GIMP_STRING_ACTION (action)->value;
-      path    = (gchar *) gegl_operation_get_key (op_name, "gimp:menu-path");
+      action  = clay_action_group_get_action (group, gegl_actions[i]);
+      op_name = (const gchar *) CLAY_STRING_ACTION (action)->value;
+      path    = (gchar *) gegl_operation_get_key (op_name, "clay:menu-path");
 
       if (path == NULL)
         continue;
@@ -85,7 +85,7 @@ filters_menu_setup (GimpUIManager *manager,
       if (root == NULL || root == path)
         {
           g_printerr ("GEGL operation \"%s\" attempted to register a menu item "
-                      "with an invalid value for key \"gimp:menu-path\": \"%s\"\n"
+                      "with an invalid value for key \"clay:menu-path\": \"%s\"\n"
                       "Expected format is \"<MenuName>/menu/submenu.\n",
                       gegl_actions[i], path);
         }
@@ -94,7 +94,7 @@ filters_menu_setup (GimpUIManager *manager,
           GList *managers;
 
           *root    = '\0';
-          managers = gimp_ui_managers_from_name (path);
+          managers = clay_ui_managers_from_name (path);
 
           if (managers == NULL)
             {
@@ -112,7 +112,7 @@ filters_menu_setup (GimpUIManager *manager,
               *root = '/';
 
               for (GList *m = managers; m; m = m->next)
-                gimp_ui_manager_add_ui (m->data, root, gegl_actions[i], FALSE);
+                clay_ui_manager_add_ui (m->data, root, gegl_actions[i], FALSE);
             }
         }
       g_free (path);

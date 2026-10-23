@@ -22,54 +22,54 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "actions-types.h"
 
-#include "operations/gimp-operation-config.h"
-#include "operations/gimpoperationsettings.h"
+#include "operations/clay-operation-config.h"
+#include "operations/clayoperationsettings.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimp-filter-history.h"
-#include "core/gimpimage.h"
-#include "core/gimpitem.h"
-#include "core/gimpprogress.h"
+#include "core/clay.h"
+#include "core/clay-filter-history.h"
+#include "core/clayimage.h"
+#include "core/clayitem.h"
+#include "core/clayprogress.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
-#include "widgets/gimpaction.h"
+#include "widgets/clayaction.h"
 
 #include "actions.h"
 #include "filters-commands.h"
-#include "gimpgeglprocedure.h"
+#include "claygeglprocedure.h"
 #include "procedure-commands.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  local function prototypes  */
 
-static gchar * filters_parse_operation (Gimp          *gimp,
+static gchar * filters_parse_operation (Clay          *clay,
                                         const gchar   *operation_str,
                                         const gchar   *icon_name,
-                                        GimpObject   **settings);
+                                        ClayObject   **settings);
 
 /*  public functions  */
 
 void
-filters_apply_cmd_callback (GimpAction *action,
+filters_apply_cmd_callback (ClayAction *action,
                             GVariant   *value,
                             gpointer    data)
 {
-  GimpImage     *image;
+  ClayImage     *image;
   GList         *drawables;
   gchar         *operation;
-  GimpObject    *settings;
-  GimpProcedure *procedure;
+  ClayObject    *settings;
+  ClayProcedure *procedure;
   GVariant      *variant;
 
   return_if_no_drawables (image, drawables, data);
@@ -81,27 +81,27 @@ filters_apply_cmd_callback (GimpAction *action,
       return;
     }
 
-  operation = filters_parse_operation (image->gimp,
+  operation = filters_parse_operation (image->clay,
                                        g_variant_get_string (value, NULL),
-                                       gimp_action_get_icon_name (action),
+                                       clay_action_get_icon_name (action),
                                        &settings);
 
-  procedure = gimp_gegl_procedure_new (image->gimp,
+  procedure = clay_gegl_procedure_new (image->clay,
                                        NULL,
-                                       GIMP_RUN_NONINTERACTIVE, settings,
+                                       CLAY_RUN_NONINTERACTIVE, settings,
                                        operation,
-                                       gimp_action_get_name (action),
-                                       gimp_action_get_label (action),
-                                       gimp_action_get_tooltip (action),
-                                       gimp_action_get_icon_name (action),
-                                       gimp_action_get_help_id (action));
+                                       clay_action_get_name (action),
+                                       clay_action_get_label (action),
+                                       clay_action_get_tooltip (action),
+                                       clay_action_get_icon_name (action),
+                                       clay_action_get_help_id (action));
 
   g_free (operation);
 
   if (settings)
     g_object_unref (settings);
 
-  gimp_filter_history_add (image->gimp, procedure);
+  clay_filter_history_add (image->clay, procedure);
 
   variant = g_variant_new_uint64 (GPOINTER_TO_SIZE (procedure));
   g_variant_take_ref (variant);
@@ -113,13 +113,13 @@ filters_apply_cmd_callback (GimpAction *action,
 }
 
 void
-filters_apply_interactive_cmd_callback (GimpAction *action,
+filters_apply_interactive_cmd_callback (ClayAction *action,
                                         GVariant   *value,
                                         gpointer    data)
 {
-  GimpImage     *image;
+  ClayImage     *image;
   GList         *drawables;
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
   GVariant      *variant;
 
   return_if_no_drawables (image, drawables, data);
@@ -131,17 +131,17 @@ filters_apply_interactive_cmd_callback (GimpAction *action,
       return;
     }
 
-  procedure = gimp_gegl_procedure_new (image->gimp,
+  procedure = clay_gegl_procedure_new (image->clay,
                                        NULL,
-                                       GIMP_RUN_INTERACTIVE, NULL,
+                                       CLAY_RUN_INTERACTIVE, NULL,
                                        g_variant_get_string (value, NULL),
-                                       gimp_action_get_name (action),
-                                       gimp_action_get_label (action),
-                                       gimp_action_get_tooltip (action),
-                                       gimp_action_get_icon_name (action),
-                                       gimp_action_get_help_id (action));
+                                       clay_action_get_name (action),
+                                       clay_action_get_label (action),
+                                       clay_action_get_tooltip (action),
+                                       clay_action_get_icon_name (action),
+                                       clay_action_get_help_id (action));
 
-  gimp_filter_history_add (image->gimp, procedure);
+  clay_filter_history_add (image->clay, procedure);
 
   variant = g_variant_new_uint64 (GPOINTER_TO_SIZE (procedure));
   g_variant_take_ref (variant);
@@ -153,53 +153,53 @@ filters_apply_interactive_cmd_callback (GimpAction *action,
 }
 
 void
-filters_repeat_cmd_callback (GimpAction *action,
+filters_repeat_cmd_callback (ClayAction *action,
                              GVariant   *value,
                              gpointer    data)
 {
-  Gimp          *gimp;
-  GimpDisplay   *display;
-  GimpProcedure *procedure;
-  GimpRunMode    run_mode;
+  Clay          *clay;
+  ClayDisplay   *display;
+  ClayProcedure *procedure;
+  ClayRunMode    run_mode;
 
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
   return_if_no_display (display, data);
 
-  run_mode = (GimpRunMode) g_variant_get_int32 (value);
+  run_mode = (ClayRunMode) g_variant_get_int32 (value);
 
-  procedure = gimp_filter_history_nth (gimp, 0);
+  procedure = clay_filter_history_nth (clay, 0);
 
   if (procedure)
-    filters_run_procedure (gimp, display, procedure, run_mode);
+    filters_run_procedure (clay, display, procedure, run_mode);
 }
 
 void
-filters_history_cmd_callback (GimpAction *action,
+filters_history_cmd_callback (ClayAction *action,
                               GVariant   *value,
                               gpointer    data)
 {
-  Gimp          *gimp;
-  GimpDisplay   *display;
-  GimpProcedure *procedure;
+  Clay          *clay;
+  ClayDisplay   *display;
+  ClayProcedure *procedure;
   gsize          hack;
-  return_if_no_gimp (gimp, data);
+  return_if_no_clay (clay, data);
   return_if_no_display (display, data);
 
   hack = g_variant_get_uint64 (value);
 
   procedure = GSIZE_TO_POINTER (hack);
 
-  filters_run_procedure (gimp, display, procedure, GIMP_RUN_INTERACTIVE);
+  filters_run_procedure (clay, display, procedure, CLAY_RUN_INTERACTIVE);
 }
 
 
 /*  private functions  */
 
 static gchar *
-filters_parse_operation (Gimp         *gimp,
+filters_parse_operation (Clay         *clay,
                          const gchar  *operation_str,
                          const gchar  *icon_name,
-                         GimpObject  **settings)
+                         ClayObject  **settings)
 {
   const gchar *newline = strchr (operation_str, '\n');
 
@@ -218,12 +218,12 @@ filters_parse_operation (Gimp         *gimp,
           GError *error = NULL;
 
           *settings =
-            g_object_new (gimp_operation_config_get_type (gimp, operation,
+            g_object_new (clay_operation_config_get_type (clay, operation,
                                                           icon_name,
-                                                          GIMP_TYPE_OPERATION_SETTINGS),
+                                                          CLAY_TYPE_OPERATION_SETTINGS),
                           NULL);
 
-          if (! gimp_config_deserialize_string (GIMP_CONFIG (*settings),
+          if (! clay_config_deserialize_string (CLAY_CONFIG (*settings),
                                                 serialized, -1, NULL,
                                                 &error))
             {
@@ -244,41 +244,41 @@ filters_parse_operation (Gimp         *gimp,
 }
 
 void
-filters_run_procedure (Gimp          *gimp,
-                       GimpDisplay   *display,
-                       GimpProcedure *procedure,
-                       GimpRunMode    run_mode)
+filters_run_procedure (Clay          *clay,
+                       ClayDisplay   *display,
+                       ClayProcedure *procedure,
+                       ClayRunMode    run_mode)
 {
-  GimpObject     *settings = NULL;
-  GimpValueArray *args;
+  ClayObject     *settings = NULL;
+  ClayValueArray *args;
 
-  if (GIMP_IS_GEGL_PROCEDURE (procedure))
+  if (CLAY_IS_GEGL_PROCEDURE (procedure))
     {
-      GimpGeglProcedure *gegl_procedure = GIMP_GEGL_PROCEDURE (procedure);
+      ClayGeglProcedure *gegl_procedure = CLAY_GEGL_PROCEDURE (procedure);
 
-      if (gegl_procedure->default_run_mode == GIMP_RUN_NONINTERACTIVE)
-        run_mode = GIMP_RUN_NONINTERACTIVE;
+      if (gegl_procedure->default_run_mode == CLAY_RUN_NONINTERACTIVE)
+        run_mode = CLAY_RUN_NONINTERACTIVE;
 
       settings = gegl_procedure->default_settings;
     }
 
   /* Prevent non-interactive or repeated filters from running on invisible
    * layers unless the user has allowed this option */
-  if (run_mode == GIMP_RUN_NONINTERACTIVE)
+  if (run_mode == CLAY_RUN_NONINTERACTIVE)
     {
-      GimpImage     *image  = gimp_display_get_image (display);
-      GimpGuiConfig *config = GIMP_GUI_CONFIG (display->gimp->config);
+      ClayImage     *image  = clay_display_get_image (display);
+      ClayGuiConfig *config = CLAY_GUI_CONFIG (display->clay->config);
       GList         *drawables;
       GList         *iter;
 
-      drawables = gimp_image_get_selected_drawables (image);
+      drawables = clay_image_get_selected_drawables (image);
       for (iter = drawables; iter; iter = iter->next)
         {
-          if (! gimp_item_is_visible (GIMP_ITEM (iter->data)) &&
+          if (! clay_item_is_visible (CLAY_ITEM (iter->data)) &&
               ! config->edit_non_visible)
             {
-              gimp_message_literal (display->gimp, G_OBJECT (display),
-                                    GIMP_MESSAGE_ERROR,
+              clay_message_literal (display->clay, G_OBJECT (display),
+                                    CLAY_MESSAGE_ERROR,
                                     _("A selected layer is not visible."));
               g_list_free (drawables);
               return;
@@ -293,25 +293,25 @@ filters_run_procedure (Gimp          *gimp,
     {
       gboolean success = FALSE;
 
-      if (run_mode == GIMP_RUN_NONINTERACTIVE)
+      if (run_mode == CLAY_RUN_NONINTERACTIVE)
         {
           success =
-            procedure_commands_run_procedure (procedure, gimp,
-                                              GIMP_PROGRESS (display),
+            procedure_commands_run_procedure (procedure, clay,
+                                              CLAY_PROGRESS (display),
                                               args);
         }
       else
         {
           success =
-            procedure_commands_run_procedure_async (procedure, gimp,
-                                                    GIMP_PROGRESS (display),
+            procedure_commands_run_procedure_async (procedure, clay,
+                                                    CLAY_PROGRESS (display),
                                                     run_mode, args,
                                                     display);
         }
 
       if (success &&
-          (! GIMP_IS_GEGL_PROCEDURE (procedure) ||
-           /* XXX GimpGeglProcedure made for filter-editing are
+          (! CLAY_IS_GEGL_PROCEDURE (procedure) ||
+           /* XXX ClayGeglProcedure made for filter-editing are
             * short-lived and should not be added to history. I'm not
             * sure it makes sense UX-wise anyway ("used" filters are for
             * first calls, not edits).
@@ -319,9 +319,9 @@ filters_run_procedure (Gimp          *gimp,
             * changes are needed too. Cf. crash report #12576 and my
             * (Jehan's) technical comment in there..
             */
-           ! gimp_gegl_procedure_is_editing_filter (GIMP_GEGL_PROCEDURE (procedure))))
-        gimp_filter_history_add (gimp, procedure);
+           ! clay_gegl_procedure_is_editing_filter (CLAY_GEGL_PROCEDURE (procedure))))
+        clay_filter_history_add (clay, procedure);
 
-      gimp_value_array_unref (args);
+      clay_value_array_unref (args);
     }
 }

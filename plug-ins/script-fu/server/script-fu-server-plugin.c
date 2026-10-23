@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
+#include <libclay/clay.h>
 
 #include "script-fu-server.h"
 
@@ -28,34 +28,34 @@
 
 
 #define SCRIPT_FU_SERVER_TYPE (script_fu_server_get_type ())
-G_DECLARE_FINAL_TYPE (ScriptFuServer, script_fu_server, SCRIPT, FU_SERVER, GimpPlugIn)
+G_DECLARE_FINAL_TYPE (ScriptFuServer, script_fu_server, SCRIPT, FU_SERVER, ClayPlugIn)
 
 struct _ScriptFuServer
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
-static GList          * script_fu_server_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * script_fu_server_create_procedure (GimpPlugIn           *plug_in,
+static GList          * script_fu_server_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * script_fu_server_create_procedure (ClayPlugIn           *plug_in,
                                                            const gchar          *name);
 
-static GimpValueArray * script_fu_server_outer_run        (GimpProcedure        *procedure,
-                                                           GimpProcedureConfig  *config,
+static ClayValueArray * script_fu_server_outer_run        (ClayProcedure        *procedure,
+                                                           ClayProcedureConfig  *config,
                                                            gpointer              run_data);
-static void             script_fu_server_run_init         (GimpProcedure        *procedure,
-                                                           GimpRunMode           run_mode);
+static void             script_fu_server_run_init         (ClayProcedure        *procedure,
+                                                           ClayRunMode           run_mode);
 
 
-G_DEFINE_TYPE (ScriptFuServer, script_fu_server, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (ScriptFuServer, script_fu_server, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SCRIPT_FU_SERVER_TYPE)
+CLAY_MAIN (SCRIPT_FU_SERVER_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 script_fu_server_class_init (ScriptFuServerClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = script_fu_server_query_procedures;
   plug_in_class->create_procedure = script_fu_server_create_procedure;
@@ -68,7 +68,7 @@ script_fu_server_init (ScriptFuServer *script_fu_server)
 }
 
 static GList *
-script_fu_server_query_procedures (GimpPlugIn *plug_in)
+script_fu_server_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -77,22 +77,22 @@ script_fu_server_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-script_fu_server_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+script_fu_server_create_procedure (ClayPlugIn  *plug_in,
                                    const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   /* The run func script_fu_server_outer_run is defined in this source file. */
-  procedure = gimp_procedure_new (plug_in, name,
-                                  GIMP_PDB_PROC_TYPE_PLUGIN,
+  procedure = clay_procedure_new (plug_in, name,
+                                  CLAY_PDB_PROC_TYPE_PLUGIN,
                                   script_fu_server_outer_run, NULL, NULL);
 
-  gimp_procedure_set_menu_label (procedure, _("_Start Server..."));
-  gimp_procedure_add_menu_path (procedure,
+  clay_procedure_set_menu_label (procedure, _("_Start Server..."));
+  clay_procedure_add_menu_path (procedure,
                                 "<Image>/Filters/Development/Script-Fu");
 
-  gimp_procedure_set_documentation (procedure,
+  clay_procedure_set_documentation (procedure,
                                     _("Server for remote Script-Fu "
                                       "operation"),
                                     "Provides a server for remote "
@@ -105,32 +105,32 @@ script_fu_server_create_procedure (GimpPlugIn  *plug_in,
                                     "procedure with the old API will "
                                     "fail on purpose.",
                                     name);
-  gimp_procedure_set_attribution (procedure,
+  clay_procedure_set_attribution (procedure,
                                   "Spencer Kimball & Peter Mattis",
                                   "Spencer Kimball & Peter Mattis",
                                   "1997");
 
-  gimp_procedure_add_enum_argument (procedure, "run-mode",
+  clay_procedure_add_enum_argument (procedure, "run-mode",
                                     "Run mode",
                                     "The run mode",
-                                    GIMP_TYPE_RUN_MODE,
-                                    GIMP_RUN_INTERACTIVE,
+                                    CLAY_TYPE_RUN_MODE,
+                                    CLAY_RUN_INTERACTIVE,
                                     G_PARAM_READWRITE);
 
-  gimp_procedure_add_string_argument (procedure, "ip",
+  clay_procedure_add_string_argument (procedure, "ip",
                                       "IP",
                                       "The IP on which to listen for requests",
                                       NULL,
                                       G_PARAM_READWRITE);
 
-  gimp_procedure_add_int_argument (procedure, "port",
+  clay_procedure_add_int_argument (procedure, "port",
                                    "Port",
                                    "The port on which to listen for requests",
                                    0, G_MAXINT, 0,
                                    G_PARAM_READWRITE);
 
-  /* FUTURE: gimp_procedure_add_file_argument, but little benefit, need change script-fu-server.c */
-  gimp_procedure_add_string_argument (procedure, "logfile",
+  /* FUTURE: clay_procedure_add_file_argument, but little benefit, need change script-fu-server.c */
+  clay_procedure_add_string_argument (procedure, "logfile",
                                       "Log File",
                                       "The file to log activity to",
                                       NULL,
@@ -143,19 +143,19 @@ script_fu_server_create_procedure (GimpPlugIn  *plug_in,
 /*
  * Test cases:
  *
- * Normal starting is from GIMP GUI: "Filters>Development>Script-Fu>Start server...""
+ * Normal starting is from Clay GUI: "Filters>Development>Script-Fu>Start server...""
  * Expect a dialog to enter IP, etc.
  * Expect a console msg: "ScriptFu server: initialized and listening...""
  *
  * Does not have settings.  After the above,
  * Expect "Filters>Repeat Last" and "Reshow Last" to be disabled (greyed out)
  *
- * Execute the server from headless GIMP:
- * gimp -i --batch-interpreter='plug-in-script-fu-eval'
- " -c '(plug-in-script-fu-server 1 "127.0.0.1" 10008 "/tmp/gimp-log")'
+ * Execute the server from headless Clay:
+ * clay -i --batch-interpreter='plug-in-script-fu-eval'
+ " -c '(plug-in-script-fu-server 1 "127.0.0.1" 10008 "/tmp/clay-log")'
  *
  * Execute the binary from command line fails with:
- * "script-fu-server is a GIMP plug-in and must be run by GIMP to be used"
+ * "script-fu-server is a Clay plug-in and must be run by Clay to be used"
  *
  * The PDB procedure plug-in-script-fu-server CAN be called from another procedure
  * (but shouldn't be.)
@@ -173,7 +173,7 @@ script_fu_server_create_procedure (GimpPlugIn  *plug_in,
  * Its logging defaults to stdout, but optionally to a file.
  * The server logs errors in interpretation of the stream from the client.
  *
- * A client may quit the server by eval "(gimp-quit)"
+ * A client may quit the server by eval "(clay-quit)"
  * Otherwise, the server blocks on IO from the client.
  *
  * A server that dies leaves the client with a broken connection,
@@ -182,13 +182,13 @@ script_fu_server_create_procedure (GimpPlugIn  *plug_in,
  * A server is a child process of a Clay process.
  * Quitting or killing the parent process also kills the server.
  */
-static GimpValueArray *
-script_fu_server_outer_run (GimpProcedure        *procedure,
-                            GimpProcedureConfig  *config,
+static ClayValueArray *
+script_fu_server_outer_run (ClayProcedure        *procedure,
+                            ClayProcedureConfig  *config,
                             gpointer              run_data)
 {
-  GimpValueArray *return_vals = NULL;
-  GimpRunMode     run_mode    = GIMP_RUN_NONINTERACTIVE;
+  ClayValueArray *return_vals = NULL;
+  ClayRunMode     run_mode    = CLAY_RUN_NONINTERACTIVE;
 
   g_object_get (config, "run-mode", &run_mode, NULL);
   script_fu_server_run_init (procedure, run_mode);
@@ -198,7 +198,7 @@ script_fu_server_outer_run (GimpProcedure        *procedure,
 
   /*
    * Call the inner run func, defined in script-fu-server.c
-   * !!! This does not return unless a client evals "(gimp-quit)"
+   * !!! This does not return unless a client evals "(clay-quit)"
    */
   return_vals = script_fu_server_run (procedure, config);
 
@@ -223,11 +223,11 @@ script_fu_server_outer_run (GimpProcedure        *procedure,
  * and the SF server calls extension-script-fu via PDB calls.
  */
 static void
-script_fu_server_run_init (GimpProcedure *procedure,
-                           GimpRunMode    run_mode)
+script_fu_server_run_init (ClayProcedure *procedure,
+                           ClayRunMode    run_mode)
 {
   GList      *path;
-  GimpPlugIn *plug_in = gimp_procedure_get_plug_in (procedure);
+  ClayPlugIn *plug_in = clay_procedure_get_plug_in (procedure);
 
   /* The path to init and compat scripts, and /scripts. */
   path = script_fu_search_path ();

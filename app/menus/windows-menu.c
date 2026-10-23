@@ -21,26 +21,26 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpthumb/gimpthumb.h"
+#include "libclaythumb/claythumb.h"
 
 #include "menus-types.h"
 
-#include "config/gimpguiconfig.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpimage.h"
-#include "core/gimplist.h"
-#include "core/gimpviewable.h"
+#include "core/clay.h"
+#include "core/clayimage.h"
+#include "core/claylist.h"
+#include "core/clayviewable.h"
 
-#include "widgets/gimpaction.h"
-#include "widgets/gimpactionimpl.h"
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpdock.h"
-#include "widgets/gimpdockwindow.h"
-#include "widgets/gimpsessioninfo.h"
-#include "widgets/gimpuimanager.h"
+#include "widgets/clayaction.h"
+#include "widgets/clayactionimpl.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claydock.h"
+#include "widgets/claydockwindow.h"
+#include "widgets/claysessioninfo.h"
+#include "widgets/clayuimanager.h"
 
-#include "display/gimpdisplay.h"
+#include "display/claydisplay.h"
 
 #include "dialogs/dialogs.h"
 
@@ -49,93 +49,93 @@
 #include "windows-menu.h"
 
 
-static void      windows_menu_display_add                (GimpContainer     *container,
-                                                          GimpDisplay       *display,
-                                                          GimpUIManager     *manager);
-static void      windows_menu_display_remove             (GimpContainer     *container,
-                                                          GimpDisplay       *display,
-                                                          GimpUIManager     *manager);
-static void      windows_menu_display_reorder            (GimpContainer     *container,
-                                                          GimpDisplay       *display,
+static void      windows_menu_display_add                (ClayContainer     *container,
+                                                          ClayDisplay       *display,
+                                                          ClayUIManager     *manager);
+static void      windows_menu_display_remove             (ClayContainer     *container,
+                                                          ClayDisplay       *display,
+                                                          ClayUIManager     *manager);
+static void      windows_menu_display_reorder            (ClayContainer     *container,
+                                                          ClayDisplay       *display,
                                                           gint               old_index,
                                                           gint               new_index,
-                                                          GimpUIManager     *manager);
-static void      windows_menu_image_notify               (GimpDisplay       *display,
+                                                          ClayUIManager     *manager);
+static void      windows_menu_image_notify               (ClayDisplay       *display,
                                                           const GParamSpec  *unused,
-                                                          GimpUIManager     *manager);
+                                                          ClayUIManager     *manager);
 #ifdef PLATFORM_OSX
-static void      windows_menu_single_window_mode_notify  (GimpDisplayConfig *config,
+static void      windows_menu_single_window_mode_notify  (ClayDisplayConfig *config,
                                                           const GParamSpec  *pspec,
-                                                          GimpUIManager     *manager);
+                                                          ClayUIManager     *manager);
 #endif
-static void      windows_menu_dock_window_added          (GimpDialogFactory *factory,
-                                                          GimpDockWindow    *dock_window,
-                                                          GimpUIManager     *manager);
-static void      windows_menu_dock_window_removed        (GimpDialogFactory *factory,
-                                                          GimpDockWindow    *dock_window,
-                                                          GimpUIManager     *manager);
-static void      windows_menu_recent_add                 (GimpContainer     *container,
-                                                          GimpSessionInfo   *info,
-                                                          GimpUIManager     *manager);
-static void      windows_menu_recent_remove              (GimpContainer     *container,
-                                                          GimpSessionInfo   *info,
-                                                          GimpUIManager     *manager);
+static void      windows_menu_dock_window_added          (ClayDialogFactory *factory,
+                                                          ClayDockWindow    *dock_window,
+                                                          ClayUIManager     *manager);
+static void      windows_menu_dock_window_removed        (ClayDialogFactory *factory,
+                                                          ClayDockWindow    *dock_window,
+                                                          ClayUIManager     *manager);
+static void      windows_menu_recent_add                 (ClayContainer     *container,
+                                                          ClaySessionInfo   *info,
+                                                          ClayUIManager     *manager);
+static void      windows_menu_recent_remove              (ClayContainer     *container,
+                                                          ClaySessionInfo   *info,
+                                                          ClayUIManager     *manager);
 
 
 void
-windows_menu_setup (GimpUIManager *manager,
+windows_menu_setup (ClayUIManager *manager,
                     const gchar   *ui_path)
 {
   GList *list;
 
-  g_return_if_fail (GIMP_IS_UI_MANAGER (manager));
+  g_return_if_fail (CLAY_IS_UI_MANAGER (manager));
   g_return_if_fail (ui_path != NULL);
 
   g_object_set_data (G_OBJECT (manager), "image-menu-ui-path",
                      (gpointer) ui_path);
 
-  g_signal_connect_object (manager->gimp->displays, "add",
+  g_signal_connect_object (manager->clay->displays, "add",
                            G_CALLBACK (windows_menu_display_add),
                            manager, 0);
-  g_signal_connect_object (manager->gimp->displays, "remove",
+  g_signal_connect_object (manager->clay->displays, "remove",
                            G_CALLBACK (windows_menu_display_remove),
                            manager, 0);
-  g_signal_connect_object (manager->gimp->displays, "reorder",
+  g_signal_connect_object (manager->clay->displays, "reorder",
                            G_CALLBACK (windows_menu_display_reorder),
                            manager, 0);
 
 #ifdef PLATFORM_OSX
   /* macOS provide native native windows list (see app/menus.c) so we
-     hide gimp/duplicated one on multi window mode */
-  g_signal_connect_object (manager->gimp->config, "notify::single-window-mode",
+     hide clay/duplicated one on multi window mode */
+  g_signal_connect_object (manager->clay->config, "notify::single-window-mode",
                            G_CALLBACK (windows_menu_single_window_mode_notify),
                            manager, 0);
 #endif
 
-  for (list = gimp_get_display_iter (manager->gimp);
+  for (list = clay_get_display_iter (manager->clay);
        list;
        list = g_list_next (list))
     {
-      GimpDisplay *display = list->data;
+      ClayDisplay *display = list->data;
 
-      windows_menu_display_add (manager->gimp->displays, display, manager);
+      windows_menu_display_add (manager->clay->displays, display, manager);
     }
 
-  g_signal_connect_object (gimp_dialog_factory_get_singleton (), "dock-window-added",
+  g_signal_connect_object (clay_dialog_factory_get_singleton (), "dock-window-added",
                            G_CALLBACK (windows_menu_dock_window_added),
                            manager, 0);
-  g_signal_connect_object (gimp_dialog_factory_get_singleton (), "dock-window-removed",
+  g_signal_connect_object (clay_dialog_factory_get_singleton (), "dock-window-removed",
                            G_CALLBACK (windows_menu_dock_window_removed),
                            manager, 0);
 
-  for (list = gimp_dialog_factory_get_open_dialogs (gimp_dialog_factory_get_singleton ());
+  for (list = clay_dialog_factory_get_open_dialogs (clay_dialog_factory_get_singleton ());
        list;
        list = g_list_next (list))
     {
-      GimpDockWindow *dock_window = list->data;
+      ClayDockWindow *dock_window = list->data;
 
-      if (GIMP_IS_DOCK_WINDOW (dock_window))
-        windows_menu_dock_window_added (gimp_dialog_factory_get_singleton (),
+      if (CLAY_IS_DOCK_WINDOW (dock_window))
+        windows_menu_dock_window_added (clay_dialog_factory_get_singleton (),
                                         dock_window,
                                         manager);
     }
@@ -147,11 +147,11 @@ windows_menu_setup (GimpUIManager *manager,
                            G_CALLBACK (windows_menu_recent_remove),
                            manager, 0);
 
-  for (list = g_list_last (GIMP_LIST (global_recent_docks)->queue->head);
+  for (list = g_list_last (CLAY_LIST (global_recent_docks)->queue->head);
        list;
        list = g_list_previous (list))
     {
-      GimpSessionInfo *info = list->data;
+      ClaySessionInfo *info = list->data;
 
       windows_menu_recent_add (global_recent_docks, info, manager);
     }
@@ -161,75 +161,75 @@ windows_menu_setup (GimpUIManager *manager,
 /*  private functions  */
 
 static void
-windows_menu_display_add (GimpContainer *container,
-                          GimpDisplay   *display,
-                          GimpUIManager *manager)
+windows_menu_display_add (ClayContainer *container,
+                          ClayDisplay   *display,
+                          ClayUIManager *manager)
 {
   g_signal_connect_object (display, "notify::image",
                            G_CALLBACK (windows_menu_image_notify),
                            manager, 0);
 
-  if (gimp_display_get_image (display))
+  if (clay_display_get_image (display))
     windows_menu_image_notify (display, NULL, manager);
 }
 
 static void
-windows_menu_display_remove (GimpContainer *container,
-                             GimpDisplay   *display,
-                             GimpUIManager *manager)
+windows_menu_display_remove (ClayContainer *container,
+                             ClayDisplay   *display,
+                             ClayUIManager *manager)
 {
   gchar *action_name;
 
-  action_name = gimp_display_get_action_name (display);
-  gimp_ui_manager_remove_ui (manager, action_name);
+  action_name = clay_display_get_action_name (display);
+  clay_ui_manager_remove_ui (manager, action_name);
 
   g_free (action_name);
 }
 
 static void
-windows_menu_display_reorder (GimpContainer *container,
-                              GimpDisplay   *display,
+windows_menu_display_reorder (ClayContainer *container,
+                              ClayDisplay   *display,
                               gint           old_index,
                               gint           new_index,
-                              GimpUIManager *manager)
+                              ClayUIManager *manager)
 {
-  gint n_display = gimp_container_get_n_children (container);
+  gint n_display = clay_container_get_n_children (container);
   gint i;
 
   for (i = new_index; i < n_display; i++)
     {
-      GimpObject *d = gimp_container_get_child_by_index (container, i);
+      ClayObject *d = clay_container_get_child_by_index (container, i);
 
-      windows_menu_display_remove (container, GIMP_DISPLAY (d), manager);
+      windows_menu_display_remove (container, CLAY_DISPLAY (d), manager);
     }
 
   for (i = new_index; i < n_display; i++)
     {
-      GimpObject *d = gimp_container_get_child_by_index (container, i);
+      ClayObject *d = clay_container_get_child_by_index (container, i);
 
-      windows_menu_display_add (container, GIMP_DISPLAY (d), manager);
+      windows_menu_display_add (container, CLAY_DISPLAY (d), manager);
     }
 }
 
 static void
-windows_menu_image_notify (GimpDisplay      *display,
+windows_menu_image_notify (ClayDisplay      *display,
                            const GParamSpec *unused,
-                           GimpUIManager    *manager)
+                           ClayUIManager    *manager)
 {
-  windows_menu_display_remove (manager->gimp->displays, display, manager);
+  windows_menu_display_remove (manager->clay->displays, display, manager);
 
 #ifdef PLATFORM_OSX
-  if (! GIMP_GUI_CONFIG (manager->gimp->config)->single_window_mode)
+  if (! CLAY_GUI_CONFIG (manager->clay->config)->single_window_mode)
     return;
 #endif
 
-  if (gimp_display_get_image (display))
+  if (clay_display_get_image (display))
     {
       gchar *action_name;
 
-      action_name = gimp_display_get_action_name (display);
+      action_name = clay_display_get_action_name (display);
 
-      gimp_ui_manager_add_ui (manager, "/Windows/[Images]", action_name, FALSE);
+      clay_ui_manager_add_ui (manager, "/Windows/[Images]", action_name, FALSE);
 
       g_free (action_name);
     }
@@ -237,17 +237,17 @@ windows_menu_image_notify (GimpDisplay      *display,
 
 #ifdef PLATFORM_OSX
 static void
-windows_menu_single_window_mode_notify (GimpDisplayConfig *config,
+windows_menu_single_window_mode_notify (ClayDisplayConfig *config,
                                         const GParamSpec  *pspec,
-                                        GimpUIManager     *manager)
+                                        ClayUIManager     *manager)
 {
   GList *list;
 
-  for (list = gimp_get_display_iter (manager->gimp);
+  for (list = clay_get_display_iter (manager->clay);
        list;
        list = g_list_next (list))
     {
-      GimpDisplay *display = list->data;
+      ClayDisplay *display = list->data;
 
       windows_menu_image_notify (display, NULL, manager);
     }
@@ -255,37 +255,37 @@ windows_menu_single_window_mode_notify (GimpDisplayConfig *config,
 #endif
 
 static void
-windows_menu_dock_window_added (GimpDialogFactory *factory,
-                                GimpDockWindow    *dock_window,
-                                GimpUIManager     *manager)
+windows_menu_dock_window_added (ClayDialogFactory *factory,
+                                ClayDockWindow    *dock_window,
+                                ClayUIManager     *manager)
 {
   gchar *action_name;
 
   action_name = windows_actions_dock_window_to_action_name (dock_window);
 
   /* TODO GMenu: doesn't look like it's working, neither will old or new API. */
-  gimp_ui_manager_add_ui (manager, "/Windows/[Docks]", action_name, FALSE);
+  clay_ui_manager_add_ui (manager, "/Windows/[Docks]", action_name, FALSE);
 
   g_free (action_name);
 }
 
 static void
-windows_menu_dock_window_removed (GimpDialogFactory *factory,
-                                  GimpDockWindow    *dock_window,
-                                  GimpUIManager     *manager)
+windows_menu_dock_window_removed (ClayDialogFactory *factory,
+                                  ClayDockWindow    *dock_window,
+                                  ClayUIManager     *manager)
 {
   gchar *action_name;
 
   action_name = windows_actions_dock_window_to_action_name (dock_window);
-  gimp_ui_manager_remove_ui (manager, action_name);
+  clay_ui_manager_remove_ui (manager, action_name);
 
   g_free (action_name);
 }
 
 static void
-windows_menu_recent_add (GimpContainer   *container,
-                         GimpSessionInfo *info,
-                         GimpUIManager   *manager)
+windows_menu_recent_add (ClayContainer   *container,
+                         ClaySessionInfo *info,
+                         ClayUIManager   *manager)
 {
   gchar *action_name;
   gint   info_id;
@@ -294,15 +294,15 @@ windows_menu_recent_add (GimpContainer   *container,
 
   action_name = g_strdup_printf ("windows-recent-%04d", info_id);
 
-  gimp_ui_manager_add_ui (manager, "/Windows/Recently Closed Docks", action_name, TRUE);
+  clay_ui_manager_add_ui (manager, "/Windows/Recently Closed Docks", action_name, TRUE);
 
   g_free (action_name);
 }
 
 static void
-windows_menu_recent_remove (GimpContainer   *container,
-                            GimpSessionInfo *info,
-                            GimpUIManager   *manager)
+windows_menu_recent_remove (ClayContainer   *container,
+                            ClaySessionInfo *info,
+                            ClayUIManager   *manager)
 {
   gchar *action_name;
   gint   info_id;
@@ -311,7 +311,7 @@ windows_menu_recent_remove (GimpContainer   *container,
 
   action_name = g_strdup_printf ("windows-recent-%04d", info_id);
 
-  gimp_ui_manager_remove_uis (manager, action_name);
+  clay_ui_manager_remove_uis (manager, action_name);
 
   g_free (action_name);
 }

@@ -27,42 +27,42 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpbase/gimpbaseenums.h"
-#include "libgimpcolor/gimpcolor.h"
+#include "libclaybase/claybaseenums.h"
+#include "libclaycolor/claycolor.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpgrid.h"
-#include "core/gimpimage-grid.h"
-#include "core/gimpimage.h"
-#include "core/gimpparamspecs.h"
+#include "core/claygrid.h"
+#include "core/clayimage-grid.h"
+#include "core/clayimage.h"
+#include "core/clayparamspecs.h"
 
-#include "gimppdb.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static GimpValueArray *
-image_grid_get_spacing_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_get_spacing_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gdouble xspacing = 0.0;
   gdouble yspacing = 0.0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_get (grid,
@@ -73,38 +73,38 @@ image_grid_get_spacing_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_double (gimp_value_array_index (return_vals, 1), xspacing);
-      g_value_set_double (gimp_value_array_index (return_vals, 2), yspacing);
+      g_value_set_double (clay_value_array_index (return_vals, 1), xspacing);
+      g_value_set_double (clay_value_array_index (return_vals, 2), yspacing);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_grid_set_spacing_invoker (GimpProcedure         *procedure,
-                                Gimp                  *gimp,
-                                GimpContext           *context,
-                                GimpProgress          *progress,
-                                const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_set_spacing_invoker (ClayProcedure         *procedure,
+                                Clay                  *clay,
+                                ClayContext           *context,
+                                ClayProgress          *progress,
+                                const ClayValueArray  *args,
                                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gdouble xspacing;
   gdouble yspacing;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  xspacing = g_value_get_double (gimp_value_array_index (args, 1));
-  yspacing = g_value_get_double (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  xspacing = g_value_get_double (clay_value_array_index (args, 1));
+  yspacing = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_set (grid,
@@ -115,29 +115,29 @@ image_grid_set_spacing_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_grid_get_offset_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_get_offset_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gdouble xoffset = 0.0;
   gdouble yoffset = 0.0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_get (grid,
@@ -148,38 +148,38 @@ image_grid_get_offset_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
     {
-      g_value_set_double (gimp_value_array_index (return_vals, 1), xoffset);
-      g_value_set_double (gimp_value_array_index (return_vals, 2), yoffset);
+      g_value_set_double (clay_value_array_index (return_vals, 1), xoffset);
+      g_value_set_double (clay_value_array_index (return_vals, 2), yoffset);
     }
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_grid_set_offset_invoker (GimpProcedure         *procedure,
-                               Gimp                  *gimp,
-                               GimpContext           *context,
-                               GimpProgress          *progress,
-                               const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_set_offset_invoker (ClayProcedure         *procedure,
+                               Clay                  *clay,
+                               ClayContext           *context,
+                               ClayProgress          *progress,
+                               const ClayValueArray  *args,
                                GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gdouble xoffset;
   gdouble yoffset;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  xoffset = g_value_get_double (gimp_value_array_index (args, 1));
-  yoffset = g_value_get_double (gimp_value_array_index (args, 2));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  xoffset = g_value_get_double (clay_value_array_index (args, 1));
+  yoffset = g_value_get_double (clay_value_array_index (args, 2));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_set (grid,
@@ -190,28 +190,28 @@ image_grid_set_offset_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_grid_get_foreground_color_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_get_foreground_color_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   GeglColor *fgcolor = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         fgcolor = gegl_color_duplicate (grid->fgcolor);
@@ -219,33 +219,33 @@ image_grid_get_foreground_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), fgcolor);
+    g_value_take_object (clay_value_array_index (return_vals, 1), fgcolor);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_grid_set_foreground_color_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_set_foreground_color_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GeglColor *fgcolor;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  fgcolor = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  fgcolor = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_set (grid, "fgcolor", fgcolor, NULL);
@@ -253,28 +253,28 @@ image_grid_set_foreground_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_grid_get_background_color_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_get_background_color_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   GeglColor *bgcolor = NULL;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         bgcolor = gegl_color_duplicate (grid->bgcolor);
@@ -282,33 +282,33 @@ image_grid_get_background_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_take_object (gimp_value_array_index (return_vals, 1), bgcolor);
+    g_value_take_object (clay_value_array_index (return_vals, 1), bgcolor);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_grid_set_background_color_invoker (GimpProcedure         *procedure,
-                                         Gimp                  *gimp,
-                                         GimpContext           *context,
-                                         GimpProgress          *progress,
-                                         const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_set_background_color_invoker (ClayProcedure         *procedure,
+                                         Clay                  *clay,
+                                         ClayContext           *context,
+                                         ClayProgress          *progress,
+                                         const ClayValueArray  *args,
                                          GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   GeglColor *bgcolor;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  bgcolor = g_value_get_object (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  bgcolor = g_value_get_object (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_set (grid, "bgcolor", bgcolor, NULL);
@@ -316,28 +316,28 @@ image_grid_set_background_color_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-image_grid_get_style_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_get_style_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpValueArray *return_vals;
-  GimpImage *image;
+  ClayValueArray *return_vals;
+  ClayImage *image;
   gint style = 0;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
+  image = g_value_get_object (clay_value_array_index (args, 0));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_get (grid, "style", &style, NULL);
@@ -345,33 +345,33 @@ image_grid_get_style_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return_vals = gimp_procedure_get_return_values (procedure, success,
+  return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
 
   if (success)
-    g_value_set_enum (gimp_value_array_index (return_vals, 1), style);
+    g_value_set_enum (clay_value_array_index (return_vals, 1), style);
 
   return return_vals;
 }
 
-static GimpValueArray *
-image_grid_set_style_invoker (GimpProcedure         *procedure,
-                              Gimp                  *gimp,
-                              GimpContext           *context,
-                              GimpProgress          *progress,
-                              const GimpValueArray  *args,
+static ClayValueArray *
+image_grid_set_style_invoker (ClayProcedure         *procedure,
+                              Clay                  *clay,
+                              ClayContext           *context,
+                              ClayProgress          *progress,
+                              const ClayValueArray  *args,
                               GError               **error)
 {
   gboolean success = TRUE;
-  GimpImage *image;
+  ClayImage *image;
   gint style;
 
-  image = g_value_get_object (gimp_value_array_index (args, 0));
-  style = g_value_get_enum (gimp_value_array_index (args, 1));
+  image = g_value_get_object (clay_value_array_index (args, 0));
+  style = g_value_get_enum (clay_value_array_index (args, 1));
 
   if (success)
     {
-      GimpGrid *grid = gimp_image_get_grid (image);
+      ClayGrid *grid = clay_image_get_grid (image);
 
       if (grid)
         g_object_set (grid, "style", style, NULL);
@@ -379,332 +379,332 @@ image_grid_set_style_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_image_grid_procs (GimpPDB *pdb)
+register_image_grid_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-image-grid-get-spacing
+   * clay-image-grid-get-spacing
    */
-  procedure = gimp_procedure_new (image_grid_get_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-get-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_get_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-get-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the spacing of an image's grid.",
                                   "This procedure retrieves the horizontal and vertical spacing of an image's grid. It takes the image as parameter.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("xspacing",
                                                         "xspacing",
                                                         "The image's grid horizontal spacing",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("yspacing",
                                                         "yspacing",
                                                         "The image's grid vertical spacing",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-set-spacing
+   * clay-image-grid-set-spacing
    */
-  procedure = gimp_procedure_new (image_grid_set_spacing_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-set-spacing");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_set_spacing_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-set-spacing");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the spacing of an image's grid.",
                                   "This procedure sets the horizontal and vertical spacing of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("xspacing",
                                                     "xspacing",
                                                     "The image's grid horizontal spacing",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("yspacing",
                                                     "yspacing",
                                                     "The image's grid vertical spacing",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-get-offset
+   * clay-image-grid-get-offset
    */
-  procedure = gimp_procedure_new (image_grid_get_offset_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-get-offset");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_get_offset_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-get-offset");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the offset of an image's grid.",
                                   "This procedure retrieves the horizontal and vertical offset of an image's grid. It takes the image as parameter.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("xoffset",
                                                         "xoffset",
                                                         "The image's grid horizontal offset",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                        CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_double ("yoffset",
                                                         "yoffset",
                                                         "The image's grid vertical offset",
                                                         -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                        GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                        CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-set-offset
+   * clay-image-grid-set-offset
    */
-  procedure = gimp_procedure_new (image_grid_set_offset_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-set-offset");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_set_offset_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-set-offset");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the offset of an image's grid.",
                                   "This procedure sets the horizontal and vertical offset of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("xoffset",
                                                     "xoffset",
                                                     "The image's grid horizontal offset",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("yoffset",
                                                     "yoffset",
                                                     "The image's grid vertical offset",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-get-foreground-color
+   * clay-image-grid-get-foreground-color
    */
-  procedure = gimp_procedure_new (image_grid_get_foreground_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-get-foreground-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_get_foreground_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-get-foreground-color");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the foreground color of an image's grid.",
                                   "This procedure gets the foreground color of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("fgcolor",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("fgcolor",
                                                           "fgcolor",
                                                           "The image's grid foreground color",
                                                           TRUE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-set-foreground-color
+   * clay-image-grid-set-foreground-color
    */
-  procedure = gimp_procedure_new (image_grid_set_foreground_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-set-foreground-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_set_foreground_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-set-foreground-color");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the foreground color of an image's grid.",
                                   "This procedure sets the foreground color of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("fgcolor",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("fgcolor",
                                                       "fgcolor",
                                                       "The new foreground color",
                                                       TRUE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-get-background-color
+   * clay-image-grid-get-background-color
    */
-  procedure = gimp_procedure_new (image_grid_get_background_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-get-background-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_get_background_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-get-background-color");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the background color of an image's grid.",
                                   "This procedure gets the background color of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
-                                   gimp_param_spec_color ("bgcolor",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
+                                   clay_param_spec_color ("bgcolor",
                                                           "bgcolor",
                                                           "The image's grid background color",
                                                           TRUE,
                                                           NULL,
-                                                          GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                          CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-set-background-color
+   * clay-image-grid-set-background-color
    */
-  procedure = gimp_procedure_new (image_grid_set_background_color_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-set-background-color");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_set_background_color_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-set-background-color");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the background color of an image's grid.",
                                   "This procedure sets the background color of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_color ("bgcolor",
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_color ("bgcolor",
                                                       "bgcolor",
                                                       "The new background color",
                                                       TRUE,
                                                       NULL,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-get-style
+   * clay-image-grid-get-style
    */
-  procedure = gimp_procedure_new (image_grid_get_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-get-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_get_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-get-style");
+  clay_procedure_set_static_help (procedure,
                                   "Gets the style of an image's grid.",
                                   "This procedure retrieves the style of an image's grid.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_return_value (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_return_value (procedure,
                                    g_param_spec_enum ("style",
                                                       "style",
                                                       "The image's grid style",
-                                                      GIMP_TYPE_GRID_STYLE,
-                                                      GIMP_GRID_DOTS,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                      CLAY_TYPE_GRID_STYLE,
+                                                      CLAY_GRID_DOTS,
+                                                      CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-image-grid-set-style
+   * clay-image-grid-set-style
    */
-  procedure = gimp_procedure_new (image_grid_set_style_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-image-grid-set-style");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (image_grid_set_style_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-image-grid-set-style");
+  clay_procedure_set_static_help (procedure,
                                   "Sets the style unit of an image's grid.",
                                   "This procedure sets the style of an image's grid. It takes the image and the new style as parameters.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Sylvain Foret",
                                          "Sylvain Foret",
                                          "2005");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_image ("image",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_image ("image",
                                                       "image",
                                                       "The image",
                                                       FALSE,
-                                                      GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                      CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("style",
                                                   "style",
                                                   "The image's grid style",
-                                                  GIMP_TYPE_GRID_STYLE,
-                                                  GIMP_GRID_DOTS,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_GRID_STYLE,
+                                                  CLAY_GRID_DOTS,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

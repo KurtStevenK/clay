@@ -29,7 +29,7 @@ HELP
     %invoke = (
         code => <<'CODE'
 {
-  gimp_data_factory_data_refresh (gimp->palette_factory, context);
+  clay_data_factory_data_refresh (clay->palette_factory, context);
 }
 CODE
     );
@@ -41,7 +41,7 @@ sub palettes_get_list {
     $help = <<'HELP';
 This procedure returns a complete listing of available palettes.
 
-Each palette returned can be used as input to [func@Gimp.context_set_palette].
+Each palette returned can be used as input to [func@Clay.context_set_palette].
 HELP
 
     &rock_pdb_misc('2001');
@@ -57,10 +57,10 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpcontainer-filter.h") ],
+        headers => [ qw("core/claycontainer-filter.h") ],
         code    => <<'CODE'
 {
-  palette_list = (GimpPalette **) gimp_container_get_filtered_array (gimp_data_factory_get_container (gimp->palette_factory),
+  palette_list = (ClayPalette **) clay_container_get_filtered_array (clay_data_factory_get_container (clay->palette_factory),
                                                                      filter);
 }
 CODE
@@ -69,11 +69,11 @@ CODE
 
 
 @headers = qw(<string.h>
-              "core/gimp.h"
-              "core/gimpcontext.h"
-              "core/gimpdatafactory.h"
-              "core/gimppalette.h"
-              "gimppdb-utils.h");
+              "core/clay.h"
+              "core/claycontext.h"
+              "core/claydatafactory.h"
+              "core/claypalette.h"
+              "claypdb-utils.h");
 
 @procs = qw(palettes_refresh
             palettes_get_list);
@@ -81,7 +81,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Palettes';
-$doc_title = 'gimppalettes';
+$doc_title = 'claypalettes';
 $doc_short_desc = 'Operations related to palettes.';
 $doc_long_desc = 'Operations related to palettes.';
 

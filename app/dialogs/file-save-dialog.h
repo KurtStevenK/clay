@@ -21,15 +21,15 @@
 #define FILE_SAVE_RESPONSE_OTHER_DIALOG -23
 
 
-GtkWidget * file_save_dialog_new        (Gimp                *gimp,
+GtkWidget * file_save_dialog_new        (Clay                *clay,
                                          gboolean             export);
 
-gboolean    file_save_dialog_save_image (GimpProgress        *progress_and_handler,
-                                         Gimp                *gimp,
-                                         GimpImage           *image,
+gboolean    file_save_dialog_save_image (ClayProgress        *progress_and_handler,
+                                         Clay                *clay,
+                                         ClayImage           *image,
                                          GFile               *file,
-                                         GimpPlugInProcedure *write_proc,
-                                         GimpRunMode          run_mode,
+                                         ClayPlugInProcedure *write_proc,
+                                         ClayRunMode          run_mode,
                                          gboolean             save_a_copy,
                                          gboolean             export_backward,
                                          gboolean             export_forward,

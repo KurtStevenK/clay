@@ -1,5 +1,5 @@
 etcconf = configuration_data()
-etcconf.set('GIMP_APP_VERSION', gimp_app_version)
+etcconf.set('CLAY_APP_VERSION', clay_app_version)
 etcconf.set('mypaint_brushes_dir', mypaint_brushes_dir)
 
 
@@ -7,17 +7,17 @@ install_data(
   [
     'controllerrc',
     configure_file(
-      input : 'gimprc.in',
-      output: 'gimprc',
+      input : 'clayrc.in',
+      output: 'clayrc',
       configuration: etcconf,
     ),
-    'gimp.css',
+    'clay.css',
     'sessionrc',
     'templaterc',
     'toolrc',
     'unitrc',
   ],
-  install_dir: gimpsysconfdir,
+  install_dir: claysysconfdir,
 )
 
 # Bash completion
@@ -30,16 +30,16 @@ if bash_completion.found()
                                                     default_value: get_option('datadir') / 'bash-completion' / 'completions')
 
   bash_completion_conf = configuration_data()
-  bash_completion_conf.set('GIMP_MAIN_EXE', gimpmain_exe_name)
-  bash_completion_conf.set('GIMP_SYMLINK1', 'gimp-' + gimp_app_version_major.to_string())
-  bash_completion_conf.set('GIMP_SYMLINK2', 'gimp')
+  bash_completion_conf.set('CLAY_MAIN_EXE', claymain_exe_name)
+  bash_completion_conf.set('CLAY_SYMLINK1', 'clay-' + clay_app_version_major.to_string())
+  bash_completion_conf.set('CLAY_SYMLINK2', 'clay')
 
-  bash_completion_conf.set('GIMP_CONSOLE_EXE',      gimpconsole_exe_name)
-  bash_completion_conf.set('GIMP_CONSOLE_SYMLINK1', 'gimp-console-' + gimp_app_version_major.to_string())
-  bash_completion_conf.set('GIMP_CONSOLE_SYMLINK2', 'gimp-console')
+  bash_completion_conf.set('CLAY_CONSOLE_EXE',      clayconsole_exe_name)
+  bash_completion_conf.set('CLAY_CONSOLE_SYMLINK1', 'clay-console-' + clay_app_version_major.to_string())
+  bash_completion_conf.set('CLAY_CONSOLE_SYMLINK2', 'clay-console')
 
   configure_file(input : 'bash_completion.in',
-                 output: 'gimp-' + gimp_app_version,
+                 output: 'clay-' + clay_app_version,
                  configuration: bash_completion_conf,
                  install: true,
                  install_dir: bash_comp_inst_dir)

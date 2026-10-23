@@ -26,37 +26,37 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpcolor/gimpcolor.h"
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpwidgets/gimpwidgets.h"
+#include "libclaybase/claybase.h"
+#include "libclaycolor/claycolor.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaywidgets/claywidgets.h"
 
 #include "dialogs-types.h"
 
-#include "config/gimpcoreconfig.h"
+#include "config/claycoreconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimpcontext.h"
-#include "core/gimpimage.h"
-#include "core/gimpimage-color-profile.h"
+#include "core/clay.h"
+#include "core/claycontext.h"
+#include "core/clayimage.h"
+#include "core/clayimage-color-profile.h"
 
-#include "widgets/gimphelp-ids.h"
-#include "widgets/gimpviewabledialog.h"
-#include "widgets/gimpwidgets-constructors.h"
+#include "widgets/clayhelp-ids.h"
+#include "widgets/clayviewabledialog.h"
+#include "widgets/claywidgets-constructors.h"
 
 #include "color-profile-import-dialog.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 /*  public functions  */
 
-GimpColorProfilePolicy
-color_profile_import_dialog_run (GimpImage                 *image,
-                                 GimpContext               *context,
+ClayColorProfilePolicy
+color_profile_import_dialog_run (ClayImage                 *image,
+                                 ClayContext               *context,
                                  GtkWidget                 *parent,
-                                 GimpColorProfile         **dest_profile,
-                                 GimpColorRenderingIntent  *intent,
+                                 ClayColorProfile         **dest_profile,
+                                 ClayColorRenderingIntent  *intent,
                                  gboolean                  *bpc,
                                  gboolean                  *dont_ask)
 {
@@ -70,47 +70,47 @@ color_profile_import_dialog_run (GimpImage                 *image,
   GtkWidget              *intent_combo;
   GtkWidget              *bpc_toggle;
   GtkWidget              *dont_ask_toggle;
-  GimpColorProfile       *src_profile;
-  GimpColorProfile       *pref_profile = NULL;
-  GimpColorProfilePolicy  policy;
+  ClayColorProfile       *src_profile;
+  ClayColorProfile       *pref_profile = NULL;
+  ClayColorProfilePolicy  policy;
   const gchar            *frame_title;
   gchar                  *text;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), GIMP_COLOR_PROFILE_POLICY_KEEP);
-  g_return_val_if_fail (GIMP_IS_CONTEXT (context), GIMP_COLOR_PROFILE_POLICY_KEEP);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), CLAY_COLOR_PROFILE_POLICY_KEEP);
+  g_return_val_if_fail (CLAY_IS_CONTEXT (context), CLAY_COLOR_PROFILE_POLICY_KEEP);
   g_return_val_if_fail (parent == NULL || GTK_IS_WIDGET (parent),
-                        GIMP_COLOR_PROFILE_POLICY_KEEP);
-  g_return_val_if_fail (dest_profile != NULL, GIMP_COLOR_PROFILE_POLICY_KEEP);
+                        CLAY_COLOR_PROFILE_POLICY_KEEP);
+  g_return_val_if_fail (dest_profile != NULL, CLAY_COLOR_PROFILE_POLICY_KEEP);
 
-  src_profile   = gimp_image_get_color_profile (image);
-  *dest_profile = gimp_image_get_builtin_color_profile (image);
+  src_profile   = clay_image_get_color_profile (image);
+  *dest_profile = clay_image_get_builtin_color_profile (image);
 
-  if (gimp_image_get_base_type (image) == GIMP_GRAY)
+  if (clay_image_get_base_type (image) == CLAY_GRAY)
     {
       frame_title = _("Convert the image to the built-in grayscale color profile?");
 
-      pref_profile = gimp_color_config_get_gray_color_profile (image->gimp->config->color_management, NULL);
-      if (pref_profile && gimp_color_profile_is_equal (pref_profile, *dest_profile))
+      pref_profile = clay_color_config_get_gray_color_profile (image->clay->config->color_management, NULL);
+      if (pref_profile && clay_color_profile_is_equal (pref_profile, *dest_profile))
         g_clear_object (&pref_profile);
     }
   else
     {
       frame_title = _("Convert the image to the built-in sRGB color profile?");
 
-      pref_profile = gimp_color_config_get_rgb_color_profile (image->gimp->config->color_management, NULL);
-      if (pref_profile && gimp_color_profile_is_equal (pref_profile, *dest_profile))
+      pref_profile = clay_color_config_get_rgb_color_profile (image->clay->config->color_management, NULL);
+      if (pref_profile && clay_color_profile_is_equal (pref_profile, *dest_profile))
         g_clear_object (&pref_profile);
     }
 
   dialog =
-    gimp_viewable_dialog_new (g_list_prepend (NULL, image), context,
+    clay_viewable_dialog_new (g_list_prepend (NULL, image), context,
                               _("Keep the Embedded Working Space?"),
-                              "gimp-image-color-profile-import",
-                              "gimp-prefs-color-management",
+                              "clay-image-color-profile-import",
+                              "clay-prefs-color-management",
                               _("Keep the image's color profile"),
                               parent,
-                              gimp_standard_help_func,
-                              GIMP_HELP_IMAGE_COLOR_PROFILE_IMPORT,
+                              clay_standard_help_func,
+                              CLAY_HELP_IMAGE_COLOR_PROFILE_IMPORT,
 
                               _("_Keep"),    GTK_RESPONSE_YES,
                               _("_Convert"), GTK_RESPONSE_NO,
@@ -128,13 +128,13 @@ color_profile_import_dialog_run (GimpImage                 *image,
   gtk_widget_set_visible (main_vbox, TRUE);
 
   text = g_strdup_printf (_("The image '%s' has an embedded color profile"),
-                          gimp_image_get_display_name (image));
-  frame = gimp_frame_new (text);
+                          clay_image_get_display_name (image));
+  frame = clay_frame_new (text);
   g_free (text);
   gtk_box_pack_start (GTK_BOX (main_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_set_visible (frame, TRUE);
 
-  label = gimp_color_profile_label_new (src_profile);
+  label = clay_color_profile_label_new (src_profile);
   gtk_container_add (GTK_CONTAINER (frame), label);
   gtk_widget_set_visible (label, TRUE);
 
@@ -146,28 +146,28 @@ color_profile_import_dialog_run (GimpImage                 *image,
   gtk_box_pack_start (GTK_BOX (main_vbox), switcher, FALSE, FALSE, 0);
   gtk_widget_set_visible (stack, TRUE);
 
-  frame = gimp_frame_new (frame_title);
+  frame = clay_frame_new (frame_title);
   gtk_stack_add_titled (GTK_STACK (stack), frame, "builtin",
                         _("Built-in Profile"));
   gtk_widget_set_visible (frame, TRUE);
 
-  label = gimp_color_profile_label_new (*dest_profile);
+  label = clay_color_profile_label_new (*dest_profile);
   gtk_container_add (GTK_CONTAINER (frame), label);
   gtk_widget_set_visible (label, TRUE);
 
   if (pref_profile)
     {
-      if (gimp_image_get_base_type (image) == GIMP_GRAY)
+      if (clay_image_get_base_type (image) == CLAY_GRAY)
         frame_title  = _("Convert the image to the preferred grayscale color profile?");
       else
         frame_title = _("Convert the image to the preferred RGB color profile?");
 
-      frame = gimp_frame_new (frame_title);
+      frame = clay_frame_new (frame_title);
       gtk_stack_add_titled (GTK_STACK (stack), frame, "preferred",
                             _("Preferred Profile"));
       gtk_widget_set_visible (frame, TRUE);
 
-      label = gimp_color_profile_label_new (pref_profile);
+      label = clay_color_profile_label_new (pref_profile);
       gtk_container_add (GTK_CONTAINER (frame), label);
       gtk_widget_set_visible (label, TRUE);
 
@@ -198,8 +198,8 @@ color_profile_import_dialog_run (GimpImage                 *image,
       gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
       gtk_widget_set_visible (label, TRUE);
 
-      intent_combo = gimp_enum_combo_box_new (GIMP_TYPE_COLOR_RENDERING_INTENT);
-      gimp_int_combo_box_set_active (GIMP_INT_COMBO_BOX (intent_combo),
+      intent_combo = clay_enum_combo_box_new (CLAY_TYPE_COLOR_RENDERING_INTENT);
+      clay_int_combo_box_set_active (CLAY_INT_COMBO_BOX (intent_combo),
                                      *intent);
       gtk_box_pack_start (GTK_BOX (hbox), intent_combo, TRUE, TRUE, 0);
       gtk_widget_set_visible (intent_combo, TRUE);
@@ -233,23 +233,23 @@ color_profile_import_dialog_run (GimpImage                 *image,
       if (g_strcmp0 (gtk_stack_get_visible_child_name (GTK_STACK (stack)),
                      "builtin") == 0)
         {
-          policy = GIMP_COLOR_PROFILE_POLICY_CONVERT_BUILTIN;
+          policy = CLAY_COLOR_PROFILE_POLICY_CONVERT_BUILTIN;
           g_object_ref (*dest_profile);
         }
       else
         {
-          policy = GIMP_COLOR_PROFILE_POLICY_CONVERT_PREFERRED;
+          policy = CLAY_COLOR_PROFILE_POLICY_CONVERT_PREFERRED;
           *dest_profile = g_object_ref (pref_profile);
         }
       break;
 
     default:
-      policy = GIMP_COLOR_PROFILE_POLICY_KEEP;
+      policy = CLAY_COLOR_PROFILE_POLICY_KEEP;
       break;
     }
 
   if (intent)
-    gimp_int_combo_box_get_active (GIMP_INT_COMBO_BOX (intent_combo),
+    clay_int_combo_box_get_active (CLAY_INT_COMBO_BOX (intent_combo),
                                    (gint *) intent);
 
   if (bpc)

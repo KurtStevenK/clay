@@ -35,10 +35,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_image_is_not_base_type (image, GIMP_RGB, error) &&
-      gimp_babl_is_valid (GIMP_RGB, gimp_image_get_precision (image)))
+  if (clay_pdb_image_is_not_base_type (image, CLAY_RGB, error) &&
+      clay_babl_is_valid (CLAY_RGB, clay_image_get_precision (image)))
     {
-      success = gimp_image_convert_type (image, GIMP_RGB, NULL, NULL, error);
+      success = clay_image_convert_type (image, CLAY_RGB, NULL, NULL, error);
     }
   else
     {
@@ -67,10 +67,10 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_image_is_not_base_type (image, GIMP_GRAY, error) &&
-      gimp_babl_is_valid (GIMP_GRAY, gimp_image_get_precision (image)))
+  if (clay_pdb_image_is_not_base_type (image, CLAY_GRAY, error) &&
+      clay_babl_is_valid (CLAY_GRAY, clay_image_get_precision (image)))
     {
-      success = gimp_image_convert_type (image, GIMP_GRAY, NULL, NULL, error);
+      success = clay_image_convert_type (image, CLAY_GRAY, NULL, NULL, error);
     }
   else
     {
@@ -92,7 +92,7 @@ optimal palette of 'num_cols' generated from the colors in the
 image. A type of '1' means to re-use the previous palette (not
 currently implemented). A type of '2' means to use the so-called
 WWW-optimized palette. Type '3' means to use only black and white
-colors. A type of '4' means to use a palette from the gimp palettes
+colors. A type of '4' means to use a palette from the clay palettes
 directories.  The 'dither type' specifies what kind of dithering to
 use.  '0' means no dithering, '1' means standard Floyd-Steinberg error
 diffusion, '2' means Floyd-Steinberg error diffusion with reduced
@@ -105,44 +105,44 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-	{ name => 'dither_type', type => 'enum GimpConvertDitherType',
+	{ name => 'dither_type', type => 'enum ClayConvertDitherType',
 	  desc => 'The dither type to use' },
-	{ name => 'palette_type', type => 'enum GimpConvertPaletteType',
+	{ name => 'palette_type', type => 'enum ClayConvertPaletteType',
 	  desc => 'The type of palette to use' },
 	{ name => 'num_cols', type => 'int32',
 	  desc => 'The number of colors to quantize to, ignored unless
-		   (palette_type == GIMP_CONVERT_PALETTE_GENERATE)' },
+		   (palette_type == CLAY_CONVERT_PALETTE_GENERATE)' },
 	{ name => 'alpha_dither', type => 'boolean',
 	  desc => 'Dither transparency to fake partial opacity' },
 	{ name => 'remove_unused', type => 'boolean',
 	  desc => 'Remove unused or duplicate color entries from final
 		   palette, ignored if (palette_type ==
-		   GIMP_CONVERT_PALETTE_GENERATE)' },
+		   CLAY_CONVERT_PALETTE_GENERATE)' },
 	{ name => 'palette', type => 'string',
 	  desc => 'The name of the custom palette to use, ignored unless
-		   (palette_type == GIMP_CONVERT_PALETTE_CUSTOM)' }
+		   (palette_type == CLAY_CONVERT_PALETTE_CUSTOM)' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  GimpPalette *pal = NULL;
+  ClayPalette *pal = NULL;
 
-  if (gimp_pdb_image_is_not_base_type (image, GIMP_INDEXED, error)             &&
-      gimp_pdb_image_is_precision (image, GIMP_PRECISION_U8_NON_LINEAR, error) &&
-      gimp_babl_is_valid (GIMP_INDEXED, gimp_image_get_precision (image))      &&
-      gimp_item_stack_is_flat (GIMP_ITEM_STACK (gimp_image_get_layers (image))))
+  if (clay_pdb_image_is_not_base_type (image, CLAY_INDEXED, error)             &&
+      clay_pdb_image_is_precision (image, CLAY_PRECISION_U8_NON_LINEAR, error) &&
+      clay_babl_is_valid (CLAY_INDEXED, clay_image_get_precision (image))      &&
+      clay_item_stack_is_flat (CLAY_ITEM_STACK (clay_image_get_layers (image))))
     {
       switch (palette_type)
 	{
-	case GIMP_CONVERT_PALETTE_GENERATE:
+	case CLAY_CONVERT_PALETTE_GENERATE:
 	  if (num_cols < 1 || num_cols > MAXNUMCOLORS)
 	    success = FALSE;
 	  break;
 
-	case GIMP_CONVERT_PALETTE_CUSTOM:
-          pal = GIMP_PALETTE (gimp_pdb_get_resource (gimp, GIMP_TYPE_PALETTE, palette,
-                                                     GIMP_PDB_DATA_ACCESS_READ, error));
+	case CLAY_CONVERT_PALETTE_CUSTOM:
+          pal = CLAY_PALETTE (clay_pdb_get_resource (clay, CLAY_TYPE_PALETTE, palette,
+                                                     CLAY_PDB_DATA_ACCESS_READ, error));
 	  if (! pal)
             {
               success = FALSE;
@@ -150,8 +150,8 @@ HELP
           else if (pal->n_colors > MAXNUMCOLORS)
             {
               g_set_error_literal (error,
-	                           GIMP_PDB_ERROR,
-                                   GIMP_PDB_ERROR_INVALID_ARGUMENT,
+	                           CLAY_PDB_ERROR,
+                                   CLAY_PDB_ERROR_INVALID_ARGUMENT,
                                    _("Cannot convert to a palette "
                                      "with more than 256 colors."));
               success = FALSE;
@@ -168,7 +168,7 @@ HELP
     }
 
   if (success)
-    success = gimp_image_convert_indexed (image,
+    success = clay_image_convert_indexed (image,
                                           palette_type, num_cols, remove_unused,
                                           dither_type, alpha_dither, FALSE,
                                           pal,
@@ -202,13 +202,13 @@ HELP
 {
   if (width == 0 || height == 0 || g_bytes_get_size (matrix) == width * height)
     {
-      gimp_image_convert_indexed_set_dither_matrix (g_bytes_get_data (matrix, NULL),
+      clay_image_convert_indexed_set_dither_matrix (g_bytes_get_data (matrix, NULL),
                                                     width, height);
     }
   else
     {
-      g_set_error_literal (error, GIMP_PDB_ERROR,
-                           GIMP_PDB_ERROR_INVALID_ARGUMENT,
+      g_set_error_literal (error, CLAY_PDB_ERROR,
+                           CLAY_PDB_ERROR_INVALID_ARGUMENT,
                            "Dither matrix length must be width * height");
       success = FALSE;
     }
@@ -223,7 +223,7 @@ sub image_convert_precision {
     $help = <<'HELP';
 This procedure converts the image to the specified precision. Note
 that indexed images cannot be converted and are always in
-GIMP_PRECISION_U8.
+CLAY_PRECISION_U8.
 HELP
 
     &mitch_pdb_misc('2012', '2.10');
@@ -231,18 +231,18 @@ HELP
     @inargs = (
 	{ name => 'image', type => 'image',
 	  desc => 'The image' },
-	{ name => 'precision', type => 'enum GimpPrecision',
+	{ name => 'precision', type => 'enum ClayPrecision',
 	  desc => 'The new precision' }
     );
 
     %invoke = (
 	code => <<'CODE'
 {
-  if (gimp_pdb_image_is_not_base_type (image, GIMP_INDEXED, error) &&
-      gimp_pdb_image_is_not_precision (image, precision, error)    &&
-      gimp_babl_is_valid (gimp_image_get_base_type (image), precision))
+  if (clay_pdb_image_is_not_base_type (image, CLAY_INDEXED, error) &&
+      clay_pdb_image_is_not_precision (image, precision, error)    &&
+      clay_babl_is_valid (clay_image_get_base_type (image), precision))
     {
-      gimp_image_convert_precision (image, precision,
+      clay_image_convert_precision (image, precision,
                                     GEGL_DITHER_NONE,
                                     GEGL_DITHER_NONE,
                                     GEGL_DITHER_NONE,
@@ -257,17 +257,17 @@ CODE
     );
 }
 
-@headers = qw("gegl/gimp-babl.h"
-              "core/gimp.h"
-              "core/gimpimage.h"
-              "core/gimpimage-convert-indexed.h"
-              "core/gimpimage-convert-precision.h"
-              "core/gimpimage-convert-type.h"
-              "core/gimpitemstack.h"
-              "core/gimppalette.h"
-              "gimppdberror.h"
-              "gimppdb-utils.h"
-              "gimp-intl.h");
+@headers = qw("gegl/clay-babl.h"
+              "core/clay.h"
+              "core/clayimage.h"
+              "core/clayimage-convert-indexed.h"
+              "core/clayimage-convert-precision.h"
+              "core/clayimage-convert-type.h"
+              "core/clayitemstack.h"
+              "core/claypalette.h"
+              "claypdberror.h"
+              "claypdb-utils.h"
+              "clay-intl.h");
 
 @procs = qw(image_convert_rgb
             image_convert_grayscale
@@ -278,7 +278,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Image Convert';
-$doc_title = 'gimpimageconvert';
+$doc_title = 'clayimageconvert';
 $doc_short_desc = 'Conversions between RGB, indexed, and grayscale modes.';
 $doc_long_desc = 'Conversions between RGB, indexed, and grayscale modes.';
 

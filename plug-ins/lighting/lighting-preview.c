@@ -6,8 +6,8 @@
 
 #include <gtk/gtk.h>
 
-#include <libgimp/gimp.h>
-#include <libgimpmath/gimpmath.h>
+#include <libclay/clay.h>
+#include <libclaymath/claymath.h>
 
 #include "lighting-main.h"
 #include "lighting-ui.h"
@@ -52,9 +52,9 @@ compute_preview (gint startx,
   gdouble imagex, imagey;
   gint32 index = 0;
   gdouble color[4];
-  gdouble lightcheck[4] = { GIMP_CHECK_LIGHT,  GIMP_CHECK_LIGHT, GIMP_CHECK_LIGHT, 1.0 };
-  gdouble darkcheck[4]  = { GIMP_CHECK_DARK,  GIMP_CHECK_DARK, GIMP_CHECK_DARK, 1.0 };
-  GimpVector3 pos;
+  gdouble lightcheck[4] = { CLAY_CHECK_LIGHT,  CLAY_CHECK_LIGHT, CLAY_CHECK_LIGHT, 1.0 };
+  gdouble darkcheck[4]  = { CLAY_CHECK_DARK,  CLAY_CHECK_DARK, CLAY_CHECK_DARK, 1.0 };
+  ClayVector3 pos;
   get_ray_func ray_func;
 
   if (xpostab_size != w)
@@ -96,7 +96,7 @@ compute_preview (gint startx,
 
   if (mapvals.bump_mapped == TRUE && mapvals.bumpmap_id != -1)
     {
-      bumpmap_setup (gimp_drawable_get_by_id (mapvals.bumpmap_id));
+      bumpmap_setup (clay_drawable_get_by_id (mapvals.bumpmap_id));
     }
 
   imagey = 0;
@@ -108,7 +108,7 @@ compute_preview (gint startx,
 
   if (mapvals.env_mapped == TRUE && mapvals.envmap_id != -1)
     {
-      envmap_setup (gimp_drawable_get_by_id (mapvals.envmap_id));
+      envmap_setup (clay_drawable_get_by_id (mapvals.envmap_id));
 
       if (mapvals.previewquality)
         ray_func = get_ray_color_ref;
@@ -175,7 +175,7 @@ compute_preview (gint startx,
               r = (guchar) (color[0] * 255);
               g = (guchar) (color[1] * 255);
               b = (guchar) (color[2] * 255);
-              GIMP_CAIRO_RGB24_SET_PIXEL((preview_rgb_data + index), r, g, b);
+              CLAY_CAIRO_RGB24_SET_PIXEL((preview_rgb_data + index), r, g, b);
               index += 4;
               imagex++;
             }
@@ -258,8 +258,8 @@ draw_handles (cairo_t *cr)
 {
   gdouble     dxpos, dypos;
   gint        startx, starty, pw, ph;
-  GimpVector3 viewpoint;
-  GimpVector3 light_position;
+  ClayVector3 viewpoint;
+  ClayVector3 light_position;
   gint        k      = mapvals.light_selected;
 
   gfloat length;
@@ -278,7 +278,7 @@ draw_handles (cairo_t *cr)
       viewpoint = mapvals.viewpoint;
       viewpoint.z = -viewpoint.z;
       light_position = mapvals.lightsource[k].position;
-      gimp_vector_3d_to_2d (startx, starty, pw, ph, &dxpos, &dypos,
+      clay_vector_3d_to_2d (startx, starty, pw, ph, &dxpos, &dypos,
                             &viewpoint, &light_position);
       handle_xpos = (gint) (dxpos + 0.5);
       handle_ypos = (gint) (dypos + 0.5);
@@ -287,7 +287,7 @@ draw_handles (cairo_t *cr)
       light_position.x = light_position.y = 0.5;
       light_position.z = 0;
       viewpoint.z = -viewpoint.z;
-      gimp_vector_3d_to_2d (startx, starty, pw, ph, &dxpos, &dypos,
+      clay_vector_3d_to_2d (startx, starty, pw, ph, &dxpos, &dypos,
                             &viewpoint, &light_position);
       length = PREVIEW_HEIGHT / 4;
       delta_x = mapvals.lightsource[k].direction.x * length;
@@ -341,7 +341,7 @@ void
 update_light (gint xpos, gint ypos)
 {
   gint startx, starty, pw, ph;
-  GimpVector3  vp;
+  ClayVector3  vp;
   gint         k = mapvals.light_selected;
 
   compute_preview_rectangle (&startx, &starty, &pw, &ph);
@@ -355,14 +355,14 @@ update_light (gint xpos, gint ypos)
       break;
     case        POINT_LIGHT:
     case        SPOT_LIGHT:
-      gimp_vector_2d_to_3d (startx,
+      clay_vector_2d_to_3d (startx,
                             starty,
                             pw,
                             ph,
                             xpos, ypos, &vp, &mapvals.lightsource[k].position);
       break;
     case DIRECTIONAL_LIGHT:
-      gimp_vector_2d_to_3d (startx,
+      clay_vector_2d_to_3d (startx,
                             starty,
                             pw,
                             ph,

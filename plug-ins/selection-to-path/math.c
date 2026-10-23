@@ -22,7 +22,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 #include "types.h"
 #include "global.h"

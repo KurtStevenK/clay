@@ -1,6 +1,6 @@
 ; A testing framework
 ;
-; Independent of GIMP except for gimp_message,
+; Independent of Clay except for clay_message,
 ; which you can redefine
 
 
@@ -54,7 +54,7 @@
 
 ; Notes on implementation:
 ;
-; Debug stream for testing is gimp-message
+; Debug stream for testing is clay-message
 
 
 ; EvalResult object
@@ -63,7 +63,7 @@
 ; <error> is type string
 
 (define (make-evalresult result errors)
-  ;(gimp-message "make-evalresult")
+  ;(clay-message "make-evalresult")
   (list result errors))
 (define (evalresult-get-result x) (car x))
 (define (evalresult-get-error x)  (cadr x))
@@ -82,7 +82,7 @@
 
 (define (testing:log-passed!)
   ; Not announce success to console, but can debug
-  (gimp-message "Passed")
+  (clay-message "Passed")
   (set! testing:passed (+ testing:passed 1)))
 
 ; log any failure
@@ -113,8 +113,8 @@
 (define (test! string)
   (displayln "")
   (displayln string)
-  ; also to GIMP Error Console
-  (gimp-message string))
+  ; also to Clay Error Console
+  (clay-message string))
 
 
 ; reset testing state when test framework is loaded
@@ -194,7 +194,7 @@
 ; This knows that a passed normal test has true result and empty error.
 ; <code is> a an object? a Scheme text, is a boolean proposition,
 (define (testing:record-assert-result eval-result code)
-  ;(gimp-message "record-assert-result")
+  ;(clay-message "record-assert-result")
   ; passed when has no error and result is #t
   (if (and (evalresult-has-no-error? eval-result)
            (evalresult-get-result eval-result))
@@ -333,20 +333,20 @@
 ; We only record the first error message in an eval of the code under test.
 
 (define (harnessed-eval code)
-  ;(gimp-message "harnessed-eval")
+  ;(clay-message "harnessed-eval")
   (let* ((old-error-hook *error-hook*) ; save original handler, which is throw
          (errors "") ; initial empty string
          (result #f) ; initial result is #f, not () which is truthy
 
          (testing-error-hook
            (lambda (xs)
-             ;(gimp-message "testing-error-hook")
+             ;(clay-message "testing-error-hook")
 
              ; Only record the first error
              (if (= (string-length errors) 0)
                  (if (string? xs)
                     (begin
-                      ;(gimp-message "xs is string")
+                      ;(clay-message "xs is string")
                       (set! errors xs))
                     (set! errors "Non-string error")))
 
@@ -356,13 +356,13 @@
              ;
              ; This returns to current eval,
              ; which may call this error hook again.
-             ;(gimp-message "returning from error hook")
+             ;(clay-message "returning from error hook")
              )))
-    ;(gimp-message "override error hook")
+    ;(clay-message "override error hook")
     (set! *error-hook* testing-error-hook)
-    ;(gimp-message "eval test code")
+    ;(clay-message "eval test code")
     (set! result (eval code))
-    ;(gimp-message "restore error hook")
+    ;(clay-message "restore error hook")
     ; restore the error hook for any code in a test script between asserts
     (set! *error-hook* old-error-hook)
     ; return an EvalResult
@@ -393,48 +393,48 @@
 
 ; Return the fullpath of a test script.
 ; When fileScm is empty, returns path to dir of test scripts.
-; From gimp-data-directory i.e. the shared install dir for GIMP
+; From clay-data-directory i.e. the shared install dir for Clay
 ; Require filename is string
 ; Require suffix, usually ".scm" on the filename
 
 (define (path-to-test-scripts fileScm)
-    (let*   (   (path (string-append gimp-data-directory DIR-SEPARATOR "tests")))
+    (let*   (   (path (string-append clay-data-directory DIR-SEPARATOR "tests")))
         (if (zero? (string-length fileScm)) path (string-append path DIR-SEPARATOR fileScm))))
 
 (define (path-to-test-images fileScm)
-    (let*   (   (path (string-append gimp-data-directory DIR-SEPARATOR "images")))
+    (let*   (   (path (string-append clay-data-directory DIR-SEPARATOR "images")))
         (if (zero? (string-length fileScm)) path (string-append path DIR-SEPARATOR fileScm))))
 
 ; load a test file, which executes it
-; Knows where GIMP installs test scripts
+; Knows where Clay installs test scripts
 ;
 ; Subsequently, testing:report will say results
 (define (testing:load-test filename)
-  (gimp-message (path-to-test-scripts filename))
+  (clay-message (path-to-test-scripts filename))
   (load (path-to-test-scripts filename)))
 
-; Tell Gimp to load a test image by name
+; Tell Clay to load a test image by name
 ; Returns ID of image
 ; Knows installed image directory (not dedicated to testing but always there.)
-; Accepts image suffixes that Gimp can load.
-; Typical is /usr/local/share/gimp/2.99/images/gimp-logo.png
+; Accepts image suffixes that Clay can load.
+; Typical is /usr/local/share/clay/2.99/images/clay-logo.png
 (define (testing:load-test-image filename)
-  (gimp-message (path-to-test-images filename))
+  (clay-message (path-to-test-images filename))
   ; unpack ID via car
-  (car (gimp-file-load RUN-NONINTERACTIVE (path-to-test-images filename))))
+  (car (clay-file-load RUN-NONINTERACTIVE (path-to-test-images filename))))
 
 
-; Tell Gimp to load a basic image always distributed with Gimp
+; Tell Clay to load a basic image always distributed with Clay
 ; This hides the name of the file.
 ; Many tests use this, so you can temporarily change the file name
 ; and many tests will then use a different image.
 ; But some tests expect the image to have certain properties, like 256x256.
 (define (testing:load-test-image-basic)
-  (testing:load-test-image "gimp-logo.png"))
+  (testing:load-test-image "clay-logo.png"))
 
 ; Load a basic image while we are using v3 binding: no car
 (define (testing:load-test-image-basic-v3)
-  (gimp-file-load RUN-NONINTERACTIVE (path-to-test-images "gimp-logo.png")))
+  (clay-file-load RUN-NONINTERACTIVE (path-to-test-images "clay-logo.png")))
 
 ; Returns path to file containing named color profile
 ; Currently, assumes color profiles downloaded to /work dir.
@@ -447,7 +447,7 @@
 ; The new layer initial attributes are hard-coded.
 ; The new layer is not added i.e. inserted in the image.
 (define (testing:layer-new testImage)
-  (gimp-layer-new
+  (clay-layer-new
     testImage
     "LayerNew"  ; name
     21 22      ; dimensions
@@ -459,7 +459,7 @@
 ; The new layer initial attributes are hard-coded.
 (define (testing:layer-new-inserted testImage)
   (let ((newLayer (testing:layer-new testImage)))
-    (gimp-image-insert-layer
+    (clay-image-insert-layer
             testImage
             newLayer
             0 0) ; parent, position within parent
@@ -480,5 +480,5 @@
 ; Now commented out.
 ; The PDB API has no predicate answering "can open display?"
 (define (testing:show image)
-  ;(gimp-display-new image)
+  ;(clay-display-new image)
   )

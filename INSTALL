@@ -6,12 +6,12 @@ There are some basic steps to building and installing Clay, a fork of
 the GNU Image Manipulation Program.
 
 Clay 3.36 replaces earlier Clay builds. Uninstall those first. The
-libgimp* libraries and data are still versioned, so an older GIMP 2.x
+libclay* libraries and data are still versioned, so an older Clay 2.x
 install can sit on the same prefix as Clay 3.36.
 
-Clay 3.36 is not backward compatible with GIMP 2 and earlier. Plug-ins
-and scripts written for GIMP 2.10, 2.8, 2.6 or earlier will not work
-because this tree uses the GIMP 3.0 API.
+Clay 3.36 is not backward compatible with Clay 2 and earlier. Plug-ins
+and scripts written for Clay 2.10, 2.8, 2.6 or earlier will not work
+because this tree uses the Clay 3.0 API.
 
 The most important part is to make sure the requirements for a build
 are fulfilled. We depend on a number of tools and libraries which are
@@ -214,7 +214,7 @@ Windows, Linux, and macOS packaging scripts live under build/.
      GdkPixbuf, GEGL, GIO, GLib, GObject, GTK and Gexiv2.
 
  16. Windows builds can now generate backtrace logs upon a crash.
-     The logs will be available in: %APPDATA%\GIMP\3.36\CrashLog\
+     The logs will be available in: %APPDATA%\Clay\3.36\CrashLog\
      The feature depends on Dr.MinGW's ExcHndl library:
 
         https://github.com/jrfonseca/drmingw
@@ -364,8 +364,8 @@ These are:
      checking to be disabled. NOTE: This option is intended primarily as
      a convenience for developers.
 
-  -Dgimpdir=DIR.  This option changes the default directory Clay uses to
-     search for its configuration files from $XDG_CONFIG_HOME/GIMP/3.36/
+  -Dclaydir=DIR.  This option changes the default directory Clay uses to
+     search for its configuration files from $XDG_CONFIG_HOME/Clay/3.36/
      (per XDG Base Directory Specification, $XDG_CONFIG_HOME defaults to
      the directory .config/ in the user's home directory) to
      $XDG_CONFIG_HOME/DIR/3.36/.
@@ -400,7 +400,7 @@ These are:
   -Dlinux-input=disabled  If you don't want to compile the Linux Input
      controller module, you can use the -Dlinux-input=disabled option.
 
-  -Dgi-docgen=enabled|disabled  This option controls whether the libgimp
+  -Dgi-docgen=enabled|disabled  This option controls whether the libclay
      C API references will be created using gi-docgen.
 
   -Denable-multiproc=false This option allows you to disable support for
@@ -435,14 +435,14 @@ Additionally meson supports a wide range of common built-in options. See
 documentation: https://mesonbuild.com/Builtin-options.html
 
 The `ninja' command builds several things:
- - A bunch of public libraries in the directories starting with 'libgimp'.
+ - A bunch of public libraries in the directories starting with 'libclay'.
  - The plug-in programs in the 'plug-ins' directory.
  - Some modules in the 'modules' subdirectory.
  - The main Clay program 'clay-3.36' in `app'.
  - A CLI Clay program 'clay-console-3.36' in `app' (unless
    -Denable-console-bin=false was set).
 
-The `ninja install' command installs the libgimp header files, the
+The `ninja install' command installs the libclay header files, the
 plug-ins, some data files and the Clay executable. After running
 `ninja install' and assuming the build process was successful you
 should be able to run `clay'.

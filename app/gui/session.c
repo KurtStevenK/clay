@@ -23,27 +23,27 @@
 #include <gegl.h>
 #include <gtk/gtk.h>
 
-#include "libgimpbase/gimpbase.h"
-#include "libgimpconfig/gimpconfig.h"
+#include "libclaybase/claybase.h"
+#include "libclayconfig/clayconfig.h"
 
 #include "gui-types.h"
 
-#include "config/gimpconfig-file.h"
-#include "config/gimpguiconfig.h"
+#include "config/clayconfig-file.h"
+#include "config/clayguiconfig.h"
 
-#include "core/gimp.h"
-#include "core/gimperror.h"
+#include "core/clay.h"
+#include "core/clayerror.h"
 
-#include "widgets/gimpdialogfactory.h"
-#include "widgets/gimpsessioninfo.h"
-#include "widgets/gimpwidgets-utils.h"
+#include "widgets/claydialogfactory.h"
+#include "widgets/claysessioninfo.h"
+#include "widgets/claywidgets-utils.h"
 
 #include "dialogs/dialogs.h"
 
 #include "session.h"
-#include "gimp-log.h"
+#include "clay-log.h"
 
-#include "gimp-intl.h"
+#include "clay-intl.h"
 
 
 enum
@@ -57,7 +57,7 @@ enum
 };
 
 
-static GFile * session_file (Gimp *gimp);
+static GFile * session_file (Clay *clay);
 
 
 /*  private variables  */
@@ -68,27 +68,27 @@ static gboolean   sessionrc_deleted = FALSE;
 /*  public functions  */
 
 void
-session_init (Gimp *gimp)
+session_init (Clay *clay)
 {
   GFile      *file;
   GScanner   *scanner;
   GTokenType  token;
   GError     *error = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
-  file = session_file (gimp);
+  file = session_file (clay);
 
-  scanner = gimp_scanner_new_file (file, &error);
+  scanner = clay_scanner_new_file (file, &error);
 
-  if (! scanner && error->code == GIMP_CONFIG_ERROR_OPEN_ENOENT)
+  if (! scanner && error->code == CLAY_CONFIG_ERROR_OPEN_ENOENT)
     {
       g_clear_error (&error);
       g_object_unref (file);
 
-      file = gimp_sysconf_directory_file ("sessionrc", NULL);
+      file = clay_sysconf_directory_file ("sessionrc", NULL);
 
-      scanner = gimp_scanner_new_file (file, NULL);
+      scanner = clay_scanner_new_file (file, NULL);
     }
 
   if (! scanner)
@@ -98,8 +98,8 @@ session_init (Gimp *gimp)
       return;
     }
 
-  if (gimp->be_verbose)
-    g_print ("Parsing '%s'\n", gimp_file_get_utf8_name (file));
+  if (clay->be_verbose)
+    g_print ("Parsing '%s'\n", clay_file_get_utf8_name (file));
 
   g_scanner_scope_add_symbol (scanner, 0, "session-info",
                               GINT_TO_POINTER (SESSION_INFO));
@@ -129,34 +129,34 @@ session_init (Gimp *gimp)
         case G_TOKEN_SYMBOL:
           if (scanner->value.v_symbol == GINT_TO_POINTER (SESSION_INFO))
             {
-              GimpDialogFactory      *factory      = NULL;
-              GimpSessionInfo        *info         = NULL;
+              ClayDialogFactory      *factory      = NULL;
+              ClaySessionInfo        *info         = NULL;
               gchar                  *factory_name = NULL;
               gchar                  *entry_name   = NULL;
-              GimpDialogFactoryEntry *entry        = NULL;
+              ClayDialogFactoryEntry *entry        = NULL;
 
               token = G_TOKEN_STRING;
 
-              if (! gimp_scanner_parse_string (scanner, &factory_name))
+              if (! clay_scanner_parse_string (scanner, &factory_name))
                 break;
 
-              /* In versions <= GIMP 2.6 there was a "toolbox", a
+              /* In versions <= Clay 2.6 there was a "toolbox", a
                * "dock", a "display" and a "toplevel" factory. These
-               * are now merged to a single gimp_dialog_factory_get_singleton (). We
+               * are now merged to a single clay_dialog_factory_get_singleton (). We
                * need the legacy name though, so keep it around.
                */
-              factory = gimp_dialog_factory_get_singleton ();
+              factory = clay_dialog_factory_get_singleton ();
 
-              info = gimp_session_info_new ();
+              info = clay_session_info_new ();
 
-              /* GIMP 2.6 has the entry name as part of the
+              /* Clay 2.6 has the entry name as part of the
                * session-info header, so try to get it
                */
-              gimp_scanner_parse_string (scanner, &entry_name);
+              clay_scanner_parse_string (scanner, &entry_name);
               if (entry_name)
                 {
-                  /* Previously, GimpDock was a toplevel. That is why
-                   * versions <= GIMP 2.6 has "dock" as the entry name. We
+                  /* Previously, ClayDock was a toplevel. That is why
+                   * versions <= Clay 2.6 has "dock" as the entry name. We
                    * want "dock" to be interpreted as 'dock window'
                    * however so have some special-casing for that. When
                    * the entry name is "dock" the factory name is either
@@ -165,14 +165,14 @@ session_init (Gimp *gimp)
                   if (strcmp (entry_name, "dock") == 0)
                     {
                       entry =
-                        gimp_dialog_factory_find_entry (factory,
+                        clay_dialog_factory_find_entry (factory,
                                                         (strcmp (factory_name, "toolbox") == 0 ?
-                                                         "gimp-toolbox-window" :
-                                                         "gimp-dock-window"));
+                                                         "clay-toolbox-window" :
+                                                         "clay-dock-window"));
                     }
                   else
                     {
-                      entry = gimp_dialog_factory_find_entry (factory,
+                      entry = clay_dialog_factory_find_entry (factory,
                                                               entry_name);
                     }
                 }
@@ -181,31 +181,31 @@ session_init (Gimp *gimp)
               g_free (factory_name);
               g_free (entry_name);
 
-              /* We can get the factory entry either now (the GIMP <=
-               * 2.6 way), or when we deserialize (the GIMP 2.8 way)
+              /* We can get the factory entry either now (the Clay <=
+               * 2.6 way), or when we deserialize (the Clay 2.8 way)
                */
               if (entry)
                 {
-                  gimp_session_info_set_factory_entry (info, entry);
+                  clay_session_info_set_factory_entry (info, entry);
                 }
 
               /* Always try to deserialize */
-              if (gimp_config_deserialize (GIMP_CONFIG (info), scanner, 1, NULL))
+              if (clay_config_deserialize (CLAY_CONFIG (info), scanner, 1, NULL))
                 {
                   /* Make sure we got a factory entry either the 2.6
                    * or 2.8 way
                    */
-                  if (gimp_session_info_get_factory_entry (info))
+                  if (clay_session_info_get_factory_entry (info))
                     {
-                      GIMP_LOG (DIALOG_FACTORY,
+                      CLAY_LOG (DIALOG_FACTORY,
                                 "successfully parsed and added session info %p",
                                 info);
 
-                      gimp_dialog_factory_add_session_info (factory, info);
+                      clay_dialog_factory_add_session_info (factory, info);
                     }
                   else
                     {
-                      GIMP_LOG (DIALOG_FACTORY,
+                      CLAY_LOG (DIALOG_FACTORY,
                                 "failed to parse session info %p, not adding",
                                 info);
                     }
@@ -217,7 +217,7 @@ session_init (Gimp *gimp)
                   g_object_unref (info);
 
                   /* set token to left paren so we won't set another
-                   * error below, gimp_config_deserialize() already did
+                   * error below, clay_config_deserialize() already did
                    */
                   token = G_TOKEN_LEFT_PAREN;
                   goto error;
@@ -229,10 +229,10 @@ session_init (Gimp *gimp)
 
               token = G_TOKEN_IDENTIFIER;
 
-              if (! gimp_scanner_parse_boolean (scanner, &hide_docks))
+              if (! clay_scanner_parse_boolean (scanner, &hide_docks))
                 break;
 
-              g_object_set (gimp->config,
+              g_object_set (clay->config,
                             "hide-docks", hide_docks,
                             NULL);
             }
@@ -242,10 +242,10 @@ session_init (Gimp *gimp)
 
               token = G_TOKEN_IDENTIFIER;
 
-              if (! gimp_scanner_parse_boolean (scanner, &single_window_mode))
+              if (! clay_scanner_parse_boolean (scanner, &single_window_mode))
                 break;
 
-              g_object_set (gimp->config,
+              g_object_set (clay->config,
                             "single-window-mode", single_window_mode,
                             NULL);
             }
@@ -255,10 +255,10 @@ session_init (Gimp *gimp)
 
             token = G_TOKEN_IDENTIFIER;
 
-            if (! gimp_scanner_parse_boolean (scanner, &show_tabs))
+            if (! clay_scanner_parse_boolean (scanner, &show_tabs))
               break;
 
-            g_object_set (gimp->config,
+            g_object_set (clay->config,
                           "show-tabs", show_tabs,
                           NULL);
           }
@@ -268,10 +268,10 @@ session_init (Gimp *gimp)
 
               token = G_TOKEN_INT;
 
-              if (! gimp_scanner_parse_int (scanner, &tabs_position))
+              if (! clay_scanner_parse_int (scanner, &tabs_position))
                 break;
 
-              g_object_set (gimp->config,
+              g_object_set (clay->config,
                             "tabs-position", tabs_position,
                             NULL);
             }
@@ -281,10 +281,10 @@ session_init (Gimp *gimp)
 
               token = G_TOKEN_INT;
 
-              if (! gimp_scanner_parse_int (scanner, &last_tip_shown))
+              if (! clay_scanner_parse_int (scanner, &last_tip_shown))
                 break;
 
-              g_object_set (gimp->config,
+              g_object_set (clay->config,
                             "last-tip-shown", last_tip_shown,
                             NULL);
             }
@@ -311,64 +311,64 @@ session_init (Gimp *gimp)
 
   if (error)
     {
-      gimp_message_literal (gimp, NULL, GIMP_MESSAGE_ERROR, error->message);
+      clay_message_literal (clay, NULL, CLAY_MESSAGE_ERROR, error->message);
       g_clear_error (&error);
 
-      gimp_config_file_backup_on_error (file, "sessionrc", NULL);
+      clay_config_file_backup_on_error (file, "sessionrc", NULL);
     }
 
-  gimp_scanner_unref (scanner);
+  clay_scanner_unref (scanner);
   g_object_unref (file);
 
-  dialogs_load_recent_docks (gimp);
+  dialogs_load_recent_docks (clay);
 }
 
 void
-session_exit (Gimp *gimp)
+session_exit (Clay *clay)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 }
 
 void
-session_restore (Gimp       *gimp,
+session_restore (Clay       *clay,
                  GdkMonitor *monitor)
 {
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
   g_return_if_fail (GDK_IS_MONITOR (monitor));
 
-  gimp_dialog_factory_restore (gimp_dialog_factory_get_singleton (),
+  clay_dialog_factory_restore (clay_dialog_factory_get_singleton (),
                                monitor);
 
-  /* make sure GimpImageWindow acts upon hide-docks at the right time,
+  /* make sure ClayImageWindow acts upon hide-docks at the right time,
    * see bug #678043.
    */
-  if (GIMP_GUI_CONFIG (gimp->config)->single_window_mode &&
-      GIMP_GUI_CONFIG (gimp->config)->hide_docks)
+  if (CLAY_GUI_CONFIG (clay->config)->single_window_mode &&
+      CLAY_GUI_CONFIG (clay->config)->hide_docks)
     {
-      g_object_notify (G_OBJECT (gimp->config), "hide-docks");
+      g_object_notify (G_OBJECT (clay->config), "hide-docks");
     }
 }
 
 void
-session_save (Gimp     *gimp,
+session_save (Clay     *clay,
               gboolean  always_save)
 {
-  GimpConfigWriter *writer;
+  ClayConfigWriter *writer;
   GFile            *file;
   GError           *error = NULL;
 
-  g_return_if_fail (GIMP_IS_GIMP (gimp));
+  g_return_if_fail (CLAY_IS_CLAY (clay));
 
   if (sessionrc_deleted && ! always_save)
     return;
 
-  file = session_file (gimp);
+  file = session_file (clay);
 
-  if (gimp->be_verbose)
-    g_print ("Writing '%s'\n", gimp_file_get_utf8_name (file));
+  if (clay->be_verbose)
+    g_print ("Writing '%s'\n", clay_file_get_utf8_name (file));
 
   writer =
-    gimp_config_writer_new_from_file (file,
+    clay_config_writer_new_from_file (file,
                                       TRUE,
                                       "Clay sessionrc\n\n"
                                       "This file takes session-specific info "
@@ -385,69 +385,69 @@ session_save (Gimp     *gimp,
   if (!writer)
     return;
 
-  gimp_dialog_factory_save (gimp_dialog_factory_get_singleton (), writer);
-  gimp_config_writer_linefeed (writer);
+  clay_dialog_factory_save (clay_dialog_factory_get_singleton (), writer);
+  clay_config_writer_linefeed (writer);
 
-  gimp_config_writer_open (writer, "hide-docks");
-  gimp_config_writer_identifier (writer,
-                                 GIMP_GUI_CONFIG (gimp->config)->hide_docks ?
+  clay_config_writer_open (writer, "hide-docks");
+  clay_config_writer_identifier (writer,
+                                 CLAY_GUI_CONFIG (clay->config)->hide_docks ?
                                  "yes" : "no");
-  gimp_config_writer_close (writer);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_open (writer, "single-window-mode");
-  gimp_config_writer_identifier (writer,
-                                 GIMP_GUI_CONFIG (gimp->config)->single_window_mode ?
+  clay_config_writer_open (writer, "single-window-mode");
+  clay_config_writer_identifier (writer,
+                                 CLAY_GUI_CONFIG (clay->config)->single_window_mode ?
                                  "yes" : "no");
-  gimp_config_writer_close (writer);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_open (writer, "show-tabs");
-  gimp_config_writer_printf (writer,
-                             GIMP_GUI_CONFIG (gimp->config)->show_tabs ?
+  clay_config_writer_open (writer, "show-tabs");
+  clay_config_writer_printf (writer,
+                             CLAY_GUI_CONFIG (clay->config)->show_tabs ?
                              "yes" : "no");
-  gimp_config_writer_close (writer);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_open (writer, "tabs-position");
-  gimp_config_writer_printf (writer, "%d",
-                             GIMP_GUI_CONFIG (gimp->config)->tabs_position);
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "tabs-position");
+  clay_config_writer_printf (writer, "%d",
+                             CLAY_GUI_CONFIG (clay->config)->tabs_position);
+  clay_config_writer_close (writer);
 
-  gimp_config_writer_open (writer, "last-tip-shown");
-  gimp_config_writer_printf (writer, "%d",
-                             GIMP_GUI_CONFIG (gimp->config)->last_tip_shown);
-  gimp_config_writer_close (writer);
+  clay_config_writer_open (writer, "last-tip-shown");
+  clay_config_writer_printf (writer, "%d",
+                             CLAY_GUI_CONFIG (clay->config)->last_tip_shown);
+  clay_config_writer_close (writer);
 
-  if (! gimp_config_writer_finish (writer, "end of sessionrc", &error))
+  if (! clay_config_writer_finish (writer, "end of sessionrc", &error))
     {
-      gimp_message_literal (gimp, NULL, GIMP_MESSAGE_ERROR, error->message);
+      clay_message_literal (clay, NULL, CLAY_MESSAGE_ERROR, error->message);
       g_clear_error (&error);
     }
 
-  dialogs_save_recent_docks (gimp);
+  dialogs_save_recent_docks (clay);
 
   sessionrc_deleted = FALSE;
 }
 
 gboolean
-session_clear (Gimp    *gimp,
+session_clear (Clay    *clay,
                GError **error)
 {
   GFile    *file;
   GError   *my_error = NULL;
   gboolean  success  = TRUE;
 
-  g_return_val_if_fail (GIMP_IS_GIMP (gimp), FALSE);
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  file = session_file (gimp);
+  file = session_file (clay);
 
   if (! g_file_delete (file, NULL, &my_error) &&
       my_error->code != G_IO_ERROR_NOT_FOUND)
     {
       success = FALSE;
 
-      g_set_error (error, GIMP_ERROR, GIMP_FAILED,
+      g_set_error (error, CLAY_ERROR, CLAY_FAILED,
                    _("Deleting \"%s\" failed: %s"),
-                   gimp_file_get_utf8_name (file), my_error->message);
+                   clay_file_get_utf8_name (file), my_error->message);
     }
   else
     {
@@ -462,22 +462,22 @@ session_clear (Gimp    *gimp,
 
 
 static GFile *
-session_file (Gimp *gimp)
+session_file (Clay *clay)
 {
   const gchar *basename;
   gchar       *filename;
   GFile       *file;
 
-  basename = g_getenv ("GIMP_TESTING_SESSIONRC_NAME");
+  basename = g_getenv ("CLAY_TESTING_SESSIONRC_NAME");
   if (! basename)
     basename = "sessionrc";
 
-  if (gimp->session_name)
-    filename = g_strconcat (basename, ".", gimp->session_name, NULL);
+  if (clay->session_name)
+    filename = g_strconcat (basename, ".", clay->session_name, NULL);
   else
     filename = g_strdup (basename);
 
-  file = gimp_directory_file (filename, NULL);
+  file = clay_directory_file (filename, NULL);
 
   g_free (filename);
 

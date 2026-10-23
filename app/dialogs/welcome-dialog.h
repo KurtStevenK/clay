@@ -21,5 +21,5 @@
 #pragma once
 
 
-GtkWidget * welcome_dialog_create (Gimp     *gimp,
+GtkWidget * welcome_dialog_create (Clay     *clay,
                                    gboolean  show_welcome_page);

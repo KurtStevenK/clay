@@ -22,14 +22,14 @@
 #include "plug-in/plug-in-enums.h"
 
 
-#define GIMP_PLUG_IN_TILE_WIDTH  128
-#define GIMP_PLUG_IN_TILE_HEIGHT 128
+#define CLAY_PLUG_IN_TILE_WIDTH  128
+#define CLAY_PLUG_IN_TILE_HEIGHT 128
 
 
-typedef struct _GimpPlugIn           GimpPlugIn;
-typedef struct _GimpPlugInDebug      GimpPlugInDebug;
-typedef struct _GimpPlugInDef        GimpPlugInDef;
-typedef struct _GimpPlugInManager    GimpPlugInManager;
-typedef struct _GimpPlugInMenuBranch GimpPlugInMenuBranch;
-typedef struct _GimpPlugInProcFrame  GimpPlugInProcFrame;
-typedef struct _GimpPlugInShm        GimpPlugInShm;
+typedef struct _ClayPlugIn           ClayPlugIn;
+typedef struct _ClayPlugInDebug      ClayPlugInDebug;
+typedef struct _ClayPlugInDef        ClayPlugInDef;
+typedef struct _ClayPlugInManager    ClayPlugInManager;
+typedef struct _ClayPlugInMenuBranch ClayPlugInMenuBranch;
+typedef struct _ClayPlugInProcFrame  ClayPlugInProcFrame;
+typedef struct _ClayPlugInShm        ClayPlugInShm;

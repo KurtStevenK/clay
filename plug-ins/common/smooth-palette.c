@@ -23,15 +23,15 @@
 
 #include <string.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define PLUG_IN_PROC   "plug-in-smooth-palette"
 #define PLUG_IN_BINARY "smooth-palette"
-#define PLUG_IN_ROLE   "gimp-smooth-palette"
+#define PLUG_IN_ROLE   "clay-smooth-palette"
 
 
 typedef struct _Palette      Palette;
@@ -39,12 +39,12 @@ typedef struct _PaletteClass PaletteClass;
 
 struct _Palette
 {
-  GimpPlugIn parent_instance;
+  ClayPlugIn parent_instance;
 };
 
 struct _PaletteClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -53,29 +53,29 @@ struct _PaletteClass
 
 GType                   palette_get_type         (void);
 
-static GList          * palette_query_procedures (GimpPlugIn           *plug_in);
-static GimpProcedure  * palette_create_procedure (GimpPlugIn           *plug_in,
+static GList          * palette_query_procedures (ClayPlugIn           *plug_in);
+static ClayProcedure  * palette_create_procedure (ClayPlugIn           *plug_in,
                                                   const gchar          *name);
 
-static GimpValueArray * palette_run              (GimpProcedure        *procedure,
-                                                  GimpRunMode           run_mode,
-                                                  GimpImage            *image,
-                                                  GimpDrawable        **drawables,
-                                                  GimpProcedureConfig  *config,
+static ClayValueArray * palette_run              (ClayProcedure        *procedure,
+                                                  ClayRunMode           run_mode,
+                                                  ClayImage            *image,
+                                                  ClayDrawable        **drawables,
+                                                  ClayProcedureConfig  *config,
                                                   gpointer              run_data);
 
-static gboolean         dialog                   (GimpProcedure        *procedure,
-                                                  GimpProcedureConfig  *config,
-                                                  GimpDrawable         *drawable);
+static gboolean         dialog                   (ClayProcedure        *procedure,
+                                                  ClayProcedureConfig  *config,
+                                                  ClayDrawable         *drawable);
 
-static GimpImage      * smooth_palette           (GimpProcedureConfig  *config,
-                                                  GimpDrawable         *drawable,
-                                                  GimpLayer           **layer);
+static ClayImage      * smooth_palette           (ClayProcedureConfig  *config,
+                                                  ClayDrawable         *drawable,
+                                                  ClayLayer           **layer);
 
 
-G_DEFINE_TYPE (Palette, palette, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Palette, palette, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (PALETTE_TYPE)
+CLAY_MAIN (PALETTE_TYPE)
 DEFINE_STD_SET_I18N
 
 #define TRY_SIZE 10000
@@ -83,7 +83,7 @@ DEFINE_STD_SET_I18N
 static void
 palette_class_init (PaletteClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = palette_query_procedures;
   plug_in_class->create_procedure = palette_create_procedure;
@@ -96,70 +96,70 @@ palette_init (Palette *palette)
 }
 
 static GList *
-palette_query_procedures (GimpPlugIn *plug_in)
+palette_query_procedures (ClayPlugIn *plug_in)
 {
   return g_list_append (NULL, g_strdup (PLUG_IN_PROC));
 }
 
-static GimpProcedure *
-palette_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+palette_create_procedure (ClayPlugIn  *plug_in,
                           const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, PLUG_IN_PROC))
     {
-      procedure = gimp_image_procedure_new (plug_in, name,
-                                            GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_image_procedure_new (plug_in, name,
+                                            CLAY_PDB_PROC_TYPE_PLUGIN,
                                             palette_run, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGB*");
-      gimp_procedure_set_sensitivity_mask (procedure,
-                                           GIMP_PROCEDURE_SENSITIVE_DRAWABLE);
+      clay_procedure_set_image_types (procedure, "RGB*");
+      clay_procedure_set_sensitivity_mask (procedure,
+                                           CLAY_PROCEDURE_SENSITIVE_DRAWABLE);
 
-      gimp_procedure_set_menu_label (procedure, _("Smoo_th Palette..."));
-      gimp_procedure_add_menu_path (procedure, "<Image>/Colors/Info");
+      clay_procedure_set_menu_label (procedure, _("Smoo_th Palette..."));
+      clay_procedure_add_menu_path (procedure, "<Image>/Colors/Info");
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Derive a smooth color palette "
                                           "from the image"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Scott Draves",
                                       "Scott Draves",
                                       "1997");
 
-      gimp_procedure_add_int_argument (procedure, "width",
+      clay_procedure_add_int_argument (procedure, "width",
                                        _("_Width"),
                                        _("Width"),
-                                       2, GIMP_MAX_IMAGE_SIZE, 256,
+                                       2, CLAY_MAX_IMAGE_SIZE, 256,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "height",
+      clay_procedure_add_int_argument (procedure, "height",
                                        _("_Height"),
                                        _("Height"),
-                                       2, GIMP_MAX_IMAGE_SIZE, 64,
+                                       2, CLAY_MAX_IMAGE_SIZE, 64,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "n-tries",
+      clay_procedure_add_int_argument (procedure, "n-tries",
                                        _("Search _depth"),
                                        _("Search depth"),
                                        1, 1024, 50,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "show-image",
+      clay_procedure_add_boolean_argument (procedure, "show-image",
                                            _("Show image"),
                                            _("Show image"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_image_return_value (procedure, "new-image",
+      clay_procedure_add_image_return_value (procedure, "new-image",
                                              _("New image"),
                                              _("Output image"),
                                              FALSE,
                                              G_PARAM_READWRITE);
 
-      gimp_procedure_add_layer_return_value (procedure, "new-layer",
+      clay_procedure_add_layer_return_value (procedure, "new-layer",
                                              _("New layer"),
                                              _("Output layer"),
                                              FALSE,
@@ -169,31 +169,31 @@ palette_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-palette_run (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
-             GimpImage            *image,
-             GimpDrawable        **drawables,
-             GimpProcedureConfig  *config,
+static ClayValueArray *
+palette_run (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
+             ClayImage            *image,
+             ClayDrawable        **drawables,
+             ClayProcedureConfig  *config,
              gpointer              run_data)
 {
-  GimpImage    *new_image;
-  GimpLayer    *new_layer;
-  GimpDrawable *drawable;
+  ClayImage    *new_image;
+  ClayLayer    *new_layer;
+  ClayDrawable *drawable;
   gboolean      show_image;
 
   gegl_init (NULL, NULL);
 
-  if (gimp_core_object_array_get_length ((GObject **) drawables) != 1)
+  if (clay_core_object_array_get_length ((GObject **) drawables) != 1)
     {
       GError *error = NULL;
 
-      g_set_error (&error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (&error, CLAY_PLUG_IN_ERROR, 0,
                    _("Procedure '%s' only works with one drawable."),
                    PLUG_IN_PROC);
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CALLING_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CALLING_ERROR,
                                                error);
     }
   else
@@ -201,31 +201,31 @@ palette_run (GimpProcedure        *procedure,
       drawable = drawables[0];
     }
 
-  if (run_mode == GIMP_RUN_INTERACTIVE && ! dialog (procedure, config, drawable))
+  if (run_mode == CLAY_RUN_INTERACTIVE && ! dialog (procedure, config, drawable))
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_CANCEL,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_CANCEL,
                                                NULL);
     }
 
-  if (gimp_drawable_is_rgb (drawable))
+  if (clay_drawable_is_rgb (drawable))
     {
-      gimp_progress_init (_("Deriving smooth palette"));
+      clay_progress_init (_("Deriving smooth palette"));
 
       new_image = smooth_palette (config, drawable, &new_layer);
 
       g_object_get (config, "show-image", &show_image, NULL);
       if (show_image)
-        gimp_display_new (new_image);
+        clay_display_new (new_image);
     }
   else
     {
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                NULL);
     }
 
-  return gimp_procedure_new_return_values (procedure, GIMP_PDB_SUCCESS, NULL);
+  return clay_procedure_new_return_values (procedure, CLAY_PDB_SUCCESS, NULL);
 }
 
 static gfloat
@@ -263,12 +263,12 @@ pix_swap (gfloat *pal,
     }
 }
 
-static GimpImage *
-smooth_palette (GimpProcedureConfig  *config,
-                GimpDrawable         *drawable,
-                GimpLayer           **layer)
+static ClayImage *
+smooth_palette (ClayProcedureConfig  *config,
+                ClayDrawable         *drawable,
+                ClayLayer           **layer)
 {
-  GimpImage    *new_image;
+  ClayImage    *new_image;
   gint          psize, i, j;
   guint         bpp;
   gint          sel_x1, sel_y1;
@@ -281,7 +281,7 @@ smooth_palette (GimpProcedureConfig  *config,
   gfloat       *pal;
   GRand        *gr;
 
-  const Babl *format = gimp_drawable_has_alpha (drawable) ?
+  const Babl *format = clay_drawable_has_alpha (drawable) ?
                        babl_format ("RGBA float") : babl_format ("RGB float");
 
   g_object_get (config,
@@ -290,22 +290,22 @@ smooth_palette (GimpProcedureConfig  *config,
                 "n-tries", &config_n_tries,
                 NULL);
 
-  new_image = gimp_image_new_with_precision (config_width,
+  new_image = clay_image_new_with_precision (config_width,
                                              config_height,
-                                             GIMP_RGB,
-                                             GIMP_PRECISION_FLOAT_LINEAR);
+                                             CLAY_RGB,
+                                             CLAY_PRECISION_FLOAT_LINEAR);
 
-  gimp_image_undo_disable (new_image);
+  clay_image_undo_disable (new_image);
 
-  *layer = gimp_layer_new (new_image, _("Background"),
+  *layer = clay_layer_new (new_image, _("Background"),
                            config_width, config_height,
-                           gimp_drawable_type (drawable),
+                           clay_drawable_type (drawable),
                            100,
-                           gimp_image_get_default_new_layer_mode (new_image));
+                           clay_image_get_default_new_layer_mode (new_image));
 
-  gimp_image_insert_layer (new_image, *layer, NULL, 0);
+  clay_image_insert_layer (new_image, *layer, NULL, 0);
 
-  if (! gimp_drawable_mask_intersect (drawable,
+  if (! clay_drawable_mask_intersect (drawable,
                                       &sel_x1, &sel_y1, &width, &height))
     return new_image;
 
@@ -313,7 +313,7 @@ smooth_palette (GimpProcedureConfig  *config,
 
   psize = config_width;
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
   sampler = gegl_buffer_sampler_new (buffer, format, GEGL_SAMPLER_NEAREST);
 
@@ -352,7 +352,7 @@ smooth_palette (GimpProcedureConfig  *config,
           gdouble len;
 
           if (! (try % 5))
-            gimp_progress_update (try / (double) config_n_tries);
+            clay_progress_update (try / (double) config_n_tries);
           memcpy (pal, original, bpp * psize);
 
           /* scramble */
@@ -410,7 +410,7 @@ smooth_palette (GimpProcedureConfig  *config,
             }
         }
 
-      gimp_progress_update (1.0);
+      clay_progress_update (1.0);
       memcpy (pal, pal_best, bpp * psize);
       g_free (pal_best);
       g_free (original);
@@ -437,7 +437,7 @@ smooth_palette (GimpProcedureConfig  *config,
 
   /* store smooth palette */
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (*layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (*layer));
 
   for (j = 0; j < config_height; j++)
     {
@@ -447,9 +447,9 @@ smooth_palette (GimpProcedureConfig  *config,
 
   gegl_buffer_flush (buffer);
 
-  gimp_drawable_update (GIMP_DRAWABLE (*layer), 0, 0,
+  clay_drawable_update (CLAY_DRAWABLE (*layer), 0, 0,
                         config_width, config_height);
-  gimp_image_undo_enable (new_image);
+  clay_image_undo_enable (new_image);
 
   g_object_unref (buffer);
   g_free (pal);
@@ -459,14 +459,14 @@ smooth_palette (GimpProcedureConfig  *config,
 }
 
 static gboolean
-dialog (GimpProcedure       *procedure,
-        GimpProcedureConfig *config,
-        GimpDrawable        *drawable)
+dialog (ClayProcedure       *procedure,
+        ClayProcedureConfig *config,
+        ClayDrawable        *drawable)
 {
   GtkWidget     *dlg;
   GtkWidget     *sizeentry;
-  GimpImage     *image;
-  GimpUnit      *unit;
+  ClayImage     *image;
+  ClayUnit      *unit;
   gdouble        xres, yres;
   gint           width;
   gint           height;
@@ -477,47 +477,47 @@ dialog (GimpProcedure       *procedure,
                 "height", &height,
                 NULL);
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dlg = gimp_procedure_dialog_new (procedure,
-                                   GIMP_PROCEDURE_CONFIG (config),
+  dlg = clay_procedure_dialog_new (procedure,
+                                   CLAY_PROCEDURE_CONFIG (config),
                                    _("Smooth Palette"));
 
-  gimp_window_set_transient (GTK_WINDOW (dlg));
+  clay_window_set_transient (GTK_WINDOW (dlg));
 
-  image = gimp_item_get_image (GIMP_ITEM (drawable));
-  unit = gimp_image_get_unit (image);
-  gimp_image_get_resolution (image, &xres, &yres);
+  image = clay_item_get_image (CLAY_ITEM (drawable));
+  unit = clay_image_get_unit (image);
+  clay_image_get_resolution (image, &xres, &yres);
 
-  sizeentry = gimp_coordinates_new (unit, "%a", TRUE, FALSE, 6,
-                                    GIMP_SIZE_ENTRY_UPDATE_SIZE,
+  sizeentry = clay_coordinates_new (unit, "%a", TRUE, FALSE, 6,
+                                    CLAY_SIZE_ENTRY_UPDATE_SIZE,
                                     FALSE, FALSE,
 
                                     _("_Width:"),
                                     width, xres,
-                                    2, GIMP_MAX_IMAGE_SIZE,
-                                    2, GIMP_MAX_IMAGE_SIZE,
+                                    2, CLAY_MAX_IMAGE_SIZE,
+                                    2, CLAY_MAX_IMAGE_SIZE,
 
                                     _("_Height:"),
                                     height, yres,
-                                    1, GIMP_MAX_IMAGE_SIZE,
-                                    1, GIMP_MAX_IMAGE_SIZE);
+                                    1, CLAY_MAX_IMAGE_SIZE,
+                                    1, CLAY_MAX_IMAGE_SIZE);
   gtk_container_set_border_width (GTK_CONTAINER (sizeentry), 12);
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dlg))),
                       sizeentry, FALSE, FALSE, 0);
   gtk_widget_set_visible (sizeentry, TRUE);
 
   /* We don't want to have the "Show Image" option in the GUI */
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dlg), "n-tries", NULL);
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dlg), "n-tries", NULL);
 
   gtk_widget_set_visible (dlg, TRUE);
 
-  run = (gimp_dialog_run (GIMP_DIALOG (dlg)) == GTK_RESPONSE_OK);
+  run = (clay_dialog_run (CLAY_DIALOG (dlg)) == GTK_RESPONSE_OK);
 
   if (run)
     {
-      width  = gimp_size_entry_get_refval (GIMP_SIZE_ENTRY (sizeentry), 0);
-      height = gimp_size_entry_get_refval (GIMP_SIZE_ENTRY (sizeentry), 1);
+      width  = clay_size_entry_get_refval (CLAY_SIZE_ENTRY (sizeentry), 0);
+      height = clay_size_entry_get_refval (CLAY_SIZE_ENTRY (sizeentry), 1);
 
       g_object_set (config,
                     "width",  width,

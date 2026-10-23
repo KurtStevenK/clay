@@ -17,7 +17,7 @@
 # "Perlized" from C source by Manish Singh <yosh@gimp.org>
 
 sub patterns_popup {
-    $blurb = 'Invokes the Gimp pattern selection.';
+    $blurb = 'Invokes the Clay pattern selection.';
     $help  = 'Opens the pattern selection dialog.';
 
     &andy_pdb_misc('1998');
@@ -36,14 +36,14 @@ sub patterns_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->pattern_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->pattern_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, pattern_callback) ||
-      ! gimp_pdb_dialog_new (gimp, context, progress,
-                             gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, pattern_callback) ||
+      ! clay_pdb_dialog_new (clay, context, progress,
+                             clay_container_get_child_type (container),
                              parent_window, popup_title, pattern_callback,
-                             GIMP_OBJECT (initial_pattern), NULL))
+                             CLAY_OBJECT (initial_pattern), NULL))
     success = FALSE;
 }
 CODE
@@ -64,12 +64,12 @@ sub patterns_close_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->pattern_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->pattern_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, pattern_callback) ||
-      ! gimp_pdb_dialog_close (gimp,
-                               gimp_container_get_child_type (container),
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, pattern_callback) ||
+      ! clay_pdb_dialog_close (clay,
+                               clay_container_get_child_type (container),
                                pattern_callback))
     success = FALSE;
 }
@@ -93,13 +93,13 @@ sub patterns_set_popup {
     %invoke = (
 	code => <<'CODE'
 {
-  GimpContainer *container = gimp_data_factory_get_container (gimp->pattern_factory);
+  ClayContainer *container = clay_data_factory_get_container (clay->pattern_factory);
 
-  if (gimp->no_interface ||
-      ! gimp_pdb_lookup_procedure (gimp->pdb, pattern_callback) ||
-      ! gimp_pdb_dialog_set (gimp,
-                             gimp_container_get_child_type (container),
-                             pattern_callback, GIMP_OBJECT (pattern), NULL))
+  if (clay->no_interface ||
+      ! clay_pdb_lookup_procedure (clay->pdb, pattern_callback) ||
+      ! clay_pdb_dialog_set (clay,
+                             clay_container_get_child_type (container),
+                             pattern_callback, CLAY_OBJECT (pattern), NULL))
     success = FALSE;
 }
 CODE
@@ -107,9 +107,9 @@ CODE
 }
 
 
-@headers = qw("core/gimp.h"
-              "core/gimpcontainer.h"
-              "core/gimpdatafactory.h");
+@headers = qw("core/clay.h"
+              "core/claycontainer.h"
+              "core/claydatafactory.h");
 
 @procs = qw(patterns_popup
             patterns_close_popup
@@ -118,8 +118,8 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Pattern UI';
-$doc_title = 'gimppatternselect';
+$doc_title = 'claypatternselect';
 $doc_short_desc = 'Methods of a pattern chooser dialog';
-$doc_long_desc = 'A dialog letting a user choose a pattern.  Read more at gimpfontselect.';
+$doc_long_desc = 'A dialog letting a user choose a pattern.  Read more at clayfontselect.';
 
 1;

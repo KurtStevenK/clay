@@ -1,7 +1,7 @@
 /* xyz.kainzmayer.ClayDesign
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * TrueVision Targa loading and exporting file filter for GIMP.
+ * TrueVision Targa loading and exporting file filter for Clay.
  * Targa code Copyright (C) 1997 Raphael FRANCOIS and Gordon Matzigkeit
  *
  * The Targa reading and writing code was written from scratch by
@@ -61,7 +61,7 @@
  * TODO:
  *   - Handle TGA images with version 2 extensions (image comment,
  *     resolution, date, ...).
- *   - GIMP stores the indexed alpha channel as a separate byte,
+ *   - Clay stores the indexed alpha channel as a separate byte,
  *     one for each pixel.  The TGA file format spec requires that the
  *     alpha channel be stored as part of the colormap, not with each
  *     individual pixel.  This means that we have no good way of
@@ -79,16 +79,16 @@
 
 #include <glib/gstdio.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC      "file-tga-load"
 #define EXPORT_PROC    "file-tga-export"
 #define PLUG_IN_BINARY "file-tga"
-#define PLUG_IN_ROLE   "gimp-file-tga"
+#define PLUG_IN_ROLE   "clay-file-tga"
 
 
 typedef enum
@@ -139,7 +139,7 @@ typedef struct tga_info_struct
   /* Extensions (version 2) */
 
 /* Not all the structures described in the standard are transcribed here
-   only those which seem applicable to Gimp */
+   only those which seem applicable to Clay */
 
   gchar   authorName[41];
   gchar   comment[324];
@@ -156,12 +156,12 @@ typedef struct _TgaClass TgaClass;
 
 struct _Tga
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _TgaClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -170,46 +170,46 @@ struct _TgaClass
 
 GType                   tga_get_type         (void);
 
-static GList          * tga_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * tga_create_procedure (GimpPlugIn            *plug_in,
+static GList          * tga_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * tga_create_procedure (ClayPlugIn            *plug_in,
                                                const gchar           *name);
 
-static GimpValueArray * tga_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * tga_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
-static GimpValueArray * tga_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * tga_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage      * load_image           (GFile                 *file,
+static ClayImage      * load_image           (GFile                 *file,
                                               GError               **error);
 static gboolean         export_image         (GFile                 *file,
-                                              GimpImage             *image,
-                                              GimpDrawable          *drawable,
+                                              ClayImage             *image,
+                                              ClayDrawable          *drawable,
                                               GObject               *config,
                                               GError               **error);
 
-static gboolean         save_dialog          (GimpImage             *image,
-                                              GimpProcedure         *procedure,
+static gboolean         save_dialog          (ClayImage             *image,
+                                              ClayProcedure         *procedure,
                                               GObject               *config);
 
-static GimpImage      * ReadImage            (FILE                  *fp,
+static ClayImage      * ReadImage            (FILE                  *fp,
                                               tga_info              *info,
                                               GFile                 *file);
 
 
-G_DEFINE_TYPE (Tga, tga, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Tga, tga, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (TGA_TYPE)
+CLAY_MAIN (TGA_TYPE)
 DEFINE_STD_SET_I18N
 
 
@@ -224,7 +224,7 @@ static guchar magic[18] =
 static void
 tga_class_init (TgaClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = tga_query_procedures;
   plug_in_class->create_procedure = tga_create_procedure;
@@ -237,7 +237,7 @@ tga_init (Tga *tga)
 }
 
 static GList *
-tga_query_procedures (GimpPlugIn *plug_in)
+tga_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -247,77 +247,77 @@ tga_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-tga_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+tga_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            tga_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("TarGA image"));
+      clay_procedure_set_menu_label (procedure, _("TarGA image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Loads files of Targa file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Raphael FRANCOIS, Gordon Matzigkeit",
                                       "Raphael FRANCOIS, Gordon Matzigkeit",
                                       "1997,2000,2007");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-tga");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "tga,vda,icb,vst");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "-18&,string,TRUEVISION-XFILE.,-1,byte,0");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, tga_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("TarGA image"));
+      clay_procedure_set_menu_label (procedure, _("TarGA image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         "Exports files in the Targa file format",
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Raphael FRANCOIS, Gordon Matzigkeit",
                                       "Raphael FRANCOIS, Gordon Matzigkeit",
                                       "1997,2000");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("TGA"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/x-tga");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "tga");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_boolean_argument (procedure, "rle",
+      clay_procedure_add_boolean_argument (procedure, "rle",
                                            _("_Use RLE compression"),
                                            _("Use RLE compression"),
                                            TRUE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "origin",
+      clay_procedure_add_choice_argument (procedure, "origin",
                                           _("Ori_gin"),
                                           _("Image origin"),
-                                          gimp_choice_new_with_values ("bottom-left", ORIGIN_BOTTOM_LEFT, _("Bottom left"), NULL,
+                                          clay_choice_new_with_values ("bottom-left", ORIGIN_BOTTOM_LEFT, _("Bottom left"), NULL,
                                                                        "top-left",    ORIGIN_TOP_LEFT,    _("Top left"),    NULL,
                                                                        NULL),
                                           "bottom-left",
@@ -327,17 +327,17 @@ tga_create_procedure (GimpPlugIn  *plug_in,
   return procedure;
 }
 
-static GimpValueArray *
-tga_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+tga_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -345,64 +345,64 @@ tga_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-tga_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+tga_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GList             *drawables;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! save_dialog (image, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
       if (! export_image (file, image, drawables->data, G_OBJECT (config),
                           &error))
         {
-          status = GIMP_PDB_EXECUTION_ERROR;
+          status = CLAY_PDB_EXECUTION_ERROR;
         }
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_list_free (drawables);
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
@@ -412,10 +412,10 @@ load_image (GFile   *file,
   guchar     footer[26];
   guchar     extension[495];
   long       offset;
-  GimpImage *image = NULL;
+  ClayImage *image = NULL;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "rb");
 
@@ -423,7 +423,7 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -433,7 +433,7 @@ load_image (GFile   *file,
       if (fread (footer, sizeof (footer), 1, fp) != 1)
         {
           g_message (_("Cannot read footer from '%s'"),
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
           fclose (fp);
           return NULL;
         }
@@ -452,7 +452,7 @@ load_image (GFile   *file,
                   fread (extension, sizeof (extension), 1, fp) != 1)
                 {
                   g_message (_("Cannot read extension from '%s'"),
-                             gimp_file_get_utf8_name (file));
+                             clay_file_get_utf8_name (file));
                   fclose (fp);
                   return NULL;
                 }
@@ -465,7 +465,7 @@ load_image (GFile   *file,
       fread (header, sizeof (header), 1, fp) != 1)
     {
       g_message (_("Cannot read header from '%s'"),
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -548,7 +548,7 @@ load_image (GFile   *file,
         if (info.bpp != 8 || !info.colorMapLength)
           {
             g_message ("Unhandled sub-format in '%s' (type = %u, bpp = %u)",
-                       gimp_file_get_utf8_name (file),
+                       clay_file_get_utf8_name (file),
                        info.imageType, info.bpp);
             fclose (fp);
             return NULL;
@@ -564,7 +564,7 @@ load_image (GFile   *file,
             (info.bpp == 32 && info.alphaBits != 8))
           {
             g_message ("Unhandled sub-format in '%s' (type = %u, bpp = %u, alpha = %u)",
-                       gimp_file_get_utf8_name (file),
+                       clay_file_get_utf8_name (file),
                        info.imageType, info.bpp, info.alphaBits);
             fclose (fp);
             return NULL;
@@ -575,7 +575,7 @@ load_image (GFile   *file,
             (info.alphaBits != 8 || (info.bpp != 16 && info.bpp != 15)))
           {
             g_message ("Unhandled sub-format in '%s' (type = %u, bpp = %u)",
-                       gimp_file_get_utf8_name (file),
+                       clay_file_get_utf8_name (file),
                        info.imageType, info.bpp);
             fclose (fp);
             return NULL;
@@ -584,7 +584,7 @@ load_image (GFile   *file,
 
       default:
         g_message ("Unknown image type %u for '%s'",
-                   info.imageType, gimp_file_get_utf8_name (file));
+                   info.imageType, clay_file_get_utf8_name (file));
         fclose (fp);
         return NULL;
     }
@@ -593,7 +593,7 @@ load_image (GFile   *file,
   if (info.bytes * 8 != info.bpp && info.bpp != 15)
     {
       g_message ("Unhandled sub-format in '%s' (type = %u, bpp = %u)",
-                 gimp_file_get_utf8_name (file),
+                 clay_file_get_utf8_name (file),
                  info.imageType, info.bpp);
       fclose (fp);
       return NULL;
@@ -619,7 +619,7 @@ load_image (GFile   *file,
   if (info.idLength && fseek (fp, info.idLength, SEEK_CUR))
     {
       g_message ("File '%s' is truncated or corrupted",
-                 gimp_file_get_utf8_name (file));
+                 clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -882,7 +882,7 @@ apply_colormap (guchar       *dest,
         /* On Windows the error console can run out of resources when
          * producing a huge amount of messages. This can happen when using
          * fuzzed test images. This causes unresponsiveness at first and
-         * finally crashes GIMP. Eventually this needs to be fixed at the
+         * finally crashes Clay. Eventually this needs to be fixed at the
          * source, but for now let's limit the error messages to 10
          * per line (this function is called once per read_line). */
         if (errcnt < 10)
@@ -977,23 +977,23 @@ read_line (FILE         *fp,
     }
 }
 
-static GimpImage *
+static ClayImage *
 ReadImage (FILE     *fp,
            tga_info *info,
            GFile    *file)
 {
-  GimpImage         *image;
-  GimpLayer         *layer;
+  ClayImage         *image;
+  ClayLayer         *layer;
   GeglBuffer        *buffer;
   guchar            *data, *buf, *row;
-  GimpImageType      dtype = 0;
-  GimpImageBaseType  itype = 0;
+  ClayImageType      dtype = 0;
+  ClayImageBaseType  itype = 0;
   gint               bpp;
   gint               i, y;
   gint               max_tileheight, tileheight;
   guint              cmap_bytes   = 0;
   guchar            *tga_cmap     = NULL;
-  guchar            *gimp_cmap    = NULL;
+  guchar            *clay_cmap    = NULL;
   guchar            *convert_cmap = NULL;
 
   switch (info->imageType)
@@ -1005,41 +1005,41 @@ ReadImage (FILE     *fp,
       if (info->colorMapSize > 24 || info->alphaBits > 0)
         {
           /* indexed + full alpha, or alpha exists => promoted to RGBA */
-          itype = GIMP_RGB;
-          dtype = GIMP_RGBA_IMAGE;
+          itype = CLAY_RGB;
+          dtype = CLAY_RGBA_IMAGE;
           convert_cmap = g_new (guchar, info->colorMapLength * 4);
         }
       else if (info->colorMapIndex + info->colorMapLength > 256)
         {
           /* more than 256 colormap entries => promoted to RGB */
-          itype = GIMP_RGB;
-          dtype = GIMP_RGB_IMAGE;
+          itype = CLAY_RGB;
+          dtype = CLAY_RGB_IMAGE;
           convert_cmap = g_new (guchar, info->colorMapLength * 3);
         }
       else
         {
-          itype = GIMP_INDEXED;
-          dtype = GIMP_INDEXED_IMAGE;
-          gimp_cmap = g_new (guchar, info->colorMapLength * 3);
+          itype = CLAY_INDEXED;
+          dtype = CLAY_INDEXED_IMAGE;
+          clay_cmap = g_new (guchar, info->colorMapLength * 3);
         }
       break;
 
     case TGA_TYPE_GRAY:
-      itype = GIMP_GRAY;
+      itype = CLAY_GRAY;
 
       if (info->alphaBits)
-        dtype = GIMP_GRAYA_IMAGE;
+        dtype = CLAY_GRAYA_IMAGE;
       else
-        dtype = GIMP_GRAY_IMAGE;
+        dtype = CLAY_GRAY_IMAGE;
       break;
 
     case TGA_TYPE_COLOR:
-      itype = GIMP_RGB;
+      itype = CLAY_RGB;
 
       if (info->alphaBits)
-        dtype = GIMP_RGBA_IMAGE;
+        dtype = CLAY_RGBA_IMAGE;
       else
-        dtype = GIMP_RGB_IMAGE;
+        dtype = CLAY_RGB_IMAGE;
       break;
     }
 
@@ -1071,10 +1071,10 @@ ReadImage (FILE     *fp,
           else
             {
               if (info->colorMapSize == 24)
-                bgr2rgb (gimp_cmap, tga_cmap,
+                bgr2rgb (clay_cmap, tga_cmap,
                          info->colorMapLength, cmap_bytes, 0);
               else if (info->colorMapSize == 16 || info->colorMapSize == 15)
-                upsample (gimp_cmap, tga_cmap,
+                upsample (clay_cmap, tga_cmap,
                           info->colorMapLength, cmap_bytes, info->alphaBits);
               else
                 {
@@ -1087,31 +1087,31 @@ ReadImage (FILE     *fp,
       else
         {
           g_message ("File '%s' is truncated or corrupted",
-                     gimp_file_get_utf8_name (file));
+                     clay_file_get_utf8_name (file));
           return NULL;
         }
     }
 
-  image = gimp_image_new (info->width, info->height, itype);
+  image = clay_image_new (info->width, info->height, itype);
 
-  if (gimp_cmap)
-    gimp_palette_set_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), gimp_cmap, info->colorMapLength * 3);
+  if (clay_cmap)
+    clay_palette_set_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), clay_cmap, info->colorMapLength * 3);
 
-  layer = gimp_layer_new (image,
+  layer = clay_layer_new (image,
                           _("Background"),
                           info->width, info->height,
                           dtype,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
+                          clay_image_get_default_new_layer_mode (image));
 
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
-  bpp = gimp_drawable_get_bpp (GIMP_DRAWABLE (layer));
+  bpp = clay_drawable_get_bpp (CLAY_DRAWABLE (layer));
 
   /* Allocate the data. */
-  max_tileheight = gimp_tile_height ();
+  max_tileheight = clay_tile_height ();
   data = g_new (guchar, info->width * max_tileheight * bpp);
   buf  = g_new (guchar, info->width * info->bytes);
 
@@ -1134,7 +1134,7 @@ ReadImage (FILE     *fp,
                                            info->width, tileheight), 0,
                            NULL, data, GEGL_AUTO_ROWSTRIDE);
 
-          gimp_progress_update ((gdouble) (i + tileheight) /
+          clay_progress_update ((gdouble) (i + tileheight) /
                                 (gdouble) info->height);
         }
     }
@@ -1154,7 +1154,7 @@ ReadImage (FILE     *fp,
                            GEGL_RECTANGLE (0, i, info->width, tileheight), 0,
                            NULL, data, GEGL_AUTO_ROWSTRIDE);
 
-          gimp_progress_update ((gdouble) (i + tileheight) /
+          clay_progress_update ((gdouble) (i + tileheight) /
                                 (gdouble) info->height);
         }
     }
@@ -1163,12 +1163,12 @@ ReadImage (FILE     *fp,
   g_free (buf);
 
   g_free (convert_cmap);
-  g_free (gimp_cmap);
+  g_free (clay_cmap);
   g_free (tga_cmap);
 
   g_object_unref (buffer);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return image;
 }
@@ -1176,14 +1176,14 @@ ReadImage (FILE     *fp,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
-              GimpDrawable  *drawable,
+              ClayImage     *image,
+              ClayDrawable  *drawable,
               GObject       *config,
               GError       **error)
 {
   GeglBuffer    *buffer;
   const Babl    *format = NULL;
-  GimpImageType  dtype;
+  ClayImageType  dtype;
   gint           width;
   gint           height;
   FILE          *fp;
@@ -1195,25 +1195,25 @@ export_image (GFile         *file,
   guchar        *pixels;
   guchar        *data;
   gint           num_colors;
-  guchar        *gimp_cmap = NULL;
+  guchar        *clay_cmap = NULL;
   gboolean       rle;
   TgaOrigin      origin;
 
   g_object_get (config,
                 "rle", &rle,
                 NULL);
-  origin = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  origin = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                 "origin");
 
-  buffer = gimp_drawable_get_buffer (drawable);
+  buffer = clay_drawable_get_buffer (drawable);
 
-  dtype = gimp_drawable_type (drawable);
+  dtype = clay_drawable_type (drawable);
 
   width  = gegl_buffer_get_width  (buffer);
   height = gegl_buffer_get_height (buffer);
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   fp = g_fopen (g_file_peek_path (file), "wb");
 
@@ -1221,15 +1221,15 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
   header[0] = 0; /* No image identifier / description */
 
-  if (dtype == GIMP_INDEXED_IMAGE)
+  if (dtype == CLAY_INDEXED_IMAGE)
     {
-      gimp_cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &num_colors, NULL);
+      clay_cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &num_colors, NULL);
 
       header[1] = 1; /* cmap type */
       header[2] = rle ? 9 : 1;
@@ -1238,9 +1238,9 @@ export_image (GFile         *file,
       header[6] = num_colors / 256;
       header[7] = 24; /* cmap size / bits */
     }
-  else if (dtype == GIMP_INDEXEDA_IMAGE)
+  else if (dtype == CLAY_INDEXEDA_IMAGE)
     {
-      gimp_cmap = gimp_palette_get_colormap (gimp_image_get_palette (image), babl_format ("R'G'B' u8"), &num_colors, NULL);
+      clay_cmap = clay_palette_get_colormap (clay_image_get_palette (image), babl_format ("R'G'B' u8"), &num_colors, NULL);
 
       header[1] = 1; /* cmap type */
       header[2] = rle ? 9 : 1;
@@ -1253,7 +1253,7 @@ export_image (GFile         *file,
     {
       header[1]= 0;
 
-      if (dtype == GIMP_RGB_IMAGE || dtype == GIMP_RGBA_IMAGE)
+      if (dtype == CLAY_RGB_IMAGE || dtype == CLAY_RGBA_IMAGE)
         {
           header[2]= rle ? 10 : 2;
         }
@@ -1278,36 +1278,36 @@ export_image (GFile         *file,
 
   switch (dtype)
     {
-    case GIMP_INDEXED_IMAGE:
-    case GIMP_INDEXEDA_IMAGE:
+    case CLAY_INDEXED_IMAGE:
+    case CLAY_INDEXEDA_IMAGE:
       format  = NULL;
       out_bpp = 1;
       header[16] = 8; /* bpp */
       header[17] = origin ? 0 : 0x20; /* alpha + orientation */
       break;
 
-    case GIMP_GRAY_IMAGE:
+    case CLAY_GRAY_IMAGE:
       format  = babl_format ("Y' u8");
       out_bpp = 1;
       header[16] = 8; /* bpp */
       header[17] = origin ? 0 : 0x20; /* alpha + orientation */
       break;
 
-    case GIMP_GRAYA_IMAGE:
+    case CLAY_GRAYA_IMAGE:
       format  = babl_format ("Y'A u8");
       out_bpp = 2;
       header[16] = 16; /* bpp */
       header[17] = origin ? 8 : 0x28; /* alpha + orientation */
       break;
 
-    case GIMP_RGB_IMAGE:
+    case CLAY_RGB_IMAGE:
       format  = babl_format ("R'G'B' u8");
       out_bpp = 3;
       header[16] = 24; /* bpp */
       header[17] = origin ? 0 : 0x20; /* alpha + orientation */
       break;
 
-    case GIMP_RGBA_IMAGE:
+    case CLAY_RGBA_IMAGE:
       format  = babl_format ("R'G'B'A u8");
       out_bpp = 4;
       header[16] = 32; /* bpp */
@@ -1318,24 +1318,24 @@ export_image (GFile         *file,
   /* write header to front of file */
   fwrite (header, sizeof (header), 1, fp);
 
-  if (dtype == GIMP_INDEXED_IMAGE)
+  if (dtype == CLAY_INDEXED_IMAGE)
     {
       /* write out palette */
       for (i = 0; i < num_colors; ++i)
         {
-          fputc (gimp_cmap[(i * 3) + 2], fp);
-          fputc (gimp_cmap[(i * 3) + 1], fp);
-          fputc (gimp_cmap[(i * 3) + 0], fp);
+          fputc (clay_cmap[(i * 3) + 2], fp);
+          fputc (clay_cmap[(i * 3) + 1], fp);
+          fputc (clay_cmap[(i * 3) + 0], fp);
         }
     }
-  else if (dtype == GIMP_INDEXEDA_IMAGE)
+  else if (dtype == CLAY_INDEXEDA_IMAGE)
     {
       /* write out palette */
       for (i = 0; i < num_colors; ++i)
         {
-          fputc (gimp_cmap[(i * 3) + 2], fp);
-          fputc (gimp_cmap[(i * 3) + 1], fp);
-          fputc (gimp_cmap[(i * 3) + 0], fp);
+          fputc (clay_cmap[(i * 3) + 2], fp);
+          fputc (clay_cmap[(i * 3) + 1], fp);
+          fputc (clay_cmap[(i * 3) + 0], fp);
           fputc (255, fp);
         }
 
@@ -1345,7 +1345,7 @@ export_image (GFile         *file,
       fputc (0, fp);
     }
 
-  if (dtype == GIMP_INDEXEDA_IMAGE)
+  if (dtype == CLAY_INDEXEDA_IMAGE)
     pixels = g_new (guchar, width * 2);
   else
     pixels = g_new (guchar, width * out_bpp);
@@ -1368,15 +1368,15 @@ export_image (GFile         *file,
                            GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
         }
 
-      if (dtype == GIMP_RGB_IMAGE)
+      if (dtype == CLAY_RGB_IMAGE)
         {
           bgr2rgb (data, pixels, width, out_bpp, 0);
         }
-      else if (dtype == GIMP_RGBA_IMAGE)
+      else if (dtype == CLAY_RGBA_IMAGE)
         {
           bgr2rgb (data, pixels, width, out_bpp, 1);
         }
-      else if (dtype == GIMP_INDEXEDA_IMAGE)
+      else if (dtype == CLAY_INDEXEDA_IMAGE)
         {
           for (i = 0; i < width; ++i)
             {
@@ -1401,7 +1401,7 @@ export_image (GFile         *file,
         }
 
       if (row % 16 == 0)
-        gimp_progress_update ((gdouble) row / (gdouble) height);
+        clay_progress_update ((gdouble) row / (gdouble) height);
     }
 
   g_object_unref (buffer);
@@ -1416,38 +1416,38 @@ export_image (GFile         *file,
 
   fclose (fp);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   return status;
 }
 
 static gboolean
-save_dialog (GimpImage     *image,
-             GimpProcedure *procedure,
+save_dialog (ClayImage     *image,
+             ClayProcedure *procedure,
              GObject       *config)
 {
   GtkWidget    *dialog;
   GtkWidget    *vbox;
   gboolean      run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  vbox = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  vbox = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                          "tga-save-vbox",
                                          "rle",
                                          "origin",
                                          NULL);
   gtk_box_set_spacing (GTK_BOX (vbox), 12);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               "tga-save-vbox",
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 

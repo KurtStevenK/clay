@@ -1,5 +1,5 @@
 /*
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates clickable image maps.
  *
@@ -24,12 +24,12 @@
 
 #include <gtk/gtk.h>
 
-#include "libgimp/gimp.h"
+#include "libclay/clay.h"
 
 #include "imap_commands.h"
 #include "imap_main.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 static void move_command_destruct(Command_t *parent);
 static CmdExecuteValue_t move_command_execute(Command_t *parent);

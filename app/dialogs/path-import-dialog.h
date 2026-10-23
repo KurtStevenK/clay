@@ -18,8 +18,8 @@
 #pragma once
 
 
-typedef void (* GimpPathImportCallback) (GtkWidget *dialog,
-                                         GimpImage *image,
+typedef void (* ClayPathImportCallback) (GtkWidget *dialog,
+                                         ClayImage *image,
                                          GFile     *file,
                                          GFile     *import_folder,
                                          gboolean   merge_paths,
@@ -27,10 +27,10 @@ typedef void (* GimpPathImportCallback) (GtkWidget *dialog,
                                          gpointer   user_data);
 
 
-GtkWidget * path_import_dialog_new (GimpImage                 *image,
+GtkWidget * path_import_dialog_new (ClayImage                 *image,
                                     GtkWidget                 *parent,
                                     GFile                     *import_folder,
                                     gboolean                   merge_paths,
                                     gboolean                   scale_paths,
-                                    GimpPathImportCallback     callback,
+                                    ClayPathImportCallback     callback,
                                     gpointer                   user_data);

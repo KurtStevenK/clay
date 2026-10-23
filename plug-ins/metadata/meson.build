@@ -12,7 +12,7 @@ plugin_sources = plugin_sourcecode
 if platform_windows
   plugin_rc = custom_target(
     plugin_name + '-rc',
-    input: gimp_plugins_rc,
+    input: clay_plugins_rc,
     output: plugin_name + '.rc',
     command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@']
   )
@@ -31,20 +31,20 @@ endif
 plugin_exe = executable(plugin_name,
                         plugin_sources,
                         dependencies: [
-                          libgimpui_dep,
+                          libclayui_dep,
                           gexiv2,
                         ],
                         c_args: [ '-Wno-deprecated-declarations', ],
                         win_subsystem: 'windows',
                         install: true,
-                        install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                        install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
 # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
 plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)
 
 ###############################################################################
@@ -61,7 +61,7 @@ plugin_sources = plugin_sourcecode
 if platform_windows
   plugin_rc = custom_target(
     plugin_name + '-rc',
-    input: gimp_plugins_rc,
+    input: clay_plugins_rc,
     output: plugin_name + '.rc',
     command: [python, '-c', 'import shutil, sys; shutil.copy(sys.argv[1], sys.argv[2])', '@INPUT@', '@OUTPUT@']
   )
@@ -85,22 +85,22 @@ plugin_exe = executable(plugin_name,
                         ],
                         c_args: [ '-Wno-deprecated-declarations', ],
                         link_with: [
-                          libgimp,
-                          libgimpbase,
-                          libgimpcolor,
-                          libgimpconfig,
-                          libgimpmath,
-                          libgimpui,
-                          libgimpwidgets,
+                          libclay,
+                          libclaybase,
+                          libclaycolor,
+                          libclayconfig,
+                          libclaymath,
+                          libclayui,
+                          libclaywidgets,
                         ],
                         win_subsystem: 'windows',
                         install: true,
-                        install_dir: gimpplugindir / 'plug-ins' / plugin_name)
+                        install_dir: clayplugindir / 'plug-ins' / plugin_name)
 
 # Ugly trick to add executables to plugin_custom_targets list (see root meson.build)
 plugin_custom_targets += custom_target('dummy-' + plugin_name,
               input: plugin_exe,
               output: 'dummy-' + plugin_name + '.dummy',
               command: [python, '-c',
-                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-gimp.py\\n")'],
+                        'open("@OUTPUT@", "w").write("Nice. I was built before calling in-build-clay.py\\n")'],
               build_by_default: true)

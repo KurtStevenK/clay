@@ -1,5 +1,5 @@
 /*
- *   X11 Mouse Cursor (XMC) plug-in for GIMP
+ *   X11 Mouse Cursor (XMC) plug-in for Clay
  *
  *   Copyright 2008-2009 Takeshi Matsuyama <tksmashiw@gmail.com>
  *
@@ -23,8 +23,8 @@
  */
 
 /*
- * Todo: if drawable->bpp != 4 in save_image for GIMP-2.8?
- * Todo: support for "gimp-metadata" parasite.
+ * Todo: if drawable->bpp != 4 in save_image for Clay-2.8?
+ * Todo: support for "clay-metadata" parasite.
  *       "xmc-copyright" and "xmc-license" may be deprecated in future?
  */
 
@@ -33,7 +33,7 @@
  * "hot-spot"       common with file-xbm plug-in
  * "xmc-copyright"  original, store contents of type1 comment chunk of Xcursor
  * "xmc-license"    original, store contents of type2 comment chunk of Xcursor
- * "gimp-comment"   common, store contents of type3 comment chunk of Xcursor
+ * "clay-comment"   common, store contents of type3 comment chunk of Xcursor
  */
 
 /* *** Caution: Size vs Dimension ***
@@ -55,13 +55,13 @@
 #include <glib/gstdio.h>
 #include <glib/gprintf.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xcursor/Xcursor.h>
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 /* For debug */
 /* #define XMC_DEBUG */
@@ -80,7 +80,7 @@
 #define EXPORT_PROC            "file-xmc-export"
 
 #define PLUG_IN_BINARY         "file-xmc"
-#define PLUG_IN_ROLE           "gimp-file-xmc"
+#define PLUG_IN_ROLE           "clay-file-xmc"
 
 /* We use "xmc" as the file extension of X cursor for convenience */
 #define XCURSOR_EXTENSION      "xmc"
@@ -139,12 +139,12 @@ typedef struct _XmcClass XmcClass;
 
 struct _Xmc
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _XmcClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -153,35 +153,35 @@ struct _XmcClass
 
 GType                   xmc_get_type                 (void);
 
-static GList          * xmc_query_procedures         (GimpPlugIn            *plug_in);
-static GimpProcedure  * xmc_create_procedure         (GimpPlugIn            *plug_in,
+static GList          * xmc_query_procedures         (ClayPlugIn            *plug_in);
+static ClayProcedure  * xmc_create_procedure         (ClayPlugIn            *plug_in,
                                                       const gchar           *name);
 
-static GimpValueArray * xmc_load                     (GimpProcedure         *procedure,
-                                                      GimpRunMode            run_mode,
+static ClayValueArray * xmc_load                     (ClayProcedure         *procedure,
+                                                      ClayRunMode            run_mode,
                                                       GFile                 *file,
-                                                      GimpMetadata          *metadata,
-                                                      GimpMetadataLoadFlags *flags,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayMetadata          *metadata,
+                                                      ClayMetadataLoadFlags *flags,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
-static GimpValueArray * xmc_load_thumb               (GimpProcedure         *procedure,
+static ClayValueArray * xmc_load_thumb               (ClayProcedure         *procedure,
                                                       GFile                 *file,
                                                       gint                   size,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
-static GimpValueArray * xmc_export                   (GimpProcedure         *procedure,
-                                                      GimpRunMode            run_mode,
-                                                      GimpImage             *image,
+static ClayValueArray * xmc_export                   (ClayProcedure         *procedure,
+                                                      ClayRunMode            run_mode,
+                                                      ClayImage             *image,
                                                       GFile                 *file,
-                                                      GimpExportOptions     *options,
-                                                      GimpMetadata          *metadata,
-                                                      GimpProcedureConfig   *config,
+                                                      ClayExportOptions     *options,
+                                                      ClayMetadata          *metadata,
+                                                      ClayProcedureConfig   *config,
                                                       gpointer               run_data);
 
-static GimpImage      * load_image                   (GFile                 *file,
+static ClayImage      * load_image                   (GFile                 *file,
                                                       GError               **error);
 
-static GimpImage      * load_thumbnail               (GFile                 *file,
+static ClayImage      * load_thumbnail               (GFile                 *file,
                                                       gint32                 thumb_size,
                                                       gint32                *width,
                                                       gint32                *height,
@@ -192,19 +192,19 @@ static guint32          read32                       (FILE                  *f,
                                                       GError               **error);
 
 static gboolean         export_image                 (GFile                 *file,
-                                                      GimpImage             *image,
+                                                      ClayImage             *image,
                                                       gint                   n_drawables,
                                                       GList                *drawables,
-                                                      GimpImage             *orig_image,
+                                                      ClayImage             *orig_image,
                                                       GObject               *config,
                                                       GError               **error);
 
-static gboolean         save_dialog                  (GimpProcedure         *procedure,
+static gboolean         save_dialog                  (ClayProcedure         *procedure,
                                                       GObject               *config,
-                                                      GimpImage             *image,
+                                                      ClayImage             *image,
                                                       GeglRectangle         *hotspot_range);
 
-static void             load_default_hotspot         (GimpImage             *image,
+static void             load_default_hotspot         (ClayImage             *image,
                                                       GeglRectangle         *hotspot_range,
                                                       GObject               *config);
 
@@ -214,11 +214,11 @@ static inline guint32   premultiply_alpha            (guint32                pix
 
 static XcursorComments *set_cursor_comments          (GObject               *config);
 
-static gboolean         set_hotspot_to_parasite      (GimpImage       *image,
+static gboolean         set_hotspot_to_parasite      (ClayImage       *image,
                                                       gint             hot_spot_x,
                                                       gint             hot_spot_y);
 
-static gboolean         get_hotspot_from_parasite    (GimpImage       *image,
+static gboolean         get_hotspot_from_parasite    (ClayImage       *image,
                                                       gint            *hot_spot_x,
                                                       gint            *hot_spot_y);
 
@@ -239,7 +239,7 @@ static void             get_cropped_region           (GeglRectangle    *retrun_r
 
 static inline gboolean  pix_is_opaque                (guint32           pix);
 
-static GeglRectangle  * get_intersection_of_frames   (GimpImage        *image);
+static GeglRectangle  * get_intersection_of_frames   (ClayImage        *image);
 
 static gboolean         pix_in_region                (gint32            x,
                                                       gint32            y,
@@ -252,16 +252,16 @@ static void             find_hotspots_and_dimensions (XcursorImages    *xcIs,
                                                       gint32           *height);
 
 
-G_DEFINE_TYPE (Xmc, xmc, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Xmc, xmc, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (XMC_TYPE)
+CLAY_MAIN (XMC_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 xmc_class_init (XmcClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = xmc_query_procedures;
   plug_in_class->create_procedure = xmc_create_procedure;
@@ -274,7 +274,7 @@ xmc_init (Xmc *xmc)
 }
 
 static GList *
-xmc_query_procedures (GimpPlugIn *plug_in)
+xmc_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -285,116 +285,116 @@ xmc_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-xmc_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+xmc_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_load_procedure_new (plug_in, name,
-                                           GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_load_procedure_new (plug_in, name,
+                                           CLAY_PDB_PROC_TYPE_PLUGIN,
                                            xmc_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("X11 Mouse Cursor"));
+      clay_procedure_set_menu_label (procedure, _("X11 Mouse Cursor"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files of X11 Mouse Cursor "
                                           "file format"),
                                         _("This plug-in loads X11 Mouse Cursor "
                                           "(XMC) files."),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Takeshi Matsuyama <tksmashiw@gmail.com>",
                                       "Takeshi Matsuyama",
                                       "26 May 2009");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           XCURSOR_MIME_TYPE);
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           XCURSOR_EXTENSION);
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,Xcur");
 
-      gimp_load_procedure_set_thumbnail_loader (GIMP_LOAD_PROCEDURE (procedure),
+      clay_load_procedure_set_thumbnail_loader (CLAY_LOAD_PROCEDURE (procedure),
                                                 LOAD_THUMB_PROC);
     }
   else if (! strcmp (name, LOAD_THUMB_PROC))
     {
-      procedure = gimp_thumbnail_procedure_new (plug_in, name,
-                                                GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_thumbnail_procedure_new (plug_in, name,
+                                                CLAY_PDB_PROC_TYPE_PLUGIN,
                                                 xmc_load_thumb, NULL, NULL);
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads only first frame of X11 Mouse "
                                           "Cursor's animation sequence which "
                                           "nominal size is the closest of "
                                           "thumb-size to be used as a thumbnail"),
                                         NULL, name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Takeshi Matsuyama <tksmashiw@gmail.com>",
                                       "Takeshi Matsuyama",
                                       "26 May 2009");
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, xmc_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "RGBA");
+      clay_procedure_set_image_types (procedure, "RGBA");
 
-      gimp_procedure_set_menu_label (procedure, _("X11 Mouse Cursor"));
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_procedure_set_menu_label (procedure, _("X11 Mouse Cursor"));
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("X11 Mouse Cursor"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files of X11 cursor file"),
                                         _("This plug-in exports X11 Mouse Cursor "
                                           "(XMC) files"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Takeshi Matsuyama <tksmashiw@gmail.com>",
                                       "Takeshi Matsuyama",
                                       "26 May 2009");
 
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           XCURSOR_MIME_TYPE);
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           XCURSOR_EXTENSION);
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB    |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA  |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS |
-                                              GIMP_EXPORT_NEEDS_ALPHA,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB    |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA  |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS |
+                                              CLAY_EXPORT_NEEDS_ALPHA,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_int_argument (procedure, "hot-spot-x",
+      clay_procedure_add_int_argument (procedure, "hot-spot-x",
                                        _("Hot spot _X"),
                                        _("X-coordinate of hot spot "
                                          "(use -1, -1 to keep original hot spot)"),
-                                       -1, GIMP_MAX_IMAGE_SIZE, -1,
+                                       -1, CLAY_MAX_IMAGE_SIZE, -1,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "hot-spot-y",
+      clay_procedure_add_int_argument (procedure, "hot-spot-y",
                                        _("Hot spot _Y"),
                                        _("Y-coordinate of hot spot "
                                          "(use -1, -1 to keep original hot spot)"),
-                                       -1, GIMP_MAX_IMAGE_SIZE, -1,
+                                       -1, CLAY_MAX_IMAGE_SIZE, -1,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "crop",
+      clay_procedure_add_boolean_argument (procedure, "crop",
                                            _("_Auto Crop all frames"),
                                            _("Remove the empty borders of all frames."),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "size",
+      clay_procedure_add_choice_argument (procedure, "size",
                                           _("Si_ze where unspecified"),
                                           _("Default frame size if unspecified"),
-                                          gimp_choice_new_with_values ("size-12px", 12, ("12px"), NULL,
+                                          clay_choice_new_with_values ("size-12px", 12, ("12px"), NULL,
                                                                        "size-16px", 16, ("16px"), NULL,
                                                                        "size-24px", 24, ("24px"), NULL,
                                                                        "size-32px", 32, ("32px"), NULL,
@@ -406,67 +406,67 @@ xmc_create_procedure (GimpPlugIn  *plug_in,
                                           "size-32px",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "size-replace",
+      clay_procedure_add_boolean_argument (procedure, "size-replace",
                                            _("_Use default size for all frames"),
                                            _("Use default size for all frames"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_int_argument (procedure, "delay",
+      clay_procedure_add_int_argument (procedure, "delay",
                                        _("_Delay where unspecified"),
                                        _("Default time span in milliseconds in which "
                                          "each frame is rendered"),
                                        CURSOR_MINIMUM_DELAY, G_MAXINT, CURSOR_DEFAULT_DELAY,
                                        G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "delay-replace",
+      clay_procedure_add_boolean_argument (procedure, "delay-replace",
                                            _("Use default delay for all _frames"),
                                            _("Use default delay for all frames"),
                                            FALSE,
                                            G_PARAM_READWRITE);
 
-      gimp_procedure_add_string_argument (procedure, "xmc-copyright",
+      clay_procedure_add_string_argument (procedure, "xmc-copyright",
                                           _("C_opyright"),
                                           _("Copyright information"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_set_argument_sync (procedure, "xmc-copyright",
-                                        GIMP_ARGUMENT_SYNC_PARASITE);
+      clay_procedure_set_argument_sync (procedure, "xmc-copyright",
+                                        CLAY_ARGUMENT_SYNC_PARASITE);
 
-      gimp_procedure_add_string_argument (procedure, "xmc-license",
+      clay_procedure_add_string_argument (procedure, "xmc-license",
                                           _("Lice_nse"),
                                           _("License information"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_set_argument_sync (procedure, "xmc-license",
-                                        GIMP_ARGUMENT_SYNC_PARASITE);
+      clay_procedure_set_argument_sync (procedure, "xmc-license",
+                                        CLAY_ARGUMENT_SYNC_PARASITE);
 
-      gimp_procedure_add_string_argument (procedure, "gimp-comment",
+      clay_procedure_add_string_argument (procedure, "clay-comment",
                                           _("Co_mment"),
                                           _("Optional comment"),
-                                          gimp_get_default_comment (),
+                                          clay_get_default_comment (),
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_set_argument_sync (procedure, "gimp-comment",
-                                        GIMP_ARGUMENT_SYNC_PARASITE);
+      clay_procedure_set_argument_sync (procedure, "clay-comment",
+                                        CLAY_ARGUMENT_SYNC_PARASITE);
     }
 
   return procedure;
 }
 
-static GimpValueArray *
-xmc_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+xmc_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               run_data)
 {
-  GimpValueArray *return_vals;
-  GimpImage      *image;
+  ClayValueArray *return_vals;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -474,31 +474,31 @@ xmc_load (GimpProcedure         *procedure,
   image = load_image (file, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-xmc_load_thumb (GimpProcedure       *procedure,
+static ClayValueArray *
+xmc_load_thumb (ClayProcedure       *procedure,
                 GFile               *file,
                 gint                 size,
-                GimpProcedureConfig *config,
+                ClayProcedureConfig *config,
                 gpointer             run_data)
 {
-  GimpValueArray *return_vals;
+  ClayValueArray *return_vals;
   gint            width;
   gint            height;
   gint            num_layers;
-  GimpImage      *image;
+  ClayImage      *image;
   GError         *error = NULL;
 
   gegl_init (NULL, NULL);
@@ -510,38 +510,38 @@ xmc_load_thumb (GimpProcedure       *procedure,
                           &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
-  GIMP_VALUES_SET_INT   (return_vals, 2, width);
-  GIMP_VALUES_SET_INT   (return_vals, 3, height);
-  GIMP_VALUES_SET_ENUM  (return_vals, 4, GIMP_RGBA_IMAGE);
-  GIMP_VALUES_SET_INT   (return_vals, 5, num_layers);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_INT   (return_vals, 2, width);
+  CLAY_VALUES_SET_INT   (return_vals, 3, height);
+  CLAY_VALUES_SET_ENUM  (return_vals, 4, CLAY_RGBA_IMAGE);
+  CLAY_VALUES_SET_INT   (return_vals, 5, num_layers);
 
   return return_vals;
 }
 
-static GimpValueArray *
-xmc_export (GimpProcedure        *procedure,
-            GimpRunMode           run_mode,
-            GimpImage            *image,
+static ClayValueArray *
+xmc_export (ClayProcedure        *procedure,
+            ClayRunMode           run_mode,
+            ClayImage            *image,
             GFile                *file,
-            GimpExportOptions    *options,
-            GimpMetadata         *metadata,
-            GimpProcedureConfig  *config,
+            ClayExportOptions    *options,
+            ClayMetadata         *metadata,
+            ClayProcedureConfig  *config,
             gpointer              run_data)
 {
-  GimpPDBStatusType  status      = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export      = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status      = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export      = CLAY_EXPORT_IGNORE;
   GList             *drawables   = NULL;
   gint               n_drawables = 0;
-  GimpImage         *orig_image;
+  ClayImage         *orig_image;
   GeglRectangle     *hotspot_range;
   gint               hot_spot_x;
   gint               hot_spot_y;
@@ -560,24 +560,24 @@ xmc_export (GimpProcedure        *procedure,
                      "You must arrange layers so that all of them have "
                      "an intersection."));
 
-      return gimp_procedure_new_return_values (procedure,
-                                               GIMP_PDB_EXECUTION_ERROR,
+      return clay_procedure_new_return_values (procedure,
+                                               CLAY_PDB_EXECUTION_ERROR,
                                                error);
     }
 
   switch (run_mode)
     {
-    case GIMP_RUN_INTERACTIVE:
-      gimp_ui_init (PLUG_IN_BINARY);
+    case CLAY_RUN_INTERACTIVE:
+      clay_ui_init (PLUG_IN_BINARY);
       load_default_hotspot (image, hotspot_range, G_OBJECT (config));
 
       if (! save_dialog (procedure, G_OBJECT (config), image, hotspot_range))
-        return gimp_procedure_new_return_values (procedure,
-                                                 GIMP_PDB_CANCEL,
+        return clay_procedure_new_return_values (procedure,
+                                                 CLAY_PDB_CANCEL,
                                                  NULL);
       break;
 
-    case GIMP_RUN_NONINTERACTIVE:
+    case CLAY_RUN_NONINTERACTIVE:
       g_object_get (config,
                     "hot-spot-x", &hot_spot_x,
                     "hot-spot-y", &hot_spot_y,
@@ -592,7 +592,7 @@ xmc_export (GimpProcedure        *procedure,
         }
       break;
 
-    case GIMP_RUN_WITH_LAST_VALS:
+    case CLAY_RUN_WITH_LAST_VALS:
       load_default_hotspot (image, hotspot_range, G_OBJECT (config));
       break;
 
@@ -600,36 +600,36 @@ xmc_export (GimpProcedure        *procedure,
       break;
     }
 
-  export = gimp_export_options_get_image (options, &image);
-  drawables = gimp_image_list_layers (image);
+  export = clay_export_options_get_image (options, &image);
+  drawables = clay_image_list_layers (image);
   n_drawables = g_list_length (drawables);
 
   if (! export_image (file, image, n_drawables, drawables,
                       orig_image, G_OBJECT (config), &error))
     {
-      status = GIMP_PDB_EXECUTION_ERROR;
+      status = CLAY_PDB_EXECUTION_ERROR;
     }
 
-  if (export == GIMP_EXPORT_EXPORT)
-    gimp_image_delete (image);
+  if (export == CLAY_EXPORT_EXPORT)
+    clay_image_delete (image);
 
   g_free (hotspot_range);
   g_list_free (drawables);
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
 /*
  * 'load_image()' - Load a X cursor image into a new image window.
  */
 
-static GimpImage *
+static ClayImage *
 load_image (GFile   *file,
             GError **error)
 {
   FILE            *fp;
-  GimpImage       *image;
-  GimpLayer       *layer;
+  ClayImage       *image;
+  ClayLayer       *layer;
   GeglBuffer      *buffer;
   XcursorComments *commentsp; /* pointer to comments */
   XcursorImages   *imagesp;   /* pointer to images*/
@@ -643,8 +643,8 @@ load_image (GFile   *file,
   gint             hot_spot_y;
   gint             i, j;
 
-  gimp_progress_init_printf (_("Opening '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Opening '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /* Open the file and check it is a valid X cursor */
 
@@ -654,14 +654,14 @@ load_image (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
   if (! XcursorFileLoad (fp, &commentsp, &imagesp))
     {
       g_set_error (error, 0, 0, _("'%s' is not a valid X cursor."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -674,7 +674,7 @@ load_image (GFile   *file,
         {
           g_set_error (error, 0, 0,
                        _("Frame %d of '%s' is too wide for an X cursor."),
-                       i + 1, gimp_file_get_utf8_name (file));
+                       i + 1, clay_file_get_utf8_name (file));
           fclose (fp);
           return NULL;
         }
@@ -682,7 +682,7 @@ load_image (GFile   *file,
         {
           g_set_error (error, 0, 0,
                        _("Frame %d of '%s' is too high for an X cursor."),
-                       i + 1, gimp_file_get_utf8_name (file));
+                       i + 1, clay_file_get_utf8_name (file));
           fclose (fp);
           return NULL;
         }
@@ -699,14 +699,14 @@ load_image (GFile   *file,
   if (! g_size_checked_mul (&allocation, img_width, img_height) ||
       ! (tmppixel = g_try_new0 (guint32, allocation)))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    img_width, img_height);
       fclose (fp);
       return NULL;
     }
 
-  image = gimp_image_new (img_width, img_height, GIMP_RGB);
+  image = clay_image_new (img_width, img_height, CLAY_RGB);
 
   if (! set_hotspot_to_parasite (image, hot_spot_x, hot_spot_y))
     {
@@ -738,14 +738,14 @@ load_image (GFile   *file,
           return NULL;
         }
 
-      layer = gimp_layer_new (image, framename, width, height,
-                              GIMP_RGBA_IMAGE,
+      layer = clay_layer_new (image, framename, width, height,
+                              CLAY_RGBA_IMAGE,
                               100,
-                              gimp_image_get_default_new_layer_mode (image));
-      gimp_image_insert_layer (image, layer, NULL, 0);
+                              clay_image_get_default_new_layer_mode (image));
+      clay_image_insert_layer (image, layer, NULL, 0);
 
       /* Adjust layer position to let hotspot sit on the same point. */
-      gimp_item_transform_translate (GIMP_ITEM (layer),
+      clay_item_transform_translate (CLAY_ITEM (layer),
                                      hot_spot_x - imagesp->images[i]->xhot,
                                      hot_spot_y - imagesp->images[i]->yhot);
 
@@ -753,7 +753,7 @@ load_image (GFile   *file,
 
       /* Get the buffer for our load... */
 
-      buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+      buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
       /* set color to each pixel */
       for (j = 0; j < width * height; j++)
@@ -765,20 +765,20 @@ load_image (GFile   *file,
       gegl_buffer_set (buffer, GEGL_RECTANGLE (0, 0, width, height), 0,
                        NULL, tmppixel, GEGL_AUTO_ROWSTRIDE);
 
-      gimp_progress_update ((i + 1) / imagesp->nimage);
+      clay_progress_update ((i + 1) / imagesp->nimage);
 
       g_object_unref (buffer);
     }
 
   g_free (tmppixel);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   /* Comment parsing */
 
   if (commentsp)
     {
-      GimpParasite *parasite;
+      ClayParasite *parasite;
       gchar        *comments[3] = { NULL, };
 
       for (i = 0; i < commentsp->ncomment; ++i)
@@ -808,36 +808,36 @@ load_image (GFile   *file,
 
       if (comments[0])
         {
-          parasite = gimp_parasite_new ("xmc-copyright",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("xmc-copyright",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (comments[0]) + 1,
                                         (gpointer) comments[0]);
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
 
           g_free (comments[0]);
         }
 
       if (comments[1])
         {
-          parasite = gimp_parasite_new ("xmc-license",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("xmc-license",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (comments[1]) + 1,
                                         (gpointer) comments[1]);
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
 
           g_free (comments[1]);
         }
 
       if (comments[2])
         {
-          parasite = gimp_parasite_new ("gimp-comment",
-                                        GIMP_PARASITE_PERSISTENT,
+          parasite = clay_parasite_new ("clay-comment",
+                                        CLAY_PARASITE_PERSISTENT,
                                         strlen (comments[2]) + 1,
                                         (gpointer) comments[2]);
-          gimp_image_attach_parasite (image, parasite);
-          gimp_parasite_free (parasite);
+          clay_image_attach_parasite (image, parasite);
+          clay_parasite_free (parasite);
 
           g_free (comments[2]);
         }
@@ -847,7 +847,7 @@ load_image (GFile   *file,
   XcursorImagesDestroy (imagesp);
   fclose (fp);
 
-  gimp_progress_end ();
+  clay_progress_end ();
 
   return image;
 }
@@ -856,7 +856,7 @@ load_image (GFile   *file,
  * load_thumbnail
  */
 
-static GimpImage *
+static ClayImage *
 load_thumbnail (GFile   *file,
                 gint32   thumb_size,
                 gint32  *img_width,
@@ -877,8 +877,8 @@ load_thumbnail (GFile   *file,
   guint32        min_diff = XCURSOR_IMAGE_MAX_SIZE; /* minimum value of diff */
   guint32        type;         /* chunk type */
   FILE          *fp    = NULL;
-  GimpImage     *image = NULL;
-  GimpLayer     *layer;
+  ClayImage     *image = NULL;
+  ClayLayer     *layer;
   GeglBuffer    *buffer;
   guint32       *tmppixel;     /* pixel data (guchar * bpp = guint32) */
   guint32        ntoc = 0;     /* the number of table of contents */
@@ -902,7 +902,7 @@ load_thumbnail (GFile   *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return NULL;
     }
 
@@ -923,7 +923,7 @@ load_thumbnail (GFile   *file,
     {
       g_set_error (error, 0, 0,
                    "'%s' seems to have an incorrect toc size.",
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -962,7 +962,7 @@ load_thumbnail (GFile   *file,
     {
       g_set_error (error, 0, 0,
                    _("there is no image chunk in \"%s\"."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -1003,7 +1003,7 @@ load_thumbnail (GFile   *file,
     {
       g_set_error (error, 0, 0,
                    _("'%s' is too wide for an X cursor."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -1012,7 +1012,7 @@ load_thumbnail (GFile   *file,
     {
       g_set_error (error, 0, 0,
                    _("'%s' is too high for an X cursor."),
-                   gimp_file_get_utf8_name (file));
+                   clay_file_get_utf8_name (file));
       fclose (fp);
       return NULL;
     }
@@ -1026,27 +1026,27 @@ load_thumbnail (GFile   *file,
   if (! g_size_checked_mul (&allocation, width, height) ||
       ! (tmppixel = g_try_new0 (guint32, allocation)))
     {
-      g_set_error (error, GIMP_PLUG_IN_ERROR, 0,
+      g_set_error (error, CLAY_PLUG_IN_ERROR, 0,
                    _("Image dimensions too large: width %d x height %d"),
                    width, height);
       fclose (fp);
       return NULL;
     }
 
-  image = gimp_image_new (width, height, GIMP_RGB);
+  image = clay_image_new (width, height, CLAY_RGB);
 
-  layer = gimp_layer_new (image, NULL, width, height,
-                          GIMP_RGBA_IMAGE,
+  layer = clay_layer_new (image, NULL, width, height,
+                          CLAY_RGBA_IMAGE,
                           100,
-                          gimp_image_get_default_new_layer_mode (image));
+                          clay_image_get_default_new_layer_mode (image));
 
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
   /*
    * Get the drawable and set the pixel region for our load...
    */
 
-  buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (layer));
+  buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (layer));
 
   /* copy the chunk data to tmppixel */
   fseek (fp, positions[sel_num], SEEK_SET);
@@ -1103,9 +1103,9 @@ read32 (FILE    *f,
 /* 'save_dialog ()'
  */
 static gboolean
-save_dialog (GimpProcedure *procedure,
+save_dialog (ClayProcedure *procedure,
              GObject       *config,
-             GimpImage     *image,
+             ClayImage     *image,
              GeglRectangle *hotspot_range)
 {
   GtkWidget     *dialog;
@@ -1114,37 +1114,37 @@ save_dialog (GimpProcedure *procedure,
   GtkWidget     *combo;
   gboolean       run;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
   /* Define hot-spot ranges relative to the image */
-  button = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  button = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                              "hot-spot-x", G_TYPE_NONE);
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Enter the X coordinate of the hot spot. "
                              "The origin is top left corner."),
                            NULL);
-  spin_button = gimp_label_spin_get_spin_button (GIMP_LABEL_SPIN (button));
+  spin_button = clay_label_spin_get_spin_button (CLAY_LABEL_SPIN (button));
   gtk_spin_button_set_range (GTK_SPIN_BUTTON (spin_button),
                              hotspot_range->x,
                              hotspot_range->x + hotspot_range->width - 1);
 
-  button = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  button = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                              "hot-spot-y", G_TYPE_NONE);
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Enter the Y coordinate of the hot spot. "
                              "The origin is top left corner."),
                            NULL);
-  spin_button = gimp_label_spin_get_spin_button (GIMP_LABEL_SPIN (button));
+  spin_button = clay_label_spin_get_spin_button (CLAY_LABEL_SPIN (button));
   gtk_spin_button_set_range (GTK_SPIN_BUTTON (spin_button),
                              hotspot_range->y,
                              hotspot_range->y + hotspot_range->height - 1);
 
   /* Auto-crop */
-  button = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  button = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                              "crop", GTK_TYPE_CHECK_BUTTON);
-  gimp_help_set_help_data (button,
+  clay_help_set_help_data (button,
                            _("Remove the empty borders of all frames.\n"
                              "This reduces the file size and may fix "
                              "the problem that some large cursors disorder "
@@ -1154,9 +1154,9 @@ save_dialog (GimpProcedure *procedure,
                            NULL);
 
   /* Size */
-  combo = gimp_procedure_dialog_get_widget (GIMP_PROCEDURE_DIALOG (dialog),
+  combo = clay_procedure_dialog_get_widget (CLAY_PROCEDURE_DIALOG (dialog),
                                             "size", G_TYPE_NONE);
-  gimp_help_set_help_data (combo,
+  clay_help_set_help_data (combo,
                            _("Choose the nominal size of frames.\n"
                              "If you don't have plans to make multi-sized "
                              "cursor, or you have no idea, leave it \"32px\".\n"
@@ -1168,12 +1168,12 @@ save_dialog (GimpProcedure *procedure,
                              "\"gtk-cursor-theme-size\"."),
                            NULL);
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog),
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog),
                               NULL);
 
   gtk_widget_set_visible (dialog, TRUE);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -1184,7 +1184,7 @@ save_dialog (GimpProcedure *procedure,
  * Set default hotspot based on hotspot_range.
 **/
 static void
-load_default_hotspot (GimpImage     *image,
+load_default_hotspot (ClayImage     *image,
                       GeglRectangle *hotspot_range,
                       GObject       *config)
 {
@@ -1220,10 +1220,10 @@ load_default_hotspot (GimpImage     *image,
 
 static gboolean
 export_image (GFile         *file,
-              GimpImage     *image,
+              ClayImage     *image,
               gint           n_drawables,
               GList         *drawables,
-              GimpImage     *orig_image,
+              ClayImage     *orig_image,
               GObject       *config,
               GError       **error)
 {
@@ -1271,8 +1271,8 @@ export_image (GFile         *file,
                     0,
                     NULL);
 
-  gimp_progress_init_printf (_("Saving '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Saving '%s'"),
+                             clay_file_get_utf8_name (file));
 
   /*
    * Open the file pointer.
@@ -1285,12 +1285,12 @@ export_image (GFile         *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Could not open '%s' for writing: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
   /* get layers, in bottom-to-top order */
-  layers      = gimp_image_list_layers (image);
+  layers      = clay_image_list_layers (image);
 
   layers      = g_list_reverse (layers);
 
@@ -1312,13 +1312,13 @@ export_image (GFile         *file,
    */
   for (list = layers, i = 0; list; list = g_list_next (list), i++)
     {
-      GimpDrawable *drawable = list->data;
+      ClayDrawable *drawable = list->data;
       GeglBuffer   *buffer;
       const Babl   *format;
       gint          width;
       gint          height;
 
-      buffer = gimp_drawable_get_buffer (drawable);
+      buffer = clay_drawable_get_buffer (drawable);
 
       width  = gegl_buffer_get_width  (buffer);
       height = gegl_buffer_get_height (buffer);
@@ -1326,9 +1326,9 @@ export_image (GFile         *file,
       format = babl_format ("R'G'B'A u8");
 
       /* get framename of this layer */
-      framename = gimp_item_get_name (GIMP_ITEM (drawable));
+      framename = clay_item_get_name (CLAY_ITEM (drawable));
       /* get offset of this layer. */
-      gimp_drawable_get_offsets (drawable, &layer_xoffset, &layer_yoffset);
+      clay_drawable_get_offsets (drawable, &layer_xoffset, &layer_yoffset);
 
       /*
        * layer dimension check.
@@ -1343,7 +1343,7 @@ export_image (GFile         *file,
         {
           g_set_error (error, 0, 0,
                        _("Frame '%s' is too wide. Please reduce to no more than %dpx."),
-                       gimp_any_to_utf8 (framename, -1, NULL),
+                       clay_any_to_utf8 (framename, -1, NULL),
                        MAX_SAVE_DIMENSION);
           fclose (fp);
           return FALSE;
@@ -1353,7 +1353,7 @@ export_image (GFile         *file,
         {
           g_set_error (error, 0, 0,
                        _("Frame '%s' is too high. Please reduce to no more than %dpx."),
-                       gimp_any_to_utf8 (framename, -1, NULL),
+                       clay_any_to_utf8 (framename, -1, NULL),
                        MAX_SAVE_DIMENSION);
           fclose (fp);
           return FALSE;
@@ -1363,7 +1363,7 @@ export_image (GFile         *file,
         {
           g_set_error (error, 0, 0,
                        _("Width and/or height of frame '%s' is zero!"),
-                       gimp_any_to_utf8 (framename, -1, NULL));
+                       clay_any_to_utf8 (framename, -1, NULL));
           fclose (fp);
           return FALSE;
         }
@@ -1408,7 +1408,7 @@ export_image (GFile         *file,
                              "is not on frame '%s'.\n"
                              "Try to change the hot spot position, "
                              "layer geometry or export without auto-crop."),
-                           gimp_any_to_utf8 (framename, -1, NULL));
+                           clay_any_to_utf8 (framename, -1, NULL));
               fclose (fp);
               return FALSE;
             }
@@ -1492,12 +1492,12 @@ export_image (GFile         *file,
 
       g_object_unref (buffer);
 
-      gimp_progress_update ((i + 1) / imagesp->nimage);
+      clay_progress_update ((i + 1) / imagesp->nimage);
     }
 
   g_list_free (list);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 
   /*
    * comment parsing
@@ -1589,7 +1589,7 @@ export_image (GFile         *file,
   XcursorImagesDestroy (imagesp);
   DM_XMC ("Xcursor destroyed.\n");
   XcursorCommentsDestroy (commentsp); /* this is safe even if commentsp is NULL. */
-  gimp_progress_end ();
+  clay_progress_end ();
 
   /* Save hotspot back to the original image */
   set_hotspot_to_parasite (orig_image, config_hot_spot_x, config_hot_spot_y);
@@ -1675,7 +1675,7 @@ set_cursor_comments (GObject *config)
   g_object_get (config,
                 "xmc-copyright", comments,
                 "xmc-license",   comments + 1,
-                "gimp-comment",  comments + 2,
+                "clay-comment",  comments + 2,
                 NULL);
 
   xcCommentsArray = g_array_new (FALSE, FALSE, sizeof (XcursorComment *));
@@ -1729,27 +1729,27 @@ set_cursor_comments (GObject *config)
  * of file-xbm.
  */
 static gboolean
-set_hotspot_to_parasite (GimpImage *image,
+set_hotspot_to_parasite (ClayImage *image,
                          gint       hot_spot_x,
                          gint       hot_spot_y)
 {
   gboolean      ret = FALSE;
   gchar        *tmpstr;
-  GimpParasite *parasite;
+  ClayParasite *parasite;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), FALSE);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
 
   tmpstr = g_strdup_printf ("%d %d", hot_spot_x, hot_spot_y);
-  parasite = gimp_parasite_new ("hot-spot",
-                                GIMP_PARASITE_PERSISTENT,
+  parasite = clay_parasite_new ("hot-spot",
+                                CLAY_PARASITE_PERSISTENT,
                                 strlen (tmpstr) + 1,
                                 tmpstr);
   g_free (tmpstr);
 
   if (parasite)
     {
-      ret = gimp_image_attach_parasite (image, parasite);
-      gimp_parasite_free (parasite);
+      ret = clay_image_attach_parasite (image, parasite);
+      clay_parasite_free (parasite);
     }
 
   return ret;
@@ -1761,17 +1761,17 @@ set_hotspot_to_parasite (GimpImage *image,
  * If "hot-spot" is not found or broken, return FALSE.
  */
 static gboolean
-get_hotspot_from_parasite (GimpImage *image,
+get_hotspot_from_parasite (ClayImage *image,
                            gint      *hot_spot_x,
                            gint      *hot_spot_y)
 {
-  GimpParasite *parasite;
+  ClayParasite *parasite;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), FALSE);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
 
   DM_XMC ("function: getHotsopt\n");
 
-  parasite = gimp_image_get_parasite (image, "hot-spot");
+  parasite = clay_image_get_parasite (image, "hot-spot");
 
   if (parasite)
     {
@@ -1779,7 +1779,7 @@ get_hotspot_from_parasite (GimpImage *image,
       guint32  parasite_size;
       gint     x, y;
 
-      parasite_data = (gchar *) gimp_parasite_get_data (parasite, &parasite_size);
+      parasite_data = (gchar *) clay_parasite_get_data (parasite, &parasite_size);
       parasite_data = g_strndup (parasite_data, parasite_size);
 
       if (sscanf (parasite_data, "%i %i", &x, &y) == 2)
@@ -1828,7 +1828,7 @@ set_size_and_delay (GObject     *config,
                 "delay-replace", &config_delay_replace,
                 NULL);
   config_size =
-    gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config), "size");
+    clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config), "size");
 
   DM_XMC ("function: set_size_and_delay\tframename=%s\n", framename);
 
@@ -2102,7 +2102,7 @@ pix_is_opaque (guint32 pix)
  * don't forget to g_free returned pointer later.
  */
 static GeglRectangle *
-get_intersection_of_frames (GimpImage *image)
+get_intersection_of_frames (ClayImage *image)
 {
   GeglRectangle *iregion;
   gint32         x1 = G_MININT32, x2 = G_MAXINT32;
@@ -2111,15 +2111,15 @@ get_intersection_of_frames (GimpImage *image)
   GList         *layers;
   GList         *list;
 
-  g_return_val_if_fail (GIMP_IS_IMAGE (image), FALSE);
+  g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
 
-  layers = gimp_image_list_layers (image);
+  layers = clay_image_list_layers (image);
 
   for (list = layers; list; list = g_list_next (list))
     {
-      GimpDrawable *drawable = list->data;
+      ClayDrawable *drawable = list->data;
 
-      if (! gimp_drawable_get_offsets (drawable, &x_off, &y_off))
+      if (! clay_drawable_get_offsets (drawable, &x_off, &y_off))
         {
           g_list_free (layers);
           return NULL;
@@ -2127,8 +2127,8 @@ get_intersection_of_frames (GimpImage *image)
 
       x1 = MAX (x1, x_off);
       y1 = MAX (y1, y_off);
-      x2 = MIN (x2, x_off + gimp_drawable_get_width  (drawable) - 1);
-      y2 = MIN (y2, y_off + gimp_drawable_get_height (drawable) - 1);
+      x2 = MIN (x2, x_off + clay_drawable_get_width  (drawable) - 1);
+      y2 = MIN (y2, y_off + clay_drawable_get_height (drawable) - 1);
     }
 
   g_list_free (layers);

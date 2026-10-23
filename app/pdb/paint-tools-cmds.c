@@ -25,43 +25,43 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#include "libgimpconfig/gimpconfig.h"
-#include "libgimpmath/gimpmath.h"
+#include "libclayconfig/clayconfig.h"
+#include "libclaymath/claymath.h"
 
-#include "libgimpbase/gimpbase.h"
+#include "libclaybase/claybase.h"
 
 #include "pdb-types.h"
 
-#include "core/gimpdrawable.h"
-#include "core/gimpdynamics.h"
-#include "core/gimppaintinfo.h"
-#include "core/gimpparamspecs.h"
-#include "paint/gimppaintcore-stroke.h"
-#include "paint/gimppaintcore.h"
-#include "paint/gimppaintoptions.h"
+#include "core/claydrawable.h"
+#include "core/claydynamics.h"
+#include "core/claypaintinfo.h"
+#include "core/clayparamspecs.h"
+#include "paint/claypaintcore-stroke.h"
+#include "paint/claypaintcore.h"
+#include "paint/claypaintoptions.h"
 
-#include "gimppdb.h"
-#include "gimppdb-utils.h"
-#include "gimppdbcontext.h"
-#include "gimpprocedure.h"
+#include "claypdb.h"
+#include "claypdb-utils.h"
+#include "claypdbcontext.h"
+#include "clayprocedure.h"
 #include "internal-procs.h"
 
 
-static const GimpCoords default_coords = GIMP_COORDS_DEFAULT_VALUES;
+static const ClayCoords default_coords = CLAY_COORDS_DEFAULT_VALUES;
 
 static gboolean
-paint_tools_stroke (Gimp              *gimp,
-                    GimpContext       *context,
-                    GimpPaintOptions  *options,
-                    GimpDrawable      *drawable,
+paint_tools_stroke (Clay              *clay,
+                    ClayContext       *context,
+                    ClayPaintOptions  *options,
+                    ClayDrawable      *drawable,
                     gsize              n_strokes,
                     const gdouble     *strokes,
                     GError           **error,
                     const gchar       *first_property_name,
                     ...)
 {
-  GimpPaintCore *core;
-  GimpCoords    *coords;
+  ClayPaintCore *core;
+  ClayCoords    *coords;
   gboolean       retval;
   gint           i;
   va_list        args;
@@ -71,17 +71,17 @@ paint_tools_stroke (Gimp              *gimp,
   /*  undefine the paint-relevant context properties and get them
    *  from the current context
    */
-  gimp_context_define_properties (GIMP_CONTEXT (options),
-                                  GIMP_CONTEXT_PROP_MASK_PAINT,
+  clay_context_define_properties (CLAY_CONTEXT (options),
+                                  CLAY_CONTEXT_PROP_MASK_PAINT,
                                   FALSE);
-  gimp_context_set_parent (GIMP_CONTEXT (options), context);
+  clay_context_set_parent (CLAY_CONTEXT (options), context);
 
   va_start (args, first_property_name);
-  core = GIMP_PAINT_CORE (g_object_new_valist (options->paint_info->paint_type,
+  core = CLAY_PAINT_CORE (g_object_new_valist (options->paint_info->paint_type,
                                                first_property_name, args));
   va_end (args);
 
-  coords = g_new (GimpCoords, n_strokes);
+  coords = g_new (ClayCoords, n_strokes);
 
   for (i = 0; i < n_strokes; i++)
     {
@@ -90,7 +90,7 @@ paint_tools_stroke (Gimp              *gimp,
       coords[i].y = strokes[2 * i + 1];
     }
 
-  retval = gimp_paint_core_stroke (core, drawable, options,
+  retval = clay_paint_core_stroke (core, drawable, options,
                                    coords, n_strokes, TRUE,
                                    error);
 
@@ -102,42 +102,42 @@ paint_tools_stroke (Gimp              *gimp,
   return retval;
 }
 
-static GimpValueArray *
-airbrush_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+airbrush_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gdouble pressure;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  pressure = g_value_get_double (gimp_value_array_index (args, 1));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 2), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  pressure = g_value_get_double (clay_value_array_index (args, 1));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 2), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-airbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-airbrush");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
           g_object_set (options,
                         "pressure", pressure,
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -146,40 +146,40 @@ airbrush_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-airbrush_default_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+airbrush_default_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-airbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-airbrush");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -188,48 +188,48 @@ airbrush_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-clone_invoker (GimpProcedure         *procedure,
-               Gimp                  *gimp,
-               GimpContext           *context,
-               GimpProgress          *progress,
-               const GimpValueArray  *args,
+static ClayValueArray *
+clone_invoker (ClayProcedure         *procedure,
+               Clay                  *clay,
+               ClayContext           *context,
+               ClayProgress          *progress,
+               const ClayValueArray  *args,
                GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
-  GimpDrawable *src_drawable;
+  ClayDrawable *drawable;
+  ClayDrawable *src_drawable;
   gint clone_type;
   gdouble src_x;
   gdouble src_y;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  src_drawable = g_value_get_object (gimp_value_array_index (args, 1));
-  clone_type = g_value_get_enum (gimp_value_array_index (args, 2));
-  src_x = g_value_get_double (gimp_value_array_index (args, 3));
-  src_y = g_value_get_double (gimp_value_array_index (args, 4));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 5), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  src_drawable = g_value_get_object (clay_value_array_index (args, 1));
+  clone_type = g_value_get_enum (clay_value_array_index (args, 2));
+  src_x = g_value_get_double (clay_value_array_index (args, 3));
+  src_y = g_value_get_double (clay_value_array_index (args, 4));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 5), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-clone");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-clone");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
           GList *src_drawables;
 
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
           src_drawables = g_list_prepend (NULL, src_drawable);
 
           g_object_set (options,
@@ -239,7 +239,7 @@ clone_invoker (GimpProcedure         *procedure,
                         "src-y",         (gint) floor (src_y),
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -249,40 +249,40 @@ clone_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-clone_default_invoker (GimpProcedure         *procedure,
-                       Gimp                  *gimp,
-                       GimpContext           *context,
-                       GimpProgress          *progress,
-                       const GimpValueArray  *args,
+static ClayValueArray *
+clone_default_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
                        GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-clone");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-clone");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -291,49 +291,49 @@ clone_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-convolve_invoker (GimpProcedure         *procedure,
-                  Gimp                  *gimp,
-                  GimpContext           *context,
-                  GimpProgress          *progress,
-                  const GimpValueArray  *args,
+static ClayValueArray *
+convolve_invoker (ClayProcedure         *procedure,
+                  Clay                  *clay,
+                  ClayContext           *context,
+                  ClayProgress          *progress,
+                  const ClayValueArray  *args,
                   GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gdouble pressure;
   gint convolve_type;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  pressure = g_value_get_double (gimp_value_array_index (args, 1));
-  convolve_type = g_value_get_enum (gimp_value_array_index (args, 2));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 3), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  pressure = g_value_get_double (clay_value_array_index (args, 1));
+  convolve_type = g_value_get_enum (clay_value_array_index (args, 2));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 3), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-convolve");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-convolve");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
           g_object_set (options,
                         "type", convolve_type,
                         "rate", pressure,
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -342,40 +342,40 @@ convolve_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-convolve_default_invoker (GimpProcedure         *procedure,
-                          Gimp                  *gimp,
-                          GimpContext           *context,
-                          GimpProgress          *progress,
-                          const GimpValueArray  *args,
+static ClayValueArray *
+convolve_default_invoker (ClayProcedure         *procedure,
+                          Clay                  *clay,
+                          ClayContext           *context,
+                          ClayProgress          *progress,
+                          const ClayValueArray  *args,
                           GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-convolve");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-convolve");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -384,44 +384,44 @@ convolve_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-dodgeburn_invoker (GimpProcedure         *procedure,
-                   Gimp                  *gimp,
-                   GimpContext           *context,
-                   GimpProgress          *progress,
-                   const GimpValueArray  *args,
+static ClayValueArray *
+dodgeburn_invoker (ClayProcedure         *procedure,
+                   Clay                  *clay,
+                   ClayContext           *context,
+                   ClayProgress          *progress,
+                   const ClayValueArray  *args,
                    GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gdouble exposure;
   gint dodgeburn_type;
   gint dodgeburn_mode;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  exposure = g_value_get_double (gimp_value_array_index (args, 1));
-  dodgeburn_type = g_value_get_enum (gimp_value_array_index (args, 2));
-  dodgeburn_mode = g_value_get_enum (gimp_value_array_index (args, 3));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 4), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  exposure = g_value_get_double (clay_value_array_index (args, 1));
+  dodgeburn_type = g_value_get_enum (clay_value_array_index (args, 2));
+  dodgeburn_mode = g_value_get_enum (clay_value_array_index (args, 3));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 4), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-dodge-burn");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-dodge-burn");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
           g_object_set (options,
                         "type",     dodgeburn_type,
@@ -429,7 +429,7 @@ dodgeburn_invoker (GimpProcedure         *procedure,
                         "exposure", exposure,
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -438,40 +438,40 @@ dodgeburn_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-dodgeburn_default_invoker (GimpProcedure         *procedure,
-                           Gimp                  *gimp,
-                           GimpContext           *context,
-                           GimpProgress          *progress,
-                           const GimpValueArray  *args,
+static ClayValueArray *
+dodgeburn_default_invoker (ClayProcedure         *procedure,
+                           Clay                  *clay,
+                           ClayContext           *context,
+                           ClayProgress          *progress,
+                           const ClayValueArray  *args,
                            GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-dodge-burn");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-dodge-burn");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -480,49 +480,49 @@ dodgeburn_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-eraser_invoker (GimpProcedure         *procedure,
-                Gimp                  *gimp,
-                GimpContext           *context,
-                GimpProgress          *progress,
-                const GimpValueArray  *args,
+static ClayValueArray *
+eraser_invoker (ClayProcedure         *procedure,
+                Clay                  *clay,
+                ClayContext           *context,
+                ClayProgress          *progress,
+                const ClayValueArray  *args,
                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
   gint hardness;
   gint method;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
-  hardness = g_value_get_enum (gimp_value_array_index (args, 2));
-  method = g_value_get_enum (gimp_value_array_index (args, 3));
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
+  hardness = g_value_get_enum (clay_value_array_index (args, 2));
+  method = g_value_get_enum (clay_value_array_index (args, 3));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-eraser");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-eraser");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
           g_object_set (options,
                         "application-mode", method,
                         "hard",             hardness,
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -531,40 +531,40 @@ eraser_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-eraser_default_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+eraser_default_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-eraser");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-eraser");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -573,46 +573,46 @@ eraser_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-heal_invoker (GimpProcedure         *procedure,
-              Gimp                  *gimp,
-              GimpContext           *context,
-              GimpProgress          *progress,
-              const GimpValueArray  *args,
+static ClayValueArray *
+heal_invoker (ClayProcedure         *procedure,
+              Clay                  *clay,
+              ClayContext           *context,
+              ClayProgress          *progress,
+              const ClayValueArray  *args,
               GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
-  GimpDrawable *src_drawable;
+  ClayDrawable *drawable;
+  ClayDrawable *src_drawable;
   gdouble src_x;
   gdouble src_y;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  src_drawable = g_value_get_object (gimp_value_array_index (args, 1));
-  src_x = g_value_get_double (gimp_value_array_index (args, 2));
-  src_y = g_value_get_double (gimp_value_array_index (args, 3));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 4), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  src_drawable = g_value_get_object (clay_value_array_index (args, 1));
+  src_x = g_value_get_double (clay_value_array_index (args, 2));
+  src_y = g_value_get_double (clay_value_array_index (args, 3));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 4), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-heal");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-heal");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
           GList *src_drawables;
 
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
           src_drawables = g_list_prepend (NULL, src_drawable);
 
           g_object_set (options,
@@ -621,7 +621,7 @@ heal_invoker (GimpProcedure         *procedure,
                         "src-y",         (gint) floor (src_y),
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -631,40 +631,40 @@ heal_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-heal_default_invoker (GimpProcedure         *procedure,
-                      Gimp                  *gimp,
-                      GimpContext           *context,
-                      GimpProgress          *progress,
-                      const GimpValueArray  *args,
+static ClayValueArray *
+heal_default_invoker (ClayProcedure         *procedure,
+                      Clay                  *clay,
+                      ClayContext           *context,
+                      ClayProgress          *progress,
+                      const ClayValueArray  *args,
                       GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-heal");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-heal");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -673,47 +673,47 @@ heal_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-paintbrush_invoker (GimpProcedure         *procedure,
-                    Gimp                  *gimp,
-                    GimpContext           *context,
-                    GimpProgress          *progress,
-                    const GimpValueArray  *args,
+static ClayValueArray *
+paintbrush_invoker (ClayProcedure         *procedure,
+                    Clay                  *clay,
+                    ClayContext           *context,
+                    ClayProgress          *progress,
+                    const ClayValueArray  *args,
                     GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gdouble fade_out;
   gsize num_strokes;
   const gdouble *strokes;
   gint method;
   gdouble gradient_length;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  fade_out = g_value_get_double (gimp_value_array_index (args, 1));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 2), &num_strokes);
-  method = g_value_get_enum (gimp_value_array_index (args, 3));
-  gradient_length = g_value_get_double (gimp_value_array_index (args, 4));
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  fade_out = g_value_get_double (clay_value_array_index (args, 1));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 2), &num_strokes);
+  method = g_value_get_enum (clay_value_array_index (args, 3));
+  gradient_length = g_value_get_double (clay_value_array_index (args, 4));
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-paintbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-paintbrush");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          GimpDynamics *pdb_dynamics  = GIMP_DYNAMICS (gimp_dynamics_new (context, "pdb"));
-          GimpDynamics *user_dynamics = gimp_context_get_dynamics (context);
+          ClayDynamics *pdb_dynamics  = CLAY_DYNAMICS (clay_dynamics_new (context, "pdb"));
+          ClayDynamics *user_dynamics = clay_context_get_dynamics (context);
 
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
           g_object_set (options,
                         "application-mode", method,
@@ -722,9 +722,9 @@ paintbrush_invoker (GimpProcedure         *procedure,
 
           if (fade_out > 0)
             {
-               GimpDynamicsOutput *opacity_output =
-                 gimp_dynamics_get_output (pdb_dynamics,
-                                           GIMP_DYNAMICS_OUTPUT_OPACITY);
+               ClayDynamicsOutput *opacity_output =
+                 clay_dynamics_get_output (pdb_dynamics,
+                                           CLAY_DYNAMICS_OUTPUT_OPACITY);
 
                g_object_set (opacity_output,
                              "use-fade", TRUE,
@@ -733,23 +733,23 @@ paintbrush_invoker (GimpProcedure         *procedure,
 
           if (gradient_length > 0)
             {
-              GimpDynamicsOutput *color_output =
-                gimp_dynamics_get_output (pdb_dynamics,
-                                          GIMP_DYNAMICS_OUTPUT_COLOR);
+              ClayDynamicsOutput *color_output =
+                clay_dynamics_get_output (pdb_dynamics,
+                                          CLAY_DYNAMICS_OUTPUT_COLOR);
 
               g_object_set (color_output,
                             "use-fade", TRUE,
                             NULL);
             }
 
-          gimp_context_set_dynamics (context, pdb_dynamics);
+          clay_context_set_dynamics (context, pdb_dynamics);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
 
-          gimp_context_set_dynamics (context, user_dynamics);
+          clay_context_set_dynamics (context, user_dynamics);
 
           g_object_unref (pdb_dynamics);
         }
@@ -757,40 +757,40 @@ paintbrush_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-paintbrush_default_invoker (GimpProcedure         *procedure,
-                            Gimp                  *gimp,
-                            GimpContext           *context,
-                            GimpProgress          *progress,
-                            const GimpValueArray  *args,
+static ClayValueArray *
+paintbrush_default_invoker (ClayProcedure         *procedure,
+                            Clay                  *clay,
+                            ClayContext           *context,
+                            ClayProgress          *progress,
+                            const ClayValueArray  *args,
                             GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-paintbrush");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-paintbrush");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -799,40 +799,40 @@ paintbrush_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-pencil_invoker (GimpProcedure         *procedure,
-                Gimp                  *gimp,
-                GimpContext           *context,
-                GimpProgress          *progress,
-                const GimpValueArray  *args,
+static ClayValueArray *
+pencil_invoker (ClayProcedure         *procedure,
+                Clay                  *clay,
+                ClayContext           *context,
+                ClayProgress          *progress,
+                const ClayValueArray  *args,
                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-pencil");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-pencil");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -841,46 +841,46 @@ pencil_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-smudge_invoker (GimpProcedure         *procedure,
-                Gimp                  *gimp,
-                GimpContext           *context,
-                GimpProgress          *progress,
-                const GimpValueArray  *args,
+static ClayValueArray *
+smudge_invoker (ClayProcedure         *procedure,
+                Clay                  *clay,
+                ClayContext           *context,
+                ClayProgress          *progress,
+                const ClayValueArray  *args,
                 GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gdouble pressure;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  pressure = g_value_get_double (gimp_value_array_index (args, 1));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 2), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  pressure = g_value_get_double (clay_value_array_index (args, 1));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 2), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-smudge");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-smudge");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
           g_object_set (options,
                         "rate", pressure,
                         NULL);
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -889,40 +889,40 @@ smudge_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
-static GimpValueArray *
-smudge_default_invoker (GimpProcedure         *procedure,
-                        Gimp                  *gimp,
-                        GimpContext           *context,
-                        GimpProgress          *progress,
-                        const GimpValueArray  *args,
+static ClayValueArray *
+smudge_default_invoker (ClayProcedure         *procedure,
+                        Clay                  *clay,
+                        ClayContext           *context,
+                        ClayProgress          *progress,
+                        const ClayValueArray  *args,
                         GError               **error)
 {
   gboolean success = TRUE;
-  GimpDrawable *drawable;
+  ClayDrawable *drawable;
   gsize num_strokes;
   const gdouble *strokes;
 
-  drawable = g_value_get_object (gimp_value_array_index (args, 0));
-  strokes = gimp_value_get_double_array (gimp_value_array_index (args, 1), &num_strokes);
+  drawable = g_value_get_object (clay_value_array_index (args, 0));
+  strokes = clay_value_get_double_array (clay_value_array_index (args, 1), &num_strokes);
 
   if (success)
     {
-      GimpPaintOptions *options =
-        gimp_pdb_context_get_paint_options (GIMP_PDB_CONTEXT (context),
-                                            "gimp-smudge");
+      ClayPaintOptions *options =
+        clay_pdb_context_get_paint_options (CLAY_PDB_CONTEXT (context),
+                                            "clay-smudge");
 
       if (options &&
-          gimp_pdb_item_is_attached (GIMP_ITEM (drawable), NULL,
-                                     GIMP_PDB_ITEM_CONTENT, error) &&
-          gimp_pdb_item_is_not_group (GIMP_ITEM (drawable), error))
+          clay_pdb_item_is_attached (CLAY_ITEM (drawable), NULL,
+                                     CLAY_PDB_ITEM_CONTENT, error) &&
+          clay_pdb_item_is_not_group (CLAY_ITEM (drawable), error))
         {
-          options = gimp_config_duplicate (GIMP_CONFIG (options));
+          options = clay_config_duplicate (CLAY_CONFIG (options));
 
-          success = paint_tools_stroke (gimp, context, options, drawable,
+          success = paint_tools_stroke (clay, context, options, drawable,
                                         num_strokes, strokes, error,
                                         "undo-desc", options->paint_info->blurb,
                                         NULL);
@@ -931,609 +931,609 @@ smudge_default_invoker (GimpProcedure         *procedure,
         success = FALSE;
     }
 
-  return gimp_procedure_get_return_values (procedure, success,
+  return clay_procedure_get_return_values (procedure, success,
                                            error ? *error : NULL);
 }
 
 void
-register_paint_tools_procs (GimpPDB *pdb)
+register_paint_tools_procs (ClayPDB *pdb)
 {
-  GimpProcedure *procedure;
+  ClayProcedure *procedure;
 
   /*
-   * gimp-airbrush
+   * clay-airbrush
    */
-  procedure = gimp_procedure_new (airbrush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-airbrush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (airbrush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-airbrush");
+  clay_procedure_set_static_help (procedure,
                                   "Paint in the current brush with varying pressure. Paint application is time-dependent.",
                                   "This tool simulates the use of an airbrush. Paint pressure represents the relative intensity of the paint application. High pressure results in a thicker layer of paint while low pressure results in a thinner layer.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("pressure",
                                                     "pressure",
                                                     "The pressure of the airbrush strokes",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-airbrush-default
+   * clay-airbrush-default
    */
-  procedure = gimp_procedure_new (airbrush_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-airbrush-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (airbrush_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-airbrush-default");
+  clay_procedure_set_static_help (procedure,
                                   "Paint in the current brush with varying pressure. Paint application is time-dependent.",
-                                  "This tool simulates the use of an airbrush. It is similar to 'gimp-airbrush' except that the pressure is derived from the airbrush tools options box. It the option has not been set the default for the option will be used.",
+                                  "This tool simulates the use of an airbrush. It is similar to 'clay-airbrush' except that the pressure is derived from the airbrush tools options box. It the option has not been set the default for the option will be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-clone
+   * clay-clone
    */
-  procedure = gimp_procedure_new (clone_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-clone");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clone_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-clone");
+  clay_procedure_set_static_help (procedure,
                                   "Clone from the source to the dest drawable using the current brush",
                                   "This tool clones (copies) from the source drawable starting at the specified source coordinates to the dest drawable. If the \"clone_type\" argument is set to PATTERN-CLONE, then the current pattern is used as the source and the \"src_drawable\" argument is ignored. Pattern cloning assumes a tileable pattern and mods the sum of the src coordinates and subsequent stroke offsets with the width and height of the pattern. For image cloning, if the sum of the src coordinates and subsequent stroke offsets exceeds the extents of the src drawable, then no paint is transferred. The clone tool is capable of transforming between any image types including RGB->Indexed--although converting from any type to indexed is significantly slower.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("src-drawable",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("src-drawable",
                                                          "src drawable",
                                                          "The source drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("clone-type",
                                                   "clone type",
                                                   "The type of clone",
-                                                  GIMP_TYPE_CLONE_TYPE,
-                                                  GIMP_CLONE_IMAGE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_CLONE_TYPE,
+                                                  CLAY_CLONE_IMAGE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("src-x",
                                                     "src x",
                                                     "The x coordinate in the source image",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("src-y",
                                                     "src y",
                                                     "The y coordinate in the source image",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-clone-default
+   * clay-clone-default
    */
-  procedure = gimp_procedure_new (clone_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-clone-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (clone_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-clone-default");
+  clay_procedure_set_static_help (procedure,
                                   "Clone from the source to the dest drawable using the current brush",
-                                  "This tool clones (copies) from the source drawable starting at the specified source coordinates to the dest drawable. This function performs exactly the same as the 'gimp-clone' function except that the tools arguments are obtained from the clones option dialog. It this dialog has not been activated then the dialogs default values will be used.",
+                                  "This tool clones (copies) from the source drawable starting at the specified source coordinates to the dest drawable. This function performs exactly the same as the 'clay-clone' function except that the tools arguments are obtained from the clones option dialog. It this dialog has not been activated then the dialogs default values will be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-convolve
+   * clay-convolve
    */
-  procedure = gimp_procedure_new (convolve_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-convolve");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (convolve_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-convolve");
+  clay_procedure_set_static_help (procedure,
                                   "Convolve (Blur, Sharpen) using the current brush.",
                                   "This tool convolves the specified drawable with either a sharpening or blurring kernel. The pressure parameter controls the magnitude of the operation. Like the paintbrush, this tool linearly interpolates between the specified stroke coordinates.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("pressure",
                                                     "pressure",
                                                     "The pressure",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("convolve-type",
                                                   "convolve type",
                                                   "Convolve type",
-                                                  GIMP_TYPE_CONVOLVE_TYPE,
-                                                  GIMP_CONVOLVE_BLUR,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                  CLAY_TYPE_CONVOLVE_TYPE,
+                                                  CLAY_CONVOLVE_BLUR,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-convolve-default
+   * clay-convolve-default
    */
-  procedure = gimp_procedure_new (convolve_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-convolve-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (convolve_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-convolve-default");
+  clay_procedure_set_static_help (procedure,
                                   "Convolve (Blur, Sharpen) using the current brush.",
-                                  "This tool convolves the specified drawable with either a sharpening or blurring kernel. This function performs exactly the same as the 'gimp-convolve' function except that the tools arguments are obtained from the convolve option dialog. It this dialog has not been activated then the dialogs default values will be used.",
+                                  "This tool convolves the specified drawable with either a sharpening or blurring kernel. This function performs exactly the same as the 'clay-convolve' function except that the tools arguments are obtained from the convolve option dialog. It this dialog has not been activated then the dialogs default values will be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-dodgeburn
+   * clay-dodgeburn
    */
-  procedure = gimp_procedure_new (dodgeburn_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-dodgeburn");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (dodgeburn_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-dodgeburn");
+  clay_procedure_set_static_help (procedure,
                                   "Dodgeburn image with varying exposure.",
                                   "Dodgeburn. More details here later.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("exposure",
                                                     "exposure",
                                                     "The exposure of the strokes",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("dodgeburn-type",
                                                   "dodgeburn type",
                                                   "The type either dodge or burn",
-                                                  GIMP_TYPE_DODGE_BURN_TYPE,
-                                                  GIMP_DODGE_BURN_TYPE_DODGE,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_DODGE_BURN_TYPE,
+                                                  CLAY_DODGE_BURN_TYPE_DODGE,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("dodgeburn-mode",
                                                   "dodgeburn mode",
                                                   "The mode",
-                                                  GIMP_TYPE_TRANSFER_MODE,
-                                                  GIMP_TRANSFER_SHADOWS,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                  CLAY_TYPE_TRANSFER_MODE,
+                                                  CLAY_TRANSFER_SHADOWS,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-dodgeburn-default
+   * clay-dodgeburn-default
    */
-  procedure = gimp_procedure_new (dodgeburn_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-dodgeburn-default");
-  gimp_procedure_set_static_help (procedure,
-                                  "Dodgeburn image with varying exposure. This is the same as the gimp_dodgeburn() function except that the exposure, type and mode are taken from the tools option dialog. If the dialog has not been activated then the defaults as used by the dialog will be used.",
+  procedure = clay_procedure_new (dodgeburn_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-dodgeburn-default");
+  clay_procedure_set_static_help (procedure,
+                                  "Dodgeburn image with varying exposure. This is the same as the clay_dodgeburn() function except that the exposure, type and mode are taken from the tools option dialog. If the dialog has not been activated then the defaults as used by the dialog will be used.",
                                   "Dodgeburn. More details here later.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-eraser
+   * clay-eraser
    */
-  procedure = gimp_procedure_new (eraser_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-eraser");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (eraser_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-eraser");
+  clay_procedure_set_static_help (procedure,
                                   "Erase using the current brush.",
                                   "This tool erases using the current brush mask. If the specified drawable contains an alpha channel, then the erased pixels will become transparent. Otherwise, the eraser tool replaces the contents of the drawable with the background color. Like paintbrush, this tool linearly interpolates between the specified stroke coordinates.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("hardness",
                                                   "hardness",
                                                   "How to apply the brush",
-                                                  GIMP_TYPE_BRUSH_APPLICATION_MODE,
-                                                  GIMP_BRUSH_HARD,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_BRUSH_APPLICATION_MODE,
+                                                  CLAY_BRUSH_HARD,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("method",
                                                   "method",
                                                   "The paint method to use",
-                                                  GIMP_TYPE_PAINT_APPLICATION_MODE,
-                                                  GIMP_PAINT_CONSTANT,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                  CLAY_TYPE_PAINT_APPLICATION_MODE,
+                                                  CLAY_PAINT_CONSTANT,
+                                                  CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-eraser-default
+   * clay-eraser-default
    */
-  procedure = gimp_procedure_new (eraser_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-eraser-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (eraser_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-eraser-default");
+  clay_procedure_set_static_help (procedure,
                                   "Erase using the current brush.",
-                                  "This tool erases using the current brush mask. This function performs exactly the same as the 'gimp-eraser' function except that the tools arguments are obtained from the eraser option dialog. It this dialog has not been activated then the dialogs default values will be used.",
+                                  "This tool erases using the current brush mask. This function performs exactly the same as the 'clay-eraser' function except that the tools arguments are obtained from the eraser option dialog. It this dialog has not been activated then the dialogs default values will be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-heal
+   * clay-heal
    */
-  procedure = gimp_procedure_new (heal_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-heal");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (heal_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-heal");
+  clay_procedure_set_static_help (procedure,
                                   "Heal from the source to the dest drawable using the current brush",
                                   "This tool heals the source drawable starting at the specified source coordinates to the dest drawable. For image healing, if the sum of the src coordinates and subsequent stroke offsets exceeds the extents of the src drawable, then no paint is transferred. The healing tool is capable of transforming between any image types except RGB->Indexed.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Kevin Sookocheff",
                                          "Kevin Sookocheff",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("src-drawable",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("src-drawable",
                                                          "src drawable",
                                                          "The source drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("src-x",
                                                     "src x",
                                                     "The x coordinate in the source image",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("src-y",
                                                     "src y",
                                                     "The y coordinate in the source image",
                                                     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-heal-default
+   * clay-heal-default
    */
-  procedure = gimp_procedure_new (heal_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-heal-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (heal_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-heal-default");
+  clay_procedure_set_static_help (procedure,
                                   "Heal from the source to the dest drawable using the current brush",
-                                  "This tool heals from the source drawable starting at the specified source coordinates to the dest drawable. This function performs exactly the same as the 'gimp-heal' function except that the tools arguments are obtained from the healing option dialog. It this dialog has not been activated then the dialogs default values will be used.",
+                                  "This tool heals from the source drawable starting at the specified source coordinates to the dest drawable. This function performs exactly the same as the 'clay-heal' function except that the tools arguments are obtained from the healing option dialog. It this dialog has not been activated then the dialogs default values will be used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Kevin Sookocheff",
                                          "Kevin Sookocheff",
                                          "2006");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-paintbrush
+   * clay-paintbrush
    */
-  procedure = gimp_procedure_new (paintbrush_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-paintbrush");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (paintbrush_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-paintbrush");
+  clay_procedure_set_static_help (procedure,
                                   "Paint in the current brush with optional fade out parameter and pull colors from a gradient.",
                                   "This tool is the standard paintbrush. It draws linearly interpolated lines through the specified stroke coordinates. It operates on the specified drawable in the foreground color with the active brush. The 'fade-out' parameter is measured in pixels and allows the brush stroke to linearly fall off. The pressure is set to the maximum at the beginning of the stroke. As the distance of the stroke nears the fade-out value, the pressure will approach zero. The gradient-length is the distance to spread the gradient over. It is measured in pixels. If the gradient-length is 0, no gradient is used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("fade-out",
                                                     "fade out",
                                                     "Fade out parameter",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                             CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_enum ("method",
                                                   "method",
                                                   "The paint method to use",
-                                                  GIMP_TYPE_PAINT_APPLICATION_MODE,
-                                                  GIMP_PAINT_CONSTANT,
-                                                  GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                  CLAY_TYPE_PAINT_APPLICATION_MODE,
+                                                  CLAY_PAINT_CONSTANT,
+                                                  CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("gradient-length",
                                                     "gradient length",
                                                     "Length of gradient to draw",
                                                     0, G_MAXDOUBLE, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                    CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-paintbrush-default
+   * clay-paintbrush-default
    */
-  procedure = gimp_procedure_new (paintbrush_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-paintbrush-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (paintbrush_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-paintbrush-default");
+  clay_procedure_set_static_help (procedure,
                                   "Paint in the current brush. The fade out parameter and pull colors from a gradient parameter are set from the paintbrush options dialog. If this dialog has not been activated then the dialog defaults will be used.",
                                   "This tool is similar to the standard paintbrush. It draws linearly interpolated lines through the specified stroke coordinates. It operates on the specified drawable in the foreground color with the active brush. The 'fade-out' parameter is measured in pixels and allows the brush stroke to linearly fall off (value obtained from the option dialog). The pressure is set to the maximum at the beginning of the stroke. As the distance of the stroke nears the fade-out value, the pressure will approach zero. The gradient-length (value obtained from the option dialog) is the distance to spread the gradient over. It is measured in pixels. If the gradient-length is 0, no gradient is used.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-pencil
+   * clay-pencil
    */
-  procedure = gimp_procedure_new (pencil_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-pencil");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (pencil_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-pencil");
+  clay_procedure_set_static_help (procedure,
                                   "Paint in the current brush without sub-pixel sampling.",
                                   "This tool is the standard pencil. It draws linearly interpolated lines through the specified stroke coordinates. It operates on the specified drawable in the foreground color with the active brush. The brush mask is treated as though it contains only black and white values. Any value below half is treated as black; any above half, as white.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-smudge
+   * clay-smudge
    */
-  procedure = gimp_procedure_new (smudge_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-smudge");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (smudge_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-smudge");
+  clay_procedure_set_static_help (procedure,
                                   "Smudge image with varying pressure.",
                                   "This tool simulates a smudge using the current brush. High pressure results in a greater smudge of paint while low pressure results in a lesser smudge.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Spencer Kimball & Peter Mattis",
                                          "Spencer Kimball & Peter Mattis",
                                          "1995-1996");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
                                g_param_spec_double ("pressure",
                                                     "pressure",
                                                     "The pressure of the smudge strokes",
                                                     0, 100, 0,
-                                                    GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                    CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 
   /*
-   * gimp-smudge-default
+   * clay-smudge-default
    */
-  procedure = gimp_procedure_new (smudge_default_invoker, FALSE);
-  gimp_object_set_static_name (GIMP_OBJECT (procedure),
-                               "gimp-smudge-default");
-  gimp_procedure_set_static_help (procedure,
+  procedure = clay_procedure_new (smudge_default_invoker, FALSE);
+  clay_object_set_static_name (CLAY_OBJECT (procedure),
+                               "clay-smudge-default");
+  clay_procedure_set_static_help (procedure,
                                   "Smudge image with varying pressure.",
-                                  "This tool simulates a smudge using the current brush. It behaves exactly the same as 'gimp-smudge' except that the pressure value is taken from the smudge tool options or the options default if the tools option dialog has not been activated.",
+                                  "This tool simulates a smudge using the current brush. It behaves exactly the same as 'clay-smudge' except that the pressure value is taken from the smudge tool options or the options default if the tools option dialog has not been activated.",
                                   NULL);
-  gimp_procedure_set_static_attribution (procedure,
+  clay_procedure_set_static_attribution (procedure,
                                          "Andy Thomas",
                                          "Andy Thomas",
                                          "1999");
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_drawable ("drawable",
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_drawable ("drawable",
                                                          "drawable",
                                                          "The affected drawable",
                                                          FALSE,
-                                                         GIMP_PARAM_READWRITE));
-  gimp_procedure_add_argument (procedure,
-                               gimp_param_spec_double_array ("strokes",
+                                                         CLAY_PARAM_READWRITE));
+  clay_procedure_add_argument (procedure,
+                               clay_param_spec_double_array ("strokes",
                                                              "strokes",
                                                              "Array of stroke coordinates: { s1.x, s1.y, s2.x, s2.y, ..., sn.x, sn.y }",
-                                                             GIMP_PARAM_READWRITE));
-  gimp_pdb_register_procedure (pdb, procedure);
+                                                             CLAY_PARAM_READWRITE));
+  clay_pdb_register_procedure (pdb, procedure);
   g_object_unref (procedure);
 }

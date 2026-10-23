@@ -21,11 +21,11 @@
 #pragma once
 
 
-GimpColorProfilePolicy
-color_profile_import_dialog_run (GimpImage                 *image,
-                                 GimpContext               *context,
+ClayColorProfilePolicy
+color_profile_import_dialog_run (ClayImage                 *image,
+                                 ClayContext               *context,
                                  GtkWidget                 *parent,
-                                 GimpColorProfile         **dest_profile,
-                                 GimpColorRenderingIntent  *intent,
+                                 ClayColorProfile         **dest_profile,
+                                 ClayColorRenderingIntent  *intent,
                                  gboolean                  *bpc,
                                  gboolean                  *dont_ask);

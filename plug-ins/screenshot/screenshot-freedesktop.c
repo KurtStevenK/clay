@@ -25,8 +25,8 @@
 
 #include <glib.h>
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
@@ -84,7 +84,7 @@ screenshot_freedesktop_dbus_signal (GDBusProxy  *proxy,
                                     gchar       *sender_name,
                                     gchar       *signal_name,
                                     GVariant    *parameters,
-                                    GimpImage  **image)
+                                    ClayImage  **image)
 {
   if (g_strcmp0 (signal_name, "Response") == 0)
     {
@@ -109,7 +109,7 @@ screenshot_freedesktop_dbus_signal (GDBusProxy  *proxy,
             {
               GFile *file = g_file_new_for_uri (uri);
 
-              *image = gimp_file_load (GIMP_RUN_NONINTERACTIVE, file);
+              *image = clay_file_load (CLAY_RUN_NONINTERACTIVE, file);
 
               /* Delete the actual file. */
               g_file_delete (file, NULL, NULL);
@@ -125,9 +125,9 @@ screenshot_freedesktop_dbus_signal (GDBusProxy  *proxy,
     }
 }
 
-GimpPDBStatusType
+ClayPDBStatusType
 screenshot_freedesktop_shoot (GdkMonitor  *monitor,
-                              GimpImage  **image,
+                              ClayImage  **image,
                               GError     **error)
 {
   GVariant        *retval;
@@ -137,7 +137,7 @@ screenshot_freedesktop_shoot (GdkMonitor  *monitor,
 #if defined (GDK_WINDOWING_X11) || defined (GDK_WINDOWING_WAYLAND)
   GBytes          *handle;
 
-  handle = gimp_progress_get_window_handle ();
+  handle = clay_progress_get_window_handle ();
 #endif
 
 #ifdef GDK_WINDOWING_X11
@@ -149,7 +149,7 @@ screenshot_freedesktop_shoot (GdkMonitor  *monitor,
       gsize      handle_size;
 
       handle_data = (Window *) g_bytes_get_data (handle, &handle_size);
-      g_return_val_if_fail (handle_size == sizeof (Window), GIMP_PDB_EXECUTION_ERROR);
+      g_return_val_if_fail (handle_size == sizeof (Window), CLAY_PDB_EXECUTION_ERROR);
       window_id = *handle_data;
 
       window = gdk_x11_window_foreign_new_for_display (gdk_display_get_default (), window_id);
@@ -230,7 +230,7 @@ screenshot_freedesktop_shoot (GdkMonitor  *monitor,
       /* Signal got a response. */
       if (*image)
         {
-          if (! gimp_image_get_color_profile (*image))
+          if (! clay_image_get_color_profile (*image))
             {
               /* The Freedesktop portal does not return a profile, so we
                * don't have color characterization through the API.
@@ -249,19 +249,19 @@ screenshot_freedesktop_shoot (GdkMonitor  *monitor,
                * We need to figure out how to do better color management for
                * portal screenshots. TODO!
                */
-              GimpColorProfile *profile;
+              ClayColorProfile *profile;
 
-              profile = gimp_monitor_get_color_profile (monitor);
+              profile = clay_monitor_get_color_profile (monitor);
               if (profile)
                 {
-                  gimp_image_set_color_profile (*image, profile);
+                  clay_image_set_color_profile (*image, profile);
                   g_object_unref (profile);
                 }
             }
 
-          return GIMP_PDB_SUCCESS;
+          return CLAY_PDB_SUCCESS;
         }
     }
 
-  return GIMP_PDB_EXECUTION_ERROR;
+  return CLAY_PDB_EXECUTION_ERROR;
 }

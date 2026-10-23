@@ -29,16 +29,16 @@
 #include <glib/gstdio.h>
 #include <librsvg/rsvg.h>
 
-#include "libgimp/gimp.h"
-#include "libgimp/gimpui.h"
+#include "libclay/clay.h"
+#include "libclay/clayui.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 
 #define LOAD_PROC               "file-svg-load"
 #define EXPORT_PROC             "file-svg-export"
 #define PLUG_IN_BINARY          "file-svg"
-#define PLUG_IN_ROLE            "gimp-file-svg"
+#define PLUG_IN_ROLE            "clay-file-svg"
 #define SVG_VERSION             "2.5.0"
 #define SVG_DEFAULT_RESOLUTION  90.0
 #define SVG_DEFAULT_SIZE        500
@@ -76,12 +76,12 @@ typedef struct _SvgClass SvgClass;
 
 struct _Svg
 {
-  GimpPlugIn      parent_instance;
+  ClayPlugIn      parent_instance;
 };
 
 struct _SvgClass
 {
-  GimpPlugInClass parent_class;
+  ClayPlugInClass parent_class;
 };
 
 
@@ -90,49 +90,49 @@ struct _SvgClass
 
 GType                   svg_get_type         (void);
 
-static GList          * svg_query_procedures (GimpPlugIn            *plug_in);
-static GimpProcedure  * svg_create_procedure (GimpPlugIn            *plug_in,
+static GList          * svg_query_procedures (ClayPlugIn            *plug_in);
+static ClayProcedure  * svg_create_procedure (ClayPlugIn            *plug_in,
                                               const gchar           *name);
 
-static gboolean        svg_extract           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static gboolean        svg_extract           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
-                                              GimpVectorLoadData    *extracted_dimensions,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
+                                              ClayVectorLoadData    *extracted_dimensions,
                                               gpointer              *data_for_run,
                                               GDestroyNotify        *data_for_run_destroy,
                                               gpointer               extract_data,
                                               GError               **error);
-static GimpValueArray * svg_load             (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
+static ClayValueArray * svg_load             (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
                                               GFile                 *file,
                                               gint                   width,
                                               gint                   height,
-                                              GimpVectorLoadData     extracted_data,
-                                              GimpMetadata          *metadata,
-                                              GimpMetadataLoadFlags *flags,
-                                              GimpProcedureConfig   *config,
+                                              ClayVectorLoadData     extracted_data,
+                                              ClayMetadata          *metadata,
+                                              ClayMetadataLoadFlags *flags,
+                                              ClayProcedureConfig   *config,
                                               gpointer               data_from_extract,
                                               gpointer               run_data);
-static GimpValueArray * svg_export           (GimpProcedure         *procedure,
-                                              GimpRunMode            run_mode,
-                                              GimpImage             *image,
+static ClayValueArray * svg_export           (ClayProcedure         *procedure,
+                                              ClayRunMode            run_mode,
+                                              ClayImage             *image,
                                               GFile                 *file,
-                                              GimpExportOptions     *options,
-                                              GimpMetadata          *metadata,
-                                              GimpProcedureConfig   *config,
+                                              ClayExportOptions     *options,
+                                              ClayMetadata          *metadata,
+                                              ClayProcedureConfig   *config,
                                               gpointer               run_data);
 
-static GimpImage         * load_image        (GFile                 *file,
+static ClayImage         * load_image        (GFile                 *file,
                                               RsvgHandle            *handle,
                                               gint                   width,
                                               gint                   height,
                                               gdouble                resolution,
                                               GError               **error);
 static gboolean            export_image      (GFile                 *file,
-                                              GimpProcedureConfig   *config,
-                                              GimpImage             *image,
+                                              ClayProcedureConfig   *config,
+                                              ClayImage             *image,
                                               GError               **error);
 
 static GdkPixbuf         * load_rsvg_pixbuf  (RsvgHandle            *handle,
@@ -140,115 +140,115 @@ static GdkPixbuf         * load_rsvg_pixbuf  (RsvgHandle            *handle,
                                               gint                   height,
                                               gdouble                resolution,
                                               GError               **error);
-static GimpPDBStatusType   load_dialog       (GFile                 *file,
+static ClayPDBStatusType   load_dialog       (GFile                 *file,
                                               RsvgHandle            *handle,
-                                              GimpProcedure         *procedure,
-                                              GimpProcedureConfig   *config,
-                                              GimpVectorLoadData     extracted_data,
+                                              ClayProcedure         *procedure,
+                                              ClayProcedureConfig   *config,
+                                              ClayVectorLoadData     extracted_data,
                                               GError               **error);
-static gboolean            export_dialog     (GimpImage             *image,
-                                              GimpProcedure         *procedure,
+static gboolean            export_dialog     (ClayImage             *image,
+                                              ClayProcedure         *procedure,
                                               GObject               *config);
-static gboolean            has_invalid_links (GimpLayer            **layers,
-                                              GimpGroupLayer        *group);
+static gboolean            has_invalid_links (ClayLayer            **layers,
+                                              ClayGroupLayer        *group);
 
 static gboolean       svg_extract_dimensions (RsvgHandle            *handle,
-                                              GimpVectorLoadData    *extracted_dimensions);
+                                              ClayVectorLoadData    *extracted_dimensions);
 
-/* Taken from /app/path/gimppath-export.c */
-static GString     * svg_export_file         (GimpImage             *image,
-                                              GimpProcedureConfig   *config,
+/* Taken from /app/path/claypath-export.c */
+static GString     * svg_export_file         (ClayImage             *image,
+                                              ClayProcedureConfig   *config,
                                               GError               **error);
-static void          svg_export_image_size   (GimpImage             *image,
+static void          svg_export_image_size   (ClayImage             *image,
                                               GString               *str);
-static void          svg_export_defs         (GimpItem             **layers,
-                                              GimpGroupLayer        *group,
+static void          svg_export_defs         (ClayItem             **layers,
+                                              ClayGroupLayer        *group,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               GList                **exported_res,
                                               GError               **error);
-static void          svg_export_def          (GimpVectorLayer       *layer,
+static void          svg_export_def          (ClayVectorLayer       *layer,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               GList                **exported_res,
                                               GError               **error);
-static gchar       * svg_get_def_string      (GimpVectorLayer       *layer,
+static gchar       * svg_get_def_string      (ClayVectorLayer       *layer,
                                               const gchar           *type,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               GList                **exported_res,
                                               GError               **error);
-static void          svg_export_inkscape     (GimpImage             *image,
+static void          svg_export_inkscape     (ClayImage             *image,
                                               GString               *str,
                                               GError               **error);
-static void          svg_export_layers       (GimpItem             **layers,
-                                              GimpGroupLayer        *group,
+static void          svg_export_layers       (ClayItem             **layers,
+                                              ClayGroupLayer        *group,
                                               gint                  *layer_ids,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing,
                                               GError               **error);
-static void          svg_export_group_header (GimpGroupLayer        *group,
+static void          svg_export_group_header (ClayGroupLayer        *group,
                                               gint                   group_id,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing);
-static void          svg_export_path         (GimpVectorLayer       *layer,
+static void          svg_export_path         (ClayVectorLayer       *layer,
                                               gint                   vector_id,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing);
-static gchar       * svg_export_path_data    (GimpPath              *paths);
-static void          svg_export_text         (GimpTextLayer         *layer,
+static gchar       * svg_export_path_data    (ClayPath              *paths);
+static void          svg_export_text         (ClayTextLayer         *layer,
                                               gint                   text_id,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing);
-static void          svg_export_text_lines   (GimpTextLayer         *layer,
+static void          svg_export_text_lines   (ClayTextLayer         *layer,
                                               GString               *str,
                                               gchar                 *text);
-static void          svg_export_link_layer   (GimpLinkLayer         *layer,
+static void          svg_export_link_layer   (ClayLinkLayer         *layer,
                                               gint                   link_id,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing);
-static void          svg_export_raster       (GimpDrawable          *layer,
+static void          svg_export_raster       (ClayDrawable          *layer,
                                               gint                  *layer_ids,
                                               GString               *str,
                                               gint                   format_id,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing,
                                               GError               **error);
-static void          svg_export_layer_mask   (GimpLayerMask         *mask,
+static void          svg_export_layer_mask   (ClayLayerMask         *mask,
                                               gint                  *layer_ids,
                                               GString               *str,
-                                              GimpProcedureConfig   *config,
+                                              ClayProcedureConfig   *config,
                                               gchar                 *spacing,
                                               GError               **error);
 
-static gchar       * svg_get_color_string    (GimpVectorLayer       *layer,
+static gchar       * svg_get_color_string    (ClayVectorLayer       *layer,
                                               const gchar           *type);
 static gchar       * svg_get_hex_color       (GeglColor             *color);
 
-static gboolean     svg_drawable_has_transparency (GimpDrawable     *drawable);
+static gboolean     svg_drawable_has_transparency (ClayDrawable     *drawable);
 
 #if LIBRSVG_CHECK_VERSION(2, 46, 0)
-static GimpUnit      * svg_rsvg_to_gimp_unit (RsvgUnit               unit);
+static ClayUnit      * svg_rsvg_to_clay_unit (RsvgUnit               unit);
 static void              svg_destroy_surface (guchar                *pixels,
                                               cairo_surface_t       *surface);
 #endif
 
 
 
-G_DEFINE_TYPE (Svg, svg, GIMP_TYPE_PLUG_IN)
+G_DEFINE_TYPE (Svg, svg, CLAY_TYPE_PLUG_IN)
 
-GIMP_MAIN (SVG_TYPE)
+CLAY_MAIN (SVG_TYPE)
 DEFINE_STD_SET_I18N
 
 
 static void
 svg_class_init (SvgClass *klass)
 {
-  GimpPlugInClass *plug_in_class = GIMP_PLUG_IN_CLASS (klass);
+  ClayPlugInClass *plug_in_class = CLAY_PLUG_IN_CLASS (klass);
 
   plug_in_class->query_procedures = svg_query_procedures;
   plug_in_class->create_procedure = svg_create_procedure;
@@ -261,7 +261,7 @@ svg_init (Svg *svg)
 }
 
 static GList *
-svg_query_procedures (GimpPlugIn *plug_in)
+svg_query_procedures (ClayPlugIn *plug_in)
 {
   GList *list = NULL;
 
@@ -271,22 +271,22 @@ svg_query_procedures (GimpPlugIn *plug_in)
   return list;
 }
 
-static GimpProcedure *
-svg_create_procedure (GimpPlugIn  *plug_in,
+static ClayProcedure *
+svg_create_procedure (ClayPlugIn  *plug_in,
                       const gchar *name)
 {
-  GimpProcedure *procedure = NULL;
+  ClayProcedure *procedure = NULL;
 
   if (! strcmp (name, LOAD_PROC))
     {
-      procedure = gimp_vector_load_procedure_new (plug_in, name,
-                                                  GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_vector_load_procedure_new (plug_in, name,
+                                                  CLAY_PDB_PROC_TYPE_PLUGIN,
                                                   svg_extract, NULL, NULL,
                                                   svg_load, NULL, NULL);
 
-      gimp_procedure_set_menu_label (procedure, _("SVG image"));
+      clay_procedure_set_menu_label (procedure, _("SVG image"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Loads files in SVG file format"),
                                         /* TODO: let's localize after we
                                          * add support for vector and/or
@@ -296,24 +296,24 @@ svg_create_procedure (GimpPlugIn  *plug_in,
                                         "Renders SVG files to raster graphics "
                                         "using librsvg.",
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Dom Lachowicz, Sven Neumann",
                                       "Dom Lachowicz <cinamod@hotmail.com>",
                                       SVG_VERSION);
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            _("SVG"));
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/svg+xml");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "svg");
-      gimp_file_procedure_set_magics (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_magics (CLAY_FILE_PROCEDURE (procedure),
                                       "0,string,<?xml,0,string,<svg");
 
-      gimp_procedure_add_choice_argument (procedure, "paths",
+      clay_procedure_add_choice_argument (procedure, "paths",
                                           _("_Paths"),
                                           _("Whether and how to import paths so that they can be used with the path tool"),
-                                          gimp_choice_new_with_values ("no-import",     0, _("Don't import paths"),        NULL,
+                                          clay_choice_new_with_values ("no-import",     0, _("Don't import paths"),        NULL,
                                                                        "import",        1, _("Import paths individually"), NULL,
                                                                        "import-merged", 2, _("Merge imported paths"),      NULL,
                                                                        NULL),
@@ -321,57 +321,57 @@ svg_create_procedure (GimpPlugIn  *plug_in,
     }
   else if (! strcmp (name, EXPORT_PROC))
     {
-      procedure = gimp_export_procedure_new (plug_in, name,
-                                             GIMP_PDB_PROC_TYPE_PLUGIN,
+      procedure = clay_export_procedure_new (plug_in, name,
+                                             CLAY_PDB_PROC_TYPE_PLUGIN,
                                              FALSE, svg_export, NULL, NULL);
 
-      gimp_procedure_set_image_types (procedure, "*");
+      clay_procedure_set_image_types (procedure, "*");
 
-      gimp_procedure_set_menu_label (procedure, _("Scalable Vector Graphic"));
+      clay_procedure_set_menu_label (procedure, _("Scalable Vector Graphic"));
 
-      gimp_procedure_set_documentation (procedure,
+      clay_procedure_set_documentation (procedure,
                                         _("Exports files in SVG file format"),
                                         _("Exports files in SVG file format "
                                           "(Scalable Vector Graphic)"),
                                         name);
-      gimp_procedure_set_attribution (procedure,
+      clay_procedure_set_attribution (procedure,
                                       "Alex S.",
                                       "Alex S.",
                                       "2025");
 
-      gimp_file_procedure_set_format_name (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_format_name (CLAY_FILE_PROCEDURE (procedure),
                                            "SVG");
-      gimp_file_procedure_set_mime_types (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_mime_types (CLAY_FILE_PROCEDURE (procedure),
                                           "image/svg+xml");
-      gimp_file_procedure_set_extensions (GIMP_FILE_PROCEDURE (procedure),
+      clay_file_procedure_set_extensions (CLAY_FILE_PROCEDURE (procedure),
                                           "svg");
 
-      gimp_export_procedure_set_capabilities (GIMP_EXPORT_PROCEDURE (procedure),
-                                              GIMP_EXPORT_CAN_HANDLE_RGB     |
-                                              GIMP_EXPORT_CAN_HANDLE_GRAY    |
-                                              GIMP_EXPORT_CAN_HANDLE_INDEXED |
-                                              GIMP_EXPORT_CAN_HANDLE_ALPHA   |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYERS  |
-                                              GIMP_EXPORT_CAN_HANDLE_LAYER_MASKS,
+      clay_export_procedure_set_capabilities (CLAY_EXPORT_PROCEDURE (procedure),
+                                              CLAY_EXPORT_CAN_HANDLE_RGB     |
+                                              CLAY_EXPORT_CAN_HANDLE_GRAY    |
+                                              CLAY_EXPORT_CAN_HANDLE_INDEXED |
+                                              CLAY_EXPORT_CAN_HANDLE_ALPHA   |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYERS  |
+                                              CLAY_EXPORT_CAN_HANDLE_LAYER_MASKS,
                                               NULL, NULL, NULL);
 
-      gimp_procedure_add_string_argument (procedure, "title",
+      clay_procedure_add_string_argument (procedure, "title",
                                           _("_Title"),
                                           _("Optional <title> for SVG"),
                                           NULL,
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_choice_argument (procedure, "raster-export-format",
+      clay_procedure_add_choice_argument (procedure, "raster-export-format",
                                           _("Em_bed raster layers as"),
                                           NULL,
-                                          gimp_choice_new_with_values ("png",  EXPORT_FORMAT_PNG,  _("PNG (always)"),                            NULL,
+                                          clay_choice_new_with_values ("png",  EXPORT_FORMAT_PNG,  _("PNG (always)"),                            NULL,
                                                                        "jpeg", EXPORT_FORMAT_JPEG, _("JPEG (for opaque images, PNG otherwise)"), NULL,
                                                                        "none", EXPORT_FORMAT_NONE, _("Do not export raster layers"),             NULL,
                                                                        NULL),
                                           "png",
                                           G_PARAM_READWRITE);
 
-      gimp_procedure_add_boolean_argument (procedure, "inkscape-svg",
+      clay_procedure_add_boolean_argument (procedure, "inkscape-svg",
                                            _("As In_kscape SVG"),
                                            _("Include Inkscape-specific "
                                              "attributes in exported SVG. "
@@ -386,12 +386,12 @@ svg_create_procedure (GimpPlugIn  *plug_in,
 }
 
 static gboolean
-svg_extract (GimpProcedure        *procedure,
-             GimpRunMode           run_mode,
+svg_extract (ClayProcedure        *procedure,
+             ClayRunMode           run_mode,
              GFile                *file,
-             GimpMetadata         *metadata,
-             GimpProcedureConfig  *config,
-             GimpVectorLoadData   *extracted_dimensions,
+             ClayMetadata         *metadata,
+             ClayProcedureConfig  *config,
+             ClayVectorLoadData   *extracted_dimensions,
              gpointer             *data_for_run,
              GDestroyNotify       *data_for_run_destroy,
              gpointer              extract_data,
@@ -408,7 +408,7 @@ svg_extract (GimpProcedure        *procedure,
 
   if (! handle)
     {
-      if (run_mode == GIMP_RUN_INTERACTIVE)
+      if (run_mode == CLAY_RUN_INTERACTIVE)
         {
           GtkWidget *dialog;
           GtkWidget *main_hbox;
@@ -416,17 +416,17 @@ svg_extract (GimpProcedure        *procedure,
           gchar     *text;
           gboolean   retry;
 
-          gimp_ui_init (PLUG_IN_BINARY);
+          clay_ui_init (PLUG_IN_BINARY);
 
           /* We need to ask explicitly before using the "unlimited" size
            * option (XML_PARSE_HUGE in libxml) because it is considered
            * unsafe, possibly consumming too much memory with malicious XML
            * files.
            */
-          dialog = gimp_dialog_new (_("Disable safety size limits?"),
+          dialog = clay_dialog_new (_("Disable safety size limits?"),
                                     PLUG_IN_ROLE,
                                     NULL, 0,
-                                    gimp_standard_help_func, LOAD_PROC,
+                                    clay_standard_help_func, LOAD_PROC,
 
                                     _("_No"),  GTK_RESPONSE_NO,
                                     _("_Yes"), GTK_RESPONSE_YES,
@@ -435,7 +435,7 @@ svg_extract (GimpProcedure        *procedure,
 
           gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_NO);
           gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-          gimp_window_set_transient (GTK_WINDOW (dialog));
+          clay_window_set_transient (GTK_WINDOW (dialog));
 
           main_hbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
           gtk_container_set_border_width (GTK_CONTAINER (main_hbox), 12);
@@ -479,7 +479,7 @@ svg_extract (GimpProcedure        *procedure,
 
           gtk_widget_set_visible (dialog, TRUE);
 
-          retry = (gimp_dialog_run (GIMP_DIALOG (dialog)) == GTK_RESPONSE_YES);
+          retry = (clay_dialog_run (CLAY_DIALOG (dialog)) == GTK_RESPONSE_YES);
           gtk_widget_destroy (dialog);
 
           if (retry)
@@ -507,7 +507,7 @@ svg_extract (GimpProcedure        *procedure,
 
 static gboolean
 svg_extract_dimensions (RsvgHandle         *handle,
-                        GimpVectorLoadData *extracted_dimensions)
+                        ClayVectorLoadData *extracted_dimensions)
 {
 #if LIBRSVG_CHECK_VERSION(2, 46, 0)
   gboolean           out_has_width;
@@ -546,14 +546,14 @@ svg_extract_dimensions (RsvgHandle         *handle,
         }
 
       /* "width" and "height" present */
-      if (svg_rsvg_to_gimp_unit (out_width.unit)  != NULL &&
-          svg_rsvg_to_gimp_unit (out_height.unit) != NULL)
+      if (svg_rsvg_to_clay_unit (out_width.unit)  != NULL &&
+          svg_rsvg_to_clay_unit (out_height.unit) != NULL)
         {
           /* Best case scenario: we know all these units. */
           extracted_dimensions->width        = out_width.length;
-          extracted_dimensions->width_unit   = svg_rsvg_to_gimp_unit (out_width.unit);
+          extracted_dimensions->width_unit   = svg_rsvg_to_clay_unit (out_width.unit);
           extracted_dimensions->height       = out_height.length;
-          extracted_dimensions->height_unit  = svg_rsvg_to_gimp_unit (out_height.unit);
+          extracted_dimensions->height_unit  = svg_rsvg_to_clay_unit (out_height.unit);
 
           if ((out_width.length == 1.0 && out_width.unit == RSVG_UNIT_PERCENT) &&
               (out_height.length == 1.0 && out_height.unit == RSVG_UNIT_PERCENT))
@@ -571,7 +571,7 @@ svg_extract_dimensions (RsvgHandle         *handle,
         }
       else
         {
-          /* Ideally we let GIMP handle the transformation, but for cases where
+          /* Ideally we let Clay handle the transformation, but for cases where
            * we don't know how, we let rsvg make a computation to pixel for us.
            */
 #if LIBRSVG_CHECK_VERSION(2, 52, 0)
@@ -579,8 +579,8 @@ svg_extract_dimensions (RsvgHandle         *handle,
                                                         &extracted_dimensions->width,
                                                         &extracted_dimensions->height))
             {
-              extracted_dimensions->width_unit   = gimp_unit_pixel ();
-              extracted_dimensions->height_unit  = gimp_unit_pixel ();
+              extracted_dimensions->width_unit   = clay_unit_pixel ();
+              extracted_dimensions->height_unit  = clay_unit_pixel ();
               extracted_dimensions->exact_width  = FALSE;
               extracted_dimensions->exact_height = FALSE;
             }
@@ -592,8 +592,8 @@ svg_extract_dimensions (RsvgHandle         *handle,
                                                             &extracted_dimensions->width,
                                                             &extracted_dimensions->height))
                 {
-                  extracted_dimensions->width_unit  = gimp_unit_percent ();
-                  extracted_dimensions->height_unit = gimp_unit_percent ();
+                  extracted_dimensions->width_unit  = clay_unit_percent ();
+                  extracted_dimensions->height_unit = clay_unit_percent ();
                 }
               else if (out_width.unit == out_height.unit)
                 {
@@ -602,8 +602,8 @@ svg_extract_dimensions (RsvgHandle         *handle,
                    */
                   extracted_dimensions->width       = out_width.length;
                   extracted_dimensions->height      = out_height.length;
-                  extracted_dimensions->width_unit  = gimp_unit_percent ();
-                  extracted_dimensions->height_unit = gimp_unit_percent ();
+                  extracted_dimensions->width_unit  = clay_unit_percent ();
+                  extracted_dimensions->height_unit = clay_unit_percent ();
                 }
               else
                 {
@@ -625,10 +625,10 @@ svg_extract_dimensions (RsvgHandle         *handle,
     {
       /* Only a viewbox, so dimensions have a ratio, but no units. */
       extracted_dimensions->width         = out_width.length;
-      extracted_dimensions->width_unit    = gimp_unit_percent ();
+      extracted_dimensions->width_unit    = clay_unit_percent ();
       extracted_dimensions->exact_width   = FALSE;
       extracted_dimensions->height        = out_height.length;
-      extracted_dimensions->height_unit   = gimp_unit_percent ();
+      extracted_dimensions->height_unit   = clay_unit_percent ();
       extracted_dimensions->exact_height  = FALSE;
       extracted_dimensions->correct_ratio = TRUE;
     }
@@ -650,34 +650,34 @@ svg_extract_dimensions (RsvgHandle         *handle,
   return TRUE;
 }
 
-static GimpValueArray *
-svg_load (GimpProcedure         *procedure,
-          GimpRunMode            run_mode,
+static ClayValueArray *
+svg_load (ClayProcedure         *procedure,
+          ClayRunMode            run_mode,
           GFile                 *file,
           gint                   width,
           gint                   height,
-          GimpVectorLoadData     extracted_data,
-          GimpMetadata          *metadata,
-          GimpMetadataLoadFlags *flags,
-          GimpProcedureConfig   *config,
+          ClayVectorLoadData     extracted_data,
+          ClayMetadata          *metadata,
+          ClayMetadataLoadFlags *flags,
+          ClayProcedureConfig   *config,
           gpointer               data_from_extract,
           gpointer               run_data)
 {
-  GimpValueArray    *return_vals;
-  GimpImage         *image;
+  ClayValueArray    *return_vals;
+  ClayImage         *image;
   GError            *error      = NULL;
-  GimpPDBStatusType  status;
+  ClayPDBStatusType  status;
   gchar             *import_paths;
   gdouble            resolution;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
       status = load_dialog (file, RSVG_HANDLE (data_from_extract),
                             procedure, config, extracted_data, &error);
-      if (status != GIMP_PDB_SUCCESS)
-        return gimp_procedure_new_return_values (procedure, status, error);
+      if (status != CLAY_PDB_SUCCESS)
+        return clay_procedure_new_return_values (procedure, status, error);
     }
 
   g_object_get (config,
@@ -689,70 +689,70 @@ svg_load (GimpProcedure         *procedure,
                       width, height, resolution, &error);
 
   if (! image)
-    return gimp_procedure_new_return_values (procedure,
-                                             GIMP_PDB_EXECUTION_ERROR,
+    return clay_procedure_new_return_values (procedure,
+                                             CLAY_PDB_EXECUTION_ERROR,
                                              error);
 
   g_object_get (config, "paths", &import_paths, NULL);
   if (g_strcmp0 (import_paths, "no-import") != 0)
     {
-      GimpPath **paths = NULL;
+      ClayPath **paths = NULL;
 
-      gimp_image_import_paths_from_file (image, file,
+      clay_image_import_paths_from_file (image, file,
                                          g_strcmp0 (import_paths, "import-merged") == 0,
                                          TRUE, &paths);
       g_free (paths);
     }
   g_free (import_paths);
 
-  return_vals = gimp_procedure_new_return_values (procedure,
-                                                  GIMP_PDB_SUCCESS,
+  return_vals = clay_procedure_new_return_values (procedure,
+                                                  CLAY_PDB_SUCCESS,
                                                   NULL);
 
-  GIMP_VALUES_SET_IMAGE (return_vals, 1, image);
+  CLAY_VALUES_SET_IMAGE (return_vals, 1, image);
 
   return return_vals;
 }
 
-static GimpValueArray *
-svg_export (GimpProcedure       *procedure,
-            GimpRunMode          run_mode,
-            GimpImage           *image,
+static ClayValueArray *
+svg_export (ClayProcedure       *procedure,
+            ClayRunMode          run_mode,
+            ClayImage           *image,
             GFile               *file,
-            GimpExportOptions   *options,
-            GimpMetadata        *metadata,
-            GimpProcedureConfig *config,
+            ClayExportOptions   *options,
+            ClayMetadata        *metadata,
+            ClayProcedureConfig *config,
             gpointer             run_data)
 {
-  GimpPDBStatusType  status = GIMP_PDB_SUCCESS;
-  GimpExportReturn   export = GIMP_EXPORT_IGNORE;
+  ClayPDBStatusType  status = CLAY_PDB_SUCCESS;
+  ClayExportReturn   export = CLAY_EXPORT_IGNORE;
   GError            *error  = NULL;
 
   gegl_init (NULL, NULL);
 
-  if (run_mode == GIMP_RUN_INTERACTIVE)
+  if (run_mode == CLAY_RUN_INTERACTIVE)
     {
-      gimp_ui_init (PLUG_IN_BINARY);
+      clay_ui_init (PLUG_IN_BINARY);
 
       if (! export_dialog (image, procedure, G_OBJECT (config)))
-        status = GIMP_PDB_CANCEL;
+        status = CLAY_PDB_CANCEL;
     }
 
-  if (status == GIMP_PDB_SUCCESS)
+  if (status == CLAY_PDB_SUCCESS)
     {
-      export = gimp_export_options_get_image (options, &image);
+      export = clay_export_options_get_image (options, &image);
 
       if (! export_image (file, config, image, &error))
-        status = GIMP_PDB_EXECUTION_ERROR;
+        status = CLAY_PDB_EXECUTION_ERROR;
 
-      if (export == GIMP_EXPORT_EXPORT)
-        gimp_image_delete (image);
+      if (export == CLAY_EXPORT_EXPORT)
+        clay_image_delete (image);
     }
 
-  return gimp_procedure_new_return_values (procedure, status, error);
+  return clay_procedure_new_return_values (procedure, status, error);
 }
 
-static GimpImage *
+static ClayImage *
 load_image (GFile            *file,
             RsvgHandle       *handle,
             gint              width,
@@ -760,8 +760,8 @@ load_image (GFile            *file,
             gdouble           resolution,
             GError          **load_error)
 {
-  GimpImage *image;
-  GimpLayer *layer;
+  ClayImage *image;
+  ClayLayer *layer;
   GdkPixbuf *pixbuf;
   GError    *error = NULL;
 
@@ -773,45 +773,45 @@ load_image (GFile            *file,
       g_set_error (load_error,
                    error ? error->domain : 0, error ? error->code : 0,
                    _("Could not open '%s' for reading: %s"),
-                   gimp_file_get_utf8_name (file),
+                   clay_file_get_utf8_name (file),
                    error ? error->message : _("Unknown reason"));
       g_clear_error (&error);
 
       return NULL;
     }
 
-  gimp_progress_init (_("Rendering SVG"));
+  clay_progress_init (_("Rendering SVG"));
 
   width  = gdk_pixbuf_get_width (pixbuf);
   height = gdk_pixbuf_get_height (pixbuf);
 
-  image = gimp_image_new (width, height, GIMP_RGB);
-  gimp_image_undo_disable (image);
+  image = clay_image_new (width, height, CLAY_RGB);
+  clay_image_undo_disable (image);
 
-  gimp_image_set_resolution (image, resolution, resolution);
+  clay_image_set_resolution (image, resolution, resolution);
 
-  layer = gimp_layer_new_from_pixbuf (image, _("Rendered SVG"), pixbuf,
+  layer = clay_layer_new_from_pixbuf (image, _("Rendered SVG"), pixbuf,
                                       100,
-                                      gimp_image_get_default_new_layer_mode (image),
+                                      clay_image_get_default_new_layer_mode (image),
                                       0.0, 1.0);
-  gimp_image_insert_layer (image, layer, NULL, 0);
+  clay_image_insert_layer (image, layer, NULL, 0);
 
-  gimp_image_undo_enable (image);
+  clay_image_undo_enable (image);
 
   return image;
 }
 
 static gboolean
 export_image (GFile                *file,
-              GimpProcedureConfig  *config,
-              GimpImage            *image,
+              ClayProcedureConfig  *config,
+              ClayImage            *image,
               GError              **error)
 {
   GOutputStream *output;
   GString       *string;
 
-  gimp_progress_init_printf (_("Exporting '%s'"),
-                             gimp_file_get_utf8_name (file));
+  clay_progress_init_printf (_("Exporting '%s'"),
+                             clay_file_get_utf8_name (file));
 
   output = G_OUTPUT_STREAM (g_file_replace (file,
                                             NULL, FALSE, G_FILE_CREATE_NONE,
@@ -820,7 +820,7 @@ export_image (GFile                *file,
     {
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Writing to file '%s' failed: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       return FALSE;
     }
 
@@ -836,7 +836,7 @@ export_image (GFile                *file,
 
       g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
                    _("Writing to file '%s' failed: %s"),
-                   gimp_file_get_utf8_name (file), g_strerror (errno));
+                   clay_file_get_utf8_name (file), g_strerror (errno));
       g_string_free (string, TRUE);
 
       /* Cancel the overwrite initiated by g_file_replace(). */
@@ -859,7 +859,7 @@ export_image (GFile                *file,
  * because librsvg uses Rust since version 2.41.0. There are 2 raised problems:
  * 1. Rust is still not available or well tested on every architecture/OS out
  *    there yet so unless we decide to have SVG support as optional again, it
- *    would make GIMP non-available on these.
+ *    would make Clay non-available on these.
  * 2. There are some technical-ideological position against Rust for bundling
  *    and linking dependencies statically.
  * While the second point may or may not be a problem we want to take into
@@ -933,7 +933,7 @@ load_rsvg_pixbuf (RsvgHandle  *handle,
   guchar            *src;
   gint               y;
   /* Aspect-ratio breaking is only implemented with newer librsvg API. */
-  GimpVectorLoadData dimensions;
+  ClayVectorLoadData dimensions;
   gdouble            x_scale       = 1.0;
   gdouble            y_scale       = 1.0;
   gdouble            aspect_width  = width;
@@ -996,7 +996,7 @@ load_rsvg_pixbuf (RsvgHandle  *handle,
 
       while (w--)
         {
-          GIMP_CAIRO_ARGB32_GET_PIXEL (s, s[0], s[1], s[2], s[3]);
+          CLAY_CAIRO_ARGB32_GET_PIXEL (s, s[0], s[1], s[2], s[3]);
           s += 4;
         }
 
@@ -1021,7 +1021,7 @@ load_rsvg_pixbuf (RsvgHandle  *handle,
 
 /*  User interface  */
 
-static GimpSizeEntry *size       = NULL;
+static ClaySizeEntry *size       = NULL;
 static GtkAdjustment *xadj       = NULL;
 static GtkAdjustment *yadj       = NULL;
 static GtkWidget     *constrain  = NULL;
@@ -1038,10 +1038,10 @@ static void
 load_dialog_size_callback (GtkWidget *widget,
                            gpointer   data)
 {
-  if (gimp_chain_button_get_active (GIMP_CHAIN_BUTTON (constrain)))
+  if (clay_chain_button_get_active (CLAY_CHAIN_BUTTON (constrain)))
     {
-      gdouble x = gimp_size_entry_get_refval (size, 0) / (gdouble) svg_width;
-      gdouble y = gimp_size_entry_get_refval (size, 1) / (gdouble) svg_height;
+      gdouble x = clay_size_entry_get_refval (size, 0) / (gdouble) svg_width;
+      gdouble y = clay_size_entry_get_refval (size, 1) / (gdouble) svg_height;
 
       if (x != ratio_x)
         {
@@ -1061,7 +1061,7 @@ load_dialog_ratio_callback (GtkAdjustment *adj,
   gdouble x = gtk_adjustment_get_value (xadj);
   gdouble y = gtk_adjustment_get_value (yadj);
 
-  if (gimp_chain_button_get_active (GIMP_CHAIN_BUTTON (constrain)))
+  if (clay_chain_button_get_active (CLAY_CHAIN_BUTTON (constrain)))
     {
       if (x != ratio_x)
         y = x;
@@ -1081,8 +1081,8 @@ load_dialog_set_ratio (gdouble x,
 
   g_signal_handlers_block_by_func (size, load_dialog_size_callback, NULL);
 
-  gimp_size_entry_set_refval (size, 0, svg_width  * x);
-  gimp_size_entry_set_refval (size, 1, svg_height * y);
+  clay_size_entry_set_refval (size, 0, svg_width  * x);
+  clay_size_entry_set_refval (size, 1, svg_height * y);
 
   g_signal_handlers_unblock_by_func (size, load_dialog_size_callback, NULL);
 
@@ -1096,33 +1096,33 @@ load_dialog_set_ratio (gdouble x,
   g_signal_handlers_unblock_by_func (yadj, load_dialog_ratio_callback, NULL);
 }
 
-static GimpPDBStatusType
+static ClayPDBStatusType
 load_dialog (GFile                *file,
              RsvgHandle           *handle,
-             GimpProcedure        *procedure,
-             GimpProcedureConfig  *config,
-             GimpVectorLoadData    extracted_data,
+             ClayProcedure        *procedure,
+             ClayProcedureConfig  *config,
+             ClayVectorLoadData    extracted_data,
              GError              **load_error)
 {
   GtkWidget *dialog;
   gboolean   run;
 
-  gimp_ui_init (PLUG_IN_BINARY);
+  clay_ui_init (PLUG_IN_BINARY);
 
-  dialog = gimp_vector_load_procedure_dialog_new (GIMP_VECTOR_LOAD_PROCEDURE (procedure),
-                                                  GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_vector_load_procedure_dialog_new (CLAY_VECTOR_LOAD_PROCEDURE (procedure),
+                                                  CLAY_PROCEDURE_CONFIG (config),
                                                   &extracted_data, file);
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), NULL);
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), NULL);
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
-  return run ? GIMP_PDB_SUCCESS : GIMP_PDB_CANCEL;
+  return run ? CLAY_PDB_SUCCESS : CLAY_PDB_CANCEL;
 }
 
 static gboolean
-export_dialog (GimpImage     *image,
-               GimpProcedure *procedure,
+export_dialog (ClayImage     *image,
+               ClayProcedure *procedure,
                GObject       *config)
 {
   GtkWidget *dialog;
@@ -1131,21 +1131,21 @@ export_dialog (GimpImage     *image,
   gboolean   run;
   gboolean   has_nonstandard_links = FALSE;
 
-  dialog = gimp_export_procedure_dialog_new (GIMP_EXPORT_PROCEDURE (procedure),
-                                             GIMP_PROCEDURE_CONFIG (config),
+  dialog = clay_export_procedure_dialog_new (CLAY_EXPORT_PROCEDURE (procedure),
+                                             CLAY_PROCEDURE_CONFIG (config),
                                              image);
 
-  box = gimp_procedure_dialog_fill_box (GIMP_PROCEDURE_DIALOG (dialog),
+  box = clay_procedure_dialog_fill_box (CLAY_PROCEDURE_DIALOG (dialog),
                                         "svg-box", "title",
                                         "raster-export-format", NULL);
 
-  has_nonstandard_links = has_invalid_links (gimp_image_get_layers (image),
+  has_nonstandard_links = has_invalid_links (clay_image_get_layers (image),
                                              NULL);
   if (has_nonstandard_links)
     {
       hint =
-        g_object_new (GIMP_TYPE_HINT_BOX,
-                      "icon-name", GIMP_ICON_DIALOG_WARNING,
+        g_object_new (CLAY_TYPE_HINT_BOX,
+                      "icon-name", CLAY_ICON_DIALOG_WARNING,
                       "hint",      _("The SVG format only requires viewers to "
                                      "display image links for SVG, PNG, and "
                                      "JPEG images.\n"
@@ -1160,10 +1160,10 @@ export_dialog (GimpImage     *image,
       gtk_box_reorder_child (GTK_BOX (box), hint, 0);
     }
 
-  gimp_procedure_dialog_fill (GIMP_PROCEDURE_DIALOG (dialog), "svg-box",
+  clay_procedure_dialog_fill (CLAY_PROCEDURE_DIALOG (dialog), "svg-box",
                               "inkscape-svg", NULL);
 
-  run = gimp_procedure_dialog_run (GIMP_PROCEDURE_DIALOG (dialog));
+  run = clay_procedure_dialog_run (CLAY_PROCEDURE_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
 
@@ -1171,23 +1171,23 @@ export_dialog (GimpImage     *image,
 }
 
 static gboolean
-has_invalid_links (GimpLayer      **layers,
-                   GimpGroupLayer  *group)
+has_invalid_links (ClayLayer      **layers,
+                   ClayGroupLayer  *group)
 {
-  GimpItem **temp_layers = (GimpItem **) layers;
+  ClayItem **temp_layers = (ClayItem **) layers;
   gint32     n_layers;
 
   if (layers == NULL)
-    temp_layers = gimp_item_get_children (GIMP_ITEM (group));
+    temp_layers = clay_item_get_children (CLAY_ITEM (group));
 
-  n_layers = gimp_core_object_array_get_length ((GObject **) temp_layers);
+  n_layers = clay_core_object_array_get_length ((GObject **) temp_layers);
 
   for (gint i = 0; i < n_layers; i++)
     {
-      if (gimp_item_is_link_layer (temp_layers[i]))
+      if (clay_item_is_link_layer (temp_layers[i]))
         {
           gchar *mimetype =
-            gimp_link_layer_get_mime_type (GIMP_LINK_LAYER (temp_layers[i]));
+            clay_link_layer_get_mime_type (CLAY_LINK_LAYER (temp_layers[i]));
 
           /* The SVG specification only requires viewers to support
              SVG, PNG, and JPEG links. If the linked layer is not one of
@@ -1198,9 +1198,9 @@ has_invalid_links (GimpLayer      **layers,
             return TRUE;
 
         }
-      else if (gimp_item_is_group (GIMP_ITEM (temp_layers[i])))
+      else if (clay_item_is_group (CLAY_ITEM (temp_layers[i])))
         {
-          if (has_invalid_links (NULL, GIMP_GROUP_LAYER (temp_layers[i])))
+          if (has_invalid_links (NULL, CLAY_GROUP_LAYER (temp_layers[i])))
             return TRUE;
         }
     }
@@ -1209,23 +1209,23 @@ has_invalid_links (GimpLayer      **layers,
 }
 
 #if LIBRSVG_CHECK_VERSION(2, 46, 0)
-static GimpUnit *
-svg_rsvg_to_gimp_unit (RsvgUnit unit)
+static ClayUnit *
+svg_rsvg_to_clay_unit (RsvgUnit unit)
 {
   switch (unit)
     {
     case RSVG_UNIT_PERCENT:
-      return gimp_unit_percent ();
+      return clay_unit_percent ();
     case RSVG_UNIT_PX:
-      return gimp_unit_pixel ();
+      return clay_unit_pixel ();
     case RSVG_UNIT_IN:
-      return gimp_unit_inch ();
+      return clay_unit_inch ();
     case RSVG_UNIT_MM:
-      return gimp_unit_mm ();
+      return clay_unit_mm ();
     case RSVG_UNIT_PT:
-      return gimp_unit_point ();
+      return clay_unit_point ();
     case RSVG_UNIT_PC:
-      return gimp_unit_pica ();
+      return clay_unit_pica ();
     case RSVG_UNIT_CM:
     case RSVG_UNIT_EM:
     case RSVG_UNIT_EX:
@@ -1243,13 +1243,13 @@ svg_destroy_surface (guchar          *pixels,
 }
 #endif
 
-/* Taken from app/path/gimppath-export.c */
+/* Taken from app/path/claypath-export.c */
 static GString *
-svg_export_file (GimpImage            *image,
-                 GimpProcedureConfig  *config,
+svg_export_file (ClayImage            *image,
+                 ClayProcedureConfig  *config,
                  GError              **error)
 {
-  GimpLayer **layers;
+  ClayLayer **layers;
   gchar      *title        = NULL;
   GString    *str          = g_string_new (NULL);
   GList      *exported_res = NULL;
@@ -1278,8 +1278,8 @@ svg_export_file (GimpImage            *image,
 
   g_string_append_printf (str,
                           "     viewBox=\"0 0 %d %d\">\n",
-                          gimp_image_get_width  (image),
-                          gimp_image_get_height (image));
+                          clay_image_get_width  (image),
+                          clay_image_get_height (image));
 
   /* Optional SVG title */
   if (title && strlen (title))
@@ -1287,16 +1287,16 @@ svg_export_file (GimpImage            *image,
                             "  <title>%s</title>\n",
                             title);
 
-  layers = gimp_image_get_layers (image);
+  layers = clay_image_get_layers (image);
   g_string_append (str, "  <defs>\n");
-  svg_export_defs ((GimpItem **) layers, NULL, str, config, &exported_res, error);
+  svg_export_defs ((ClayItem **) layers, NULL, str, config, &exported_res, error);
   g_list_free (exported_res);
   g_string_append (str, "  </defs>\n");
 
   if (inkscape_svg)
     svg_export_inkscape (image, str, error);
 
-  svg_export_layers ((GimpItem **) layers, NULL, layer_ids, str, config, "", error);
+  svg_export_layers ((ClayItem **) layers, NULL, layer_ids, str, config, "", error);
   g_free (layers);
 
   g_string_append (str, "</svg>\n");
@@ -1307,34 +1307,34 @@ svg_export_file (GimpImage            *image,
 }
 
 static void
-svg_export_defs (GimpItem             **layers,
-                 GimpGroupLayer        *group,
+svg_export_defs (ClayItem             **layers,
+                 ClayGroupLayer        *group,
                  GString               *str,
-                 GimpProcedureConfig   *config,
+                 ClayProcedureConfig   *config,
                  GList                **exported_res,
                  GError               **error)
 {
-  GimpItem **items;
+  ClayItem **items;
   gint32     n_layers;
 
   if (group)
-    items = gimp_item_get_children (GIMP_ITEM (group));
+    items = clay_item_get_children (CLAY_ITEM (group));
   else
     items = layers;
 
-  n_layers = gimp_core_object_array_get_length ((GObject **) items);
+  n_layers = clay_core_object_array_get_length ((GObject **) items);
 
   for (gint i = n_layers - 1; i >= 0; i--)
     {
-      if (gimp_item_get_visible (items[i]))
+      if (clay_item_get_visible (items[i]))
         {
-          if (gimp_item_is_group (items[i]))
-            svg_export_defs (NULL, GIMP_GROUP_LAYER (items[i]), str, config, exported_res, error);
-          else if (GIMP_IS_VECTOR_LAYER (items[i]) &&
-                   ! gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (items[i])))
-            svg_export_def (GIMP_VECTOR_LAYER (items[i]), str, config, exported_res, error);
+          if (clay_item_is_group (items[i]))
+            svg_export_defs (NULL, CLAY_GROUP_LAYER (items[i]), str, config, exported_res, error);
+          else if (CLAY_IS_VECTOR_LAYER (items[i]) &&
+                   ! clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (items[i])))
+            svg_export_def (CLAY_VECTOR_LAYER (items[i]), str, config, exported_res, error);
         }
-      gimp_progress_update ((gdouble) (n_layers - i) / n_layers);
+      clay_progress_update ((gdouble) (n_layers - i) / n_layers);
 
       if (*error)
         break;
@@ -1342,13 +1342,13 @@ svg_export_defs (GimpItem             **layers,
   if (group)
     g_free (items);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static void
-svg_export_def (GimpVectorLayer      *layer,
+svg_export_def (ClayVectorLayer      *layer,
                 GString              *str,
-                GimpProcedureConfig  *config,
+                ClayProcedureConfig  *config,
                 GList               **exported_res,
                 GError              **error)
 {
@@ -1368,26 +1368,26 @@ svg_export_def (GimpVectorLayer      *layer,
 }
 
 static gchar *
-svg_get_def_string (GimpVectorLayer      *layer,
+svg_get_def_string (ClayVectorLayer      *layer,
                     const gchar          *type,
-                    GimpProcedureConfig  *config,
+                    ClayProcedureConfig  *config,
                     GList               **exported_res,
                     GError              **error)
 {
-  GimpPattern *pattern = NULL;
+  ClayPattern *pattern = NULL;
   gboolean     enabled;
 
   if (g_strcmp0 ("fill", type) == 0)
     {
-      enabled = gimp_vector_layer_get_enable_fill (layer);
+      enabled = clay_vector_layer_get_enable_fill (layer);
       if (enabled)
-        pattern = gimp_vector_layer_get_fill_pattern (layer);
+        pattern = clay_vector_layer_get_fill_pattern (layer);
     }
   else
     {
-      enabled = gimp_vector_layer_get_enable_stroke (layer);
+      enabled = clay_vector_layer_get_enable_stroke (layer);
       if (enabled)
-        pattern = gimp_vector_layer_get_stroke_pattern (layer);
+        pattern = clay_vector_layer_get_stroke_pattern (layer);
     }
 
   if (enabled && pattern && ! g_list_find (*exported_res, pattern))
@@ -1396,10 +1396,10 @@ svg_get_def_string (GimpVectorLayer      *layer,
       GFile          *temp_file  = NULL;
       FILE           *temp_fp;
       gsize           temp_size;
-      GimpProcedure  *procedure;
-      GimpValueArray *return_vals;
-      GimpImage      *temp_image;
-      GimpLayer      *temp_layer;
+      ClayProcedure  *procedure;
+      ClayValueArray *return_vals;
+      ClayImage      *temp_image;
+      ClayLayer      *temp_layer;
       const gchar    *mimetype;
       gint            width;
       gint            height;
@@ -1409,31 +1409,31 @@ svg_get_def_string (GimpVectorLayer      *layer,
       GeglBuffer     *dst_buffer;
       gint            res_id;
 
-      res_id     = gimp_resource_get_id (GIMP_RESOURCE (pattern));
+      res_id     = clay_resource_get_id (CLAY_RESOURCE (pattern));
       /* XXX Should we try to output in high-bit depth when possible? */
-      src_buffer = gimp_pattern_get_buffer (pattern, 0, 0, babl_format ("R'G'B' u8"));
+      src_buffer = clay_pattern_get_buffer (pattern, 0, 0, babl_format ("R'G'B' u8"));
       width      = gegl_buffer_get_width (src_buffer);
       height     = gegl_buffer_get_height (src_buffer);
-      temp_image = gimp_image_new (width, height, GIMP_RGB);
-      temp_layer = gimp_layer_new (temp_image, NULL, width, height, GIMP_RGBA_IMAGE,
-                                   100.0, GIMP_LAYER_MODE_NORMAL);
-      gimp_image_insert_layer (temp_image, temp_layer, NULL, 0);
-      dst_buffer = gimp_drawable_get_buffer (GIMP_DRAWABLE (temp_layer));
+      temp_image = clay_image_new (width, height, CLAY_RGB);
+      temp_layer = clay_layer_new (temp_image, NULL, width, height, CLAY_RGBA_IMAGE,
+                                   100.0, CLAY_LAYER_MODE_NORMAL);
+      clay_image_insert_layer (temp_image, temp_layer, NULL, 0);
+      dst_buffer = clay_drawable_get_buffer (CLAY_DRAWABLE (temp_layer));
       gegl_buffer_copy (src_buffer, NULL, GEGL_ABYSS_NONE, dst_buffer, NULL);
 
       g_object_unref (src_buffer);
       g_object_unref (dst_buffer);
 
-      format_id = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+      format_id = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                        "raster-export-format");
       if (format_id == EXPORT_FORMAT_PNG)
         {
-          temp_file = gimp_temp_file ("png");
+          temp_file = clay_temp_file ("png");
           mimetype  = "image/png";
 
-          procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-png-export");
-          return_vals = gimp_procedure_run (procedure,
-                                            "run-mode",              GIMP_RUN_NONINTERACTIVE,
+          procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-png-export");
+          return_vals = clay_procedure_run (procedure,
+                                            "run-mode",              CLAY_RUN_NONINTERACTIVE,
                                             "image",                 temp_image,
                                             "file",                  temp_file,
                                             "interlaced",            FALSE,
@@ -1449,12 +1449,12 @@ svg_get_def_string (GimpVectorLayer      *layer,
         }
       else
         {
-          temp_file = gimp_temp_file ("jpeg");
+          temp_file = clay_temp_file ("jpeg");
           mimetype  = "image/jpeg";
 
-          procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-jpeg-export");
-          return_vals = gimp_procedure_run (procedure,
-                                            "run-mode",              GIMP_RUN_NONINTERACTIVE,
+          procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-jpeg-export");
+          return_vals = clay_procedure_run (procedure,
+                                            "run-mode",              CLAY_RUN_NONINTERACTIVE,
                                             "image",                 temp_image,
                                             "file",                  temp_file,
                                             "quality",               0.9f,
@@ -1462,16 +1462,16 @@ svg_get_def_string (GimpVectorLayer      *layer,
                                             "include-color-profile", FALSE,
                                             NULL);
         }
-      gimp_image_delete (temp_image);
+      clay_image_delete (temp_image);
 
-      if (GIMP_VALUES_GET_ENUM (return_vals, 0) != GIMP_PDB_SUCCESS)
+      if (CLAY_VALUES_GET_ENUM (return_vals, 0) != CLAY_PDB_SUCCESS)
         {
           if (! error)
             {
-              if (G_VALUE_HOLDS_STRING (gimp_value_array_index (return_vals, 1)))
+              if (G_VALUE_HOLDS_STRING (clay_value_array_index (return_vals, 1)))
                 g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                              "SVG: Unable to export pattern image data: %s",
-                             GIMP_VALUES_GET_STRING (return_vals, 1));
+                             CLAY_VALUES_GET_STRING (return_vals, 1));
               else
                 g_set_error_literal (error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
                                      "SVG: Unable to export pattern image data.");
@@ -1522,13 +1522,13 @@ svg_get_def_string (GimpVectorLayer      *layer,
 }
 
 static void
-svg_export_inkscape (GimpImage  *image,
+svg_export_inkscape (ClayImage  *image,
                      GString    *str,
                      GError    **error)
 {
   gboolean has_guides = FALSE;
 
-  has_guides = gimp_image_find_next_guide (image, 0);
+  has_guides = clay_image_find_next_guide (image, 0);
 
   /* TODO: Add more features to Inkscape SVG export */
   g_string_append_printf (str,
@@ -1540,28 +1540,28 @@ svg_export_inkscape (GimpImage  *image,
     {
       gint guide = 0;
 
-      while ((guide = gimp_image_find_next_guide (image, guide)))
+      while ((guide = clay_image_find_next_guide (image, guide)))
         {
           gchar  orientation;
           gint32 position;
 
-          orientation = gimp_image_get_guide_orientation (image, guide);
-          position    = gimp_image_get_guide_position (image, guide);
+          orientation = clay_image_get_guide_orientation (image, guide);
+          position    = clay_image_get_guide_position (image, guide);
 
-          if (orientation > GIMP_ORIENTATION_VERTICAL)
+          if (orientation > CLAY_ORIENTATION_VERTICAL)
             continue;
 
           g_string_append_printf (str, "    <sodipodi:guide\n");
 
-          if (orientation == GIMP_ORIENTATION_HORIZONTAL)
+          if (orientation == CLAY_ORIENTATION_HORIZONTAL)
             {
               /* 0, 0 starts from the bottom left in Inkscape */
               g_string_append_printf (str,
                                       "       position=\"0.0,%d\"\n"
                                       "       orientation=\"0,1\"\n",
-                                      gimp_image_get_height (image) - position);
+                                      clay_image_get_height (image) - position);
             }
-          else if (orientation == GIMP_ORIENTATION_VERTICAL)
+          else if (orientation == CLAY_ORIENTATION_VERTICAL)
             {
               g_string_append_printf (str,
                                       "       position=\"%d,0.0\"\n"
@@ -1580,64 +1580,64 @@ svg_export_inkscape (GimpImage  *image,
 }
 
 static void
-svg_export_layers (GimpItem             **layers,
-                   GimpGroupLayer        *group,
+svg_export_layers (ClayItem             **layers,
+                   ClayGroupLayer        *group,
                    gint                  *layer_ids,
                    GString               *str,
-                   GimpProcedureConfig   *config,
+                   ClayProcedureConfig   *config,
                    gchar                 *spacing,
                    GError               **error)
 {
-  GimpItem **items;
+  ClayItem **items;
   gint32     n_layers;
   gchar     *extra_spacing;
   gint       format_id;
 
   if (group)
-    items = gimp_item_get_children (GIMP_ITEM (group));
+    items = clay_item_get_children (CLAY_ITEM (group));
   else
     items = layers;
 
-  format_id = gimp_procedure_config_get_choice_id (GIMP_PROCEDURE_CONFIG (config),
+  format_id = clay_procedure_config_get_choice_id (CLAY_PROCEDURE_CONFIG (config),
                                                    "raster-export-format");
 
   extra_spacing = g_strdup_printf ("%s  ", spacing);
 
-  n_layers = gimp_core_object_array_get_length ((GObject **) items);
+  n_layers = clay_core_object_array_get_length ((GObject **) items);
 
   for (gint i = n_layers - 1; i >= 0; i--)
     {
-      if (gimp_item_get_visible (items[i]))
+      if (clay_item_get_visible (items[i]))
         {
-          if (gimp_item_is_group (items[i]))
+          if (clay_item_is_group (items[i]))
             {
-              svg_export_group_header (GIMP_GROUP_LAYER (items[i]),
+              svg_export_group_header (CLAY_GROUP_LAYER (items[i]),
                                        layer_ids[LAYER_ID_GROUP]++, str,
                                        config, extra_spacing);
-              svg_export_layers (NULL, GIMP_GROUP_LAYER (items[i]), layer_ids,
+              svg_export_layers (NULL, CLAY_GROUP_LAYER (items[i]), layer_ids,
                                  str, config, extra_spacing, error);
               g_string_append_printf (str, "%s</g>\n", extra_spacing);
             }
-          else if (GIMP_IS_RASTERIZABLE (items[i]) &&
-                   ! gimp_rasterizable_is_rasterized (GIMP_RASTERIZABLE (items[i])))
+          else if (CLAY_IS_RASTERIZABLE (items[i]) &&
+                   ! clay_rasterizable_is_rasterized (CLAY_RASTERIZABLE (items[i])))
             {
-              if (GIMP_IS_VECTOR_LAYER (items[i]))
+              if (CLAY_IS_VECTOR_LAYER (items[i]))
                 {
-                  GimpVectorLayer *layer = GIMP_VECTOR_LAYER (items[i]);
+                  ClayVectorLayer *layer = CLAY_VECTOR_LAYER (items[i]);
 
                   svg_export_path (layer, layer_ids[LAYER_ID_VECTOR]++, str,
                                    config, extra_spacing);
                 }
-              else if (GIMP_IS_TEXT_LAYER (items[i]))
+              else if (CLAY_IS_TEXT_LAYER (items[i]))
                 {
-                  GimpTextLayer *layer = GIMP_TEXT_LAYER (items[i]);
+                  ClayTextLayer *layer = CLAY_TEXT_LAYER (items[i]);
 
                   svg_export_text (layer, layer_ids[LAYER_ID_TEXT]++, str,
                                    config, extra_spacing);
                 }
-              else if (GIMP_IS_LINK_LAYER (items[i]))
+              else if (CLAY_IS_LINK_LAYER (items[i]))
                 {
-                  GimpLinkLayer *layer = GIMP_LINK_LAYER (items[i]);
+                  ClayLinkLayer *layer = CLAY_LINK_LAYER (items[i]);
 
                   svg_export_link_layer (layer, layer_ids[LAYER_ID_LINK]++, str,
                                          config, extra_spacing);
@@ -1645,24 +1645,24 @@ svg_export_layers (GimpItem             **layers,
             }
           else if (format_id != EXPORT_FORMAT_NONE)
             {
-              svg_export_raster (GIMP_DRAWABLE (items[i]), layer_ids, str,
+              svg_export_raster (CLAY_DRAWABLE (items[i]), layer_ids, str,
                                  format_id, config, extra_spacing, error);
             }
         }
-      gimp_progress_update ((gdouble) (n_layers - i) / n_layers);
+      clay_progress_update ((gdouble) (n_layers - i) / n_layers);
     }
   g_free (extra_spacing);
   if (group)
     g_free (items);
 
-  gimp_progress_update (1.0);
+  clay_progress_update (1.0);
 }
 
 static void
-svg_export_group_header (GimpGroupLayer      *group,
+svg_export_group_header (ClayGroupLayer      *group,
                          gint                 group_id,
                          GString             *str,
-                         GimpProcedureConfig *config,
+                         ClayProcedureConfig *config,
                          gchar               *spacing)
 {
   gchar    *name;
@@ -1672,7 +1672,7 @@ svg_export_group_header (GimpGroupLayer      *group,
   g_object_get (config, "inkscape-svg", &inkscape_svg, NULL);
 
   name    = g_strdup_printf ("group%d", group_id);
-  opacity = gimp_layer_get_opacity (GIMP_LAYER (group)) / 100.0f;
+  opacity = clay_layer_get_opacity (CLAY_LAYER (group)) / 100.0f;
 
   if (inkscape_svg)
     g_string_append_printf (str,
@@ -1681,7 +1681,7 @@ svg_export_group_header (GimpGroupLayer      *group,
                             "inkscape:groupmode=\"layer\" "
                             "opacity=\"%f\">\n",
                             spacing, name,
-                            gimp_item_get_name (GIMP_ITEM (group)), opacity);
+                            clay_item_get_name (CLAY_ITEM (group)), opacity);
   else
     g_string_append_printf (str, "%s<g id=\"%s\" opacity=\"%f\">\n",
                             spacing, name, opacity);
@@ -1689,10 +1689,10 @@ svg_export_group_header (GimpGroupLayer      *group,
 }
 
 static void
-svg_export_image_size (GimpImage *image,
+svg_export_image_size (ClayImage *image,
                        GString   *str)
 {
-  GimpUnit    *unit;
+  ClayUnit    *unit;
   const gchar *abbrev;
   gchar        wbuf[G_ASCII_DTOSTR_BUF_SIZE];
   gchar        hbuf[G_ASCII_DTOSTR_BUF_SIZE];
@@ -1700,28 +1700,28 @@ svg_export_image_size (GimpImage *image,
   gdouble      yres;
   gdouble      w, h;
 
-  gimp_image_get_resolution (image, &xres, &yres);
+  clay_image_get_resolution (image, &xres, &yres);
 
-  w = (gdouble) gimp_image_get_width  (image) / xres;
-  h = (gdouble) gimp_image_get_height (image) / yres;
+  w = (gdouble) clay_image_get_width  (image) / xres;
+  h = (gdouble) clay_image_get_height (image) / yres;
 
   /*  FIXME: should probably use the display unit here  */
-  unit = gimp_image_get_unit (image);
-  switch (gimp_unit_get_id (unit))
+  unit = clay_image_get_unit (image);
+  switch (clay_unit_get_id (unit))
     {
-    case GIMP_UNIT_INCH:  abbrev = "in";  break;
-    case GIMP_UNIT_MM:    abbrev = "mm";  break;
-    case GIMP_UNIT_POINT: abbrev = "pt";  break;
-    case GIMP_UNIT_PICA:  abbrev = "pc";  break;
+    case CLAY_UNIT_INCH:  abbrev = "in";  break;
+    case CLAY_UNIT_MM:    abbrev = "mm";  break;
+    case CLAY_UNIT_POINT: abbrev = "pt";  break;
+    case CLAY_UNIT_PICA:  abbrev = "pc";  break;
     default:              abbrev = "cm";
-      unit = gimp_unit_mm ();
+      unit = clay_unit_mm ();
       w /= 10.0;
       h /= 10.0;
       break;
     }
 
-  g_ascii_formatd (wbuf, sizeof (wbuf), "%g", w * gimp_unit_get_factor (unit));
-  g_ascii_formatd (hbuf, sizeof (hbuf), "%g", h * gimp_unit_get_factor (unit));
+  g_ascii_formatd (wbuf, sizeof (wbuf), "%g", w * clay_unit_get_factor (unit));
+  g_ascii_formatd (hbuf, sizeof (hbuf), "%g", h * clay_unit_get_factor (unit));
 
   g_string_append_printf (str,
                           "width=\"%s%s\" height=\"%s%s\"",
@@ -1729,13 +1729,13 @@ svg_export_image_size (GimpImage *image,
 }
 
 static void
-svg_export_path (GimpVectorLayer     *layer,
+svg_export_path (ClayVectorLayer     *layer,
                  gint                 vector_id,
                  GString             *str,
-                 GimpProcedureConfig *config,
+                 ClayProcedureConfig *config,
                  gchar               *spacing)
 {
-  GimpPath    *path;
+  ClayPath    *path;
   gchar       *name;
   gchar       *data;
   gdouble      opacity;
@@ -1752,32 +1752,32 @@ svg_export_path (GimpVectorLayer     *layer,
 
   g_object_get (config, "inkscape-svg", &inkscape_svg, NULL);
 
-  path = gimp_vector_layer_get_path (layer);
+  path = clay_vector_layer_get_path (layer);
   if (! path)
     return;
 
   name = g_strdup_printf ("vector%d", vector_id);
   data = svg_export_path_data (path);
 
-  opacity = gimp_layer_get_opacity (GIMP_LAYER (layer)) / 100.0f;
+  opacity = clay_layer_get_opacity (CLAY_LAYER (layer)) / 100.0f;
 
   /* Vector Layer Properties */
   fill_string         = svg_get_color_string (layer, "fill");
   stroke_string       = svg_get_color_string (layer, "stroke");
-  stroke_width        = gimp_vector_layer_get_stroke_width (layer);
-  stroke_miter_limit  = gimp_vector_layer_get_stroke_miter_limit (layer);
-  stroke_dash_offset  = gimp_vector_layer_get_stroke_dash_offset (layer);
+  stroke_width        = clay_vector_layer_get_stroke_width (layer);
+  stroke_miter_limit  = clay_vector_layer_get_stroke_miter_limit (layer);
+  stroke_dash_offset  = clay_vector_layer_get_stroke_dash_offset (layer);
 
-  gimp_vector_layer_get_stroke_dash_pattern (layer, &num_dashes,
+  clay_vector_layer_get_stroke_dash_pattern (layer, &num_dashes,
                                              &stroke_dash_pattern);
 
-  switch (gimp_vector_layer_get_stroke_cap_style (layer))
+  switch (clay_vector_layer_get_stroke_cap_style (layer))
     {
-    case GIMP_CAP_ROUND:
+    case CLAY_CAP_ROUND:
       stroke_capstyle = "round";
       break;
 
-    case GIMP_CAP_SQUARE:
+    case CLAY_CAP_SQUARE:
       stroke_capstyle = "square";
       break;
 
@@ -1786,13 +1786,13 @@ svg_export_path (GimpVectorLayer     *layer,
       break;
     }
 
-  switch (gimp_vector_layer_get_stroke_join_style (layer))
+  switch (clay_vector_layer_get_stroke_join_style (layer))
     {
-    case GIMP_JOIN_ROUND:
+    case CLAY_JOIN_ROUND:
       stroke_joinstyle = "round";
       break;
 
-    case GIMP_JOIN_BEVEL:
+    case CLAY_JOIN_BEVEL:
       stroke_joinstyle = "bevel";
       break;
 
@@ -1823,7 +1823,7 @@ svg_export_path (GimpVectorLayer     *layer,
     g_string_append_printf (str,
                             "%s      inkscape:label=\"%s\"\n",
                             spacing,
-                            gimp_item_get_name (GIMP_ITEM (layer)));
+                            clay_item_get_name (CLAY_ITEM (layer)));
 
   if (num_dashes > 0)
     {
@@ -1856,7 +1856,7 @@ svg_export_path (GimpVectorLayer     *layer,
 #define NEWLINE "\n           "
 
 static gchar *
-svg_export_path_data (GimpPath *path)
+svg_export_path_data (ClayPath *path)
 {
   GString  *str;
   gsize     num_strokes;
@@ -1868,18 +1868,18 @@ svg_export_path_data (GimpPath *path)
 
   str = g_string_new (NULL);
 
-  strokes = gimp_path_get_strokes (path, &num_strokes);
+  strokes = clay_path_get_strokes (path, &num_strokes);
   for (s = 0; s < num_strokes; s++)
     {
-      GimpPathStrokeType  type;
+      ClayPathStrokeType  type;
       gdouble            *control_points;
       gsize               num_points;
       gsize               num_indexes;
 
-      type = gimp_path_stroke_get_points (path, strokes[s], &num_points,
+      type = clay_path_stroke_get_points (path, strokes[s], &num_points,
                                           &control_points, &closed);
 
-      if (type == GIMP_PATH_STROKE_TYPE_BEZIER)
+      if (type == CLAY_PATH_STROKE_TYPE_BEZIER)
         {
           num_indexes = num_points / 2;
           if (num_indexes >= 3)
@@ -1919,10 +1919,10 @@ svg_export_path_data (GimpPath *path)
 }
 
 static void
-svg_export_text (GimpTextLayer       *layer,
+svg_export_text (ClayTextLayer       *layer,
                  gint                 text_id,
                  GString             *str,
-                 GimpProcedureConfig *config,
+                 ClayProcedureConfig *config,
                  gchar               *spacing)
 {
   gchar                *name;
@@ -1933,8 +1933,8 @@ svg_export_text (GimpTextLayer       *layer,
   gdouble               opacity;
   gchar                *hex_color;
   gdouble               font_size;
-  GimpUnit             *unit;
-  GimpFont             *gimp_font;
+  ClayUnit             *unit;
+  ClayFont             *clay_font;
   PangoFontDescription *font_description;
   PangoFontDescription *font_description2;
   PangoFontMap         *fontmap;
@@ -1946,12 +1946,12 @@ svg_export_text (GimpTextLayer       *layer,
 
   name = g_strdup_printf ("text%d", text_id);
 
-  gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &x, &y);
-  gimp_image_get_resolution (gimp_item_get_image (GIMP_ITEM (layer)),
+  clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &x, &y);
+  clay_image_get_resolution (clay_item_get_image (CLAY_ITEM (layer)),
                              &x_res, &y_res);
 
-  opacity   = gimp_layer_get_opacity (GIMP_LAYER (layer)) / 100.0f;
-  hex_color = svg_get_hex_color (gimp_text_layer_get_color (layer));
+  opacity   = clay_layer_get_opacity (CLAY_LAYER (layer)) / 100.0f;
+  hex_color = svg_get_hex_color (clay_text_layer_get_color (layer));
 
   g_string_append_printf (str,
                           "%s<text id=\"%s\"\n"
@@ -1971,17 +1971,17 @@ svg_export_text (GimpTextLayer       *layer,
     g_string_append_printf (str,
                             "%s      inkscape:label=\"%s\"\n",
                             spacing,
-                            gimp_item_get_name (GIMP_ITEM (layer)));
+                            clay_item_get_name (CLAY_ITEM (layer)));
 
   /* Font style */
-  font_size = gimp_text_layer_get_font_size (layer, &unit);
-  font_size = gimp_units_to_pixels (font_size, unit, y_res);
+  font_size = clay_text_layer_get_font_size (layer, &unit);
+  font_size = clay_units_to_pixels (font_size, unit, y_res);
 
   fontmap = pango_cairo_font_map_new_for_font_type (CAIRO_FONT_TYPE_FT);
   context = pango_font_map_create_context (fontmap);
 
-  gimp_font         = gimp_text_layer_get_font (layer);
-  font_description  = gimp_font_get_pango_font_description (gimp_font);
+  clay_font         = clay_text_layer_get_font (layer);
+  font_description  = clay_font_get_pango_font_description (clay_font);
   font              = pango_font_map_load_font (fontmap, context,
                                                 font_description);
   font_description2 = pango_font_describe (font);
@@ -1993,7 +1993,7 @@ svg_export_text (GimpTextLayer       *layer,
                           spacing, font_size,
                           pango_font_description_get_family (font_description2),
                           pango_font_description_get_weight (font_description2),
-                          gimp_text_layer_get_letter_spacing (layer));
+                          clay_text_layer_get_letter_spacing (layer));
 
   g_object_unref (font);
   pango_font_description_free (font_description);
@@ -2002,11 +2002,11 @@ svg_export_text (GimpTextLayer       *layer,
   g_object_unref (fontmap);
 
   /* Text */
-  if (gimp_text_layer_get_markup (layer))
+  if (clay_text_layer_get_markup (layer))
     {
       GString *markup;
 
-      markup = g_string_new (gimp_text_layer_get_markup (layer));
+      markup = g_string_new (clay_text_layer_get_markup (layer));
 
       g_string_replace (markup, "<markup>", "", 1);
       g_string_replace (markup, "</markup>", "", 1);
@@ -2038,14 +2038,14 @@ svg_export_text (GimpTextLayer       *layer,
     }
   else
     {
-      svg_export_text_lines (layer, str, gimp_text_layer_get_text (layer));
+      svg_export_text_lines (layer, str, clay_text_layer_get_text (layer));
     }
 
   g_string_append_printf (str, "</text>\n");
 }
 
 static void
-svg_export_text_lines (GimpTextLayer *layer,
+svg_export_text_lines (ClayTextLayer *layer,
                        GString       *str,
                        gchar         *text)
 {
@@ -2054,18 +2054,18 @@ svg_export_text_lines (GimpTextLayer *layer,
   gdouble               x_res = 0;
   gdouble               y_res = 0;
   gdouble               font_size;
-  GimpUnit             *unit;
+  ClayUnit             *unit;
   gdouble               line_spacing;
   gchar               **lines;
   guint                 count;
 
-  gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &x, &y);
-  gimp_image_get_resolution (gimp_item_get_image (GIMP_ITEM (layer)),
+  clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &x, &y);
+  clay_image_get_resolution (clay_item_get_image (CLAY_ITEM (layer)),
                              &x_res, &y_res);
 
-  line_spacing = gimp_text_layer_get_line_spacing (layer);
-  font_size    = gimp_text_layer_get_font_size (layer, &unit);
-  font_size    = gimp_units_to_pixels (font_size, unit, y_res);
+  line_spacing = clay_text_layer_get_line_spacing (layer);
+  font_size    = clay_text_layer_get_font_size (layer, &unit);
+  font_size    = clay_units_to_pixels (font_size, unit, y_res);
 
   lines = g_strsplit (text, "\n", -1);
   count = g_strv_length (lines);
@@ -2081,10 +2081,10 @@ svg_export_text_lines (GimpTextLayer *layer,
 }
 
 static void
-svg_export_link_layer (GimpLinkLayer       *layer,
+svg_export_link_layer (ClayLinkLayer       *layer,
                        gint                 link_id,
                        GString             *str,
-                       GimpProcedureConfig *config,
+                       ClayProcedureConfig *config,
                        gchar               *spacing)
 {
   GFile   *file;
@@ -2099,14 +2099,14 @@ svg_export_link_layer (GimpLinkLayer       *layer,
 
   g_object_get (config, "inkscape-svg", &inkscape_svg, NULL);
 
-  width   = gimp_drawable_get_width (GIMP_DRAWABLE (layer));
-  height  = gimp_drawable_get_height (GIMP_DRAWABLE (layer));
-  opacity = gimp_layer_get_opacity (GIMP_LAYER (layer)) / 100.0f;
-  gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &x, &y);
+  width   = clay_drawable_get_width (CLAY_DRAWABLE (layer));
+  height  = clay_drawable_get_height (CLAY_DRAWABLE (layer));
+  opacity = clay_layer_get_opacity (CLAY_LAYER (layer)) / 100.0f;
+  clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &x, &y);
 
   name = g_strdup_printf ("link%d", link_id);
 
-  file = gimp_link_layer_get_file (layer);
+  file = clay_link_layer_get_file (layer);
   path = g_file_get_path (file);
 
   g_string_append_printf (str,
@@ -2127,7 +2127,7 @@ svg_export_link_layer (GimpLinkLayer       *layer,
     g_string_append_printf (str,
                             "%s       inkscape:label=\"%s\"\n",
                             spacing,
-                            gimp_item_get_name (GIMP_ITEM (layer)));
+                            clay_item_get_name (CLAY_ITEM (layer)));
 
   g_string_append_printf (str,
                           "%s       href=\"%s\" />\n",
@@ -2138,19 +2138,19 @@ svg_export_link_layer (GimpLinkLayer       *layer,
 }
 
 static void
-svg_export_raster (GimpDrawable         *layer,
+svg_export_raster (ClayDrawable         *layer,
                    gint                 *layer_ids,
                    GString              *str,
                    gint                  format_id,
-                   GimpProcedureConfig  *config,
+                   ClayProcedureConfig  *config,
                    gchar                *spacing,
                    GError              **error)
 {
-  GimpProcedure  *procedure;
-  GimpValueArray *return_vals = NULL;
-  GimpImage      *image;
-  GimpImage      *temp_image;
-  GimpLayer      *temp_layer;
+  ClayProcedure  *procedure;
+  ClayValueArray *return_vals = NULL;
+  ClayImage      *image;
+  ClayImage      *temp_image;
+  ClayLayer      *temp_layer;
   GFile          *temp_file = NULL;
   FILE           *temp_fp;
   gsize           temp_size;
@@ -2166,9 +2166,9 @@ svg_export_raster (GimpDrawable         *layer,
   g_object_get (config, "inkscape-svg", &inkscape_svg, NULL);
 
   has_layer_mask = FALSE;
-  if (GIMP_IS_LAYER (layer) && gimp_layer_get_mask (GIMP_LAYER (layer)))
+  if (CLAY_IS_LAYER (layer) && clay_layer_get_mask (CLAY_LAYER (layer)))
     {
-      svg_export_layer_mask (gimp_layer_get_mask (GIMP_LAYER (layer)),
+      svg_export_layer_mask (clay_layer_get_mask (CLAY_LAYER (layer)),
                              layer_ids, str, config, spacing, error);
       has_layer_mask = TRUE;
     }
@@ -2178,51 +2178,51 @@ svg_export_raster (GimpDrawable         *layer,
 
   if (format_id == EXPORT_FORMAT_PNG)
     {
-      temp_file = gimp_temp_file ("png");
+      temp_file = clay_temp_file ("png");
       mimetype  = "image/png";
     }
   else
     {
-      temp_file = gimp_temp_file ("jpeg");
+      temp_file = clay_temp_file ("jpeg");
       mimetype  = "image/jpeg";
     }
   raster_id = layer_ids[LAYER_ID_RASTER]++;
 
-  width  = gimp_drawable_get_width (layer);
-  height = gimp_drawable_get_height (layer);
-  if (GIMP_IS_LAYER (layer))
-    opacity = gimp_layer_get_opacity (GIMP_LAYER (layer)) / 100.0f;
+  width  = clay_drawable_get_width (layer);
+  height = clay_drawable_get_height (layer);
+  if (CLAY_IS_LAYER (layer))
+    opacity = clay_layer_get_opacity (CLAY_LAYER (layer)) / 100.0f;
   else
-    opacity = gimp_channel_get_opacity (GIMP_CHANNEL (layer)) / 100.0f;
+    opacity = clay_channel_get_opacity (CLAY_CHANNEL (layer)) / 100.0f;
 
-  image = gimp_item_get_image (GIMP_ITEM (layer));
-  temp_image = gimp_image_new (width, height,
-                               gimp_image_get_base_type (image));
-  if (gimp_image_get_base_type (image) == GIMP_INDEXED)
-    gimp_image_set_palette (temp_image,
-                            gimp_image_get_palette (image));
+  image = clay_item_get_image (CLAY_ITEM (layer));
+  temp_image = clay_image_new (width, height,
+                               clay_image_get_base_type (image));
+  if (clay_image_get_base_type (image) == CLAY_INDEXED)
+    clay_image_set_palette (temp_image,
+                            clay_image_get_palette (image));
 
-  temp_layer = gimp_layer_new_from_drawable (layer, temp_image);
-  gimp_image_insert_layer (temp_image, temp_layer, NULL, 0);
-  gimp_layer_set_offsets (temp_layer, 0, 0);
+  temp_layer = clay_layer_new_from_drawable (layer, temp_image);
+  clay_image_insert_layer (temp_image, temp_layer, NULL, 0);
+  clay_layer_set_offsets (temp_layer, 0, 0);
   /* Set layer to full opacity and use opacity attribute instead */
-  gimp_layer_set_opacity (temp_layer, 100.0f);
+  clay_layer_set_opacity (temp_layer, 100.0f);
 
   include_color_profile = FALSE;
-  if (gimp_image_get_color_profile (image))
+  if (clay_image_get_color_profile (image))
     {
-      GimpColorProfile *profile;
+      ClayColorProfile *profile;
 
-      profile =  gimp_image_get_color_profile (image);
-      gimp_image_set_color_profile (temp_image, profile);
+      profile =  clay_image_get_color_profile (image);
+      clay_image_set_color_profile (temp_image, profile);
       include_color_profile = TRUE;
     }
 
   if (format_id == EXPORT_FORMAT_PNG)
     {
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-png-export");
-      return_vals = gimp_procedure_run (procedure,
-                                        "run-mode",              GIMP_RUN_NONINTERACTIVE,
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-png-export");
+      return_vals = clay_procedure_run (procedure,
+                                        "run-mode",              CLAY_RUN_NONINTERACTIVE,
                                         "image",                 temp_image,
                                         "file",                  temp_file,
                                         "interlaced",            FALSE,
@@ -2238,9 +2238,9 @@ svg_export_raster (GimpDrawable         *layer,
     }
   else
     {
-      procedure   = gimp_pdb_lookup_procedure (gimp_get_pdb (), "file-jpeg-export");
-      return_vals = gimp_procedure_run (procedure,
-                                        "run-mode",              GIMP_RUN_NONINTERACTIVE,
+      procedure   = clay_pdb_lookup_procedure (clay_get_pdb (), "file-jpeg-export");
+      return_vals = clay_procedure_run (procedure,
+                                        "run-mode",              CLAY_RUN_NONINTERACTIVE,
                                         "image",                 temp_image,
                                         "file",                  temp_file,
                                         "quality",               0.9f,
@@ -2248,9 +2248,9 @@ svg_export_raster (GimpDrawable         *layer,
                                         "include-color-profile", include_color_profile,
                                         NULL);
     }
-  gimp_image_delete (temp_image);
+  clay_image_delete (temp_image);
 
-  if (GIMP_VALUES_GET_ENUM (return_vals, 0) != GIMP_PDB_SUCCESS)
+  if (CLAY_VALUES_GET_ENUM (return_vals, 0) != CLAY_PDB_SUCCESS)
     {
       if (! error)
         g_set_error (error, G_FILE_ERROR, 0,
@@ -2278,7 +2278,7 @@ svg_export_raster (GimpDrawable         *layer,
       encoded = g_base64_encode ((const guchar *) buf, temp_size + 1);
 
       name = g_strdup_printf ("raster%d", raster_id);
-      gimp_drawable_get_offsets (GIMP_DRAWABLE (layer), &x, &y);
+      clay_drawable_get_offsets (CLAY_DRAWABLE (layer), &x, &y);
 
       g_string_append_printf (str,
                               "%s<image id=\"%s\"\n"
@@ -2298,7 +2298,7 @@ svg_export_raster (GimpDrawable         *layer,
         g_string_append_printf (str,
                                 "%s       inkscape:label=\"%s\"\n",
                                 spacing,
-                                gimp_item_get_name (GIMP_ITEM (layer)));
+                                clay_item_get_name (CLAY_ITEM (layer)));
 
       if (has_layer_mask)
         g_string_append_printf (str,
@@ -2319,10 +2319,10 @@ svg_export_raster (GimpDrawable         *layer,
 }
 
 static void
-svg_export_layer_mask (GimpLayerMask        *mask,
+svg_export_layer_mask (ClayLayerMask        *mask,
                        gint                 *layer_ids,
                        GString              *str,
-                       GimpProcedureConfig  *config,
+                       ClayProcedureConfig  *config,
                        gchar                *spacing,
                        GError              **error)
 {
@@ -2334,7 +2334,7 @@ svg_export_layer_mask (GimpLayerMask        *mask,
 
   mask_id = layer_ids[LAYER_ID_MASK]++;
   name    = g_strdup_printf ("mask%d", mask_id);
-  gimp_drawable_get_offsets (GIMP_DRAWABLE (mask), &x, &y);
+  clay_drawable_get_offsets (CLAY_DRAWABLE (mask), &x, &y);
 
   g_string_append_printf (str,
                           "%s<mask id=\"%s\"\n"
@@ -2349,7 +2349,7 @@ svg_export_layer_mask (GimpLayerMask        *mask,
 
   extra_spacing = g_strdup_printf ("%s  ", spacing);
 
-  svg_export_raster (GIMP_DRAWABLE (mask), layer_ids, str, EXPORT_FORMAT_PNG,
+  svg_export_raster (CLAY_DRAWABLE (mask), layer_ids, str, EXPORT_FORMAT_PNG,
                      config, extra_spacing, error);
 
   g_free (extra_spacing);
@@ -2357,26 +2357,26 @@ svg_export_layer_mask (GimpLayerMask        *mask,
 }
 
 static gchar *
-svg_get_color_string (GimpVectorLayer *layer,
+svg_get_color_string (ClayVectorLayer *layer,
                       const gchar     *type)
 {
   GeglColor   *color   = NULL;
-  GimpPattern *pattern = NULL;
+  ClayPattern *pattern = NULL;
   gboolean     enabled = TRUE;
 
   if (g_strcmp0 ("fill", type) == 0)
     {
-      color   = gimp_vector_layer_get_fill_color (layer);
+      color   = clay_vector_layer_get_fill_color (layer);
       if (color == NULL)
-        pattern = gimp_vector_layer_get_fill_pattern (layer);
-      enabled = gimp_vector_layer_get_enable_fill (layer);
+        pattern = clay_vector_layer_get_fill_pattern (layer);
+      enabled = clay_vector_layer_get_enable_fill (layer);
     }
   else
     {
-      color   = gimp_vector_layer_get_stroke_color (layer);
+      color   = clay_vector_layer_get_stroke_color (layer);
       if (color == NULL)
-        pattern = gimp_vector_layer_get_stroke_pattern (layer);
-      enabled = gimp_vector_layer_get_enable_stroke (layer);
+        pattern = clay_vector_layer_get_stroke_pattern (layer);
+      enabled = clay_vector_layer_get_enable_stroke (layer);
     }
 
   if (enabled)
@@ -2398,7 +2398,7 @@ svg_get_color_string (GimpVectorLayer *layer,
       else if (pattern)
         {
           gchar *color_string;
-          gint   res_id = gimp_resource_get_id (GIMP_RESOURCE (pattern));
+          gint   res_id = clay_resource_get_id (CLAY_RESOURCE (pattern));
 
           color_string = g_strdup_printf ("%s=\"url(#Pattern%d)\"",
                                           type, res_id);
@@ -2425,14 +2425,14 @@ svg_get_hex_color (GeglColor *color)
 }
 
 static gboolean
-svg_drawable_has_transparency (GimpDrawable *drawable)
+svg_drawable_has_transparency (ClayDrawable *drawable)
 {
-  if (gimp_drawable_has_alpha (drawable))
+  if (clay_drawable_has_alpha (drawable))
     {
       GeglBuffer         *buffer;
       GeglBufferIterator *iter;
 
-      buffer = gimp_drawable_get_buffer (drawable);
+      buffer = clay_drawable_get_buffer (drawable);
       iter   = gegl_buffer_iterator_new (buffer, NULL, 0, babl_format ("A float"),
                                          GEGL_ACCESS_READ, GEGL_ABYSS_NONE, 1);
 

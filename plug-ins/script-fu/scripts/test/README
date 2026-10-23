@@ -15,7 +15,7 @@ copy a dir containing the test script into /plugins
 and ensure the .scm files have execute permission.
 
 Old style scripts test and are interpreted by extension-script-fu.
-When a script crashes extension-script-fu, you must restart Gimp.
+When a script crashes extension-script-fu, you must restart Clay.
 
 New style scripts are interpreted in a separate process
 running binary script-fu-interpreter-3.0.
@@ -26,7 +26,7 @@ Any installed script can be tested in the SF Console
 by just calling it from the PDB: "(script-fu-test-foo)"
 since they are PDB procedures.
 
-Scripts that have menu items can be tested from the Gimp GUI.
+Scripts that have menu items can be tested from the Clay GUI.
 
 Any test script can be called by another script.
 
@@ -35,7 +35,7 @@ Any test script can be called by another script.
 test9.scm has a built-in testing framework.
 
 FUTURE: extract the framework to a Scheme extension
-that is in the Gimp repo,
+that is in the Clay repo,
 that other scripts can load and use.
 
 

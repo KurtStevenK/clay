@@ -29,7 +29,7 @@ HELP
     %invoke = (
 	code => <<'CODE'
 {
-  gimp_data_factory_data_refresh (gimp->brush_factory, context);
+  clay_data_factory_data_refresh (clay->brush_factory, context);
 }
 CODE
     );
@@ -39,10 +39,10 @@ sub brushes_get_list {
     $blurb = 'Retrieve a complete listing of the available brushes.';
 
     $help = <<'HELP';
-This procedure returns a complete listing of available GIMP
+This procedure returns a complete listing of available Clay
 brushes.
 
-Each brush returned can be used as input to [func@Gimp.context_set_brush].
+Each brush returned can be used as input to [func@Clay.context_set_brush].
 HELP
 
     &std_pdb_misc;
@@ -58,10 +58,10 @@ HELP
     );
 
     %invoke = (
-        headers => [ qw("core/gimpcontainer-filter.h") ],
+        headers => [ qw("core/claycontainer-filter.h") ],
 	code    => <<'CODE'
 {
-  brush_list = (GimpBrush **) gimp_container_get_filtered_array (gimp_data_factory_get_container (gimp->brush_factory),
+  brush_list = (ClayBrush **) clay_container_get_filtered_array (clay_data_factory_get_container (clay->brush_factory),
                                                                  filter);
 }
 CODE
@@ -69,12 +69,12 @@ CODE
 }
 
 @headers = qw(<string.h>
-              "core/gimp.h"
-              "core/gimpbrush.h"
-              "core/gimpcontext.h"
-              "core/gimpdatafactory.h"
-              "core/gimptempbuf.h"
-              "gimppdb-utils.h");
+              "core/clay.h"
+              "core/claybrush.h"
+              "core/claycontext.h"
+              "core/claydatafactory.h"
+              "core/claytempbuf.h"
+              "claypdb-utils.h");
 
 @procs = qw(brushes_refresh
             brushes_get_list);
@@ -82,7 +82,7 @@ CODE
 %exports = (app => [@procs], lib => [@procs]);
 
 $desc = 'Brushes';
-$doc_title = 'gimpbrushes';
+$doc_title = 'claybrushes';
 $doc_short_desc = 'Functions for manipulating brushes.';
 $doc_long_desc = 'Functions related to getting and setting brushes.';
 

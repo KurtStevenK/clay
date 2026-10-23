@@ -18,7 +18,7 @@
 #pragma once
 
 
-GtkWidget * data_delete_dialog_new (GimpDataFactory *factory,
-                                    GimpData        *data,
-                                    GimpContext     *context,
+GtkWidget * data_delete_dialog_new (ClayDataFactory *factory,
+                                    ClayData        *data,
+                                    ClayContext     *context,
                                     GtkWidget       *parent);

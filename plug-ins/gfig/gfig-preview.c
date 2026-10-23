@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 1995 Spencer Kimball and Peter Mattis
  *
- * This is a plug-in for GIMP.
+ * This is a plug-in for Clay.
  *
  * Generates images containing vector type drawings.
  *
@@ -23,15 +23,15 @@
 
 #include "config.h"
 
-#include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+#include <libclay/clay.h>
+#include <libclay/clayui.h>
 
 #include "gfig.h"
 #include "gfig-grid.h"
 #include "gfig-dobject.h"
 #include "gfig-preview.h"
 
-#include "libgimp/stdplugins-intl.h"
+#include "libclay/stdplugins-intl.h"
 
 #define PREVIEW_MASK  (GDK_EXPOSURE_MASK       | \
                        GDK_POINTER_MOTION_MASK | \
@@ -66,7 +66,7 @@ static void       gfig_pos_update        (gint      x,
 static void       gfig_pos_update_labels (gpointer  data);
 
 GtkWidget *
-make_preview (GimpGfig *gfig)
+make_preview (ClayGfig *gfig)
 {
   GtkWidget *frame;
   GtkWidget *vbox;
@@ -100,16 +100,16 @@ make_preview (GimpGfig *gfig)
   gtk_grid_attach (GTK_GRID (grid), gfig_context->preview, 1, 1, 1, 1);
   gtk_container_add (GTK_CONTAINER (frame), grid);
 
-  ruler = gimp_ruler_new (GTK_ORIENTATION_HORIZONTAL);
-  gimp_ruler_set_range (GIMP_RULER (ruler), 0, preview_width, PREVIEW_SIZE);
+  ruler = clay_ruler_new (GTK_ORIENTATION_HORIZONTAL);
+  clay_ruler_set_range (CLAY_RULER (ruler), 0, preview_width, PREVIEW_SIZE);
   g_signal_connect_swapped (gfig_context->preview, "motion-notify-event",
                             G_CALLBACK (GTK_WIDGET_CLASS (G_OBJECT_GET_CLASS (ruler))->motion_notify_event),
                             ruler);
   gtk_grid_attach (GTK_GRID (grid), ruler, 1, 0, 1, 1);
   gtk_widget_set_visible (ruler, TRUE);
 
-  ruler = gimp_ruler_new (GTK_ORIENTATION_VERTICAL);
-  gimp_ruler_set_range (GIMP_RULER (ruler), 0, preview_height, PREVIEW_SIZE);
+  ruler = clay_ruler_new (GTK_ORIENTATION_VERTICAL);
+  clay_ruler_set_range (CLAY_RULER (ruler), 0, preview_height, PREVIEW_SIZE);
   g_signal_connect_swapped (gfig_context->preview, "motion-notify-event",
                             G_CALLBACK (GTK_WIDGET_CLASS (G_OBJECT_GET_CLASS (ruler))->motion_notify_event),
                             ruler);
@@ -147,9 +147,9 @@ static void
 draw_background (cairo_t  *cr)
 {
   if (! back_pixbuf)
-    back_pixbuf = gimp_image_get_thumbnail (gfig_context->image,
+    back_pixbuf = clay_image_get_thumbnail (gfig_context->image,
                                             preview_width, preview_height,
-                                            GIMP_PIXBUF_LARGE_CHECKS);
+                                            CLAY_PIXBUF_LARGE_CHECKS);
 
   if (back_pixbuf)
     {
@@ -205,7 +205,7 @@ gfig_preview_events (GtkWidget *widget,
               point.x = gfig_invscale_x (point.x);
               point.y = gfig_invscale_y (point.y);
             }
-          object_operation_start (GIMP_GFIG (data), &point,
+          object_operation_start (CLAY_GFIG (data), &point,
                                   bevent->state & GDK_SHIFT_MASK);
 
           /* If constraining save start pnt */
@@ -251,7 +251,7 @@ gfig_preview_events (GtkWidget *widget,
         {
           if (obj_creating)
             {
-              object_end (GIMP_GFIG (data), &point, bevent->state & GDK_SHIFT_MASK);
+              object_end (CLAY_GFIG (data), &point, bevent->state & GDK_SHIFT_MASK);
             }
           else
             break;
@@ -319,7 +319,7 @@ make_pos_info (void)
   GtkWidget *hbox;
   GtkWidget *label;
 
-  frame = gimp_frame_new (_("Object Details"));
+  frame = clay_frame_new (_("Object Details"));
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);

@@ -1,4 +1,4 @@
-; Test gimp-<image format>-export PDB procedures
+; Test clay-<image format>-export PDB procedures
 
 ; Tests image export methods of the PDB
 
@@ -11,7 +11,7 @@
 ; setup
 
 (define testImage (testing:load-test-image-basic-v3))
-(assert `(gimp-image-id-is-valid ,testImage))
+(assert `(clay-image-id-is-valid ,testImage))
 
 
 
@@ -215,7 +215,7 @@
 
     ; eat our own dog food
     ; exported file is importable.
-    (gimp-image-delete (gimp-file-load RUN-NONINTERACTIVE tempTestFile))
+    (clay-image-delete (clay-file-load RUN-NONINTERACTIVE tempTestFile))
 
     (set! count (- count 1))))
 
@@ -234,42 +234,42 @@
 ; Not sure that is necessary, but the file loader might examine it.
 
 ; JPG
-(define tempTestFile (gimp-temp-file "jpg"))
+(define tempTestFile (clay-temp-file "jpg"))
 (iterate-exporter randomize-jpg-export testImage tempTestFile 10)
 
 ; PNG
-(define tempTestFile (gimp-temp-file "png"))
+(define tempTestFile (clay-temp-file "png"))
 (iterate-exporter randomize-png-export testImage tempTestFile 10)
 
 ; BMP
-(define tempTestFile (gimp-temp-file "bmp"))
+(define tempTestFile (clay-temp-file "bmp"))
 (iterate-exporter randomize-bmp-export testImage tempTestFile 10)
 
 ; WEBP
-(define tempTestFile (gimp-temp-file "webp"))
+(define tempTestFile (clay-temp-file "webp"))
 (iterate-exporter randomize-webp-export testImage tempTestFile 10)
 
 ; TIFF
-; Passes, but warns to GIMP Error Console
-(define tempTestFile (gimp-temp-file "tiff"))
+; Passes, but warns to Clay Error Console
+(define tempTestFile (clay-temp-file "tiff"))
 (iterate-exporter randomize-tiff-export testImage tempTestFile 10)
 
 ; GIH brush pipe
-(define tempTestFile (gimp-temp-file "gih"))
+(define tempTestFile (clay-temp-file "gih"))
 (iterate-exporter randomize-gih-export testImage tempTestFile 10)
 
 ; TODO until randomized, only call once
 ; GIF
-(define tempTestFile (gimp-temp-file "gif"))
+(define tempTestFile (clay-temp-file "gif"))
 (iterate-exporter randomize-gif-export testImage tempTestFile 1)
 
 ; PDF
-(define tempTestFile (gimp-temp-file "pdf"))
+(define tempTestFile (clay-temp-file "pdf"))
 (iterate-exporter randomize-pdf-export testImage tempTestFile 1)
 
 ; RAW
 ; requires a separate loader app installed: RawTherapee or darktable
-;(define tempTestFile (gimp-temp-file "raw"))
+;(define tempTestFile (clay-temp-file "raw"))
 ;(iterate-exporter randomize-raw-export testImage tempTestFile 10)
 
 ; XCF has no options yet, and is tested elsewhere
@@ -282,7 +282,7 @@
 
 ; cleanup
 ; Delete image but not the created file.
-(gimp-image-delete testImage)
+(clay-image-delete testImage)
 
 
 (script-fu-use-v2)

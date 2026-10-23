@@ -1,0 +1,29 @@
+/* Clay colour scheme "Espresso": a palette laid over the selected theme's dark variant.
+ * Only @define-color values, so it works with every theme. */
+
+@define-color fg-color                   rgb(241,226,204);
+@define-color bg-color                   rgb(28,19,14);
+@define-color border-color               rgb(58,48,41);
+@define-color dimmed-fg-color            rgb(188,174,156);
+@define-color disabled-fg-color          rgb(145,133,118);
+@define-color disabled-button-color      rgb(96,85,75);
+@define-color hover-color                rgb(58,48,41);
+@define-color widget-bg-color            rgb(41,31,25);
+@define-color selected-color             rgb(71,60,52);
+@define-color extreme-bg-color           rgb(20,13,10);
+@define-color extreme-selected-color     rgb(58,48,41);
+@define-color strong-border-color        rgb(103,91,80);
+@define-color stronger-border-color      rgb(103,91,80);
+@define-color edge-border-color          rgb(103,91,80);
+@define-color scrollbar-slider-color     rgb(103,91,80);
+@define-color scrollbar-trough-color     rgb(20,13,10);
+@define-color ruler-color                rgba(58,48,41,0.3);
+@define-color accent-color               rgb(224,169,109);
+@define-color accent-hover-color         rgb(230,186,138);
+@define-color on-accent-color            rgb(28,19,14);
+@define-color destructive-color          rgb(224,123,74);
+@define-color good-color                 rgb(111,191,138);
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  @selected-color;
+@define-color theme_unfocused_selected_fg_color  @fg-color;

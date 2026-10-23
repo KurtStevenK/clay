@@ -18,27 +18,27 @@
 #pragma once
 
 
-typedef void (* GimpConvertIndexedCallback) (GtkWidget              *dialog,
-                                             GimpImage              *image,
-                                             GimpConvertPaletteType  palette_type,
+typedef void (* ClayConvertIndexedCallback) (GtkWidget              *dialog,
+                                             ClayImage              *image,
+                                             ClayConvertPaletteType  palette_type,
                                              gint                    max_colors,
                                              gboolean                remove_duplicates,
-                                             GimpConvertDitherType   dither_type,
+                                             ClayConvertDitherType   dither_type,
                                              gboolean                dither_alpha,
                                              gboolean                dither_text_layers,
-                                             GimpPalette            *custom_palette,
+                                             ClayPalette            *custom_palette,
                                              gpointer                user_data);
 
 
-GtkWidget * convert_indexed_dialog_new (GimpImage                  *image,
-                                        GimpContext                *context,
+GtkWidget * convert_indexed_dialog_new (ClayImage                  *image,
+                                        ClayContext                *context,
                                         GtkWidget                  *parent,
-                                        GimpConvertPaletteType      palette_type,
+                                        ClayConvertPaletteType      palette_type,
                                         gint                        max_colors,
                                         gboolean                    remove_duplicates,
-                                        GimpConvertDitherType       dither_type,
+                                        ClayConvertDitherType       dither_type,
                                         gboolean                    dither_alpha,
                                         gboolean                    dither_text_layers,
-                                        GimpPalette                *custom_palette,
-                                        GimpConvertIndexedCallback  callback,
+                                        ClayPalette                *custom_palette,
+                                        ClayConvertIndexedCallback  callback,
                                         gpointer                    user_data);

@@ -18,6 +18,6 @@
 #pragma once
 
 
-void   data_editor_edit_active_cmd_callback (GimpAction *action,
+void   data_editor_edit_active_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);

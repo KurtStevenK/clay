@@ -1,0 +1,13 @@
+[Icon Theme]
+Name=Blue
+Comment=Clay icons in Lane blue
+Inherits=hicolor
+Example=clay-wilber
+Directories=scalable/apps
+
+[scalable/apps]
+Size=16
+MinSize=8
+MaxSize=512
+Context=Applications
+Type=Scalable

@@ -25,34 +25,34 @@
 
 (define (script-fu-old-photo inImage inLayer inDefocus inBorderSize inSepia inMottle inCopy)
   (let (
-       (theImage (if (= inCopy TRUE) (car (gimp-image-duplicate inImage)) inImage))
+       (theImage (if (= inCopy TRUE) (car (clay-image-duplicate inImage)) inImage))
        (theLayer 0)
        (theWidth 0)
        (theHeight 0)
        )
   (if (= inCopy TRUE)
-     (gimp-image-undo-disable theImage)
-     (gimp-image-undo-group-start theImage)
+     (clay-image-undo-disable theImage)
+     (clay-image-undo-group-start theImage)
   )
 
-  (gimp-selection-all theImage)
+  (clay-selection-all theImage)
 
-  (set! theLayer (car (gimp-image-flatten theImage)))
+  (set! theLayer (car (clay-image-flatten theImage)))
   (if (= inDefocus TRUE)
-      (gimp-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 0.48 "std-dev-y" 0.48 "filter" "auto")
+      (clay-drawable-merge-new-filter theLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 0.48 "std-dev-y" 0.48 "filter" "auto")
   )
   (if (> inBorderSize 0)
       (script-fu-fuzzy-border theImage (vector theLayer) '(255 255 255)
                               inBorderSize TRUE 8 FALSE 100 FALSE TRUE )
   )
-  (set! theLayer (car (gimp-image-flatten theImage)))
+  (set! theLayer (car (clay-image-flatten theImage)))
 
   (if (= inSepia TRUE)
-      (begin (gimp-drawable-merge-new-filter theLayer "gimp:desaturate" 0 LAYER-MODE-REPLACE 1.0 "mode" DESATURATE-LIGHTNESS)
-             (gimp-drawable-merge-new-filter theLayer "gimp:brightness-contrast" 0 LAYER-MODE-REPLACE 1.0
+      (begin (clay-drawable-merge-new-filter theLayer "clay:desaturate" 0 LAYER-MODE-REPLACE 1.0 "mode" DESATURATE-LIGHTNESS)
+             (clay-drawable-merge-new-filter theLayer "clay:brightness-contrast" 0 LAYER-MODE-REPLACE 1.0
                  "brightness" -0.078125
                  "contrast"   -0.15625)
-             (gimp-drawable-merge-new-filter theLayer "gimp:color-balance" 0 LAYER-MODE-REPLACE 1.0
+             (clay-drawable-merge-new-filter theLayer "clay:color-balance" 0 LAYER-MODE-REPLACE 1.0
                  "range"               TRANSFER-SHADOWS
                  "cyan-red"            0.3
                  "magenta-green"       0.0
@@ -60,37 +60,37 @@
                  "preserve-luminosity" TRUE)
       )
   )
-  (set! theWidth (car (gimp-image-get-width theImage)))
-  (set! theHeight (car (gimp-image-get-height theImage)))
+  (set! theWidth (car (clay-image-get-width theImage)))
+  (set! theHeight (car (clay-image-get-height theImage)))
   (if (= inMottle TRUE)
       (let (
-	    (mLayer (car (gimp-layer-new theImage "Mottle"
+	    (mLayer (car (clay-layer-new theImage "Mottle"
                                          theWidth theHeight RGBA-IMAGE
 					 100 LAYER-MODE-DARKEN-ONLY)))
 	    )
 
-             (gimp-image-insert-layer theImage mLayer 0 0)
-             (gimp-selection-all theImage)
-             (gimp-drawable-edit-clear mLayer)
-             (gimp-selection-none theImage)
-             (gimp-drawable-merge-new-filter mLayer "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
+             (clay-image-insert-layer theImage mLayer 0 0)
+             (clay-selection-all theImage)
+             (clay-drawable-edit-clear mLayer)
+             (clay-selection-none theImage)
+             (clay-drawable-merge-new-filter mLayer "gegl:noise-rgb" 0 LAYER-MODE-REPLACE 1.0
                                              "independent" TRUE "red" 0.0 "green" 0.0 "blue" 0.0 "alpha" 0.5
                                              "correlated" FALSE "seed" (msrg-rand) "linear" TRUE)
-             (gimp-drawable-merge-new-filter mLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 1.6 "std-dev-y" 1.6 "filter" "auto")
-             (set! theLayer (car (gimp-image-flatten theImage)))
+             (clay-drawable-merge-new-filter mLayer "gegl:gaussian-blur" 0 LAYER-MODE-REPLACE 1.0 "std-dev-x" 1.6 "std-dev-y" 1.6 "filter" "auto")
+             (set! theLayer (car (clay-image-flatten theImage)))
       )
   )
-  (gimp-selection-none theImage)
+  (clay-selection-none theImage)
 
   (if (= inCopy TRUE)
-      (begin  (gimp-image-clean-all theImage)
-              (gimp-display-new theImage)
-              (gimp-image-undo-enable theImage)
+      (begin  (clay-image-clean-all theImage)
+              (clay-display-new theImage)
+              (clay-image-undo-enable theImage)
       )
-      (gimp-image-undo-group-end theImage)
+      (clay-image-undo-group-end theImage)
   )
 
-  (gimp-displays-flush)
+  (clay-displays-flush)
   )
 )
 
