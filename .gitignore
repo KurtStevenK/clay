@@ -6,6 +6,8 @@
 # Local / machine-specific
 _build/
 _install/
+_src/
+debug-*.log
 _ico-preview-config/
 _theme-verify-config/
 _clay-launch.err
