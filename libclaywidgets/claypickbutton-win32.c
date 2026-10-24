@@ -249,7 +249,11 @@ create_cursor_from_rgba32_pixbuf (GdkPixbuf *pixbuf,
   struct {
     BITMAPV5HEADER header;
     RGBQUAD        colors[2];
-  }                info;
+  }                info = {{0}};
+  struct {
+    BITMAPV5HEADER header;
+    RGBQUAD        colors[2];
+  }                mask_info = {{0}};
   HBITMAP          bitmap      = NULL;
   uint8_t         *bitmap_data = NULL;
   HBITMAP          mask        = NULL;
@@ -281,7 +285,6 @@ create_cursor_from_rgba32_pixbuf (GdkPixbuf *pixbuf,
   size        = MAX (width, height);
   pixbuf_data = gdk_pixbuf_get_pixels (pixbuf);
 
-  memset (&info, 0, sizeof (info));
   info.header.bV5Size        = sizeof (info.header);
   info.header.bV5Width       = size;
   info.header.bV5Height      = size;
@@ -308,17 +311,16 @@ create_cursor_from_rgba32_pixbuf (GdkPixbuf *pixbuf,
   /* We also need to provide a proper mask HBITMAP, otherwise
    * CreateIconIndirect() fails with ERROR_INVALID_PARAMETER.
    * This mask bitmap is a bitfield indicating whether the */
-  memset (&info, 0, sizeof (info));
-  info.header.bV5Size        = sizeof (info.header);
-  info.header.bV5Width       = size;
-  info.header.bV5Height      = size;
-  info.header.bV5Planes      = 1;
-  info.header.bV5BitCount    = 1;
-  info.header.bV5Compression = BI_RGB;
-  info.colors[0]             = (RGBQUAD){0x00, 0x00, 0x00};
-  info.colors[1]             = (RGBQUAD){0xFF, 0xFF, 0xFF};
+  mask_info.header.bV5Size        = sizeof (mask_info.header);
+  mask_info.header.bV5Width       = size;
+  mask_info.header.bV5Height      = size;
+  mask_info.header.bV5Planes      = 1;
+  mask_info.header.bV5BitCount    = 1;
+  mask_info.header.bV5Compression = BI_RGB;
+  mask_info.colors[0]             = (RGBQUAD){0x00, 0x00, 0x00};
+  mask_info.colors[1]             = (RGBQUAD){0xFF, 0xFF, 0xFF};
 
-  mask = CreateDIBSection (hdc, (BITMAPINFO*) &info, DIB_RGB_COLORS,
+  mask = CreateDIBSection (hdc, (BITMAPINFO*) &mask_info, DIB_RGB_COLORS,
                            (void**) &mask_data, NULL, 0);
   if (!mask || !mask_data)
     {
