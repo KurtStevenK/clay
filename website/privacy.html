@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clay — Privacy</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          base: '#FFFCF0', border: '#E5E2D8',
+          text: '#100F0F', 'text-secondary': '#454340',
+          accent: '#205EA6', 'accent-hover': '#4274B3', 'on-accent': '#FFFFFF',
+        },
+        fontFamily: {
+          mono: ['"JetBrains Mono"', 'monospace'],
+          geist: ['Geist', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-base text-text font-mono min-h-screen">
+  <main class="max-w-[760px] mx-auto px-6 py-24">
+    <p class="mb-8"><a href="/" class="text-accent hover:text-accent-hover text-[15px]">← Clay</a></p>
+    <h1 class="font-geist text-[28px] font-semibold tracking-tight mb-2">Privacy policy</h1>
+    <p class="text-[13px] text-text-secondary mb-10">Last updated: 22 October 2026</p>
+
+    <h2 class="font-geist text-[19px] font-semibold mb-3">Clay collects no data</h2>
+    <p class="text-[15px] text-text-secondary mb-8">Clay has no accounts, no analytics, no advertising and no tracking. It does not send your images, settings or usage information to the developer or to anyone else.</p>
+
+    <h2 class="font-geist text-[19px] font-semibold mb-3">Your files stay on your Mac</h2>
+    <p class="text-[15px] text-text-secondary mb-8">Images you open and save, and Clay's preferences, brushes and other resources, are stored only on your computer. Clay reads files only when you open them.</p>
+
+    <h2 class="font-geist text-[19px] font-semibold mb-3">When Clay uses the network</h2>
+    <p class="text-[15px] text-text-secondary mb-8">Clay connects to the internet only when you ask it to, for example to open an image from a web address or to show the online help. Those requests go directly to the site you chose, which has its own privacy policy.</p>
+
+    <h2 class="font-geist text-[19px] font-semibold mb-3">App Store and TestFlight</h2>
+    <p class="text-[15px] text-text-secondary mb-8">If you install Clay from the Mac App Store or TestFlight, Apple may share crash reports and feedback with the developer when you agree to it in macOS. Apple's privacy policy covers that data.</p>
+
+    <h2 class="font-geist text-[19px] font-semibold mb-3">Contact</h2>
+    <p class="text-[15px] text-text-secondary mb-8">Questions about privacy: open an issue at <a href="https://github.com/KurtStevenK/clay/issues" class="text-accent hover:text-accent-hover">github.com/KurtStevenK/clay/issues</a>.</p>
+  </main>
+</body>
+</html>

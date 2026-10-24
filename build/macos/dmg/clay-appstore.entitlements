@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Mac App Store build of the main executable. %TEAM_ID% and
+       %BUNDLE_IDENTIFIER% are filled in by clay-appstore-local.sh -->
+  <key>com.apple.security.app-sandbox</key>
+  <true/>
+  <key>com.apple.application-identifier</key>
+  <string>%TEAM_ID%.%BUNDLE_IDENTIFIER%</string>
+  <key>com.apple.developer.team-identifier</key>
+  <string>%TEAM_ID%</string>
+  <!-- Open and save images the user picks -->
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+  <key>com.apple.security.files.bookmarks.app-scope</key>
+  <true/>
+  <!-- The GTK file dialog is not NSOpenPanel, so it can not grant access to
+       picked files; these folders are reachable without it -->
+  <key>com.apple.security.assets.pictures.read-write</key>
+  <true/>
+  <key>com.apple.security.files.downloads.read-write</key>
+  <true/>
+  <!-- Opening URLs (file-uri plug-in) and the online help -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+  <key>com.apple.security.print</key>
+  <true/>
+</dict>
+</plist>
