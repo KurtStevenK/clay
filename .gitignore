@@ -9,6 +9,10 @@ _install/
 _src/
 third_party/
 _mcp_fill.py
+__pycache__/
+*.pyc
+tools/clay-mcp/_stderr*.log
+tools/clay-mcp/_stdout*.log
 debug-*.log
 _ico-preview-config/
 _theme-verify-config/
