@@ -1,0 +1,37 @@
+@import url("common.css");
+
+paned.horizontal > separator {
+  background-image: url("../Windows/ui/separator-handle-v-dark.svg");
+}
+
+paned.vertical > separator {
+  background-image: url("../Windows/ui/separator-handle-h-dark.svg");
+}
+
+button:not(.flat),
+button:not(.flat):hover {
+  box-shadow: none;
+}
+
+/* One quiet icon color. Easier to scan than a rainbow toolbar. */
+image,
+button image,
+toolbutton button image,
+menuitem image,
+notebook header tabs tab image,
+treeview.view image {
+  color: rgb(214,214,214);
+}
+
+button:disabled image,
+menuitem:disabled image {
+  color: @disabled-fg-color;
+}
+
+button.suggested-action image,
+treeview.view:selected image,
+row:selected image {
+  color: @on-accent-color;
+}
+
+@import url("readability.css");

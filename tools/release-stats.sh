@@ -345,7 +345,7 @@ count_repo_contributors "../clay-test-images" main "The \`clay-test-images\` (un
 # TODO:
 # * flatpak often has bot commits. These should be filtered out.
 # * detect a beta vs. stable release and tweak branch accordingly.
-count_repo_contributors "../org.clay.Clay" master "The flatpak release had %d commits by %d contributors: %s"
+count_repo_contributors "../xyz.kainzmayer.clay" master "The flatpak release had %d commits by %d contributors: %s"
 count_repo_contributors "../clay-web" testing "Our main website (what you are reading right now) had %d commits by %d contributors: %s"
 count_repo_contributors "../clay-web-devel" testing "Our [developer website](https://developer.gimp.org/) had %d commits by %d contributors: %s"
 count_repo_contributors "../clay-help" master "Our [3.0 documentation](https://docs.gimp.org/) had %d commits by %d contributors: %s"

@@ -2,7 +2,7 @@ app/widgets/gtkscalebutton.c
 build/windows/installer/lang/setup.isl.in
 data/tags/clay-tags-default.xml.in
 data/tips/clay-tips.xml.in
-desktop/org.clay.Clay.appdata.xml.in
+desktop/xyz.kainzmayer.clay.appdata.xml.in
 desktop/clay.desktop.in
 extensions
 libclay

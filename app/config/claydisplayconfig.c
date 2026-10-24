@@ -199,7 +199,7 @@ clay_display_config_class_init (ClayDisplayConfigClass *klass)
                             "initial-zoom-to-fit",
                             "Initial zoom-to-fit",
                             INITIAL_ZOOM_TO_FIT_BLURB,
-                            TRUE,
+                            FALSE,
                             CLAY_PARAM_STATIC_STRINGS);
 
   CLAY_CONFIG_PROP_ENUM (object_class, PROP_DRAG_ZOOM_MODE,

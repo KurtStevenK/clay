@@ -231,7 +231,7 @@ foreach ($bundle in $supported_archs)
     $xmlObject.iso_639_entries.iso_639_entry | Foreach-Object { $ms_codes[$_.dl_code -replace '_','-' -replace '@latin','-Latn' -replace '@','-'] = $_.ms_code }
     ### Get developer name, name, summary and description paragraphs ('p1', 'p2' etc) of each language
     $xmlObject = New-Object XML
-    $xmlObject.Load("$(Resolve-Path $build_dir)\desktop\org.clay.Clay.appdata.xml")
+    $xmlObject.Load("$(Resolve-Path $build_dir)\desktop\xyz.kainzmayer.clay.appdata.xml")
     $msix_langs = [ordered]@{}
     $p_count = 0
     foreach ($node in $xmlObject.component.SelectNodes('developer_name | name | summary | description/p'))
@@ -559,7 +559,7 @@ if ("$CI_COMMIT_TAG" -eq (git describe --all | Foreach-Object {$_ -replace 'tags
         $jsonObject = msstore submission get $env:PRODUCT_ID | ConvertFrom-Json -AsHashtable; if ("$LASTEXITCODE" -gt '0') { exit 1 }
         ###Get changelog and others from Linux appdata
         $xmlObject = New-Object XML
-        $xmlObject.Load("$PWD\desktop\org.clay.Clay.appdata.xml.in.in")
+        $xmlObject.Load("$PWD\desktop\xyz.kainzmayer.clay.appdata.xml.in.in")
         if ($xmlObject.component.releases.release[0].version -ne ("$env:CLAY_VERSION".ToLower() -replace '-','~'))
           {
             #This check is needed to ensure the right release notes etc when the submission is (rarely) done manually/locally

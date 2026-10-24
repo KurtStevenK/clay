@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>xyz.kainzmayer.clay.extension.vfx-pack</id>
+  <extends>xyz.kainzmayer.clay</extends>
+  <name>Cyberpunk &amp; Film VFX</name>
+  <summary>Chromatic aberration, VHS, bloom, film grain, halftone</summary>
+  <description>
+    <p>Stylized VFX filters for Clay.</p>
+  </description>
+  <url type="homepage">https://claydesign.web.app</url>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <releases>
+   <release version="1.0.0" date="2026-10-23" />
+  </releases>
+  <requires>
+   <id version="3.0.0" compare="ge">xyz.kainzmayer.clay</id>
+  </requires>
+  <custom>
+   <value key="Clay::plug-in-path">@PLUGIN_SCRIPT@</value>
+  </custom>
+</component>

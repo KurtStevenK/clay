@@ -67,7 +67,9 @@ clay_gradient_load (ClayContext   *context,
   if (! line)
     goto failed;
 
-  if (! g_str_has_prefix (line, "Clay Gradient"))
+  /* Older files shipped as "GIMP Gradient" use the same body. */
+  if (! g_str_has_prefix (line, "Clay Gradient") &&
+      ! g_str_has_prefix (line, "GIMP Gradient"))
     {
       g_set_error (error, CLAY_DATA_ERROR, CLAY_DATA_ERROR_READ,
                    _("Not a Clay gradient file."));

@@ -34,6 +34,29 @@
 typedef struct _ClayExtensionManagerClass   ClayExtensionManagerClass;
 typedef struct _ClayExtensionManagerPrivate ClayExtensionManagerPrivate;
 
+typedef struct _ClayStoreEntry ClayStoreEntry;
+
+struct _ClayStoreEntry
+{
+  gchar    *id;
+  gchar    *name;
+  gchar    *name_de;
+  gchar    *summary;
+  gchar    *summary_de;
+  gchar    *description;
+  gchar    *category;
+  gchar    *tags;
+  gchar    *version;
+  gchar    *author;
+  gchar    *icon_name;
+  gchar    *download_url;
+  gchar    *local_gex_path;
+  gchar    *menu_hint;
+  gdouble   rating;
+  gint      downloads;
+  gboolean  featured;
+};
+
 struct _ClayExtensionManager
 {
   ClayObject                   parent_instance;
@@ -50,6 +73,7 @@ struct _ClayExtensionManagerClass
                                              gboolean              is_system_ext);
   void              (* extension_removed)   (ClayExtensionManager *manager,
                                              gchar                *extension_id);
+  void              (* store_updated)       (ClayExtensionManager *manager);
 };
 
 
@@ -79,3 +103,23 @@ gboolean               clay_extension_manager_remove                (ClayExtensi
 gboolean               clay_extension_manager_undo_remove           (ClayExtensionManager *manager,
                                                                      ClayExtension        *extension,
                                                                      GError              **error);
+
+ClayExtension        * clay_extension_manager_lookup                (ClayExtensionManager *manager,
+                                                                     const gchar          *id);
+
+const GList          * clay_extension_manager_get_store_catalog     (ClayExtensionManager *manager);
+GList                * clay_extension_manager_search_store          (ClayExtensionManager *manager,
+                                                                     const gchar          *query,
+                                                                     const gchar          *category);
+ClayStoreEntry       * clay_extension_manager_find_store_entry      (ClayExtensionManager *manager,
+                                                                     const gchar          *id);
+void                   clay_extension_manager_refresh_store         (ClayExtensionManager *manager);
+
+gboolean               clay_extension_manager_install_from_directory (ClayExtensionManager *manager,
+                                                                      const gchar          *path,
+                                                                      GError              **error);
+gboolean               clay_extension_manager_install_from_store     (ClayExtensionManager *manager,
+                                                                      const gchar          *entry_id,
+                                                                      GError              **error);
+
+void                   clay_store_entry_free                        (ClayStoreEntry       *entry);

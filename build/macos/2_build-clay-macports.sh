@@ -40,7 +40,7 @@ printf "\e[0Ksection_start:`date +%s`:clay_build[collapsed=true]\r\e[0KBuilding 
 if [ ! -f "_build-$(uname -m)/build.ninja" ]; then
   meson setup _build-$(uname -m) -Dprefix="$CLAY_PREFIX" $NON_RELOCATABLE_OPTION $WARN_AS_ERROR_ON_CI \
               $PKGCONF_RELOCATABLE_OPTION $DMG_OPTION \
-              -Denable-default-bin=enabled -Dbuild-id=org.clay.CLAY_official \
+              -Denable-default-bin=enabled -Dbuild-id=xyz.kainzmayer.clay.official \
               -Dc_args="-I${OPT_PREFIX}/include" -Dcpp_args="-I${OPT_PREFIX}/include" -Dc_link_args="-L${OPT_PREFIX}/lib" -Dcpp_link_args="-L${OPT_PREFIX}/lib"
 fi
 cd _build-$(uname -m)

@@ -1,0 +1,86 @@
+/* Layout: larger type, clearer panels, Photoshop-style blue selection. */
+
+* {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+label,
+entry,
+textview,
+textview text,
+treeview,
+treeview.view,
+menuitem,
+menu,
+button,
+combobox,
+spinbutton,
+notebook header tabs tab,
+tooltip,
+.view {
+  font-size: 10.5pt;
+}
+
+menu,
+menuitem {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+entry {
+  min-height: 24px;
+  padding: 2px 8px;
+}
+
+button {
+  min-height: 24px;
+  border-radius: 2px;
+}
+
+notebook header tabs tab {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-weight: 600;
+}
+
+notebook header tabs tab:checked {
+  background-color: @accent-color;
+  color: @on-accent-color;
+  box-shadow: none;
+}
+
+.view,
+treeview.view {
+  background-color: @extreme-bg-color;
+  color: @fg-color;
+}
+
+.view:selected,
+treeview.view:selected,
+.view row:selected {
+  background-color: @accent-color;
+  color: @on-accent-color;
+}
+
+tooltip {
+  background-color: rgb(28,28,28);
+  color: rgb(245,245,245);
+  border: 1px solid rgb(80,80,80);
+}
+
+scrollbar slider {
+  border-radius: 4px;
+  min-width: 8px;
+  min-height: 8px;
+}
+
+ClayDock,
+ClayToolbox {
+  background-color: @bg-color;
+}
+
+#image-menubar {
+  background-color: rgb(38,38,38);
+  color: @fg-color;
+  border-bottom: 1px solid rgb(20,20,20);
+}

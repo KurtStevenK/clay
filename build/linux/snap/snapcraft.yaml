@@ -15,7 +15,7 @@ platforms:
 
 apps:
   clay:
-    common-id: org.clay.Clay
+    common-id: xyz.kainzmayer.clay
     command: usr/bin/clay
     command-chain: [command-chain/enable-plugins]
     desktop: usr/share/applications/clay.desktop
@@ -62,7 +62,7 @@ slots:
   dbus-clay:
     interface: dbus
     bus: session
-    name: org.clay.Clay.UI
+    name: xyz.kainzmayer.ClayDesign.UI
 
 plugs:
   intel-npu:
@@ -182,7 +182,7 @@ parts:
       - -Dgi-docgen=disabled
       - -Dcheck-update=no
       - -Denable-default-bin=enabled
-      - -Dbuild-id=org.clay.Clay.snapcraft.experimental
+      - -Dbuild-id=xyz.kainzmayer.clay.snapcraft.experimental
     build-packages:
       - bison
       - flex
@@ -225,7 +225,7 @@ parts:
       echo "(plug-in-path \"${current_path}:/snap/${SNAPCRAFT_PROJECT_NAME}/current/clay-plugins\")" >> ${CRAFT_PART_INSTALL}/etc/clay/3.0/clayrc
       craftctl default
     parse-info:
-      - usr/share/metainfo/org.clay.Clay.appdata.xml
+      - usr/share/metainfo/xyz.kainzmayer.clay.appdata.xml
     override-prime: |
       # get clay icon for proper desktop integration
       cp $CRAFT_STAGE/usr/share/icons/hicolor/scalable/apps/clay.svg $CRAFT_PRIME/clay

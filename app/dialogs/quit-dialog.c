@@ -274,6 +274,10 @@ quit_close_all_dialog_response (GtkWidget  *dialog,
       else
         clay_displays_close (clay);
     }
+  else if (do_quit)
+    {
+      clay_restart_cancel (clay);
+    }
 }
 
 static void

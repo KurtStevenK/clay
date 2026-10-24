@@ -22,6 +22,8 @@
 #define __APP_CLAY_WIDGETS_UTILS_H__
 
 
+void              clay_language_flags_register       (void);
+
 GtkWidget       * clay_menu_item_get_image         (GtkMenuItem          *item);
 void              clay_menu_item_set_image         (GtkMenuItem          *item,
                                                     GtkWidget            *image,

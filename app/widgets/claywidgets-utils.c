@@ -2913,3 +2913,47 @@ themes_get_system_accent_color (gboolean prefer_dark)
 }
 #endif
 #endif
+
+void
+clay_language_flags_register (void)
+{
+  static const gchar *files[] =
+  {
+    "system", "de", "en", "fr", "es", "it", "pt", "nl", "pl",
+    "ru", "zh", "ja", "ko", "tr", "ar", "sv"
+  };
+  static gboolean done = FALSE;
+  guint i;
+
+  if (done)
+    return;
+  done = TRUE;
+
+  for (i = 0; i < G_N_ELEMENTS (files); i++)
+    {
+      GFile     *file;
+      gchar     *path;
+      gchar     *png;
+      gchar     *icon;
+      GdkPixbuf *pixbuf;
+
+      png = g_strdup_printf ("%s.png", files[i]);
+      file = clay_data_directory_file ("icons", "flags", png, NULL);
+      path = g_file_get_path (file);
+      pixbuf = gdk_pixbuf_new_from_file (path, NULL);
+
+      if (pixbuf)
+        {
+          icon = g_strdup_printf ("clay-lang-%s", files[i]);
+          gtk_icon_theme_add_builtin_icon (icon,
+                                           gdk_pixbuf_get_width (pixbuf),
+                                           pixbuf);
+          g_free (icon);
+          g_object_unref (pixbuf);
+        }
+
+      g_free (path);
+      g_free (png);
+      g_object_unref (file);
+    }
+}

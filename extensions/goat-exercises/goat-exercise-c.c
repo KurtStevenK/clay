@@ -218,7 +218,7 @@ goat_run (ClayProcedure        *procedure,
       gtk_widget_set_visible (scrolled, TRUE);
 
       path = g_build_filename (clay_plug_in_directory (), "extensions",
-                               "org.clay.extension.goat-exercises", PLUG_IN_SOURCE,
+                               "xyz.kainzmayer.clay.extension.goat-exercises", PLUG_IN_SOURCE,
                                NULL);
       file = g_file_new_for_path (path);
       g_free (path);

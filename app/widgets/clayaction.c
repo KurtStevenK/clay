@@ -1111,7 +1111,15 @@ clay_action_set_proxy (ClayAction *action,
         }
       else
         {
-          if (CLAY_IS_PROCEDURE_ACTION (action) &&
+          if (priv->icon_name &&
+              g_str_has_prefix (priv->icon_name, "clay-lang-"))
+            {
+              proxy_image = gtk_image_new_from_icon_name (priv->icon_name,
+                                                          GTK_ICON_SIZE_MENU);
+              gtk_image_set_pixel_size (GTK_IMAGE (proxy_image), 18);
+              gtk_widget_set_visible (proxy_image, TRUE);
+            }
+          else if (CLAY_IS_PROCEDURE_ACTION (action) &&
               /* Some special cases ClayProcedureAction have no procedure attached
                * (e.g. "filters-recent-*" actions.
                */

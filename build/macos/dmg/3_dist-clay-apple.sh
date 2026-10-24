@@ -43,13 +43,13 @@ eval $(sed -n 's/^#define  *\([^ ]*\)  *\(.*\) *$/export \1=\2/p' $BUILD_DIR/con
 
 # Set proper identifier and bundle name
 if [ -z "$CLAY_RELEASE" ] || [ -n "$CLAY_IS_RC_GIT" ]; then
-  BUNDLE_IDENTIFIER="org.clay.clay.internal"
+  BUNDLE_IDENTIFIER="xyz.kainzmayer.clay.internal"
   BUNDLE_NAME="Clay (Nightly)"
 elif { [ -n "$CLAY_RELEASE" ] && [ -n "$CLAY_UNSTABLE" ]; } || [ -n "$CLAY_RC_VERSION" ]; then
-  BUNDLE_IDENTIFIER="org.clay.clay.seed"
+  BUNDLE_IDENTIFIER="xyz.kainzmayer.clay.seed"
   BUNDLE_NAME="Clay (Beta)"
 else
-  BUNDLE_IDENTIFIER="org.clay.clay"
+  BUNDLE_IDENTIFIER="xyz.kainzmayer.clay"
   BUNDLE_NAME="Clay"
 fi
 

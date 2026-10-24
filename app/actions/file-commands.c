@@ -585,6 +585,17 @@ file_quit_cmd_callback (ClayAction *action,
 }
 
 void
+file_restart_cmd_callback (ClayAction *action,
+                           GVariant   *value,
+                           gpointer    data)
+{
+  Clay *clay;
+  return_if_no_clay (clay, data);
+
+  clay_restart (clay);
+}
+
+void
 file_file_open_dialog (Clay      *clay,
                        GFile     *file,
                        GtkWidget *parent)

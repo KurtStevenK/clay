@@ -43,8 +43,12 @@ struct _ClayExtensionListClass
 {
   GtkListBoxClass           parent_class;
 
-  void (* extension_activated) (ClayExtensionList *list,
-                                ClayExtension     *extension);
+  void (* extension_activated)  (ClayExtensionList *list,
+                                 ClayExtension     *extension);
+  void (* store_entry_activated)(ClayExtensionList *list,
+                                 ClayStoreEntry    *entry);
+  void (* install_requested)    (ClayExtensionList *list,
+                                 const gchar       *entry_id);
 };
 
 
@@ -56,3 +60,6 @@ void         clay_extension_list_show_system  (ClayExtensionList *list);
 void         clay_extension_list_show_user    (ClayExtensionList *list);
 void         clay_extension_list_show_search  (ClayExtensionList *list,
                                                const gchar       *search_terms);
+void         clay_extension_list_show_store   (ClayExtensionList *list,
+                                               const gchar       *search_terms,
+                                               const gchar       *category);

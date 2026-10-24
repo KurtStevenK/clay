@@ -64,6 +64,7 @@
         <attribute name="section-name" translatable="no">Close</attribute>
         <item><attribute name="action">app.view-close</attribute></item>
         <item><attribute name="action">app.file-close-all</attribute></item>
+        <item><attribute name="action">app.file-restart</attribute></item>
         <item>
           <attribute name="hidden-when">macos-menubar</attribute>
           <attribute name="action">app.file-quit</attribute>
@@ -129,9 +130,32 @@
           <attribute name="hidden-when">macos-menubar</attribute>
           <attribute name="action">app.dialogs-preferences</attribute>
         </item>
-        <!-- TODO: re-enable this when extensions are publicly released.
         <item><attribute name="action">app.dialogs-extensions</attribute></item>
-        -->
+        <submenu>
+          <attribute name="label" translatable="yes">_Language</attribute>
+          <section>
+            <item><attribute name="action">app.language-system</attribute></item>
+          </section>
+          <section>
+            <item><attribute name="action">app.language-de</attribute></item>
+            <item><attribute name="action">app.language-en</attribute></item>
+            <item><attribute name="action">app.language-fr</attribute></item>
+            <item><attribute name="action">app.language-es</attribute></item>
+            <item><attribute name="action">app.language-it</attribute></item>
+            <item><attribute name="action">app.language-pt</attribute></item>
+            <item><attribute name="action">app.language-nl</attribute></item>
+            <item><attribute name="action">app.language-pl</attribute></item>
+          </section>
+          <section>
+            <item><attribute name="action">app.language-ru</attribute></item>
+            <item><attribute name="action">app.language-zh-cn</attribute></item>
+            <item><attribute name="action">app.language-ja</attribute></item>
+            <item><attribute name="action">app.language-ko</attribute></item>
+            <item><attribute name="action">app.language-tr</attribute></item>
+            <item><attribute name="action">app.language-ar</attribute></item>
+            <item><attribute name="action">app.language-sv</attribute></item>
+          </section>
+        </submenu>
         <item>
           <attribute name="hidden-when">macos-menubar</attribute>
           <attribute name="action">app.dialogs-input-devices</attribute>

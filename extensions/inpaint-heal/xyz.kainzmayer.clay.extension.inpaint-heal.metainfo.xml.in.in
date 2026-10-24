@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>xyz.kainzmayer.clay.extension.inpaint-heal</id>
+  <extends>xyz.kainzmayer.clay</extends>
+  <name>Content-Aware Fill</name>
+  <summary>Content-Aware Fill and Heal Selection</summary>
+  <description>
+    <p>
+    Seamlessly fill selections from surrounding texture. Search the Clay
+    App Store for "Inhaltssensitives Füllen", "content-aware", or "inpaint".
+    </p>
+  </description>
+  <url type="homepage">https://claydesign.web.app</url>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <releases>
+   <release version="1.0.0" date="2026-10-23" />
+  </releases>
+  <requires>
+   <id version="3.0.0" compare="ge">xyz.kainzmayer.clay</id>
+  </requires>
+  <custom>
+   <value key="Clay::plug-in-path">@PLUGIN_SCRIPT@</value>
+  </custom>
+</component>

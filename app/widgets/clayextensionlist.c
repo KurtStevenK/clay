@@ -37,6 +37,8 @@
 enum
 {
   EXTENSION_ACTIVATED,
+  STORE_ENTRY_ACTIVATED,
+  INSTALL_REQUESTED,
   LAST_SIGNAL
 };
 
@@ -52,6 +54,8 @@ struct _ClayExtensionListPrivate
   ClayExtensionManager      *manager;
 
   ClayExtensionListContents  contents;
+  gchar                     *search_terms;
+  gchar                     *category;
 };
 
 static void clay_extension_list_set            (ClayExtensionList *list,
@@ -65,6 +69,8 @@ static void clay_extension_list_ext_installed  (ClayExtensionManager *manager,
 static void clay_extension_list_ext_removed    (ClayExtensionManager *manager,
                                                 gchar                *extension_id,
                                                 ClayExtensionList    *list);
+static void clay_extension_list_store_updated  (ClayExtensionManager *manager,
+                                                ClayExtensionList    *list);
 
 static void clay_extension_list_delete_clicked (GtkButton            *delbutton,
                                                 ClayExtensionList    *list);
@@ -74,6 +80,12 @@ static void clay_extension_switch_active       (GObject              *onoff,
 static void clay_extension_row_activated       (GtkListBox           *box,
                                                 GtkListBoxRow        *row,
                                                 gpointer              user_data);
+static void clay_extension_list_add_store_row  (ClayExtensionList    *list,
+                                                ClayStoreEntry       *entry);
+static void clay_extension_list_get_clicked    (GtkButton            *button,
+                                                ClayExtensionList    *list);
+static void clay_extension_store_power_toggled (GtkToggleButton      *button,
+                                                gpointer              extension);
 
 G_DEFINE_TYPE_WITH_PRIVATE (ClayExtensionList, clay_extension_list,
                             GTK_TYPE_LIST_BOX)
@@ -93,6 +105,24 @@ clay_extension_list_class_init (ClayExtensionListClass *klass)
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLAY_TYPE_OBJECT);
+
+  signals[STORE_ENTRY_ACTIVATED] =
+    g_signal_new ("store-entry-activated",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (ClayExtensionListClass, store_entry_activated),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1,
+                  G_TYPE_POINTER);
+
+  signals[INSTALL_REQUESTED] =
+    g_signal_new ("install-requested",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (ClayExtensionListClass, install_requested),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1,
+                  G_TYPE_STRING);
 }
 
 static void
@@ -103,6 +133,8 @@ clay_extension_list_init (ClayExtensionList *list)
   gtk_list_box_set_activate_on_single_click (GTK_LIST_BOX (list),
                                              FALSE);
   list->p = clay_extension_list_get_instance_private (list);
+  g_signal_connect (list, "row-activated",
+                    G_CALLBACK (clay_extension_row_activated), NULL);
 }
 
 static void
@@ -112,20 +144,15 @@ clay_extension_list_disable (GtkWidget *row,
   ClayExtension *extension;
   GtkWidget     *outframe = gtk_bin_get_child (GTK_BIN (row));
 
+  if (! outframe)
+    return;
+
   extension = g_object_get_data (G_OBJECT (outframe), "extension");
-  g_return_if_fail (extension);
+  if (! extension)
+    return;
 
   if (g_strcmp0 (clay_object_get_name (extension), extension_id) == 0)
-    {
-      GtkWidget *button = gtk_frame_get_label_widget (GTK_FRAME (outframe));
-      GtkWidget *image  = gtk_bin_get_child (GTK_BIN (button));
-
-      gtk_widget_set_sensitive (gtk_bin_get_child (GTK_BIN (outframe)), FALSE);
-
-      gtk_image_set_from_icon_name (GTK_IMAGE (image), CLAY_ICON_EDIT_UNDO,
-                                    GTK_ICON_SIZE_MENU);
-      gtk_image_set_pixel_size (GTK_IMAGE (image), 12);
-    }
+    gtk_widget_set_sensitive (gtk_bin_get_child (GTK_BIN (outframe)), FALSE);
 }
 
 GtkWidget *
@@ -143,6 +170,9 @@ clay_extension_list_new (ClayExtensionManager *manager)
                     list);
   g_signal_connect (manager, "extension-removed",
                     G_CALLBACK (clay_extension_list_ext_removed),
+                    list);
+  g_signal_connect (manager, "store-updated",
+                    G_CALLBACK (clay_extension_list_store_updated),
                     list);
 
   return GTK_WIDGET (list);
@@ -170,9 +200,44 @@ void
 clay_extension_list_show_search (ClayExtensionList *list,
                                  const gchar       *search_terms)
 {
+  clay_extension_list_show_store (list, search_terms, "all");
+}
+
+void
+clay_extension_list_show_store (ClayExtensionList *list,
+                                const gchar       *search_terms,
+                                const gchar       *category)
+{
+  GList *matches;
+  GList *iter;
+
   list->p->contents = CLAY_EXT_LIST_SEARCH;
-  /* TODO */
-  clay_extension_list_set (list, NULL, FALSE);
+  g_free (list->p->search_terms);
+  g_free (list->p->category);
+  list->p->search_terms = g_strdup (search_terms);
+  list->p->category     = g_strdup (category);
+
+  gtk_container_foreach (GTK_CONTAINER (list),
+                         (GtkCallback) gtk_widget_destroy,
+                         NULL);
+
+  matches = clay_extension_manager_search_store (list->p->manager,
+                                                 search_terms, category);
+  for (iter = matches; iter; iter = iter->next)
+    clay_extension_list_add_store_row (list, iter->data);
+  g_list_free (matches);
+
+  gtk_container_foreach (GTK_CONTAINER (list),
+                         (GtkCallback) gtk_list_box_row_set_activatable,
+                         GUINT_TO_POINTER (TRUE));
+}
+
+static void
+clay_extension_list_store_updated (ClayExtensionManager *manager,
+                                   ClayExtensionList    *list)
+{
+  if (list->p->contents == CLAY_EXT_LIST_SEARCH)
+    clay_extension_list_show_store (list, list->p->search_terms, list->p->category);
 }
 
 static void
@@ -196,8 +261,161 @@ clay_extension_list_set (ClayExtensionList *list,
   gtk_container_foreach (GTK_CONTAINER (list),
                          (GtkCallback) gtk_list_box_row_set_activatable,
                          GUINT_TO_POINTER (TRUE));
-  g_signal_connect (list, "row-activated",
-                    G_CALLBACK (clay_extension_row_activated), NULL);
+}
+
+static GtkWidget *
+clay_extension_list_make_icon (const gchar *icon_name)
+{
+  GtkWidget *image;
+
+  image = gtk_image_new_from_icon_name (icon_name && *icon_name ?
+                                        icon_name : "application-x-addon",
+                                        GTK_ICON_SIZE_DND);
+  gtk_image_set_pixel_size (GTK_IMAGE (image), 42);
+  gtk_widget_set_valign (image, GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (image, TRUE);
+  return image;
+}
+
+static void
+clay_extension_list_add_store_row (ClayExtensionList *list,
+                                   ClayStoreEntry    *entry)
+{
+  GtkWidget     *card;
+  GtkWidget     *hbox;
+  GtkWidget     *vbox;
+  GtkWidget     *title_box;
+  GtkWidget     *label;
+  GtkWidget     *button;
+  ClayExtension *installed;
+  gchar         *markup;
+  const gchar   *summary;
+
+  installed = clay_extension_manager_lookup (list->p->manager, entry->id);
+
+  card = gtk_frame_new (NULL);
+  gtk_frame_set_shadow_type (GTK_FRAME (card), GTK_SHADOW_ETCHED_IN);
+  gtk_container_add (GTK_CONTAINER (list), card);
+  g_object_set_data (G_OBJECT (card), "store-entry", entry);
+  g_object_set_data (G_OBJECT (card), "extension", installed);
+  gtk_widget_set_visible (card, TRUE);
+
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 8);
+  gtk_container_add (GTK_CONTAINER (card), hbox);
+  gtk_widget_set_visible (hbox, TRUE);
+
+  gtk_box_pack_start (GTK_BOX (hbox),
+                      clay_extension_list_make_icon (entry->icon_name),
+                      FALSE, FALSE, 0);
+
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
+  gtk_widget_set_visible (vbox, TRUE);
+
+  title_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
+  gtk_box_pack_start (GTK_BOX (vbox), title_box, FALSE, FALSE, 0);
+  gtk_widget_set_visible (title_box, TRUE);
+
+  markup = g_markup_printf_escaped ("<b>%s</b>",
+                                    entry->name ? entry->name : entry->id);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL (label), markup);
+  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_box_pack_start (GTK_BOX (title_box), label, FALSE, FALSE, 0);
+  gtk_widget_set_visible (label, TRUE);
+  g_free (markup);
+
+  if (entry->version)
+    {
+      label = gtk_label_new (entry->version);
+      gtk_style_context_add_class (gtk_widget_get_style_context (label),
+                                   "dim-label");
+      gtk_box_pack_start (GTK_BOX (title_box), label, FALSE, FALSE, 0);
+      gtk_widget_set_visible (label, TRUE);
+    }
+
+  if (entry->featured)
+    {
+      label = gtk_label_new (_("Featured"));
+      gtk_box_pack_start (GTK_BOX (title_box), label, FALSE, FALSE, 0);
+      gtk_widget_set_visible (label, TRUE);
+    }
+
+  if (entry->category)
+    {
+      label = gtk_label_new (entry->category);
+      gtk_box_pack_end (GTK_BOX (title_box), label, FALSE, FALSE, 0);
+      gtk_widget_set_visible (label, TRUE);
+    }
+
+  summary = entry->summary_de && *entry->summary_de ? entry->summary_de : entry->summary;
+  if (summary)
+    {
+      label = gtk_label_new (summary);
+      gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+      gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+      gtk_label_set_max_width_chars (GTK_LABEL (label), 60);
+      gtk_box_pack_start (GTK_BOX (vbox), label, TRUE, TRUE, 0);
+      gtk_widget_set_visible (label, TRUE);
+    }
+
+  if (entry->rating > 0)
+    {
+      gchar *stars = g_strdup_printf ("★ %.1f", entry->rating);
+
+      label = gtk_label_new (stars);
+      gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+      gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+      gtk_widget_set_visible (label, TRUE);
+      g_free (stars);
+    }
+
+  if (installed)
+    {
+      GtkWidget *onoff = gtk_toggle_button_new_with_label (_("Aus"));
+      gboolean   running;
+
+      running = clay_extension_manager_is_running (list->p->manager, installed);
+      gtk_widget_set_valign (onoff, GTK_ALIGN_CENTER);
+      gtk_style_context_add_class (gtk_widget_get_style_context (onoff),
+                                   "clay-store-power");
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (onoff), running);
+      gtk_button_set_label (GTK_BUTTON (onoff), running ? _("An") : _("Aus"));
+      gtk_widget_set_sensitive (onoff,
+                                clay_extension_manager_can_run (list->p->manager,
+                                                                installed));
+      g_signal_connect (onoff, "toggled",
+                        G_CALLBACK (clay_extension_store_power_toggled),
+                        installed);
+      gtk_box_pack_end (GTK_BOX (hbox), onoff, FALSE, FALSE, 0);
+      gtk_widget_set_visible (onoff, TRUE);
+    }
+  else
+    {
+      button = gtk_button_new_with_label (_("Installieren"));
+      gtk_style_context_add_class (gtk_widget_get_style_context (button),
+                                   "clay-store-get");
+      gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
+      g_object_set_data_full (G_OBJECT (button), "entry-id",
+                              g_strdup (entry->id), g_free);
+      g_signal_connect (button, "clicked",
+                        G_CALLBACK (clay_extension_list_get_clicked),
+                        list);
+      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+      gtk_widget_set_visible (button, TRUE);
+    }
+}
+
+static void
+clay_extension_list_get_clicked (GtkButton         *button,
+                                 ClayExtensionList *list)
+{
+  const gchar *entry_id;
+
+  entry_id = g_object_get_data (G_OBJECT (button), "entry-id");
+  if (entry_id)
+    g_signal_emit (list, signals[INSTALL_REQUESTED], 0, entry_id);
 }
 
 static void
@@ -214,8 +432,13 @@ clay_extension_list_ext_installed (ClayExtensionManager *manager,
   GtkWidget *onoff;
   GtkWidget *image;
 
-  if (list->p->contents == CLAY_EXT_LIST_SEARCH                  ||
-      (list->p->contents == CLAY_EXT_LIST_USER && is_system_ext) ||
+  if (list->p->contents == CLAY_EXT_LIST_SEARCH)
+    {
+      clay_extension_list_show_store (list, list->p->search_terms, list->p->category);
+      return;
+    }
+
+  if ((list->p->contents == CLAY_EXT_LIST_USER && is_system_ext) ||
       (list->p->contents == CLAY_EXT_LIST_SYSTEM && ! is_system_ext))
     return;
 
@@ -224,22 +447,18 @@ clay_extension_list_ext_installed (ClayExtensionManager *manager,
   for (iter = rows; iter; iter = iter->next)
     {
       ClayExtension *row_ext;
-      GtkWidget     *outframe = gtk_bin_get_child (GTK_BIN (iter->data));
+      GtkWidget     *frame = gtk_bin_get_child (GTK_BIN (iter->data));
 
-      row_ext = g_object_get_data (G_OBJECT (outframe), "extension");
-      g_return_if_fail (row_ext);
+      if (! frame)
+        continue;
+
+      row_ext = g_object_get_data (G_OBJECT (frame), "extension");
+      if (! row_ext)
+        continue;
 
       if (extension == row_ext)
         {
-          GtkWidget *button = gtk_frame_get_label_widget (GTK_FRAME (outframe));
-
-          image  = gtk_bin_get_child (GTK_BIN (button));
-          gtk_widget_set_sensitive (gtk_bin_get_child (GTK_BIN (outframe)), TRUE);
-
-          gtk_image_set_from_icon_name (GTK_IMAGE (image), CLAY_ICON_EDIT_DELETE,
-                                        GTK_ICON_SIZE_MENU);
-          gtk_image_set_pixel_size (GTK_IMAGE (image), 12);
-
+          gtk_widget_set_sensitive (gtk_bin_get_child (GTK_BIN (frame)), TRUE);
           g_list_free (rows);
           return;
         }
@@ -257,7 +476,6 @@ clay_extension_list_ext_installed (ClayExtensionManager *manager,
   gtk_container_add (GTK_CONTAINER (outframe), grid);
   gtk_widget_set_visible (grid, TRUE);
 
-  /* On/Off switch. */
   onoff = gtk_switch_new ();
   gtk_widget_set_vexpand (onoff, FALSE);
   gtk_widget_set_hexpand (onoff, FALSE);
@@ -274,7 +492,6 @@ clay_extension_list_ext_installed (ClayExtensionManager *manager,
   gtk_grid_attach (GTK_GRID (grid), onoff, 0, 0, 1, 1);
   gtk_widget_set_visible (onoff, TRUE);
 
-  /* Short description. */
   if (clay_extension_get_comment (extension))
     {
       GtkWidget     *desc = gtk_text_view_new ();
@@ -293,7 +510,6 @@ clay_extension_list_ext_installed (ClayExtensionManager *manager,
       gtk_widget_set_visible (desc, TRUE);
     }
 
-  /* Delete button. */
   if (! is_system_ext)
     {
       GtkWidget *delbutton;
@@ -352,6 +568,42 @@ clay_extension_list_delete_clicked (GtkButton         *delbutton,
 }
 
 static void
+clay_extension_store_power_toggled (GtkToggleButton *button,
+                                    gpointer         extension)
+{
+  ClayExtension *ext = extension;
+  gboolean       active = gtk_toggle_button_get_active (button);
+
+  gtk_button_set_label (GTK_BUTTON (button), active ? _("An") : _("Aus"));
+
+  if (active)
+    {
+      GError *error = NULL;
+
+      clay_extension_run (ext, &error);
+      if (error)
+        {
+          g_signal_handlers_block_by_func (button,
+                                           G_CALLBACK (clay_extension_store_power_toggled),
+                                           extension);
+          gtk_toggle_button_set_active (button, FALSE);
+          gtk_button_set_label (GTK_BUTTON (button), _("Aus"));
+          g_signal_handlers_unblock_by_func (button,
+                                             G_CALLBACK (clay_extension_store_power_toggled),
+                                             extension);
+          g_printerr ("Extension '%s' failed to run: %s\n",
+                      clay_object_get_name (ext),
+                      error->message);
+          g_error_free (error);
+        }
+    }
+  else
+    {
+      clay_extension_stop (ext);
+    }
+}
+
+static void
 clay_extension_switch_active (GObject    *onoff,
                               GParamSpec *pspec,
                               gpointer    extension)
@@ -387,8 +639,21 @@ clay_extension_row_activated (GtkListBox    *box,
                               GtkListBoxRow *row,
                               gpointer       user_data)
 {
-  GtkWidget *frame = gtk_bin_get_child (GTK_BIN (row));
+  GtkWidget     *frame = gtk_bin_get_child (GTK_BIN (row));
+  ClayExtension *extension;
+  ClayStoreEntry *entry;
 
-  g_signal_emit (box, signals[EXTENSION_ACTIVATED], 0,
-                 g_object_get_data (G_OBJECT (frame), "extension"));
+  if (! frame)
+    return;
+
+  entry = g_object_get_data (G_OBJECT (frame), "store-entry");
+  if (entry)
+    {
+      g_signal_emit (box, signals[STORE_ENTRY_ACTIVATED], 0, entry);
+      return;
+    }
+
+  extension = g_object_get_data (G_OBJECT (frame), "extension");
+  if (extension)
+    g_signal_emit (box, signals[EXTENSION_ACTIVATED], 0, extension);
 }

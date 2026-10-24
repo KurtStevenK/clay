@@ -5,7 +5,7 @@ data/tags
 data/tips
 desktop
 extensions/goat-exercises/goat-exercise-vala.c
-extensions/goat-exercises/org.clay.extension.goat-exercises.metainfo.xml.in
+extensions/goat-exercises/xyz.kainzmayer.clay.extension.goat-exercises.metainfo.xml.in
 libclay
 libclaybase
 libclaycolor

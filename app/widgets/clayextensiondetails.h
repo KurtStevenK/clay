@@ -51,3 +51,5 @@ GtkWidget  * clay_extension_details_new          (void);
 
 void         clay_extension_details_set          (ClayExtensionDetails *details,
                                                   ClayExtension        *extension);
+void         clay_extension_details_set_store    (ClayExtensionDetails *details,
+                                                  ClayStoreEntry       *entry);

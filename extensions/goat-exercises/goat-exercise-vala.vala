@@ -96,7 +96,7 @@ public class Goat : Clay.PlugIn {
       label.show();
 
 
-      string file = Path.build_filename(Clay.PlugIn.directory(), "extensions", "org.clay.extension.goat-exercises", PLUG_IN_SOURCE);
+      string file = Path.build_filename(Clay.PlugIn.directory(), "extensions", "xyz.kainzmayer.clay.extension.goat-exercises", PLUG_IN_SOURCE);
       string contents;
       try {
         FileUtils.get_contents(file, out contents);

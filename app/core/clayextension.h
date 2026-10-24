@@ -50,6 +50,7 @@ GType           clay_extension_get_type (void);
 
 ClayExtension * clay_extension_new                     (const gchar    *dir,
                                                         gboolean        writable);
+const gchar   * clay_extension_get_id                  (ClayExtension  *extension);
 const gchar   * clay_extension_get_name                (ClayExtension  *extension);
 const gchar   * clay_extension_get_comment             (ClayExtension  *extension);
 const gchar   * clay_extension_get_description         (ClayExtension  *extension);

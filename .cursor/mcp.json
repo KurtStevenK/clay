@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "clay": {
+      "command": "python",
+      "args": ["tools/clay-mcp/server.py"],
+      "env": {
+        "CLAY_MCP_HOST": "127.0.0.1",
+        "CLAY_MCP_PORT": "9877"
+      }
+    }
+  }
+}

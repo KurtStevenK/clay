@@ -469,7 +469,7 @@
 # is opened, otherwise it will be displayed with a scale of 1:1.  Possible
 # values are yes and no.
 # 
-# (initial-zoom-to-fit yes)
+# (initial-zoom-to-fit no)
 
 # Sets the type of mouse pointers to use.  Possible values are tool-icon,
 # tool-crosshair and crosshair.

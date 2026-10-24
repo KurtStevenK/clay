@@ -24,11 +24,11 @@ concurrency:
 jobs:
   scan:
     # workflow_run reports a tag push's tag as head_branch.
+    # Ubuntu only (~5–15 billed minutes). Skip failed/cancelled release builds.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (startsWith(github.event.workflow_run.head_branch, 'v') &&
-       github.event.workflow_run.conclusion != 'cancelled' &&
-       github.event.workflow_run.conclusion != 'skipped')
+       github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:

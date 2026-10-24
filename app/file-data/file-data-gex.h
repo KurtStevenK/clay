@@ -25,3 +25,7 @@ ClayValueArray * file_gex_load_invoker (ClayProcedure         *procedure,
                                         ClayProgress          *progress,
                                         const ClayValueArray  *args,
                                         GError               **error);
+
+gboolean         file_gex_install      (Clay                  *clay,
+                                        GFile                 *file,
+                                        GError               **error);

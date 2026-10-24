@@ -39,7 +39,7 @@ fi
 # Build Clay only
 printf "\e[0Ksection_start:`date +%s`:clay_build[collapsed=true]\r\e[0KBuilding Clay\n"
 eval $FLATPAK_BUILDER --force-clean --disable-rofiles-fuse --keep-build-dirs --build-only --disable-download \
-                      "$CLAY_PREFIX" build/linux/flatpak/org.clay.Clay-nightly.json > clay-flatpak-builder.log 2>&1 || { cat clay-flatpak-builder.log; exit 1; }
+                      "$CLAY_PREFIX" build/linux/flatpak/xyz.kainzmayer.clay-nightly.json > clay-flatpak-builder.log 2>&1 || { cat clay-flatpak-builder.log; exit 1; }
 if [ "$GITLAB_CI" ]; then
   cp .flatpak-builder/build/clay-1/_flatpak_build/meson-logs/meson-log.txt clay-meson-log.txt
 fi
@@ -50,7 +50,7 @@ printf "\e[0Ksection_end:`date +%s`:clay_build\r\e[0K\n"
 # FIXME: https://github.com/flatpak/flatpak-builder/issues/14
 printf "\e[0Ksection_start:`date +%s`:clay_bundle[collapsed=true]\r\e[0KCreating OSTree repo\n"
 eval $FLATPAK_BUILDER --disable-rofiles-fuse --finish-only --repo=repo \
-                      "$CLAY_PREFIX" build/linux/flatpak/org.clay.Clay-nightly.json
+                      "$CLAY_PREFIX" build/linux/flatpak/xyz.kainzmayer.clay-nightly.json
 if [ "$GITLAB_CI" ]; then
   tar cf repo-$(uname -m).tar repo/
 

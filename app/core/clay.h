@@ -191,6 +191,8 @@ gboolean       clay_is_restored            (Clay                *clay);
 
 void           clay_exit                   (Clay                *clay,
                                             gboolean             force);
+void           clay_restart                  (Clay                *clay);
+void           clay_restart_cancel           (Clay                *clay);
 
 void           clay_set_focused_once       (Clay                *clay);
 gboolean       clay_has_focused_once       (Clay                *clay);

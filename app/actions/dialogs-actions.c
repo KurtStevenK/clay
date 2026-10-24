@@ -27,6 +27,7 @@
 #include "core/clay.h"
 
 #include "widgets/clayactiongroup.h"
+#include "widgets/claywidgets-utils.h"
 #include "widgets/claydialogfactory.h"
 #include "widgets/clayhelp-ids.h"
 #include "widgets/claysessioninfo.h"
@@ -374,14 +375,50 @@ static const ClayStringActionEntry dialogs_toplevel_actions[] =
     "clay-action-search-dialog",
     CLAY_HELP_ACTION_SEARCH_DIALOG },
 
-#ifndef CLAY_RELEASE
   { "dialogs-extensions", CLAY_ICON_PLUGIN,
-    NC_("dialogs-action", "Manage _Extensions"), NULL,
+    NC_("dialogs-action", "Clay App Store (_DLC Shop)"), NULL,
     { NULL },
-    NC_("dialogs-action", "Manage Extensions: search, install, uninstall, update."),
+    NC_("dialogs-action", "Browse, search, and install Clay extensions, AI tools, and DLC packs."),
     "clay-extensions-dialog",
     CLAY_HELP_EXTENSIONS_DIALOG }
-#endif
+};
+
+const ClayStringActionEntry language_actions[] =
+{
+  { "language-system", "clay-lang-system",
+    NC_("language-action", "System"), NULL, { NULL },
+    NC_("language-action", "Use the language of this computer"),
+    "system", NULL },
+  { "language-de", "clay-lang-de",
+    "Deutsch", NULL, { NULL }, "Deutsch", "de", NULL },
+  { "language-en", "clay-lang-en",
+    "English", NULL, { NULL }, "English", "en", NULL },
+  { "language-fr", "clay-lang-fr",
+    "Français", NULL, { NULL }, "Français", "fr", NULL },
+  { "language-es", "clay-lang-es",
+    "Español", NULL, { NULL }, "Español", "es", NULL },
+  { "language-it", "clay-lang-it",
+    "Italiano", NULL, { NULL }, "Italiano", "it", NULL },
+  { "language-pt", "clay-lang-pt",
+    "Português", NULL, { NULL }, "Português", "pt", NULL },
+  { "language-nl", "clay-lang-nl",
+    "Nederlands", NULL, { NULL }, "Nederlands", "nl", NULL },
+  { "language-pl", "clay-lang-pl",
+    "Polski", NULL, { NULL }, "Polski", "pl", NULL },
+  { "language-ru", "clay-lang-ru",
+    "Русский", NULL, { NULL }, "Русский", "ru", NULL },
+  { "language-zh-cn", "clay-lang-zh",
+    "中文", NULL, { NULL }, "中文", "zh_CN", NULL },
+  { "language-ja", "clay-lang-ja",
+    "日本語", NULL, { NULL }, "日本語", "ja", NULL },
+  { "language-ko", "clay-lang-ko",
+    "한국어", NULL, { NULL }, "한국어", "ko", NULL },
+  { "language-tr", "clay-lang-tr",
+    "Türkçe", NULL, { NULL }, "Türkçe", "tr", NULL },
+  { "language-ar", "clay-lang-ar",
+    "العربية", NULL, { NULL }, "العربية", "ar", NULL },
+  { "language-sv", "clay-lang-sv",
+    "Svenska", NULL, { NULL }, "Svenska", "sv", NULL },
 };
 
 
@@ -421,6 +458,8 @@ dialogs_actions_toolbox_exists (Clay *clay)
 void
 dialogs_actions_setup (ClayActionGroup *group)
 {
+  clay_language_flags_register ();
+
   clay_action_group_add_string_actions (group, "dialogs-action",
                                         dialogs_dockable_actions,
                                         G_N_ELEMENTS (dialogs_dockable_actions),
@@ -430,6 +469,11 @@ dialogs_actions_setup (ClayActionGroup *group)
                                         dialogs_toplevel_actions,
                                         G_N_ELEMENTS (dialogs_toplevel_actions),
                                         dialogs_create_toplevel_cmd_callback);
+
+  clay_action_group_add_string_actions (group, "language-action",
+                                        language_actions,
+                                        G_N_ELEMENTS (language_actions),
+                                        dialogs_language_cmd_callback);
 }
 
 void

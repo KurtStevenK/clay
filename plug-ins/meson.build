@@ -87,6 +87,7 @@ foreach plugin : complex_plugins_list
 endforeach
 
 
+subdir('clay-mcp-bridge')
 subdir('python')
 
 foreach plugin : python_plugins

@@ -202,6 +202,7 @@ typedef struct _ClayDrawableFilter              ClayDrawableFilter;
 typedef struct _ClayEnvironTable                ClayEnvironTable;
 typedef struct _ClayExtension                   ClayExtension;
 typedef struct _ClayExtensionManager            ClayExtensionManager;
+typedef struct _ClayStoreEntry                  ClayStoreEntry;
 typedef struct _ClayHistogram                   ClayHistogram;
 typedef struct _ClayIdTable                     ClayIdTable;
 typedef struct _ClayImagefile                   ClayImagefile;

@@ -4275,6 +4275,16 @@ msgstr "Den Ort der Bilddatei in der Dateiverwaltung anzeigen"
 
 #: app/actions/file-actions.c:128
 msgctxt "file-action"
+msgid "_Restart"
+msgstr "_Neustarten"
+
+#: app/actions/file-actions.c:129
+msgctxt "file-action"
+msgid "Quit Clay and start it again"
+msgstr "Clay beenden und neu starten"
+
+#: app/actions/file-actions.c:133
+msgctxt "file-action"
 msgid "_Quit"
 msgstr "_Beenden"
 

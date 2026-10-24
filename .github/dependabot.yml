@@ -1,10 +1,11 @@
 version: 2
 updates:
+  # Monthly only — avoids churn PRs and accidental macOS workflow runs from broad CI edits.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly

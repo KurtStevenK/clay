@@ -1,6 +1,6 @@
 # C version
 
-extension_name = 'org.clay.extension.goat-exercises'
+extension_name = 'xyz.kainzmayer.clay.extension.goat-exercises'
 plugin_name   = 'goat-exercise'
 
 plugin_sources = [
@@ -50,7 +50,7 @@ if have_vala and have_gobject_introspection
       libclay_vapi, libclayui_vapi, libclayui_dep, math,
     ],
     c_args: [
-      '-DGETTEXT_PACKAGE="@0@"'.format('org.clay.extension.goat-exercises'),
+      '-DGETTEXT_PACKAGE="@0@"'.format('xyz.kainzmayer.clay.extension.goat-exercises'),
       '-w',
     ],
     install: true,
@@ -98,7 +98,7 @@ endif
 conf = configuration_data()
 conf.set('GOAT_EXERCISES', plug_ins)
 
-appdatafilename = 'org.clay.extension.goat-exercises.metainfo.xml'
+appdatafilename = 'xyz.kainzmayer.clay.extension.goat-exercises.metainfo.xml'
 appdatafilein = configure_file(
   input : appdatafilename + '.in.in',
   output: appdatafilename + '.in',

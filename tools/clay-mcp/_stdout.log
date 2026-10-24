@@ -1,0 +1,46 @@
+Parsing 'T:\Apps\clay\_install\etc\clay\3.0\clayrc' for configuration data required during early initialization.
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\clayrc' for configuration data required during early initialization.
+Language property found: en.
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\extensionrc'
+INIT: clay_load_config
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\unitrc'
+Parsing 'T:\Apps\clay\_install\etc\clay\3.0\clayrc'
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\clayrc'
+INIT: clay_initialize
+INIT: clay_real_initialize
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\interpreters\clay-script-fu-interpreter.interp'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\interpreters\default.interp'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\interpreters\gimp-script-fu-interpreter.interp'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\interpreters\pyclay.interp'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\interpreters\pygimp.interp'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\environ\default.env'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\environ\pyclay.env'
+Parsing 'T:\Apps\clay\_install\lib\clay\3.0\environ\pygimp.env'
+INIT: clay_restore
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\parasiterc'
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\colorrc'
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\templaterc'
+INIT: clay_real_restore
+Parsing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\pluginrc'
+Querying plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-rawtherapee\file-rawtherapee.exe'
+Querying plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-darktable\file-darktable.exe'
+Querying plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-another-rawtherapee\file-another-rawtherapee.exe'
+Initializing plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\mail\mail.exe'
+Initializing plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-rawtherapee\file-rawtherapee.exe'
+Initializing plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-libraw\file-libraw.exe'
+Initializing plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-darktable\file-darktable.exe'
+Initializing plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\file-another-rawtherapee\file-another-rawtherapee.exe'
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\pluginrc'
+Starting extension: 'extension-script-fu'
+EXIT: clay_exit
+EXIT: clay_real_exit
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\extensionrc'
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\colorrc'
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\templaterc'
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\parasiterc'
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\unitrc'
+EXIT: app_exit_after_callback
+EXIT: app_run
+Writing 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\clayrc'
+EXIT: clay_dispose
+EXIT: clay_finalize

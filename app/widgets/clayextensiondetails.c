@@ -36,10 +36,11 @@
 
 struct _ClayExtensionDetailsPrivate
 {
-  ClayExtension *extension;
+  ClayExtension  *extension;
+  ClayStoreEntry *entry;
 
-  gint           screenshot_width;
-  gint           screenshot_height;
+  gint            screenshot_width;
+  gint            screenshot_height;
 };
 
 static void clay_extension_details_size_allocate (ClayExtensionDetails *details,
@@ -83,6 +84,7 @@ clay_extension_details_set (ClayExtensionDetails *details,
   if (details->p->extension)
     g_object_unref (details->p->extension);
   details->p->extension  = g_object_ref (extension);
+  details->p->entry = NULL;
   details->p->screenshot_width = details->p->screenshot_height = 0;
 
   gtk_container_foreach (GTK_CONTAINER (details),
@@ -90,7 +92,7 @@ clay_extension_details_set (ClayExtensionDetails *details,
                          NULL);
 
   gtk_frame_set_label (GTK_FRAME (details),
-                       extension ? clay_extension_get_name (extension) : NULL);
+                       clay_extension_get_name (extension));
 
   grid = gtk_grid_new ();
   gtk_grid_set_column_homogeneous (GTK_GRID (grid), FALSE);
@@ -98,47 +100,122 @@ clay_extension_details_set (ClayExtensionDetails *details,
   gtk_container_add (GTK_CONTAINER (details), grid);
   gtk_widget_set_visible (grid, TRUE);
 
-  if (extension)
+  if (gtk_widget_get_realized (GTK_WIDGET (details)))
     {
-      gchar       *desc;
-      GtkTextIter  iter;
+      GtkAllocation allocation;
+      gint          baseline   = 0;
 
-      /* Screenshots. */
-      if (gtk_widget_get_realized (GTK_WIDGET (details)))
-        {
-          GtkAllocation allocation;
-          gint          baseline   = 0;
-
-          gtk_widget_get_allocated_size (GTK_WIDGET (details),
-                                         &allocation, &baseline);
-          clay_extension_details_size_allocate (details, &allocation, GTK_GRID (grid));
-        }
-      g_signal_connect (details, "size-allocate",
-                        G_CALLBACK (clay_extension_details_size_allocate),
-                        grid);
-
-      /* Description. */
-      desc = clay_extension_get_markup_description (extension);
-      widget = gtk_text_view_new ();
-      gtk_widget_set_vexpand (widget, TRUE);
-      gtk_widget_set_hexpand (widget, TRUE);
-      gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (widget), GTK_WRAP_WORD_CHAR);
-      gtk_text_view_set_editable (GTK_TEXT_VIEW (widget), FALSE);
-      gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (widget), FALSE);
-      gtk_text_view_set_justification (GTK_TEXT_VIEW (widget), GTK_JUSTIFY_FILL);
-      gtk_grid_attach (GTK_GRID (grid), widget, 0, 1, 3, 3);
-      buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (widget));
-      gtk_text_buffer_get_start_iter (buffer, &iter);
-      if (desc)
-        {
-          gtk_text_buffer_insert_markup (buffer, &iter, desc, -1);
-          g_free (desc);
-        }
-      gtk_widget_set_visible (widget, TRUE);
+      gtk_widget_get_allocated_size (GTK_WIDGET (details),
+                                     &allocation, &baseline);
+      clay_extension_details_size_allocate (details, &allocation, GTK_GRID (grid));
     }
+  g_signal_connect (details, "size-allocate",
+                    G_CALLBACK (clay_extension_details_size_allocate),
+                    grid);
+
+  {
+    gchar       *desc;
+    GtkTextIter  iter;
+
+    desc = clay_extension_get_markup_description (extension);
+    widget = gtk_text_view_new ();
+    gtk_widget_set_vexpand (widget, TRUE);
+    gtk_widget_set_hexpand (widget, TRUE);
+    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (widget), GTK_WRAP_WORD_CHAR);
+    gtk_text_view_set_editable (GTK_TEXT_VIEW (widget), FALSE);
+    gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (widget), FALSE);
+    gtk_text_view_set_justification (GTK_TEXT_VIEW (widget), GTK_JUSTIFY_FILL);
+    gtk_grid_attach (GTK_GRID (grid), widget, 0, 1, 3, 3);
+    buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (widget));
+    gtk_text_buffer_get_start_iter (buffer, &iter);
+    if (desc)
+      {
+        gtk_text_buffer_insert_markup (buffer, &iter, desc, -1);
+        g_free (desc);
+      }
+    gtk_widget_set_visible (widget, TRUE);
+  }
 }
 
-/* Private functions. */
+void
+clay_extension_details_set_store (ClayExtensionDetails *details,
+                                  ClayStoreEntry       *entry)
+{
+  GtkWidget *grid;
+  GtkWidget *label;
+  gchar     *markup;
+
+  g_return_if_fail (entry != NULL);
+
+  if (details->p->extension)
+    {
+      g_object_unref (details->p->extension);
+      details->p->extension = NULL;
+    }
+  details->p->entry = entry;
+
+  gtk_container_foreach (GTK_CONTAINER (details),
+                         (GtkCallback) gtk_widget_destroy,
+                         NULL);
+
+  gtk_frame_set_label (GTK_FRAME (details),
+                       entry->name ? entry->name : entry->id);
+
+  grid = gtk_grid_new ();
+  gtk_grid_set_row_spacing (GTK_GRID (grid), 8);
+  gtk_grid_set_column_spacing (GTK_GRID (grid), 12);
+  gtk_container_set_border_width (GTK_CONTAINER (grid), 12);
+  gtk_container_add (GTK_CONTAINER (details), grid);
+  gtk_widget_set_visible (grid, TRUE);
+
+  markup = g_markup_printf_escaped ("<span size='x-large'><b>%s</b></span>",
+                                    entry->name ? entry->name : entry->id);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL (label), markup);
+  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_grid_attach (GTK_GRID (grid), label, 0, 0, 2, 1);
+  gtk_widget_set_visible (label, TRUE);
+  g_free (markup);
+
+  markup = g_strdup_printf ("%s%s%s%s%s",
+                            entry->author ? entry->author : "",
+                            entry->author && entry->version ? " · " : "",
+                            entry->version ? entry->version : "",
+                            (entry->author || entry->version) && entry->category ? " · " : "",
+                            entry->category ? entry->category : "");
+  label = gtk_label_new (markup);
+  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_style_context_add_class (gtk_widget_get_style_context (label), "dim-label");
+  gtk_grid_attach (GTK_GRID (grid), label, 0, 1, 2, 1);
+  gtk_widget_set_visible (label, TRUE);
+  g_free (markup);
+
+  if (entry->menu_hint)
+    {
+      markup = g_markup_printf_escaped (_("<b>Find it in Clay:</b> %s"),
+                                        entry->menu_hint);
+      label = gtk_label_new (NULL);
+      gtk_label_set_markup (GTK_LABEL (label), markup);
+      gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+      gtk_grid_attach (GTK_GRID (grid), label, 0, 2, 2, 1);
+      gtk_widget_set_visible (label, TRUE);
+      g_free (markup);
+    }
+
+  if (entry->description)
+    {
+      GtkWidget *view = gtk_text_view_new ();
+      GtkTextBuffer *buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+
+      gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (view), GTK_WRAP_WORD_CHAR);
+      gtk_text_view_set_editable (GTK_TEXT_VIEW (view), FALSE);
+      gtk_text_buffer_set_text (buffer, entry->description, -1);
+      gtk_widget_set_vexpand (view, TRUE);
+      gtk_widget_set_hexpand (view, TRUE);
+      gtk_grid_attach (GTK_GRID (grid), view, 0, 3, 2, 1);
+      gtk_widget_set_visible (view, TRUE);
+    }
+}
 
 static void
 clay_extension_details_size_allocate (ClayExtensionDetails *details,
@@ -146,6 +223,9 @@ clay_extension_details_size_allocate (ClayExtensionDetails *details,
                                       GtkGrid              *grid)
 {
   GtkWidget *widget;
+
+  if (! details->p->extension)
+    return;
 
   if (allocation->width > 0 && allocation->height > 0 &&
       allocation->width * 2 / 3 != details->p->screenshot_width &&

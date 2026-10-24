@@ -1,0 +1,181 @@
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\French_flag.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\French_flag_smooth.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\German_flag.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\German_flag_smooth.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\Mexican_flag.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\Mexican_flag_smooth.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\Romanian_flag.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Clay-Error: Failed to load data:
+
+Error loading 'T:\Apps\clay\_install\share\clay\3.0\gradients\gimp-obsolete-files\Romanian_flag_smooth.ggr': In line 1 of gradient file: Not a Clay gradient file.
+
+Skipping duplicate plug-in: 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\plug-ins\inpaint-heal\inpaint-heal.py'
+Skipping duplicate plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\inpaint-heal\inpaint-heal.py'
+
+(script-fu.exe:20920): scriptfu-WARNING **: 02:15:50.753: Typelib file for namespace 'cairo', version '1.0' not found
+scriptfu-Message: 02:15:50.756: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\add-bevel.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\add-bevel.scm : 209)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.759: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\addborder.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\addborder.scm : 194)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.761: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\blend-anim.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\blend-anim.scm : 234)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.764: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\burn-in-anim.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\burn-in-anim.scm : 242)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.768: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\carve-it.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\carve-it.scm : 233)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.770: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\chrome-it.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\chrome-it.scm : 336)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.774: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\circuit.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\circuit.scm : 147)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.776: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\clay-online.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\clay-online.scm : 63)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.778: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\clothify.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\clothify.scm : 77)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.781: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\coffee.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\coffee.scm : 142)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.783: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\difference-clouds.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\difference-clouds.scm : 95)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.784: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\distress-selection.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\distress-selection.scm : 125)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.787: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\drop-shadow.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\drop-shadow.scm : 183)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.789: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\font-map.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\font-map.scm : 176)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.792: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\fuzzyborder.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\fuzzyborder.scm : 157)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.794: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\gimp-online.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\gimp-online.scm : 63)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.796: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\gradient-example.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\gradient-example.scm : 80)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.797: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\guides-from-rule.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\guides-from-rule.scm : 71)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.798: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\guides-from-selection.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\guides-from-selection.scm : 40)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.799: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\guides-new-percent.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\guides-new-percent.scm : 40)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.800: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\guides-new.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\guides-new.scm : 35)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.801: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\guides-remove-all.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\guides-remove-all.scm : 26)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.803: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\lava.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\lava.scm : 147)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.804: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\line-nova.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\line-nova.scm : 128)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.806: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\mkbrush.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\mkbrush.scm : 72)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.808: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\old-photo.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\old-photo.scm : 113)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.810: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\palette-export.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\palette-export.scm : 20)  list 
+scriptfu-Message: 02:15:50.813: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\paste-as-brush.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\paste-as-brush.scm : 72)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.815: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\paste-as-pattern.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\paste-as-pattern.scm : 57)  script-fu-register-procedure 
+scriptfu-Message: 02:15:50.818: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\perspective-shadow.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\perspective-shadow.scm : 211)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.819: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\reverse-layers.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\reverse-layers.scm : 48)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.821: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\ripply-anim.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\ripply-anim.scm : 93)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.823: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\round-corners.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\round-corners.scm : 148)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.824: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\script-fu-set-cmap.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\script-fu-set-cmap.scm : 61)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.826: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\script-fu-util.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\script-fu-util.scm : 105)  define-macro 
+scriptfu-Message: 02:15:50.828: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\selection-round.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\selection-round.scm : 152)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.831: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\slide.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\slide.scm : 271)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.833: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\spinning-globe.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\spinning-globe.scm : 128)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.835: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\tileblur.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\tileblur.scm : 88)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.837: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\unsharp-mask.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\unsharp-mask.scm : 105)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.839: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\waves-anim.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\waves-anim.scm : 127)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.846: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\weave.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\weave.scm : 439)  script-fu-register-filter 
+scriptfu-Message: 02:15:50.849: Error while loading T:\Apps\clay\_install\share\clay\3.0\scripts\xach-effect.scm:
+
+Error: eval: unbound variable: (T:\Apps\clay\_install\share\clay\3.0\scripts\xach-effect.scm : 140)  script-fu-register-filter 
+Clay-Message: Welcome to Clay 3.36.0!
+
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_fill_options_new: assertion 'use_context_color == FALSE || context != NULL' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_context_set_serialize_properties: assertion 'CLAY_IS_CONTEXT (context)' failed
+
+(xyz.kainzmayer.clay:23052): GLib-GObject-CRITICAL **: 02:15:51.728: invalid (NULL) pointer instance
+
+(xyz.kainzmayer.clay:23052): GLib-GObject-CRITICAL **: 02:15:51.730: g_signal_connect_data: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_stroke_options_new: assertion 'use_context_color == FALSE || context != NULL' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_context_set_serialize_properties: assertion 'CLAY_IS_CONTEXT (context)' failed
+
+(xyz.kainzmayer.clay:23052): GLib-GObject-CRITICAL **: 02:15:51.733: invalid (NULL) pointer instance
+
+(xyz.kainzmayer.clay:23052): GLib-GObject-CRITICAL **: 02:15:51.734: g_signal_connect_data: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: LibClayConfig-CRITICAL: clay_config_is_equal_to: assertion 'CLAY_IS_CONFIG (b)' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: LibClayConfig-CRITICAL: clay_config_is_equal_to: assertion 'CLAY_IS_CONFIG (b)' failed

@@ -1,0 +1,31 @@
+/* Photoshop theme, dark. Adobe Spectrum charcoal with a blue accent. */
+
+@define-color fg-color                   rgb(232,232,232);
+@define-color bg-color                   rgb(50,50,50);
+@define-color border-color               rgb(26,26,26);
+@define-color dimmed-fg-color            rgb(179,179,179);
+@define-color disabled-fg-color          rgb(112,112,112);
+@define-color disabled-button-color      rgb(90,90,90);
+@define-color hover-color                rgb(75,75,75);
+@define-color widget-bg-color            rgb(44,44,44);
+@define-color selected-color             rgb(38,128,235);
+@define-color extreme-bg-color           rgb(37,37,37);
+@define-color extreme-selected-color     rgb(20,115,230);
+@define-color strong-border-color        rgb(62,62,62);
+@define-color stronger-border-color      rgb(92,92,92);
+@define-color edge-border-color          rgb(26,26,26);
+@define-color scrollbar-slider-color     rgb(110,110,110);
+@define-color scrollbar-trough-color     rgb(37,37,37);
+@define-color ruler-color                rgba(232,232,232,0.35);
+@define-color accent-color               rgb(20,115,230);
+@define-color accent-hover-color         rgb(55,142,240);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(236,91,98);
+@define-color good-color                 rgb(45,157,98);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  rgb(62,62,62);
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-dark.css");

@@ -105,7 +105,7 @@ elif [ "$CLAY_RELEASE" ] && [ "$CLAY_UNSTABLE" ] || [ "$CLAY_RC_VERSION" ]; then
 else
   export CHANNEL="Stable"
 fi
-export APP_ID="org.clay.Clay.$CHANNEL"
+export APP_ID="xyz.kainzmayer.clay.$CHANNEL"
 
 ## Get info about Clay version
 export CUSTOM_CLAY_VERSION="$CLAY_VERSION"
@@ -663,7 +663,7 @@ ln -sfr "$USR_DIR/share/applications/${APP_ID}.desktop" $APP_DIR
 ## 4.4. Configure appdata asset (similarly to flatpaks's 'rename-appdata-file')
 printf "(INFO): configuring $APP_ID.appdata.xml\n"
 find "$USR_DIR/share/metainfo" \( -iname *.appdata.xml -and ! -iname $APP_ID*.appdata.xml \) -execdir mv "{}" $APP_ID.appdata.xml \;
-sed -i "s/org.clay.Clay</${APP_ID}</g" "$USR_DIR/share/metainfo/${APP_ID}.appdata.xml"
+sed -i "s/xyz.kainzmayer.clay</${APP_ID}</g" "$USR_DIR/share/metainfo/${APP_ID}.appdata.xml"
 sed -i "s/clay.desktop/${APP_ID}.desktop/g" "$USR_DIR/share/metainfo/${APP_ID}.appdata.xml"
 sed -i "/<release[^>]*date=\"TODO\"[^>]*>/,/<\/release>/d" "$USR_DIR/share/metainfo/${APP_ID}.appdata.xml"
 printf "\e[0Ksection_end:`date +%s`:${ARCH}_source\r\e[0K\n"

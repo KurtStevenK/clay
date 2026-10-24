@@ -25,7 +25,7 @@ desktopfile = i18n.merge_file(
 
 appdatafilename = clay_desktop_name + '.appdata.xml'
 appdatafilein = configure_file(
-  input : 'org.clay.Clay.appdata.xml.in.in',
+  input : 'xyz.kainzmayer.clay.appdata.xml.in.in',
   output: appdatafilename+'.in',
   configuration: desktop_conf,
 )

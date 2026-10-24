@@ -24,6 +24,7 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gegl.h>
+#include <json-glib/json-glib.h>
 
 #include "libclaybase/claybase.h"
 #include "libclayconfig/clayconfig.h"
@@ -64,6 +65,7 @@ enum
 {
   EXTENSION_INSTALLED,
   EXTENSION_REMOVED,
+  STORE_UPDATED,
   LAST_SIGNAL
 };
 
@@ -80,6 +82,10 @@ struct _ClayExtensionManagerPrivate
 
   /* Running extensions */
   GHashTable *running_extensions;
+
+  /* App Store catalog */
+  GList      *store_catalog;
+  gchar      *store_url;
 
   /* Metadata properties */
   GList      *brush_paths;
@@ -125,6 +131,18 @@ static void     clay_extension_manager_search_directory    (ClayExtensionManager
 static void     clay_extension_manager_extension_running   (ClayExtension        *extension,
                                                             GParamSpec           *pspec,
                                                             ClayExtensionManager *manager);
+
+static void     clay_extension_manager_load_store_file     (ClayExtensionManager *manager,
+                                                            GFile                *file);
+static void     clay_extension_manager_parse_store_json    (ClayExtensionManager *manager,
+                                                            const gchar          *json,
+                                                            gsize                 length);
+static void     clay_extension_manager_fetch_store_ready   (GObject              *source,
+                                                            GAsyncResult         *result,
+                                                            gpointer              user_data);
+static gboolean clay_extension_manager_copy_directory      (GFile                *src,
+                                                            GFile                *dest,
+                                                            GError              **error);
 
 
 G_DEFINE_TYPE_WITH_CODE (ClayExtensionManager, clay_extension_manager,
@@ -211,6 +229,13 @@ clay_extension_manager_class_init (ClayExtensionManagerClass *klass)
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   G_TYPE_STRING);
+  signals[STORE_UPDATED] =
+    g_signal_new ("store-updated",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (ClayExtensionManagerClass, store_updated),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 }
 
 static void
@@ -405,6 +430,8 @@ clay_extension_manager_finalize (GObject *object)
 
   g_list_free_full (manager->p->sys_extensions, g_object_unref);
   g_list_free_full (manager->p->extensions, g_object_unref);
+  g_list_free_full (manager->p->store_catalog, (GDestroyNotify) clay_store_entry_free);
+  g_free (manager->p->store_url);
   g_hash_table_unref (manager->p->running_extensions);
 
   for (iter = manager->p->uninstalled_extensions; iter; iter = iter->next)
@@ -672,6 +699,8 @@ clay_extension_manager_initialize (ClayExtensionManager *manager)
 
   clay_extension_manager_refresh (manager);
   g_list_free_full (processed_ids, g_free);
+
+  clay_extension_manager_refresh_store (manager);
 }
 
 void
@@ -860,6 +889,332 @@ clay_extension_manager_remove (ClayExtensionManager  *manager,
                  clay_object_get_name (extension));
 
   return TRUE;
+}
+
+ClayExtension *
+clay_extension_manager_lookup (ClayExtensionManager *manager,
+                               const gchar          *id)
+{
+  GList *iter;
+
+  g_return_val_if_fail (CLAY_IS_EXTENSION_MANAGER (manager), NULL);
+  g_return_val_if_fail (id != NULL, NULL);
+
+  for (iter = manager->p->extensions; iter; iter = iter->next)
+    {
+      if (clay_extension_id_cmp (iter->data, id) == 0)
+        return iter->data;
+    }
+
+  for (iter = manager->p->sys_extensions; iter; iter = iter->next)
+    {
+      if (clay_extension_id_cmp (iter->data, id) == 0)
+        return iter->data;
+    }
+
+  return NULL;
+}
+
+void
+clay_store_entry_free (ClayStoreEntry *entry)
+{
+  if (! entry)
+    return;
+
+  g_free (entry->id);
+  g_free (entry->name);
+  g_free (entry->name_de);
+  g_free (entry->summary);
+  g_free (entry->summary_de);
+  g_free (entry->description);
+  g_free (entry->category);
+  g_free (entry->tags);
+  g_free (entry->version);
+  g_free (entry->author);
+  g_free (entry->icon_name);
+  g_free (entry->download_url);
+  g_free (entry->local_gex_path);
+  g_free (entry->menu_hint);
+  g_free (entry);
+}
+
+const GList *
+clay_extension_manager_get_store_catalog (ClayExtensionManager *manager)
+{
+  g_return_val_if_fail (CLAY_IS_EXTENSION_MANAGER (manager), NULL);
+
+  return manager->p->store_catalog;
+}
+
+ClayStoreEntry *
+clay_extension_manager_find_store_entry (ClayExtensionManager *manager,
+                                         const gchar          *id)
+{
+  GList *iter;
+
+  g_return_val_if_fail (CLAY_IS_EXTENSION_MANAGER (manager), NULL);
+  g_return_val_if_fail (id != NULL, NULL);
+
+  for (iter = manager->p->store_catalog; iter; iter = iter->next)
+    {
+      ClayStoreEntry *entry = iter->data;
+
+      if (g_strcmp0 (entry->id, id) == 0)
+        return entry;
+    }
+
+  return NULL;
+}
+
+static gboolean
+clay_store_haystack_matches (ClayStoreEntry *entry,
+                             gchar         **tokens)
+{
+  gchar    *haystack;
+  gchar    *folded;
+  gboolean  match = TRUE;
+  gint      i;
+
+  haystack = g_strdup_printf ("%s %s %s %s %s %s %s %s",
+                              entry->id ? entry->id : "",
+                              entry->name ? entry->name : "",
+                              entry->name_de ? entry->name_de : "",
+                              entry->summary ? entry->summary : "",
+                              entry->summary_de ? entry->summary_de : "",
+                              entry->description ? entry->description : "",
+                              entry->category ? entry->category : "",
+                              entry->tags ? entry->tags : "");
+  folded = g_utf8_casefold (haystack, -1);
+  g_free (haystack);
+
+  for (i = 0; tokens[i]; i++)
+    {
+      gchar *needle = g_utf8_casefold (tokens[i], -1);
+
+      if (needle[0] && strstr (folded, needle) == NULL)
+        match = FALSE;
+
+      g_free (needle);
+      if (! match)
+        break;
+    }
+
+  g_free (folded);
+  return match;
+}
+
+GList *
+clay_extension_manager_search_store (ClayExtensionManager *manager,
+                                     const gchar          *query,
+                                     const gchar          *category)
+{
+  GList *matches = NULL;
+  GList *iter;
+  gchar **tokens = NULL;
+
+  g_return_val_if_fail (CLAY_IS_EXTENSION_MANAGER (manager), NULL);
+
+  if (query && *query)
+    tokens = g_strsplit (query, " ", -1);
+
+  for (iter = manager->p->store_catalog; iter; iter = iter->next)
+    {
+      ClayStoreEntry *entry = iter->data;
+
+      if (category && *category && g_strcmp0 (category, "all") != 0)
+        {
+          if (g_strcmp0 (category, "featured") == 0)
+            {
+              if (! entry->featured)
+                continue;
+            }
+          else if (g_strcmp0 (entry->category, category) != 0)
+            {
+              continue;
+            }
+        }
+
+      if (tokens && ! clay_store_haystack_matches (entry, tokens))
+        continue;
+
+      matches = g_list_prepend (matches, entry);
+    }
+
+  g_strfreev (tokens);
+  return g_list_reverse (matches);
+}
+
+gboolean
+clay_extension_manager_install_from_directory (ClayExtensionManager *manager,
+                                               const gchar          *path,
+                                               GError              **error)
+{
+  ClayExtension *extension;
+  gchar         *basename;
+  gchar         *writable_spec;
+  gchar         *writable;
+  gchar         *dest_path;
+  GFile         *src;
+  GFile         *dest;
+  gboolean       success;
+
+  g_return_val_if_fail (CLAY_IS_EXTENSION_MANAGER (manager), FALSE);
+  g_return_val_if_fail (path != NULL, FALSE);
+
+  basename = g_path_get_basename (path);
+  extension = clay_extension_manager_lookup (manager, basename);
+  if (extension)
+    {
+      GError *local_error = NULL;
+
+      g_free (basename);
+      if (clay_extension_manager_can_run (manager, extension) &&
+          ! clay_extension_manager_is_running (manager, extension))
+        {
+          gboolean ok = clay_extension_run (extension, error ? error : &local_error);
+          g_clear_error (&local_error);
+          return ok;
+        }
+
+      return TRUE;
+    }
+
+  writable_spec = clay_config_build_writable_path ("extensions");
+  writable = clay_config_path_expand (writable_spec, TRUE, NULL);
+  g_free (writable_spec);
+  dest_path = g_build_filename (writable, basename, NULL);
+  g_free (basename);
+  src = g_file_new_for_path (path);
+  dest = g_file_new_for_path (dest_path);
+
+  if (g_file_query_exists (dest, NULL))
+    {
+      extension = clay_extension_new (dest_path, TRUE);
+      success = clay_extension_manager_install (manager, extension, error);
+      if (success)
+        {
+          GError *local_error = NULL;
+          clay_extension_run (extension, error ? error : &local_error);
+          g_clear_error (&local_error);
+        }
+    }
+  else
+    {
+      success = clay_extension_manager_copy_directory (src, dest, error);
+      if (success)
+        {
+          GError *local_error = NULL;
+
+          extension = clay_extension_new (dest_path, TRUE);
+          success = clay_extension_manager_install (manager, extension, error);
+          if (success)
+            {
+              clay_extension_run (extension, error ? error : &local_error);
+              g_clear_error (&local_error);
+            }
+          else
+            g_object_unref (extension);
+        }
+    }
+
+  g_object_unref (src);
+  g_object_unref (dest);
+  g_free (writable);
+  g_free (dest_path);
+  return success;
+}
+
+gboolean
+clay_extension_manager_install_from_store (ClayExtensionManager *manager,
+                                           const gchar          *entry_id,
+                                           GError              **error)
+{
+  ClayStoreEntry *entry;
+  ClayExtension  *extension;
+  GFile          *local_dir;
+  gchar          *path;
+
+  g_return_val_if_fail (CLAY_IS_EXTENSION_MANAGER (manager), FALSE);
+  g_return_val_if_fail (entry_id != NULL, FALSE);
+
+  extension = clay_extension_manager_lookup (manager, entry_id);
+  if (extension)
+    {
+      GError *local_error = NULL;
+
+      if (clay_extension_manager_can_run (manager, extension) &&
+          ! clay_extension_manager_is_running (manager, extension))
+        {
+          gboolean ok = clay_extension_run (extension, error ? error : &local_error);
+          g_clear_error (&local_error);
+          return ok;
+        }
+
+      if (clay_extension_manager_is_running (manager, extension))
+        return TRUE;
+
+      /* Listed in the store but switched off: turn it on instead of
+       * pretending the install already succeeded.
+       */
+      {
+        gboolean ok = clay_extension_run (extension, error ? error : &local_error);
+        g_clear_error (&local_error);
+        return ok;
+      }
+    }
+
+  entry = clay_extension_manager_find_store_entry (manager, entry_id);
+  if (! entry)
+    {
+      g_set_error (error, CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
+                   _("Unknown store item '%s'."), entry_id);
+      return FALSE;
+    }
+
+  local_dir = clay_data_directory_file ("extensions", entry_id, NULL);
+  path = g_file_get_path (local_dir);
+  if (path && g_file_test (path, G_FILE_TEST_IS_DIR))
+    {
+      gboolean ok = clay_extension_manager_install_from_directory (manager, path, error);
+      g_free (path);
+      g_object_unref (local_dir);
+      return ok;
+    }
+  g_free (path);
+  g_object_unref (local_dir);
+
+  if (entry->local_gex_path && g_file_test (entry->local_gex_path, G_FILE_TEST_IS_DIR))
+    return clay_extension_manager_install_from_directory (manager, entry->local_gex_path, error);
+
+  g_set_error (error, CLAY_EXTENSION_ERROR, CLAY_EXTENSION_FAILED,
+               _("Store item '%s' is not available locally. Download it from the Clay App Store."),
+               entry_id);
+  return FALSE;
+}
+
+void
+clay_extension_manager_refresh_store (ClayExtensionManager *manager)
+{
+  GFile *file;
+
+  g_return_if_fail (CLAY_IS_EXTENSION_MANAGER (manager));
+
+  file = clay_data_directory_file ("extensions", "store-catalog.json", NULL);
+  if (g_file_query_exists (file, NULL))
+    clay_extension_manager_load_store_file (manager, file);
+  g_object_unref (file);
+
+  if (manager->p->store_url && *manager->p->store_url)
+    {
+      GFile *remote = g_file_new_for_uri (manager->p->store_url);
+
+      g_file_load_contents_async (remote, NULL,
+                                  clay_extension_manager_fetch_store_ready,
+                                  g_object_ref (manager));
+      g_object_unref (remote);
+    }
+
+  g_signal_emit (manager, signals[STORE_UPDATED], 0);
 }
 
 gboolean
@@ -1088,4 +1443,205 @@ clay_extension_manager_extension_running (ClayExtension        *extension,
                          (gpointer) clay_object_get_name (extension));
 
   clay_extension_manager_refresh (manager);
+}
+
+static gchar *
+clay_store_json_get_string (JsonObject  *object,
+                            const gchar *key)
+{
+  if (! json_object_has_member (object, key))
+    return NULL;
+
+  return g_strdup (json_object_get_string_member (object, key));
+}
+
+static void
+clay_extension_manager_parse_store_json (ClayExtensionManager *manager,
+                                         const gchar          *json,
+                                         gsize                 length)
+{
+  JsonParser *parser;
+  JsonNode   *root;
+  JsonObject *object;
+  JsonArray  *array;
+  GError     *error = NULL;
+  guint       i;
+
+  parser = json_parser_new ();
+  if (! json_parser_load_from_data (parser, json, length, &error))
+    {
+      g_printerr ("Failed to parse Clay store catalog: %s\n", error->message);
+      g_error_free (error);
+      g_object_unref (parser);
+      return;
+    }
+
+  root = json_parser_get_root (parser);
+  if (! JSON_NODE_HOLDS_OBJECT (root))
+    {
+      g_object_unref (parser);
+      return;
+    }
+
+  object = json_node_get_object (root);
+
+  if (json_object_has_member (object, "registry_url"))
+    {
+      g_free (manager->p->store_url);
+      manager->p->store_url = g_strdup (json_object_get_string_member (object, "registry_url"));
+    }
+
+  if (! json_object_has_member (object, "extensions"))
+    {
+      g_object_unref (parser);
+      return;
+    }
+
+  array = json_object_get_array_member (object, "extensions");
+  if (! array)
+    {
+      g_object_unref (parser);
+      return;
+    }
+
+  g_list_free_full (manager->p->store_catalog, (GDestroyNotify) clay_store_entry_free);
+  manager->p->store_catalog = NULL;
+
+  for (i = 0; i < json_array_get_length (array); i++)
+    {
+      JsonObject     *item = json_array_get_object_element (array, i);
+      ClayStoreEntry *entry;
+
+      if (! item || ! json_object_has_member (item, "id"))
+        continue;
+
+      entry = g_new0 (ClayStoreEntry, 1);
+      entry->id             = clay_store_json_get_string (item, "id");
+      entry->name           = clay_store_json_get_string (item, "name");
+      entry->name_de        = clay_store_json_get_string (item, "name_de");
+      entry->summary        = clay_store_json_get_string (item, "summary");
+      entry->summary_de     = clay_store_json_get_string (item, "summary_de");
+      entry->description    = clay_store_json_get_string (item, "description");
+      entry->category       = clay_store_json_get_string (item, "category");
+      entry->tags           = clay_store_json_get_string (item, "tags");
+      entry->version        = clay_store_json_get_string (item, "version");
+      entry->author         = clay_store_json_get_string (item, "author");
+      entry->icon_name      = clay_store_json_get_string (item, "icon_name");
+      entry->download_url   = clay_store_json_get_string (item, "download_url");
+      entry->local_gex_path = clay_store_json_get_string (item, "local_gex_path");
+      entry->menu_hint      = clay_store_json_get_string (item, "menu_hint");
+      entry->rating         = json_object_has_member (item, "rating") ?
+                              json_object_get_double_member (item, "rating") : 0.0;
+      entry->downloads      = json_object_has_member (item, "downloads") ?
+                              (gint) json_object_get_int_member (item, "downloads") : 0;
+      entry->featured       = json_object_has_member (item, "featured") &&
+                              json_object_get_boolean_member (item, "featured");
+
+      manager->p->store_catalog = g_list_prepend (manager->p->store_catalog, entry);
+    }
+
+  manager->p->store_catalog = g_list_reverse (manager->p->store_catalog);
+  g_object_unref (parser);
+}
+
+static void
+clay_extension_manager_load_store_file (ClayExtensionManager *manager,
+                                        GFile                *file)
+{
+  gchar  *contents = NULL;
+  gsize   length   = 0;
+  GError *error    = NULL;
+
+  if (g_file_load_contents (file, NULL, &contents, &length, NULL, &error))
+    {
+      clay_extension_manager_parse_store_json (manager, contents, length);
+      g_free (contents);
+    }
+  else
+    {
+      g_printerr ("Could not load Clay store catalog: %s\n", error->message);
+      g_error_free (error);
+    }
+}
+
+static void
+clay_extension_manager_fetch_store_ready (GObject      *source,
+                                          GAsyncResult *result,
+                                          gpointer      user_data)
+{
+  ClayExtensionManager *manager  = user_data;
+  gchar                *contents = NULL;
+  gsize                 length   = 0;
+  GError               *error    = NULL;
+
+  if (g_file_load_contents_finish (G_FILE (source), result,
+                                   &contents, &length, NULL, &error))
+    {
+      clay_extension_manager_parse_store_json (manager, contents, length);
+      g_free (contents);
+      g_signal_emit (manager, signals[STORE_UPDATED], 0);
+    }
+  else if (error)
+    {
+      g_printerr ("Remote Clay store catalog unavailable: %s\n", error->message);
+      g_error_free (error);
+    }
+
+  g_object_unref (manager);
+}
+
+static gboolean
+clay_extension_manager_copy_directory (GFile   *src,
+                                       GFile   *dest,
+                                       GError **error)
+{
+  GFileEnumerator *enumerator;
+  GFileInfo       *info;
+
+  if (! g_file_make_directory_with_parents (dest, NULL, error))
+    {
+      if (error && *error &&
+          ! g_error_matches (*error, G_IO_ERROR, G_IO_ERROR_EXISTS))
+        return FALSE;
+      g_clear_error (error);
+    }
+
+  enumerator = g_file_enumerate_children (src,
+                                          G_FILE_ATTRIBUTE_STANDARD_NAME ","
+                                          G_FILE_ATTRIBUTE_STANDARD_TYPE,
+                                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                                          NULL, error);
+  if (! enumerator)
+    return FALSE;
+
+  while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)))
+    {
+      GFile    *child_src  = g_file_enumerator_get_child (enumerator, info);
+      GFile    *child_dest = g_file_get_child (dest, g_file_info_get_name (info));
+      gboolean  ok         = TRUE;
+
+      if (g_file_info_get_file_type (info) == G_FILE_TYPE_DIRECTORY)
+        {
+          ok = clay_extension_manager_copy_directory (child_src, child_dest, error);
+        }
+      else
+        {
+          ok = g_file_copy (child_src, child_dest,
+                            G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS,
+                            NULL, NULL, NULL, error);
+        }
+
+      g_object_unref (child_src);
+      g_object_unref (child_dest);
+      g_object_unref (info);
+
+      if (! ok)
+        {
+          g_object_unref (enumerator);
+          return FALSE;
+        }
+    }
+
+  g_object_unref (enumerator);
+  return TRUE;
 }

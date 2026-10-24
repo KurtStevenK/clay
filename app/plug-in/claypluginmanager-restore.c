@@ -33,6 +33,7 @@
 
 #include "core/clay.h"
 #include "core/clayextension.h"
+#include "core/clayextensionmanager.h"
 #include "core/clay-utils.h"
 
 #include "pdb/claypdb.h"
@@ -84,6 +85,12 @@ static gint    clay_plug_in_manager_file_proc_compare (gconstpointer         a,
                                                        gpointer              data);
 
 static guint64 clay_plug_in_manager_get_file_time     (GFileInfo            *info);
+static gboolean clay_plug_in_manager_has_file         (ClayPlugInManager    *manager,
+                                                       GFile                *file);
+static void    clay_plug_in_manager_reload_extension_plugins
+                                                      (ClayExtensionManager *ext_manager,
+                                                       GParamSpec           *pspec,
+                                                       ClayPlugInManager    *manager);
 
 
 void
@@ -177,6 +184,10 @@ clay_plug_in_manager_restore (ClayPlugInManager  *manager,
   clay_plug_in_manager_run_extensions (manager, context, status_callback);
 
   g_object_unref (context);
+
+  g_signal_connect (clay->extension_manager, "notify::plug-in-extensions",
+                    G_CALLBACK (clay_plug_in_manager_reload_extension_plugins),
+                    manager);
 }
 
 
@@ -1066,4 +1077,96 @@ clay_plug_in_manager_get_file_time (GFileInfo *info)
                                               G_FILE_ATTRIBUTE_TIME_CHANGED);
 
   return mtime;
+}
+
+static gboolean
+clay_plug_in_manager_has_file (ClayPlugInManager *manager,
+                               GFile             *file)
+{
+  GSList *list;
+
+  for (list = manager->plug_in_procedures; list; list = list->next)
+    {
+      ClayPlugInProcedure *proc = list->data;
+
+      if (proc->file && g_file_equal (proc->file, file))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+static void
+clay_plug_in_manager_reload_extension_plugins (ClayExtensionManager *ext_manager,
+                                               GParamSpec           *pspec G_GNUC_UNUSED,
+                                               ClayPlugInManager    *manager)
+{
+  ClayContext *context;
+  GList       *extensions = NULL;
+  GList       *iter;
+
+  if (! manager->clay->restored)
+    return;
+
+  g_object_get (ext_manager, "plug-in-extensions", &extensions, NULL);
+
+  context = clay_pdb_context_new (manager->clay,
+                                  clay_get_user_context (manager->clay),
+                                  TRUE);
+
+  for (iter = extensions; iter; iter = g_list_next (iter))
+    {
+      ClayExtension *extension = iter->data;
+      GFile         *root_folder;
+      GList         *paths;
+      GList         *path;
+
+      root_folder = g_file_new_for_path (clay_extension_get_path (extension));
+      paths       = clay_extension_get_plug_in_paths (extension);
+
+      for (path = paths; path; path = path->next)
+        {
+          GFile         *file = path->data;
+          ClayPlugInDef *plug_in_def;
+          GFileInfo     *info;
+          GSList        *proc_list;
+
+          if (! clay_file_is_executable (file) ||
+              clay_plug_in_manager_has_file (manager, file))
+            continue;
+
+          info = g_file_query_info (file,
+                                    G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+                                    G_FILE_ATTRIBUTE_TIME_CHANGED,
+                                    G_FILE_QUERY_INFO_NONE, NULL, NULL);
+
+          plug_in_def = clay_plug_in_def_new (file, root_folder);
+          clay_plug_in_def_set_mtime (plug_in_def,
+                                      info ? clay_plug_in_manager_get_file_time (info) : 0);
+          clay_plug_in_def_set_needs_query (plug_in_def, TRUE);
+
+          if (manager->clay->be_verbose)
+            g_print ("Hot-loading extension plug-in: '%s'\n",
+                     clay_file_get_utf8_name (file));
+
+          clay_plug_in_manager_call_query (manager, context, plug_in_def);
+
+          if (plug_in_def->has_init)
+            clay_plug_in_manager_call_init (manager, context, plug_in_def);
+
+          for (proc_list = plug_in_def->procedures; proc_list; proc_list = proc_list->next)
+            {
+              clay_plug_in_manager_add_procedure (manager, proc_list->data);
+              clay_plug_in_manager_add_to_db (manager, context, proc_list->data);
+            }
+
+          g_object_unref (plug_in_def);
+          if (info)
+            g_object_unref (info);
+        }
+
+      g_object_unref (root_folder);
+    }
+
+  g_object_unref (context);
 }

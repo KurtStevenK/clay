@@ -1,0 +1,9 @@
+[project]
+name = "clay-mcp"
+version = "1.0.0"
+description = "MCP server that drives Clay Designer through the in-app JSON-RPC bridge"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.scripts]
+clay-mcp = "server:main"

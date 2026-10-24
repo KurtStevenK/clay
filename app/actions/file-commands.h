@@ -56,6 +56,9 @@ void   file_show_in_file_manager_cmd_callback (ClayAction *action,
 void   file_quit_cmd_callback                 (ClayAction *action,
                                                GVariant   *value,
                                                gpointer    data);
+void   file_restart_cmd_callback              (ClayAction *action,
+                                               GVariant   *value,
+                                               gpointer    data);
 
 void   file_file_open_dialog                  (Clay       *clay,
                                                GFile      *file,

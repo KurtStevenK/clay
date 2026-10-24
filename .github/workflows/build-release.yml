@@ -1,17 +1,16 @@
 name: Build & Release
 
-# Builds the signed, notarized macOS DMG and attaches it to the GitHub release of a
-# v* tag. The VirusTotal workflow listens for this workflow by name, so keep the name.
+# macOS DMG for v* tags (and optional manual runs). VirusTotal listens for this name.
+#
+# GitHub Actions billing (private repos / org limits): macOS minutes count as 10×.
+# A full run here is often ~90–180 runner minutes → ~900–1800 billed minutes.
+# Budget target for Clay: ~1 release build per month when quota is tight; use
+# workflow_dispatch for extra runs. PR CI for macOS was removed to avoid surprise usage.
+#
+# Prefer local Mac builds (build/macos/, clay-appstore-local.sh) when Actions quota is low.
 on:
   push:
     tags: ['v*']
-  # Build and sign (no notarization, no release) when the macOS build changes
-  pull_request:
-    paths:
-      - .github/workflows/build-release.yml
-      - build/macos/**
-      - clay-data/images/logo/**
-      - tools/make-mac-typelib.py
   workflow_dispatch:
     inputs:
       notarize:
@@ -24,19 +23,20 @@ permissions:
 
 concurrency:
   group: build-release-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   macos:
     name: macOS DMG (arm64)
-    # Homebrew builds its libraries for the runner's macOS, so this sets the oldest
-    # macOS the DMG runs on (clay-dist-local.sh writes it into LSMinimumSystemVersion).
     runs-on: macos-15
-    timeout-minutes: 360
+    timeout-minutes: 240
     env:
       HOMEBREW_NO_AUTO_UPDATE: '1'
       HOMEBREW_NO_INSTALL_CLEANUP: '1'
       OPT_PREFIX: /opt/homebrew
+      CLAY_PREFIX: ${{ runner.temp }}/_install
+      BUILD_DIR: ${{ runner.temp }}/build-arm64
+      DIST_DIR: ${{ runner.temp }}/dist
     steps:
       - uses: actions/checkout@v7
 
@@ -60,16 +60,23 @@ jobs:
       - name: Set up paths
         run: |
           {
-            echo "CLAY_PREFIX=$RUNNER_TEMP/_install"
-            echo "BUILD_DIR=$RUNNER_TEMP/build-arm64"
-            echo "DIST_DIR=$RUNNER_TEMP/dist"
-            echo "PKG_CONFIG_PATH=$RUNNER_TEMP/_install/lib/pkgconfig:$OPT_PREFIX/lib/pkgconfig:$OPT_PREFIX/share/pkgconfig:$OPT_PREFIX/opt/libarchive/lib/pkgconfig"
-            echo "XDG_DATA_DIRS=$RUNNER_TEMP/_install/share:$OPT_PREFIX/share"
-            echo "GI_TYPELIB_PATH=$RUNNER_TEMP/_install/lib/girepository-1.0:$OPT_PREFIX/lib/girepository-1.0"
+            echo "PKG_CONFIG_PATH=$CLAY_PREFIX/lib/pkgconfig:$OPT_PREFIX/lib/pkgconfig:$OPT_PREFIX/share/pkgconfig:$OPT_PREFIX/opt/libarchive/lib/pkgconfig"
+            echo "XDG_DATA_DIRS=$CLAY_PREFIX/share:$OPT_PREFIX/share"
+            echo "GI_TYPELIB_PATH=$CLAY_PREFIX/lib/girepository-1.0:$OPT_PREFIX/lib/girepository-1.0"
           } >> "$GITHUB_ENV"
-          # The runner's default Xcode: newer ones may crash in actool on this macOS.
-          # Without the Liquid Glass icon the app falls back to AppIcon.icns.
           xcodebuild -version
+
+      - name: Cache babl, GEGL, and Clay build trees
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/babl
+            ${{ runner.temp }}/gegl
+            ${{ runner.temp }}/_install
+            ${{ runner.temp }}/build-arm64
+          key: macos-clay-${{ hashFiles('meson.build', 'meson_options.txt', 'build/macos/all-deps-uni.txt', 'app/meson.build') }}
+          restore-keys: |
+            macos-clay-
 
       - name: Import Developer ID certificate
         env:
@@ -96,21 +103,33 @@ jobs:
 
       - name: Build babl and GEGL
         run: |
+          set -euo pipefail
           for dep in babl gegl; do
-            git clone --depth 1 "https://gitlab.gnome.org/GNOME/$dep.git" "$RUNNER_TEMP/$dep"
-            meson setup "$RUNNER_TEMP/$dep/_build" "$RUNNER_TEMP/$dep" -Dprefix="$CLAY_PREFIX" -Dbuildtype=debugoptimized \
-              -Dc_args="-I$OPT_PREFIX/include" -Dcpp_args="-I$OPT_PREFIX/include" \
-              -Dc_link_args="-L$OPT_PREFIX/lib" -Dcpp_link_args="-L$OPT_PREFIX/lib"
-            ninja -C "$RUNNER_TEMP/$dep/_build"
-            ninja -C "$RUNNER_TEMP/$dep/_build" install
+            src="$RUNNER_TEMP/$dep"
+            bld="$RUNNER_TEMP/$dep/_build"
+            if [ ! -f "$bld/build.ninja" ]; then
+              git clone --depth 1 "https://gitlab.gnome.org/GNOME/$dep.git" "$src"
+              meson setup "$bld" "$src" -Dprefix="$CLAY_PREFIX" -Dbuildtype=debugoptimized \
+                -Dc_args="-I$OPT_PREFIX/include" -Dcpp_args="-I$OPT_PREFIX/include" \
+                -Dc_link_args="-L$OPT_PREFIX/lib" -Dcpp_link_args="-L$OPT_PREFIX/lib"
+              ninja -C "$bld"
+              ninja -C "$bld" install
+            else
+              echo "Using cached $dep build; rebuilding only if needed"
+              ninja -C "$bld"
+              ninja -C "$bld" install
+            fi
           done
 
       - name: Build Clay
         run: |
-          meson setup "$BUILD_DIR" . -Dprefix="$CLAY_PREFIX" -Dbuildtype=debugoptimized \
-            -Drelocatable-bundle=yes -Ddmg=true -Denable-default-bin=enabled -Dbuild-id=xyz.kainzmayer.clay \
-            -Dc_args="-I$OPT_PREFIX/include" -Dcpp_args="-I$OPT_PREFIX/include" \
-            -Dc_link_args="-L$OPT_PREFIX/lib" -Dcpp_link_args="-L$OPT_PREFIX/lib"
+          set -euo pipefail
+          if [ ! -f "$BUILD_DIR/build.ninja" ]; then
+            meson setup "$BUILD_DIR" . -Dprefix="$CLAY_PREFIX" -Dbuildtype=debugoptimized \
+              -Drelocatable-bundle=yes -Ddmg=true -Denable-default-bin=enabled -Dbuild-id=xyz.kainzmayer.clay \
+              -Dc_args="-I$OPT_PREFIX/include" -Dcpp_args="-I$OPT_PREFIX/include" \
+              -Dc_link_args="-L$OPT_PREFIX/lib" -Dcpp_link_args="-L$OPT_PREFIX/lib"
+          fi
           ninja -C "$BUILD_DIR"
 
       - name: Bundle Clay.app
@@ -121,7 +140,6 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASS: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          # Releases (v* tags, pushed or run by hand) always notarize; other manual runs only when asked
           SKIP_NOTARIZE: ${{ !(startsWith(github.ref, 'refs/tags/v') || inputs.notarize) && '1' || '' }}
         run: build/macos/dmg/clay-dist-local.sh "$BUILD_DIR"
 
@@ -132,7 +150,6 @@ jobs:
           if-no-files-found: error
 
       - name: Attach DMG to the release
-        # Also from a manual run on the tag, in case the tag push did not start a run
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}

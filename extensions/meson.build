@@ -1,4 +1,9 @@
 subdir('goat-exercises')
+subdir('inpaint-heal')
+subdir('ai-beautify')
+subdir('vfx-pack')
+subdir('batch-export')
+subdir('clay-mcp-bridge')
 
 #.interp file read by clay_interpreter_db_load_interp_file in clayinterpreterdb.c
 if have_lua and not meson.is_cross_build() and is_variable('lua') and lua.found() and (platform_windows or not relocatable_bundle)

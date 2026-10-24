@@ -24,3 +24,6 @@ void   dialogs_create_toplevel_cmd_callback (ClayAction *action,
 void   dialogs_create_dockable_cmd_callback (ClayAction *action,
                                              GVariant   *value,
                                              gpointer    data);
+void   dialogs_language_cmd_callback        (ClayAction *action,
+                                             GVariant   *value,
+                                             gpointer    data);

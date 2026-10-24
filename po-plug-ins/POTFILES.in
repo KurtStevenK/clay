@@ -6,7 +6,7 @@ extensions/goat-exercises/goat-exercise-gjs.js
 extensions/goat-exercises/goat-exercise-lua.lua
 extensions/goat-exercises/goat-exercise-py3.py
 extensions/goat-exercises/goat-exercise-vala.vala
-extensions/goat-exercises/org.clay.extension.goat-exercises.metainfo.xml.in.in
+extensions/goat-exercises/xyz.kainzmayer.clay.extension.goat-exercises.metainfo.xml.in.in
 
 plug-ins/common/align-layers.c
 plug-ins/common/animation-optimize.c

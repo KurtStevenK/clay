@@ -406,7 +406,7 @@ clay-debian:
                                    -Dpkgconfig.relocatable=true
                                    -Dgi-docgen=disabled
                                    -Dcheck-update=yes
-                                   -Dbuild-id=org.clay.CLAY_official.AppImage.$(uname -m)
+                                   -Dbuild-id=xyz.kainzmayer.clay.official.AppImage.$(uname -m)
     - cd _build-${RUNNER}
     - ninja
     - printf "\e[0Ksection_end:`date +%s`:clay_build\r\e[0K\n"
@@ -648,7 +648,7 @@ clay-win:
       - _build-*/build/windows/installer/
       - _build-*/build/windows/store/
       # Needed by dist-store-weekly only
-      - _build-*/desktop/org.clay.Clay.appdata.xml
+      - _build-*/desktop/xyz.kainzmayer.clay.appdata.xml
     expire_in: *mid_expire
 
 

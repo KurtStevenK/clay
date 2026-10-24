@@ -140,7 +140,7 @@ cat batch-import-tests.py | flatpak run \
   --env=PYTHONPATH=$(pwd) \
   --env=CLAY_TESTS_DATA_FOLDER=<folder-with-test-data> \
   --env=CLAY_TESTS_CONFIG_FILE=$(pwd)/tests/batch-config.ini \
-  org.clay.Clay -idf --batch-interpreter=python-fu-eval -b - --quit
+  xyz.kainzmayer.clay -idf --batch-interpreter=python-fu-eval -b - --quit
 ```
 
 In case you run the batch version, the log file is written to the folder

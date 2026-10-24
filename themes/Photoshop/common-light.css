@@ -1,0 +1,30 @@
+@import url("common.css");
+
+paned.horizontal > separator {
+  background-image: url("../Windows/ui/separator-handle-v.svg");
+}
+
+paned.vertical > separator {
+  background-image: url("../Windows/ui/separator-handle-h.svg");
+}
+
+button:not(.flat),
+button:not(.flat):hover {
+  box-shadow: none;
+}
+
+image,
+button image,
+toolbutton button image,
+menuitem image,
+notebook header tabs tab image,
+treeview.view image {
+  color: rgb(50,50,50);
+}
+
+button:disabled image,
+menuitem:disabled image {
+  color: @disabled-fg-color;
+}
+
+@import url("readability.css");

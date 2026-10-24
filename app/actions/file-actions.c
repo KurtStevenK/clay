@@ -124,6 +124,12 @@ static const ClayActionEntry file_actions[] =
     file_show_in_file_manager_cmd_callback,
     CLAY_HELP_FILE_SHOW_IN_FILE_MANAGER },
 
+  { "file-restart", CLAY_ICON_VIEW_REFRESH,
+    NC_("file-action", "_Restart"), NULL, { NULL },
+    NC_("file-action", "Quit Clay and start it again"),
+    file_restart_cmd_callback,
+    CLAY_HELP_FILE_QUIT },
+
   { "file-quit", CLAY_ICON_APPLICATION_EXIT,
     NC_("file-action", "_Quit"), NULL, { "<primary>Q", NULL },
     NC_("file-action", "Quit the Clay Image Beautification Program"),

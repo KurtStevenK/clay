@@ -1,7 +1,7 @@
 # Files from the Clay distribution which have already been
 # marked to allow runtime translation of messages
 
-desktop/org.clay.Clay.appdata.xml.in.in
+desktop/xyz.kainzmayer.clay.appdata.xml.in.in
 desktop/clay.desktop.in.in
 
 app/about.h

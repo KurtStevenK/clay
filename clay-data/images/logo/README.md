@@ -183,7 +183,7 @@ concept [since longer](https://github.com/ximion/appstream/issues/187).
 
 Other desktop environments or OSes may have similar concepts.
 
-We have such accent colors defined for Clay on `desktop/org.clay.Clay.appdata.xml.in.in`
+We have such accent colors defined for Clay on `desktop/xyz.kainzmayer.clay.appdata.xml.in.in`
 from `clay` repository.
 
 ## Fun variations of the logo

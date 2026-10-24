@@ -586,12 +586,62 @@ clay_real_restore (Clay               *clay,
   clay->restored = TRUE;
 }
 
+static gboolean clay_restart_pending = FALSE;
+
+static void
+clay_restart_spawn (void)
+{
+  gchar  *exe = NULL;
+  gchar  *argv[2];
+  GError *error = NULL;
+
+#ifdef G_OS_WIN32
+  {
+    gchar *dir = g_win32_get_package_installation_directory_of_module (NULL);
+
+    if (dir)
+      {
+        exe = g_build_filename (dir, "bin", g_get_prgname (), NULL);
+        if (! g_file_test (exe, G_FILE_TEST_IS_REGULAR))
+          {
+            g_free (exe);
+            exe = g_build_filename (dir, g_get_prgname (), NULL);
+          }
+        g_free (dir);
+      }
+  }
+#else
+  exe = g_file_read_link ("/proc/self/exe", NULL);
+#endif
+
+  if (! exe)
+    return;
+
+  argv[0] = exe;
+  argv[1] = NULL;
+
+  if (! g_spawn_async (NULL, argv, NULL, G_SPAWN_DEFAULT,
+                       NULL, NULL, NULL, &error))
+    {
+      g_printerr ("Could not restart Clay: %s\n", error->message);
+      g_clear_error (&error);
+    }
+
+  g_free (exe);
+}
+
 static gboolean
 clay_real_exit (Clay     *clay,
                 gboolean  force)
 {
   if (clay->be_verbose)
     g_print ("EXIT: %s\n", G_STRFUNC);
+
+  if (clay_restart_pending)
+    {
+      clay_restart_pending = FALSE;
+      clay_restart_spawn ();
+    }
 
   clay_plug_in_manager_exit (clay->plug_in_manager);
   clay_extension_manager_exit (clay->extension_manager);
@@ -910,6 +960,23 @@ clay_is_restored (Clay *clay)
  * Exit this Clay session. Unless @force is %TRUE, the user is queried
  * whether unsaved images should be saved and can cancel the operation.
  **/
+void
+clay_restart (Clay *clay)
+{
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+
+  clay_restart_pending = TRUE;
+  clay_exit (clay, FALSE);
+}
+
+void
+clay_restart_cancel (Clay *clay)
+{
+  g_return_if_fail (CLAY_IS_CLAY (clay));
+
+  clay_restart_pending = FALSE;
+}
+
 void
 clay_exit (Clay     *clay,
            gboolean  force)

@@ -798,17 +798,29 @@ language_init (const gchar  *language,
     }
   else
     {
-      g_setenv ("LANGUAGE", language, TRUE);
 #ifdef G_OS_WIN32
-      /* Adding this fixed broken localization (for some languages) on
-       * Windows. See MR !1551.
-       * But it turned out it broke localization of plug-ins on Linux
-       * outputting a "Locale not supported by C library" error. Looks
-       * like LANG needs to be fully qualified (region and encoding).
+      /* gettext follows LANGUAGE. Do not set LC_ALL/LANG to "C":
+       * that switches GLib to the C filename charset and
+       * g_file_replace() then fails with "No such file or directory"
+       * even when the folder exists.
        */
-      g_setenv ("LANG", language, TRUE);
-#endif
+      g_unsetenv ("LC_ALL");
+      if (strcmp (language, "en") == 0)
+        {
+          g_setenv ("LANGUAGE", "C", TRUE);
+          g_setenv ("LC_MESSAGES", "C", TRUE);
+          SetThreadUILanguage (MAKELANGID (LANG_ENGLISH, SUBLANG_ENGLISH_US));
+        }
+      else
+        {
+          g_setenv ("LANGUAGE", language, TRUE);
+          g_setenv ("LC_MESSAGES", language, TRUE);
+        }
       setlocale (LC_ALL, "");
+#else
+      g_setenv ("LANGUAGE", language, TRUE);
+      setlocale (LC_ALL, "");
+#endif
 
       actual_language = g_strdup (language);
     }

@@ -24,6 +24,7 @@
 
 #include "actions-types.h"
 
+#include "config/clayrc.h"
 #include "core/clay.h"
 
 #include "widgets/claydialogfactory.h"
@@ -32,6 +33,8 @@
 
 #include "actions.h"
 #include "dialogs-commands.h"
+
+#include "clay-intl.h"
 
 
 /*  public functions  */
@@ -74,4 +77,50 @@ dialogs_create_dockable_cmd_callback (ClayAction *action,
                                                clay_dialog_factory_get_singleton (),
                                                clay_widget_get_monitor (widget),
                                                identifier);
+}
+
+void
+dialogs_language_cmd_callback (ClayAction *action,
+                               GVariant   *value,
+                               gpointer    data)
+{
+  Clay        *clay;
+  GtkWidget   *widget;
+  GtkWidget   *dialog;
+  const gchar *code;
+  gchar       *current = NULL;
+
+  return_if_no_clay (clay, data);
+  return_if_no_widget (widget, data);
+
+  code = g_variant_get_string (value, NULL);
+  if (code && g_strcmp0 (code, "system") == 0)
+    code = NULL;
+
+  g_object_get (clay->edit_config, "language", &current, NULL);
+  if (g_strcmp0 (current, code) == 0)
+    {
+      g_free (current);
+      return;
+    }
+  g_free (current);
+
+  g_object_set (clay->edit_config, "language", code, NULL);
+
+  /* Language is a restart property, so it is not copied onto the
+   * running config. Write clayrc now. An idle autosave can be skipped
+   * when preferences are open, or lost if the process exits first.
+   */
+  clay_rc_save (CLAY_RC (clay->edit_config));
+
+  dialog = gtk_message_dialog_new (GTK_IS_WINDOW (gtk_widget_get_toplevel (widget)) ?
+                                   GTK_WINDOW (gtk_widget_get_toplevel (widget)) : NULL,
+                                   GTK_DIALOG_DESTROY_WITH_PARENT,
+                                   GTK_MESSAGE_INFO,
+                                   GTK_BUTTONS_OK,
+                                   _("Language saved"));
+  gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
+                                            _("Clay will use this language the next time it starts."));
+  gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
 }

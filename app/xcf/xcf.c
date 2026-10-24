@@ -439,8 +439,22 @@ xcf_save_invoker (ClayProcedure         *procedure,
   file  = g_value_get_object (clay_value_array_index (args, 2));
 
   output = G_OUTPUT_STREAM (g_file_replace (file,
-                                            NULL, FALSE, G_FILE_CREATE_NONE,
+                                            NULL, FALSE,
+                                            G_FILE_CREATE_REPLACE_DESTINATION,
                                             NULL, &my_error));
+
+  /* Windows GIO: g_file_replace() can report NOT_FOUND for a new file
+   * in an existing folder. Create it instead of failing the save.
+   */
+  if (! output &&
+      my_error &&
+      g_error_matches (my_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+    {
+      g_clear_error (&my_error);
+      output = G_OUTPUT_STREAM (g_file_create (file,
+                                               G_FILE_CREATE_NONE,
+                                               NULL, &my_error));
+    }
 
   if (output)
     {

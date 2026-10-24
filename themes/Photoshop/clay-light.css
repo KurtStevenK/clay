@@ -1,0 +1,31 @@
+/* Photoshop theme, light. */
+
+@define-color fg-color                   rgb(34,34,34);
+@define-color bg-color                   rgb(240,240,240);
+@define-color border-color               rgb(210,210,210);
+@define-color dimmed-fg-color            rgb(80,80,80);
+@define-color disabled-fg-color          rgb(140,140,140);
+@define-color disabled-button-color      rgb(180,180,180);
+@define-color hover-color                rgb(220,220,220);
+@define-color widget-bg-color            rgb(255,255,255);
+@define-color selected-color             rgb(20,115,230);
+@define-color extreme-bg-color           rgb(255,255,255);
+@define-color extreme-selected-color     rgb(20,115,230);
+@define-color strong-border-color        rgb(190,190,190);
+@define-color stronger-border-color      rgb(150,150,150);
+@define-color edge-border-color          rgb(200,200,200);
+@define-color scrollbar-slider-color     rgb(160,160,160);
+@define-color scrollbar-trough-color     rgb(240,240,240);
+@define-color ruler-color                rgba(34,34,34,0.35);
+@define-color accent-color               rgb(20,115,230);
+@define-color accent-hover-color         rgb(13,102,208);
+@define-color on-accent-color            rgb(255,255,255);
+@define-color destructive-color          rgb(196,43,28);
+@define-color good-color                 rgb(15,123,15);
+
+@define-color theme_selected_bg_color            @accent-color;
+@define-color theme_selected_fg_color            @on-accent-color;
+@define-color theme_unfocused_selected_bg_color  rgb(210,210,210);
+@define-color theme_unfocused_selected_fg_color  @fg-color;
+
+@import url("common-light.css");

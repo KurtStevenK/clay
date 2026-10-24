@@ -26,6 +26,15 @@ Clay keeps Clay's plug-in interface (`libclay`, the PDB procedure names, the `Cl
 
 Every GitHub release is scanned on [VirusTotal](https://www.virustotal.com). The release notes list each installer's detection count and link to its full multi-engine report. Heuristic flags on large native GTK apps are common, so read the whole report rather than a single detection. See [SECURITY.md](SECURITY.md).
 
+## App Store and AI agent (MCP)
+
+Clay’s **Extensions → Clay App Store (DLC Shop)** dialog browses curated plugins (Content-Aware Fill / *Inhaltssensitives Füllen*, Beautify, VFX, batch export, and the MCP bridge). Search is live and bilingual.
+
+To let an AI agent drive Clay like Blender MCP:
+
+1. Start Clay, open an image, then **Tools → AI Agent Bridge (MCP Server)…**
+2. Use the MCP server in [tools/clay-mcp](tools/clay-mcp) (see `.cursor/mcp.json`).
+
 ## Building
 
 Desktop builds use the Meson files already in this tree: [build/windows](build/windows), [build/linux](build/linux), and [build/macos](build/macos). See [INSTALL](INSTALL) for Clay build instructions.

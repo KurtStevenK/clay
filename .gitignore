@@ -7,6 +7,8 @@
 _build/
 _install/
 _src/
+third_party/
+_mcp_fill.py
 debug-*.log
 _ico-preview-config/
 _theme-verify-config/

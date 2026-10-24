@@ -1,0 +1,21 @@
+Skipping duplicate plug-in: 'C:\Users\Kurt Steven\AppData\Roaming\Clay\3.36\plug-ins\inpaint-heal\inpaint-heal.py'
+Skipping duplicate plug-in: 'T:\Apps\clay\_install\lib\clay\3.0\plug-ins\inpaint-heal\inpaint-heal.py'
+INFO: argument 'gradient' (value "Incandescent") of procedure 'script-fu-lava' ignored because resources of type ClayGradient are not loaded.
+INFO: argument 'gradient' (value "Coffee") of procedure 'script-fu-coffee-stain' ignored because resources of type ClayGradient are not loaded.
+INFO: argument 'palette' (value "Default") of procedure 'script-fu-set-cmap' ignored because resources of type ClayPalette are not loaded.
+Clay-Message: Welcome to Clay 3.36.0!
+
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_fill_options_new: assertion 'use_context_color == FALSE || context != NULL' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_context_set_serialize_properties: assertion 'CLAY_IS_CONTEXT (context)' failed
+
+(xyz.kainzmayer.clay:32600): GLib-GObject-CRITICAL **: 02:10:56.194: invalid (NULL) pointer instance
+
+(xyz.kainzmayer.clay:32600): GLib-GObject-CRITICAL **: 02:10:56.194: g_signal_connect_data: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_stroke_options_new: assertion 'use_context_color == FALSE || context != NULL' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: Clay-Core-CRITICAL: clay_context_set_serialize_properties: assertion 'CLAY_IS_CONTEXT (context)' failed
+
+(xyz.kainzmayer.clay:32600): GLib-GObject-CRITICAL **: 02:10:56.197: invalid (NULL) pointer instance
+
+(xyz.kainzmayer.clay:32600): GLib-GObject-CRITICAL **: 02:10:56.199: g_signal_connect_data: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: LibClayConfig-CRITICAL: clay_config_is_equal_to: assertion 'CLAY_IS_CONFIG (b)' failed
+T:\Apps\clay\_install\bin\clay-console-3.36.exe: LibClayConfig-CRITICAL: clay_config_is_equal_to: assertion 'CLAY_IS_CONFIG (b)' failed

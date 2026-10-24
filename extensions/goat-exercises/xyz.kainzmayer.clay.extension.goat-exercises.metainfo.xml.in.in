@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="addon">
-  <id>org.clay.extension.goat-exercises</id>
+  <id>xyz.kainzmayer.clay.extension.goat-exercises</id>
   <extends>xyz.kainzmayer.clay</extends>
   <name>Goat Exercises</name>
   <summary>Official Demo Plug-ins</summary>

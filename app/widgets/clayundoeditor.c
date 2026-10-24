@@ -338,6 +338,13 @@ clay_undo_editor_undo_event (ClayImage      *image,
   switch (event)
     {
     case CLAY_UNDO_EVENT_UNDO_PUSHED:
+      if (! editor->container)
+        {
+          if (clay_image_undo_is_enabled (image))
+            clay_undo_editor_fill (editor);
+          break;
+        }
+
       g_signal_handlers_block_by_func (editor->view,
                                        clay_undo_editor_selection_changed,
                                        editor);

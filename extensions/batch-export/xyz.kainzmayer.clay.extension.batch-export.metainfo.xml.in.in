@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>xyz.kainzmayer.clay.extension.batch-export</id>
+  <extends>xyz.kainzmayer.clay</extends>
+  <name>Social Batch Optimizer</name>
+  <summary>Resize, watermark, and export for web and social</summary>
+  <description>
+    <p>Quick export helper for WebP, PNG and JPEG with optional watermark text.</p>
+  </description>
+  <url type="homepage">https://claydesign.web.app</url>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <releases>
+   <release version="1.0.0" date="2026-10-23" />
+  </releases>
+  <requires>
+   <id version="3.0.0" compare="ge">xyz.kainzmayer.clay</id>
+  </requires>
+  <custom>
+   <value key="Clay::plug-in-path">@PLUGIN_SCRIPT@</value>
+  </custom>
+</component>

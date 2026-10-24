@@ -32,8 +32,8 @@ printf "\e[0Ksection_end:`date +%s`:flat_tlkt\r\e[0K\n"
 # GLOBAL INFO
 printf "\e[0Ksection_start:`date +%s`:flat_info\r\e[0KGetting flatpak global info\n"
 ## Get proper app ID and update branch
-APP_ID=$(awk -F'"' '/"app-id"/ {print $4; exit}' build/linux/flatpak/org.clay.Clay-nightly.json)
-BRANCH=$(awk -F'"' '/"branch"/ {print $4; exit}' build/linux/flatpak/org.clay.Clay-nightly.json)
+APP_ID=$(awk -F'"' '/"app-id"/ {print $4; exit}' build/linux/flatpak/xyz.kainzmayer.clay-nightly.json)
+BRANCH=$(awk -F'"' '/"branch"/ {print $4; exit}' build/linux/flatpak/xyz.kainzmayer.clay-nightly.json)
 printf "(INFO): App ID: $APP_ID (branch: $BRANCH)\n"
 
 ## Autodetects what archs will be packaged

@@ -44,7 +44,7 @@ if (-not (Test-Path _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREF
     #FIXME: There is no GJS for Windows. See: https://github.com/KurtStevenK/clay/-/issues/5891
     meson setup _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREFIX) | ?{$_} | select -First 1) -Dprefix="$CLAY_PREFIX" $NON_RELOCATABLE_OPTION `
                 $PKGCONF_RELOCATABLE_OPTION $WARN_AS_ERROR_ON_CI $INSTALLER_OPTION $STORE_OPTION `
-                -Denable-default-bin=enabled -Dbuild-id='org.clay.CLAY_official';
+                -Denable-default-bin=enabled -Dbuild-id='xyz.kainzmayer.clay.official';
     if ("$LASTEXITCODE" -gt '0') { exit 1 }
   }
 Set-Location _build-$(@($env:VCPKG_DEFAULT_HOST_TRIPLET,$env:MSYSTEM_PREFIX) | ?{$_} | select -First 1)

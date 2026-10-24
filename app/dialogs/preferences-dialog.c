@@ -151,6 +151,8 @@ static void   prefs_icon_theme_reset_callback      (GObject      *config,
                                                     GtkWidget    *widget);
 static void   prefs_startup_monitor_add            (GObject      *config,
                                                     GtkBox       *vbox);
+static void   prefs_language_flags_add             (GObject      *config,
+                                                    GtkBox       *vbox);
 
 
 /*  private variables  */
@@ -158,6 +160,199 @@ static void   prefs_startup_monitor_add            (GObject      *config,
 static GtkWidget *prefs_dialog = NULL;
 static GtkWidget *tool_editor  = NULL;
 
+
+typedef struct
+{
+  const gchar *code;
+  const gchar *icon;
+  const gchar *name;
+} PrefsLanguageChip;
+
+static const PrefsLanguageChip prefs_language_chips[] =
+{
+  { "",      "clay-lang-system", "System" },
+  { "de",    "clay-lang-de",     "Deutsch" },
+  { "en",    "clay-lang-en",     "English" },
+  { "fr",    "clay-lang-fr",     "Français" },
+  { "es",    "clay-lang-es",     "Español" },
+  { "it",    "clay-lang-it",     "Italiano" },
+  { "pt",    "clay-lang-pt",     "Português" },
+  { "nl",    "clay-lang-nl",     "Nederlands" },
+  { "pl",    "clay-lang-pl",     "Polski" },
+  { "ru",    "clay-lang-ru",     "Русский" },
+  { "zh_CN", "clay-lang-zh",     "中文" },
+  { "ja",    "clay-lang-ja",     "日本語" },
+  { "ko",    "clay-lang-ko",     "한국어" },
+  { "tr",    "clay-lang-tr",     "Türkçe" },
+  { "ar",    "clay-lang-ar",     "العربية" },
+  { "sv",    "clay-lang-sv",     "Svenska" },
+};
+
+static void prefs_language_flags_notify (GObject    *config,
+                                         GParamSpec *pspec,
+                                         GtkWidget  *flow);
+
+static void
+prefs_language_flags_css (void)
+{
+  static gboolean done = FALSE;
+  GtkCssProvider *css;
+
+  if (done)
+    return;
+  done = TRUE;
+
+  css = gtk_css_provider_new ();
+  gtk_css_provider_load_from_data (css,
+                                   "button.clay-lang-chip {"
+                                   "  padding: 6px 8px;"
+                                   "  border-radius: 12px;"
+                                   "  margin: 3px;"
+                                   "}"
+                                   "button.clay-lang-chip:checked {"
+                                   "  background-image: none;"
+                                   "  background-color: @theme_selected_bg_color;"
+                                   "  color: @theme_selected_fg_color;"
+                                   "}",
+                                   -1, NULL);
+  gtk_style_context_add_provider_for_screen (gdk_screen_get_default (),
+                                             GTK_STYLE_PROVIDER (css),
+                                             GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  g_object_unref (css);
+}
+
+static void
+prefs_language_flag_toggled (GtkToggleButton *button,
+                             GObject         *config)
+{
+  GtkWidget   *flow;
+  const gchar *code;
+
+  if (! gtk_toggle_button_get_active (button))
+    return;
+
+  code = g_object_get_data (G_OBJECT (button), "lang-code");
+  flow = gtk_widget_get_parent (gtk_widget_get_parent (GTK_WIDGET (button)));
+
+  g_signal_handlers_block_by_func (config, prefs_language_flags_notify, flow);
+  g_object_set (config, "language", (code && *code) ? code : NULL, NULL);
+  g_signal_handlers_unblock_by_func (config, prefs_language_flags_notify, flow);
+}
+
+static void
+prefs_language_flags_notify (GObject    *config,
+                             GParamSpec *pspec,
+                             GtkWidget  *flow)
+{
+  gchar *value = NULL;
+  GList *rows;
+  GList *iter;
+
+  g_object_get (config, "language", &value, NULL);
+  rows = gtk_container_get_children (GTK_CONTAINER (flow));
+
+  for (iter = rows; iter; iter = iter->next)
+    {
+      GtkWidget   *button = gtk_bin_get_child (GTK_BIN (iter->data));
+      const gchar *code   = g_object_get_data (G_OBJECT (button), "lang-code");
+      gboolean     match  = (value == NULL || value[0] == '\0')
+                            ? (code == NULL || code[0] == '\0')
+                            : g_strcmp0 (value, code) == 0;
+
+      if (match && ! gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)))
+        {
+          g_signal_handlers_block_by_func (button, prefs_language_flag_toggled, config);
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
+          g_signal_handlers_unblock_by_func (button, prefs_language_flag_toggled, config);
+        }
+    }
+
+  g_list_free (rows);
+  g_free (value);
+}
+
+static void
+prefs_language_flags_add (GObject *config,
+                          GtkBox  *vbox)
+{
+  GtkWidget *flow;
+  GtkWidget *hint;
+  GtkWidget *group = NULL;
+  gchar     *current = NULL;
+  guint      i;
+
+  clay_language_flags_register ();
+  prefs_language_flags_css ();
+
+  hint = gtk_label_new (_("Pick a language. Clay uses it the next time it starts."));
+  gtk_label_set_xalign (GTK_LABEL (hint), 0.0);
+  gtk_label_set_line_wrap (GTK_LABEL (hint), TRUE);
+  gtk_style_context_add_class (gtk_widget_get_style_context (hint), "dim-label");
+  gtk_box_pack_start (vbox, hint, FALSE, FALSE, 2);
+  gtk_widget_set_visible (hint, TRUE);
+
+  flow = gtk_flow_box_new ();
+  gtk_flow_box_set_selection_mode (GTK_FLOW_BOX (flow), GTK_SELECTION_NONE);
+  gtk_flow_box_set_max_children_per_line (GTK_FLOW_BOX (flow), 8);
+  gtk_flow_box_set_homogeneous (GTK_FLOW_BOX (flow), TRUE);
+  gtk_flow_box_set_column_spacing (GTK_FLOW_BOX (flow), 4);
+  gtk_flow_box_set_row_spacing (GTK_FLOW_BOX (flow), 4);
+  gtk_box_pack_start (vbox, flow, FALSE, FALSE, 4);
+  gtk_widget_set_visible (flow, TRUE);
+
+  g_object_get (config, "language", &current, NULL);
+
+  for (i = 0; i < G_N_ELEMENTS (prefs_language_chips); i++)
+    {
+      const PrefsLanguageChip *chip = &prefs_language_chips[i];
+      GtkWidget               *button;
+      GtkWidget               *label;
+      gchar                   *markup;
+      gboolean                 active;
+
+      if (group)
+        button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON (group), " ");
+      else
+        button = gtk_radio_button_new_with_label (NULL, " ");
+
+      gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (button), FALSE);
+      gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
+      gtk_style_context_add_class (gtk_widget_get_style_context (button),
+                                   "clay-lang-chip");
+      g_object_set_data (G_OBJECT (button), "lang-code", (gpointer) chip->code);
+
+      label = gtk_bin_get_child (GTK_BIN (button));
+      gtk_label_set_text (GTK_LABEL (label), chip->name);
+      {
+        GtkWidget *flag = gtk_image_new_from_icon_name (chip->icon,
+                                                        GTK_ICON_SIZE_DND);
+
+        gtk_image_set_pixel_size (GTK_IMAGE (flag), 28);
+        gtk_button_set_image (GTK_BUTTON (button), flag);
+        gtk_button_set_always_show_image (GTK_BUTTON (button), TRUE);
+        gtk_button_set_image_position (GTK_BUTTON (button), GTK_POS_TOP);
+      }
+
+      active = (current == NULL || current[0] == '\0')
+               ? chip->code[0] == '\0'
+               : g_strcmp0 (current, chip->code) == 0;
+      if (active)
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
+
+      g_signal_connect (button, "toggled",
+                        G_CALLBACK (prefs_language_flag_toggled), config);
+      gtk_widget_set_tooltip_text (button, chip->name);
+      gtk_flow_box_insert (GTK_FLOW_BOX (flow), button, -1);
+      gtk_widget_set_visible (button, TRUE);
+
+      if (! group)
+        group = button;
+    }
+
+  g_free (current);
+  g_signal_connect (config, "notify::language",
+                    G_CALLBACK (prefs_language_flags_notify), flow);
+}
 
 static void
 prefs_startup_monitor_changed (GtkComboBox *combo,
@@ -2004,11 +2199,11 @@ prefs_dialog_new (Clay       *clay,
   clay_prefs_box_set_page_scrollable (CLAY_PREFS_BOX (prefs_box), vbox, TRUE);
 
   /*  Language  */
-
-  /*  Only add the language entry if the iso-codes package is available.  */
-#ifdef HAVE_ISO_CODES
   vbox2 = prefs_frame_new (_("Language"), GTK_CONTAINER (vbox), FALSE);
+  prefs_language_flags_add (object, GTK_BOX (vbox2));
 
+  /*  Full list when iso-codes is available.  */
+#ifdef HAVE_ISO_CODES
   prefs_language_combo_box_add (object, "language", GTK_BOX (vbox2));
 #endif
 

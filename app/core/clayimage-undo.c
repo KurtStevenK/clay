@@ -59,12 +59,22 @@ clay_image_undo_is_enabled (ClayImage *image)
 gboolean
 clay_image_undo_enable (ClayImage *image)
 {
+  ClayImagePrivate *private;
+
   g_return_val_if_fail (CLAY_IS_IMAGE (image), FALSE);
+
+  private = CLAY_IMAGE_GET_PRIVATE (image);
 
   /*  Free all undo steps as they are now invalidated  */
   clay_image_undo_free (image);
 
-  return clay_image_undo_thaw (image);
+  /*  Match file_open_sanitize_image(): nested freeze without matching
+   *  thaw leaves undo recording off and the history dock empty.
+   */
+  while (private->undo_freeze_count > 0)
+    clay_image_undo_thaw (image);
+
+  return TRUE;
 }
 
 gboolean

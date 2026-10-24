@@ -23,7 +23,7 @@
 #include "config/claydisplayconfig.h"
 
 
-#define CLAY_CONFIG_DEFAULT_THEME          "Clay"
+#define CLAY_CONFIG_DEFAULT_THEME          "Photoshop"
 #define CLAY_CONFIG_DEFAULT_ICON_THEME     "Default"
 
 

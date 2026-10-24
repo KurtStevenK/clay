@@ -7,6 +7,16 @@ subdir('tags')
 subdir('tips')
 subdir('tool-presets')
 
+install_data(
+  'extensions' / 'store-catalog.json',
+  install_dir: claydatadir / 'extensions',
+)
+
+install_subdir(
+  'icons' / 'flags',
+  install_dir: claydatadir / 'icons',
+)
+
 
 meson.add_install_script(python, '-c',
   'from pathlib import Path; import sys, os; destdir = os.environ.get("MESON_INSTALL_DESTDIR_PREFIX"); (Path(destdir) / sys.argv[1] / "fonts").mkdir(parents=True, exist_ok=True)',

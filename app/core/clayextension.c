@@ -220,6 +220,14 @@ clay_extension_new (const gchar *dir,
 }
 
 const gchar *
+clay_extension_get_id (ClayExtension *extension)
+{
+  g_return_val_if_fail (CLAY_IS_EXTENSION (extension), NULL);
+
+  return clay_object_get_name (CLAY_OBJECT (extension));
+}
+
+const gchar *
 clay_extension_get_name (ClayExtension *extension)
 {
   g_return_val_if_fail (extension->p->component != NULL, NULL);
@@ -441,15 +449,18 @@ clay_extension_load (ClayExtension  *extension,
   extends = as_component_get_extends (component);
   if (success &&
       ! g_ptr_array_find_with_equal_func (extends, CLAY_DESKTOP_NAME,
+                                          g_str_equal, NULL) &&
+      ! g_ptr_array_find_with_equal_func (extends, "org.gimp.GIMP",
                                           g_str_equal, NULL))
     {
       /* Properly setting the <extends> will allow extensions to be
-       * distributed appropriately through other means.
+       * distributed appropriately through other means. Clay also
+       * accepts GIMP 3 add-ons so existing plug-in packs keep working.
        */
       if (error && *error == NULL)
         *error = g_error_new (CLAY_EXTENSION_ERROR,
                               CLAY_EXTENSION_BAD_APPDATA,
-                              _("Extension AppData must extend \"%s\"."),
+                              _("Extension AppData must extend \"%s\" or \"org.gimp.GIMP\"."),
                               CLAY_DESKTOP_NAME);
       success = FALSE;
     }
@@ -504,7 +515,8 @@ clay_extension_load (ClayExtension  *extension,
           AsRelation *relation = g_ptr_array_index(relations, i);
 
           if (as_relation_get_item_kind(relation) == AS_RELATION_ITEM_KIND_ID &&
-              g_strcmp0(as_relation_get_value_str(relation), CLAY_DESKTOP_NAME) == 0)
+              (g_strcmp0(as_relation_get_value_str(relation), CLAY_DESKTOP_NAME) == 0 ||
+               g_strcmp0(as_relation_get_value_str(relation), "org.gimp.GIMP") == 0))
             {
               has_require = TRUE;
 
@@ -533,7 +545,7 @@ clay_extension_load (ClayExtension  *extension,
         {
           *error = g_error_new (CLAY_EXTENSION_ERROR,
                                 CLAY_EXTENSION_FAILED,
-                                _("<requires><id>%s</id></requires> for version comparison is mandatory."),
+                                _("<requires><id>%s</id></requires> (or org.gimp.GIMP) for version comparison is mandatory."),
                                 CLAY_DESKTOP_NAME);
         }
     }

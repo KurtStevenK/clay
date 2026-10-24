@@ -544,7 +544,7 @@ clay_paint_core_finish (ClayPaintCore *core,
           continue;
         }
 
-      if (push_undo)
+      if (push_undo && clay_image_undo_is_enabled (image))
         {
           GeglBuffer    *undo_buffer;
           GeglBuffer    *buffer;

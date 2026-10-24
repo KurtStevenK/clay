@@ -522,24 +522,18 @@ file_gex_decompress (GFile   *file,
 
 /*  public functions  */
 
-ClayValueArray *
-file_gex_load_invoker (ClayProcedure         *procedure,
-                       Clay                  *clay,
-                       ClayContext           *context,
-                       ClayProgress          *progress,
-                       const ClayValueArray  *args,
-                       GError               **error)
+gboolean
+file_gex_install (Clay    *clay,
+                  GFile   *file,
+                  GError **error)
 {
-  ClayValueArray *return_vals;
-  GFile          *file;
-  gchar          *ext_dir   = NULL;
-  AsMetadata     *metadata  = NULL;
-  AsComponent    *component = NULL;
-  gboolean        success   = FALSE;
+  gchar       *ext_dir   = NULL;
+  AsMetadata  *metadata  = NULL;
+  AsComponent *component = NULL;
+  gboolean     success   = FALSE;
 
-  clay_set_busy (clay);
-
-  file = g_value_get_object (clay_value_array_index (args, 1));
+  g_return_val_if_fail (CLAY_IS_CLAY (clay), FALSE);
+  g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
   success = file_gex_validate (file, &metadata, &component, error);
   if (success)
@@ -558,21 +552,33 @@ file_gex_load_invoker (ClayProcedure         *procedure,
       success   = clay_extension_manager_install (clay->extension_manager,
                                                   extension, error);
 
-      if (! success)
+      if (success)
         {
-          GFile *file;
+          GError *run_error = NULL;
+
+          clay_extension_run (extension, &run_error);
+          if (run_error)
+            {
+              g_printerr ("Installed extension but failed to run: %s\n",
+                          run_error->message);
+              g_error_free (run_error);
+            }
+        }
+      else
+        {
+          GFile *dir_file;
 
           g_object_unref (extension);
 
-          file = g_file_new_for_path (ext_dir);
+          dir_file = g_file_new_for_path (ext_dir);
 
-          if (! clay_file_delete_recursive (file, &rm_error))
+          if (! clay_file_delete_recursive (dir_file, &rm_error))
             {
               g_warning ("%s: %s\n", G_STRFUNC, rm_error->message);
               g_error_free (rm_error);
             }
 
-          g_object_unref (file);
+          g_object_unref (dir_file);
         }
 
       g_free (ext_dir);
@@ -581,6 +587,26 @@ file_gex_load_invoker (ClayProcedure         *procedure,
     {
       success = FALSE;
     }
+
+  return success;
+}
+
+ClayValueArray *
+file_gex_load_invoker (ClayProcedure         *procedure,
+                       Clay                  *clay,
+                       ClayContext           *context,
+                       ClayProgress          *progress,
+                       const ClayValueArray  *args,
+                       GError               **error)
+{
+  ClayValueArray *return_vals;
+  GFile          *file;
+  gboolean        success   = FALSE;
+
+  clay_set_busy (clay);
+
+  file = g_value_get_object (clay_value_array_index (args, 1));
+  success = file_gex_install (clay, file, error);
 
   return_vals = clay_procedure_get_return_values (procedure, success,
                                                   error ? *error : NULL);
