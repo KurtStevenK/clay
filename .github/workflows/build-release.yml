@@ -67,7 +67,7 @@ jobs:
           xcodebuild -version
 
       - name: Cache babl, GEGL, and Clay build trees
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ${{ runner.temp }}/babl
