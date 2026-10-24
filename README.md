@@ -10,17 +10,11 @@ Clay is a free image editor for Windows, Linux, and macOS. Mobile editions for i
 
 ## License
 
-Clay is free software under the GNU General Public License, version 3 or any later version. See [COPYING](COPYING) and [LICENSE](LICENSE). The libraries under `libclay` are under the GNU Lesser General Public License. Some icons and the splash artwork keep their own notices.
+Clay is [GPL-3.0-or-later](COPYING). `libclay` is [LGPL-3.0-or-later](libclay/COPYING). Component and data licensing notes: [LICENSE](LICENSE); bundled assets: [clay-data/LICENSE](clay-data/LICENSE).
 
-This program is a fork of the GNU Image Manipulation Program. Publishing this source is allowed. Distributing a binary requires offering this source under the same license, which this public repository does.
+Fork of [GIMP](https://www.gimp.org/) (the GNU Image Manipulation Program), not affiliated with the GIMP project. Upstream trademarks and attribution: [NOTICE](NOTICE). Copyright belongs to the respective contributors; Clay Design maintains this fork. Questions: [open an issue](https://github.com/KurtStevenK/clay/issues).
 
-Copyright in the program belongs to its contributors. Clay Design maintains this fork. The original authors' copyright notices stay in the source files. Those notices are not replaced.
-
-If you have a concern about attribution, a contribution, or the license, write immediately: [open an issue](https://github.com/KurtStevenK/clay/issues). We will cooperate to align with the law and respect everybody's contribution.
-
-Clay and the Wilber mascot are names of the upstream project. This fork is Clay. It is not affiliated with the Clay project; see [NOTICE](NOTICE).
-
-Clay keeps Clay's plug-in interface (`libclay`, the PDB procedure names, the `Clay-3.0` introspection namespace and the `clay-3.0` pkg-config files), so Clay plug-ins and scripts keep working and Clay can still take upstream fixes. Everything users see is named Clay.
+The plug-in interface (`libclay`, clay-* PDB, `Clay-3.0`, `clay-3.0` pkg-config) stays compatible so scripts and ports keep working while the app is named Clay.
 
 ## Verify downloads
 
