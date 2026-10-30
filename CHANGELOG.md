@@ -6,6 +6,13 @@ Clay 3.36.0 is the first branded release of the Clay fork. It is based on the
 GNU Image Manipulation Program (GIMP) 3.36 development line, with Clay-specific
 branding, packaging, themes, and a renamed but compatible plug-in API (`libclay`).
 
+## [Unreleased]
+
+### Website
+
+- Remove the donate page (`/donate`), its SumUp section, and the Donate links
+  in the site navigation.
+
 ## [3.36.0] — 2026-10-23
 
 ### Summary
