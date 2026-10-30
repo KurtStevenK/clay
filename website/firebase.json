@@ -11,7 +11,6 @@
       { "source": "/docs", "destination": "/docs.html" },
       { "source": "/tutorials", "destination": "/tutorials.html" },
       { "source": "/contributing", "destination": "/contributing.html" },
-      { "source": "/donate", "destination": "/donate.html" },
       { "source": "/privacy", "destination": "/privacy.html" }
     ]
   }
