@@ -577,11 +577,6 @@ welcome_dialog_create_welcome_page (Clay      *clay,
                     "\xe2\x8c\xa8",
                     _("Contributing"),
                     "https://claydesign.web.app/contributing");
-  welcome_add_link (GTK_GRID (grid), size_group, 1, &row,
-                    /* "love letter" emoticone in UTF-8. */
-                    "\xf0\x9f\x92\x8c",
-                    _("Donating"),
-                    "https://claydesign.web.app/donate");
 
   g_object_unref (size_group);
 }
@@ -907,10 +902,6 @@ welcome_dialog_create_contribute_page (Clay       *clay,
   gtk_widget_set_visible (label, TRUE);
   button = gtk_link_button_new_with_label ("https://liberapay.com/Clay/donate",
                                            _("Donate via Liberapay"));
-  gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
-  gtk_widget_set_visible (button, TRUE);
-  button = gtk_link_button_new_with_label ("https://claydesign.web.app/donate",
-                                           _("Other donation options"));
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
   gtk_widget_set_visible (button, TRUE);
 }

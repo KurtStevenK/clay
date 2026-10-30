@@ -13,6 +13,11 @@ branding, packaging, themes, and a renamed but compatible plug-in API (`libclay`
 - Remove the donate page (`/donate`), its SumUp section, and the Donate links
   in the site navigation.
 
+### Welcome dialog
+
+- Remove the "Donating" welcome link and the "Other donation options" link
+  that pointed at the deleted donate page. The Liberapay link stays.
+
 ## [3.36.0] — 2026-10-23
 
 ### Summary
